@@ -15,3 +15,4 @@ playwright-report/
 
 # Test screenshots
 tests/screenshots/
+node_modules/
