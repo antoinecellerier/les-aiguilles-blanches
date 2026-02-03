@@ -7,6 +7,8 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 - **Local URL**: `http://localhost/~antoine/snow-groomer/index-phaser.html`
 - **Skip levels**: Press `N` to skip to next level (useful for testing)
 - **No need to start a server** - local web server already available
+- **E2E tests**: `./run-tests.sh` (Playwright, runs headless by default)
+- **Headed tests**: `./run-tests.sh --headed` (to watch browser)
 
 ## Workflow
 1. **Commit early, commit often** - After each validated fix or feature, commit with descriptive message

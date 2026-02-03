@@ -175,7 +175,26 @@ class MenuScene extends Phaser.Scene {
     }
     
     startGame() {
-        this.scene.start('GameScene', { level: 0 });
+        // Remove and recreate all game-related scenes to avoid texture corruption
+        const game = this.game;
+        this.scene.stop('MenuScene');
+        
+        setTimeout(() => {
+            // Clean up all game-related scenes
+            ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach(key => {
+                if (game.scene.getScene(key)) {
+                    game.scene.remove(key);
+                }
+            });
+            
+            // Recreate overlay scenes
+            game.scene.add('HUDScene', HUDScene, false);
+            game.scene.add('DialogueScene', DialogueScene, false);
+            game.scene.add('PauseScene', PauseScene, false);
+            
+            // Start fresh GameScene
+            game.scene.add('GameScene', GameScene, true, { level: 0 });
+        }, 100);
     }
     
     showHowToPlay() {

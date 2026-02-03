@@ -47,6 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         const game = new Phaser.Game(config);
         
+        // Expose game instance for testing
+        window.game = game;
+        
         // Handle window resize
         window.addEventListener('resize', () => {
             game.scale.resize(window.innerWidth, window.innerHeight);

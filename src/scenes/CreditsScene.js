@@ -184,10 +184,31 @@ class CreditsScene extends Phaser.Scene {
     }
     
     restartGame() {
-        this.scene.start('GameScene', { level: 0 });
+        // Must remove and recreate GameScene to avoid texture corruption
+        const game = this.game;
+        this.scene.stop('CreditsScene');
+        
+        setTimeout(() => {
+            // Remove old GameScene if it exists
+            if (game.scene.getScene('GameScene')) {
+                game.scene.remove('GameScene');
+            }
+            // Add fresh GameScene
+            game.scene.add('GameScene', GameScene, true, { level: 0 });
+        }, 100);
     }
     
     returnToMenu() {
-        this.scene.start('MenuScene');
+        // Clean up scenes before returning to menu
+        const game = this.game;
+        this.scene.stop('CreditsScene');
+        
+        setTimeout(() => {
+            // Remove GameScene to ensure clean state for next play
+            if (game.scene.getScene('GameScene')) {
+                game.scene.remove('GameScene');
+            }
+            game.scene.start('MenuScene');
+        }, 100);
     }
 }

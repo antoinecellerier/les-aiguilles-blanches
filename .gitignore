@@ -2,3 +2,16 @@
 # Phaser library (use CDN or install separately)
 js/phaser.js
 js/phaser.min.js
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Test screenshots
+tests/screenshots/
