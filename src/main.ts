@@ -16,8 +16,6 @@ import CreditsScene from './scenes/CreditsScene';
 import LevelCompleteScene from './scenes/LevelCompleteScene';
 import HUDScene from './scenes/HUDScene';
 import MenuScene from './scenes/MenuScene';
-
-// JavaScript scenes (during migration)
 import SettingsScene from './scenes/SettingsScene';
 import GameScene from './scenes/GameScene';
 
