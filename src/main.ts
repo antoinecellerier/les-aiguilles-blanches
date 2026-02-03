@@ -14,16 +14,14 @@ import DialogueScene from './scenes/DialogueScene';
 import PauseScene from './scenes/PauseScene';
 import CreditsScene from './scenes/CreditsScene';
 import LevelCompleteScene from './scenes/LevelCompleteScene';
+import HUDScene from './scenes/HUDScene';
+import MenuScene from './scenes/MenuScene';
 
 // JavaScript scenes (during migration)
-// @ts-ignore
-import MenuScene from './scenes/MenuScene.js';
 // @ts-ignore
 import SettingsScene from './scenes/SettingsScene.js';
 // @ts-ignore
 import GameScene from './scenes/GameScene.js';
-// @ts-ignore
-import HUDScene from './scenes/HUDScene.js';
 
 declare global {
   interface Window {

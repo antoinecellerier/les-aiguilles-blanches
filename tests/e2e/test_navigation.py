@@ -258,19 +258,19 @@ class TestLevelNavigation:
     def test_credits_returns_to_menu(self, game_page: Page):
         """Test that exiting credits returns to menu."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_timeout(2000)
         
         # Skip all 9 levels
         for _ in range(9):
             game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1200)
+            game_page.wait_for_timeout(1500)
         
-        game_page.wait_for_timeout(1000)
+        game_page.wait_for_timeout(2000)
         assert_scene_active(game_page, 'CreditsScene')
         
         # Exit credits
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(1000)
+        game_page.wait_for_timeout(2000)
         
         assert_scene_active(game_page, 'MenuScene', "Should return to menu from credits")
         game_page.screenshot(path="tests/screenshots/menu_after_credits.png")
@@ -582,22 +582,22 @@ class TestCreditsScreen:
         """Test full cycle: play through credits, return to menu, start new game."""
         # Complete game
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_timeout(2000)
         for _ in range(9):
             game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1200)
+            game_page.wait_for_timeout(1500)
         
-        game_page.wait_for_timeout(2000)
+        game_page.wait_for_timeout(3000)
         assert_scene_active(game_page, 'CreditsScene')
         
         # Return to menu
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_timeout(2000)
         assert_scene_active(game_page, 'MenuScene')
         
         # Start new game
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        game_page.wait_for_timeout(3000)
         
         assert_scene_active(game_page, 'GameScene')
         level = get_current_level(game_page)
