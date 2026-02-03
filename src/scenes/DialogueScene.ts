@@ -16,6 +16,7 @@ export default class DialogueScene extends Phaser.Scene {
   private isShowing = false;
   private container: Phaser.GameObjects.Container | null = null;
   private bg: Phaser.GameObjects.Rectangle | null = null;
+  private hitZone: Phaser.GameObjects.Rectangle | null = null;
   private speakerText: Phaser.GameObjects.Text | null = null;
   private dialogueText: Phaser.GameObjects.Text | null = null;
   private continueText: Phaser.GameObjects.Text | null = null;
@@ -30,6 +31,13 @@ export default class DialogueScene extends Phaser.Scene {
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
+
+    // Fullscreen hit zone for clicking anywhere to dismiss
+    this.hitZone = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0);
+    this.hitZone.setDepth(-1);
+    this.hitZone.on('pointerdown', () => {
+      if (this.isShowing) this.advanceDialogue();
+    });
 
     this.container = this.add.container(0, height - 150);
     this.container.setVisible(false);
@@ -66,6 +74,9 @@ export default class DialogueScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => {
       if (this.isShowing) this.advanceDialogue();
     });
+    this.input.keyboard?.on('keydown-ESC', () => {
+      if (this.isShowing) this.dismissAllDialogue();
+    });
   }
 
   showDialogue(key: string): void {
@@ -91,6 +102,11 @@ export default class DialogueScene extends Phaser.Scene {
 
     const dialogue = this.dialogueQueue.shift()!;
     this.isShowing = true;
+
+    // Enable fullscreen hit zone for click-to-dismiss
+    if (this.hitZone) {
+      this.hitZone.setInteractive({ useHandCursor: true });
+    }
 
     if (this.bg) {
       this.bg.setInteractive({ useHandCursor: true });
@@ -126,6 +142,10 @@ export default class DialogueScene extends Phaser.Scene {
 
     if (!this.container) return;
 
+    // Disable hit zones
+    if (this.hitZone) {
+      this.hitZone.disableInteractive();
+    }
     if (this.bg) {
       this.bg.disableInteractive();
     }
@@ -143,6 +163,17 @@ export default class DialogueScene extends Phaser.Scene {
     });
   }
 
+  private dismissAllDialogue(): void {
+    // Clear queue and hide immediately
+    this.dialogueQueue = [];
+    this.hideDialogue();
+  }
+
+  /** Check if dialogue is currently being displayed */
+  isDialogueShowing(): boolean {
+    return this.isShowing;
+  }
+
   shutdown(): void {
     this.tweens.killAll();
     this.children.removeAll(true);
@@ -150,6 +181,7 @@ export default class DialogueScene extends Phaser.Scene {
     this.isShowing = false;
     this.container = null;
     this.bg = null;
+    this.hitZone = null;
     this.speakerText = null;
     this.dialogueText = null;
     this.continueText = null;

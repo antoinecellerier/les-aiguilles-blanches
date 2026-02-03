@@ -724,15 +724,20 @@ export default class GameScene extends Phaser.Scene {
     const poleWidth = 5;
     const orangeTopHeight = Math.floor(poleHeight * 0.15);
 
+    // French piste marker style:
+    // Left (gauche) when facing downhill: piste color with orange top section
+    // Right (droite) when facing downhill: fully piste color
     if (side === 'left') {
-      g.fillStyle(color, 1);
-      g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
-    } else {
+      // Orange top section on LEFT side markers
       g.fillStyle(color, 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight + orangeTopHeight, poleWidth, poleHeight - orangeTopHeight);
 
       g.fillStyle(0xFF6600, 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, orangeTopHeight);
+    } else {
+      // Full piste color on RIGHT side
+      g.fillStyle(color, 1);
+      g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
     }
 
     g.fillStyle(0x222222, 1);
@@ -1643,6 +1648,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleMovement(): void {
+    // Don't handle movement while dialogue is showing
+    const dialogueScene = this.scene.get('DialogueScene') as DialogueScene;
+    if (dialogueScene && dialogueScene.isDialogueShowing()) {
+      this.groomer.setVelocity(0, 0);
+      return;
+    }
+
     const speed = GAME_CONFIG.GROOMER_SPEED * (this.buffs.speed ? 1.5 : 1);
 
     let vx = 0;
@@ -1685,6 +1697,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleGrooming(): void {
+    // Don't handle grooming while dialogue is showing
+    const dialogueScene = this.scene.get('DialogueScene') as DialogueScene;
+    if (dialogueScene && dialogueScene.isDialogueShowing()) {
+      this.isGrooming = false;
+      return;
+    }
+
     this.isGrooming = this.groomKey.isDown || (this.gamepad !== null && this.gamepad.A);
 
     if (this.isGrooming && this.fuel > 0) {
