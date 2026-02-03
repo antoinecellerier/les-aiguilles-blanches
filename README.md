@@ -2,15 +2,9 @@
 
 ## Quick Start
 
-**Recommended - Phaser 3 Version:**
-- Open `index-phaser.html` in any browser
-- Works in Firefox, Chrome, Safari, Edge
+Open `index.html` in any modern browser (Firefox, Chrome, Safari, Edge).
 
-**Legacy Versions (Vanilla JS):**
-- `index-modular.html` - Modular vanilla JS version
-- `index-standalone.html` - Single-file version (backup)
-
-Test URL: http://localhost/~antoine/snow-groomer/index-phaser.html
+Test URL: http://localhost/~antoine/snow-groomer/index.html
 
 ---
 
@@ -18,16 +12,16 @@ A retro-style (SkiFree aesthetic) snow groomer simulation game set in a fictiona
 
 ## 🎮 Play the Game
 
-**Recommended**: Open `index-phaser.html` in a modern web browser.
+Open `index.html` in a modern web browser.
 
 For local development:
 ```bash
 # Already served via nginx user dirs
-open http://localhost/~antoine/snow-groomer/index-phaser.html
+open http://localhost/~antoine/snow-groomer/index.html
 
 # Or with Python
 python3 -m http.server 8080
-open http://localhost:8080/index-phaser.html
+open http://localhost:8080/index.html
 ```
 
 ## 🏔️ About
@@ -72,25 +66,19 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 
 ```
 snow-groomer/
-├── index-phaser.html   # Main game (Phaser 3, recommended)
-├── index-modular.html  # Legacy modular vanilla JS version
-├── index-standalone.html # Single-file version (backup)
-├── tests.html          # Automated test suite
+├── index.html   # Main game (Phaser 3, recommended)
+├── index.html          # Main game entry point
+├── tests.html          # Browser-based unit tests
 ├── README.md           # This file
-├── css/
-│   └── style.css       # Styles for vanilla JS version
-├── js/                 # Legacy vanilla JS modules
-│   ├── config.js       # Game configuration, levels, food items
-│   ├── localization.js # Translations (FR, EN, DE, IT, ES)
-│   ├── input.js        # Input abstraction (keyboard, gamepad, touch)
-│   ├── renderer.js     # Canvas rendering
-│   ├── game.js         # Core game logic
-│   └── main.js         # Entry point
-├── src/                # Phaser 3 version
+├── run-tests.sh        # E2E test runner
+├── pytest.ini          # Pytest configuration
+├── src/                # Game source (Phaser 3)
 │   ├── config/         # Game config, levels, localization
 │   ├── scenes/         # Phaser scenes (Boot, Menu, Game, etc.)
 │   ├── utils/          # Accessibility utilities
-│   └── main.js         # Phaser entry point
+│   └── main.js         # Entry point
+├── tests/              # E2E tests (Playwright)
+│   └── e2e/            # Navigation, rendering tests
 └── docs/
     ├── ARCHITECTURE.md # Technical architecture
     └── GAMEPLAY.md     # Detailed gameplay guide
@@ -98,7 +86,7 @@ snow-groomer/
 
 ## 🚀 Quick Start
 
-1. Open `index-phaser.html` in a modern browser
+1. Open `index.html` in a modern browser
 2. Click "Commencer" (Start Game)
 3. Use WASD/Arrows to move, Space to groom
 4. Reach the coverage target before time runs out!

@@ -4,7 +4,7 @@
 Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 browser game with SkiFree-style retro aesthetics.
 
 ## Testing
-- **Local URL**: `http://localhost/~antoine/snow-groomer/index-phaser.html`
+- **Local URL**: `http://localhost/~antoine/snow-groomer/index.html`
 - **Skip levels**: Press `N` to skip to next level (useful for testing)
 - **No need to start a server** - local web server already available
 - **E2E tests**: `./run-tests.sh` (Playwright, parallel on Chromium + Firefox)

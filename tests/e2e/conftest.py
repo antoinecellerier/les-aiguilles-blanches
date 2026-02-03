@@ -2,7 +2,7 @@
 import pytest
 
 # Base URL for the game
-GAME_URL = "http://localhost/~antoine/snow-groomer/index-phaser.html"
+GAME_URL = "http://localhost/~antoine/snow-groomer/index.html"
 
 
 @pytest.fixture(scope="session")

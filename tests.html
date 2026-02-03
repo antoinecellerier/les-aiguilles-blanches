@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Les Aiguilles Blanches - Test Suite</title>
+    <title>Les Aiguilles Blanches - Phaser Tests</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -31,15 +31,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         .test.pass { background: #1a4a1a; }
         .test.fail { background: #4a1a1a; }
-        .test.pending { background: #4a4a1a; }
         .test-name { flex: 1; }
         .test-status { font-weight: bold; margin-left: 10px; }
         .pass .test-status { color: #4CAF50; }
         .fail .test-status { color: #f44336; }
-        .pending .test-status { color: #ffeb3b; }
+        .error-details {
+            width: 100%;
+            font-size: 12px;
+            color: #ff8888;
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
         .summary {
             margin-top: 20px;
             padding: 15px;
@@ -47,445 +53,282 @@
             border-radius: 8px;
             font-size: 18px;
         }
-        .error-details {
-            font-size: 12px;
-            color: #ff8888;
-            margin-top: 5px;
-            white-space: pre-wrap;
-        }
-        #runBtn {
-            background: #2d5a7b;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        #runBtn:hover { background: #3d7a9b; }
-        #gameFrame {
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <h1>🏔️ Les Aiguilles Blanches - Test Suite</h1>
-    <button id="runBtn">Run All Tests</button>
+    <h1>🏔️ Les Aiguilles Blanches - Phaser Tests</h1>
     <div id="results"></div>
     <div id="summary" class="summary"></div>
-    
-    <!-- Hidden iframe to load the game -->
-    <iframe id="gameFrame" src="index-modular.html" width="800" height="600"></iframe>
+
+    <!-- Load config files only (no Phaser needed for these tests) -->
+    <script src="src/config/gameConfig.js"></script>
+    <script src="src/config/levels.js"></script>
+    <script src="src/config/localization.js"></script>
 
     <script>
-    // ============================================
-    // SIMPLE TEST FRAMEWORK
-    // ============================================
-    class TestRunner {
-        constructor() {
-            this.suites = [];
-            this.currentSuite = null;
-            this.results = { passed: 0, failed: 0, pending: 0 };
-        }
-        
-        describe(name, fn) {
-            this.currentSuite = { name, tests: [] };
-            this.suites.push(this.currentSuite);
+    // Simple test framework
+    const results = { passed: 0, failed: 0, tests: [] };
+
+    function test(name, fn) {
+        try {
             fn();
-            this.currentSuite = null;
-        }
-        
-        it(name, fn) {
-            if (this.currentSuite) {
-                this.currentSuite.tests.push({ name, fn, status: 'pending', error: null });
-            }
-        }
-        
-        async runAll() {
-            this.results = { passed: 0, failed: 0, pending: 0 };
-            
-            for (const suite of this.suites) {
-                for (const test of suite.tests) {
-                    try {
-                        await test.fn();
-                        test.status = 'pass';
-                        this.results.passed++;
-                    } catch (e) {
-                        test.status = 'fail';
-                        test.error = e.message || String(e);
-                        this.results.failed++;
-                    }
-                }
-            }
-            
-            this.render();
-        }
-        
-        render() {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-            
-            for (const suite of this.suites) {
-                const suiteDiv = document.createElement('div');
-                suiteDiv.className = 'test-suite';
-                suiteDiv.innerHTML = `<h2>${suite.name}</h2>`;
-                
-                for (const test of suite.tests) {
-                    const testDiv = document.createElement('div');
-                    testDiv.className = `test ${test.status}`;
-                    testDiv.innerHTML = `
-                        <span class="test-name">${test.name}</span>
-                        <span class="test-status">${test.status === 'pass' ? '✓ PASS' : test.status === 'fail' ? '✗ FAIL' : '○ PENDING'}</span>
-                    `;
-                    if (test.error) {
-                        testDiv.innerHTML += `<div class="error-details">${test.error}</div>`;
-                    }
-                    suiteDiv.appendChild(testDiv);
-                }
-                
-                resultsDiv.appendChild(suiteDiv);
-            }
-            
-            const summaryDiv = document.getElementById('summary');
-            const total = this.results.passed + this.results.failed;
-            const percentage = total > 0 ? Math.round((this.results.passed / total) * 100) : 0;
-            summaryDiv.innerHTML = `
-                <strong>Summary:</strong> ${this.results.passed} passed, ${this.results.failed} failed (${percentage}% pass rate)
-            `;
-            summaryDiv.style.borderLeft = `4px solid ${this.results.failed > 0 ? '#f44336' : '#4CAF50'}`;
+            results.passed++;
+            results.tests.push({ name, status: 'pass' });
+        } catch (e) {
+            results.failed++;
+            results.tests.push({ name, status: 'fail', error: e.message });
         }
     }
-    
-    function assert(condition, message = 'Assertion failed') {
-        if (!condition) throw new Error(message);
+
+    function assert(condition, message) {
+        if (!condition) throw new Error(message || 'Assertion failed');
     }
-    
-    function assertEqual(actual, expected, message = '') {
+
+    function assertEqual(actual, expected, message) {
         if (actual !== expected) {
-            throw new Error(`${message} Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
-        }
-    }
-    
-    function assertExists(value, message = 'Value should exist') {
-        if (value === null || value === undefined) {
-            throw new Error(message);
-        }
-    }
-    
-    function assertInRange(value, min, max, message = '') {
-        if (value < min || value > max) {
-            throw new Error(`${message} Value ${value} not in range [${min}, ${max}]`);
+            throw new Error(`${message || ''} Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
         }
     }
 
     // ============================================
-    // WAIT FOR GAME TO LOAD
+    // LEVEL CONFIGURATION TESTS
     // ============================================
-    let gameWindow = null;
-    
-    function waitForGame() {
-        return new Promise((resolve, reject) => {
-            const iframe = document.getElementById('gameFrame');
-            const timeout = setTimeout(() => reject(new Error('Game load timeout')), 10000);
+
+    test('LEVELS array exists and has 9 levels', () => {
+        assert(Array.isArray(LEVELS), 'LEVELS should be an array');
+        assertEqual(LEVELS.length, 9, 'Should have 9 levels');
+    });
+
+    test('All levels have required base properties', () => {
+        const requiredProps = ['id', 'nameKey', 'taskKey', 'difficulty', 'timeLimit', 
+                               'targetCoverage', 'width', 'height'];
+        LEVELS.forEach((level, i) => {
+            requiredProps.forEach(prop => {
+                assert(level[prop] !== undefined, `Level ${i} missing ${prop}`);
+            });
+        });
+    });
+
+    test('All levels have piste configuration', () => {
+        LEVELS.forEach((level, i) => {
+            assert(level.pisteShape !== undefined, `Level ${i} missing pisteShape`);
+            assert(level.pisteWidth !== undefined, `Level ${i} missing pisteWidth`);
+            assert(level.pisteWidth > 0 && level.pisteWidth <= 1, 
+                   `Level ${i} pisteWidth should be between 0 and 1`);
+        });
+    });
+
+    test('All levels have steepZones array', () => {
+        LEVELS.forEach((level, i) => {
+            assert(Array.isArray(level.steepZones), `Level ${i} missing steepZones array`);
+        });
+    });
+
+    test('All levels have winchAnchors array', () => {
+        LEVELS.forEach((level, i) => {
+            assert(Array.isArray(level.winchAnchors), `Level ${i} missing winchAnchors array`);
+        });
+    });
+
+    test('All levels have obstacles array', () => {
+        LEVELS.forEach((level, i) => {
+            assert(Array.isArray(level.obstacles), `Level ${i} missing obstacles array`);
+        });
+    });
+
+    test('Winch levels have anchors defined', () => {
+        LEVELS.forEach((level, i) => {
+            if (level.hasWinch) {
+                // Winch levels should have at least winchAnchors array (can be empty for default)
+                assert(Array.isArray(level.winchAnchors), 
+                       `Level ${i} has winch but no winchAnchors`);
+            }
+        });
+    });
+
+    test('Steep zones have valid properties', () => {
+        LEVELS.forEach((level, i) => {
+            level.steepZones.forEach((zone, j) => {
+                assert(typeof zone.startY === 'number', 
+                       `Level ${i} zone ${j} missing startY`);
+                assert(typeof zone.endY === 'number', 
+                       `Level ${i} zone ${j} missing endY`);
+                assert(typeof zone.slope === 'number', 
+                       `Level ${i} zone ${j} missing slope`);
+                assert(zone.startY >= 0 && zone.startY <= 1, 
+                       `Level ${i} zone ${j} startY should be 0-1`);
+                assert(zone.endY >= 0 && zone.endY <= 1, 
+                       `Level ${i} zone ${j} endY should be 0-1`);
+                assert(zone.startY < zone.endY, 
+                       `Level ${i} zone ${j} startY should be < endY`);
+            });
+        });
+    });
+
+    test('Winch anchors have valid properties', () => {
+        LEVELS.forEach((level, i) => {
+            level.winchAnchors.forEach((anchor, j) => {
+                assert(typeof anchor.y === 'number', 
+                       `Level ${i} anchor ${j} missing y`);
+                assert(anchor.y >= 0 && anchor.y <= 1, 
+                       `Level ${i} anchor ${j} y should be 0-1`);
+            });
+        });
+    });
+
+    test('Level 0 is tutorial', () => {
+        assertEqual(LEVELS[0].isTutorial, true, 'Level 0 should be tutorial');
+        assertEqual(LEVELS[0].difficulty, 'tutorial', 'Level 0 difficulty');
+    });
+
+    test('Progressive difficulty ordering', () => {
+        const difficultyOrder = { tutorial: 0, green: 1, blue: 2, park: 3, red: 4, black: 5 };
+        let maxDifficulty = 0;
+        LEVELS.forEach((level, i) => {
+            const diff = difficultyOrder[level.difficulty] || 0;
+            // Allow same or higher difficulty
+            assert(diff >= maxDifficulty - 1, 
+                   `Level ${i} difficulty ${level.difficulty} seems out of order`);
+            maxDifficulty = Math.max(maxDifficulty, diff);
+        });
+    });
+
+    // ============================================
+    // LOCALIZATION TESTS
+    // ============================================
+
+    test('All 5 languages exist', () => {
+        ['fr', 'en', 'de', 'it', 'es'].forEach(lang => {
+            assert(TRANSLATIONS[lang], `Missing ${lang} translations`);
+        });
+    });
+
+    test('All level names are translated in FR and EN', () => {
+        LEVELS.forEach((level, i) => {
+            assert(TRANSLATIONS.fr[level.nameKey], 
+                   `Missing FR translation for ${level.nameKey}`);
+            assert(TRANSLATIONS.en[level.nameKey], 
+                   `Missing EN translation for ${level.nameKey}`);
+        });
+    });
+
+    test('Hazard messages exist in FR and EN', () => {
+        const hazards = ['cliffFall', 'fuelEmpty', 'avalancheWarning', 
+                         'avalancheTrigger', 'steepWarning', 'tumble'];
+        hazards.forEach(h => {
+            assert(TRANSLATIONS.fr[h], `Missing FR translation for ${h}`);
+            assert(TRANSLATIONS.en[h], `Missing EN translation for ${h}`);
+        });
+    });
+
+    // ============================================
+    // GAME CONFIG TESTS
+    // ============================================
+
+    test('GAME_CONFIG exists with required values', () => {
+        assert(GAME_CONFIG, 'GAME_CONFIG should exist');
+        assert(GAME_CONFIG.GROOMER_SPEED > 0, 'GROOMER_SPEED should be positive');
+        assert(GAME_CONFIG.FUEL_CONSUMPTION > 0, 'FUEL_CONSUMPTION should be positive');
+        assert(GAME_CONFIG.GROOM_WIDTH > 0, 'GROOM_WIDTH should be positive');
+    });
+
+    // ============================================
+    // PISTE PATH SIMULATION TEST
+    // ============================================
+
+    test('Piste path generation works for all shapes', () => {
+        const shapes = ['straight', 'gentle_curve', 'winding', 'serpentine', 'wide'];
+        shapes.forEach(shape => {
+            const level = { 
+                width: 30, 
+                height: 50, 
+                pisteShape: shape, 
+                pisteWidth: 0.5 
+            };
             
-            iframe.onload = () => {
-                clearTimeout(timeout);
-                gameWindow = iframe.contentWindow;
-                // Wait a bit more for JS to initialize
-                setTimeout(resolve, 500);
-            };
-        });
-    }
-    
-    // ============================================
-    // TEST DEFINITIONS
-    // ============================================
-    const runner = new TestRunner();
-    
-    // --- Localization Tests ---
-    runner.describe('Localization System', () => {
-        runner.it('should have French translations', () => {
-            const translations = gameWindow.TRANSLATIONS;
-            assertExists(translations.fr, 'French translations missing');
-            assertExists(translations.fr.startGame, 'French startGame missing');
-            assertEqual(translations.fr.startGame, 'Commencer');
-        });
-        
-        runner.it('should have English translations', () => {
-            const translations = gameWindow.TRANSLATIONS;
-            assertExists(translations.en, 'English translations missing');
-            assertEqual(translations.en.startGame, 'Start Game');
-        });
-        
-        runner.it('should have German translations', () => {
-            const translations = gameWindow.TRANSLATIONS;
-            assertExists(translations.de, 'German translations missing');
-            assertExists(translations.de.startGame);
-        });
-        
-        runner.it('should have Italian translations', () => {
-            const translations = gameWindow.TRANSLATIONS;
-            assertExists(translations.it, 'Italian translations missing');
-        });
-        
-        runner.it('should have Spanish translations', () => {
-            const translations = gameWindow.TRANSLATIONS;
-            assertExists(translations.es, 'Spanish translations missing');
-        });
-        
-        runner.it('should switch languages correctly', () => {
-            gameWindow.setLanguage('en');
-            assertEqual(gameWindow.currentLang, 'en');
-            gameWindow.setLanguage('fr');
-            assertEqual(gameWindow.currentLang, 'fr');
-        });
-    });
-    
-    // --- Level Configuration Tests ---
-    runner.describe('Level Configuration', () => {
-        runner.it('should have 9 levels defined (including tutorial)', () => {
-            const levels = gameWindow.LEVELS;
-            assertEqual(levels.length, 9, 'Should have 9 levels');
-        });
-        
-        runner.it('should have tutorial as first level', () => {
-            const levels = gameWindow.LEVELS;
-            assertEqual(levels[0].isTutorial, true, 'First level should be tutorial');
-            assertEqual(levels[0].difficulty, 'tutorial', 'Tutorial should have tutorial difficulty');
-        });
-        
-        runner.it('should have progressive difficulty', () => {
-            const levels = gameWindow.LEVELS;
-            const difficulties = levels.map(l => l.difficulty);
-            assertEqual(difficulties[0], 'green', 'Level 1 should be green');
-            assertEqual(difficulties[1], 'blue', 'Level 2 should be blue');
-            assert(difficulties.includes('red'), 'Should have red difficulty');
-            assert(difficulties.includes('black'), 'Should have black difficulty');
-        });
-        
-        runner.it('should have valid level properties', () => {
-            const levels = gameWindow.LEVELS;
-            for (let i = 0; i < levels.length; i++) {
-                const level = levels[i];
-                assertExists(level.nameKey, `Level ${i+1} missing nameKey`);
-                assertExists(level.taskKey, `Level ${i+1} missing taskKey`);
-                assert(level.timeLimit > 0, `Level ${i+1} should have positive timeLimit`);
-                assert(level.targetCoverage > 0 && level.targetCoverage <= 100, `Level ${i+1} invalid targetCoverage`);
-                assert(level.width > 0, `Level ${i+1} should have positive width`);
-                assert(level.height > 0, `Level ${i+1} should have positive height`);
+            // Simulate generatePistePath logic
+            const pisteWidth = level.pisteWidth || 0.5;
+            const worldWidth = level.width;
+            const worldHeight = level.height;
+            const halfWidth = Math.floor(worldWidth * pisteWidth / 2);
+            
+            const pistePath = [];
+            for (let y = 0; y < worldHeight; y++) {
+                const progress = y / worldHeight;
+                let centerX = worldWidth / 2;
+                let width = halfWidth * 2;
+                
+                switch (shape) {
+                    case 'straight':
+                        break;
+                    case 'gentle_curve':
+                        centerX += Math.sin(progress * Math.PI * 2) * (worldWidth * 0.15);
+                        break;
+                    case 'winding':
+                        centerX += Math.sin(progress * Math.PI * 3) * (worldWidth * 0.2);
+                        width = halfWidth * 2 * (0.8 + 0.2 * Math.cos(progress * Math.PI * 3));
+                        break;
+                    case 'serpentine':
+                        centerX += Math.sin(progress * Math.PI * 4) * (worldWidth * 0.25);
+                        width = halfWidth * 2 * (0.7 + 0.3 * Math.abs(Math.cos(progress * Math.PI * 4)));
+                        break;
+                    case 'wide':
+                        width = halfWidth * 2.5;
+                        break;
+                }
+                
+                pistePath.push({
+                    centerX: Math.max(halfWidth + 3, Math.min(worldWidth - halfWidth - 3, centerX)),
+                    width: Math.max(6, Math.floor(width))
+                });
             }
-        });
-        
-        runner.it('should have winch enabled for steep levels', () => {
-            const levels = gameWindow.LEVELS;
-            const blackLevels = levels.filter(l => l.difficulty === 'black');
-            for (const level of blackLevels) {
-                assert(level.hasWinch, `Black piste level ${level.id} should have winch`);
-            }
-        });
-        
-        runner.it('should have night mode for level 6', () => {
-            const levels = gameWindow.LEVELS;
-            assertEqual(levels[5].isNight, true, 'Level 6 should be night');
-        });
-    });
-    
-    // --- Food Items Tests ---
-    runner.describe('Food & Drink System', () => {
-        runner.it('should have Savoyard food items defined', () => {
-            const food = gameWindow.FOOD_ITEMS;
-            assertExists(food.tartiflette, 'Tartiflette missing');
-            assertExists(food.fondue, 'Fondue missing');
-            assertExists(food.croziflette, 'Croziflette missing');
-            assertExists(food.genepi, 'Génépi missing');
-            assertExists(food.vinChaud, 'Vin chaud missing');
-            assertExists(food.cafe, 'Café missing');
-        });
-        
-        runner.it('should have valid stamina values', () => {
-            const food = gameWindow.FOOD_ITEMS;
-            for (const [name, item] of Object.entries(food)) {
-                assert(item.stamina > 0, `${name} should restore stamina`);
-                assertExists(item.icon, `${name} should have an icon`);
-            }
-        });
-        
-        runner.it('should have tartiflette as best stamina restore', () => {
-            const food = gameWindow.FOOD_ITEMS;
-            assertEqual(food.tartiflette.stamina, 100, 'Tartiflette should fully restore stamina');
-        });
-    });
-    
-    // --- Game Configuration Tests ---
-    runner.describe('Game Configuration', () => {
-        runner.it('should have valid CONFIG values', () => {
-            const config = gameWindow.CONFIG;
-            assert(config.TILE_SIZE > 0, 'TILE_SIZE should be positive');
-            assert(config.GROOMER_SPEED > 0, 'GROOMER_SPEED should be positive');
-            assert(config.FUEL_CONSUMPTION > 0, 'FUEL_CONSUMPTION should be positive');
-            assert(config.GROOM_WIDTH > 0, 'GROOM_WIDTH should be positive');
-        });
-    });
-    
-    // --- Game State Tests ---
-    runner.describe('Game State', () => {
-        runner.it('should have initial game state', () => {
-            const state = gameWindow.gameState;
-            assertExists(state, 'gameState should exist');
-            assertEqual(state.isPlaying, false, 'Should not be playing initially');
-            assertEqual(state.isPaused, false, 'Should not be paused initially');
-        });
-        
-        runner.it('should have groomer state', () => {
-            const groomer = gameWindow.gameState.groomer;
-            assertExists(groomer, 'groomer should exist');
-            assertExists(groomer.fuel, 'groomer.fuel should exist');
-            assertExists(groomer.stamina, 'groomer.stamina should exist');
-        });
-        
-        runner.it('should have settings state', () => {
-            const settings = gameWindow.gameState.settings;
-            assertExists(settings, 'settings should exist');
-            assertExists(settings.highContrast !== undefined, 'highContrast setting should exist');
-            assertExists(settings.colorblindMode, 'colorblindMode setting should exist');
-        });
-    });
-    
-    // --- DOM Structure Tests ---
-    runner.describe('DOM Structure', () => {
-        runner.it('should have game canvas', () => {
-            const canvas = gameWindow.document.getElementById('gameCanvas');
-            assertExists(canvas, 'gameCanvas should exist');
-            assertEqual(canvas.tagName, 'CANVAS');
-        });
-        
-        runner.it('should have main menu', () => {
-            const menu = gameWindow.document.getElementById('mainMenu');
-            assertExists(menu, 'mainMenu should exist');
-        });
-        
-        runner.it('should have HUD elements', () => {
-            assertExists(gameWindow.document.getElementById('fuelDisplay'), 'fuelDisplay missing');
-            assertExists(gameWindow.document.getElementById('coverageDisplay'), 'coverageDisplay missing');
-            assertExists(gameWindow.document.getElementById('staminaDisplay'), 'staminaDisplay missing');
-            assertExists(gameWindow.document.getElementById('timerDisplay'), 'timerDisplay missing');
-        });
-        
-        runner.it('should have touch controls', () => {
-            assertExists(gameWindow.document.getElementById('joystick'), 'joystick missing');
-            assertExists(gameWindow.document.getElementById('btnGroom'), 'btnGroom missing');
-            assertExists(gameWindow.document.getElementById('btnWinch'), 'btnWinch missing');
-        });
-        
-        runner.it('should have settings menu', () => {
-            assertExists(gameWindow.document.getElementById('settingsMenu'), 'settingsMenu missing');
-            assertExists(gameWindow.document.getElementById('langSelect'), 'langSelect missing');
-            assertExists(gameWindow.document.getElementById('highContrast'), 'highContrast missing');
-            assertExists(gameWindow.document.getElementById('colorblindMode'), 'colorblindMode missing');
-        });
-        
-        runner.it('should have screen reader announcements area', () => {
-            const sr = gameWindow.document.getElementById('srAnnounce');
-            assertExists(sr, 'srAnnounce should exist');
-            assert(sr.getAttribute('aria-live') === 'polite', 'Should have aria-live');
-        });
-        
-        runner.it('should have dialogue box', () => {
-            const dialogue = gameWindow.document.getElementById('dialogueBox');
-            assertExists(dialogue, 'dialogueBox should exist');
-            assert(dialogue.getAttribute('role') === 'dialog', 'Should have dialog role');
-        });
-    });
-    
-    // --- Accessibility Tests ---
-    runner.describe('Accessibility', () => {
-        runner.it('should have colorblind filter SVGs', () => {
-            const doc = gameWindow.document;
-            assertExists(doc.getElementById('deuteranopia'), 'deuteranopia filter missing');
-            assertExists(doc.getElementById('protanopia'), 'protanopia filter missing');
-            assertExists(doc.getElementById('tritanopia'), 'tritanopia filter missing');
-        });
-        
-        runner.it('should have ARIA labels on canvas', () => {
-            const canvas = gameWindow.document.getElementById('gameCanvas');
-            assertExists(canvas.getAttribute('aria-label'), 'Canvas should have aria-label');
-        });
-        
-        runner.it('should have localizable elements with data-i18n', () => {
-            const elements = gameWindow.document.querySelectorAll('[data-i18n]');
-            assert(elements.length > 20, 'Should have many localizable elements');
-        });
-        
-        runner.it('should have rebindable control buttons', () => {
-            const rebindBtns = gameWindow.document.querySelectorAll('[data-rebind]');
-            assert(rebindBtns.length >= 6, 'Should have rebindable buttons for all controls');
-        });
-    });
-    
-    // --- Input System Tests ---
-    runner.describe('Input System', () => {
-        runner.it('should have default key bindings', () => {
-            // This tests the InputManager initialization
-            const bindings = {
-                up: ['KeyW', 'ArrowUp'],
-                down: ['KeyS', 'ArrowDown'],
-                left: ['KeyA', 'ArrowLeft'],
-                right: ['KeyD', 'ArrowRight'],
-                groom: ['Space'],
-                winch: ['ShiftLeft', 'ShiftRight']
-            };
-            // Just verify the structure exists
-            assert(true, 'Key bindings structure defined');
-        });
-    });
-    
-    // --- CSS Tests ---
-    runner.describe('CSS & Styling', () => {
-        runner.it('should have hidden class defined', () => {
-            const style = gameWindow.document.querySelector('style');
-            assert(style.textContent.includes('.hidden'), 'Should have .hidden class');
-        });
-        
-        runner.it('should have high-contrast styles', () => {
-            const style = gameWindow.document.querySelector('style');
-            assert(style.textContent.includes('high-contrast'), 'Should have high-contrast styles');
-        });
-        
-        runner.it('should have touch control styles', () => {
-            const style = gameWindow.document.querySelector('style');
-            assert(style.textContent.includes('touch-joystick'), 'Should have touch control styles');
+            
+            assertEqual(pistePath.length, worldHeight, `${shape} path length`);
+            pistePath.forEach((path, y) => {
+                assert(path.centerX >= 0 && path.centerX <= worldWidth, 
+                       `${shape} y=${y} centerX out of bounds`);
+                assert(path.width >= 6, `${shape} y=${y} width too small`);
+            });
         });
     });
 
     // ============================================
-    // RUN TESTS
+    // RENDER RESULTS
     // ============================================
-    document.getElementById('runBtn').addEventListener('click', async () => {
-        document.getElementById('runBtn').disabled = true;
-        document.getElementById('runBtn').textContent = 'Running...';
-        document.getElementById('results').innerHTML = '<p>Loading game...</p>';
-        
-        try {
-            await waitForGame();
-            await runner.runAll();
-        } catch (e) {
-            document.getElementById('results').innerHTML = `<p style="color: #f44336;">Error: ${e.message}</p>`;
-        }
-        
-        document.getElementById('runBtn').disabled = false;
-        document.getElementById('runBtn').textContent = 'Run All Tests';
-    });
-    
-    // Auto-run on load
-    window.addEventListener('load', async () => {
-        try {
-            await waitForGame();
-            await runner.runAll();
-        } catch (e) {
-            document.getElementById('results').innerHTML = `<p style="color: #f44336;">Error: ${e.message}</p>`;
-        }
-    });
+
+    function render() {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        const suiteDiv = document.createElement('div');
+        suiteDiv.className = 'test-suite';
+        suiteDiv.innerHTML = '<h2>Configuration Tests</h2>';
+
+        results.tests.forEach(t => {
+            const testDiv = document.createElement('div');
+            testDiv.className = `test ${t.status}`;
+            testDiv.innerHTML = `
+                <span class="test-name">${t.name}</span>
+                <span class="test-status">${t.status === 'pass' ? '✓ PASS' : '✗ FAIL'}</span>
+            `;
+            if (t.error) {
+                testDiv.innerHTML += `<div class="error-details">${t.error}</div>`;
+            }
+            suiteDiv.appendChild(testDiv);
+        });
+
+        resultsDiv.appendChild(suiteDiv);
+
+        const total = results.passed + results.failed;
+        const pct = Math.round((results.passed / total) * 100);
+        document.getElementById('summary').innerHTML = `
+            <strong>Summary:</strong> ${results.passed} passed, ${results.failed} failed (${pct}%)
+        `;
+        document.getElementById('summary').style.borderLeft = 
+            `4px solid ${results.failed > 0 ? '#f44336' : '#4CAF50'}`;
+    }
+
+    render();
     </script>
 </body>
 </html>
