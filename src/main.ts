@@ -12,6 +12,8 @@ import './setup';
 import BootScene from './scenes/BootScene';
 import DialogueScene from './scenes/DialogueScene';
 import PauseScene from './scenes/PauseScene';
+import CreditsScene from './scenes/CreditsScene';
+import LevelCompleteScene from './scenes/LevelCompleteScene';
 
 // JavaScript scenes (during migration)
 // @ts-ignore
@@ -22,10 +24,6 @@ import SettingsScene from './scenes/SettingsScene.js';
 import GameScene from './scenes/GameScene.js';
 // @ts-ignore
 import HUDScene from './scenes/HUDScene.js';
-// @ts-ignore
-import LevelCompleteScene from './scenes/LevelCompleteScene.js';
-// @ts-ignore
-import CreditsScene from './scenes/CreditsScene.js';
 
 declare global {
   interface Window {

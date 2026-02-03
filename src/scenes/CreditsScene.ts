@@ -1,0 +1,218 @@
+import Phaser from 'phaser';
+import { t, Accessibility } from '../setup';
+// @ts-ignore - JS file during migration
+import GameScene from './GameScene.js';
+
+/**
+ * Les Aiguilles Blanches - Credits Scene
+ * Shows end-game credits after completing all levels
+ */
+
+export default class CreditsScene extends Phaser.Scene {
+  private creditsContainer!: Phaser.GameObjects.Container;
+  private buttonsContainer!: Phaser.GameObjects.Container;
+  private skipHint!: Phaser.GameObjects.Text;
+  private creditsHeight = 0;
+
+  constructor() {
+    super({ key: 'CreditsScene' });
+  }
+
+  create(): void {
+    const { width, height } = this.cameras.main;
+
+    this.cameras.main.setBackgroundColor(0x0a1628);
+    this.createStars();
+
+    this.add.text(width / 2, 60, '🏆', { font: '60px Arial' }).setOrigin(0.5);
+
+    this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
+      font: 'bold 32px Courier New',
+      color: '#FFD700',
+    }).setOrigin(0.5);
+
+    this.add.text(width / 2, 160, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
+      font: '16px Courier New',
+      color: '#87CEEB',
+    }).setOrigin(0.5);
+
+    const credits = [
+      '',
+      '🎿 LES AIGUILLES BLANCHES 🎿',
+      '',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      '',
+      'Créé par',
+      'Antoine',
+      '',
+      'Développé avec',
+      'GitHub Copilot',
+      '',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      '',
+      'Direction Artistique',
+      'Style "SkiFree" classique',
+      '',
+      'Inspiré par',
+      'Les dameurs de Savoie',
+      'PistenBully 600',
+      '',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      '',
+      'Gastronomie Savoyarde',
+      'Tartiflette • Fondue • Raclette',
+      'Génépi • Vin Chaud',
+      '',
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+      '',
+      'Merci d\'avoir joué !',
+      '',
+      '🏔️ À bientôt sur les pistes ! 🏔️',
+    ];
+
+    this.creditsContainer = this.add.container(0, height);
+
+    let yOffset = 0;
+    credits.forEach((line) => {
+      const isTitle = line.includes('━') || line.includes('🎿') || line.includes('🏔️');
+      const style: Phaser.Types.GameObjects.Text.TextStyle = {
+        font: isTitle ? 'bold 14px Courier New' : '14px Courier New',
+        color: isTitle ? '#FFD700' : '#ffffff',
+        align: 'center',
+      };
+
+      const text = this.add.text(width / 2, yOffset, line, style).setOrigin(0.5);
+      this.creditsContainer.add(text);
+      yOffset += line === '' ? 15 : 25;
+    });
+
+    this.creditsHeight = yOffset;
+
+    this.tweens.add({
+      targets: this.creditsContainer,
+      y: -this.creditsHeight + 100,
+      duration: 15000,
+      ease: 'Linear',
+      onComplete: () => this.showButtons(),
+    });
+
+    this.buttonsContainer = this.add.container(0, 0);
+    this.buttonsContainer.setVisible(false);
+
+    const buttonStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      font: '16px Courier New',
+      color: '#ffffff',
+      backgroundColor: '#2d5a7b',
+      padding: { x: 20, y: 10 },
+    };
+
+    const playAgainBtn = this.add.text(
+      width / 2 - 100,
+      height - 60,
+      (t('playAgain') || 'Rejouer') + ' [ENTER]',
+      buttonStyle
+    )
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', function (this: Phaser.GameObjects.Text) {
+        this.setStyle({ backgroundColor: '#3d7a9b' });
+      })
+      .on('pointerout', function (this: Phaser.GameObjects.Text) {
+        this.setStyle({ backgroundColor: '#2d5a7b' });
+      })
+      .on('pointerdown', () => this.restartGame());
+
+    const menuBtn = this.add.text(
+      width / 2 + 100,
+      height - 60,
+      (t('menu') || 'Menu') + ' [ESC]',
+      buttonStyle
+    )
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', function (this: Phaser.GameObjects.Text) {
+        this.setStyle({ backgroundColor: '#3d7a9b' });
+      })
+      .on('pointerout', function (this: Phaser.GameObjects.Text) {
+        this.setStyle({ backgroundColor: '#2d5a7b' });
+      })
+      .on('pointerdown', () => this.returnToMenu());
+
+    this.buttonsContainer.add([playAgainBtn, menuBtn]);
+
+    this.skipHint = this.add.text(
+      width / 2,
+      height - 20,
+      t('skipCredits') || 'Appuyez sur une touche pour passer',
+      { font: '12px Courier New', color: '#666666' }
+    ).setOrigin(0.5);
+
+    this.input.keyboard?.once('keydown', (event: KeyboardEvent) => {
+      if (event.code === 'Escape') {
+        this.returnToMenu();
+      } else if (event.code === 'Enter' || event.code === 'Space') {
+        this.restartGame();
+      } else {
+        this.skipCredits();
+      }
+    });
+    this.input.once('pointerdown', () => this.skipCredits());
+
+    Accessibility.announce(t('creditsTitle') || 'Félicitations! Vous avez terminé le jeu.');
+  }
+
+  private createStars(): void {
+    const { width, height } = this.cameras.main;
+    const graphics = this.add.graphics();
+
+    for (let i = 0; i < 50; i++) {
+      const x = Phaser.Math.Between(0, width);
+      const y = Phaser.Math.Between(0, height);
+      const size = Phaser.Math.FloatBetween(0.5, 2);
+      const alpha = Phaser.Math.FloatBetween(0.3, 1);
+
+      graphics.fillStyle(0xffffff, alpha);
+      graphics.fillCircle(x, y, size);
+    }
+  }
+
+  private skipCredits(): void {
+    this.tweens.killAll();
+    this.creditsContainer.setY(-this.creditsHeight + 100);
+    this.showButtons();
+  }
+
+  private showButtons(): void {
+    this.buttonsContainer.setVisible(true);
+    this.skipHint.setVisible(false);
+
+    this.input.keyboard?.removeAllListeners();
+    this.input.keyboard?.on('keydown-ENTER', () => this.restartGame());
+    this.input.keyboard?.on('keydown-SPACE', () => this.restartGame());
+    this.input.keyboard?.on('keydown-ESC', () => this.returnToMenu());
+  }
+
+  private restartGame(): void {
+    const game = this.game;
+    this.scene.stop('CreditsScene');
+
+    setTimeout(() => {
+      if (game.scene.getScene('GameScene')) {
+        game.scene.remove('GameScene');
+      }
+      game.scene.add('GameScene', GameScene, true, { level: 0 });
+    }, 100);
+  }
+
+  private returnToMenu(): void {
+    const game = this.game;
+    this.scene.stop('CreditsScene');
+
+    setTimeout(() => {
+      if (game.scene.getScene('GameScene')) {
+        game.scene.remove('GameScene');
+      }
+      game.scene.start('MenuScene');
+    }, 100);
+  }
+}
