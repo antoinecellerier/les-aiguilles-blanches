@@ -1,3 +1,7 @@
+import Phaser from "phaser";
+
+import GameScene from "./GameScene.js";
+
 /**
  * Les Aiguilles Blanches - Credits Scene
  * Shows end-game credits after completing all levels
@@ -212,3 +216,5 @@ class CreditsScene extends Phaser.Scene {
         }, 100);
     }
 }
+
+export default CreditsScene;

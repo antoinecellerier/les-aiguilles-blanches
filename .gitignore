@@ -1,4 +1,3 @@
-
 # Phaser library (use CDN or install separately)
 js/phaser.js
 js/phaser.min.js
@@ -13,6 +12,11 @@ __pycache__/
 test-results/
 playwright-report/
 
-# Test screenshots
-tests/screenshots/
+# Node
 node_modules/
+
+# Build output
+dist/
+
+# Test artifacts
+tests/screenshots/

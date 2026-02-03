@@ -1,8 +1,13 @@
 """Pytest configuration for Playwright E2E tests."""
+import os
 import pytest
 
-# Base URL for the game
-GAME_URL = "http://localhost/~antoine/snow-groomer/index.html"
+# Base URL for the game - can be overridden via environment variable
+# Default: Vite dev server, fallback to legacy PHP server
+GAME_URL = os.environ.get(
+    "GAME_URL",
+    "http://localhost:3000/index-vite.html"
+)
 
 
 @pytest.fixture(scope="session")

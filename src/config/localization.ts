@@ -3,9 +3,11 @@
  * Multi-language support for Phaser 3 version
  */
 
-let currentLang = 'fr';
+export type SupportedLanguage = 'fr' | 'en' | 'de' | 'it' | 'es';
 
-const TRANSLATIONS = {
+let currentLang: SupportedLanguage = 'fr';
+
+export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     fr: {
         // Menu
         subtitle: "Simulation de Damage",
@@ -226,11 +228,7 @@ const TRANSLATIONS = {
         playAgain: "Play Again",
         skipCredits: "Press any key to skip",
         
-        tutorialName: "Tutorial - First Steps",
-        tutorialTask: "Learn the basics of grooming",
-        tutorialIntro: "Welcome, rookie! I'm Jean-Pierre. Let's go over the basics together.",
-        tutorialMove: "Use WASD or Arrow keys to move the groomer. Try moving around!",
-        // Tutorial - Step by step
+        // Tutorial - Full walkthrough
         tutorialName: "Tutorial - First Steps",
         tutorialTask: "Learn grooming basics",
         tutorialIntro: "Welcome to Les Aiguilles Blanches!",
@@ -469,22 +467,30 @@ const TRANSLATIONS = {
     }
 };
 
-function setLanguage(lang) {
+export function setLanguage(lang: SupportedLanguage): void {
     if (TRANSLATIONS[lang]) {
         currentLang = lang;
         localStorage.setItem('snowGroomer_lang', lang);
     }
 }
 
-function t(key) {
+export function getLanguage(): SupportedLanguage {
+    return currentLang;
+}
+
+export function t(key: string): string {
     return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS['en']?.[key] || key;
 }
 
-function detectLanguage() {
+export function detectLanguage(): SupportedLanguage {
     const saved = localStorage.getItem('snowGroomer_lang');
-    if (saved && TRANSLATIONS[saved]) {
-        return saved;
+    if (saved && saved in TRANSLATIONS) {
+        return saved as SupportedLanguage;
     }
     const browserLang = navigator.language.split('-')[0];
-    return TRANSLATIONS[browserLang] ? browserLang : 'fr';
+    return browserLang in TRANSLATIONS ? browserLang as SupportedLanguage : 'fr';
+}
+
+export function getSavedLanguage(): SupportedLanguage {
+    return detectLanguage();
 }

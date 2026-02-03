@@ -1,3 +1,8 @@
+import Phaser from "phaser";
+
+import HUDScene from "./HUDScene.js";
+import DialogueScene from "./DialogueScene.js";
+
 /**
  * Les Aiguilles Blanches - Game Scene
  * Main gameplay scene with grooming mechanics
@@ -2022,3 +2027,5 @@ class GameScene extends Phaser.Scene {
         this.windStreaks = null;
     }
 }
+
+export default GameScene;

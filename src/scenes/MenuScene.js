@@ -1,3 +1,10 @@
+import Phaser from "phaser";
+
+import GameScene from "./GameScene.js";
+import HUDScene from "./HUDScene.js";
+import DialogueScene from "./DialogueScene.js";
+import PauseScene from "./PauseScene.js";
+
 /**
  * Les Aiguilles Blanches - Menu Scene
  * Main menu with game start, settings, and controls
@@ -288,3 +295,5 @@ class MenuScene extends Phaser.Scene {
         });
     }
 }
+
+export default MenuScene;

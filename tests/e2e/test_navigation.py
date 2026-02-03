@@ -6,10 +6,12 @@ from playwright.sync_api import Page, expect
 # Button positions (based on 720px height viewport)
 # Menu buttons are at: menuY - 30 + i * 55 where menuY = height/2 + 30 = 390
 # So: Start=360, HowToPlay=415, Settings=470, Controls=525
-BUTTON_START = 360
-BUTTON_HOW_TO_PLAY = 415
-BUTTON_SETTINGS = 470
-BUTTON_CONTROLS = 525
+# Menu button Y positions (relative to canvas top)
+# These are approximate center positions of each button
+BUTTON_START = 388
+BUTTON_HOW_TO_PLAY = 443
+BUTTON_SETTINGS = 498
+BUTTON_CONTROLS = 553
 
 
 def get_active_scenes(page: Page) -> list:

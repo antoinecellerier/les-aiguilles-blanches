@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 /**
  * Les Aiguilles Blanches - Level Complete Scene
  * Shows level results and next level option
@@ -218,3 +219,5 @@ class LevelCompleteScene extends Phaser.Scene {
         return '⭐ ' + t('passed');
     }
 }
+
+export default LevelCompleteScene;

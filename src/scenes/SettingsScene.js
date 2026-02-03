@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 /**
  * Les Aiguilles Blanches - Settings Scene
  * Language, accessibility, and control rebinding
@@ -57,6 +58,7 @@ class SettingsScene extends Phaser.Scene {
             { code: 'de', name: '🇩🇪' }, { code: 'it', name: '🇮🇹' }, { code: 'es', name: '🇪🇸' }
         ];
         
+        const currentLang = getLanguage();
         this.langButtons = [];
         languages.forEach((lang, i) => {
             const isActive = currentLang === lang.code;
@@ -343,3 +345,5 @@ class SettingsScene extends Phaser.Scene {
         }
     }
 }
+
+export default SettingsScene;

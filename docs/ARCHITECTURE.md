@@ -13,26 +13,32 @@ The architecture prioritizes:
 
 ## Technology Stack
 
-- **Framework**: Phaser 3.70.0
+- **Framework**: Phaser 3.90.0
+- **Bundler**: Vite 7.x with TypeScript
+- **Language**: TypeScript (config/utils), JavaScript (scenes - gradual migration)
 - **Rendering**: Canvas (forced for Firefox compatibility)
 - **Physics**: Arcade Physics
 - **Input**: Built-in keyboard, gamepad, touch support
 - **Scenes**: Modular scene-based architecture
-- **Testing**: Vitest (unit), Playwright (E2E)
+- **Testing**: Vitest (unit), Playwright (E2E, parallel)
 
 ## Project Structure
 
 ```
 snow-groomer/
-├── index.html              # Entry point
-├── js/phaser.js           # Phaser library (run ./setup.sh)
+├── index-vite.html         # Entry point (Vite)
+├── index.html              # Legacy entry point
+├── vite.config.ts          # Vite bundler config
+├── tsconfig.json           # TypeScript config
 ├── src/
+│   ├── main.ts             # Phaser init, game creation
+│   ├── setup.ts            # Window globals initialization
 │   ├── config/
-│   │   ├── gameConfig.js   # Game constants, colors
-│   │   ├── levels.js       # Level definitions
-│   │   └── localization.js # i18n translations (5 languages)
+│   │   ├── gameConfig.ts   # Game constants, colors (TypeScript)
+│   │   ├── levels.ts       # Level definitions (TypeScript)
+│   │   └── localization.ts # i18n translations (TypeScript)
 │   ├── utils/
-│   │   └── accessibility.js # A11y helpers, settings
+│   │   └── accessibility.ts # A11y helpers, settings (TypeScript)
 │   ├── scenes/
 │   │   ├── BootScene.js    # Asset loading, texture generation
 │   │   ├── MenuScene.js    # Main menu
@@ -43,7 +49,6 @@ snow-groomer/
 │   │   ├── PauseScene.js   # Pause menu
 │   │   ├── LevelCompleteScene.js
 │   │   └── CreditsScene.js
-│   └── main.js             # Phaser init, window.game exposure
 ├── tests/
 │   ├── e2e/                # Playwright browser tests
 │   └── unit-js/            # Vitest config validation

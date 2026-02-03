@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 /**
  * Les Aiguilles Blanches - HUD Scene
  * Displays fuel, stamina, coverage, and timer
@@ -264,3 +265,5 @@ class HUDScene extends Phaser.Scene {
         }
     }
 }
+
+export default HUDScene;

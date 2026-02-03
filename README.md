@@ -2,9 +2,19 @@
 
 ## Quick Start
 
-Open `index.html` in any modern browser (Firefox, Chrome, Safari, Edge).
+### Development (with Vite)
+```bash
+npm install
+npm run dev    # Start dev server at http://localhost:3000
+```
 
-Test URL: http://localhost/~antoine/snow-groomer/index.html
+### Production Build
+```bash
+npm run build  # Build to dist/
+```
+
+### Legacy (no build step)
+Open `index.html` in any modern browser (Firefox, Chrome, Safari, Edge).
 
 ---
 
@@ -12,17 +22,15 @@ A retro-style (SkiFree aesthetic) snow groomer simulation game set in a fictiona
 
 ## 🎮 Play the Game
 
-Open `index.html` in a modern web browser.
-
-For local development:
+### With Vite (Recommended)
 ```bash
-# Already served via nginx user dirs
-open http://localhost/~antoine/snow-groomer/index.html
-
-# Or with Python
-python3 -m http.server 8080
-open http://localhost:8080/index.html
+npm install
+npm run dev
+# Open http://localhost:3000/index-vite.html
 ```
+
+### Without Build Step
+Open `index.html` directly in a browser.
 
 ## 🏔️ About
 
@@ -66,19 +74,30 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 
 ```
 snow-groomer/
-├── index.html   # Main game (Phaser 3, recommended)
-├── index.html          # Main game entry point
-├── tests.html          # Browser-based unit tests
-├── README.md           # This file
+├── index-vite.html     # Vite entry point (recommended)
+├── index.html          # Legacy entry point (no build)
+├── vite.config.ts      # Vite bundler configuration
+├── tsconfig.json       # TypeScript configuration
+├── package.json        # npm dependencies and scripts
 ├── run-tests.sh        # E2E test runner
-├── pytest.ini          # Pytest configuration
-├── src/                # Game source (Phaser 3)
-│   ├── config/         # Game config, levels, localization
-│   ├── scenes/         # Phaser scenes (Boot, Menu, Game, etc.)
-│   ├── utils/          # Accessibility utilities
-│   └── main.js         # Entry point
-├── tests/              # E2E tests (Playwright)
-│   └── e2e/            # Navigation, rendering tests
+├── pytest.ini          # Pytest configuration (parallel)
+├── src/                # Game source
+│   ├── main.ts         # Phaser initialization
+│   ├── setup.ts        # Global setup
+│   ├── config/         # Config files (TypeScript)
+│   │   ├── gameConfig.ts
+│   │   ├── levels.ts
+│   │   └── localization.ts
+│   ├── scenes/         # Phaser scenes (JavaScript)
+│   │   ├── BootScene.js
+│   │   ├── MenuScene.js
+│   │   ├── GameScene.js
+│   │   └── ...
+│   └── utils/          # Utilities (TypeScript)
+│       └── accessibility.ts
+├── tests/
+│   ├── e2e/            # Playwright E2E tests
+│   └── unit-js/        # Vitest unit tests
 └── docs/
     ├── ARCHITECTURE.md # Technical architecture
     └── GAMEPLAY.md     # Detailed gameplay guide
@@ -86,18 +105,22 @@ snow-groomer/
 
 ## 🚀 Quick Start
 
-1. Open `index.html` in a modern browser
-2. Click "Commencer" (Start Game)
-3. Use WASD/Arrows to move, Space to groom
-4. Reach the coverage target before time runs out!
+1. `npm install` (first time only)
+2. `npm run dev` to start dev server
+3. Open http://localhost:3000/index-vite.html
+4. Click "Commencer" (Start Game)
+5. Use WASD/Arrows to move, Space to groom
+6. Reach the coverage target before time runs out!
 
 ## 🧪 Testing
 
-### Unit Tests (Browser)
-Open `tests.html` in a browser to run the unit test suite covering localization, level config, etc.
+### Unit Tests (Vitest)
+```bash
+npm test
+```
 
 ### E2E Tests (Playwright)
-Automated browser tests using Playwright (Chromium + Firefox):
+Automated browser tests using Playwright (Chromium + Firefox, parallel):
 
 ```bash
 # Setup (first time only)
@@ -106,11 +129,11 @@ source .venv/bin/activate
 pip install playwright pytest-playwright pytest-xdist
 python -m playwright install chromium firefox
 
-# Run tests
-./run-tests.sh                    # Parallel, headless (both browsers)
+# Run tests (requires Vite dev server running)
+npm run dev &       # Start Vite in background
+./run-tests.sh      # Parallel, headless (both browsers)
 ./run-tests.sh --headed           # Sequential, visible browser
 ./run-tests.sh --browser chromium # Single browser only
-./run-tests.sh -k "credits"       # Run specific tests
 ```
 
 E2E tests cover: menu navigation, all 9 levels, tutorial flow, grooming, pause, credits, and restart cycle.
@@ -124,7 +147,7 @@ The game supports 5 languages:
 - 🇮🇹 Italian
 - 🇪🇸 Spanish
 
-Translations are in `js/localization.js`. To add a new language, add a new key to the `TRANSLATIONS` object.
+Translations are in `src/config/localization.ts`. To add a new language, add a new key to the `TRANSLATIONS` object.
 
 ## ♿ Accessibility
 
