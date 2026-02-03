@@ -2,59 +2,54 @@
 
 ## Overview
 
-Les Aiguilles Blanches is a browser-based game with two implementations:
-
-1. **Phaser 3 Version** (Recommended) - Uses the Phaser game framework for cross-browser compatibility
-2. **Vanilla JS Version** (Legacy) - Pure JavaScript/Canvas implementation
+Les Aiguilles Blanches is a browser-based Phaser 3 game with retro SkiFree aesthetics.
 
 The architecture prioritizes:
 
 1. **Cross-browser compatibility** - Works in Firefox, Chrome, Safari, Edge
-2. **Modular code organization** - Separated concerns for maintainability
+2. **Modular code organization** - Scene-based architecture for maintainability
 3. **Progressive enhancement** - Works on all devices, enhanced where supported
 4. **Accessibility first** - WCAG compliance built into the design
 
 ## Technology Stack
 
-### Phaser 3 Version (Recommended)
 - **Framework**: Phaser 3.70.0
 - **Rendering**: Canvas (forced for Firefox compatibility)
 - **Physics**: Arcade Physics
 - **Input**: Built-in keyboard, gamepad, touch support
 - **Scenes**: Modular scene-based architecture
+- **Testing**: Vitest (unit), Playwright (E2E)
 
-### Vanilla JS Version (Legacy)
-- **Rendering**: HTML5 Canvas 2D API
-- **Language**: Vanilla JavaScript (ES6+)
-- **Styling**: CSS3 with CSS Variables
-- **No Build Required**: Runs directly in browser
-
-## Phaser 3 Architecture
+## Project Structure
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   index-phaser.html                      │
-│                    (Entry Point)                         │
-└─────────────────────────────────────────────────────────┘
-                           │
-         ┌─────────────────┼─────────────────┐
-         ▼                 ▼                 ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│  src/config/    │ │  src/utils/     │ │  src/scenes/    │
-│  gameConfig.js  │ │ accessibility.js│ │  BootScene.js   │
-│  levels.js      │ └─────────────────┘ │  MenuScene.js   │
-│  localization.js│                     │  GameScene.js   │
-└─────────────────┘                     │  HUDScene.js    │
-                                        │  DialogueScene  │
-                                        │  PauseScene.js  │
-                                        │  LevelComplete  │
-                                        └─────────────────┘
-                                                 │
-                                                 ▼
-                                        ┌─────────────────┐
-                                        │   src/main.js   │
-                                        │  (Game Init)    │
-                                        └─────────────────┘
+snow-groomer/
+├── index.html              # Entry point
+├── js/phaser.js           # Phaser library (run ./setup.sh)
+├── src/
+│   ├── config/
+│   │   ├── gameConfig.js   # Game constants, colors
+│   │   ├── levels.js       # Level definitions
+│   │   └── localization.js # i18n translations (5 languages)
+│   ├── utils/
+│   │   └── accessibility.js # A11y helpers, settings
+│   ├── scenes/
+│   │   ├── BootScene.js    # Asset loading, texture generation
+│   │   ├── MenuScene.js    # Main menu
+│   │   ├── SettingsScene.js # Language, a11y, key rebinding
+│   │   ├── GameScene.js    # Main gameplay
+│   │   ├── HUDScene.js     # UI overlay (parallel to GameScene)
+│   │   ├── DialogueScene.js # Character dialogue overlay
+│   │   ├── PauseScene.js   # Pause menu
+│   │   ├── LevelCompleteScene.js
+│   │   └── CreditsScene.js
+│   └── main.js             # Phaser init, window.game exposure
+├── tests/
+│   ├── e2e/                # Playwright browser tests
+│   └── unit-js/            # Vitest config validation
+└── docs/
+    ├── ARCHITECTURE.md     # This file
+    └── GAMEPLAY.md         # Game mechanics
 ```
 
 ### Scene Flow
@@ -67,36 +62,8 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
      │           │      PauseScene      │
      │           │            ↓         │
      │           └── LevelCompleteScene ┘
-     └─────────────────────────────────────
-```
-
-## Vanilla JS Module Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                      index.html                          │
-│                    (Entry Point)                         │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                      main.js                             │
-│              (Initialization & Glue Code)                │
-└─────────────────────────────────────────────────────────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        ▼                  ▼                  ▼
-┌───────────────┐  ┌───────────────┐  ┌───────────────┐
-│   config.js   │  │    game.js    │  │  renderer.js  │
-│ (Static Data) │  │ (Game Logic)  │  │  (Drawing)    │
-└───────────────┘  └───────────────┘  └───────────────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        ▼                  ▼                  ▼
-┌───────────────┐  ┌───────────────┐  ┌───────────────┐
-│   input.js    │  │localization.js│  │  style.css    │
-│ (Input Layer) │  │ (i18n System) │  │  (Styles)     │
-└───────────────┘  └───────────────┘  └───────────────┘
+     │                        ↓
+     └──────────── CreditsScene ────────
 ```
 
 ## Design Decisions

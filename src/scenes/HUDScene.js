@@ -24,24 +24,25 @@ class HUDScene extends Phaser.Scene {
         const refHeight = 768;
         const scaleX = width / refWidth;
         const scaleY = height / refHeight;
-        this.uiScale = Math.max(0.75, Math.min(2, Math.min(scaleX, scaleY)));
+        // Increase minimum scale to 1.0 for better readability
+        this.uiScale = Math.max(1.0, Math.min(2.5, Math.min(scaleX, scaleY)));
         
         // Scale-adjusted values
         const padding = Math.round(12 * this.uiScale);
         const barWidth = Math.round(130 * this.uiScale);
-        const barHeight = Math.round(16 * this.uiScale);
-        const leftPanelWidth = Math.round(200 * this.uiScale);
-        const leftPanelHeight = Math.round(130 * this.uiScale);
-        const rightPanelWidth = Math.round(140 * this.uiScale);
-        const rightPanelHeight = Math.round(80 * this.uiScale);
+        const barHeight = Math.round(18 * this.uiScale);
+        const leftPanelWidth = Math.round(220 * this.uiScale);
+        const leftPanelHeight = Math.round(140 * this.uiScale);
+        const rightPanelWidth = Math.round(150 * this.uiScale);
+        const rightPanelHeight = Math.round(90 * this.uiScale);
         
-        // Font sizes scaled
-        const fontTiny = Math.round(10 * this.uiScale) + 'px';
-        const fontSmall = Math.round(11 * this.uiScale) + 'px';
-        const fontMed = Math.round(12 * this.uiScale) + 'px';
-        const fontIcon = Math.round(14 * this.uiScale) + 'px';
-        const fontIconLg = Math.round(18 * this.uiScale) + 'px';
-        const fontLarge = Math.round(22 * this.uiScale) + 'px';
+        // Font sizes scaled - increased base sizes for readability
+        const fontTiny = Math.round(12 * this.uiScale) + 'px';
+        const fontSmall = Math.round(14 * this.uiScale) + 'px';
+        const fontMed = Math.round(16 * this.uiScale) + 'px';
+        const fontIcon = Math.round(18 * this.uiScale) + 'px';
+        const fontIconLg = Math.round(22 * this.uiScale) + 'px';
+        const fontLarge = Math.round(26 * this.uiScale) + 'px';
         
         // Left panel - Stats with border accent
         this.add.rectangle(0, 0, leftPanelWidth, leftPanelHeight, 0x000000, 0.75).setOrigin(0).setScrollFactor(0);

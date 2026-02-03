@@ -71,6 +71,9 @@ class GameScene extends Phaser.Scene {
             this.level.isNight ? GAME_CONFIG.COLORS.SKY_NIGHT : GAME_CONFIG.COLORS.SKY_DAY
         );
         
+        // Create extended background to cover full visible window
+        this.createExtendedBackground(screenWidth, screenHeight, worldWidth, worldHeight);
+        
         // Create snow grid (sets totalTiles based on groomable area)
         this.snowGrid = [];
         this.groomedCount = 0;
@@ -155,10 +158,14 @@ class GameScene extends Phaser.Scene {
                 level: this.level,
                 gameScene: this 
             });
+            // Bring HUD to top so it renders above GameScene
+            this.scene.bringToTop('HUDScene');
             console.log('HUD launched, launching Dialogue scene...');
             
             // Start dialogue scene
             this.scene.launch('DialogueScene');
+            // Bring DialogueScene to top (above HUD)
+            this.scene.bringToTop('DialogueScene');
             console.log('Dialogue launched');
             
             // Show intro dialogue
@@ -187,11 +194,178 @@ class GameScene extends Phaser.Scene {
             this.createWeatherEffects();
         }
         
+        // Apply accessibility settings
+        this.applyAccessibilitySettings();
+        
         console.log('GameScene._createLevel complete!');
         // Pause on ESC
         this.input.keyboard.on('keydown-ESC', () => this.pauseGame());
         
         Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
+    }
+    
+    applyAccessibilitySettings() {
+        const settings = Accessibility.settings;
+        
+        // Apply high contrast mode
+        if (settings.highContrast) {
+            document.body.classList.add('high-contrast');
+            // Store for use during grooming visual updates
+            this.highContrastMode = true;
+        } else {
+            document.body.classList.remove('high-contrast');
+            this.highContrastMode = false;
+        }
+        
+        // Apply colorblind filter using CSS filter on game canvas
+        const canvas = document.querySelector('#game-container canvas');
+        if (canvas) {
+            if (settings.colorblindMode && settings.colorblindMode !== 'none') {
+                // Apply SVG filter for colorblind simulation
+                canvas.style.filter = `url(#${settings.colorblindMode}-filter)`;
+                this.ensureColorblindFilters();
+            } else {
+                canvas.style.filter = '';
+            }
+        }
+    }
+    
+    ensureColorblindFilters() {
+        // Add SVG filters for colorblind modes if not already present
+        if (document.getElementById('colorblind-filters')) return;
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.id = 'colorblind-filters';
+        svg.style.position = 'absolute';
+        svg.style.width = '0';
+        svg.style.height = '0';
+        svg.innerHTML = `
+            <defs>
+                <filter id="deuteranopia-filter">
+                    <feColorMatrix type="matrix" values="
+                        0.625 0.375 0 0 0
+                        0.7 0.3 0 0 0
+                        0 0.3 0.7 0 0
+                        0 0 0 1 0"/>
+                </filter>
+                <filter id="protanopia-filter">
+                    <feColorMatrix type="matrix" values="
+                        0.567 0.433 0 0 0
+                        0.558 0.442 0 0 0
+                        0 0.242 0.758 0 0
+                        0 0 0 1 0"/>
+                </filter>
+                <filter id="tritanopia-filter">
+                    <feColorMatrix type="matrix" values="
+                        0.95 0.05 0 0 0
+                        0 0.433 0.567 0 0
+                        0 0.475 0.525 0 0
+                        0 0 0 1 0"/>
+                </filter>
+            </defs>
+        `;
+        document.body.appendChild(svg);
+    }
+    
+    createExtendedBackground(screenWidth, screenHeight, worldWidth, worldHeight) {
+        // Create natural snowy background extending from level edges
+        const g = this.add.graphics();
+        g.setDepth(-100); // Behind everything
+        
+        // Calculate extra space around the world
+        const extraLeft = this.worldOffsetX;
+        const extraTop = this.worldOffsetY;
+        const extraRight = Math.max(0, screenWidth - worldWidth - this.worldOffsetX);
+        const extraBottom = Math.max(0, screenHeight - worldHeight - this.worldOffsetY);
+        
+        // Snowy mountain colors
+        const snowBase = 0xE0EAF0; // Slightly blue-tinted snow
+        const snowShadow = 0xC8D8E0; // Shadowed snow areas
+        
+        // Fill extended areas with snow base
+        g.fillStyle(snowBase, 1);
+        
+        // Left area
+        if (extraLeft > 0) {
+            g.fillRect(-extraLeft, -extraTop, extraLeft, screenHeight);
+        }
+        // Right area  
+        if (extraRight > 0) {
+            g.fillRect(worldWidth, -extraTop, extraRight, screenHeight);
+        }
+        // Top area
+        if (extraTop > 0) {
+            g.fillRect(0, -extraTop, worldWidth, extraTop);
+        }
+        // Bottom area
+        if (extraBottom > 0) {
+            g.fillRect(0, worldHeight, worldWidth, extraBottom);
+        }
+        
+        // Add subtle snow variation with scattered shadow patches
+        const patchSize = this.tileSize * 4;
+        for (let x = -extraLeft; x < worldWidth + extraRight; x += patchSize) {
+            for (let y = -extraTop; y < worldHeight + extraBottom; y += patchSize) {
+                const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
+                if (isOutside && Math.random() > 0.7) {
+                    // Random snow shadow patches for texture
+                    g.fillStyle(snowShadow, 0.5);
+                    const px = x + Math.random() * patchSize * 0.5;
+                    const py = y + Math.random() * patchSize * 0.5;
+                    const pw = patchSize * (0.3 + Math.random() * 0.4);
+                    const ph = patchSize * (0.3 + Math.random() * 0.4);
+                    g.fillRect(px, py, pw, ph);
+                }
+            }
+        }
+        
+        // Add scattered trees in extended areas for visual continuity
+        const treeSpacing = this.tileSize * 2.5;
+        const margin = this.tileSize;
+        
+        // Scatter trees naturally with random offset
+        for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing) {
+            for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing) {
+                // Only in extended areas (outside level bounds)
+                const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
+                if (isOutside && Math.random() > 0.5) {
+                    // Random offset for natural look
+                    const offsetX = (Math.random() - 0.5) * treeSpacing * 0.8;
+                    const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
+                    this.createTree(x + offsetX, y + offsetY);
+                }
+            }
+        }
+        
+        // Occasional rocks for variety
+        for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing * 2) {
+            for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing * 2) {
+                const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
+                if (isOutside && Math.random() > 0.9) {
+                    const offsetX = (Math.random() - 0.5) * treeSpacing;
+                    const offsetY = (Math.random() - 0.5) * treeSpacing;
+                    this.createRock(x + offsetX, y + offsetY);
+                }
+            }
+        }
+    }
+    
+    createRock(x, y) {
+        const g = this.add.graphics();
+        g.setDepth(-50); // In front of background, behind trees
+        const size = 6 + Math.random() * 8;
+        
+        // Main rock body
+        g.fillStyle(0x6B6B6B, 1);
+        g.fillRect(x - size/2, y - size/3, size, size * 0.6);
+        
+        // Highlight
+        g.fillStyle(0x8B8B8B, 1);
+        g.fillRect(x - size/3, y - size/3, size * 0.3, size * 0.2);
+        
+        // Shadow
+        g.fillStyle(0x4A4A4A, 1);
+        g.fillRect(x, y + size * 0.1, size * 0.4, size * 0.15);
     }
     
     // Generate piste path based on shape type
@@ -1604,7 +1778,12 @@ class GameScene extends Phaser.Scene {
                     if (cell.groomable && !cell.groomed) {
                         cell.groomed = true;
                         cell.tile.setTexture('snow_groomed');
-                        cell.tile.clearTint();
+                        // In high contrast mode, add a subtle tint to groomed areas
+                        if (this.highContrastMode) {
+                            cell.tile.setTint(0xAADDFF); // Light blue tint for visibility
+                        } else {
+                            cell.tile.clearTint();
+                        }
                         this.groomedCount++;
                         this.hasGroomed = true;
                     }
@@ -1736,6 +1915,7 @@ class GameScene extends Phaser.Scene {
     pauseGame() {
         this.scene.pause();
         this.scene.launch('PauseScene', { gameScene: this });
+        this.scene.bringToTop('PauseScene');
     }
     
     resumeGame() {

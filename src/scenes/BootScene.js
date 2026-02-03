@@ -122,22 +122,30 @@ class BootScene extends Phaser.Scene {
         fuelGraphics.generateTexture('fuel', 40, 30);
         fuelGraphics.destroy();
         
-        // Generate snow tile
+        // Generate snow tile - ungroomed snow with rougher texture
         const snowGraphics = this.make.graphics({ x: 0, y: 0, add: false });
-        snowGraphics.fillStyle(0xE8F4F8);
+        snowGraphics.fillStyle(0xD8E4E8); // Slightly darker/grayer ungroomed snow
         snowGraphics.fillRect(0, 0, 16, 16);
+        // Add texture bumps to show ungroomed
+        snowGraphics.fillStyle(0xC8D4D8);
+        snowGraphics.fillRect(2, 2, 3, 3);
+        snowGraphics.fillRect(9, 5, 4, 3);
+        snowGraphics.fillRect(4, 10, 3, 4);
+        snowGraphics.fillRect(11, 11, 3, 3);
         snowGraphics.generateTexture('snow_ungroomed', 16, 16);
         snowGraphics.destroy();
         
-        // Generate groomed snow tile - no lines, just slightly different color
+        // Generate groomed snow tile - smooth bright white with corduroy pattern
         const groomedGraphics = this.make.graphics({ x: 0, y: 0, add: false });
-        groomedGraphics.fillStyle(0xF0F8FF);
+        groomedGraphics.fillStyle(0xFFFFFF); // Pure white - clearly groomed
         groomedGraphics.fillRect(0, 0, 16, 16);
-        // Corduroy pattern as simple rectangles
-        groomedGraphics.fillStyle(0xE0E8F0);
-        groomedGraphics.fillRect(0, 3, 16, 2);
-        groomedGraphics.fillRect(0, 7, 16, 2);
-        groomedGraphics.fillRect(0, 11, 16, 2);
+        // Corduroy pattern - distinctive horizontal lines
+        groomedGraphics.fillStyle(0xE8F0F8);
+        groomedGraphics.fillRect(0, 2, 16, 1);
+        groomedGraphics.fillRect(0, 5, 16, 1);
+        groomedGraphics.fillRect(0, 8, 16, 1);
+        groomedGraphics.fillRect(0, 11, 16, 1);
+        groomedGraphics.fillRect(0, 14, 16, 1);
         groomedGraphics.generateTexture('snow_groomed', 16, 16);
         groomedGraphics.destroy();
     }
