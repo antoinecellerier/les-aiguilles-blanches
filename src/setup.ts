@@ -5,8 +5,8 @@
 
 import { GAME_CONFIG, DIFFICULTY_MARKERS, FOOD_ITEMS } from './config/gameConfig';
 import { LEVELS, type Level } from './config/levels';
-import { TRANSLATIONS, t, setLanguage, getLanguage, detectLanguage, getSavedLanguage } from './config/localization';
-import { Accessibility } from './utils/accessibility';
+import { TRANSLATIONS, t, setLanguage, getLanguage, detectLanguage, getSavedLanguage, type SupportedLanguage } from './config/localization';
+import { Accessibility, type ColorblindMode } from './utils/accessibility';
 
 // Make globals available on window for JS scene files
 (window as any).GAME_CONFIG = GAME_CONFIG;
@@ -37,3 +37,5 @@ export {
 };
 
 export type { Level };
+export type { SupportedLanguage };
+export type { ColorblindMode };

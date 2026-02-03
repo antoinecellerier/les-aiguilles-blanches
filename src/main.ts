@@ -18,8 +18,7 @@ import HUDScene from './scenes/HUDScene';
 import MenuScene from './scenes/MenuScene';
 
 // JavaScript scenes (during migration)
-// @ts-ignore
-import SettingsScene from './scenes/SettingsScene.js';
+import SettingsScene from './scenes/SettingsScene';
 // @ts-ignore
 import GameScene from './scenes/GameScene.js';
 
