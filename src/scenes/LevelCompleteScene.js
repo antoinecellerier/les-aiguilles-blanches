@@ -100,6 +100,28 @@ class LevelCompleteScene extends Phaser.Scene {
             this.input.keyboard.once('keydown-ESC', () => {
                 this.scene.start('MenuScene');
             });
+        } else if (this.won && this.levelIndex === LEVELS.length - 1) {
+            // Completed final level - show credits!
+            this.add.text(width / 2, height / 2 + 100, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
+                font: 'bold 20px Courier New',
+                fill: '#FFD700'
+            }).setOrigin(0.5);
+            
+            // Credits button
+            this.createButton(width / 2, buttonY, 'viewCredits', buttonStyle, () => {
+                this.scene.start('CreditsScene');
+            }, '[ENTER]');
+            
+            // Keyboard shortcuts
+            this.input.keyboard.once('keydown-ENTER', () => {
+                this.scene.start('CreditsScene');
+            });
+            this.input.keyboard.once('keydown-SPACE', () => {
+                this.scene.start('CreditsScene');
+            });
+            this.input.keyboard.once('keydown-ESC', () => {
+                this.scene.start('MenuScene');
+            });
         } else {
             // Retry button
             this.createButton(width / 2 - 80, buttonY, 'retry', buttonStyle, () => {
@@ -148,6 +170,7 @@ class LevelCompleteScene extends Phaser.Scene {
             case 'fuel': return '⛽💨';
             case 'time': return '⏰❌';
             case 'avalanche': return '🏔️❄️💨';
+            case 'tumble': return '🔄💥';
             default: return '❌';
         }
     }
@@ -173,6 +196,11 @@ class LevelCompleteScene extends Phaser.Scene {
                 t('tauntAvalanche1') || "Tu as réveillé la montagne...",
                 t('tauntAvalanche2') || "Les pisteurs t'avaient pourtant prévenu !",
                 t('tauntAvalanche3') || "La neige, ça se respecte."
+            ],
+            tumble: [
+                t('tauntTumble1') || "La physique, ça s'apprend...",
+                t('tauntTumble2') || "Le treuil existe pour une raison.",
+                t('tauntTumble3') || "Jean-Pierre t'avait dit d'utiliser le câble !"
             ]
         };
         

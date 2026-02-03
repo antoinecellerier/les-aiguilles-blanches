@@ -327,6 +327,141 @@ const config = {
 - `input` configuration  
 - `backgroundColor`
 
+## Scene Lifecycle Management
+
+### Scene Transitions (Critical)
+
+Phaser scene reuse can cause texture corruption when scenes are stopped and relaunched repeatedly. This manifests as:
+```
+TypeError: can't access property "cut", data is null
+```
+
+**Problem:** When `scene.stop()` is called, the scene instance is preserved but paused. When `scene.launch()` is called again, the SAME instance is reused with potentially corrupted texture references.
+
+**Solution:** Remove and recreate ALL game scenes completely during level transitions:
+
+```javascript
+// In GameScene.transitionToLevel():
+this.scene.stop('HUDScene');
+this.scene.stop('DialogueScene');
+this.scene.stop('GameScene');
+
+setTimeout(() => {
+    // Remove ALL scene instances to clear corrupted textures
+    game.scene.remove('HUDScene');
+    game.scene.remove('DialogueScene');
+    game.scene.remove('GameScene');
+    
+    // Re-add fresh scene instances (order matters for layering)
+    game.scene.add('GameScene', GameScene, false);
+    game.scene.add('HUDScene', HUDScene, false);
+    game.scene.add('DialogueScene', DialogueScene, false);
+    
+    // Start GameScene with new level
+    game.scene.start('GameScene', { level: nextLevel });
+}, 100);
+```
+
+**Key Points:**
+- Always stop scenes before removing them
+- Use setTimeout to allow render frame to complete
+- Create fresh scene instances via `scene.add()` rather than reusing
+- Reset instance variables (like `isSkipping`) in `init()` not just `create()`
+
+### Cleanup in shutdown()
+
+All scenes should implement `shutdown()` for proper cleanup:
+
+```javascript
+shutdown() {
+    this.tweens.killAll();           // Stop all animations
+    this.time.removeAllEvents();      // Cancel all timers
+    this.children.removeAll(true);    // Destroy all game objects
+}
+```
+
+### Overlay Scene Input Handling
+
+DialogueScene runs as an overlay on top of GameScene. To prevent input blocking:
+
+```javascript
+// Disable interactivity when dialogue is hidden
+hideDialogue() {
+    this.isShowing = false;
+    if (this.bg) {
+        this.bg.disableInteractive();
+    }
+    // ... hide animation
+}
+
+// Re-enable when showing
+displayNextDialogue() {
+    this.isShowing = true;
+    if (this.bg) {
+        this.bg.setInteractive({ useHandCursor: true });
+    }
+    // ... show animation
+}
+```
+
+## Service Road System
+
+Steep piste levels require service roads for groomer access to winch anchors.
+
+### Configuration
+
+```javascript
+// In levels.js
+{
+    id: 4,
+    accessPaths: [
+        { startY: 0.15, endY: 0.4, side: 'left' },
+        { startY: 0.45, endY: 0.75, side: 'right' }
+    ],
+    // ...
+}
+```
+
+### Implementation
+
+1. **Pre-calculate entry zones** before boundary walls are created
+2. **Skip boundary walls** at entry/exit zones
+3. **Draw curved switchback paths** with smooth S-curves
+4. **Place orange/black striped poles** along path edges (French standard)
+5. **Exclude trees** from path areas
+
+### Physics
+
+Groomer on access path bypasses steep zone effects:
+```javascript
+checkSteepness() {
+    // Check if on access path first
+    if (this.accessPathRects) {
+        for (const path of this.accessPathRects) {
+            if (inBounds(groomer, path)) {
+                return; // Safe on access path
+            }
+        }
+    }
+    // Then check steep zones...
+}
+```
+
+## HUD Scaling
+
+HUD elements scale based on viewport size for readability on different displays:
+
+```javascript
+// Reference resolution: 1024x768
+const scaleX = width / 1024;
+const scaleY = height / 768;
+this.uiScale = Math.max(0.75, Math.min(2, Math.min(scaleX, scaleY)));
+
+// Apply to all UI elements
+const fontSize = Math.round(12 * this.uiScale) + 'px';
+const padding = Math.round(12 * this.uiScale);
+```
+
 ## Future Architecture Considerations
 
 1. **Save/Load**: Serialize gameState to localStorage

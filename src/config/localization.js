@@ -48,6 +48,8 @@ const TRANSLATIONS = {
         // Winch
         winchAttached: "🔗 Treuil attaché ! Maintenir SHIFT pour assistance.",
         winchHint: "Appuyez sur SHIFT près d'un ancrage ⚓ pour utiliser le treuil",
+        accessPath: "Route de service",
+        toPiste: "Vers la piste",
         
         // Taunts
         tauntCliff1: "La gravité, c'est pas ton truc ?",
@@ -84,6 +86,12 @@ const TRANSLATIONS = {
         good: "Bien joué !",
         passed: "Réussi",
         retry: "Réessayer",
+        gameComplete: "Jeu terminé !",
+        viewCredits: "Voir les crédits",
+        creditsTitle: "Félicitations !",
+        creditsSubtitle: "Vous avez maîtrisé Les Aiguilles Blanches",
+        playAgain: "Rejouer",
+        skipCredits: "Appuyez sur une touche pour passer",
         
         // Tutorial - Step by step
         tutorialName: "Tutoriel - Premiers Pas",
@@ -124,6 +132,11 @@ const TRANSLATIONS = {
         avalancheZone: "ZONE AVALANCHE",
         avalancheWarning: "⚠️ DANGER ! Le manteau neigeux est instable ! Sortez de la zone !",
         avalancheTrigger: "🏔️💨 AVALANCHE DÉCLENCHÉE ! Évacuation impossible !",
+        steepWarning: "⚠️ PENTE RAIDE ! Utilisez le treuil (SHIFT) ou vous allez glisser !",
+        tumble: "🔄 TONNEAU ! La dameuse a basculé sur la pente !",
+        tauntTumble1: "La physique, ça s'apprend...",
+        tauntTumble2: "Le treuil existe pour une raison, tu sais.",
+        tauntTumble3: "Jean-Pierre t'avait pourtant dit d'utiliser le câble !",
         tauntAvalanche1: "Tu as réveillé la montagne... Elle n'est pas contente.",
         tauntAvalanche2: "Les pisteurs t'avaient pourtant prévenu !",
         tauntAvalanche3: "La neige, ça se respecte. Maintenant tu sais.",
@@ -170,6 +183,7 @@ const TRANSLATIONS = {
         // Winch
         winchAttached: "🔗 Winch attached! Hold SHIFT for assistance.",
         winchHint: "Press SHIFT near an anchor ⚓ to use winch",
+        accessPath: "Service Road",
         
         // Taunts
         tauntCliff1: "Gravity isn't your strong suit, is it?",
@@ -205,6 +219,12 @@ const TRANSLATIONS = {
         good: "Well done!",
         passed: "Passed",
         retry: "Retry",
+        gameComplete: "Game Complete!",
+        viewCredits: "View Credits",
+        creditsTitle: "Congratulations!",
+        creditsSubtitle: "You have mastered Les Aiguilles Blanches",
+        playAgain: "Play Again",
+        skipCredits: "Press any key to skip",
         
         tutorialName: "Tutorial - First Steps",
         tutorialTask: "Learn the basics of grooming",
@@ -248,6 +268,11 @@ const TRANSLATIONS = {
         avalancheZone: "AVALANCHE ZONE",
         avalancheWarning: "⚠️ DANGER! Snowpack is unstable! Leave the zone!",
         avalancheTrigger: "🏔️💨 AVALANCHE TRIGGERED! No escape!",
+        steepWarning: "⚠️ STEEP SLOPE! Use the winch (SHIFT) or you'll slide!",
+        tumble: "🔄 ROLLOVER! The groomer tumbled on the slope!",
+        tauntTumble1: "Physics lessons are expensive...",
+        tauntTumble2: "The winch exists for a reason, you know.",
+        tauntTumble3: "Jean-Pierre told you to use the cable!",
         tauntAvalanche1: "You woke the mountain... She's not happy.",
         tauntAvalanche2: "The ski patrol warned you!",
         tauntAvalanche3: "Snow demands respect. Now you know.",

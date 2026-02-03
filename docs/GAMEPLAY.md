@@ -214,6 +214,22 @@ Unlock special challenge missions as you progress:
 4. **Buff stacking**: Multiple food effects can be active simultaneously
 5. **Winch wisely**: It uses more fuel but prevents dangerous sliding
 6. **Weather awareness**: Storms reduce visibility and speed - prepare accordingly
+7. **Use service roads**: On steep pistes, look for orange/black striped poles marking service roads - these safe routes let you reach winch anchors without the winch
+
+## 🛣️ Service Roads
+
+On advanced levels (Red and Black pistes), you'll find **service roads** marked with orange and black striped poles. These are switchback paths outside the main piste that allow your groomer to bypass steep sections.
+
+**How to use:**
+1. Look for the 🚜 Service Road sign at the piste edge
+2. Drive between the striped marker poles
+3. Follow the winding path uphill to reach winch anchors
+4. Exit at the "To Piste" sign to rejoin the main run
+
+**Why use them?**
+- Steep zones (40°+) cause your groomer to tumble without a winch
+- Service roads have gentle inclines safe for unassisted travel
+- Use them to reach the first winch anchor, then use the winch for steeper sections
 
 ## 🔧 Troubleshooting
 
@@ -224,7 +240,10 @@ A: Check fuel level. If at 0%, find the nearest fuel station.
 A: Focus on coverage, not perfection. 80% groomed is better than 50% perfect.
 
 **Q: The winch won't work!**
-A: Winch is only available on levels 6-8 where terrain requires it.
+A: Winch is only available on levels 4-8 where terrain requires it. You must be near a ⚓ anchor.
+
+**Q: I can't reach the winch anchor!**
+A: Look for service roads (orange/black poles) on the side of the piste. These provide safe access to anchors.
 
 **Q: I can't see anything!**
 A: Night levels have reduced visibility. Your headlights illuminate the path ahead.

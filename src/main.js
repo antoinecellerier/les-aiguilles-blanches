@@ -39,7 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
             HUDScene,
             DialogueScene,
             PauseScene,
-            LevelCompleteScene
+            LevelCompleteScene,
+            CreditsScene
         ]
     };
     

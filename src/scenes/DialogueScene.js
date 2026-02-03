@@ -6,9 +6,13 @@
 class DialogueScene extends Phaser.Scene {
     constructor() {
         super({ key: 'DialogueScene' });
+        // Initialize queue in constructor so it exists before create()
+        this.dialogueQueue = [];
+        this.isShowing = false;
     }
     
     create() {
+        // Reset state on create
         this.dialogueQueue = [];
         this.isShowing = false;
         
@@ -20,7 +24,7 @@ class DialogueScene extends Phaser.Scene {
         this.container = this.add.container(0, height - 150);
         this.container.setVisible(false);
         
-        // Background
+        // Background - make it interactive only when visible
         this.bg = this.add.rectangle(width / 2, 0, width - 40, 120, 0x222222, 0.95);
         this.bg.setStrokeStyle(2, 0x87CEEB);
         
@@ -45,10 +49,19 @@ class DialogueScene extends Phaser.Scene {
         
         this.container.add([this.bg, this.speakerText, this.dialogueText, this.continueText]);
         
-        // Click/key to continue
-        this.input.on('pointerdown', () => this.advanceDialogue());
-        this.input.keyboard.on('keydown-SPACE', () => this.advanceDialogue());
-        this.input.keyboard.on('keydown-ENTER', () => this.advanceDialogue());
+        // Make background clickable to advance dialogue
+        this.bg.setInteractive({ useHandCursor: true });
+        this.bg.on('pointerdown', () => {
+            if (this.isShowing) this.advanceDialogue();
+        });
+        
+        // Keyboard to continue
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (this.isShowing) this.advanceDialogue();
+        });
+        this.input.keyboard.on('keydown-ENTER', () => {
+            if (this.isShowing) this.advanceDialogue();
+        });
     }
     
     showDialogue(key) {
@@ -68,8 +81,18 @@ class DialogueScene extends Phaser.Scene {
             return;
         }
         
+        // Safety check - scene might be shutting down
+        if (!this.speakerText || !this.dialogueText || !this.container) {
+            return;
+        }
+        
         const dialogue = this.dialogueQueue.shift();
         this.isShowing = true;
+        
+        // Re-enable interactivity when showing
+        if (this.bg) {
+            this.bg.setInteractive({ useHandCursor: true });
+        }
         
         // Determine speaker from key
         let speaker = 'Jean-Pierre';
@@ -103,14 +126,40 @@ class DialogueScene extends Phaser.Scene {
     hideDialogue() {
         this.isShowing = false;
         
+        if (!this.container) return;
+        
+        // Disable interactivity when hidden
+        if (this.bg) {
+            this.bg.disableInteractive();
+        }
+        
         this.tweens.add({
             targets: this.container,
             y: this.cameras.main.height + 20,
             duration: 200,
             ease: 'Power2',
             onComplete: () => {
-                this.container.setVisible(false);
+                if (this.container) {
+                    this.container.setVisible(false);
+                }
             }
         });
+    }
+    
+    shutdown() {
+        // Stop all tweens first
+        this.tweens.killAll();
+        
+        // Destroy all children to remove from render batch
+        this.children.removeAll(true);
+        
+        // Clean up references
+        this.dialogueQueue = [];
+        this.isShowing = false;
+        this.container = null;
+        this.bg = null;
+        this.speakerText = null;
+        this.dialogueText = null;
+        this.continueText = null;
     }
 }
