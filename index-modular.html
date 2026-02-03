@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Les Aiguilles Blanches - Snow Groomer Simulation</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Screen Reader Announcements -->
+    <div id="srAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    
+    <div id="gameContainer">
+        <canvas id="gameCanvas" role="img" aria-label="Game view of Les Aiguilles Blanches ski resort"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud" role="status" aria-label="Game status">
+            <div class="hud-panel" id="levelInfo">
+                <div id="levelName">Level 1: Green Piste</div>
+                <div id="levelTask">Groom the beginner slope</div>
+            </div>
+            <div class="hud-panel" id="statsPanel">
+                <div>⛽ <span id="fuelDisplay">100%</span></div>
+                <div>❄️ <span id="coverageDisplay">0%</span></div>
+                <div>⚡ <span id="staminaDisplay">100%</span></div>
+                <div>⏱️ <span id="timerDisplay">5:00</span></div>
+            </div>
+        </div>
+        
+        <!-- Touch Controls -->
+        <div id="touchControls" aria-hidden="true">
+            <div class="touch-joystick" id="joystick">
+                <div class="joystick-knob" id="joystickKnob"></div>
+            </div>
+            <div class="touch-buttons">
+                <button class="touch-btn" id="btnGroom" aria-label="Groom">GROOM</button>
+                <button class="touch-btn" id="btnWinch" aria-label="Winch">WINCH</button>
+                <button class="touch-btn" id="btnMenu" aria-label="Menu">☰</button>
+            </div>
+        </div>
+        
+        <!-- Dialogue Box -->
+        <div id="dialogueBox" role="dialog" aria-labelledby="dialogueSpeaker">
+            <div class="dialogue-speaker" id="dialogueSpeaker"></div>
+            <div class="dialogue-text" id="dialogueText"></div>
+            <div style="text-align: center; margin-top: 15px; color: #888; font-size: 12px;">
+                <span data-i18n="pressContinue">Press Space or tap to continue</span>
+            </div>
+        </div>
+        
+        <!-- Main Menu -->
+        <div class="menu-overlay" id="mainMenu">
+            <h1 class="menu-title">🏔️ Les Aiguilles Blanches</h1>
+            <p class="menu-subtitle" data-i18n="subtitle">Snow Groomer Simulation</p>
+            <button class="menu-btn" id="btnStart" data-i18n="startGame">Start Game</button>
+            <button class="menu-btn" id="btnContinue" data-i18n="continue" style="display:none;">Continue</button>
+            <button class="menu-btn" id="btnHowToPlay" data-i18n="howToPlay">How to Play</button>
+            <button class="menu-btn" id="btnSettings" data-i18n="settings">Settings</button>
+            <button class="menu-btn" id="btnControls" data-i18n="controls">Controls</button>
+        </div>
+        
+        <!-- How to Play -->
+        <div class="menu-overlay hidden" id="howToPlayMenu">
+            <div class="settings-panel" style="max-width: 600px;">
+                <h2 data-i18n="howToPlay">How to Play</h2>
+                
+                <div class="settings-section">
+                    <h3>🚜 <span data-i18n="yourMission">Your Mission</span></h3>
+                    <p data-i18n="missionText">You are a snow groomer operator at Les Aiguilles Blanches ski resort in Savoie. Your job is to prepare the pistes before the skiers arrive each morning.</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🎮 <span data-i18n="controls">Controls</span></h3>
+                    <p data-i18n="controlsText">Move with WASD or Arrow keys. Hold SPACE to activate the tiller and groom the snow. On steep slopes, use SHIFT to deploy the winch.</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>⛽ <span data-i18n="resources">Resources</span></h3>
+                    <p data-i18n="resourcesText">Watch your fuel and stamina! Refuel at the station (⛽) and stop by Chez Marie for a tartiflette to restore your energy.</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🎯 <span data-i18n="objectives">Objectives</span></h3>
+                    <p data-i18n="objectivesText">Groom enough snow to reach the coverage target before time runs out. Avoid obstacles like trees, rocks, and lift pylons!</p>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🧀 <span data-i18n="savoyard">Savoyard Tips</span></h3>
+                    <p data-i18n="savoyardText">Visit Chez Marie for local specialties: Tartiflette restores full energy, Fondue gives stamina regen, and Vin Chaud helps in storms!</p>
+                </div>
+                
+                <button class="menu-btn" id="btnBackHowToPlay" data-i18n="back">Back</button>
+            </div>
+        </div>
+        
+        <!-- Settings Menu -->
+        <div class="menu-overlay hidden" id="settingsMenu">
+            <div class="settings-panel">
+                <h2 data-i18n="settings">Settings</h2>
+                
+                <div class="settings-section">
+                    <h3 data-i18n="language">Language</h3>
+                    <div class="setting-row">
+                        <label for="langSelect" data-i18n="selectLanguage">Select Language</label>
+                        <select id="langSelect">
+                            <option value="fr">Français</option>
+                            <option value="en">English</option>
+                            <option value="de">Deutsch</option>
+                            <option value="it">Italiano</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3 data-i18n="accessibility">Accessibility</h3>
+                    <div class="setting-row">
+                        <label for="highContrast" data-i18n="highContrast">High Contrast Mode</label>
+                        <input type="checkbox" id="highContrast">
+                    </div>
+                    <div class="setting-row">
+                        <label for="colorblindMode" data-i18n="colorblindMode">Colorblind Mode</label>
+                        <select id="colorblindMode">
+                            <option value="none" data-i18n="none">None</option>
+                            <option value="deuteranopia">Deuteranopia</option>
+                            <option value="protanopia">Protanopia</option>
+                            <option value="tritanopia">Tritanopia</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label for="reducedMotion" data-i18n="reducedMotion">Reduced Motion</label>
+                        <input type="checkbox" id="reducedMotion">
+                    </div>
+                    <div class="setting-row">
+                        <label for="uiScale" data-i18n="uiScale">UI Scale</label>
+                        <select id="uiScale">
+                            <option value="1">100%</option>
+                            <option value="1.25">125%</option>
+                            <option value="1.5">150%</option>
+                            <option value="2">200%</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3 data-i18n="audio">Audio</h3>
+                    <div class="setting-row">
+                        <label for="musicVolume" data-i18n="music">Music</label>
+                        <input type="range" id="musicVolume" min="0" max="100" value="70">
+                    </div>
+                    <div class="setting-row">
+                        <label for="sfxVolume" data-i18n="sfx">Sound Effects</label>
+                        <input type="range" id="sfxVolume" min="0" max="100" value="100">
+                    </div>
+                </div>
+                
+                <button class="menu-btn" id="btnBackSettings" data-i18n="back">Back</button>
+            </div>
+        </div>
+        
+        <!-- Controls Menu -->
+        <div class="menu-overlay hidden" id="controlsMenu">
+            <div class="settings-panel">
+                <h2 data-i18n="controls">Controls</h2>
+                
+                <div class="settings-section">
+                    <h3 data-i18n="keyboard">Keyboard</h3>
+                    <div class="setting-row">
+                        <label data-i18n="moveUp">Move Up</label>
+                        <button class="menu-btn" style="min-width:100px" data-rebind="up">W / ↑</button>
+                    </div>
+                    <div class="setting-row">
+                        <label data-i18n="moveDown">Move Down</label>
+                        <button class="menu-btn" style="min-width:100px" data-rebind="down">S / ↓</button>
+                    </div>
+                    <div class="setting-row">
+                        <label data-i18n="moveLeft">Move Left</label>
+                        <button class="menu-btn" style="min-width:100px" data-rebind="left">A / ←</button>
+                    </div>
+                    <div class="setting-row">
+                        <label data-i18n="moveRight">Move Right</label>
+                        <button class="menu-btn" style="min-width:100px" data-rebind="right">D / →</button>
+                    </div>
+                    <div class="setting-row">
+                        <label data-i18n="groom">Groom</label>
+                        <button class="menu-btn" style="min-width:100px" data-rebind="groom">Space</button>
+                    </div>
+                    <div class="setting-row">
+                        <label data-i18n="winch">Winch</label>
+                        <button class="menu-btn" style="min-width:100px" data-rebind="winch">Shift</button>
+                    </div>
+                </div>
+                
+                <p style="margin: 15px 0; color: #aaa; font-size: 14px;" data-i18n="gamepadSupport">
+                    🎮 Gamepad: D-pad/Stick to move, A to groom, B for winch
+                </p>
+                <p style="margin: 15px 0; color: #aaa; font-size: 14px;" data-i18n="touchSupport">
+                    📱 Touch: Virtual joystick on left, action buttons on right
+                </p>
+                
+                <button class="menu-btn" id="btnBackControls" data-i18n="back">Back</button>
+            </div>
+        </div>
+        
+        <!-- Pause Menu -->
+        <div class="menu-overlay hidden" id="pauseMenu">
+            <h2 data-i18n="paused">Paused</h2>
+            <button class="menu-btn" id="btnResume" data-i18n="resume">Resume</button>
+            <button class="menu-btn" id="btnPauseSettings" data-i18n="settings">Settings</button>
+            <button class="menu-btn" id="btnQuit" data-i18n="quitToMenu">Quit to Menu</button>
+        </div>
+        
+        <!-- Level Complete -->
+        <div class="menu-overlay hidden" id="levelCompleteMenu">
+            <div class="level-complete">
+                <h2 data-i18n="levelComplete">Level Complete!</h2>
+                <div class="stats">
+                    <div>❄️ <span data-i18n="coverage">Coverage</span>: <span id="finalCoverage">95%</span></div>
+                    <div>⏱️ <span data-i18n="time">Time</span>: <span id="finalTime">3:42</span></div>
+                    <div>⭐ <span data-i18n="rating">Rating</span>: <span id="finalRating">⭐⭐⭐</span></div>
+                </div>
+                <button class="menu-btn" id="btnNextLevel" data-i18n="nextLevel">Next Level</button>
+                <button class="menu-btn" id="btnReplay" data-i18n="replay">Replay</button>
+            </div>
+        </div>
+        
+        <!-- Level Failed -->
+        <div class="menu-overlay hidden" id="levelFailedMenu">
+            <div class="level-complete level-failed">
+                <h2 data-i18n="levelFailed">Level Failed</h2>
+                <p style="margin: 20px 0; color: #aaa;" data-i18n="tryAgainText">Don't give up! The mountain awaits.</p>
+                <button class="menu-btn" id="btnTryAgain" data-i18n="tryAgain">Try Again</button>
+                <button class="menu-btn" id="btnFailQuit" data-i18n="quitToMenu">Quit to Menu</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SVG Filters for Colorblind Modes -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="deuteranopia">
+                <feColorMatrix type="matrix" values="0.625 0.375 0 0 0  0.7 0.3 0 0 0  0 0.3 0.7 0 0  0 0 0 1 0"/>
+            </filter>
+            <filter id="protanopia">
+                <feColorMatrix type="matrix" values="0.567 0.433 0 0 0  0.558 0.442 0 0 0  0 0.242 0.758 0 0  0 0 0 1 0"/>
+            </filter>
+            <filter id="tritanopia">
+                <feColorMatrix type="matrix" values="0.95 0.05 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Game Scripts (order matters) -->
+    <script src="js/config.js"></script>
+    <script src="js/localization.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

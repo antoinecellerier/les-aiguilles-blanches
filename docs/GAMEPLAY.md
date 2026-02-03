@@ -1,0 +1,234 @@
+# Gameplay Guide
+
+## 🏔️ Welcome to Les Aiguilles Blanches
+
+You've just been hired as a snow groomer operator at one of Savoie's most beautiful ski resorts. Your job is critical: prepare the pistes each night so skiers enjoy perfect corduroy snow in the morning.
+
+## 🚜 Your Machine: The Snow Groomer
+
+Your vehicle is inspired by the legendary **PistenBully 600**, a powerful snow grooming machine used in ski resorts worldwide.
+
+### Components
+
+| Part | Function | Control |
+|------|----------|---------|
+| **Tracks** | Propulsion and traction on snow | Movement keys |
+| **Blade** (front) | Pushes and levels snow | Automatic |
+| **Tiller** (rear) | Creates corduroy pattern | Hold Groom button |
+| **Winch** | Anchors to steep slopes | Hold Winch button |
+| **Cabin** | Protects operator, houses controls | Your home! |
+
+## 📊 HUD Elements
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Level Name                              ⛽ 100%         │
+│ Current Task                            ❄️ 45%          │
+│                                         ⚡ 100%         │
+│                                         ⏱️ 4:32         │
+└─────────────────────────────────────────────────────────┘
+```
+
+- **⛽ Fuel**: Depletes while moving. Refuel at stations.
+- **❄️ Coverage**: Percentage of piste groomed. Reach target to win.
+- **⚡ Stamina**: Your energy level. Eat at Chez Marie to restore.
+- **⏱️ Timer**: Time remaining. Complete before it hits 0:00.
+
+## 🎮 Controls
+
+### Keyboard (QWERTY/AZERTY/QWERTZ compatible)
+
+| Action | Primary | Alternative |
+|--------|---------|-------------|
+| Move Up | W | ↑ Arrow |
+| Move Down | S | ↓ Arrow |
+| Move Left | A | ← Arrow |
+| Move Right | D | → Arrow |
+| Groom Snow | Space | - |
+| Use Winch | Shift | - |
+| Pause | Escape | P |
+
+All controls can be rebound in the Controls menu.
+
+### Gamepad
+
+| Action | Button |
+|--------|--------|
+| Move | D-pad or Left Stick |
+| Groom | A / Cross |
+| Winch | B / Circle |
+| Pause | Start |
+
+### Touch (Mobile)
+
+- **Left side**: Virtual joystick for movement
+- **Right side**: GROOM and WINCH action buttons
+- **Menu button**: Access pause menu
+
+## 🎯 Level Progression
+
+### Level 1: Green Piste - Les Marmottes
+*"Welcome aboard, rookie!"*
+
+- **Difficulty**: ● Green (Beginner)
+- **Objective**: Groom 80% of the beginner slope
+- **Time**: 5 minutes
+- **Skills**: Basic movement and grooming
+
+**Tips**: Take your time. Follow the natural slope pattern. Jean-Pierre will guide you.
+
+### Level 2: Blue Piste - Le Chamois
+*"Time to pick up the pace!"*
+
+- **Difficulty**: ■ Blue (Intermediate)
+- **Objective**: Groom 85% before resort opens
+- **Time**: 4 minutes
+- **Skills**: Efficiency, coverage patterns
+
+**Tips**: Work in parallel strips. Don't backtrack unnecessarily.
+
+### Level 3: Snowpark - Air Zone
+*"The freestylers are counting on you!"*
+
+- **Difficulty**: Park
+- **Objective**: Prepare freestyle features to 90%
+- **Time**: 5 minutes
+- **Skills**: Precision grooming around obstacles
+
+**Tips**: Be careful around jumps and rails. They need perfect landings!
+
+### Level 4: Red Piste - L'Aigle
+*"Now we're talking steep!"*
+
+- **Difficulty**: ◆ Red (Advanced)
+- **Objective**: Groom 80% of steep terrain
+- **Time**: 4:40
+- **Skills**: Gradient handling, fuel management
+
+**Tips**: Watch your fuel consumption on steep sections. Plan your route to pass the fuel station.
+
+### Level 5: Half-pipe - Le Tube
+*"Competition tomorrow!"*
+
+- **Difficulty**: Park (Precision)
+- **Objective**: Perfect 95% coverage
+- **Time**: 6 minutes
+- **Skills**: Special grooming patterns
+
+**Tips**: The half-pipe walls need careful attention. Work from top to bottom.
+
+### Level 6: Black Piste - La Verticale
+*"Night shift on the steepest run."*
+
+- **Difficulty**: ★ Black (Expert)
+- **Objective**: Groom 75% in darkness
+- **Time**: 6 minutes
+- **Skills**: Night visibility, winch operation
+
+**Tips**: Use headlights to see. Deploy winch on the steepest sections to prevent sliding.
+
+### Level 7: Avalanche Zone - Col Dangereux
+*"High risk, high reward."*
+
+- **Difficulty**: ★ Black (Hazard)
+- **Objective**: Prepare 70% of hazard zone
+- **Time**: 5 minutes
+- **Skills**: Safety awareness, strategic routing
+
+**Tips**: Avoid marked avalanche zones. Listen to Thierry's safety briefing.
+
+### Level 8: Storm Recovery
+*"Nature's fury has passed. Time to clean up."*
+
+- **Difficulty**: ◆ Red (Endurance)
+- **Objective**: Clear 85% after heavy snowfall
+- **Time**: 7 minutes
+- **Skills**: Heavy snow handling, time management
+
+**Tips**: Deep snow slows you down. Use the winch and eat hearty food for stamina.
+
+## 🧀 Savoyard Cuisine
+
+### Chez Marie - Mountain Restaurant
+
+Visit the restaurant (🏠) to restore stamina with authentic Savoyard dishes:
+
+| Dish | Stamina | Special Effect |
+|------|---------|----------------|
+| **Tartiflette** 🥔 | +100% | Cold resistance (2 min) |
+| **Croziflette** 🍝 | +50% | Speed boost (2 min) |
+| **Fondue Savoyarde** 🧀 | +30% | Stamina regeneration (3 min) |
+| **Génépi** 🥃 | +20% | Precision handling (1.5 min) |
+| **Vin Chaud** 🍷 | +40% | Warmth in storms (2.5 min) |
+| **Café** ☕ | +25% | Quick pick-me-up |
+
+**Pro tip**: Before tackling Level 8's storm, grab some Vin Chaud!
+
+## 🏆 Scoring
+
+Each level awards 1-3 stars based on:
+
+| Stars | Requirements |
+|-------|--------------|
+| ⭐ | Complete the level |
+| ⭐⭐ | Reach 90%+ coverage |
+| ⭐⭐⭐ | Complete in under 70% of time limit |
+
+## 🎭 Characters
+
+### Jean-Pierre 👨‍🔧
+*Head Groomer*
+
+Your mentor and the resort's most experienced operator. He's gruff but fair, and knows every contour of the mountain. Listen to his advice!
+
+### Marie 👩‍🍳
+*Restaurant Owner*
+
+Runs "Chez Marie" at mid-station. Her tartiflette is legendary, and she always has a kind word for the night crew.
+
+### Thierry 🧑‍⚕️
+*Ski Patrol Chief*
+
+Coordinates safety across the resort. When he says an area is dangerous, believe him. He'll brief you before hazardous missions.
+
+### Émilie 📋
+*Event Organizer*
+
+Manages competitions and festivals. When she needs the park perfect for tomorrow's event, the pressure is on!
+
+## 🎪 Special Events
+
+Unlock special challenge missions as you progress:
+
+- **Coupe des Aiguilles Blanches**: Slalom race preparation - perfect corduroy required!
+- **Fête de la Tartiflette**: Festival week - heavy traffic, tight schedules
+- **Boardercross Championship**: Park must be absolutely pristine
+- **Nuit des Flambeaux**: Torchlight descent - deadline is sunset!
+- **Raclette Emergency**: Clear a path for the cheese delivery truck! 🧀
+
+## 💡 Advanced Tips
+
+1. **Efficient patterns**: Work in long parallel strips rather than random movement
+2. **Use terrain**: Let gravity help on downhill sections
+3. **Plan fuel stops**: Route past the station when tank is at 30%
+4. **Buff stacking**: Multiple food effects can be active simultaneously
+5. **Winch wisely**: It uses more fuel but prevents dangerous sliding
+6. **Weather awareness**: Storms reduce visibility and speed - prepare accordingly
+
+## 🔧 Troubleshooting
+
+**Q: My groomer won't move!**
+A: Check fuel level. If at 0%, find the nearest fuel station.
+
+**Q: I keep running out of time!**
+A: Focus on coverage, not perfection. 80% groomed is better than 50% perfect.
+
+**Q: The winch won't work!**
+A: Winch is only available on levels 6-8 where terrain requires it.
+
+**Q: I can't see anything!**
+A: Night levels have reduced visibility. Your headlights illuminate the path ahead.
+
+---
+
+*Bonne chance et bonne glisse!* 🎿
