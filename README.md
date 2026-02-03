@@ -105,14 +105,27 @@ snow-groomer/
 
 ## 🧪 Testing
 
-Open `tests.html` in a browser to run the automated test suite. Tests cover:
+### Unit Tests (Browser)
+Open `tests.html` in a browser to run the unit test suite covering localization, level config, etc.
 
-- Localization system
-- Level configuration
-- Game state management
-- DOM structure
-- Accessibility features
-- CSS styling
+### E2E Tests (Playwright)
+Automated browser tests using Playwright (Chromium + Firefox):
+
+```bash
+# Setup (first time only)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install playwright pytest-playwright pytest-xdist
+python -m playwright install chromium firefox
+
+# Run tests
+./run-tests.sh                    # Parallel, headless (both browsers)
+./run-tests.sh --headed           # Sequential, visible browser
+./run-tests.sh --browser chromium # Single browser only
+./run-tests.sh -k "credits"       # Run specific tests
+```
+
+E2E tests cover: menu navigation, all 9 levels, tutorial flow, grooming, pause, credits, and restart cycle.
 
 ## 🌐 Localization
 

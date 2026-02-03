@@ -53,6 +53,38 @@ def assert_no_error_message(page: Page):
     assert len(scenes) > 0, "No active scenes - game may have crashed"
 
 
+def assert_canvas_renders_content(page: Page):
+    """Assert canvas has non-black content (catches Firefox rendering issues).
+    
+    Uses screenshot analysis instead of canvas getImageData() because the original
+    Firefox black screen bug showed content in getImageData but visually was black.
+    """
+    from PIL import Image
+    import io
+    
+    screenshot = page.screenshot()
+    img = Image.open(io.BytesIO(screenshot))
+    pixels = img.load()
+    w, h = img.size
+    
+    # Sample several points across the screen
+    samples = [
+        pixels[w//2, h//2],       # center
+        pixels[w//2, h//4],       # upper center  
+        pixels[w//4, h//2],       # left center
+        pixels[3*w//4, h//2],     # right center
+        pixels[w//2, 3*h//4],     # lower center
+    ]
+    
+    # Check if any pixel is not black/very dark
+    has_content = any(
+        (p[0] > 20 or p[1] > 20 or p[2] > 20) for p in samples
+    )
+    
+    assert has_content, \
+        f"Screen appears all black - possible rendering issue. Samples (RGBA): {samples}"
+
+
 def assert_scene_active(page: Page, scene_key: str, msg: str = ""):
     """Assert that a specific scene is active."""
     assert_no_error_message(page)
@@ -81,6 +113,37 @@ def click_button(page: Page, button_y: int, description: str):
     
     page.mouse.click(center_x, box["y"] + button_y)
     page.wait_for_timeout(500)
+
+
+class TestCanvasRendering:
+    """Test that canvas actually renders visible content (catches Firefox black screen bugs)."""
+
+    def test_menu_renders_visible_content(self, game_page: Page):
+        """Verify menu scene renders non-black content."""
+        assert_canvas_renders_content(game_page)
+        assert_scene_active(game_page, 'MenuScene')
+
+    def test_game_renders_visible_content(self, game_page: Page):
+        """Verify game scene renders non-black content."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        game_page.wait_for_timeout(1500)
+        
+        assert_scene_active(game_page, 'GameScene')
+        assert_canvas_renders_content(game_page)
+
+    def test_all_levels_render_content(self, game_page: Page):
+        """Skip through all levels and verify each renders visible content."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        game_page.wait_for_timeout(1500)
+        
+        for level in range(9):
+            assert_canvas_renders_content(game_page)
+            game_page.keyboard.press("n")
+            game_page.wait_for_timeout(1200)
+        
+        # Credits should also render
+        assert_scene_active(game_page, 'CreditsScene')
+        assert_canvas_renders_content(game_page)
 
 
 class TestMenuNavigation:
@@ -501,14 +564,14 @@ class TestCreditsScreen:
     def test_credits_has_required_elements(self, game_page: Page):
         """Test credits screen appears with proper scene."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1000)
+        game_page.wait_for_timeout(1500)
         
-        # Skip all levels quickly
+        # Skip all levels
         for _ in range(9):
             game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1000)
+            game_page.wait_for_timeout(1200)
         
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_timeout(2000)
         
         assert_scene_active(game_page, 'CreditsScene', "Credits should be showing")
         assert_scene_not_active(game_page, 'GameScene', "GameScene should not be active during credits")
@@ -517,22 +580,22 @@ class TestCreditsScreen:
         """Test full cycle: play through credits, return to menu, start new game."""
         # Complete game
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1000)
+        game_page.wait_for_timeout(1500)
         for _ in range(9):
             game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1000)
+            game_page.wait_for_timeout(1200)
         
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_timeout(2000)
         assert_scene_active(game_page, 'CreditsScene')
         
         # Return to menu
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(1000)
+        game_page.wait_for_timeout(1500)
         assert_scene_active(game_page, 'MenuScene')
         
         # Start new game
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_timeout(2000)
         
         assert_scene_active(game_page, 'GameScene')
         level = get_current_level(game_page)
