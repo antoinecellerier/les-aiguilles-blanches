@@ -19,8 +19,7 @@ import MenuScene from './scenes/MenuScene';
 
 // JavaScript scenes (during migration)
 import SettingsScene from './scenes/SettingsScene';
-// @ts-ignore
-import GameScene from './scenes/GameScene.js';
+import GameScene from './scenes/GameScene';
 
 declare global {
   interface Window {
