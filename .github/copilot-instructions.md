@@ -98,3 +98,5 @@ if (activePointers.length === 0) {
 - Refueling point at bottom of levels
 - Level differentiation (varied objectives)
 - Winch cliff freeze bug on La Verticale
+- Winch anchor proximity requirement
+- Menu rendering QA across resolutions
