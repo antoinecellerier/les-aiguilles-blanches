@@ -19,6 +19,14 @@ export default class MenuScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.cameras.main;
 
+    // Calculate scale factor for responsive text
+    const baseHeight = 768;
+    const scaleFactor = Math.max(0.7, Math.min(height / baseHeight, 1.5));
+    const titleSize = Math.round(40 * scaleFactor);
+    const subtitleSize = Math.round(16 * scaleFactor);
+    const buttonSize = Math.round(18 * scaleFactor);
+    const buttonPadding = Math.round(12 * scaleFactor);
+
     // Gradient-like background
     this.add.rectangle(width / 2, 0, width, height * 0.4, 0x1a3a5c).setOrigin(0.5, 0);
     this.add.rectangle(width / 2, height * 0.4, width, height * 0.3, 0x2d5a7b).setOrigin(0.5, 0);
@@ -32,50 +40,54 @@ export default class MenuScene extends Phaser.Scene {
 
     this.createSnowflakes(width, height);
 
-    // Title
-    this.add.rectangle(width / 2, 140, 520, 80, 0x000000, 0.3).setOrigin(0.5);
-    this.add.text(width / 2 + 3, 143, 'Les Aiguilles Blanches', {
+    // Title - positioned proportionally
+    const titleY = height * 0.18;
+    const titleBgWidth = Math.round(520 * scaleFactor);
+    const titleBgHeight = Math.round(80 * scaleFactor);
+    this.add.rectangle(width / 2, titleY, titleBgWidth, titleBgHeight, 0x000000, 0.3).setOrigin(0.5);
+    this.add.text(width / 2 + 3, titleY + 3, 'Les Aiguilles Blanches', {
       fontFamily: 'Courier New, monospace',
-      fontSize: '40px',
+      fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#1a3a5c',
     }).setOrigin(0.5);
-    this.add.text(width / 2, 140, 'Les Aiguilles Blanches', {
+    this.add.text(width / 2, titleY, 'Les Aiguilles Blanches', {
       fontFamily: 'Courier New, monospace',
-      fontSize: '40px',
+      fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#ffffff',
     }).setOrigin(0.5);
 
     const subtitleText = t('subtitle') || 'Snow Groomer Simulation';
-    this.add.text(width / 2, 190, '❄️ ' + subtitleText + ' ❄️', {
+    this.add.text(width / 2, titleY + titleBgHeight * 0.65, '❄️ ' + subtitleText + ' ❄️', {
       fontFamily: 'Courier New, monospace',
-      fontSize: '16px',
+      fontSize: subtitleSize + 'px',
       color: '#87CEEB',
     }).setOrigin(0.5);
 
-    // Menu
-    const menuY = height / 2 + 30;
-    this.add.rectangle(width / 2, menuY + 60, 280, 280, 0x000000, 0.4).setOrigin(0.5);
+    // Menu - positioned proportionally
+    const menuY = height * 0.55;
+    const buttonSpacing = Math.round(55 * scaleFactor);
+    const menuBgHeight = Math.round(280 * scaleFactor);
+    this.add.rectangle(width / 2, menuY + menuBgHeight * 0.2, Math.round(280 * scaleFactor), menuBgHeight, 0x000000, 0.4).setOrigin(0.5);
 
     const buttonStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: 'Courier New, monospace',
-      fontSize: '18px',
+      fontSize: buttonSize + 'px',
       color: '#ffffff',
       backgroundColor: '#CC2200',
-      padding: { x: 50, y: 12 },
+      padding: { x: Math.round(50 * scaleFactor), y: buttonPadding },
     };
 
     const buttons = [
       { text: 'startGame', callback: () => this.startGame(), primary: true },
       { text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false },
       { text: 'settings', callback: () => this.showSettings(), primary: false },
-      { text: 'controls', callback: () => this.showControls(), primary: false },
     ];
 
     buttons.forEach((btn, i) => {
       const btnText = t(btn.text) || btn.text;
-      const yPos = menuY - 30 + i * 55;
+      const yPos = menuY - buttonSpacing * 0.5 + i * buttonSpacing;
 
       const button = this.add.text(width / 2, yPos, btnText, {
         ...buttonStyle,
@@ -94,10 +106,13 @@ export default class MenuScene extends Phaser.Scene {
         .on('pointerdown', btn.callback);
     });
 
-    // Decorations
-    this.add.text(width / 2 - 180, menuY + 60, '🚜', { fontSize: '48px' }).setOrigin(0.5);
-    this.add.text(width / 2 + 180, menuY + 60, '⛷️', { fontSize: '48px' }).setOrigin(0.5);
+    // Decorations - scaled
+    const decoSize = Math.round(48 * scaleFactor);
+    const decoOffset = Math.round(180 * scaleFactor);
+    this.add.text(width / 2 - decoOffset, menuY + buttonSpacing, '🚜', { fontSize: decoSize + 'px' }).setOrigin(0.5);
+    this.add.text(width / 2 + decoOffset, menuY + buttonSpacing, '⛷️', { fontSize: decoSize + 'px' }).setOrigin(0.5);
 
+    const versionSize = Math.round(12 * scaleFactor);
     this.add.text(10, height - 25, 'v1.0.0 | Phaser 3', {
       fontFamily: 'Courier New, monospace',
       fontSize: '11px',
@@ -260,35 +275,44 @@ export default class MenuScene extends Phaser.Scene {
   private showOverlay(titleKey: string, lines: string[]): void {
     const { width, height } = this.cameras.main;
 
-    const panelWidth = Math.min(600, width - 40);
-    const panelHeight = Math.min(500, height - 80);
+    // Scale based on available height for optimal legibility
+    const contentLines = lines.filter(l => l.trim()).length + 3; // +3 for title, spacing, back button
+    const availableHeight = height * 0.7;
+    const optimalLineHeight = availableHeight / contentLines;
+    const optimalFontSize = optimalLineHeight / 2.2;
+    const fontSize = Math.round(Math.max(16, Math.min(28, optimalFontSize)));
+    const titleSize = Math.round(fontSize * 1.4);
+    const scaleFactor = fontSize / 18;
+
+    const panelWidth = Math.min(700 * scaleFactor, width - 40);
+    const panelHeight = Math.min(500 * scaleFactor, height - 60);
 
     const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
     const panelBorder = this.add.rectangle(width / 2, height / 2, panelWidth + 10, panelHeight + 10, 0x3d7a9b);
     const panel = this.add.rectangle(width / 2, height / 2, panelWidth, panelHeight, 0x1a2a3e);
 
-    const title = this.add.text(width / 2, height / 2 - panelHeight / 2 + 40, t(titleKey) || titleKey, {
+    const title = this.add.text(width / 2, height / 2 - panelHeight / 2 + titleSize * 2, t(titleKey) || titleKey, {
       fontFamily: 'Courier New, monospace',
-      fontSize: '24px',
+      fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#87CEEB',
     }).setOrigin(0.5);
 
     const content = this.add.text(width / 2, height / 2, lines.join('\n'), {
       fontFamily: 'Courier New, monospace',
-      fontSize: '14px',
+      fontSize: fontSize + 'px',
       color: '#cccccc',
       align: 'center',
-      lineSpacing: 10,
+      lineSpacing: Math.round(fontSize * 0.6),
       wordWrap: { width: panelWidth - 60 },
     }).setOrigin(0.5);
 
-    const backBtn = this.add.text(width / 2, height / 2 + panelHeight / 2 - 50, '← ' + (t('back') || 'Back'), {
+    const backBtn = this.add.text(width / 2, height / 2 + panelHeight / 2 - fontSize * 3, '← ' + (t('back') || 'Back'), {
       fontFamily: 'Courier New, monospace',
-      fontSize: '16px',
+      fontSize: fontSize + 'px',
       color: '#ffffff',
       backgroundColor: '#CC2200',
-      padding: { x: 30, y: 10 },
+      padding: { x: Math.round(30 * scaleFactor), y: Math.round(10 * scaleFactor) },
     }).setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', () => backBtn.setStyle({ backgroundColor: '#FF3300' }))

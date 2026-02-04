@@ -44,6 +44,7 @@ export default class SettingsScene extends Phaser.Scene {
   private rebindStatus: Phaser.GameObjects.Text | null = null;
   private langButtons: LangButton[] = [];
   private colorblindButtons: ColorblindButton[] = [];
+  private scaleFactor = 1;
 
   constructor() {
     super({ key: 'SettingsScene' });
@@ -60,22 +61,32 @@ export default class SettingsScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(0x1a2a3e);
     this.loadBindings();
 
-    const padding = Math.max(15, width * 0.02);
-    const fontSize = Math.max(10, Math.min(13, height / 55));
-    const lineHeight = fontSize * 2;
+    // Calculate optimal font size to maximize legibility while fitting content
+    // Settings has ~12 logical rows of content in each column
+    const contentRows = 12;
+    const availableHeight = height * 0.85; // Leave room for title and back button
+    const optimalLineHeight = availableHeight / contentRows;
+    const optimalFontSize = optimalLineHeight / 2.0;
+    
+    // Clamp font size to reasonable bounds (16px min for readability, 32px max)
+    const fontSize = Math.round(Math.max(16, Math.min(32, optimalFontSize)));
+    this.scaleFactor = fontSize / 20; // relative to base of 20px
+    
+    const padding = Math.max(20, Math.round(width * 0.025));
+    const lineHeight = Math.round(fontSize * 2.0);
     const startX = padding;
     const colWidth = (width - padding * 3) / 2;
 
     // Title
     this.add.text(width / 2, padding, '⚙️ ' + (t('settings') || 'Settings'), {
       fontFamily: 'Courier New, monospace',
-      fontSize: (fontSize * 1.6) + 'px',
+      fontSize: Math.round(fontSize * 1.4) + 'px',
       fontStyle: 'bold',
       color: '#87CEEB',
     }).setOrigin(0.5, 0);
 
-    let leftY = padding + lineHeight * 1.8;
-    let rightY = padding + lineHeight * 1.8;
+    let leftY = padding + lineHeight * 1.5;
+    let rightY = padding + lineHeight * 1.5;
 
     // === LEFT COLUMN ===
 
@@ -100,11 +111,11 @@ export default class SettingsScene extends Phaser.Scene {
     this.langButtons = [];
     languages.forEach((lang, i) => {
       const isActive = currentLang === lang.code;
-      const btn = this.add.text(startX + i * 40, leftY, lang.name, {
+      const btn = this.add.text(startX + i * Math.round(45 * this.scaleFactor), leftY, lang.name, {
         fontFamily: 'Courier New',
-        fontSize: '16px',
+        fontSize: Math.round(18 * this.scaleFactor) + 'px',
         backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
-        padding: { x: 5, y: 3 },
+        padding: { x: Math.round(6 * this.scaleFactor), y: Math.round(4 * this.scaleFactor) },
       }).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.setLang(lang.code));
       this.langButtons.push({ btn, code: lang.code });
@@ -124,13 +135,13 @@ export default class SettingsScene extends Phaser.Scene {
     this.createToggle(startX, leftY, t('highContrast') || 'High Contrast',
       Accessibility.settings.highContrast, fontSize,
       (val) => { Accessibility.settings.highContrast = val; Accessibility.saveSettings(); });
-    leftY += lineHeight * 0.8;
+    leftY += lineHeight;
 
     // Reduced Motion
     this.createToggle(startX, leftY, t('reducedMotion') || 'Reduced Motion',
       Accessibility.settings.reducedMotion, fontSize,
       (val) => { Accessibility.settings.reducedMotion = val; Accessibility.saveSettings(); });
-    leftY += lineHeight;
+    leftY += lineHeight * 1.2;
 
     // Colorblind
     this.add.text(startX, leftY, t('colorblindMode') || 'Colorblind:', {
@@ -144,13 +155,13 @@ export default class SettingsScene extends Phaser.Scene {
     this.colorblindButtons = [];
     cbModes.forEach((mode, i) => {
       const isActive = Accessibility.settings.colorblindMode === mode;
-      const label = (t(mode) || mode).substring(0, 7);
-      const btn = this.add.text(startX + (i % 2) * (colWidth * 0.45), leftY + Math.floor(i / 2) * lineHeight * 0.7, label, {
+      const label = (t(mode) || mode).substring(0, 8);
+      const btn = this.add.text(startX + (i % 2) * (colWidth * 0.55), leftY + Math.floor(i / 2) * lineHeight * 0.9, label, {
         fontFamily: 'Courier New',
         fontSize: (fontSize - 2) + 'px',
         color: isActive ? '#00FF00' : '#aaa',
         backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
-        padding: { x: 4, y: 2 },
+        padding: { x: Math.round(8 * this.scaleFactor), y: Math.round(4 * this.scaleFactor) },
       }).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.setColorblindMode(mode));
       this.colorblindButtons.push({ btn, id: mode });
@@ -240,12 +251,12 @@ export default class SettingsScene extends Phaser.Scene {
       // Show layout selector buttons
       AVAILABLE_LAYOUTS.forEach((layout, idx) => {
         const isActive = currentLayout === layout.id;
-        const btn = this.add.text(rightX + idx * 90, rightY, layout.id.toUpperCase(), {
+        const btn = this.add.text(rightX + idx * Math.round(95 * this.scaleFactor), rightY, layout.id.toUpperCase(), {
           fontFamily: 'Courier New',
           fontSize: (fontSize - 2) + 'px',
           color: isActive ? '#000000' : '#ffffff',
           backgroundColor: isActive ? '#87ceeb' : '#555555',
-          padding: { x: 6, y: 3 },
+          padding: { x: Math.round(8 * this.scaleFactor), y: Math.round(4 * this.scaleFactor) },
         }).setInteractive({ useHandCursor: true })
           .on('pointerdown', () => this.setLayout(layout.id));
       });
@@ -259,12 +270,30 @@ export default class SettingsScene extends Phaser.Scene {
       fontSize: (fontSize - 1) + 'px',
       color: '#ffaaaa',
       backgroundColor: '#5a2d2d',
-      padding: { x: 8, y: 4 },
+      padding: { x: Math.round(10 * this.scaleFactor), y: Math.round(5 * this.scaleFactor) },
     }).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.resetBindings());
 
+    rightY += lineHeight * 1.2;
+
+    // Show available input methods
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasGamepad = navigator.getGamepads && navigator.getGamepads().length > 0;
+    
+    const inputHints: string[] = [];
+    if (hasTouch) {
+      inputHints.push('📱 ' + (t('touchSupported') || 'Touch OK'));
+    }
+    inputHints.push('🎮 ' + (t('gamepadSupported') || 'Gamepad OK'));
+    
+    this.add.text(rightX, rightY, inputHints.join('  '), {
+      fontFamily: 'Courier New',
+      fontSize: (fontSize - 2) + 'px',
+      color: '#88aa88',
+    });
+
     // Rebinding status text
-    this.rebindStatus = this.add.text(width / 2, height - padding * 4, '', {
+    this.rebindStatus = this.add.text(width / 2, height - padding * 3, '', {
       fontFamily: 'Courier New',
       fontSize: fontSize + 'px',
       color: '#FFFF00',
@@ -272,12 +301,12 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Back button
     const backLabel = this.returnTo ? (t('backToGame') || 'Back to Game') : (t('back') || 'Back');
-    const backBtn = this.add.text(width / 2, height - padding * 2, '← ' + backLabel, {
+    const backBtn = this.add.text(width / 2, height - padding * 1.5, '← ' + backLabel, {
       fontFamily: 'Courier New',
-      fontSize: fontSize + 'px',
+      fontSize: Math.round(fontSize * 1.1) + 'px',
       color: '#ffffff',
       backgroundColor: '#CC2200',
-      padding: { x: 20, y: 6 },
+      padding: { x: Math.round(24 * this.scaleFactor), y: Math.round(8 * this.scaleFactor) },
     }).setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', () => backBtn.setStyle({ backgroundColor: '#FF3300' }))
@@ -463,19 +492,19 @@ export default class SettingsScene extends Phaser.Scene {
     fontSize: number,
     onChange: (val: boolean) => void
   ): void {
-    this.add.text(x, y, label, {
+    this.add.text(x, y, label + ':', {
       fontFamily: 'Courier New',
       fontSize: (fontSize - 1) + 'px',
       color: '#cccccc',
     });
 
-    const toggleX = x + 160;
+    const toggleX = x + Math.round(220 * this.scaleFactor);
     const btn = this.add.text(toggleX, y, initialValue ? '✓ ON' : '✗ OFF', {
       fontFamily: 'Courier New',
       fontSize: (fontSize - 1) + 'px',
       color: initialValue ? '#00FF00' : '#888888',
       backgroundColor: initialValue ? '#1a5a1a' : '#333333',
-      padding: { x: 6, y: 2 },
+      padding: { x: Math.round(10 * this.scaleFactor), y: Math.round(4 * this.scaleFactor) },
     }).setInteractive({ useHandCursor: true });
 
     let value = initialValue;

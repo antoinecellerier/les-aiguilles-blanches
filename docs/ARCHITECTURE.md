@@ -38,11 +38,12 @@ snow-groomer/
 │   │   ├── levels.ts       # Level definitions
 │   │   └── localization.ts # i18n translations
 │   ├── utils/
-│   │   └── accessibility.ts # A11y helpers, settings
+│   │   ├── accessibility.ts # A11y helpers, settings
+│   │   └── keyboardLayout.ts # Keyboard layout detection, defaults
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
-│   │   ├── MenuScene.ts    # Main menu
-│   │   ├── SettingsScene.ts # Language, a11y, key rebinding
+│   │   ├── MenuScene.ts    # Main menu, How to Play overlay
+│   │   ├── SettingsScene.ts # Language, a11y, controls, keyboard layout
 │   │   ├── GameScene.ts    # Main gameplay
 │   │   ├── HUDScene.ts     # UI overlay (parallel to GameScene)
 │   │   ├── DialogueScene.ts # Character dialogue overlay

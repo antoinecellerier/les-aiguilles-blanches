@@ -3,15 +3,33 @@ import pytest
 from playwright.sync_api import Page, expect
 
 
-# Button positions (based on 720px height viewport)
-# Menu buttons are at: menuY - 30 + i * 55 where menuY = height/2 + 30 = 390
-# So: Start=360, HowToPlay=415, Settings=470, Controls=525
-# Menu button Y positions (relative to canvas top)
-# These are approximate center positions of each button
-BUTTON_START = 388
-BUTTON_HOW_TO_PLAY = 443
-BUTTON_SETTINGS = 498
-BUTTON_CONTROLS = 553
+def click_menu_button(page: Page, button_index: int, button_name: str = "button"):
+    """Click a menu button by index (0=Start, 1=How to Play, 2=Settings).
+    
+    Menu buttons are positioned proportionally based on viewport height.
+    menuY = height * 0.55, buttonSpacing = 55 * scaleFactor
+    """
+    canvas = page.locator("canvas")
+    box = canvas.bounding_box()
+    assert box, "Canvas not found"
+    
+    height = box["height"]
+    # Scale factor based on 768px reference height
+    scale_factor = max(0.7, min(height / 768, 1.5))
+    button_spacing = 55 * scale_factor
+    menu_y = height * 0.55
+    
+    # Button Y = menuY - buttonSpacing * 0.5 + index * buttonSpacing
+    button_y = menu_y - button_spacing * 0.5 + button_index * button_spacing
+    
+    page.mouse.click(box["x"] + box["width"] / 2, box["y"] + button_y)
+    page.wait_for_timeout(300)
+
+
+# Legacy constants for backward compatibility
+BUTTON_START = 0
+BUTTON_HOW_TO_PLAY = 1
+BUTTON_SETTINGS = 2
 
 
 def get_active_scenes(page: Page) -> list:
@@ -107,14 +125,16 @@ def assert_not_on_menu(page: Page):
     assert 'MenuScene' not in scenes, f"Still on MenuScene! Button click likely missed. Active: {scenes}"
 
 
-def click_button(page: Page, button_y: int, description: str):
-    """Click a menu button and verify the click worked."""
-    canvas = page.locator("canvas")
-    box = canvas.bounding_box()
-    center_x = box["x"] + box["width"] / 2
+def click_button(page: Page, button_index: int, description: str):
+    """Click a menu button by index and verify the click worked.
     
-    page.mouse.click(center_x, box["y"] + button_y)
-    page.wait_for_timeout(500)
+    Args:
+        page: Playwright page
+        button_index: 0=Start, 1=How to Play, 2=Settings
+        description: Button name for debugging
+    """
+    click_menu_button(page, button_index, description)
+    page.wait_for_timeout(200)
 
 
 class TestCanvasRendering:
@@ -195,15 +215,6 @@ class TestMenuNavigation:
         game_page.keyboard.press("Escape")
         game_page.wait_for_timeout(500)
         assert_scene_active(game_page, 'MenuScene', "Should return to menu")
-
-    def test_controls_button(self, game_page: Page):
-        """Test Controls button shows controls overlay."""
-        assert_scene_active(game_page, 'MenuScene')
-        
-        click_button(game_page, BUTTON_CONTROLS, "Controls")
-        
-        # Menu should still be active
-        assert_scene_active(game_page, 'MenuScene')
 
 
 class TestLevelNavigation:

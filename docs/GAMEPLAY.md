@@ -48,7 +48,7 @@ Your vehicle is inspired by the legendary **PistenBully 600**, a powerful snow g
 | Use Winch | Shift | - |
 | Pause | Escape | P |
 
-All controls can be rebound in the Controls menu.
+All controls can be rebound in the Settings menu.
 
 ### Gamepad
 
