@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
+import { isBackPressed } from '../utils/gamepad';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -606,12 +607,11 @@ export default class SettingsScene extends Phaser.Scene {
   private gamepadBPressed = false;
 
   update(): void {
-    // Gamepad B button to go back
+    // Gamepad B button to go back (handles Nintendo swap)
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        // Accept both B (Xbox) and button 0 (Nintendo B) as back
-        const backPressed = pad.buttons[1]?.pressed;
+        const backPressed = isBackPressed(pad);
         if (backPressed && !this.gamepadBPressed) {
           this.goBack();
         }

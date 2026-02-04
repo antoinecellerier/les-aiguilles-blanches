@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
+import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
 
 /**
  * Les Aiguilles Blanches - Dialogue Scene
@@ -99,7 +100,7 @@ export default class DialogueScene extends Phaser.Scene {
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
+        this.gamepadAPressed = isConfirmPressed(pad);
       }
     } else {
       this.gamepadAPressed = false;
@@ -109,11 +110,11 @@ export default class DialogueScene extends Phaser.Scene {
   private gamepadAPressed = false;
 
   update(): void {
-    // Gamepad confirm button to advance dialogue (A on Xbox, B on Nintendo = both work)
+    // Gamepad confirm button to advance dialogue (handles Nintendo swap)
     if (this.isShowing && this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        const confirmPressed = pad.buttons[0]?.pressed;
+        const confirmPressed = isConfirmPressed(pad);
         if (confirmPressed && !this.gamepadAPressed) {
           this.advanceDialogue();
         }

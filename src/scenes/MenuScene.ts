@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { getMovementKeysString } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
+import { getMappingFromGamepad, isConfirmPressed } from '../utils/gamepad';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
@@ -105,6 +106,16 @@ export default class MenuScene extends Phaser.Scene {
     }
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
     buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
+    
+    // Add fullscreen option if supported
+    if (document.fullscreenEnabled) {
+      const isFullscreen = !!document.fullscreenElement;
+      buttonDefs.push({ 
+        text: isFullscreen ? 'exitFullscreen' : 'fullscreen', 
+        callback: () => this.toggleFullscreen(), 
+        primary: false 
+      });
+    }
 
     // Store buttons for gamepad navigation
     this.menuButtons = [];
@@ -163,22 +174,6 @@ export default class MenuScene extends Phaser.Scene {
       color: '#4a6a7b',
     }).setOrigin(0.5, 0);
 
-    // Fullscreen button (show on touch devices, or always show exit button when in fullscreen)
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isFullscreen = !!document.fullscreenElement;
-    if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
-      const fsIcon = isFullscreen ? '⛶' : '⛶';  // Same icon, toggles action
-      const fsLabel = isFullscreen ? '✕' : '⛶';
-      const fsBtn = this.add.text(width - 15, 15, fsLabel, {
-        fontSize: Math.round(28 * scaleFactor) + 'px',
-        color: isFullscreen ? '#FF6666' : '#87CEEB',
-        backgroundColor: '#1a2a3e',
-        padding: { x: 8, y: 4 },
-      }).setOrigin(1, 0)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.toggleFullscreen());
-    }
-
     // Keyboard navigation
     this.input.keyboard?.on('keydown-UP', () => this.navigateMenu(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.navigateMenu(1));
@@ -189,7 +184,7 @@ export default class MenuScene extends Phaser.Scene {
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
+        this.gamepadAPressed = isConfirmPressed(pad);
       }
     }
 
@@ -257,10 +252,8 @@ export default class MenuScene extends Phaser.Scene {
           }
         }
         
-        // Use button indices for cross-platform compatibility:
-        // Button 0 = South (Xbox A, Nintendo B, PS Cross) = Confirm
-        // Button 1 = East (Xbox B, Nintendo A, PS Circle) = Back
-        const confirmPressed = pad.buttons[0]?.pressed || false;
+        // Use controller-aware button mapping (handles Nintendo swap)
+        const confirmPressed = isConfirmPressed(pad);
         if (confirmPressed && !this.gamepadAPressed) {
           this.activateSelected();
         }
@@ -357,17 +350,26 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showHowToPlay(): void {
+    // Check for gamepad
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+    
     // On devices with both touch and keyboard, show keyboard (primary on desktop)
     // Only show touch-specific hints on touch-only devices (no physical keyboard)
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const showTouchHints = hasTouch && isMobile;
+    const showTouchHints = hasTouch && isMobile && !hasGamepad;
     const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
     
     let moveHint: string;
     let groomHint: string;
     
-    if (showTouchHints) {
+    if (hasGamepad) {
+      // Gamepad connected - show gamepad controls
+      const pad = this.input.gamepad!.getPad(0);
+      const mapping = getMappingFromGamepad(pad);
+      moveHint = '🎮 ' + (t('howToPlayMoveGamepad') || 'Left stick or D-pad to move');
+      groomHint = `❄️ ${mapping.confirmLabel} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
+    } else if (showTouchHints) {
       moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
       groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
     } else if (hasTouch) {

@@ -67,14 +67,14 @@ All controls can be rebound in the Settings menu.
 | Action | Xbox | PlayStation | Nintendo |
 |--------|------|-------------|----------|
 | Move | D-pad / Left Stick | D-pad / Left Stick | D-pad / Left Stick |
-| Groom | A | X | B |
+| Groom | A | ✕ | A |
 | Winch | LB | L1 | L |
 | Pause | Start | Options | + |
-| Menu Confirm | A | X | B |
-| Menu Back | B | O | A |
+| Menu Confirm | A | ✕ | A |
+| Menu Back | B | ○ | B |
 | Menu Navigate | D-pad / Left Stick | D-pad / Left Stick | D-pad / Left Stick |
 
-Note: Both Xbox-style (A=bottom) and Nintendo-style (A=right) button positions work for confirm/back.
+**Controller Detection**: The game automatically detects your controller type and maps buttons correctly. On Nintendo controllers, the physical A button (right position) confirms, matching the expected behavior for that controller family.
 
 ### Touch (Mobile/Tablet)
 

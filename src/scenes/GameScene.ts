@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { saveProgress } from '../utils/gameProgress';
+import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
 
@@ -1887,7 +1888,8 @@ export default class GameScene extends Phaser.Scene {
       if (Math.abs(this.gamepad.leftStick.y) > threshold) {
         vy = this.gamepad.leftStick.y * speed;
       }
-      if (this.gamepad.A) this.isGrooming = true;
+      // Use controller-aware confirm button for grooming (handles Nintendo swap)
+      if (isConfirmPressed(this.gamepad)) this.isGrooming = true;
     }
 
     if (this.winchActive && this.winchAnchor) {
@@ -1922,7 +1924,9 @@ export default class GameScene extends Phaser.Scene {
     const hudScene = this.scene.get('HUDScene') as HUDScene;
     const touchGroom = hudScene?.touchGroom ?? false;
 
-    this.isGrooming = this.groomKey.isDown || (this.gamepad !== null && this.gamepad.A) || touchGroom;
+    // Use controller-aware confirm button for grooming (handles Nintendo swap)
+    const gamepadGroom = this.gamepad !== null && isConfirmPressed(this.gamepad);
+    this.isGrooming = this.groomKey.isDown || gamepadGroom || touchGroom;
 
     if (this.isGrooming && this.fuel > 0) {
       this.groomAtPosition(this.groomer.x, this.groomer.y);
@@ -2178,13 +2182,21 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private showDialogue(key: string): void {
-    // On touch-only devices, use touch-specific tutorial messages if available
+    // Check for gamepad first, then touch, then default
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isTouchOnly = isMobile && hasTouch;
+    const isTouchOnly = isMobile && hasTouch && !hasGamepad;
     
     let dialogueKey = key;
-    if (isTouchOnly) {
+    
+    if (hasGamepad) {
+      // Check if gamepad-specific version exists
+      const gamepadKey = key + 'Gamepad';
+      if (t(gamepadKey) !== gamepadKey) {
+        dialogueKey = gamepadKey;
+      }
+    } else if (isTouchOnly) {
       // Check if touch-specific version exists
       const touchKey = key + 'Touch';
       if (t(touchKey) !== touchKey) {

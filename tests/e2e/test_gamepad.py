@@ -224,3 +224,166 @@ class TestGamepadGameplay:
         
         # Verify game is still active (didn't crash or go back to menu)
         wait_for_scene(gamepad_page, 'GameScene')
+
+
+# Nintendo controller mock - uses different ID for button swap detection
+MOCK_NINTENDO_GAMEPAD_SCRIPT = """
+(function() {
+    const mockGamepad = {
+        id: 'Nintendo Switch Pro Controller (STANDARD GAMEPAD Vendor: 057e Product: 2009)',
+        index: 0,
+        connected: true,
+        timestamp: performance.now(),
+        mapping: 'standard',
+        axes: [0, 0, 0, 0],
+        buttons: []
+    };
+    
+    for (let i = 0; i < 17; i++) {
+        mockGamepad.buttons.push({ pressed: false, touched: false, value: 0 });
+    }
+    
+    window._mockGamepad = mockGamepad;
+    
+    navigator.getGamepads = function() {
+        return [window._mockGamepad, null, null, null];
+    };
+})();
+"""
+
+
+@pytest.fixture
+def nintendo_page(page: Page):
+    """Page fixture with Nintendo Switch Pro Controller mock."""
+    page.add_init_script(MOCK_NINTENDO_GAMEPAD_SCRIPT)
+    page.goto(GAME_URL)
+    wait_for_scene(page, 'MenuScene')
+    page.wait_for_timeout(200)
+    return page
+
+
+class TestNintendoControllerSwap:
+    """Test that Nintendo controller has swapped A/B buttons."""
+
+    def test_nintendo_detected(self, nintendo_page: Page):
+        """Verify Nintendo controller is detected."""
+        gamepad_id = nintendo_page.evaluate("""() => {
+            const gamepads = navigator.getGamepads();
+            return gamepads[0]?.id || null;
+        }""")
+        assert 'Nintendo' in gamepad_id, f"Should detect Nintendo controller, got: {gamepad_id}"
+
+    def test_nintendo_a_button_confirms(self, nintendo_page: Page):
+        """On Nintendo, physical A button (index 1) should confirm."""
+        # On Nintendo, A is at button index 1 (east position)
+        # The game should now use button 1 for confirm on Nintendo
+        press_gamepad_button(nintendo_page, 1)  # Nintendo A = index 1
+        nintendo_page.wait_for_timeout(100)
+        release_gamepad_button(nintendo_page, 1)
+        
+        # Should start game (confirm action)
+        wait_for_scene(nintendo_page, 'GameScene', timeout=3000)
+
+    def test_nintendo_b_button_goes_back(self, nintendo_page: Page):
+        """On Nintendo, physical B button (index 0) should go back."""
+        # First enter settings
+        for _ in range(2):
+            set_gamepad_stick(nintendo_page, 'left', 0, 0.8)
+            nintendo_page.wait_for_timeout(50)
+            set_gamepad_stick(nintendo_page, 'left', 0, 0)
+            nintendo_page.wait_for_timeout(250)
+        
+        # Confirm with Nintendo A (index 1)
+        press_gamepad_button(nintendo_page, 1)
+        nintendo_page.wait_for_timeout(150)
+        release_gamepad_button(nintendo_page, 1)
+        
+        wait_for_scene(nintendo_page, 'SettingsScene', timeout=3000)
+        
+        # Go back with Nintendo B (index 0)
+        press_gamepad_button(nintendo_page, 0)  # Nintendo B = index 0
+        nintendo_page.wait_for_timeout(150)
+        release_gamepad_button(nintendo_page, 0)
+        
+        wait_for_scene(nintendo_page, 'MenuScene', timeout=3000)
+
+
+# PlayStation controller mock
+MOCK_PLAYSTATION_GAMEPAD_SCRIPT = """
+(function() {
+    const mockGamepad = {
+        id: 'Sony DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)',
+        index: 0,
+        connected: true,
+        timestamp: performance.now(),
+        mapping: 'standard',
+        axes: [0, 0, 0, 0],
+        buttons: []
+    };
+    
+    for (let i = 0; i < 17; i++) {
+        mockGamepad.buttons.push({ pressed: false, touched: false, value: 0 });
+    }
+    
+    window._mockGamepad = mockGamepad;
+    
+    navigator.getGamepads = function() {
+        return [window._mockGamepad, null, null, null];
+    };
+})();
+"""
+
+
+@pytest.fixture
+def playstation_page(page: Page):
+    """Page fixture with PlayStation DualSense controller mock."""
+    page.add_init_script(MOCK_PLAYSTATION_GAMEPAD_SCRIPT)
+    page.goto(GAME_URL)
+    wait_for_scene(page, 'MenuScene')
+    page.wait_for_timeout(200)
+    return page
+
+
+class TestPlayStationController:
+    """Test PlayStation controller button mapping."""
+
+    def test_playstation_detected(self, playstation_page: Page):
+        """Verify PlayStation controller is detected."""
+        gamepad_id = playstation_page.evaluate("""() => {
+            const gamepads = navigator.getGamepads();
+            return gamepads[0]?.id || null;
+        }""")
+        assert 'Sony' in gamepad_id or 'DualSense' in gamepad_id, f"Should detect PlayStation controller, got: {gamepad_id}"
+
+    def test_playstation_cross_button_confirms(self, playstation_page: Page):
+        """On PlayStation, Cross button (index 0) should confirm."""
+        # PlayStation Cross = button index 0 (same as Xbox A)
+        press_gamepad_button(playstation_page, 0)
+        playstation_page.wait_for_timeout(100)
+        release_gamepad_button(playstation_page, 0)
+        
+        # Should start game (confirm action)
+        wait_for_scene(playstation_page, 'GameScene', timeout=3000)
+
+    def test_playstation_circle_button_goes_back(self, playstation_page: Page):
+        """On PlayStation, Circle button (index 1) should go back."""
+        # First enter settings
+        for _ in range(2):
+            set_gamepad_stick(playstation_page, 'left', 0, 0.8)
+            playstation_page.wait_for_timeout(50)
+            set_gamepad_stick(playstation_page, 'left', 0, 0)
+            playstation_page.wait_for_timeout(250)
+        
+        # Confirm with Cross (index 0)
+        press_gamepad_button(playstation_page, 0)
+        playstation_page.wait_for_timeout(150)
+        release_gamepad_button(playstation_page, 0)
+        
+        wait_for_scene(playstation_page, 'SettingsScene', timeout=3000)
+        
+        # Go back with Circle (index 1)
+        press_gamepad_button(playstation_page, 1)
+        playstation_page.wait_for_timeout(150)
+        release_gamepad_button(playstation_page, 1)
+        
+        wait_for_scene(playstation_page, 'MenuScene', timeout=3000)

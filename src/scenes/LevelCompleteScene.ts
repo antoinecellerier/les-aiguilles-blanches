@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level } from '../setup';
 import { THEME } from '../config/theme';
+import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -200,15 +201,15 @@ export default class LevelCompleteScene extends Phaser.Scene {
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        // Accept both A (Xbox) and button 1 (Nintendo A) as confirm
-        const confirmPressed = pad.buttons[0]?.pressed;
+        // Use controller-aware button mapping (handles Nintendo swap)
+        const confirmPressed = isConfirmPressed(pad);
         if (confirmPressed && !this.gamepadAPressed && this.primaryAction) {
           this.primaryAction();
         }
         this.gamepadAPressed = confirmPressed;
 
-        // Accept both B (Xbox) and button 0 (Nintendo B) as back
-        const backPressed = pad.buttons[1]?.pressed;
+        // Back button to return to menu
+        const backPressed = isBackPressed(pad);
         if (backPressed && !this.gamepadBPressed) {
           this.scene.start('MenuScene');
         }

@@ -82,9 +82,16 @@ if (activePointers.length === 0) {
 - `src/scenes/HUDScene.ts` - UI overlay with scaling, touch controls
 - `src/scenes/MenuScene.ts` - Main menu with responsive layout
 - `src/utils/accessibility.ts` - A11y settings storage
+- `src/utils/gamepad.ts` - Controller detection and button mapping (Nintendo/Xbox/PlayStation)
 - `src/main.ts` - Game init, resize/orientation handlers
 - `docs/ARCHITECTURE.md` - Technical decisions, patterns
 - `docs/GAMEPLAY.md` - Game mechanics documentation
+
+## Gamepad Support
+- **Controller detection**: `src/utils/gamepad.ts` detects controller type from `pad.id`
+- **Nintendo swap**: A/B buttons are physically swapped vs Xbox; utility handles this
+- **Button mapping**: Use `isConfirmPressed(pad)` and `isBackPressed(pad)` instead of `pad.A`/`pad.B`
+- **Labels**: Use `getMappingFromGamepad(pad).confirmLabel` for UI hints
 
 ## French Ski Standards
 - **Piste markers**: Green ●, Blue ■, Red ◆, Black ◆◆
@@ -100,7 +107,6 @@ if (activePointers.length === 0) {
 ## Queued Items (from plan.md)
 ### Polish
 - Gamepad button rebinding
-- Gamepad automated tests
 - Taunt text size (make bigger on fail screen)
 - Night scene rendering + groomer headlights
 - Keyboard-only menu navigation

@@ -18,6 +18,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         settings: "Paramètres",
         controls: "Contrôles",
         howToPlay: "Comment jouer",
+        fullscreen: "Plein écran",
+        exitFullscreen: "Quitter plein écran",
         back: "Retour",
         backToGame: "Retour au jeu",
         
@@ -54,8 +56,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         // How to Play hints
         howToPlayMove: "WASD ou Flèches pour se déplacer",
         howToPlayMoveTouch: "Utilisez le D-pad virtuel",
+        howToPlayMoveGamepad: "Stick ou D-pad pour se déplacer",
         howToPlayGroom: "ESPACE pour damer la neige",
         howToPlayGroomTouch: "Touchez ❄️ pour damer",
+        howToPlayGroomGamepad: "pour damer la neige",
         howToPlayFuel: "Surveillez carburant et endurance !",
         
         // Winch
@@ -114,10 +118,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tutorialWelcome: "🏔️ Bienvenue, recrue ! Je suis Jean-Pierre, chef dameur. Je vais t'apprendre le métier.",
         tutorialControls: "🎮 CONTRÔLES : Utilise WASD ou les flèches ↑↓←→ pour déplacer la dameuse.",
         tutorialControlsTouch: "🎮 CONTRÔLES : Utilise le D-pad ◀▲▼▶ à gauche pour déplacer la dameuse.",
+        tutorialControlsGamepad: "🎮 CONTRÔLES : Utilise le stick gauche ou D-pad pour déplacer la dameuse.",
         tutorialMove: "👆 ESSAIE : Déplace-toi sur la piste. La neige blanche doit être damée !",
         tutorialGroomIntro: "✅ Bien joué ! Maintenant, passons au damage.",
         tutorialGroomAction: "❄️ DAMER : Maintiens ESPACE tout en te déplaçant pour transformer la neige en piste damée.",
         tutorialGroomActionTouch: "❄️ DAMER : Maintiens le bouton ❄️ à droite tout en te déplaçant pour damer la neige.",
+        tutorialGroomActionGamepad: "❄️ DAMER : Maintiens Ⓐ tout en te déplaçant pour transformer la neige en piste damée.",
         tutorialCoverage: "📊 Tu vois ? La neige devient plus lisse ! Continue à damer la piste.",
         tutorialHUD: "📈 INTERFACE : En haut à gauche : ⛽ Carburant, 💪 Endurance, ❄️ Couverture. En haut à droite : ⏱️ Temps et 🎯 Objectif.",
         tutorialGoal: "🎯 OBJECTIF : Dame au moins 40% de la piste avant la fin du temps. Les skieurs arrivent bientôt !",
@@ -178,6 +184,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         settings: "Settings",
         controls: "Controls",
         howToPlay: "How to Play",
+        fullscreen: "Fullscreen",
+        exitFullscreen: "Exit Fullscreen",
         back: "Back",
         
         // Settings
@@ -212,8 +220,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         // How to Play hints
         howToPlayMove: "WASD or Arrows to move",
         howToPlayMoveTouch: "Use the virtual D-pad",
+        howToPlayMoveGamepad: "Left stick or D-pad to move",
         howToPlayGroom: "SPACE to groom snow",
         howToPlayGroomTouch: "Tap ❄️ to groom",
+        howToPlayGroomGamepad: "to groom snow",
         howToPlayFuel: "Watch your fuel and stamina!",
         
         // Winch
@@ -270,10 +280,12 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tutorialWelcome: "🏔️ Welcome, rookie! I'm Jean-Pierre, head groomer. I'll teach you the trade.",
         tutorialControls: "🎮 CONTROLS: Use WASD or arrow keys ↑↓←→ to move the groomer.",
         tutorialControlsTouch: "🎮 CONTROLS: Use the D-pad ◀▲▼▶ on the left to move the groomer.",
+        tutorialControlsGamepad: "🎮 CONTROLS: Use the left stick or D-pad to move the groomer.",
         tutorialMove: "👆 TRY IT: Move around the piste. The white snow needs to be groomed!",
         tutorialGroomIntro: "✅ Nice! Now let's learn to groom.",
         tutorialGroomAction: "❄️ GROOMING: Hold SPACE while moving to transform snow into a smooth piste.",
         tutorialGroomActionTouch: "❄️ GROOMING: Hold the ❄️ button on the right while moving to groom the snow.",
+        tutorialGroomActionGamepad: "❄️ GROOMING: Hold Ⓐ while moving to transform snow into a smooth piste.",
         tutorialCoverage: "📊 See? The snow becomes smoother! Keep grooming the piste.",
         tutorialHUD: "📈 HUD: Top-left: ⛽ Fuel, 💪 Stamina, ❄️ Coverage. Top-right: ⏱️ Time and 🎯 Target.",
         tutorialGoal: "🎯 GOAL: Groom at least 40% of the piste before time runs out. Skiers are coming!",
@@ -332,6 +344,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         settings: "Einstellungen",
         controls: "Steuerung",
         howToPlay: "Anleitung",
+        fullscreen: "Vollbild",
+        exitFullscreen: "Vollbild beenden",
         back: "Zurück",
         
         // Settings
@@ -405,6 +419,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         settings: "Impostazioni",
         controls: "Comandi",
         howToPlay: "Come Giocare",
+        fullscreen: "Schermo intero",
+        exitFullscreen: "Esci schermo intero",
         back: "Indietro",
         
         // Settings
@@ -478,6 +494,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         settings: "Ajustes",
         controls: "Controles",
         howToPlay: "Cómo Jugar",
+        fullscreen: "Pantalla completa",
+        exitFullscreen: "Salir pantalla completa",
         back: "Volver",
         
         // Settings

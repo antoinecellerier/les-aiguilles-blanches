@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle, titleStyle } from '../config/theme';
+import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -143,15 +144,15 @@ export default class PauseScene extends Phaser.Scene {
           }
         }
         
-        // Accept both A (Xbox) and button 1 (Nintendo A) as confirm
-        const confirmPressed = pad.buttons[0]?.pressed;
+        // Use controller-aware button mapping (handles Nintendo swap)
+        const confirmPressed = isConfirmPressed(pad);
         if (confirmPressed && !this.gamepadAPressed) {
           this.activateSelected();
         }
         this.gamepadAPressed = confirmPressed;
 
-        // B button (or button 0 on Nintendo) to resume
-        const backPressed = pad.buttons[1]?.pressed;
+        // Back button or Start to resume
+        const backPressed = isBackPressed(pad);
         const startPressed = pad.buttons[9]?.pressed ?? false;
         
         if ((backPressed && !this.gamepadBPressed) || (startPressed && !this.gamepadStartPressed)) {
