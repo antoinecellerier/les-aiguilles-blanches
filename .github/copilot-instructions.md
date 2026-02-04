@@ -98,9 +98,6 @@ if (activePointers.length === 0) {
 - **Screen reader**: ARIA live region announcements
 
 ## Queued Items (from plan.md)
-### Features  
-- Stamina mechanics review
-
 ### Polish
 - Taunt text size (make bigger on fail screen)
 - Keyboard-only menu navigation

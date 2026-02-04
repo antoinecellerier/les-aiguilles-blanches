@@ -29,10 +29,22 @@ Your vehicle is inspired by the legendary **PistenBully 600**, a powerful snow g
 └─────────────────────────────────────────────────────────┘
 ```
 
-- **⛽ Fuel**: Depletes while moving. Refuel at stations.
+- **⛽ Fuel**: Depletes while moving. Refuel at fuel stations (bottom of level). Shows ⛽+ feedback when refueling.
 - **❄️ Coverage**: Percentage of piste groomed. Reach target to win.
-- **⚡ Stamina**: Your energy level. Eat at Chez Marie to restore.
+- **💪 Stamina**: Operator energy. Drains faster on steep slopes without winch, slower with winch. Below 30%, grooming width decreases. Visit Chez Marie to restore (shows 🍲 Tartiflette! on first visit, 💪 for top-ups).
 - **⏱️ Timer**: Time remaining. Complete before it hits 0:00.
+
+## 🍽️ Service Points
+
+### Fuel Station (⛽)
+Located at the bottom of each level. Drive over it to refuel automatically. Visual feedback shows when fuel is being added.
+
+### Chez Marie (🍲)
+The resort restaurant near the top of the level. Drive over it to:
+- **First visit**: Full stamina restoration + 60 second regeneration buff
+- **While buff active**: Gradual stamina top-up
+
+Pro tip: Plan your route to pass by Chez Marie before tackling steep sections!
 
 ## 🎮 Controls
 

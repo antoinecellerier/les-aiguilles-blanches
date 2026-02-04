@@ -1805,6 +1805,16 @@ export default class GameScene extends Phaser.Scene {
     this.steepWarningShown = false;
   }
 
+  private getSlopeAtPosition(x: number, y: number): number {
+    for (const zone of this.steepZoneRects) {
+      if (y >= zone.startY && y <= zone.endY &&
+        x >= zone.leftX && x <= zone.rightX) {
+        return zone.slope;
+      }
+    }
+    return 0;
+  }
+
   private triggerTumble(_slope: number): void {
     if (this.isTumbling) return;
     this.isTumbling = true;
@@ -1908,7 +1918,11 @@ export default class GameScene extends Phaser.Scene {
   private groomAtPosition(x: number, y: number): void {
     const tileX = Math.floor(x / this.tileSize);
     const tileY = Math.floor(y / this.tileSize);
-    const radius = Math.ceil(GAME_CONFIG.GROOM_WIDTH / this.tileSize / 2) + 1;
+    
+    // Low stamina reduces grooming effectiveness (smaller radius)
+    const staminaFactor = this.stamina > 30 ? 1 : (0.5 + this.stamina / 60);
+    const baseRadius = Math.ceil(GAME_CONFIG.GROOM_WIDTH / this.tileSize / 2) + 1;
+    const radius = Math.max(1, Math.floor(baseRadius * staminaFactor));
 
     for (let dy = -radius; dy <= radius; dy++) {
       for (let dx = -radius; dx <= radius; dx++) {
@@ -1936,10 +1950,32 @@ export default class GameScene extends Phaser.Scene {
 
   private updateResources(delta: number): void {
     const dt = delta / 1000;
+    const isMoving = (this.groomer.body as Phaser.Physics.Arcade.Body).velocity.length() > 0;
 
-    if ((this.groomer.body as Phaser.Physics.Arcade.Body).velocity.length() > 0) {
+    if (isMoving) {
       this.fuel -= GAME_CONFIG.FUEL_CONSUMPTION * dt * 100;
-      this.stamina -= GAME_CONFIG.STAMINA_CONSUMPTION * dt * 100;
+      
+      // Stamina drain varies based on work difficulty
+      let staminaDrain = GAME_CONFIG.STAMINA_CONSUMPTION;
+      
+      // Check if on steep terrain
+      const currentSlope = this.getSlopeAtPosition(this.groomer.x, this.groomer.y);
+      const isOnSteep = currentSlope >= 30;
+      
+      if (this.winchActive) {
+        // Winch does the work - minimal operator effort
+        staminaDrain *= 0.3;
+      } else if (isOnSteep) {
+        // Fighting gravity without winch - exhausting!
+        staminaDrain *= 3.0;
+      }
+      
+      if (this.isGrooming) {
+        // Operating the tiller adds effort
+        staminaDrain *= 1.5;
+      }
+      
+      this.stamina -= staminaDrain * dt * 100;
     }
 
     this.fuel = Phaser.Math.Clamp(this.fuel, 0, 100);
@@ -1978,15 +2014,52 @@ export default class GameScene extends Phaser.Scene {
 
   private handleInteraction(_groomer: Phaser.GameObjects.GameObject, interactableObj: Phaser.GameObjects.GameObject): void {
     const interactable = interactableObj as Phaser.Physics.Arcade.Sprite & { interactionType: string };
+    // Use groomer position for feedback (where player is looking)
+    const feedbackX = this.groomer.x;
+    const feedbackY = this.groomer.y;
+    
     if (interactable.interactionType === 'fuel') {
-      this.fuel = Math.min(100, this.fuel + 0.5);
+      if (this.fuel < 100) {
+        this.fuel = Math.min(100, this.fuel + 0.5);
+        this.showInteractionFeedback(feedbackX, feedbackY, '🛢️', 0x44aaff, 28);
+      }
     } else if (interactable.interactionType === 'food') {
-      if (this.groomKey.isDown && !this.buffs.staminaRegen) {
+      // Restore stamina and give regen buff when visiting Chez Marie
+      if (!this.buffs.staminaRegen) {
         this.stamina = 100;
-        this.buffs.staminaRegen = 60000;
+        this.buffs.staminaRegen = 60000; // 60 second regen buff
         Accessibility.announce(t('marieWelcome'));
+        this.showInteractionFeedback(feedbackX, feedbackY, '🧀 Reblochon!', 0xffdd44, 32, true);
+      } else if (this.stamina < 100) {
+        // If already have buff, just top up stamina
+        this.stamina = Math.min(100, this.stamina + 0.3);
+        this.showInteractionFeedback(feedbackX, feedbackY, '🧀', 0xffdd44, 24);
       }
     }
+  }
+
+  private lastFeedbackTime = 0;
+  private showInteractionFeedback(x: number, y: number, text: string, color: number, fontSize = 24, forceShow = false): void {
+    const now = Date.now();
+    // Throttle feedback to avoid spam (except for forceShow)
+    if (!forceShow && now - this.lastFeedbackTime < 500) return;
+    this.lastFeedbackTime = now;
+
+    const feedback = this.add.text(x, y - 30, text, {
+      fontSize: fontSize + 'px',
+      color: '#' + color.toString(16).padStart(6, '0'),
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(200);
+
+    this.tweens.add({
+      targets: feedback,
+      y: y - 70,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Power2',
+      onComplete: () => feedback.destroy(),
+    });
   }
 
   getCoverage(): number {
