@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
-// @ts-ignore - JS file during migration
-import GameScene from './GameScene.js';
+import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
 import PauseScene from './PauseScene';
