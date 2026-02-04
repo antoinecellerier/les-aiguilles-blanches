@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
+import { getMovementKeysString } from '../utils/keyboardLayout';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
@@ -185,6 +186,7 @@ export default class MenuScene extends Phaser.Scene {
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const showTouchHints = hasTouch && isMobile;
+    const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
     
     let moveHint: string;
     let groomHint: string;
@@ -194,10 +196,10 @@ export default class MenuScene extends Phaser.Scene {
       groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
     } else if (hasTouch) {
       // PC with touchscreen - show both
-      moveHint = '🚜 ' + (t('howToPlayMove') || 'WASD/Arrows or touch D-pad');
+      moveHint = `🚜 ${keys}/Arrows or touch D-pad`;
       groomHint = '❄️ ' + (t('howToPlayGroom') || 'SPACE or tap ❄️ to groom');
     } else {
-      moveHint = '🚜 ' + (t('howToPlayMove') || 'WASD or Arrows to move');
+      moveHint = `🚜 ${keys} or Arrows to move`;
       groomHint = '❄️ ' + (t('howToPlayGroom') || 'SPACE to groom snow');
     }
     
@@ -218,6 +220,7 @@ export default class MenuScene extends Phaser.Scene {
     // Detect capabilities
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
     
     if (isMobile && hasTouch) {
       // Mobile-only: show touch controls
@@ -233,7 +236,7 @@ export default class MenuScene extends Phaser.Scene {
     } else if (hasTouch) {
       // PC with touchscreen: show both
       this.showOverlay('controls', [
-        '⬆️ WASD / Arrows - Move',
+        `⬆️ ${keys} / Arrows - Move`,
         '⏺️ SPACE - Groom',
         '🔗 SHIFT - Winch',
         '⏸️ ESC - Pause',
@@ -244,7 +247,7 @@ export default class MenuScene extends Phaser.Scene {
     } else {
       // Keyboard only
       this.showOverlay('controls', [
-        '⬆️ WASD / Arrows - Move',
+        `⬆️ ${keys} / Arrows - Move`,
         '⏺️ SPACE - Groom',
         '🔗 SHIFT - Winch',
         '⏸️ ESC - Pause',

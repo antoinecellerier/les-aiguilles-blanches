@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Accessibility, setLanguage, detectLanguage } from '../setup';
+import { detectKeyboardLayout } from '../utils/keyboardLayout';
 
 /**
  * Les Aiguilles Blanches - Boot Scene
@@ -46,6 +47,9 @@ export default class BootScene extends Phaser.Scene {
 
       // Detect and set language
       setLanguage(detectLanguage());
+
+      // Detect keyboard layout (async, but we don't wait - it caches for later use)
+      detectKeyboardLayout();
 
       // Generate placeholder textures
       this.generateTextures();

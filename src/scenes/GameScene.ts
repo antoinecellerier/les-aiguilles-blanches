@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
+import { getLayoutDefaults } from '../utils/keyboardLayout';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
 
@@ -1579,19 +1580,32 @@ export default class GameScene extends Phaser.Scene {
 
   private setupInput(): void {
     this.cursors = this.input.keyboard!.createCursorKeys();
-    this.wasd = this.input.keyboard!.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D
-    }) as { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key };
-    this.groomKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.winchKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+    
+    // Load custom key bindings from localStorage (keyCodes are numbers)
+    const bindings = this.loadKeyBindings();
+    
+    this.wasd = {
+      up: this.input.keyboard!.addKey(bindings.up),
+      down: this.input.keyboard!.addKey(bindings.down),
+      left: this.input.keyboard!.addKey(bindings.left),
+      right: this.input.keyboard!.addKey(bindings.right),
+    };
+    this.groomKey = this.input.keyboard!.addKey(bindings.groom);
+    this.winchKey = this.input.keyboard!.addKey(bindings.winch);
 
     if (this.input.gamepad) {
-      this.input.gamepad.once('connected', (pad: Phaser.Input.Gamepad.Gamepad) => {
-        this.gamepad = pad;
+      // Check for already connected gamepads
+      if (this.input.gamepad.total > 0) {
+        this.gamepad = this.input.gamepad.getPad(0);
         Accessibility.announce('Gamepad connected');
+      }
+      
+      // Listen for new connections
+      this.input.gamepad.on('connected', (pad: Phaser.Input.Gamepad.Gamepad) => {
+        if (!this.gamepad) {
+          this.gamepad = pad;
+          Accessibility.announce('Gamepad connected');
+        }
       });
     }
 
@@ -1600,6 +1614,37 @@ export default class GameScene extends Phaser.Scene {
         // Touch joystick logic placeholder
       }
     });
+  }
+
+  private loadKeyBindings(): { up: number; down: number; left: number; right: number; groom: number; winch: number } {
+    const BINDINGS_VERSION = 2; // Must match SettingsScene
+    const savedVersion = localStorage.getItem('snowGroomer_bindingsVersion');
+    const saved = localStorage.getItem('snowGroomer_bindings');
+    
+    // Get layout-specific defaults
+    const defaults = getLayoutDefaults();
+    
+    // If version doesn't match, use defaults
+    if (savedVersion !== String(BINDINGS_VERSION)) {
+      return defaults;
+    }
+    
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Only use saved values if they are valid numbers
+        const result = { ...defaults };
+        for (const key of Object.keys(defaults) as Array<keyof typeof defaults>) {
+          if (typeof parsed[key] === 'number' && parsed[key] > 0) {
+            result[key] = parsed[key];
+          }
+        }
+        return result;
+      } catch {
+        return defaults;
+      }
+    }
+    return defaults;
   }
 
   private createNightOverlay(): void {

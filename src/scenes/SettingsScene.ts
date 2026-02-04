@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode } from '../setup';
+import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 
 /**
  * Les Aiguilles Blanches - Settings Scene
@@ -12,12 +13,12 @@ interface SettingsSceneData {
 }
 
 interface KeyBindings {
-  up: string;
-  down: string;
-  left: string;
-  right: string;
-  groom: string;
-  winch: string;
+  up: number;
+  down: number;
+  left: number;
+  right: number;
+  groom: number;
+  winch: number;
 }
 
 interface LangButton {
@@ -30,11 +31,15 @@ interface ColorblindButton {
   id: string;
 }
 
+// Storage version - increment when making breaking changes to binding format
+const BINDINGS_VERSION = 2;
+
 export default class SettingsScene extends Phaser.Scene {
   private returnTo: string | null = null;
   private levelIndex = 0;
   private rebindingAction: string | null = null;
   private bindings: KeyBindings = this.getDefaultBindings();
+  private displayNames: Record<number, string> = {}; // Store display names for keyCodes
   private rebindButtons: Record<string, Phaser.GameObjects.Text> = {};
   private rebindStatus: Phaser.GameObjects.Text | null = null;
   private langButtons: LangButton[] = [];
@@ -188,12 +193,16 @@ export default class SettingsScene extends Phaser.Scene {
         color: '#cccccc',
       });
 
-      const keyName = this.getKeyName(this.bindings[action.id as keyof KeyBindings]);
-      const btn = this.add.text(rightX + colWidth * 0.4, y, keyName, {
+      const currentBinding = this.bindings[action.id as keyof KeyBindings];
+      const defaultBinding = this.getDefaultBindings()[action.id as keyof KeyBindings];
+      const isCustom = currentBinding !== defaultBinding;
+      
+      const keyName = this.getKeyName(currentBinding);
+      const btn = this.add.text(rightX + colWidth * 0.4, y, keyName + (isCustom ? ' *' : ''), {
         fontFamily: 'Courier New',
         fontSize: (fontSize - 1) + 'px',
-        color: '#87CEEB',
-        backgroundColor: '#2d5a7b',
+        color: isCustom ? '#FFDD00' : '#87CEEB',
+        backgroundColor: isCustom ? '#5a5a2d' : '#2d5a7b',
         padding: { x: 8, y: 2 },
       }).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.startRebind(action.id, btn));
@@ -203,8 +212,49 @@ export default class SettingsScene extends Phaser.Scene {
 
     rightY += actions.length * lineHeight * 0.75 + lineHeight * 0.5;
 
-    // Reset bindings button
-    this.add.text(rightX, rightY, t('resetControls') || 'Reset to Default', {
+    // Check if user has customized any bindings
+    const hasCustomBindings = actions.some(action => 
+      this.bindings[action.id as keyof KeyBindings] !== this.getDefaultBindings()[action.id as keyof KeyBindings]
+    );
+
+    // Keyboard layout selector
+    const currentLayout = getKeyboardLayout();
+    const isNonDefaultLayout = currentLayout !== 'qwerty';
+    
+    this.add.text(rightX, rightY, '⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', {
+      fontFamily: 'Courier New',
+      fontSize: (fontSize - 1) + 'px',
+      color: '#aaaaaa',
+    });
+    rightY += lineHeight * 0.6;
+
+    if (hasCustomBindings) {
+      // Show "Custom" when user has overridden bindings
+      this.add.text(rightX, rightY, t('customBindings') || 'Custom (user-defined)', {
+        fontFamily: 'Courier New',
+        fontSize: (fontSize - 2) + 'px',
+        color: '#FFDD00',
+        fontStyle: 'italic',
+      });
+    } else {
+      // Show layout selector buttons
+      AVAILABLE_LAYOUTS.forEach((layout, idx) => {
+        const isActive = currentLayout === layout.id;
+        const btn = this.add.text(rightX + idx * 90, rightY, layout.id.toUpperCase(), {
+          fontFamily: 'Courier New',
+          fontSize: (fontSize - 2) + 'px',
+          color: isActive ? '#000000' : '#ffffff',
+          backgroundColor: isActive ? '#87ceeb' : '#555555',
+          padding: { x: 6, y: 3 },
+        }).setInteractive({ useHandCursor: true })
+          .on('pointerdown', () => this.setLayout(layout.id));
+      });
+    }
+
+    rightY += lineHeight * 1.2;
+
+    // Reset bindings button (below layout selector to make it clear it resets both)
+    this.add.text(rightX, rightY, '🔄 ' + (t('resetControls') || 'Reset All'), {
       fontFamily: 'Courier New',
       fontSize: (fontSize - 1) + 'px',
       color: '#ffaaaa',
@@ -237,7 +287,9 @@ export default class SettingsScene extends Phaser.Scene {
     // ESC to go back (only if not rebinding)
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       if (this.rebindingAction) {
-        this.finishRebind(event.code);
+        // Store keyCode (character-based) for Phaser compatibility
+        // Store key for display, code for reference
+        this.finishRebind(event.keyCode, event.key, event.code);
       } else if (event.code === 'Escape') {
         this.goBack();
       }
@@ -245,46 +297,87 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private loadBindings(): void {
+    const savedVersion = localStorage.getItem('snowGroomer_bindingsVersion');
     const saved = localStorage.getItem('snowGroomer_bindings');
+    const savedNames = localStorage.getItem('snowGroomer_displayNames');
     const defaults = this.getDefaultBindings();
+
+    // If version doesn't match, clear old bindings and use defaults
+    if (savedVersion !== String(BINDINGS_VERSION)) {
+      localStorage.removeItem('snowGroomer_bindings');
+      localStorage.removeItem('snowGroomer_displayNames');
+      this.bindings = defaults;
+      this.displayNames = {};
+      return;
+    }
 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        this.bindings = { ...defaults, ...parsed };
+        // Only use saved values if they are valid numbers
+        this.bindings = { ...defaults };
+        for (const key of Object.keys(defaults) as Array<keyof KeyBindings>) {
+          if (typeof parsed[key] === 'number' && parsed[key] > 0) {
+            this.bindings[key] = parsed[key];
+          }
+        }
       } catch {
         this.bindings = defaults;
       }
     } else {
       this.bindings = defaults;
     }
+
+    if (savedNames) {
+      try {
+        this.displayNames = JSON.parse(savedNames);
+      } catch {
+        this.displayNames = {};
+      }
+    }
   }
 
   private getDefaultBindings(): KeyBindings {
-    return {
-      up: 'KeyW',
-      down: 'KeyS',
-      left: 'KeyA',
-      right: 'KeyD',
-      groom: 'Space',
-      winch: 'ShiftLeft',
-    };
+    // Use layout-specific defaults from utility
+    return getLayoutDefaults();
+  }
+
+  private detectKeyboardLayout(): string {
+    return getKeyboardLayout();
   }
 
   private saveBindings(): void {
+    localStorage.setItem('snowGroomer_bindingsVersion', String(BINDINGS_VERSION));
     localStorage.setItem('snowGroomer_bindings', JSON.stringify(this.bindings));
+    localStorage.setItem('snowGroomer_displayNames', JSON.stringify(this.displayNames));
   }
 
-  private getKeyName(code: string): string {
-    if (!code) return '?';
-    const names: Record<string, string> = {
-      'KeyW': 'W', 'KeyA': 'A', 'KeyS': 'S', 'KeyD': 'D',
-      'ArrowUp': '↑', 'ArrowDown': '↓', 'ArrowLeft': '←', 'ArrowRight': '→',
-      'Space': 'SPACE', 'ShiftLeft': 'L-SHIFT', 'ShiftRight': 'R-SHIFT',
-      'ControlLeft': 'L-CTRL', 'ControlRight': 'R-CTRL',
-      'Enter': 'ENTER', 'Tab': 'TAB',
+  private getKeyName(keyCode: number): string {
+    if (!keyCode) return '?';
+    
+    // Use stored display name if available (from user's actual keyboard)
+    if (this.displayNames[keyCode]) {
+      return this.displayNames[keyCode];
+    }
+    
+    // Fallback to special key names by keyCode
+    const specialKeys: Record<number, string> = {
+      38: '↑', 40: '↓', 37: '←', 39: '→',
+      32: 'SPACE', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT',
+      13: 'ENTER', 9: 'TAB', 27: 'ESC',
+      8: '⌫', 46: 'DEL',
     };
-    return names[code] || code.replace('Key', '');
+    if (specialKeys[keyCode]) return specialKeys[keyCode];
+    
+    // For letter/number keys, return the character
+    if (keyCode >= 65 && keyCode <= 90) {
+      return String.fromCharCode(keyCode); // A-Z
+    }
+    if (keyCode >= 48 && keyCode <= 57) {
+      return String.fromCharCode(keyCode); // 0-9
+    }
+    
+    return keyCode.toString();
   }
 
   private startRebind(actionId: string, btn: Phaser.GameObjects.Text): void {
@@ -296,25 +389,36 @@ export default class SettingsScene extends Phaser.Scene {
     this.rebindStatus?.setText(t('pressKey') || 'Press a key...');
   }
 
-  private finishRebind(keyCode: string): void {
+  private finishRebind(keyCode: number, keyChar: string, eventCode: string): void {
     if (!this.rebindingAction) return;
 
-    if (keyCode === 'Escape') {
+    if (eventCode === 'Escape') {
       this.cancelRebind();
       return;
     }
 
     const actionId = this.rebindingAction as keyof KeyBindings;
     this.bindings[actionId] = keyCode;
+    
+    // Store display name from the actual keyboard character
+    if (keyChar.length === 1) {
+      this.displayNames[keyCode] = keyChar.toUpperCase();
+    } else {
+      // For special keys, store a readable name
+      this.displayNames[keyCode] = keyChar;
+    }
+    
     this.saveBindings();
 
     const btn = this.rebindButtons[actionId];
-    btn.setText(this.getKeyName(keyCode));
-    btn.setStyle({ backgroundColor: '#2d5a7b' });
+    btn.setText(this.getKeyName(keyCode) + ' *');
+    btn.setStyle({ backgroundColor: '#5a5a2d', color: '#FFDD00' });
 
     this.rebindingAction = null;
     this.rebindStatus?.setText(t('saved') || 'Saved!');
-    this.time.delayedCall(1500, () => this.rebindStatus?.setText(''));
+    
+    // Restart scene to refresh layout selector (shows "Custom" when bindings differ from defaults)
+    this.time.delayedCall(800, () => this.scene.restart());
   }
 
   private cancelRebind(): void {
@@ -329,15 +433,26 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private resetBindings(): void {
+    // Reset keyboard layout to default (qwerty)
+    setKeyboardLayout('qwerty');
+    // Reset bindings to defaults for that layout
     this.bindings = this.getDefaultBindings();
+    this.displayNames = {}; // Clear custom display names
     this.saveBindings();
 
-    for (const [actionId, btn] of Object.entries(this.rebindButtons)) {
-      btn.setText(this.getKeyName(this.bindings[actionId as keyof KeyBindings]));
-    }
-
     this.rebindStatus?.setText(t('controlsReset') || 'Controls reset!');
-    this.time.delayedCall(1500, () => this.rebindStatus?.setText(''));
+    // Restart scene to refresh all UI elements
+    this.time.delayedCall(800, () => this.scene.restart());
+  }
+
+  private setLayout(layout: KeyboardLayout): void {
+    setKeyboardLayout(layout);
+    // Reset bindings to new layout defaults
+    this.bindings = this.getDefaultBindings();
+    this.displayNames = {}; // Clear custom display names
+    this.saveBindings();
+    // Refresh the scene to show updated buttons
+    this.scene.restart();
   }
 
   private createToggle(

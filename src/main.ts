@@ -37,6 +37,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   input: {
     activePointers: 3, // Enable multitouch (D-pad + action buttons)
+    gamepad: true, // Enable gamepad support
   },
   physics: {
     default: 'arcade',
