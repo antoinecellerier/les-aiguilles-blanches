@@ -72,19 +72,25 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // Fail taunt if applicable - prominent styling with background
     if (!this.won && this.failReason) {
       const taunt = this.getFailTaunt();
-      const tauntBg = this.add.rectangle(0, 0, width * 0.85, baseFontSize * 2.5, 0x442222, 0.9);
-      tauntBg.setStrokeStyle(2, 0xff4444);
+      const tauntFontSize = Math.round(baseFontSize * 1.3); // 30% larger than base
       const tauntText = this.add.text(0, 0, `« ${taunt} »`, {
-        font: `bold ${baseFontSize}px ${THEME.fonts.family}`,
-        color: '#ffcccc',
+        font: `bold ${tauntFontSize}px ${THEME.fonts.family}`,
+        color: '#ffdddd',
         align: 'center',
         wordWrap: { width: width * 0.75 },
       });
       tauntText.setOrigin(0.5, 0.5);
       
-      // Container to hold both bg and text
+      // Size background to fit text with padding
+      const bgWidth = Math.min(width * 0.9, tauntText.width + 40);
+      const bgHeight = tauntText.height + 20;
+      const tauntBg = this.add.rectangle(0, 0, bgWidth, bgHeight, 0x442222, 0.95);
+      tauntBg.setStrokeStyle(3, 0xff4444);
+      
+      // Container to hold both bg and text - set size for sizer layout
       const tauntContainer = this.add.container(0, 0, [tauntBg, tauntText]);
-      mainSizer.add(tauntContainer, { align: 'center', padding: { top: 10, bottom: 5 } });
+      tauntContainer.setSize(bgWidth, bgHeight);
+      mainSizer.add(tauntContainer, { align: 'center', padding: { top: 10, bottom: 15 } });
     }
 
     // Level name

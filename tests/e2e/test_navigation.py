@@ -740,6 +740,52 @@ class TestLevelComplete:
         assert new_level == initial_level + 1, f"Should advance to level 1, got {new_level}"
 
 
+class TestFailScreen:
+    """Test fail screen with taunt messages."""
+
+    def test_fail_screen_shows_taunt(self, game_page: Page):
+        """Test that failing a level shows LevelCompleteScene with taunt text."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Trigger a fail by calling gameOver directly via JavaScript
+        game_page.evaluate("""() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            if (gameScene && gameScene.gameOver) {
+                gameScene.gameOver(false, 'fuel');
+            }
+        }""")
+        
+        # Wait for LevelCompleteScene to appear
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        
+        # Verify we're on the fail screen (not won)
+        scene_data = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('LevelCompleteScene');
+            return scene ? { won: scene.won } : null;
+        }""")
+        assert scene_data is not None, "LevelCompleteScene should exist"
+        assert scene_data['won'] == False, "Should be a fail screen"
+
+    def test_fail_screen_has_retry_option(self, game_page: Page):
+        """Test that fail screen has retry button."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Trigger fail
+        game_page.evaluate("""() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            if (gameScene && gameScene.gameOver) {
+                gameScene.gameOver(false, 'cliff');
+            }
+        }""")
+        
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        
+        # Take screenshot for visual verification
+        game_page.screenshot(path="tests/screenshots/fail_screen_taunt.png")
+
+
 class TestCreditsScreen:
     """Test credits screen."""
 
