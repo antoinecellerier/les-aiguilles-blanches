@@ -20,3 +20,4 @@ dist/
 
 # Test artifacts
 tests/screenshots/
+stats.html

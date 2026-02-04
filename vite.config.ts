@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { execSync } from 'child_process';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // Get git commit hash and build date for version string
 function getVersion() {
@@ -25,8 +26,27 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
       },
+      output: {
+        // Split vendor chunks for better caching
+        manualChunks(id) {
+          if (id.includes('node_modules/phaser3-rex-plugins')) {
+            return 'rexui';
+          }
+          if (id.includes('node_modules/phaser')) {
+            return 'phaser';
+          }
+        },
+      },
     },
   },
+  plugins: [
+    // Generate bundle analysis (run: npm run build && open stats.html)
+    visualizer({
+      filename: 'stats.html',
+      open: false,
+      gzipSize: true,
+    }),
+  ],
   server: {
     port: 3000,
     open: false,
