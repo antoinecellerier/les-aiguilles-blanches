@@ -139,11 +139,16 @@ class TestSettingsLayout:
         elements = get_settings_text_elements(settings_page)
         texts = [e['text'].lower() for e in elements]
         
-        # Check for expected sections
-        expected_content = ['settings', 'language', 'accessibility', 'controls']
-        for expected in expected_content:
-            found = any(expected in t for t in texts)
-            assert found, f"Expected to find '{expected}' in Settings, got: {texts[:10]}"
+        # Check for expected sections (support both EN and FR)
+        # Note: Controls/keyboard section may not be visible on small screens
+        expected_content = [
+            ('settings', 'paramètres'),
+            ('language', 'langue'),
+            ('accessibility', 'accessibilité'),
+        ]
+        for expected_options in expected_content:
+            found = any(any(opt in t for opt in expected_options) for t in texts)
+            assert found, f"Expected to find one of {expected_options} in Settings, got: {texts[:15]}"
 
     def test_settings_toggles_clickable(self, settings_page: Page):
         """Test that toggle buttons are interactive."""

@@ -10,6 +10,26 @@ from playwright.sync_api import Page, expect
 from conftest import GAME_URL
 
 
+def click_start_button(page: Page):
+    """Click the Start Game button with proper scaling calculation."""
+    box = page.locator("canvas").bounding_box()
+    w, h = box["width"], box["height"]
+    
+    # Match MenuScene scaling: min of width and height based scales
+    # Note: In tests, devicePixelRatio is typically 1, so dprBoost = 1
+    scale_h = max(0.7, min(h / 768, 1.5))
+    scale_w = max(0.5, min(w / 1024, 1.5))
+    dpr = page.evaluate("window.devicePixelRatio || 1")
+    dpr_boost = (min(dpr, 2)) ** 0.5
+    scale = min(scale_h, scale_w) * dpr_boost
+    
+    menu_y = h * 0.55
+    btn_spacing = 55 * scale
+    start_y = menu_y - btn_spacing * 0.5
+    
+    page.mouse.click(box["x"] + w / 2, box["y"] + start_y)
+
+
 @pytest.fixture
 def touch_page(page: Page):
     """Configure page to emulate a touch device."""
@@ -34,9 +54,7 @@ def touch_page(page: Page):
 def test_touch_controls_visible_on_touch_device(touch_page: Page):
     """Touch controls should appear on touch-capable devices."""
     # Start game
-    touch_page.click("canvas")
-    touch_page.wait_for_timeout(500)
-    touch_page.click("canvas")  # Click through menu
+    click_start_button(touch_page)
     touch_page.wait_for_timeout(3000)  # Wait for game to load
     
     # Dismiss any dialogue
@@ -62,9 +80,7 @@ def test_touch_controls_visible_on_touch_device(touch_page: Page):
 def test_touch_dpad_movement(touch_page: Page):
     """D-pad buttons should trigger movement in GameScene."""
     # Start game
-    touch_page.click("canvas")
-    touch_page.wait_for_timeout(500)
-    touch_page.click("canvas")
+    click_start_button(touch_page)
     touch_page.wait_for_timeout(3000)
     
     # Dismiss dialogues - wait longer and click more
@@ -142,9 +158,7 @@ def test_touch_dpad_movement(touch_page: Page):
 def test_touch_groom_button(touch_page: Page):
     """Groom button should trigger grooming action."""
     # Start game
-    touch_page.click("canvas")
-    touch_page.wait_for_timeout(500)
-    touch_page.click("canvas")
+    click_start_button(touch_page)
     touch_page.wait_for_timeout(3000)
     
     # Dismiss dialogues
@@ -206,9 +220,7 @@ def test_touch_groom_button(touch_page: Page):
 def test_multitouch_simultaneous_inputs(touch_page: Page):
     """Multiple keyboard inputs should work simultaneously (touch controls use same mechanism)."""
     # Start game
-    touch_page.click("canvas")
-    touch_page.wait_for_timeout(500)
-    touch_page.click("canvas")
+    click_start_button(touch_page)
     touch_page.wait_for_timeout(3000)
     
     # Dismiss dialogues
@@ -350,10 +362,8 @@ class TestOrientationChanges:
         page.wait_for_selector("canvas", timeout=10000)
         page.wait_for_timeout(2000)
         
-        # Click to start game
-        page.click("canvas")
-        page.wait_for_timeout(500)
-        page.click("canvas")
+        # Click to start game (calculate button position for small screen)
+        click_start_button(page)
         page.wait_for_timeout(2000)
         
         # Verify game is running

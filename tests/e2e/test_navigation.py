@@ -326,9 +326,20 @@ class TestTutorial:
         box = canvas.bounding_box()
         
         # Dismiss initial dialogues (welcome, controls, move instruction)
-        for _ in range(4):
+        for _ in range(6):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
             game_page.wait_for_timeout(500)
+        
+        # Verify dialogue is dismissed
+        dialogue_hidden = game_page.evaluate("""() => {
+            const ds = window.game.scene.getScene('DialogueScene');
+            return !ds || !ds.isDialogueShowing || !ds.isDialogueShowing();
+        }""")
+        if not dialogue_hidden:
+            # Click more if dialogue still showing
+            for _ in range(4):
+                game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+                game_page.wait_for_timeout(400)
         
         # Get initial position
         initial_pos = game_page.evaluate("""() => {

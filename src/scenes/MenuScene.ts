@@ -20,8 +20,18 @@ export default class MenuScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Calculate scale factor for responsive text
+    // On high DPI devices, use device pixel ratio to compensate for small CSS pixels
     const baseHeight = 768;
-    const scaleFactor = Math.max(0.7, Math.min(height / baseHeight, 1.5));
+    const baseWidth = 1024;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x to avoid giant UI
+    
+    const scaleByHeight = Math.max(0.7, Math.min(height / baseHeight, 1.5));
+    const scaleByWidth = Math.max(0.5, Math.min(width / baseWidth, 1.5));
+    // Use smaller of height/width scaling to ensure content fits
+    // But boost by sqrt(dpr) on high DPI to compensate for tiny CSS pixels
+    const dprBoost = Math.sqrt(dpr);
+    const scaleFactor = Math.min(scaleByHeight, scaleByWidth) * dprBoost;
+    
     const titleSize = Math.round(40 * scaleFactor);
     const subtitleSize = Math.round(16 * scaleFactor);
     const buttonSize = Math.round(18 * scaleFactor);
