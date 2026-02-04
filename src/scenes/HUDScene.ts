@@ -284,6 +284,7 @@ export default class HUDScene extends Phaser.Scene {
     // D-pad (bottom-left)
     const dpadX = padding + btnSize * 1.5;
     const dpadY = height - padding - btnSize * 1.5;
+    const diagSize = btnSize * 0.7; // Slightly smaller for diagonals
 
     // Up button
     this.createTouchButton(dpadX, dpadY - btnSize, btnSize, '▲', alpha,
@@ -307,6 +308,28 @@ export default class HUDScene extends Phaser.Scene {
     this.createTouchButton(dpadX + btnSize, dpadY, btnSize, '▶', alpha,
       () => { this.touchRight = true; },
       () => { this.touchRight = false; }
+    );
+
+    // Diagonal buttons (corners)
+    // Up-Left
+    this.createTouchButton(dpadX - btnSize, dpadY - btnSize, diagSize, '◤', alpha * 0.8,
+      () => { this.touchUp = true; this.touchLeft = true; },
+      () => { this.touchUp = false; this.touchLeft = false; }
+    );
+    // Up-Right
+    this.createTouchButton(dpadX + btnSize, dpadY - btnSize, diagSize, '◥', alpha * 0.8,
+      () => { this.touchUp = true; this.touchRight = true; },
+      () => { this.touchUp = false; this.touchRight = false; }
+    );
+    // Down-Left
+    this.createTouchButton(dpadX - btnSize, dpadY + btnSize, diagSize, '◣', alpha * 0.8,
+      () => { this.touchDown = true; this.touchLeft = true; },
+      () => { this.touchDown = false; this.touchLeft = false; }
+    );
+    // Down-Right
+    this.createTouchButton(dpadX + btnSize, dpadY + btnSize, diagSize, '◢', alpha * 0.8,
+      () => { this.touchDown = true; this.touchRight = true; },
+      () => { this.touchDown = false; this.touchRight = false; }
     );
 
     // Action buttons (bottom-right)
@@ -340,6 +363,12 @@ export default class HUDScene extends Phaser.Scene {
       .on('pointerdown', onDown)
       .on('pointerup', onUp)
       .on('pointerout', onUp)
+      .on('pointerover', (pointer: Phaser.Input.Pointer) => {
+        // Trigger onDown when finger slides onto button while pressed
+        if (pointer.isDown) {
+          onDown();
+        }
+      })
       .on('pointercancel', onUp);  // Handle touch cancel events
 
     const text = this.add.text(x, y, label, {
