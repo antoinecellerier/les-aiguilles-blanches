@@ -25,17 +25,28 @@ export default class CreditsScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(0x0a1628);
     this.createStars();
 
-    this.add.text(width / 2, 60, '🏆', { font: '60px Arial' }).setOrigin(0.5);
+    // Header zone background (covers scrolling credits)
+    const headerBg = this.add.rectangle(width / 2, 100, width, 200, 0x0a1628);
+    headerBg.setDepth(10);
 
-    this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
+    const trophy = this.add.text(width / 2, 60, '🏆', { font: '60px Arial' }).setOrigin(0.5);
+    trophy.setDepth(11);
+
+    const title = this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
       font: 'bold 32px Courier New',
       color: '#FFD700',
     }).setOrigin(0.5);
+    title.setDepth(11);
 
-    this.add.text(width / 2, 160, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
+    const subtitle = this.add.text(width / 2, 160, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
       font: '16px Courier New',
       color: '#87CEEB',
     }).setOrigin(0.5);
+    subtitle.setDepth(11);
+
+    // Footer zone background (covers scrolling credits at bottom)
+    const footerBg = this.add.rectangle(width / 2, height - 50, width, 100, 0x0a1628);
+    footerBg.setDepth(10);
 
     const credits = [
       '',
@@ -99,6 +110,7 @@ export default class CreditsScene extends Phaser.Scene {
 
     this.buttonsContainer = this.add.container(0, 0);
     this.buttonsContainer.setVisible(false);
+    this.buttonsContainer.setDepth(12);
 
     const buttonStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       font: '16px Courier New',
@@ -147,6 +159,7 @@ export default class CreditsScene extends Phaser.Scene {
       t('skipCredits') || 'Appuyez sur une touche pour passer',
       { font: '12px Courier New', color: '#666666' }
     ).setOrigin(0.5);
+    this.skipHint.setDepth(12);
 
     this.input.keyboard?.once('keydown', (event: KeyboardEvent) => {
       if (event.code === 'Escape') {
