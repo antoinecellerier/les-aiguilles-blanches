@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
-// @ts-ignore - JS file during migration
-import GameScene from './GameScene.js';
+import GameScene from './GameScene';
+import HUDScene from './HUDScene';
+import DialogueScene from './DialogueScene';
 
 /**
  * Les Aiguilles Blanches - Credits Scene
@@ -197,10 +198,20 @@ export default class CreditsScene extends Phaser.Scene {
     this.scene.stop('CreditsScene');
 
     setTimeout(() => {
-      if (game.scene.getScene('GameScene')) {
+      // Remove and re-add all game scenes for clean restart
+      try {
+        game.scene.remove('HUDScene');
+        game.scene.remove('DialogueScene');
         game.scene.remove('GameScene');
+      } catch (e) {
+        // Scenes may not exist
       }
-      game.scene.add('GameScene', GameScene, true, { level: 0 });
+
+      game.scene.add('GameScene', GameScene, false);
+      game.scene.add('HUDScene', HUDScene, false);
+      game.scene.add('DialogueScene', DialogueScene, false);
+
+      game.scene.start('GameScene', { level: 0 });
     }, 100);
   }
 
@@ -209,9 +220,19 @@ export default class CreditsScene extends Phaser.Scene {
     this.scene.stop('CreditsScene');
 
     setTimeout(() => {
-      if (game.scene.getScene('GameScene')) {
+      // Remove game scenes for clean state
+      try {
+        game.scene.remove('HUDScene');
+        game.scene.remove('DialogueScene');
         game.scene.remove('GameScene');
+      } catch (e) {
+        // Scenes may not exist
       }
+
+      game.scene.add('GameScene', GameScene, false);
+      game.scene.add('HUDScene', HUDScene, false);
+      game.scene.add('DialogueScene', DialogueScene, false);
+
       game.scene.start('MenuScene');
     }, 100);
   }

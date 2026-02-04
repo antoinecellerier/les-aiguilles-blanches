@@ -32,15 +32,18 @@ export default class DialogueScene extends Phaser.Scene {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
-    // Fullscreen hit zone for clicking anywhere to dismiss
+    // Fullscreen hit zone for clicking anywhere to dismiss (initially disabled)
     this.hitZone = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0);
-    this.hitZone.setDepth(-1);
+    this.hitZone.setDepth(50); // Above game, below dialogue box
+    this.hitZone.setInteractive();
+    this.hitZone.disableInteractive(); // Start disabled
     this.hitZone.on('pointerdown', () => {
       if (this.isShowing) this.advanceDialogue();
     });
 
     this.container = this.add.container(0, height - 150);
     this.container.setVisible(false);
+    this.container.setDepth(100); // Above hit zone
 
     this.bg = this.add.rectangle(width / 2, 0, width - 40, 120, 0x222222, 0.95);
     this.bg.setStrokeStyle(2, 0x87ceeb);

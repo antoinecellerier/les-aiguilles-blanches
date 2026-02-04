@@ -401,9 +401,12 @@ class TestGroomerMovement:
         # Dismiss intro dialogue if any
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
-        for _ in range(3):
+        for _ in range(5):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(300)
+            game_page.wait_for_timeout(350)
+        
+        # Ensure dialogue is dismissed before testing movement
+        game_page.wait_for_timeout(200)
         
         # Get initial groomer position
         initial_pos = game_page.evaluate("""() => {
@@ -442,12 +445,13 @@ class TestGroomerMovement:
         game_page.keyboard.press("n")
         game_page.wait_for_timeout(1500)
         
-        # Dismiss dialogues
+        # Dismiss dialogues - use more clicks and wait longer for Firefox
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
-        for _ in range(3):
+        for _ in range(5):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
+            game_page.wait_for_timeout(300)
+        game_page.wait_for_timeout(200)
         
         initial_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');

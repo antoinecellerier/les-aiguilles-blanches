@@ -1363,7 +1363,20 @@ export default class GameScene extends Phaser.Scene {
     const worldWidth = this.level.width * this.tileSize;
     const worldHeight = this.level.height * this.tileSize;
 
-    const obstacleCount = Math.floor(this.level.width * this.level.height / 100);
+    // Adjust obstacle count based on difficulty
+    // Easier pistes have fewer obstacles on the groomed area
+    const baseCount = Math.floor(this.level.width * this.level.height / 100);
+    let difficultyMultiplier: number;
+    switch (this.level.difficulty) {
+      case 'tutorial': difficultyMultiplier = 0.2; break;
+      case 'green': difficultyMultiplier = 0.4; break;
+      case 'blue': difficultyMultiplier = 0.6; break;
+      case 'red': difficultyMultiplier = 0.8; break;
+      case 'black': difficultyMultiplier = 1.0; break;
+      case 'park': difficultyMultiplier = 0.5; break;
+      default: difficultyMultiplier = 0.6;
+    }
+    const obstacleCount = Math.floor(baseCount * difficultyMultiplier);
 
     for (let i = 0; i < obstacleCount; i++) {
       const type = Phaser.Utils.Array.GetRandom(obstacleTypes);
@@ -1405,6 +1418,110 @@ export default class GameScene extends Phaser.Scene {
     );
     fuelStation.interactionType = 'fuel';
     fuelStation.setScale(this.tileSize / 16);
+
+    // Add resort buildings on easier pistes (near resort)
+    if (['tutorial', 'green', 'blue'].includes(this.level.difficulty)) {
+      this.createResortBuildings(worldWidth, worldHeight);
+    }
+  }
+
+  private createResortBuildings(worldWidth: number, worldHeight: number): void {
+    const tileSize = this.tileSize;
+
+    // Place more chalets on easier pistes (closer to resort)
+    let chaletCount: number;
+    switch (this.level.difficulty) {
+      case 'tutorial': chaletCount = 3; break;
+      case 'green': chaletCount = 4; break;
+      case 'blue': chaletCount = 2; break;
+      default: chaletCount = 1;
+    }
+
+    // Tutorial is inside the resort village - chalets throughout
+    // Other pistes - chalets near bottom where skiers arrive
+    const isTutorial = this.level.difficulty === 'tutorial';
+
+    for (let i = 0; i < chaletCount; i++) {
+      const side = i % 2 === 0 ? 'left' : 'right';
+
+      let yPos: number;
+      if (isTutorial) {
+        // Spread chalets throughout the village area
+        yPos = tileSize * (4 + i * 2.5);
+      } else {
+        // Position chalets near bottom of piste (arrival area)
+        const bottomY = this.level.height * tileSize;
+        yPos = bottomY - tileSize * (8 + i * 3);
+      }
+
+      const pathIndex = Math.floor(yPos / tileSize);
+      const path = this.pistePath[pathIndex] ||
+        { centerX: this.level.width / 2, width: this.level.width * 0.5 };
+
+      const pisteEdge = side === 'left' ?
+        (path.centerX - path.width / 2) * tileSize :
+        (path.centerX + path.width / 2) * tileSize;
+
+      const x = side === 'left' ?
+        Math.max(tileSize * 3, pisteEdge - tileSize * 4) :
+        Math.min(worldWidth - tileSize * 3, pisteEdge + tileSize * 4);
+
+      this.createChalet(x, yPos);
+    }
+  }
+
+  private createChalet(x: number, y: number): void {
+    const g = this.add.graphics();
+    const size = this.tileSize * 2;
+
+    // Chalet body (wooden)
+    g.fillStyle(0x8B4513, 1);
+    g.fillRect(x - size / 2, y - size * 0.4, size, size * 0.6);
+
+    // Stone foundation
+    g.fillStyle(0x666666, 1);
+    g.fillRect(x - size / 2 - 2, y + size * 0.15, size + 4, size * 0.1);
+
+    // Roof (dark wood with snow)
+    g.fillStyle(0x4a3728, 1);
+    g.beginPath();
+    g.moveTo(x - size * 0.7, y - size * 0.35);
+    g.lineTo(x, y - size * 0.8);
+    g.lineTo(x + size * 0.7, y - size * 0.35);
+    g.closePath();
+    g.fillPath();
+
+    // Snow on roof
+    g.fillStyle(0xFFFFFF, 0.9);
+    g.beginPath();
+    g.moveTo(x - size * 0.65, y - size * 0.4);
+    g.lineTo(x, y - size * 0.75);
+    g.lineTo(x + size * 0.65, y - size * 0.4);
+    g.lineTo(x + size * 0.5, y - size * 0.35);
+    g.lineTo(x, y - size * 0.6);
+    g.lineTo(x - size * 0.5, y - size * 0.35);
+    g.closePath();
+    g.fillPath();
+
+    // Windows
+    g.fillStyle(0x87CEEB, 1);
+    g.fillRect(x - size * 0.3, y - size * 0.25, size * 0.2, size * 0.2);
+    g.fillRect(x + size * 0.1, y - size * 0.25, size * 0.2, size * 0.2);
+
+    // Door
+    g.fillStyle(0x4a3728, 1);
+    g.fillRect(x - size * 0.1, y - size * 0.05, size * 0.2, size * 0.25);
+
+    // Chimney with smoke
+    g.fillStyle(0x555555, 1);
+    g.fillRect(x + size * 0.25, y - size * 0.7, size * 0.12, size * 0.2);
+
+    // Smoke puffs (if not reduced motion)
+    if (!Accessibility.settings.reducedMotion) {
+      g.fillStyle(0xCCCCCC, 0.6);
+      g.fillCircle(x + size * 0.31, y - size * 0.8, 3);
+      g.fillCircle(x + size * 0.28, y - size * 0.9, 2);
+    }
   }
 
   private createGroomer(): void {
@@ -1847,8 +1964,53 @@ export default class GameScene extends Phaser.Scene {
 
   private checkWinCondition(): void {
     if (this.getCoverage() >= this.level.targetCoverage) {
-      this.gameOver(true);
+      this.triggerVictory();
     }
+  }
+
+  private triggerVictory(): void {
+    if (this.isGameOver || this.isTransitioning) return;
+    this.isTransitioning = true; // Prevent further updates, but don't block gameOver
+
+    // Stop groomer movement
+    this.groomer.setVelocity(0, 0);
+
+    // Celebratory camera flash
+    this.cameras.main.flash(300, 255, 255, 255, false);
+
+    // Brief camera zoom on groomer
+    if (!Accessibility.settings.reducedMotion) {
+      this.cameras.main.zoomTo(1.2, 500, 'Power2');
+    }
+
+    // Show victory message
+    const victoryText = this.add.text(
+      this.cameras.main.scrollX + this.cameras.main.width / 2,
+      this.cameras.main.scrollY + this.cameras.main.height / 2 - 50,
+      '✅ ' + (t('levelComplete') || 'Level Complete!'),
+      {
+        fontFamily: 'Courier New',
+        fontSize: '28px',
+        fontStyle: 'bold',
+        color: '#00FF00',
+        backgroundColor: '#000000',
+        padding: { x: 20, y: 10 }
+      }
+    ).setOrigin(0.5).setDepth(500);
+
+    // Fade in text
+    victoryText.setAlpha(0);
+    this.tweens.add({
+      targets: victoryText,
+      alpha: 1,
+      duration: 300,
+      ease: 'Power2'
+    });
+
+    // Delay before transitioning to level complete screen
+    this.time.delayedCall(1500, () => {
+      this.gameOver(true);
+    });
   }
 
   private showDialogue(key: string): void {
