@@ -180,12 +180,33 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showHowToPlay(): void {
+    // On devices with both touch and keyboard, show keyboard (primary on desktop)
+    // Only show touch-specific hints on touch-only devices (no physical keyboard)
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const showTouchHints = hasTouch && isMobile;
+    
+    let moveHint: string;
+    let groomHint: string;
+    
+    if (showTouchHints) {
+      moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
+      groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
+    } else if (hasTouch) {
+      // PC with touchscreen - show both
+      moveHint = '🚜 ' + (t('howToPlayMove') || 'WASD/Arrows or touch D-pad');
+      groomHint = '❄️ ' + (t('howToPlayGroom') || 'SPACE or tap ❄️ to groom');
+    } else {
+      moveHint = '🚜 ' + (t('howToPlayMove') || 'WASD or Arrows to move');
+      groomHint = '❄️ ' + (t('howToPlayGroom') || 'SPACE to groom snow');
+    }
+    
     this.showOverlay('howToPlay', [
-      '🚜 ' + (t('tutorialMove') || 'Use WASD or Arrow keys to move'),
+      moveHint,
       '',
-      '❄️ ' + (t('tutorialGroom') || 'Hold SPACE to groom snow'),
+      groomHint,
       '',
-      '⛽ ' + (t('tutorialFuel') || 'Watch your fuel and stamina!'),
+      '⛽ ' + (t('howToPlayFuel') || 'Watch your fuel and stamina!'),
     ]);
   }
 
@@ -194,15 +215,43 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showControls(): void {
-    this.showOverlay('controls', [
-      '⬆️ WASD / Arrows - Move',
-      '⏺️ SPACE - Groom',
-      '🔗 SHIFT - Winch',
-      '⏸️ ESC - Pause',
-      '',
-      '🎮 Gamepad supported',
-      '📱 Touch controls on mobile',
-    ]);
+    // Detect capabilities
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    
+    if (isMobile && hasTouch) {
+      // Mobile-only: show touch controls
+      this.showOverlay('controls', [
+        '🎮 ' + (t('touchSupported') || 'Touch controls'),
+        '',
+        '◀▲▼▶ D-pad - Move',
+        '❄️ Button - Groom',
+        '🔗 Button - Winch',
+        '',
+        '🎮 Gamepad also supported',
+      ]);
+    } else if (hasTouch) {
+      // PC with touchscreen: show both
+      this.showOverlay('controls', [
+        '⬆️ WASD / Arrows - Move',
+        '⏺️ SPACE - Groom',
+        '🔗 SHIFT - Winch',
+        '⏸️ ESC - Pause',
+        '',
+        '🎮 Gamepad supported',
+        '📱 Touch D-pad available',
+      ]);
+    } else {
+      // Keyboard only
+      this.showOverlay('controls', [
+        '⬆️ WASD / Arrows - Move',
+        '⏺️ SPACE - Groom',
+        '🔗 SHIFT - Winch',
+        '⏸️ ESC - Pause',
+        '',
+        '🎮 Gamepad supported',
+      ]);
+    }
   }
 
   private showOverlay(titleKey: string, lines: string[]): void {

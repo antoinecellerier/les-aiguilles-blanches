@@ -1096,7 +1096,11 @@ export default class GameScene extends Phaser.Scene {
   private updateWinch(): void {
     if (!this.level.hasWinch) return;
 
-    const isWinchPressed = this.winchKey.isDown;
+    // Check touch input from HUDScene
+    const hudScene = this.scene.get('HUDScene') as HUDScene;
+    const touchWinch = hudScene?.touchWinch ?? false;
+
+    const isWinchPressed = this.winchKey.isDown || touchWinch;
 
     if (isWinchPressed && !this.winchActive) {
       this.winchAnchor = this.getNearestAnchor();
@@ -1777,10 +1781,20 @@ export default class GameScene extends Phaser.Scene {
     let vx = 0;
     let vy = 0;
 
+    // Keyboard input
     if (this.cursors.left.isDown || this.wasd.left.isDown) vx = -speed;
     if (this.cursors.right.isDown || this.wasd.right.isDown) vx = speed;
     if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -speed;
     if (this.cursors.down.isDown || this.wasd.down.isDown) vy = speed;
+
+    // Touch input from HUDScene
+    const hudScene = this.scene.get('HUDScene') as HUDScene;
+    if (hudScene) {
+      if (hudScene.touchLeft) vx = -speed;
+      if (hudScene.touchRight) vx = speed;
+      if (hudScene.touchUp) vy = -speed;
+      if (hudScene.touchDown) vy = speed;
+    }
 
     if (this.gamepad) {
       const threshold = 0.2;
@@ -1821,7 +1835,11 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.isGrooming = this.groomKey.isDown || (this.gamepad !== null && this.gamepad.A);
+    // Check touch input from HUDScene
+    const hudScene = this.scene.get('HUDScene') as HUDScene;
+    const touchGroom = hudScene?.touchGroom ?? false;
+
+    this.isGrooming = this.groomKey.isDown || (this.gamepad !== null && this.gamepad.A) || touchGroom;
 
     if (this.isGrooming && this.fuel > 0) {
       this.groomAtPosition(this.groomer.x, this.groomer.y);

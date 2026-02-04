@@ -34,6 +34,15 @@ export default class HUDScene extends Phaser.Scene {
   private timerText: Phaser.GameObjects.Text | null = null;
   private targetText: Phaser.GameObjects.Text | null = null;
   private winchHint: Phaser.GameObjects.Text | null = null;
+  private touchControlsContainer: Phaser.GameObjects.Container | null = null;
+
+  // Touch controls state (public for GameScene to read)
+  public touchUp = false;
+  public touchDown = false;
+  public touchLeft = false;
+  public touchRight = false;
+  public touchGroom = false;
+  public touchWinch = false;
 
   constructor() {
     super({ key: 'HUDScene' });
@@ -148,8 +157,20 @@ export default class HUDScene extends Phaser.Scene {
 
     this.input.keyboard?.on('keydown-N', () => this.skipLevel());
 
+    // Detect touch capability
+    const phaserTouch = this.sys.game.device.input.touch;
+    const browserTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouch = phaserTouch || browserTouch;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    
+    // Show keyboard hint on desktop (even with touchscreen), touch hint on mobile
+    const showTouchHint = hasTouch && isMobile;
+
     if (this.level.hasWinch) {
-      this.winchHint = this.add.text(width / 2, Math.round(12 * this.uiScale), '🔗 ' + (t('winchHint') || 'SHIFT = Winch'), {
+      const winchHintText = showTouchHint
+        ? '🔗 ' + (t('winchHintTouch') || 'Hold 🔗 for winch')
+        : '🔗 ' + (t('winchHint') || 'SHIFT = Winch');
+      this.winchHint = this.add.text(width / 2, Math.round(12 * this.uiScale), winchHintText, {
         fontFamily: 'Courier New',
         fontSize: fontSmall,
         color: '#FFD700',
@@ -160,6 +181,105 @@ export default class HUDScene extends Phaser.Scene {
 
     this.barWidth = barWidth;
     this.gameScene?.events.on('timerUpdate', this.updateTimer, this);
+
+    // Create touch controls - show on mobile, or on first touch for PC with touchscreen
+    if (isMobile && hasTouch) {
+      this.createTouchControls();
+    } else if (hasTouch) {
+      // PC with touchscreen: create controls but hidden, show on first touch
+      this.createTouchControls(true);
+    }
+  }
+
+  private createTouchControls(startHidden = false): void {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const btnSize = Math.round(50 * this.uiScale);
+    const padding = Math.round(20 * this.uiScale);
+    const alpha = 0.6;
+
+    // Create container for all touch controls
+    this.touchControlsContainer = this.add.container(0, 0);
+    this.touchControlsContainer.setScrollFactor(0);
+    
+    if (startHidden) {
+      this.touchControlsContainer.setVisible(false);
+      // Show on first touch anywhere
+      this.input.once('pointerdown', () => {
+        if (this.touchControlsContainer) {
+          this.touchControlsContainer.setVisible(true);
+        }
+      });
+    }
+
+    // D-pad (bottom-left)
+    const dpadX = padding + btnSize * 1.5;
+    const dpadY = height - padding - btnSize * 1.5;
+
+    // Up button
+    this.createTouchButton(dpadX, dpadY - btnSize, btnSize, '▲', alpha,
+      () => { this.touchUp = true; },
+      () => { this.touchUp = false; }
+    );
+
+    // Down button
+    this.createTouchButton(dpadX, dpadY + btnSize, btnSize, '▼', alpha,
+      () => { this.touchDown = true; },
+      () => { this.touchDown = false; }
+    );
+
+    // Left button
+    this.createTouchButton(dpadX - btnSize, dpadY, btnSize, '◀', alpha,
+      () => { this.touchLeft = true; },
+      () => { this.touchLeft = false; }
+    );
+
+    // Right button
+    this.createTouchButton(dpadX + btnSize, dpadY, btnSize, '▶', alpha,
+      () => { this.touchRight = true; },
+      () => { this.touchRight = false; }
+    );
+
+    // Action buttons (bottom-right)
+    const actionX = width - padding - btnSize;
+    const actionY = height - padding - btnSize;
+
+    // Groom button (SPACE equivalent)
+    this.createTouchButton(actionX - btnSize - padding / 2, actionY, btnSize * 1.2, '❄️', alpha,
+      () => { this.touchGroom = true; },
+      () => { this.touchGroom = false; },
+      0x2266aa
+    );
+
+    // Winch button (SHIFT equivalent) - only if level has winch
+    if (this.level.hasWinch) {
+      this.createTouchButton(actionX, actionY - btnSize - padding / 2, btnSize * 1.2, '🔗', alpha,
+        () => { this.touchWinch = true; },
+        () => { this.touchWinch = false; },
+        0xaa6622
+      );
+    }
+  }
+
+  private createTouchButton(
+    x: number, y: number, size: number, label: string, alpha: number,
+    onDown: () => void, onUp: () => void, color = 0x333333
+  ): void {
+    const bg = this.add.circle(x, y, size / 2, color, alpha)
+      .setScrollFactor(0)
+      .setInteractive()
+      .on('pointerdown', onDown)
+      .on('pointerup', onUp)
+      .on('pointerout', onUp);
+
+    const text = this.add.text(x, y, label, {
+      fontSize: Math.round(size * 0.5) + 'px',
+    }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.9);
+
+    // Add to container if it exists
+    if (this.touchControlsContainer) {
+      this.touchControlsContainer.add([bg, text]);
+    }
   }
 
   private skipLevel(): void {

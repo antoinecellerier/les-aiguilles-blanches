@@ -146,7 +146,8 @@ Layer 3: Visual Accessibility
 Layer 4: Motor Accessibility
 ├── No simultaneous key requirements
 ├── Rebindable controls with localStorage persistence
-├── Touch controls with large hit targets
+├── Touch controls: Virtual D-pad + action buttons (mobile-first, show on first touch for desktop)
+├── Multitouch: 3 active pointers for simultaneous D-pad + action
 └── Gamepad support via standard Gamepad API
 ```
 

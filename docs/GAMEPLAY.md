@@ -59,11 +59,13 @@ All controls can be rebound in the Controls menu.
 | Winch | B / Circle |
 | Pause | Start |
 
-### Touch (Mobile)
+### Touch (Mobile/Tablet)
 
-- **Left side**: Virtual joystick for movement
-- **Right side**: GROOM and WINCH action buttons
-- **Menu button**: Access pause menu
+Touch controls appear automatically on mobile devices. On desktop with touchscreen, they appear after first touch.
+
+- **Left side**: Virtual D-pad (◀▲▼▶) for movement
+- **Right side**: ❄️ (Groom) and 🔗 (Winch) action buttons
+- **Multitouch**: Move and groom simultaneously
 
 ## 🎯 Level Progression
 

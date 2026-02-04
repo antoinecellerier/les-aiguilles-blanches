@@ -42,12 +42,14 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 
 ### Controls
 
-| Action | Keyboard | Gamepad | Touch |
-|--------|----------|---------|-------|
-| Move | WASD / Arrows | D-pad / Left Stick | Virtual Joystick |
-| Groom | Space | A Button | GROOM Button |
-| Winch | Shift | B Button | WINCH Button |
-| Pause | Escape | Start | Menu Button |
+| Action | Keyboard | Gamepad | Touch (Mobile) |
+|--------|----------|---------|----------------|
+| Move | WASD / Arrows | D-pad / Left Stick | D-pad (◀▲▼▶) |
+| Groom | Space | A Button | ❄️ Button |
+| Winch | Shift | B Button | 🔗 Button |
+| Pause | Escape | Start | - |
+
+Touch controls appear automatically on mobile. Multitouch supported for simultaneous move + groom.
 
 ### Objectives
 

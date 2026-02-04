@@ -47,9 +47,17 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         gamepadSupported: "Manette OK",
         touchSupported: "Tactile OK",
         
+        // How to Play hints
+        howToPlayMove: "WASD ou Flèches pour se déplacer",
+        howToPlayMoveTouch: "Utilisez le D-pad virtuel",
+        howToPlayGroom: "ESPACE pour damer la neige",
+        howToPlayGroomTouch: "Touchez ❄️ pour damer",
+        howToPlayFuel: "Surveillez carburant et endurance !",
+        
         // Winch
         winchAttached: "🔗 Treuil attaché ! Maintenir SHIFT pour assistance.",
         winchHint: "Appuyez sur SHIFT près d'un ancrage ⚓ pour utiliser le treuil",
+        winchHintTouch: "Maintenir 🔗 pour le treuil",
         accessPath: "Route de service",
         toPiste: "Vers la piste",
         
@@ -182,9 +190,17 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
         
+        // How to Play hints
+        howToPlayMove: "WASD or Arrows to move",
+        howToPlayMoveTouch: "Use the virtual D-pad",
+        howToPlayGroom: "SPACE to groom snow",
+        howToPlayGroomTouch: "Tap ❄️ to groom",
+        howToPlayFuel: "Watch your fuel and stamina!",
+        
         // Winch
         winchAttached: "🔗 Winch attached! Hold SHIFT for assistance.",
         winchHint: "Press SHIFT near an anchor ⚓ to use winch",
+        winchHintTouch: "Hold 🔗 for winch",
         accessPath: "Service Road",
         
         // Taunts
