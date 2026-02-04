@@ -33,11 +33,20 @@ export default class DialogueScene extends Phaser.Scene {
     const height = this.cameras.main.height;
 
     // Fullscreen hit zone for clicking anywhere to dismiss (initially disabled)
-    this.hitZone = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0);
+    // Exclude top-right corner (200x200) where HUD buttons are located
+    const excludeSize = 200;
+    
+    // Create hit zone that covers most of screen except top-right button area
+    // Use a larger zone that starts below the button area
+    this.hitZone = this.add.rectangle(width / 2, height / 2 + excludeSize / 4, width, height - excludeSize / 2, 0x000000, 0);
     this.hitZone.setDepth(50); // Above game, below dialogue box
     this.hitZone.setInteractive();
     this.hitZone.disableInteractive(); // Start disabled
-    this.hitZone.on('pointerdown', () => {
+    this.hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Extra check: ignore clicks in top-right corner where buttons are
+      if (pointer.x > width - excludeSize && pointer.y < excludeSize) {
+        return;
+      }
       if (this.isShowing) this.advanceDialogue();
     });
 
@@ -105,6 +114,9 @@ export default class DialogueScene extends Phaser.Scene {
 
     const dialogue = this.dialogueQueue.shift()!;
     this.isShowing = true;
+
+    // Bring dialogue scene to top so it renders above HUD
+    this.scene.bringToTop();
 
     // Enable fullscreen hit zone for click-to-dismiss
     if (this.hitZone) {

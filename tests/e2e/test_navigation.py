@@ -493,6 +493,26 @@ class TestDialogueSystem:
         
         assert_scene_active(game_page, 'DialogueScene', "Tutorial should have dialogue")
 
+    def test_dialogue_is_visible(self, game_page: Page):
+        """Test that dialogue box is actually visible on screen."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        game_page.wait_for_timeout(2000)
+        
+        # Check if dialogue is showing and container is visible
+        dialogue_visible = game_page.evaluate("""() => {
+            const dialogueScene = window.game.scene.getScene('DialogueScene');
+            if (!dialogueScene) return { exists: false };
+            return {
+                exists: true,
+                isShowing: dialogueScene.isDialogueShowing ? dialogueScene.isDialogueShowing() : false,
+                containerVisible: dialogueScene.container ? dialogueScene.container.visible : false
+            };
+        }""")
+        
+        assert dialogue_visible.get("exists"), "DialogueScene should exist"
+        assert dialogue_visible.get("isShowing") or dialogue_visible.get("containerVisible"), \
+            f"Dialogue should be visible: {dialogue_visible}"
+
     def test_dialogue_dismisses_on_click(self, game_page: Page):
         """Test dialogues advance on click."""
         click_button(game_page, BUTTON_START, "Start Game")

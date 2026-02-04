@@ -66,6 +66,13 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
 - **Left side**: Virtual D-pad (◀▲▼▶) for movement
 - **Right side**: ❄️ (Groom) and 🔗 (Winch) action buttons
 - **Multitouch**: Move and groom simultaneously
+- **Top-right buttons** (stacked vertically):
+  - ⏭ **Skip**: Skip to next level (for testing)
+  - ☰ **Menu**: Open pause menu
+  - ⛶ **Fullscreen**: Enter fullscreen mode
+  - ✕ **Exit Fullscreen**: Exit fullscreen mode (shown when in fullscreen)
+
+Buttons are semi-transparent to avoid blocking gameplay view.
 
 ## 🎯 Level Progression
 

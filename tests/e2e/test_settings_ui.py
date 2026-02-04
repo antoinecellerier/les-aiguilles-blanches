@@ -95,6 +95,7 @@ def check_text_overlap(elements: list) -> list:
 def settings_page(page: Page):
     """Navigate to Settings screen."""
     page.goto("http://localhost:3000/")
+    page.wait_for_selector("canvas", timeout=10000)
     page.wait_for_timeout(2000)
     
     # Click Settings button (index 2)

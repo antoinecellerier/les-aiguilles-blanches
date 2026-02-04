@@ -9,6 +9,7 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 - **E2E tests**: `./run-tests.sh` (Playwright, parallel on Chromium + Firefox)
 - **Headed tests**: `./run-tests.sh --headed` (sequential, visible browser)
 - **Single browser**: `./run-tests.sh --browser chromium` (skip Firefox)
+- **Specific test**: Run individual tests when debugging: `python -m pytest tests/e2e/test_file.py::TestClass::test_name -v`
 
 ## Workflow
 1. **Commit early, commit often** - After each validated fix or feature, commit with descriptive message
@@ -27,10 +28,11 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 ## Code Patterns
 
 ### Scene Layering (Critical)
-Overlay scenes must be brought to top to render above GameScene:
+HUDScene must be on top for input priority over DialogueScene:
 ```javascript
+this.scene.launch('DialogueScene');
 this.scene.launch('HUDScene', { ... });
-this.scene.bringToTop('HUDScene');
+this.scene.bringToTop('HUDScene');  // HUD on top for button clicks
 ```
 
 ### Scene Transitions (Critical)
@@ -48,19 +50,34 @@ this.bg.disableInteractive();  // in hideDialogue()
 this.bg.setInteractive();      // in displayNextDialogue()
 ```
 
-### Groomer Spawn
-Use actual piste path center, not world center:
+### Responsive Scaling
+Game uses `Scale.RESIZE` mode for full viewport coverage:
 ```javascript
-const bottomPath = this.pistePath[yIndex];
-const startX = bottomPath.centerX * this.tileSize;
+scale: {
+  mode: Phaser.Scale.RESIZE,
+  autoCenter: Phaser.Scale.CENTER_BOTH,
+}
+// Handle resize in scenes:
+this.scale.on('resize', this.handleResize, this);
+```
+
+### Touch Control Safety
+HUDScene resets touch states when no pointers are active (prevents stuck controls):
+```javascript
+const activePointers = this.input.manager.pointers.filter(p => p.isDown);
+if (activePointers.length === 0) {
+  this.touchUp = false; // etc.
+}
 ```
 
 ## Key Files
-- `src/config/levels.js` - Level definitions, accessPaths, steepZones
-- `src/config/localization.js` - All UI strings (FR primary, EN)
-- `src/scenes/GameScene.js` - Main gameplay, physics, terrain
-- `src/scenes/HUDScene.js` - UI overlay with scaling
-- `src/utils/accessibility.js` - A11y settings storage
+- `src/config/levels.ts` - Level definitions, accessPaths, steepZones
+- `src/config/localization.ts` - All UI strings (FR primary, EN)
+- `src/scenes/GameScene.ts` - Main gameplay, physics, terrain
+- `src/scenes/HUDScene.ts` - UI overlay with scaling, touch controls
+- `src/scenes/MenuScene.ts` - Main menu with responsive layout
+- `src/utils/accessibility.ts` - A11y settings storage
+- `src/main.ts` - Game init, resize/orientation handlers
 - `docs/ARCHITECTURE.md` - Technical decisions, patterns
 - `docs/GAMEPLAY.md` - Game mechanics documentation
 
@@ -76,9 +93,8 @@ const startX = bottomPath.centerX * this.tileSize;
 - **Screen reader**: ARIA live region announcements
 
 ## Queued Items (from plan.md)
-- Responsive game scene (window resize, orientation changes)
-- Touch screen controls verification
-- Piste marker orientation fix (orange on right going downhill)
-- Difficulty-based obstacles (fewer on easy pistes)
-- Resort buildings on easy pistes (chalets near resort)
-- Dialogue improvements (ESC dismiss, freeze groomer)
+- Gamepad support (manual testing needed)
+- Game progression persistence (Resume vs Start)
+- Refueling point at bottom of levels
+- Level differentiation (varied objectives)
+- Winch cliff freeze bug on La Verticale

@@ -3,7 +3,6 @@ import os
 import pytest
 
 # Base URL for the game - can be overridden via environment variable
-# Default: Vite dev server, fallback to legacy PHP server
 GAME_URL = os.environ.get(
     "GAME_URL",
     "http://localhost:3000/index.html"

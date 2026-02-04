@@ -58,11 +58,22 @@ export default class HUDScene extends Phaser.Scene {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
+    // For very tall screens (21:9 phones), scale based on width to ensure UI fits
     const refWidth = 1024;
     const refHeight = 768;
     const scaleX = width / refWidth;
     const scaleY = height / refHeight;
-    this.uiScale = Math.max(1.0, Math.min(2.5, Math.min(scaleX, scaleY)));
+    // Use smaller scale dimension to ensure everything fits
+    let baseScale = Math.max(0.6, Math.min(2.0, Math.min(scaleX, scaleY)));
+    
+    // On high-DPI mobile devices, boost UI scale for better readability
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const dpr = window.devicePixelRatio || 1;
+    if (isMobile && dpr > 1.5) {
+      // Boost scale by ~20% on high-DPI mobile for larger, more readable UI
+      baseScale = Math.min(2.0, baseScale * 1.2);
+    }
+    this.uiScale = baseScale;
 
     const padding = Math.round(12 * this.uiScale);
     const barWidth = Math.round(130 * this.uiScale);
@@ -137,31 +148,42 @@ export default class HUDScene extends Phaser.Scene {
     }).setOrigin(1, 0).setScrollFactor(0);
 
     this.add.text(timerIconX, Math.round(50 * this.uiScale), '🎯', { fontSize: fontIcon }).setOrigin(0, 0).setScrollFactor(0);
-    this.targetText = this.add.text(width - padding, Math.round(53 * this.uiScale), (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
+    this.targetText = this.add.text(timerIconX + Math.round(25 * this.uiScale), Math.round(53 * this.uiScale), (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
       fontFamily: 'Courier New, monospace',
       fontSize: fontMed,
       color: '#FFD700',
-    }).setOrigin(1, 0).setScrollFactor(0);
+    }).setOrigin(0, 0).setScrollFactor(0);
 
-    const skipBtn = this.add.text(width - padding, rightPanelHeight + Math.round(5 * this.uiScale), '⏭ Skip Level [N]', {
+    // Touch detection for button sizing
+    const phaserTouch = this.sys.game.device.input.touch;
+    const browserTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouch = phaserTouch || browserTouch;
+    // isMobile already defined at top of create()
+    
+    // Skip level button - larger and more visible on touch devices
+    const skipFontSize = (hasTouch && isMobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
+    const skipPadX = (hasTouch && isMobile) ? Math.max(10, Math.round(8 * this.uiScale)) : Math.round(6 * this.uiScale);
+    const skipPadY = (hasTouch && isMobile) ? Math.max(6, Math.round(5 * this.uiScale)) : Math.round(3 * this.uiScale);
+    const skipLabel = (hasTouch && isMobile) ? '⏭ Skip' : '⏭ Skip Level [N]';
+    
+    // Track Y position for stacked buttons
+    let nextButtonY = rightPanelHeight + Math.round(5 * this.uiScale);
+    
+    const skipBtn = this.add.text(width - padding, nextButtonY, skipLabel, {
       fontFamily: 'Courier New',
-      fontSize: fontTiny,
+      fontSize: skipFontSize,
       color: '#888888',
       backgroundColor: '#333333',
-      padding: { x: Math.round(6 * this.uiScale), y: Math.round(3 * this.uiScale) },
+      padding: { x: skipPadX, y: skipPadY },
     }).setOrigin(1, 0).setScrollFactor(0)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', () => skipBtn.setStyle({ color: '#ffffff' }))
       .on('pointerout', () => skipBtn.setStyle({ color: '#888888' }))
       .on('pointerdown', () => this.skipLevel());
+    
+    nextButtonY += skipBtn.height + Math.round(5 * this.uiScale);
 
     this.input.keyboard?.on('keydown-N', () => this.skipLevel());
-
-    // Detect touch capability
-    const phaserTouch = this.sys.game.device.input.touch;
-    const browserTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const hasTouch = phaserTouch || browserTouch;
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     
     // Show keyboard hint on desktop (even with touchscreen), touch hint on mobile
     const showTouchHint = hasTouch && isMobile;
@@ -189,14 +211,61 @@ export default class HUDScene extends Phaser.Scene {
       // PC with touchscreen: create controls but hidden, show on first touch
       this.createTouchControls(true);
     }
+
+    // Touch-specific buttons (created AFTER touch controls so they render on top)
+    const isFullscreen = !!document.fullscreenElement;
+    
+    // Larger font for touch buttons on mobile (minimum 24px for easy tapping)
+    const touchBtnSize = isMobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
+    const touchBtnPadX = isMobile ? Math.max(12, Math.round(10 * this.uiScale)) : Math.round(8 * this.uiScale);
+    const touchBtnPadY = isMobile ? Math.max(8, Math.round(6 * this.uiScale)) : Math.round(4 * this.uiScale);
+    const touchBtnAlpha = 0.6;
+    
+    // Pause/Menu button (touch devices)
+    if (hasTouch) {
+      const pauseBtn = this.add.text(width - padding, nextButtonY, '☰', {
+        fontFamily: 'Courier New',
+        fontSize: touchBtnSize,
+        color: '#CCCCCC',
+        backgroundColor: '#333333',
+        padding: { x: touchBtnPadX, y: touchBtnPadY },
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(100).setAlpha(touchBtnAlpha)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.openPauseMenu());
+      nextButtonY += pauseBtn.height + Math.round(5 * this.uiScale);
+    }
+
+    // Fullscreen button (touch devices or when in fullscreen)
+    if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
+      const fsLabel = isFullscreen ? '✕' : '⛶';
+      this.add.text(width - padding, nextButtonY, fsLabel, {
+        fontFamily: 'Courier New',
+        fontSize: touchBtnSize,
+        color: isFullscreen ? '#FF6666' : '#CCCCCC',
+        backgroundColor: '#333333',
+        padding: { x: touchBtnPadX, y: touchBtnPadY },
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(100).setAlpha(touchBtnAlpha)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.toggleFullscreen());
+    }
   }
 
   private createTouchControls(startHidden = false): void {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
-    const btnSize = Math.round(50 * this.uiScale);
-    const padding = Math.round(20 * this.uiScale);
-    const alpha = 0.6;
+    
+    // Scale touch controls for high-DPI screens
+    // On mobile, we want buttons to be at least ~15mm physical size for comfortable touch
+    // devicePixelRatio helps approximate physical size
+    const dpr = window.devicePixelRatio || 1;
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    
+    // Base size: larger on mobile, especially high-DPI screens
+    // Minimum 60px on mobile, scale up with uiScale but cap the reduction from DPI
+    const baseSize = isMobile ? Math.max(60, 50 * Math.max(1, this.uiScale)) : 50 * this.uiScale;
+    const btnSize = Math.round(baseSize);
+    const padding = Math.round(25 * this.uiScale);
+    const alpha = 0.7;
 
     // Create container for all touch controls
     this.touchControlsContainer = this.add.container(0, 0);
@@ -270,7 +339,8 @@ export default class HUDScene extends Phaser.Scene {
       .setInteractive()
       .on('pointerdown', onDown)
       .on('pointerup', onUp)
-      .on('pointerout', onUp);
+      .on('pointerout', onUp)
+      .on('pointercancel', onUp);  // Handle touch cancel events
 
     const text = this.add.text(x, y, label, {
       fontSize: Math.round(size * 0.5) + 'px',
@@ -280,6 +350,33 @@ export default class HUDScene extends Phaser.Scene {
     if (this.touchControlsContainer) {
       this.touchControlsContainer.add([bg, text]);
     }
+  }
+
+  private openPauseMenu(): void {
+    // Launch pause scene (same as pressing ESC in GameScene)
+    if (this.gameScene && !this.scene.isActive('PauseScene')) {
+      this.scene.launch('PauseScene', { 
+        returnScene: 'GameScene',
+        levelIndex: this.level.id 
+      });
+      this.scene.bringToTop('PauseScene');
+    }
+  }
+
+  private toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {
+        // Fullscreen not supported or denied
+      });
+    }
+    // Restart HUD to update button appearance after fullscreen change
+    this.time.delayedCall(200, () => {
+      if (this.scene.isActive()) {
+        this.scene.restart({ level: this.level, gameScene: this.gameScene });
+      }
+    });
   }
 
   private skipLevel(): void {
@@ -335,6 +432,17 @@ export default class HUDScene extends Phaser.Scene {
     } else if (this.winchHint) {
       this.winchHint.setText('🔗 ' + (t('winchHint') || 'SHIFT = Winch'));
       this.winchHint.setStyle({ color: '#FFD700' });
+    }
+
+    // Safety: reset touch states if no active pointers (prevents stuck controls)
+    const activePointers = this.input.manager.pointers.filter(p => p.isDown);
+    if (activePointers.length === 0) {
+      this.touchUp = false;
+      this.touchDown = false;
+      this.touchLeft = false;
+      this.touchRight = false;
+      this.touchGroom = false;
+      this.touchWinch = false;
     }
   }
 

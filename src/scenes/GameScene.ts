@@ -285,18 +285,17 @@ export default class GameScene extends Phaser.Scene {
 
     // Delay overlay scene launches to next frame to avoid render queue conflicts
     this.time.delayedCall(1, () => {
-      // Start HUD scene
+      // Start dialogue scene first (for rendering below HUD)
+      this.scene.launch('DialogueScene');
+      console.log('Dialogue launched');
+
+      // Start HUD scene - bring to top LAST so its input is processed first
       this.scene.launch('HUDScene', {
         level: this.level,
         gameScene: this
       });
       this.scene.bringToTop('HUDScene');
-      console.log('HUD launched, launching Dialogue scene...');
-
-      // Start dialogue scene
-      this.scene.launch('DialogueScene');
-      this.scene.bringToTop('DialogueScene');
-      console.log('Dialogue launched');
+      console.log('HUD launched on top');
 
       // Show intro dialogue
       if (this.level.introDialogue) {
@@ -326,6 +325,9 @@ export default class GameScene extends Phaser.Scene {
 
     // Apply accessibility settings
     this.applyAccessibilitySettings();
+
+    // Handle window resize - keep camera bounds updated and groomer visible
+    this.scale.on('resize', this.handleResize, this);
 
     console.log('GameScene._createLevel complete!');
     // Pause on ESC
@@ -2088,6 +2090,57 @@ export default class GameScene extends Phaser.Scene {
 
   resumeGame(): void {
     this.scene.resume();
+  }
+
+  private handleResize(gameSize: Phaser.Structs.Size): void {
+    const width = gameSize.width;
+    const height = gameSize.height;
+    
+    // Calculate the world size based on original tile size
+    const worldWidth = this.level.width * this.tileSize;
+    const worldHeight = this.level.height * this.tileSize;
+    
+    // Calculate zoom to fit world in new viewport
+    // Use margins similar to original calculation
+    const marginX = 50;
+    const marginY = 100;
+    const availableWidth = width - marginX * 2;
+    const availableHeight = height - marginY;
+    
+    const zoomX = availableWidth / worldWidth;
+    const zoomY = availableHeight / worldHeight;
+    const zoom = Math.min(zoomX, zoomY, 1.5); // Cap zoom at 1.5x
+    
+    // Apply zoom
+    this.cameras.main.setZoom(zoom);
+    
+    // Recalculate world offset for centering
+    const scaledWorldWidth = worldWidth * zoom;
+    const scaledWorldHeight = worldHeight * zoom;
+    const newOffsetX = Math.max(0, (width - scaledWorldWidth) / 2);
+    const newOffsetY = Math.max(marginY / 2, (height - scaledWorldHeight) / 2);
+    
+    // Update camera bounds
+    this.cameras.main.setBounds(
+      -newOffsetX / zoom,
+      -newOffsetY / zoom,
+      worldWidth + (newOffsetX * 2) / zoom,
+      worldHeight + (newOffsetY * 2) / zoom
+    );
+    
+    // Ensure camera follows groomer
+    if (this.groomer) {
+      this.cameras.main.startFollow(this.groomer, true, 0.1, 0.1);
+      this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
+    }
+    
+    // Restart HUD to recalculate layout
+    if (this.scene.isActive('HUDScene')) {
+      this.scene.stop('HUDScene');
+      this.scene.launch('HUDScene', { level: this.level, gameScene: this });
+      // HUD must be on top for input priority over DialogueScene
+      this.scene.bringToTop('HUDScene');
+    }
   }
 
   gameOver(won: boolean, failReason: string | null = null): void {

@@ -125,10 +125,46 @@ export default class MenuScene extends Phaser.Scene {
       color: '#4a6a7b',
     }).setOrigin(1, 0);
 
+    // Fullscreen button (show on touch devices, or always show exit button when in fullscreen)
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isFullscreen = !!document.fullscreenElement;
+    if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
+      const fsIcon = isFullscreen ? '⛶' : '⛶';  // Same icon, toggles action
+      const fsLabel = isFullscreen ? '✕' : '⛶';
+      const fsBtn = this.add.text(width - 15, 15, fsLabel, {
+        fontSize: Math.round(28 * scaleFactor) + 'px',
+        color: isFullscreen ? '#FF6666' : '#87CEEB',
+        backgroundColor: '#1a2a3e',
+        padding: { x: 8, y: 4 },
+      }).setOrigin(1, 0)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.toggleFullscreen());
+    }
+
     this.input.keyboard?.on('keydown-ENTER', () => this.startGame());
     this.input.keyboard?.on('keydown-SPACE', () => this.startGame());
 
+    // Handle resize - restart scene to reflow layout
+    this.scale.on('resize', this.handleResize, this);
+
     Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
+  }
+
+  private handleResize(): void {
+    // Restart scene to recalculate all positions
+    this.scene.restart();
+  }
+
+  private toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {
+        // Fullscreen not supported or denied
+      });
+    }
+    // Restart scene to update button appearance
+    this.time.delayedCall(200, () => this.scene.restart());
   }
 
   private createMountains(width: number, height: number): void {
