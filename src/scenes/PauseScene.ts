@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
+import { THEME, buttonStyle, titleStyle } from '../config/theme';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -25,24 +26,17 @@ export default class PauseScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Dim overlay
-    this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7);
+    this.add.rectangle(width / 2, height / 2, width, height, THEME.colors.overlayDim, THEME.opacity.overlay);
 
     // Panel
-    this.add.rectangle(width / 2, height / 2, 300, 350, 0x222222, 0.95);
+    this.add.rectangle(width / 2, height / 2, 300, 350, THEME.colors.panelBg, THEME.opacity.panelBg);
 
     // Title
-    this.add.text(width / 2, height / 2 - 130, t('pauseTitle') || 'Paused', {
-      font: 'bold 28px Courier New',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    this.add.text(width / 2, height / 2 - 130, t('pauseTitle') || 'Paused', titleStyle())
+      .setOrigin(0.5);
 
     // Buttons
-    const buttonStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      font: '18px Courier New',
-      color: '#ffffff',
-      backgroundColor: '#2d5a7b',
-      padding: { x: 30, y: 12 },
-    };
+    const btnStyle = buttonStyle();
 
     const buttons = [
       { text: 'resume', callback: () => this.resumeGame() },
@@ -52,11 +46,11 @@ export default class PauseScene extends Phaser.Scene {
     ];
 
     buttons.forEach((btn, i) => {
-      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, buttonStyle)
+      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, btnStyle)
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
-        .on('pointerover', () => button.setStyle({ backgroundColor: '#3d7a9b' }))
-        .on('pointerout', () => button.setStyle({ backgroundColor: '#2d5a7b' }))
+        .on('pointerover', () => button.setStyle({ backgroundColor: THEME.colors.buttonHoverHex }))
+        .on('pointerout', () => button.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex }))
         .on('pointerdown', btn.callback);
     });
 

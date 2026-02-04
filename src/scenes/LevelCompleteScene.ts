@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level } from '../setup';
+import { THEME } from '../config/theme';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -166,13 +167,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
     callback: () => void
   ): Phaser.GameObjects.Text {
     const btn = this.add.text(0, 0, text, {
-      font: `${fontSize}px Courier New`,
-      color: '#ffffff',
-      backgroundColor: '#2d5a7b',
+      fontFamily: THEME.fonts.family,
+      fontSize: `${fontSize}px`,
+      color: THEME.colors.textPrimary,
+      backgroundColor: THEME.colors.buttonPrimaryHex,
       padding,
     }).setInteractive({ useHandCursor: true })
-      .on('pointerover', () => btn.setStyle({ backgroundColor: '#3d7a9b' }))
-      .on('pointerout', () => btn.setStyle({ backgroundColor: '#2d5a7b' }))
+      .on('pointerover', () => btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex }))
+      .on('pointerout', () => btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex }))
       .on('pointerdown', callback);
     return btn;
   }

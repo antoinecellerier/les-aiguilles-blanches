@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
+import { THEME, buttonStyle } from '../config/theme';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
@@ -22,30 +23,33 @@ export default class CreditsScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.cameras.main;
 
-    this.cameras.main.setBackgroundColor(0x0a1628);
+    this.cameras.main.setBackgroundColor(THEME.colors.darkBg);
     this.createStars();
 
     // Header zone background (covers scrolling credits)
-    const headerBg = this.add.rectangle(width / 2, 100, width, 200, 0x0a1628);
+    const headerBg = this.add.rectangle(width / 2, 100, width, 200, THEME.colors.darkBg);
     headerBg.setDepth(10);
 
-    const trophy = this.add.text(width / 2, 60, '🏆', { font: '60px Arial' }).setOrigin(0.5);
+    const trophy = this.add.text(width / 2, 60, '🏆', { font: `60px ${THEME.fonts.familyEmoji}` }).setOrigin(0.5);
     trophy.setDepth(11);
 
     const title = this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
-      font: 'bold 32px Courier New',
-      color: '#FFD700',
+      fontFamily: THEME.fonts.family,
+      fontSize: `${THEME.fonts.sizes.hero}px`,
+      fontStyle: 'bold',
+      color: THEME.colors.accent,
     }).setOrigin(0.5);
     title.setDepth(11);
 
     const subtitle = this.add.text(width / 2, 160, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
-      font: '16px Courier New',
-      color: '#87CEEB',
+      fontFamily: THEME.fonts.family,
+      fontSize: `${THEME.fonts.sizes.medium}px`,
+      color: THEME.colors.info,
     }).setOrigin(0.5);
     subtitle.setDepth(11);
 
     // Footer zone background (covers scrolling credits at bottom)
-    const footerBg = this.add.rectangle(width / 2, height - 50, width, 100, 0x0a1628);
+    const footerBg = this.add.rectangle(width / 2, height - 50, width, 100, THEME.colors.darkBg);
     footerBg.setDepth(10);
 
     const credits = [
@@ -88,8 +92,10 @@ export default class CreditsScene extends Phaser.Scene {
     credits.forEach((line) => {
       const isTitle = line.includes('━') || line.includes('🎿') || line.includes('🏔️');
       const style: Phaser.Types.GameObjects.Text.TextStyle = {
-        font: isTitle ? 'bold 14px Courier New' : '14px Courier New',
-        color: isTitle ? '#FFD700' : '#ffffff',
+        fontFamily: THEME.fonts.family,
+        fontSize: `${THEME.fonts.sizes.small}px`,
+        fontStyle: isTitle ? 'bold' : 'normal',
+        color: isTitle ? THEME.colors.accent : THEME.colors.textPrimary,
         align: 'center',
       };
 
@@ -112,26 +118,21 @@ export default class CreditsScene extends Phaser.Scene {
     this.buttonsContainer.setVisible(false);
     this.buttonsContainer.setDepth(12);
 
-    const buttonStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      font: '16px Courier New',
-      color: '#ffffff',
-      backgroundColor: '#2d5a7b',
-      padding: { x: 20, y: 10 },
-    };
+    const btnStyle = buttonStyle(THEME.fonts.sizes.medium, 20, 10);
 
     const playAgainBtn = this.add.text(
       width / 2 - 100,
       height - 60,
       (t('playAgain') || 'Rejouer') + ' [ENTER]',
-      buttonStyle
+      btnStyle
     )
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: '#3d7a9b' });
+        this.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
       })
       .on('pointerout', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: '#2d5a7b' });
+        this.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
       })
       .on('pointerdown', () => this.restartGame());
 
@@ -139,15 +140,15 @@ export default class CreditsScene extends Phaser.Scene {
       width / 2 + 100,
       height - 60,
       (t('menu') || 'Menu') + ' [ESC]',
-      buttonStyle
+      btnStyle
     )
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: '#3d7a9b' });
+        this.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
       })
       .on('pointerout', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: '#2d5a7b' });
+        this.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
       })
       .on('pointerdown', () => this.returnToMenu());
 
@@ -157,7 +158,7 @@ export default class CreditsScene extends Phaser.Scene {
       width / 2,
       height - 20,
       t('skipCredits') || 'Appuyez sur une touche pour passer',
-      { font: '12px Courier New', color: '#666666' }
+      { fontFamily: THEME.fonts.family, fontSize: `${THEME.fonts.sizes.tiny}px`, color: THEME.colors.disabled }
     ).setOrigin(0.5);
     this.skipHint.setDepth(12);
 
