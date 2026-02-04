@@ -2079,7 +2079,21 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private showDialogue(key: string): void {
-    (this.scene.get('DialogueScene') as DialogueScene).showDialogue(key);
+    // On touch-only devices, use touch-specific tutorial messages if available
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isTouchOnly = isMobile && hasTouch;
+    
+    let dialogueKey = key;
+    if (isTouchOnly) {
+      // Check if touch-specific version exists
+      const touchKey = key + 'Touch';
+      if (t(touchKey) !== touchKey) {
+        dialogueKey = touchKey;
+      }
+    }
+    
+    (this.scene.get('DialogueScene') as DialogueScene).showDialogue(dialogueKey);
   }
 
   pauseGame(): void {

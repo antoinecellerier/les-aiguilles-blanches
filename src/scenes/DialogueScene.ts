@@ -54,7 +54,9 @@ export default class DialogueScene extends Phaser.Scene {
     this.container.setVisible(false);
     this.container.setDepth(100); // Above hit zone
 
-    this.bg = this.add.rectangle(width / 2, 0, width - 40, 120, 0x222222, 0.95);
+    const boxWidth = width - 40;
+    const boxHeight = 120;
+    this.bg = this.add.rectangle(width / 2, 0, boxWidth, boxHeight, 0x222222, 0.95);
     this.bg.setStrokeStyle(2, 0x87ceeb);
 
     this.speakerText = this.add.text(40, -40, '', {
@@ -65,13 +67,14 @@ export default class DialogueScene extends Phaser.Scene {
     this.dialogueText = this.add.text(40, -10, '', {
       font: '14px Courier New',
       color: '#ffffff',
-      wordWrap: { width: width - 100 },
+      wordWrap: { width: width - 120 },
     });
 
-    this.continueText = this.add.text(width - 60, 40, '▶', {
-      font: '20px Arial',
+    // Continue indicator - positioned at bottom-right of dialogue box
+    this.continueText = this.add.text(width / 2 + boxWidth / 2 - 35, boxHeight / 2 - 25, '▶ tap', {
+      font: '14px Courier New',
       color: '#87CEEB',
-    });
+    }).setAlpha(0.8);
 
     this.container.add([this.bg, this.speakerText, this.dialogueText, this.continueText]);
 

@@ -119,6 +119,19 @@ export default class MenuScene extends Phaser.Scene {
       color: '#4a6a7b',
     });
 
+    // GitHub link
+    const githubLink = this.add.text(width / 2, height - 25, '📦 GitHub', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '11px',
+      color: '#87CEEB',
+    }).setOrigin(0.5, 0)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', () => githubLink.setColor('#FFD700'))
+      .on('pointerout', () => githubLink.setColor('#87CEEB'))
+      .on('pointerdown', () => {
+        window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank');
+      });
+
     this.add.text(width - 10, height - 25, 'Made with ❄️ in Savoie', {
       fontFamily: 'Courier New, monospace',
       fontSize: '11px',

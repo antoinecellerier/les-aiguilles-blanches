@@ -1,6 +1,10 @@
 # Les Aiguilles Blanches - Snow Groomer Simulation
 
-## Quick Start
+## 🎮 Play Now
+
+**[▶️ Play Online](https://cellerier.net/les-aiguilles-blanches/)** - No installation required!
+
+## Quick Start (Local Development)
 
 ```bash
 npm install
@@ -16,14 +20,6 @@ npm run build  # Build to dist/
 ---
 
 A retro-style (SkiFree aesthetic) snow groomer simulation game set in a fictional Savoie ski resort.
-
-## 🎮 Play the Game
-
-```bash
-npm install
-npm run dev
-# Open http://localhost:3000
-```
 
 ## 🏔️ About
 
