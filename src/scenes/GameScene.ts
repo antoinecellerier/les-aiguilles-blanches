@@ -1882,12 +1882,18 @@ export default class GameScene extends Phaser.Scene {
 
     if (this.gamepad) {
       const threshold = 0.2;
+      // Left stick movement
       if (Math.abs(this.gamepad.leftStick.x) > threshold) {
         vx = this.gamepad.leftStick.x * speed;
       }
       if (Math.abs(this.gamepad.leftStick.y) > threshold) {
         vy = this.gamepad.leftStick.y * speed;
       }
+      // D-pad movement (overrides stick if pressed)
+      if (this.gamepad.left) vx = -speed;
+      if (this.gamepad.right) vx = speed;
+      if (this.gamepad.up) vy = -speed;
+      if (this.gamepad.down) vy = speed;
       // Use controller-aware confirm button for grooming (handles Nintendo swap)
       if (isConfirmPressed(this.gamepad)) this.isGrooming = true;
     }
