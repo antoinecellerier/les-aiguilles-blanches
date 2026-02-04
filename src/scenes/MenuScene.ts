@@ -95,18 +95,23 @@ export default class MenuScene extends Phaser.Scene {
     const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0;
 
     // Build button list based on whether there's saved progress
-    const buttons: Array<{ text: string; callback: () => void; primary: boolean }> = [];
+    const buttonDefs: Array<{ text: string; callback: () => void; primary: boolean }> = [];
     
     if (hasProgress) {
-      buttons.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel), primary: true });
-      buttons.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
+      buttonDefs.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel), primary: true });
+      buttonDefs.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
     } else {
-      buttons.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
+      buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
     }
-    buttons.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
-    buttons.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
+    buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
+    buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
 
-    buttons.forEach((btn, i) => {
+    // Store buttons for gamepad navigation
+    this.menuButtons = [];
+    this.buttonCallbacks = [];
+    this.selectedIndex = 0;
+
+    buttonDefs.forEach((btn, i) => {
       const btnText = t(btn.text) || btn.text;
       const yPos = menuY - buttonSpacing * 0.5 + i * buttonSpacing;
 
@@ -117,15 +122,19 @@ export default class MenuScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => {
-          button.setStyle({ backgroundColor: btn.primary ? '#FF3300' : '#3d7a9b' });
-          button.setScale(1.05);
+          this.selectButton(i);
         })
         .on('pointerout', () => {
-          button.setStyle({ backgroundColor: btn.primary ? '#CC2200' : '#2d5a7b' });
-          button.setScale(1);
+          this.updateButtonStyles();
         })
         .on('pointerdown', btn.callback);
+      
+      this.menuButtons.push(button);
+      this.buttonCallbacks.push(btn.callback);
     });
+
+    // Highlight first button
+    this.updateButtonStyles();
 
     // Decorations - scaled (snow groomer and mountain theme)
     const decoSize = Math.round(48 * scaleFactor);
@@ -170,16 +179,94 @@ export default class MenuScene extends Phaser.Scene {
         .on('pointerdown', () => this.toggleFullscreen());
     }
 
-    // Keyboard shortcuts - resume if there's progress, else start new
-    const progressForKeys = getSavedProgress();
-    const resumeLevel = progressForKeys?.currentLevel ?? 0;
-    this.input.keyboard?.on('keydown-ENTER', () => this.startGame(resumeLevel));
-    this.input.keyboard?.on('keydown-SPACE', () => this.startGame(resumeLevel));
+    // Keyboard navigation
+    this.input.keyboard?.on('keydown-UP', () => this.navigateMenu(-1));
+    this.input.keyboard?.on('keydown-DOWN', () => this.navigateMenu(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
+
+    // Initialize gamepad button state to current state (prevent phantom presses from previous scene)
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
+      }
+    }
 
     // Handle resize - restart scene to reflow layout
     this.scale.on('resize', this.handleResize, this);
 
     Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
+  }
+
+  private menuButtons: Phaser.GameObjects.Text[] = [];
+  private buttonCallbacks: (() => void)[] = [];
+  private selectedIndex = 0;
+  private gamepadAPressed = false;
+  private gamepadStickY = 0;
+  private gamepadNavCooldown = 0;
+
+  private selectButton(index: number): void {
+    this.selectedIndex = Math.max(0, Math.min(index, this.menuButtons.length - 1));
+    this.updateButtonStyles();
+  }
+
+  private navigateMenu(direction: number): void {
+    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
+    this.updateButtonStyles();
+  }
+
+  private activateSelected(): void {
+    if (this.buttonCallbacks[this.selectedIndex]) {
+      this.buttonCallbacks[this.selectedIndex]();
+    }
+  }
+
+  private updateButtonStyles(): void {
+    this.menuButtons.forEach((btn, i) => {
+      if (i === this.selectedIndex) {
+        btn.setStyle({ backgroundColor: '#3d7a9b' });
+        btn.setScale(1.1);
+      } else {
+        btn.setStyle({ backgroundColor: i === 0 ? '#CC2200' : '#2d5a7b' });
+        btn.setScale(1);
+      }
+    });
+  }
+
+  update(_time: number, delta: number): void {
+    // Gamepad support for menu
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        // Navigation cooldown
+        this.gamepadNavCooldown = Math.max(0, this.gamepadNavCooldown - delta);
+        
+        // D-pad or stick navigation
+        const stickY = pad.leftStick.y;
+        const dpadUp = pad.up;
+        const dpadDown = pad.down;
+        
+        if (this.gamepadNavCooldown <= 0) {
+          if (stickY < -0.5 || dpadUp) {
+            this.navigateMenu(-1);
+            this.gamepadNavCooldown = 200;
+          } else if (stickY > 0.5 || dpadDown) {
+            this.navigateMenu(1);
+            this.gamepadNavCooldown = 200;
+          }
+        }
+        
+        // Use button indices for cross-platform compatibility:
+        // Button 0 = South (Xbox A, Nintendo B, PS Cross) = Confirm
+        // Button 1 = East (Xbox B, Nintendo A, PS Circle) = Back
+        const confirmPressed = pad.buttons[0]?.pressed || false;
+        if (confirmPressed && !this.gamepadAPressed) {
+          this.activateSelected();
+        }
+        this.gamepadAPressed = confirmPressed;
+      }
+    }
   }
 
   private handleResize(): void {

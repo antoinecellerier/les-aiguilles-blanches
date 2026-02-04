@@ -124,12 +124,17 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     const buttonPadding = { x: Math.max(15, padding), y: Math.max(8, padding * 0.6) };
 
+    // Check if gamepad is connected for button hints
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+    const confirmHint = hasGamepad ? 'Ⓐ' : 'ENTER';
+    const backHint = hasGamepad ? 'Ⓑ' : 'ESC';
+
     if (this.won && this.levelIndex < LEVELS.length - 1) {
       // Won, more levels: Next Level + Menu
-      buttonSizer.add(this.createButton(t('nextLevel') + ' [ENTER]', buttonFontSize, buttonPadding, () => {
+      buttonSizer.add(this.createButton(t('nextLevel') + ` [${confirmHint}]`, buttonFontSize, buttonPadding, () => {
         this.scene.start('GameScene', { level: this.levelIndex + 1 });
       }));
-      buttonSizer.add(this.createButton(t('menu') + ' [ESC]', buttonFontSize, buttonPadding, () => {
+      buttonSizer.add(this.createButton(t('menu') + ` [${backHint}]`, buttonFontSize, buttonPadding, () => {
         this.scene.start('MenuScene');
       }));
 
@@ -139,7 +144,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       // Won final level: View Credits
-      buttonSizer.add(this.createButton(t('viewCredits') + ' [ENTER]', buttonFontSize, buttonPadding, () => {
+      buttonSizer.add(this.createButton(t('viewCredits') + ` [${confirmHint}]`, buttonFontSize, buttonPadding, () => {
         this.scene.start('CreditsScene');
       }));
 
@@ -149,10 +154,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     } else {
       // Failed: Retry + Menu
-      buttonSizer.add(this.createButton(t('retry') + ' [ENTER]', buttonFontSize, buttonPadding, () => {
+      buttonSizer.add(this.createButton(t('retry') + ` [${confirmHint}]`, buttonFontSize, buttonPadding, () => {
         this.scene.start('GameScene', { level: this.levelIndex });
       }));
-      buttonSizer.add(this.createButton(t('menu') + ' [ESC]', buttonFontSize, buttonPadding, () => {
+      buttonSizer.add(this.createButton(t('menu') + ` [${backHint}]`, buttonFontSize, buttonPadding, () => {
         this.scene.start('MenuScene');
       }));
 
@@ -164,7 +169,52 @@ export default class LevelCompleteScene extends Phaser.Scene {
     mainSizer.add(buttonSizer, { align: 'center', padding: { top: 30 } });
     mainSizer.layout();
 
+    // Setup gamepad tracking
+    this.primaryAction = this.won && this.levelIndex < LEVELS.length - 1 
+      ? () => this.scene.start('GameScene', { level: this.levelIndex + 1 })
+      : this.won && this.levelIndex === LEVELS.length - 1
+        ? () => this.scene.start('CreditsScene')
+        : () => this.scene.start('GameScene', { level: this.levelIndex });
+    
+    // Initialize to current state to prevent phantom presses from previous scene
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
+        this.gamepadBPressed = pad.buttons[1]?.pressed || false;
+      }
+    } else {
+      this.gamepadAPressed = false;
+      this.gamepadBPressed = false;
+    }
+
     Accessibility.announce(t(titleKey) + '. ' + t('coverage') + ' ' + this.coverage + '%');
+  }
+
+  private primaryAction: (() => void) | null = null;
+  private gamepadAPressed = false;
+  private gamepadBPressed = false;
+
+  update(): void {
+    // Gamepad support for level complete
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        // Accept both A (Xbox) and button 1 (Nintendo A) as confirm
+        const confirmPressed = pad.buttons[0]?.pressed;
+        if (confirmPressed && !this.gamepadAPressed && this.primaryAction) {
+          this.primaryAction();
+        }
+        this.gamepadAPressed = confirmPressed;
+
+        // Accept both B (Xbox) and button 0 (Nintendo B) as back
+        const backPressed = pad.buttons[1]?.pressed;
+        if (backPressed && !this.gamepadBPressed) {
+          this.scene.start('MenuScene');
+        }
+        this.gamepadBPressed = backPressed;
+      }
+    }
   }
 
   private createButton(

@@ -1107,7 +1107,10 @@ export default class GameScene extends Phaser.Scene {
     const hudScene = this.scene.get('HUDScene') as HUDScene;
     const touchWinch = hudScene?.touchWinch ?? false;
 
-    const isWinchPressed = this.winchKey.isDown || touchWinch;
+    // Gamepad L1/LB (button 4) for winch
+    const gamepadWinch = this.gamepad?.L1 ?? false;
+
+    const isWinchPressed = this.winchKey.isDown || touchWinch || gamepadWinch;
 
     if (isWinchPressed && !this.winchActive) {
       this.winchAnchor = this.getNearestAnchor();
@@ -1750,7 +1753,18 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
+  private gamepadStartPressed = false;
+  
   update(_time: number, delta: number): void {
+    // Check gamepad Start button for pause (with debounce)
+    if (this.gamepad) {
+      const startPressed = this.gamepad.buttons[9]?.pressed ?? false; // Start button
+      if (startPressed && !this.gamepadStartPressed && !this.isGameOver) {
+        this.pauseGame();
+      }
+      this.gamepadStartPressed = startPressed;
+    }
+    
     if (this.scene.isPaused() || this.isGameOver || this.isTransitioning) return;
 
     this.handleMovement();

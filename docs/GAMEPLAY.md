@@ -62,14 +62,19 @@ Pro tip: Plan your route to pass by Chez Marie before tackling steep sections!
 
 All controls can be rebound in the Settings menu.
 
-### Gamepad
+### Gamepad (Xbox, PlayStation, Nintendo Switch Pro)
 
-| Action | Button |
-|--------|--------|
-| Move | D-pad or Left Stick |
-| Groom | A / Cross |
-| Winch | B / Circle |
-| Pause | Start |
+| Action | Xbox | PlayStation | Nintendo |
+|--------|------|-------------|----------|
+| Move | D-pad / Left Stick | D-pad / Left Stick | D-pad / Left Stick |
+| Groom | A | X | B |
+| Winch | LB | L1 | L |
+| Pause | Start | Options | + |
+| Menu Confirm | A | X | B |
+| Menu Back | B | O | A |
+| Menu Navigate | D-pad / Left Stick | D-pad / Left Stick | D-pad / Left Stick |
+
+Note: Both Xbox-style (A=bottom) and Nintendo-style (A=right) button positions work for confirm/back.
 
 ### Touch (Mobile/Tablet)
 

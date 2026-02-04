@@ -70,8 +70,10 @@ export default class DialogueScene extends Phaser.Scene {
       wordWrap: { width: width - 120 },
     });
 
-    // Continue indicator - positioned at bottom-right of dialogue box
-    this.continueText = this.add.text(width / 2 + boxWidth / 2 - 35, boxHeight / 2 - 25, '▶ tap', {
+    // Continue indicator - show gamepad hint if connected
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+    const continueHint = hasGamepad ? '▶ Ⓐ' : '▶ tap';
+    this.continueText = this.add.text(width / 2 + boxWidth / 2 - 35, boxHeight / 2 - 25, continueHint, {
       font: '14px Courier New',
       color: '#87CEEB',
     }).setAlpha(0.8);
@@ -92,6 +94,32 @@ export default class DialogueScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ESC', () => {
       if (this.isShowing) this.dismissAllDialogue();
     });
+
+    // Initialize gamepad state to current (prevent phantom presses from previous scene)
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
+      }
+    } else {
+      this.gamepadAPressed = false;
+    }
+  }
+
+  private gamepadAPressed = false;
+
+  update(): void {
+    // Gamepad confirm button to advance dialogue (A on Xbox, B on Nintendo = both work)
+    if (this.isShowing && this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        const confirmPressed = pad.buttons[0]?.pressed;
+        if (confirmPressed && !this.gamepadAPressed) {
+          this.advanceDialogue();
+        }
+        this.gamepadAPressed = confirmPressed;
+      }
+    }
   }
 
   showDialogue(key: string): void {

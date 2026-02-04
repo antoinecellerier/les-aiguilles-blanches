@@ -99,9 +99,11 @@ if (activePointers.length === 0) {
 
 ## Queued Items (from plan.md)
 ### Polish
+- Gamepad button rebinding
+- Gamepad automated tests
 - Taunt text size (make bigger on fail screen)
+- Night scene rendering + groomer headlights
 - Keyboard-only menu navigation
-- Gamepad support (manual testing needed)
 - Level differentiation (varied objectives)
 - Winch anchor proximity requirement
 - Character avatars
