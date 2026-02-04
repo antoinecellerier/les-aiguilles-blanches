@@ -91,7 +91,7 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
 
 Buttons are semi-transparent to avoid blocking gameplay view.
 
-**Tutorial**: On touch-only devices, the tutorial shows touch-specific instructions (D-pad and action buttons) instead of keyboard controls.
+**Tutorial**: The tutorial adapts to your input method - showing keyboard, touch, or gamepad controls based on what's detected.
 
 ## 🎯 Level Progression
 

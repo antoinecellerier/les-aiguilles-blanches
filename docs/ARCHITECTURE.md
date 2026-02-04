@@ -40,6 +40,8 @@ snow-groomer/
 │   │   └── localization.ts # i18n translations
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
+│   │   ├── gamepad.ts      # Controller detection, button mapping
+│   │   ├── gameProgress.ts # Save/load game progress
 │   │   └── keyboardLayout.ts # Keyboard layout detection, defaults
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
