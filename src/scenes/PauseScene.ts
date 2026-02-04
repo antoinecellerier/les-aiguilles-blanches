@@ -31,7 +31,7 @@ export default class PauseScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, 300, 350, 0x222222, 0.95);
 
     // Title
-    this.add.text(width / 2, height / 2 - 130, t('pauseTitle'), {
+    this.add.text(width / 2, height / 2 - 130, t('pauseTitle') || 'Paused', {
       font: 'bold 28px Courier New',
       color: '#ffffff',
     }).setOrigin(0.5);
@@ -52,7 +52,7 @@ export default class PauseScene extends Phaser.Scene {
     ];
 
     buttons.forEach((btn, i) => {
-      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text), buttonStyle)
+      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, buttonStyle)
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => button.setStyle({ backgroundColor: '#3d7a9b' }))

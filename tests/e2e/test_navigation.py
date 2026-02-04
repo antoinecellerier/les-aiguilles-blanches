@@ -586,6 +586,42 @@ class TestPauseMenu:
         game_page.wait_for_timeout(500)
         assert_scene_not_active(game_page, 'PauseScene', "Pause should close on second Escape")
 
+    def test_pause_menu_buttons_visible(self, game_page: Page):
+        """Test that pause menu shows all expected buttons."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        game_page.wait_for_timeout(1500)
+        
+        # Dismiss dialogues first
+        canvas = game_page.locator("canvas")
+        box = canvas.bounding_box()
+        for _ in range(8):
+            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+            game_page.wait_for_timeout(200)
+        
+        game_page.keyboard.press("Escape")
+        game_page.wait_for_timeout(500)
+        
+        assert_scene_active(game_page, 'PauseScene', "Pause menu should be open")
+        
+        # Check that interactive buttons exist in the scene
+        button_count = game_page.evaluate("""
+            () => {
+                const pauseScene = window.game?.scene?.getScene('PauseScene');
+                if (!pauseScene) return 0;
+                // Count interactive text objects (buttons)
+                let count = 0;
+                pauseScene.children.list.forEach(child => {
+                    if (child.type === 'Text' && child.input?.enabled) {
+                        count++;
+                    }
+                });
+                return count;
+            }
+        """)
+        
+        assert button_count >= 4, f"Pause menu should have at least 4 buttons, found {button_count}"
+        game_page.screenshot(path="tests/screenshots/pause_menu_buttons.png")
+
 
 class TestLevelComplete:
     """Test level completion flow."""

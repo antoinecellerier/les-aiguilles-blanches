@@ -3,7 +3,7 @@ import { t, Accessibility, LEVELS, type Level } from '../setup';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
- * Shows level results and next level option
+ * Shows level results and next level option using rexUI Sizer
  */
 
 interface LevelCompleteData {
@@ -36,136 +36,145 @@ export default class LevelCompleteScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.cameras.main;
     const level = LEVELS[this.levelIndex] as Level;
+    const padding = Math.min(20, width * 0.03, height * 0.03);
 
     this.cameras.main.setBackgroundColor(this.won ? 0x1a3a2e : 0x3a1a1a);
+
+    // Calculate responsive font sizes
+    const baseFontSize = Math.min(16, width / 40, height / 35);
+    const titleFontSize = Math.min(36, baseFontSize * 2.2);
+    const iconFontSize = Math.min(80, baseFontSize * 4.5);
+    const buttonFontSize = Math.min(18, baseFontSize * 1.1);
 
     const icon = this.won ? '🏆' : this.getFailIcon();
     const titleKey = this.won ? 'levelComplete' : 'levelFailed';
 
-    this.add.text(width / 2, height / 4 - 20, icon, { font: '80px Arial' }).setOrigin(0.5);
+    // Build main content sizer
+    const mainSizer = this.rexUI.add.sizer({
+      x: width / 2,
+      y: height / 2,
+      width: width - padding * 2,
+      orientation: 'vertical',
+      space: { item: 10 },
+    });
 
-    this.add.text(width / 2, height / 4 + 50, t(titleKey), {
-      font: 'bold 36px Courier New',
+    // Icon
+    mainSizer.add(this.add.text(0, 0, icon, { font: `${iconFontSize}px Arial` }), { align: 'center' });
+
+    // Title
+    mainSizer.add(this.add.text(0, 0, t(titleKey), {
+      font: `bold ${titleFontSize}px Courier New`,
       color: '#ffffff',
-    }).setOrigin(0.5);
+    }), { align: 'center' });
 
+    // Fail taunt if applicable
     if (!this.won && this.failReason) {
       const taunt = this.getFailTaunt();
-      this.add.text(width / 2, height / 4 + 95, taunt, {
-        font: 'italic 14px Courier New',
+      mainSizer.add(this.add.text(0, 0, taunt, {
+        font: `italic ${baseFontSize * 0.9}px Courier New`,
         color: '#ff8888',
         align: 'center',
         wordWrap: { width: width * 0.8 },
-      }).setOrigin(0.5);
+      }), { align: 'center' });
     }
 
-    this.add.text(width / 2, height / 4 + 130, t(level.nameKey), {
-      font: '18px Courier New',
+    // Level name
+    mainSizer.add(this.add.text(0, 0, t(level.nameKey), {
+      font: `${baseFontSize}px Courier New`,
       color: '#aaaaaa',
-    }).setOrigin(0.5);
+    }), { align: 'center', padding: { top: 10 } });
 
-    const statsY = height / 2 + 40;
-    this.add.text(width / 2, statsY, [
+    // Stats
+    const statsText = [
       t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
       '',
       t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
       '',
       this.won ? this.getGrade() : '',
-    ].join('\n'), {
-      font: '16px Courier New',
+    ].join('\n');
+
+    mainSizer.add(this.add.text(0, 0, statsText, {
+      font: `${baseFontSize}px Courier New`,
       color: '#ffffff',
       align: 'center',
       lineSpacing: 8,
-    }).setOrigin(0.5);
+    }), { align: 'center', padding: { top: 20 } });
 
-    const buttonStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      font: '18px Courier New',
-      color: '#ffffff',
-      backgroundColor: '#2d5a7b',
-      padding: { x: 30, y: 12 },
-    };
+    // Game complete message for final level win
+    if (this.won && this.levelIndex === LEVELS.length - 1) {
+      mainSizer.add(this.add.text(0, 0, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
+        font: `bold ${baseFontSize * 1.25}px Courier New`,
+        color: '#FFD700',
+      }), { align: 'center', padding: { top: 20 } });
+    }
 
-    const buttonY = height - 100;
+    // Button row
+    const buttonSizer = this.rexUI.add.sizer({
+      orientation: 'horizontal',
+      space: { item: 20 },
+    });
+
+    const buttonPadding = { x: Math.max(15, padding), y: Math.max(8, padding * 0.6) };
 
     if (this.won && this.levelIndex < LEVELS.length - 1) {
-      this.createButton(width / 2 - 100, buttonY, 'nextLevel', buttonStyle, () => {
+      // Won, more levels: Next Level + Menu
+      buttonSizer.add(this.createButton(t('nextLevel') + ' [ENTER]', buttonFontSize, buttonPadding, () => {
         this.scene.start('GameScene', { level: this.levelIndex + 1 });
-      }, '[ENTER]');
-
-      this.createButton(width / 2 + 100, buttonY, 'menu', buttonStyle, () => {
+      }));
+      buttonSizer.add(this.createButton(t('menu') + ' [ESC]', buttonFontSize, buttonPadding, () => {
         this.scene.start('MenuScene');
-      }, '[ESC]');
+      }));
 
-      this.input.keyboard?.once('keydown-ENTER', () => {
-        this.scene.start('GameScene', { level: this.levelIndex + 1 });
-      });
-      this.input.keyboard?.once('keydown-SPACE', () => {
-        this.scene.start('GameScene', { level: this.levelIndex + 1 });
-      });
-      this.input.keyboard?.once('keydown-ESC', () => {
-        this.scene.start('MenuScene');
-      });
+      this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('GameScene', { level: this.levelIndex + 1 }));
+      this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('GameScene', { level: this.levelIndex + 1 }));
+      this.input.keyboard?.once('keydown-ESC', () => this.scene.start('MenuScene'));
+
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
-      this.add.text(width / 2, height / 2 + 100, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
-        font: 'bold 20px Courier New',
-        color: '#FFD700',
-      }).setOrigin(0.5);
+      // Won final level: View Credits
+      buttonSizer.add(this.createButton(t('viewCredits') + ' [ENTER]', buttonFontSize, buttonPadding, () => {
+        this.scene.start('CreditsScene');
+      }));
 
-      this.createButton(width / 2, buttonY, 'viewCredits', buttonStyle, () => {
-        this.scene.start('CreditsScene');
-      }, '[ENTER]');
+      this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('CreditsScene'));
+      this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('CreditsScene'));
+      this.input.keyboard?.once('keydown-ESC', () => this.scene.start('MenuScene'));
 
-      this.input.keyboard?.once('keydown-ENTER', () => {
-        this.scene.start('CreditsScene');
-      });
-      this.input.keyboard?.once('keydown-SPACE', () => {
-        this.scene.start('CreditsScene');
-      });
-      this.input.keyboard?.once('keydown-ESC', () => {
-        this.scene.start('MenuScene');
-      });
     } else {
-      this.createButton(width / 2 - 80, buttonY, 'retry', buttonStyle, () => {
+      // Failed: Retry + Menu
+      buttonSizer.add(this.createButton(t('retry') + ' [ENTER]', buttonFontSize, buttonPadding, () => {
         this.scene.start('GameScene', { level: this.levelIndex });
-      }, '[ENTER]');
-
-      this.createButton(width / 2 + 80, buttonY, 'menu', buttonStyle, () => {
+      }));
+      buttonSizer.add(this.createButton(t('menu') + ' [ESC]', buttonFontSize, buttonPadding, () => {
         this.scene.start('MenuScene');
-      }, '[ESC]');
+      }));
 
-      this.input.keyboard?.once('keydown-ENTER', () => {
-        this.scene.start('GameScene', { level: this.levelIndex });
-      });
-      this.input.keyboard?.once('keydown-SPACE', () => {
-        this.scene.start('GameScene', { level: this.levelIndex });
-      });
-      this.input.keyboard?.once('keydown-ESC', () => {
-        this.scene.start('MenuScene');
-      });
+      this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('GameScene', { level: this.levelIndex }));
+      this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('GameScene', { level: this.levelIndex }));
+      this.input.keyboard?.once('keydown-ESC', () => this.scene.start('MenuScene'));
     }
+
+    mainSizer.add(buttonSizer, { align: 'center', padding: { top: 30 } });
+    mainSizer.layout();
 
     Accessibility.announce(t(titleKey) + '. ' + t('coverage') + ' ' + this.coverage + '%');
   }
 
   private createButton(
-    x: number,
-    y: number,
-    textKey: string,
-    style: Phaser.Types.GameObjects.Text.TextStyle,
-    callback: () => void,
-    hint = ''
+    text: string,
+    fontSize: number,
+    padding: { x: number; y: number },
+    callback: () => void
   ): Phaser.GameObjects.Text {
-    const label = hint ? t(textKey) + ' ' + hint : t(textKey);
-    return this.add.text(x, y, label, style)
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: '#3d7a9b' });
-      })
-      .on('pointerout', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: '#2d5a7b' });
-      })
+    const btn = this.add.text(0, 0, text, {
+      font: `${fontSize}px Courier New`,
+      color: '#ffffff',
+      backgroundColor: '#2d5a7b',
+      padding,
+    }).setInteractive({ useHandCursor: true })
+      .on('pointerover', () => btn.setStyle({ backgroundColor: '#3d7a9b' }))
+      .on('pointerout', () => btn.setStyle({ backgroundColor: '#2d5a7b' }))
       .on('pointerdown', callback);
+    return btn;
   }
 
   private formatTime(seconds: number): string {

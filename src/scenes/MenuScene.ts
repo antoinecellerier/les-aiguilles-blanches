@@ -330,7 +330,7 @@ export default class MenuScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Scale based on available height for optimal legibility
-    const contentLines = lines.filter(l => l.trim()).length + 3; // +3 for title, spacing, back button
+    const contentLines = lines.filter(l => l.trim()).length + 3;
     const availableHeight = height * 0.7;
     const optimalLineHeight = availableHeight / contentLines;
     const optimalFontSize = optimalLineHeight / 2.2;
@@ -341,52 +341,69 @@ export default class MenuScene extends Phaser.Scene {
     const panelWidth = Math.min(700 * scaleFactor, width - 40);
     const panelHeight = Math.min(500 * scaleFactor, height - 60);
 
+    // Create dialog using rexUI
+    const dialog = this.rexUI.add.dialog({
+      x: width / 2,
+      y: height / 2,
+      width: panelWidth,
+      background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 8, 0x1a2a3e).setStrokeStyle(4, 0x3d7a9b),
+      title: this.add.text(0, 0, t(titleKey) || titleKey, {
+        fontFamily: 'Courier New, monospace',
+        fontSize: titleSize + 'px',
+        fontStyle: 'bold',
+        color: '#87CEEB',
+      }),
+      content: this.add.text(0, 0, lines.join('\n'), {
+        fontFamily: 'Courier New, monospace',
+        fontSize: fontSize + 'px',
+        color: '#cccccc',
+        align: 'center',
+        lineSpacing: Math.round(fontSize * 0.6),
+        wordWrap: { width: panelWidth - 60 },
+      }),
+      actions: [
+        this.createDialogButton('← ' + (t('back') || 'Back'), fontSize, scaleFactor)
+      ],
+      space: {
+        title: Math.round(fontSize * 1.5),
+        content: Math.round(fontSize * 1.5),
+        action: Math.round(fontSize * 0.8),
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: 20,
+      },
+      align: { actions: 'center' },
+      expand: { content: false },
+    }).layout();
+
+    // Dark overlay behind dialog
     const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
-    const panelBorder = this.add.rectangle(width / 2, height / 2, panelWidth + 10, panelHeight + 10, 0x3d7a9b);
-    const panel = this.add.rectangle(width / 2, height / 2, panelWidth, panelHeight, 0x1a2a3e);
+    overlay.setDepth(dialog.depth - 1);
 
-    const title = this.add.text(width / 2, height / 2 - panelHeight / 2 + titleSize * 2, t(titleKey) || titleKey, {
-      fontFamily: 'Courier New, monospace',
-      fontSize: titleSize + 'px',
-      fontStyle: 'bold',
-      color: '#87CEEB',
-    }).setOrigin(0.5);
+    // Handle button click
+    dialog.on('button.click', () => {
+      overlay.destroy();
+      dialog.destroy();
+    });
 
-    const content = this.add.text(width / 2, height / 2, lines.join('\n'), {
-      fontFamily: 'Courier New, monospace',
-      fontSize: fontSize + 'px',
-      color: '#cccccc',
-      align: 'center',
-      lineSpacing: Math.round(fontSize * 0.6),
-      wordWrap: { width: panelWidth - 60 },
-    }).setOrigin(0.5);
+    // ESC to close
+    this.input.keyboard?.once('keydown-ESC', () => {
+      overlay.destroy();
+      dialog.destroy();
+    });
+  }
 
-    const backBtn = this.add.text(width / 2, height / 2 + panelHeight / 2 - fontSize * 3, '← ' + (t('back') || 'Back'), {
+  private createDialogButton(text: string, fontSize: number, scaleFactor: number): Phaser.GameObjects.Text {
+    const btn = this.add.text(0, 0, text, {
       fontFamily: 'Courier New, monospace',
       fontSize: fontSize + 'px',
       color: '#ffffff',
       backgroundColor: '#CC2200',
       padding: { x: Math.round(30 * scaleFactor), y: Math.round(10 * scaleFactor) },
-    }).setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => backBtn.setStyle({ backgroundColor: '#FF3300' }))
-      .on('pointerout', () => backBtn.setStyle({ backgroundColor: '#CC2200' }))
-      .on('pointerdown', () => {
-        overlay.destroy();
-        panelBorder.destroy();
-        panel.destroy();
-        title.destroy();
-        content.destroy();
-        backBtn.destroy();
-      });
-
-    this.input.keyboard?.once('keydown-ESC', () => {
-      overlay.destroy();
-      panelBorder.destroy();
-      panel.destroy();
-      title.destroy();
-      content.destroy();
-      backBtn.destroy();
-    });
+    }).setInteractive({ useHandCursor: true })
+      .on('pointerover', () => btn.setStyle({ backgroundColor: '#FF3300' }))
+      .on('pointerout', () => btn.setStyle({ backgroundColor: '#CC2200' }));
+    return btn;
   }
 }
