@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { getMovementKeysString } from '../utils/keyboardLayout';
+import { getSavedProgress, clearProgress } from '../utils/gameProgress';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
@@ -89,11 +90,21 @@ export default class MenuScene extends Phaser.Scene {
       padding: { x: Math.round(50 * scaleFactor), y: buttonPadding },
     };
 
-    const buttons = [
-      { text: 'startGame', callback: () => this.startGame(), primary: true },
-      { text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false },
-      { text: 'settings', callback: () => this.showSettings(), primary: false },
-    ];
+    // Check for saved progress
+    const savedProgress = getSavedProgress();
+    const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0;
+
+    // Build button list based on whether there's saved progress
+    const buttons: Array<{ text: string; callback: () => void; primary: boolean }> = [];
+    
+    if (hasProgress) {
+      buttons.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel), primary: true });
+      buttons.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
+    } else {
+      buttons.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
+    }
+    buttons.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
+    buttons.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
 
     buttons.forEach((btn, i) => {
       const btnText = t(btn.text) || btn.text;
@@ -159,8 +170,11 @@ export default class MenuScene extends Phaser.Scene {
         .on('pointerdown', () => this.toggleFullscreen());
     }
 
-    this.input.keyboard?.on('keydown-ENTER', () => this.startGame());
-    this.input.keyboard?.on('keydown-SPACE', () => this.startGame());
+    // Keyboard shortcuts - resume if there's progress, else start new
+    const progressForKeys = getSavedProgress();
+    const resumeLevel = progressForKeys?.currentLevel ?? 0;
+    this.input.keyboard?.on('keydown-ENTER', () => this.startGame(resumeLevel));
+    this.input.keyboard?.on('keydown-SPACE', () => this.startGame(resumeLevel));
 
     // Handle resize - restart scene to reflow layout
     this.scale.on('resize', this.handleResize, this);
@@ -231,7 +245,7 @@ export default class MenuScene extends Phaser.Scene {
     });
   }
 
-  private startGame(): void {
+  private startGame(level: number = 0): void {
     const game = this.game;
     this.scene.stop('MenuScene');
 
@@ -245,8 +259,14 @@ export default class MenuScene extends Phaser.Scene {
       game.scene.add('HUDScene', HUDScene, false);
       game.scene.add('DialogueScene', DialogueScene, false);
       game.scene.add('PauseScene', PauseScene, false);
-      game.scene.add('GameScene', GameScene, true, { level: 0 });
+      game.scene.add('GameScene', GameScene, true, { level });
     }, 100);
+  }
+
+  private confirmNewGame(): void {
+    // Clear progress and start fresh
+    clearProgress();
+    this.startGame(0);
   }
 
   private showHowToPlay(): void {

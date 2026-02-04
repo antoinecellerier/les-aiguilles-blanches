@@ -12,6 +12,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         // Menu
         subtitle: "Simulation de Damage",
         startGame: "Commencer",
+        resumeGame: "Reprendre",
+        newGame: "Nouvelle partie",
         continue: "Continuer",
         settings: "Paramètres",
         controls: "Contrôles",
@@ -170,6 +172,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     en: {
         subtitle: "Snow Groomer Simulation",
         startGame: "Start Game",
+        resumeGame: "Resume",
+        newGame: "New Game",
         continue: "Continue",
         settings: "Settings",
         controls: "Controls",
@@ -322,6 +326,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     de: {
         subtitle: "Pistenraupe Simulation",
         startGame: "Spiel starten",
+        resumeGame: "Fortsetzen",
+        newGame: "Neues Spiel",
         continue: "Fortfahren",
         settings: "Einstellungen",
         controls: "Steuerung",
@@ -393,6 +399,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     it: {
         subtitle: "Simulazione Gatto delle Nevi",
         startGame: "Inizia",
+        resumeGame: "Riprendi",
+        newGame: "Nuova Partita",
         continue: "Continua",
         settings: "Impostazioni",
         controls: "Comandi",
@@ -464,6 +472,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     es: {
         subtitle: "Simulación de Pisapistas",
         startGame: "Empezar",
+        resumeGame: "Continuar Partida",
+        newGame: "Nueva Partida",
         continue: "Continuar",
         settings: "Ajustes",
         controls: "Controles",

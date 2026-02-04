@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
+import { saveProgress } from '../utils/gameProgress';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
 
@@ -2187,6 +2188,9 @@ export default class GameScene extends Phaser.Scene {
     if (this.isTransitioning) return;
     this.isTransitioning = true;
     this.isGameOver = true;
+
+    // Save progress when advancing to next level
+    saveProgress(nextLevel);
 
     console.log('GameScene.transitionToLevel:', nextLevel);
 

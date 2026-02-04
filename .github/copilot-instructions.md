@@ -19,11 +19,16 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
    - `docs/ARCHITECTURE.md` - Technical patterns, scene lifecycle, code structure
    - `docs/GAMEPLAY.md` - Game mechanics, controls, level progression
    - `.github/copilot-instructions.md` - Development patterns, key files, queued items
-4. **Add/update tests** - When fixing bugs or adding features:
+4. **Update localizations** - When adding/changing UI text:
+   - Add strings to `src/config/localization.ts` for ALL languages (FR, EN, DE, IT, ES)
+   - Use `t('keyName')` for all user-facing text
+   - FR is primary, others can use similar phrasing if unsure
+5. **Add/update tests** - When fixing bugs or adding features:
    - Add E2E tests in `tests/e2e/test_navigation.py` for UI/gameplay changes
    - Add unit tests in `tests/unit-js/` for config validation
    - Run `./run-tests.sh` to verify all tests pass before committing
-5. **Queue non-urgent items** - Use plan.md for tracking; don't interrupt current work
+6. **Queue non-urgent items** - Use plan.md for tracking; don't interrupt current work
+7. **Keep queued items current** - Remove completed items from the Queued Items section below
 
 ## Code Patterns
 
@@ -93,25 +98,21 @@ if (activePointers.length === 0) {
 - **Screen reader**: ARIA live region announcements
 
 ## Queued Items (from plan.md)
-### Infrastructure
-- [x] Version number on home screen (date + git hash)
-- Code cleanup audit (unused assets, dead code)
-- Scene readability QA (remaining scenes)
-- Consider rexUI library for UI
-- Evaluate other Phaser plugins
-- Changelog / upcoming features view
-- Bundle size optimization (rexUI added ~900KB)
-- Queue audit (review plan.md and history for missed items)
-- Flaky E2E tests (credits, dialogue, movement use timing - need explicit waits)
-
-### Gameplay
-- Game progression persistence (Resume vs Start)
-- Level differentiation (varied objectives)
-- Refueling point bug
-- Stamina mechanics review
-- Winch cliff freeze bug on La Verticale
-- Winch anchor proximity requirement
-- Off-piste appearance (no groomed look)
+### Features  
 - Touch D-pad diagonal movement
+- Off-piste appearance (no groomed look)
+- Stamina mechanics review
+
+### Polish
+- Taunt text size (make bigger on fail screen)
+- Keyboard-only menu navigation
+- Gamepad support (manual testing needed)
+- Level differentiation (varied objectives)
+- Winch anchor proximity requirement
 - Character avatars
+
+### Future
+- Localization audit (verify all scenes use t() except intentional French)
 - Easter eggs (5G towers, slipping cars, wildlife, Candide Thovex)
+- Sound effects and music
+- Leaderboards

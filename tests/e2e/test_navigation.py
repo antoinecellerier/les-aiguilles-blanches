@@ -218,6 +218,83 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene', "Should return to menu")
 
 
+class TestGameProgress:
+    """Test game progress persistence (Resume/New Game)."""
+
+    def test_no_progress_shows_start_game(self, game_page: Page):
+        """With no saved progress, menu shows Start Game button."""
+        # Clear any saved progress
+        game_page.evaluate("localStorage.removeItem('snowGroomer_progress')")
+        game_page.reload()
+        wait_for_scene(game_page, 'MenuScene')
+        
+        # Start Game should work and go to level 0
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        assert get_current_level(game_page) == 0, "Should start on level 0"
+
+    def test_progress_saved_on_level_complete(self, game_page: Page):
+        """Completing a level saves progress to localStorage."""
+        # Clear progress first
+        game_page.evaluate("localStorage.removeItem('snowGroomer_progress')")
+        
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to next level (saves progress)
+        game_page.keyboard.press("n")
+        wait_for_level_or_credits(game_page, 1, timeout=5000)
+        
+        # Check progress was saved
+        progress = game_page.evaluate("JSON.parse(localStorage.getItem('snowGroomer_progress') || 'null')")
+        assert progress is not None, "Progress should be saved"
+        assert progress["currentLevel"] == 1, "Should have saved level 1"
+
+    def test_resume_continues_from_saved_level(self, game_page: Page):
+        """With saved progress, Resume button continues from saved level."""
+        # Set up saved progress at level 2
+        game_page.evaluate("""
+            localStorage.setItem('snowGroomer_progress', JSON.stringify({
+                currentLevel: 2,
+                savedAt: new Date().toISOString()
+            }))
+        """)
+        game_page.reload()
+        wait_for_scene(game_page, 'MenuScene')
+        
+        # First button should now be Resume (index 0)
+        click_button(game_page, BUTTON_START, "Resume")
+        wait_for_scene(game_page, 'GameScene')
+        
+        level = get_current_level(game_page)
+        assert level == 2, f"Should resume at level 2, got {level}"
+
+    def test_new_game_clears_progress(self, game_page: Page):
+        """New Game button clears saved progress and starts from level 0."""
+        # Set up saved progress
+        game_page.evaluate("""
+            localStorage.setItem('snowGroomer_progress', JSON.stringify({
+                currentLevel: 3,
+                savedAt: new Date().toISOString()
+            }))
+        """)
+        game_page.reload()
+        wait_for_scene(game_page, 'MenuScene')
+        
+        # With saved progress, button layout is: Resume(0), New Game(1), How to Play(2), Settings(3)
+        # Click New Game (index 1)
+        click_button(game_page, 1, "New Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Should start from level 0
+        level = get_current_level(game_page)
+        assert level == 0, f"New Game should start at level 0, got {level}"
+        
+        # Progress should be cleared
+        progress = game_page.evaluate("localStorage.getItem('snowGroomer_progress')")
+        assert progress is None, "Progress should be cleared after New Game"
+
+
 class TestLevelNavigation:
     """Test level transitions using keyboard shortcuts."""
 
@@ -691,8 +768,9 @@ class TestCreditsScreen:
         wait_for_scene(game_page, 'MenuScene')
         assert_scene_active(game_page, 'MenuScene')
         
-        # Start new game
-        click_button(game_page, BUTTON_START, "Start Game")
+        # After completing all levels, progress is saved so menu shows Resume/New Game
+        # Click New Game (index 1) to start fresh
+        click_button(game_page, 1, "New Game")
         wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')

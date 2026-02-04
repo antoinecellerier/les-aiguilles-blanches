@@ -78,6 +78,12 @@ Buttons are semi-transparent to avoid blocking gameplay view.
 
 ## 🎯 Level Progression
 
+### Saving Progress
+
+Your progress is automatically saved when you complete a level. When you return to the game:
+- **Resume**: Continue from where you left off
+- **New Game**: Start fresh from the tutorial
+
 ### Difficulty Scaling
 
 The game's difficulty naturally increases as you progress:
