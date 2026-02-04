@@ -68,15 +68,22 @@ export default class LevelCompleteScene extends Phaser.Scene {
       color: '#ffffff',
     }), { align: 'center' });
 
-    // Fail taunt if applicable
+    // Fail taunt if applicable - prominent styling with background
     if (!this.won && this.failReason) {
       const taunt = this.getFailTaunt();
-      mainSizer.add(this.add.text(0, 0, taunt, {
-        font: `italic ${baseFontSize * 0.9}px Courier New`,
-        color: '#ff8888',
+      const tauntBg = this.add.rectangle(0, 0, width * 0.85, baseFontSize * 2.5, 0x442222, 0.9);
+      tauntBg.setStrokeStyle(2, 0xff4444);
+      const tauntText = this.add.text(0, 0, `« ${taunt} »`, {
+        font: `bold ${baseFontSize}px ${THEME.fonts.family}`,
+        color: '#ffcccc',
         align: 'center',
-        wordWrap: { width: width * 0.8 },
-      }), { align: 'center' });
+        wordWrap: { width: width * 0.75 },
+      });
+      tauntText.setOrigin(0.5, 0.5);
+      
+      // Container to hold both bg and text
+      const tauntContainer = this.add.container(0, 0, [tauntBg, tauntText]);
+      mainSizer.add(tauntContainer, { align: 'center', padding: { top: 10, bottom: 5 } });
     }
 
     // Level name
