@@ -1418,9 +1418,10 @@ export default class GameScene extends Phaser.Scene {
     restaurant.interactionType = 'food';
     restaurant.setScale(this.tileSize / 16);
 
+    // Fuel station at bottom of level (maintenance area in resort)
     const fuelStation = this.interactables.create(
       worldWidth / 2 + this.tileSize * 4,
-      this.tileSize * 2,
+      worldHeight - this.tileSize * 3,
       'fuel'
     );
     fuelStation.interactionType = 'fuel';

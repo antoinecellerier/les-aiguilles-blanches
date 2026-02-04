@@ -116,11 +116,11 @@ export default class MenuScene extends Phaser.Scene {
         .on('pointerdown', btn.callback);
     });
 
-    // Decorations - scaled
+    // Decorations - scaled (snow groomer and mountain theme)
     const decoSize = Math.round(48 * scaleFactor);
     const decoOffset = Math.round(180 * scaleFactor);
-    this.add.text(width / 2 - decoOffset, menuY + buttonSpacing, '🚜', { fontSize: decoSize + 'px' }).setOrigin(0.5);
-    this.add.text(width / 2 + decoOffset, menuY + buttonSpacing, '⛷️', { fontSize: decoSize + 'px' }).setOrigin(0.5);
+    this.add.text(width / 2 - decoOffset, menuY + buttonSpacing, '🏔️', { fontSize: decoSize + 'px' }).setOrigin(0.5);
+    this.add.text(width / 2 + decoOffset, menuY + buttonSpacing, '❄️', { fontSize: decoSize + 'px' }).setOrigin(0.5);
 
     // Footer: GitHub link with version on first line
     const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';

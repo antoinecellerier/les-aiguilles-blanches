@@ -119,13 +119,30 @@ export default class BootScene extends Phaser.Scene {
     restGraphics.generateTexture('restaurant', 60, 50);
     restGraphics.destroy();
 
-    // Fuel station sprite
+    // Fuel station sprite - simplified gas pump
     const fuelGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
-    fuelGraphics.fillStyle(0xff4444);
-    fuelGraphics.fillRect(0, 0, 40, 25);
-    fuelGraphics.fillStyle(0xffffff);
-    fuelGraphics.fillRect(15, 5, 10, 15);
-    fuelGraphics.generateTexture('fuel', 40, 30);
+    // Pump body (red)
+    fuelGraphics.fillStyle(0xcc2222);
+    fuelGraphics.fillRect(8, 8, 24, 32);
+    // Pump top (darker red roof)
+    fuelGraphics.fillStyle(0x991111);
+    fuelGraphics.fillRect(6, 4, 28, 6);
+    // Display panel (white/gray)
+    fuelGraphics.fillStyle(0xeeeeee);
+    fuelGraphics.fillRect(12, 12, 16, 10);
+    // Nozzle holder (black)
+    fuelGraphics.fillStyle(0x333333);
+    fuelGraphics.fillRect(30, 18, 8, 4);
+    // Hose (black line to nozzle)
+    fuelGraphics.lineStyle(2, 0x333333);
+    fuelGraphics.lineBetween(34, 22, 38, 28);
+    // Nozzle tip
+    fuelGraphics.fillStyle(0x333333);
+    fuelGraphics.fillRect(36, 26, 4, 8);
+    // Base (gray concrete)
+    fuelGraphics.fillStyle(0x666666);
+    fuelGraphics.fillRect(4, 38, 32, 4);
+    fuelGraphics.generateTexture('fuel', 44, 44);
     fuelGraphics.destroy();
 
     // Ungroomed snow tile
