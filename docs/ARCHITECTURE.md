@@ -262,6 +262,39 @@ groomer.buffs = {
 3. **RequestAnimationFrame**: Synchronized with display refresh
 4. **Reduced motion**: Skip particle effects when enabled
 
+## Responsive UI Design
+
+### DPI-Aware Layout
+
+All UI scenes use DPI-aware calculations to ensure proper sizing on high-density displays:
+
+```typescript
+const dpr = window.devicePixelRatio || 1;
+const logicalWidth = width / dpr;  // CSS pixels
+const logicalHeight = height / dpr;
+```
+
+### SettingsScene Layout
+
+The Settings scene uses adaptive layout based on screen dimensions:
+
+- **Single column mode**: Activated when `logicalWidth < 500` or `aspectRatio > 1.5` (portrait)
+- **Two column mode**: Used on wider landscape displays
+- **Line height**: Calculated as `availableHeight / contentRows` to fill available space
+- **Font sizing**: Scales with `sqrt(dpr)` for readability on high-DPI devices
+- **Touch targets**: Minimum 44 CSS pixels on touch devices (via button padding)
+
+### MenuScene Scaling
+
+Menu uses responsive scaling based on viewport:
+
+```typescript
+const scaleByHeight = Math.max(0.7, Math.min(height / 768, 1.5));
+const scaleByWidth = Math.max(0.5, Math.min(width / 1024, 1.5));
+const dprBoost = Math.sqrt(Math.min(dpr, 2));
+const scaleFactor = Math.min(scaleByHeight, scaleByWidth) * dprBoost;
+```
+
 ## Browser Compatibility Notes
 
 ### Firefox Rendering
