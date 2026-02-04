@@ -547,12 +547,13 @@ export default class GameScene extends Phaser.Scene {
         const tile = this.add.image(
           x * tileSize + tileSize / 2,
           y * tileSize + tileSize / 2,
-          isGroomable ? 'snow_ungroomed' : 'snow_groomed'
+          isGroomable ? 'snow_ungroomed' : 'snow_offpiste'
         );
         tile.setDisplaySize(tileSize, tileSize);
 
+        // Tint off-piste areas slightly green to show forest/nature
         if (!isGroomable) {
-          tile.setTint(0x4a6741);
+          tile.setTint(0x7a9a71);
         }
 
         this.snowGrid[y][x] = {

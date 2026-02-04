@@ -99,7 +99,6 @@ if (activePointers.length === 0) {
 
 ## Queued Items (from plan.md)
 ### Features  
-- Off-piste appearance (no groomed look)
 - Stamina mechanics review
 
 ### Polish

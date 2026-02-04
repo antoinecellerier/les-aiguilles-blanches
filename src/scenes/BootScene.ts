@@ -157,6 +157,26 @@ export default class BootScene extends Phaser.Scene {
     snowGraphics.generateTexture('snow_ungroomed', 16, 16);
     snowGraphics.destroy();
 
+    // Off-piste snow (rough, untouched snow with more texture)
+    const offPisteGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
+    offPisteGraphics.fillStyle(0xb8c8cc);  // Slightly darker base
+    offPisteGraphics.fillRect(0, 0, 16, 16);
+    // Irregular snow mounds
+    offPisteGraphics.fillStyle(0xd0dce0);
+    offPisteGraphics.fillRect(1, 1, 4, 3);
+    offPisteGraphics.fillRect(8, 2, 5, 4);
+    offPisteGraphics.fillRect(3, 7, 6, 4);
+    offPisteGraphics.fillRect(11, 9, 4, 5);
+    offPisteGraphics.fillRect(0, 12, 3, 3);
+    // Shadows/depth
+    offPisteGraphics.fillStyle(0x9ab0b8);
+    offPisteGraphics.fillRect(5, 3, 2, 2);
+    offPisteGraphics.fillRect(13, 5, 2, 3);
+    offPisteGraphics.fillRect(9, 11, 2, 2);
+    offPisteGraphics.fillRect(2, 9, 1, 2);
+    offPisteGraphics.generateTexture('snow_offpiste', 16, 16);
+    offPisteGraphics.destroy();
+
     // Groomed snow tile
     const groomedGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
     groomedGraphics.fillStyle(0xffffff);
