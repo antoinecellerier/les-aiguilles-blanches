@@ -9,7 +9,8 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 - **E2E tests**: `./run-tests.sh` (Playwright, parallel on Chromium + Firefox)
 - **Headed tests**: `./run-tests.sh --headed` (sequential, visible browser)
 - **Single browser**: `./run-tests.sh --browser chromium` (skip Firefox)
-- **Specific test**: Run individual tests when debugging: `python -m pytest tests/e2e/test_file.py::TestClass::test_name -v`
+- **Specific test**: `./run-tests.sh -k "test_name"` (uses pytest -k filter)
+- **Test script auto-starts dev server** if not already running
 
 ## Workflow
 1. **Commit early, commit often** - After each validated fix or feature, commit with descriptive message
@@ -22,6 +23,7 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 4. **Update localizations** - When adding/changing UI text:
    - Add strings to `src/config/localization.ts` for ALL languages (FR, EN, DE, IT, ES)
    - Use `t('keyName')` for all user-facing text
+   - Use placeholders for dynamic keys: `{keys}`, `{groomKey}`, `{winchKey}`
    - FR is primary, others can use similar phrasing if unsure
 5. **Add/update tests** - When fixing bugs or adding features:
    - Add E2E tests in `tests/e2e/test_navigation.py` for UI/gameplay changes
@@ -30,7 +32,31 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 6. **Queue non-urgent items** - Use plan.md for tracking; don't interrupt current work
 7. **Keep queued items current** - Remove completed items from the Queued Items section below
 
-## Code Patterns
+## Critical Patterns
+
+### localStorage Keys (Must Match)
+Settings use specific localStorage keys - tests must use the same:
+```javascript
+// Correct keys (from SettingsScene.ts):
+localStorage.setItem('snowGroomer_bindings', JSON.stringify(bindings));
+localStorage.setItem('snowGroomer_displayNames', JSON.stringify(displayNames));
+localStorage.setItem('snowgroomer-keyboard-layout', 'azerty');
+```
+
+### Dynamic Key Placeholders
+Localized strings support placeholders for rebound keys:
+```typescript
+// In localization.ts:
+tutorialControls: "Use {keys} or arrows to move."
+tutorialGroomAction: "Hold {groomKey} while moving to groom."
+winchHint: "Press {winchKey} near anchor to use winch."
+
+// Replaced in DialogueScene.showDialogue() and HUDScene.update()
+// Using utilities from keyboardLayout.ts:
+getMovementKeysString()  // Returns "WASD" or "ZQSD" based on layout
+getGroomKeyName()        // Returns bound groom key name
+getWinchKeyName()        // Returns bound winch key name
+```
 
 ### Scene Layering (Critical)
 HUDScene must be on top for input priority over DialogueScene:
@@ -77,12 +103,14 @@ if (activePointers.length === 0) {
 
 ## Key Files
 - `src/config/levels.ts` - Level definitions, accessPaths, steepZones
-- `src/config/localization.ts` - All UI strings (FR primary, EN)
+- `src/config/localization.ts` - All UI strings (FR primary, EN) with {placeholder} syntax
 - `src/scenes/GameScene.ts` - Main gameplay, physics, terrain
 - `src/scenes/HUDScene.ts` - UI overlay with scaling, touch controls
+- `src/scenes/DialogueScene.ts` - Dialogue with dynamic key replacement
 - `src/scenes/MenuScene.ts` - Main menu with responsive layout
 - `src/utils/accessibility.ts` - A11y settings storage
 - `src/utils/gamepad.ts` - Controller detection and button mapping (Nintendo/Xbox/PlayStation)
+- `src/utils/keyboardLayout.ts` - Layout detection, getGroomKeyName(), getWinchKeyName()
 - `src/main.ts` - Game init, resize/orientation handlers
 - `docs/ARCHITECTURE.md` - Technical decisions, patterns
 - `docs/GAMEPLAY.md` - Game mechanics documentation
@@ -107,12 +135,13 @@ if (activePointers.length === 0) {
 ## Queued Items (from plan.md)
 ### Polish
 - Gamepad button rebinding
-- Taunt text size (make bigger on fail screen)
 - Night scene rendering + groomer headlights
 - Keyboard-only menu navigation
 - Level differentiation (varied objectives)
 - Winch anchor proximity requirement
 - Character avatars
+- Show connected gamepad name in settings
+- Localize How to Play WASD directions
 
 ### Future
 - Localization audit (verify all scenes use t() except intentional French)

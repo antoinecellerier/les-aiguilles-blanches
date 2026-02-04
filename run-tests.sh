@@ -19,6 +19,32 @@ if [ $UNIT_EXIT -ne 0 ]; then
     exit $UNIT_EXIT
 fi
 
+# Start dev server if not already running
+DEV_SERVER_PID=""
+if ! curl -s http://localhost:3000 > /dev/null 2>&1; then
+    echo ""
+    echo "=== Starting dev server ==="
+    npm run dev &
+    DEV_SERVER_PID=$!
+    # Wait for server to be ready
+    for i in {1..30}; do
+        if curl -s http://localhost:3000 > /dev/null 2>&1; then
+            echo "Dev server ready"
+            break
+        fi
+        sleep 1
+    done
+fi
+
+# Cleanup function
+cleanup() {
+    if [ -n "$DEV_SERVER_PID" ]; then
+        echo "Stopping dev server (PID: $DEV_SERVER_PID)"
+        kill $DEV_SERVER_PID 2>/dev/null
+    fi
+}
+trap cleanup EXIT
+
 # Run E2E tests
 echo ""
 echo "=== Running E2E tests (Playwright) ==="
@@ -32,9 +58,9 @@ else
     BROWSER_ARGS="--browser chromium --browser firefox"
 fi
 
-# Default to parallel execution unless --headed is specified
+# Headed mode: run sequentially (override -n auto from pytest.ini)
 if [[ "$*" == *"--headed"* ]]; then
-    pytest tests/e2e $BROWSER_ARGS "$@"
+    pytest tests/e2e $BROWSER_ARGS -n 0 "$@"
 else
     pytest tests/e2e $BROWSER_ARGS "$@"
 fi

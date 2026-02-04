@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level } from '../setup';
+import { getWinchKeyName } from '../utils/keyboardLayout';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -189,9 +190,11 @@ export default class HUDScene extends Phaser.Scene {
     const showTouchHint = hasTouch && isMobile;
 
     if (this.level.hasWinch) {
-      const winchHintText = showTouchHint
-        ? '🔗 ' + (t('winchHintTouch') || 'Hold 🔗 for winch')
-        : '🔗 ' + (t('winchHint') || 'SHIFT = Winch');
+      const winchKey = getWinchKeyName();
+      const winchHintRaw = showTouchHint
+        ? (t('winchHintTouch') || 'Hold 🔗 for winch')
+        : (t('winchHint') || `${winchKey} = Winch`);
+      const winchHintText = '🔗 ' + winchHintRaw.replace('{winchKey}', winchKey);
       this.winchHint = this.add.text(width / 2, Math.round(12 * this.uiScale), winchHintText, {
         fontFamily: 'Courier New',
         fontSize: fontSmall,
@@ -456,10 +459,14 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     if (this.winchHint && this.gameScene.winchActive) {
-      this.winchHint.setText('🔗 ' + (t('winchAttached') || 'Winch ACTIVE'));
+      const winchKey = getWinchKeyName();
+      const winchAttachedRaw = t('winchAttached') || 'Winch ACTIVE';
+      this.winchHint.setText('🔗 ' + winchAttachedRaw.replace('{winchKey}', winchKey));
       this.winchHint.setStyle({ color: '#00FF00' });
     } else if (this.winchHint) {
-      this.winchHint.setText('🔗 ' + (t('winchHint') || 'SHIFT = Winch'));
+      const winchKey = getWinchKeyName();
+      const winchHintRaw = t('winchHint') || `${winchKey} = Winch`;
+      this.winchHint.setText('🔗 ' + winchHintRaw.replace('{winchKey}', winchKey));
       this.winchHint.setStyle({ color: '#FFD700' });
     }
 

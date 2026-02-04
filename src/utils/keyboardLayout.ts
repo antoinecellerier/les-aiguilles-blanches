@@ -191,6 +191,48 @@ export function getMovementKeysString(): string {
 }
 
 /**
+ * Get the display name for the groom key (default: SPACE)
+ */
+export function getGroomKeyName(): string {
+  const savedNames = localStorage.getItem('snowGroomer_displayNames');
+  const savedBindings = localStorage.getItem('snowGroomer_bindings');
+  
+  if (savedNames && savedBindings) {
+    try {
+      const names = JSON.parse(savedNames);
+      const bindings = JSON.parse(savedBindings);
+      if (names[bindings.groom]) {
+        return names[bindings.groom].toUpperCase();
+      }
+    } catch {
+      // Fall through to default
+    }
+  }
+  return 'SPACE';
+}
+
+/**
+ * Get the display name for the winch key (default: SHIFT)
+ */
+export function getWinchKeyName(): string {
+  const savedNames = localStorage.getItem('snowGroomer_displayNames');
+  const savedBindings = localStorage.getItem('snowGroomer_bindings');
+  
+  if (savedNames && savedBindings) {
+    try {
+      const names = JSON.parse(savedNames);
+      const bindings = JSON.parse(savedBindings);
+      if (names[bindings.winch]) {
+        return names[bindings.winch].toUpperCase();
+      }
+    } catch {
+      // Fall through to default
+    }
+  }
+  return 'SHIFT';
+}
+
+/**
  * Available layouts for the settings UI
  */
 export const AVAILABLE_LAYOUTS: { id: KeyboardLayout; name: string }[] = [

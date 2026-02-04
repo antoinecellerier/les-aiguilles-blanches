@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
+import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 
 /**
  * Les Aiguilles Blanches - Dialogue Scene
@@ -124,8 +125,13 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   showDialogue(key: string): void {
-    const text = t(key);
+    let text = t(key);
     if (!text || text === key) return;
+
+    // Replace dynamic key placeholders
+    text = text.replace('{keys}', getMovementKeysString());
+    text = text.replace('{groomKey}', getGroomKeyName());
+    text = text.replace('{winchKey}', getWinchKeyName());
 
     this.dialogueQueue.push({ key, text });
 

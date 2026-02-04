@@ -37,12 +37,12 @@ snow-groomer/
 │   ├── config/
 │   │   ├── gameConfig.ts   # Game constants, colors
 │   │   ├── levels.ts       # Level definitions
-│   │   └── localization.ts # i18n translations
+│   │   └── localization.ts # i18n translations (uses {placeholder} syntax)
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
 │   │   ├── gamepad.ts      # Controller detection, button mapping
 │   │   ├── gameProgress.ts # Save/load game progress
-│   │   └── keyboardLayout.ts # Keyboard layout detection, defaults
+│   │   └── keyboardLayout.ts # Keyboard layout detection, key name utilities
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
@@ -112,16 +112,25 @@ inputManager.isPressed('groom') // true/false
 
 ### 4. Localization System
 
-**Decision**: Inline translations with `data-i18n` attributes
+**Decision**: Inline translations with `t()` function and dynamic placeholders
 
 **Rationale**:
 - No build step required
 - Easy to add languages by extending TRANSLATIONS object
-- DOM elements self-document their translation keys
-- Works with screen readers
+- Supports dynamic placeholders for key rebindings
 
-```html
-<button data-i18n="startGame">Start Game</button>
+**Dynamic Placeholders**:
+- `{keys}` - Movement keys (WASD/ZQSD based on layout/rebinding)
+- `{groomKey}` - Groom action key (respects rebinding)
+- `{winchKey}` - Winch action key (respects rebinding)
+
+```typescript
+// In localization.ts
+tutorialControls: "🎮 CONTROLS: Use {keys} or arrows to move."
+
+// Replaced at runtime in DialogueScene.showDialogue()
+text = text.replace('{keys}', getMovementKeysString());
+text = text.replace('{groomKey}', getGroomKeyName());
 ```
 
 ### 5. Accessibility Architecture

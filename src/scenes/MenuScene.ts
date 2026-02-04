@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
-import { getMovementKeysString } from '../utils/keyboardLayout';
+import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
 import { getMappingFromGamepad, isConfirmPressed } from '../utils/gamepad';
 import GameScene from './GameScene';
@@ -359,6 +359,7 @@ export default class MenuScene extends Phaser.Scene {
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const showTouchHints = hasTouch && isMobile && !hasGamepad;
     const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
+    const groomKey = getGroomKeyName(); // e.g., "SPACE" or rebound key
     
     let moveHint: string;
     let groomHint: string;
@@ -373,12 +374,17 @@ export default class MenuScene extends Phaser.Scene {
       moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
       groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
     } else if (hasTouch) {
-      // PC with touchscreen - show both
-      moveHint = `🚜 ${keys}/Arrows or touch D-pad`;
-      groomHint = '❄️ ' + (t('howToPlayGroom') || 'SPACE or tap ❄️ to groom');
+      // PC with touchscreen - show both (use localized string with key placeholder)
+      const moveText = t('howToPlayMoveHybrid') || `${keys}/Arrows or touch D-pad`;
+      moveHint = '🚜 ' + moveText.replace('{keys}', keys);
+      const groomText = t('howToPlayGroomHybrid') || `${groomKey} or tap ❄️ to groom`;
+      groomHint = '❄️ ' + groomText.replace('{groomKey}', groomKey);
     } else {
-      moveHint = `🚜 ${keys} or Arrows to move`;
-      groomHint = '❄️ ' + (t('howToPlayGroom') || 'SPACE to groom snow');
+      // Keyboard only - use localized string with key placeholder
+      const moveText = t('howToPlayMove') || `${keys} or Arrows to move`;
+      moveHint = '🚜 ' + moveText.replace('{keys}', keys);
+      const groomText = t('howToPlayGroom') || `${groomKey} to groom snow`;
+      groomHint = '❄️ ' + groomText.replace('{groomKey}', groomKey);
     }
     
     this.showOverlay('howToPlay', [
