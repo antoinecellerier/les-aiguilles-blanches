@@ -6,7 +6,7 @@ import pytest
 # Default: Vite dev server, fallback to legacy PHP server
 GAME_URL = os.environ.get(
     "GAME_URL",
-    "http://localhost:3000/index-vite.html"
+    "http://localhost:3000/index.html"
 )
 
 

@@ -26,29 +26,29 @@ The architecture prioritizes:
 
 ```
 snow-groomer/
-├── index-vite.html         # Entry point (Vite)
-├── index.html              # Legacy entry point
+├── index.html              # Entry point
 ├── vite.config.ts          # Vite bundler config
 ├── tsconfig.json           # TypeScript config
+├── publish.sh              # Build script for deployment
 ├── src/
 │   ├── main.ts             # Phaser init, game creation
 │   ├── setup.ts            # Window globals initialization
 │   ├── config/
-│   │   ├── gameConfig.ts   # Game constants, colors (TypeScript)
-│   │   ├── levels.ts       # Level definitions (TypeScript)
-│   │   └── localization.ts # i18n translations (TypeScript)
+│   │   ├── gameConfig.ts   # Game constants, colors
+│   │   ├── levels.ts       # Level definitions
+│   │   └── localization.ts # i18n translations
 │   ├── utils/
-│   │   └── accessibility.ts # A11y helpers, settings (TypeScript)
+│   │   └── accessibility.ts # A11y helpers, settings
 │   ├── scenes/
-│   │   ├── BootScene.js    # Asset loading, texture generation
-│   │   ├── MenuScene.js    # Main menu
-│   │   ├── SettingsScene.js # Language, a11y, key rebinding
-│   │   ├── GameScene.js    # Main gameplay
-│   │   ├── HUDScene.js     # UI overlay (parallel to GameScene)
-│   │   ├── DialogueScene.js # Character dialogue overlay
-│   │   ├── PauseScene.js   # Pause menu
-│   │   ├── LevelCompleteScene.js
-│   │   └── CreditsScene.js
+│   │   ├── BootScene.ts    # Asset loading, texture generation
+│   │   ├── MenuScene.ts    # Main menu
+│   │   ├── SettingsScene.ts # Language, a11y, key rebinding
+│   │   ├── GameScene.ts    # Main gameplay
+│   │   ├── HUDScene.ts     # UI overlay (parallel to GameScene)
+│   │   ├── DialogueScene.ts # Character dialogue overlay
+│   │   ├── PauseScene.ts   # Pause menu
+│   │   ├── LevelCompleteScene.ts
+│   │   └── CreditsScene.ts
 ├── tests/
 │   ├── e2e/                # Playwright browser tests
 │   └── unit-js/            # Vitest config validation

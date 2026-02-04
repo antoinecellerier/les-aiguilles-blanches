@@ -2,7 +2,6 @@
 
 ## Quick Start
 
-### Development (with Vite)
 ```bash
 npm install
 npm run dev    # Start dev server at http://localhost:3000
@@ -11,10 +10,8 @@ npm run dev    # Start dev server at http://localhost:3000
 ### Production Build
 ```bash
 npm run build  # Build to dist/
+./publish.sh   # Or use publish script
 ```
-
-### Legacy (no build step)
-Open `index.html` in any modern browser (Firefox, Chrome, Safari, Edge).
 
 ---
 
@@ -22,15 +19,11 @@ A retro-style (SkiFree aesthetic) snow groomer simulation game set in a fictiona
 
 ## 🎮 Play the Game
 
-### With Vite (Recommended)
 ```bash
 npm install
 npm run dev
-# Open http://localhost:3000/index-vite.html
+# Open http://localhost:3000
 ```
-
-### Without Build Step
-Open `index.html` directly in a browser.
 
 ## 🏔️ About
 
@@ -74,26 +67,26 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 
 ```
 snow-groomer/
-├── index-vite.html     # Vite entry point (recommended)
-├── index.html          # Legacy entry point (no build)
+├── index.html          # Entry point
 ├── vite.config.ts      # Vite bundler configuration
 ├── tsconfig.json       # TypeScript configuration
 ├── package.json        # npm dependencies and scripts
+├── publish.sh          # Build script for deployment
 ├── run-tests.sh        # E2E test runner
 ├── pytest.ini          # Pytest configuration (parallel)
-├── src/                # Game source
+├── src/                # Game source (TypeScript)
 │   ├── main.ts         # Phaser initialization
 │   ├── setup.ts        # Global setup
-│   ├── config/         # Config files (TypeScript)
+│   ├── config/         # Config files
 │   │   ├── gameConfig.ts
 │   │   ├── levels.ts
 │   │   └── localization.ts
-│   ├── scenes/         # Phaser scenes (JavaScript)
-│   │   ├── BootScene.js
-│   │   ├── MenuScene.js
-│   │   ├── GameScene.js
+│   ├── scenes/         # Phaser scenes
+│   │   ├── BootScene.ts
+│   │   ├── MenuScene.ts
+│   │   ├── GameScene.ts
 │   │   └── ...
-│   └── utils/          # Utilities (TypeScript)
+│   └── utils/          # Utilities
 │       └── accessibility.ts
 ├── tests/
 │   ├── e2e/            # Playwright E2E tests
@@ -107,7 +100,7 @@ snow-groomer/
 
 1. `npm install` (first time only)
 2. `npm run dev` to start dev server
-3. Open http://localhost:3000/index-vite.html
+3. Open http://localhost:3000
 4. Click "Commencer" (Start Game)
 5. Use WASD/Arrows to move, Space to groom
 6. Reach the coverage target before time runs out!
