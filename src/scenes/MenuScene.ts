@@ -122,15 +122,9 @@ export default class MenuScene extends Phaser.Scene {
     this.add.text(width / 2 - decoOffset, menuY + buttonSpacing, '🚜', { fontSize: decoSize + 'px' }).setOrigin(0.5);
     this.add.text(width / 2 + decoOffset, menuY + buttonSpacing, '⛷️', { fontSize: decoSize + 'px' }).setOrigin(0.5);
 
-    const versionSize = Math.round(12 * scaleFactor);
-    this.add.text(10, height - 25, 'v1.0.0 | Phaser 3', {
-      fontFamily: 'Courier New, monospace',
-      fontSize: '11px',
-      color: '#4a6a7b',
-    });
-
-    // GitHub link
-    const githubLink = this.add.text(width / 2, height - 25, '📦 GitHub', {
+    // Footer: GitHub link with version on first line
+    const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+    const githubLink = this.add.text(width / 2, height - 35, `📦 GitHub  •  v${version}`, {
       fontFamily: 'Courier New, monospace',
       fontSize: '11px',
       color: '#87CEEB',
@@ -142,11 +136,12 @@ export default class MenuScene extends Phaser.Scene {
         window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank');
       });
 
-    this.add.text(width - 10, height - 25, 'Made with ❄️ in Savoie', {
+    // Made in Savoie credit on second line
+    this.add.text(width / 2, height - 18, 'Made with ❄️ in Savoie', {
       fontFamily: 'Courier New, monospace',
-      fontSize: '11px',
+      fontSize: '10px',
       color: '#4a6a7b',
-    }).setOrigin(1, 0);
+    }).setOrigin(0.5, 0);
 
     // Fullscreen button (show on touch devices, or always show exit button when in fullscreen)
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;

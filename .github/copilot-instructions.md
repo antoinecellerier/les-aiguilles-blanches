@@ -93,10 +93,21 @@ if (activePointers.length === 0) {
 - **Screen reader**: ARIA live region announcements
 
 ## Queued Items (from plan.md)
-- Gamepad support (manual testing needed)
+### Infrastructure
+- Version number on home screen (date + git hash)
+- Code cleanup audit (unused assets, dead code)
+- Scene readability QA (remaining scenes)
+- Consider rexUI library for UI
+- Evaluate other Phaser plugins
+
+### Gameplay
 - Game progression persistence (Resume vs Start)
-- Refueling point at bottom of levels
 - Level differentiation (varied objectives)
+- Refueling point bug
+- Stamina mechanics review
 - Winch cliff freeze bug on La Verticale
 - Winch anchor proximity requirement
-- Menu rendering QA across resolutions
+- Off-piste appearance (no groomed look)
+- Touch D-pad diagonal movement
+- Character avatars
+- Easter eggs (5G towers, slipping cars, wildlife, Candide Thovex)
