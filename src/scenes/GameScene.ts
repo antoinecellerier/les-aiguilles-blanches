@@ -79,6 +79,7 @@ export default class GameScene extends Phaser.Scene {
   private isGameOver = false;
   private isTransitioning = false;
   private isTumbling = false;
+  private isFallingOffCliff = false;
   private steepWarningShown = false;
   private winchActive = false;
   private winchAnchor: WinchAnchor | null = null;
@@ -155,6 +156,7 @@ export default class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.isTransitioning = false;
     this.isTumbling = false;
+    this.isFallingOffCliff = false;
     this.steepWarningShown = false;
     this.winchActive = false;
     this.winchAnchor = null;
@@ -1572,8 +1574,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleCliffFall(): void {
-    if (this.isGameOver) return;
-    this.isGameOver = true;
+    if (this.isGameOver || this.isFallingOffCliff) return;
+    this.isFallingOffCliff = true;
+    
+    // Clear winch state
+    this.winchActive = false;
+    this.winchAnchor = null;
+    if (this.winchCableGraphics) {
+      this.winchCableGraphics.clear();
+    }
 
     this.showDialogue('cliffFall');
     this.time.delayedCall(1500, () => {
