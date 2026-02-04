@@ -1,6 +1,7 @@
 """E2E tests for game navigation and basic flows."""
 import pytest
 from playwright.sync_api import Page, expect
+from conftest import wait_for_scene, wait_for_scene_inactive, skip_to_credits, wait_for_level_or_credits
 
 
 def click_menu_button(page: Page, button_index: int, button_name: str = "button"):
@@ -23,7 +24,6 @@ def click_menu_button(page: Page, button_index: int, button_name: str = "button"
     button_y = menu_y - button_spacing * 0.5 + button_index * button_spacing
     
     page.mouse.click(box["x"] + box["width"] / 2, box["y"] + button_y)
-    page.wait_for_timeout(300)
 
 
 # Legacy constants for backward compatibility
@@ -134,7 +134,8 @@ def click_button(page: Page, button_index: int, description: str):
         description: Button name for debugging
     """
     click_menu_button(page, button_index, description)
-    page.wait_for_timeout(200)
+    # Brief wait for click to register, then let caller wait for scene changes
+    page.wait_for_timeout(100)
 
 
 class TestCanvasRendering:
@@ -148,7 +149,7 @@ class TestCanvasRendering:
     def test_game_renders_visible_content(self, game_page: Page):
         """Verify game scene renders non-black content."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')
         assert_canvas_renders_content(game_page)
@@ -156,7 +157,7 @@ class TestCanvasRendering:
     def test_all_levels_render_content(self, game_page: Page):
         """Skip through all levels and verify each renders visible content."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         for level in range(9):
             assert_canvas_renders_content(game_page)
@@ -182,7 +183,7 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene')
         
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Must have left menu and entered game
         assert_not_on_menu(game_page)
@@ -207,13 +208,13 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene')
         
         click_button(game_page, BUTTON_SETTINGS, "Settings")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'SettingsScene')
         
         assert_scene_active(game_page, 'SettingsScene', "Settings should open")
         
         # Escape should return to menu
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'MenuScene')
         assert_scene_active(game_page, 'MenuScene', "Should return to menu")
 
 
@@ -223,14 +224,17 @@ class TestLevelNavigation:
     def test_skip_level_advances_to_next(self, game_page: Page):
         """Test that N key advances from tutorial to level 1."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')
         assert get_current_level(game_page) == 0, "Should start on tutorial (level 0)"
         
-        # Skip level
+        # Skip level - wait for level change
         game_page.keyboard.press("n")
-        game_page.wait_for_timeout(2000)
+        game_page.wait_for_function(
+            "() => window.game?.scene?.getScene('GameScene')?.levelIndex === 1",
+            timeout=5000
+        )
         
         # Should now be on level 1
         level = get_current_level(game_page)
@@ -240,7 +244,7 @@ class TestLevelNavigation:
     def test_full_level_progression_through_all_9_levels(self, game_page: Page):
         """Skip through ALL 9 levels (0-8), verify each, then credits."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         level_names = [
             "Tutorial", "Les Marmottes", "Les Écureuils", "Air Zone",
@@ -257,31 +261,33 @@ class TestLevelNavigation:
             # Take screenshot for visual verification
             game_page.screenshot(path=f"tests/screenshots/level_{expected_level}_{level_names[expected_level].replace(' ', '_')}.png")
             
-            # Skip to next
+            # Skip to next - wait for level to change or credits
             game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1500)
+            if expected_level < 8:
+                game_page.wait_for_function(
+                    f"() => window.game?.scene?.getScene('GameScene')?.levelIndex === {expected_level + 1}",
+                    timeout=5000
+                )
+            else:
+                wait_for_scene(game_page, 'CreditsScene')
         
         # After level 8, should be at credits
-        game_page.wait_for_timeout(1000)
         assert_scene_active(game_page, 'CreditsScene', "Should be at credits after completing all levels")
         game_page.screenshot(path="tests/screenshots/credits_screen.png")
 
     def test_credits_returns_to_menu(self, game_page: Page):
         """Test that exiting credits returns to menu."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         
-        # Skip all 9 levels
-        for _ in range(9):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1500)
+        # Skip all levels using deterministic helper
+        skip_to_credits(game_page)
         
-        game_page.wait_for_timeout(2000)
         assert_scene_active(game_page, 'CreditsScene')
         
         # Exit credits
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'MenuScene')
         
         assert_scene_active(game_page, 'MenuScene', "Should return to menu from credits")
         game_page.screenshot(path="tests/screenshots/menu_after_credits.png")
@@ -293,7 +299,7 @@ class TestTutorial:
     def test_tutorial_starts_with_welcome_dialogue(self, game_page: Page):
         """Test tutorial begins with welcome message."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')
         assert_scene_active(game_page, 'DialogueScene', "Tutorial should show dialogue")
@@ -304,14 +310,14 @@ class TestTutorial:
     def test_tutorial_dialogue_advances_on_click(self, game_page: Page):
         """Test clicking advances through tutorial dialogues."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
         
         # Click to advance first dialogue
         game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-        game_page.wait_for_timeout(500)
+        game_page.wait_for_timeout(200)
         
         # Should still be in tutorial with dialogues
         assert_scene_active(game_page, 'GameScene')
@@ -320,7 +326,7 @@ class TestTutorial:
     def test_tutorial_movement_trigger(self, game_page: Page):
         """Test that moving triggers the next tutorial step."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
@@ -328,7 +334,7 @@ class TestTutorial:
         # Dismiss initial dialogues (welcome, controls, move instruction)
         for _ in range(6):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(500)
+            game_page.wait_for_timeout(200)
         
         # Verify dialogue is dismissed
         dialogue_hidden = game_page.evaluate("""() => {
@@ -366,11 +372,11 @@ class TestTutorial:
     def test_tutorial_grooming_increases_coverage(self, game_page: Page):
         """Test that grooming increases coverage (on level 1 for cleaner test)."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Skip tutorial to level 1 for cleaner grooming test
         game_page.keyboard.press("n")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
@@ -389,7 +395,7 @@ class TestTutorial:
         # Move and groom - hold space (groom key) while moving
         game_page.keyboard.down("Space")
         game_page.keyboard.down("ArrowUp")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         game_page.keyboard.up("ArrowUp")
         game_page.keyboard.up("Space")
         game_page.wait_for_timeout(100)
@@ -410,11 +416,11 @@ class TestGroomerMovement:
     def test_groomer_movement_after_dialogue_dismissal(self, game_page: Page):
         """Test groomer can move after dismissing tutorial dialogues."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Skip tutorial to level 1 (simpler, no tutorial dialogues blocking)
         game_page.keyboard.press("n")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')
         level = get_current_level(game_page)
@@ -461,30 +467,35 @@ class TestGroomerMovement:
     def test_wasd_controls(self, game_page: Page):
         """Test WASD movement controls work."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
-        # Skip tutorial to level 1
+        # Skip tutorial to level 1 to avoid tutorial dialogues
         game_page.keyboard.press("n")
-        game_page.wait_for_timeout(1500)
+        wait_for_level_or_credits(game_page, 1, timeout=5000)
         
-        # Dismiss dialogues - use more clicks and wait longer for Firefox
+        # Dismiss any remaining dialogues
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
         for _ in range(5):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(300)
-        game_page.wait_for_timeout(200)
+            game_page.wait_for_timeout(150)
         
         initial_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
             return gs && gs.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
         }""")
         
-        # Hold key for movement
+        # Hold key longer for movement - give physics time to update
         game_page.keyboard.down("w")
-        game_page.wait_for_timeout(300)
+        game_page.wait_for_timeout(500)
         game_page.keyboard.up("w")
-        game_page.wait_for_timeout(200)
+        
+        # Wait for position to actually change (deterministic)
+        game_page.wait_for_function(f"""() => {{
+            const gs = window.game?.scene?.getScene('GameScene');
+            if (!gs || !gs.groomer) return false;
+            return gs.groomer.y !== {initial_pos['y']};
+        }}""", timeout=2000)
         
         new_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
@@ -500,14 +511,21 @@ class TestDialogueSystem:
     def test_tutorial_shows_dialogue(self, game_page: Page):
         """Test that tutorial level shows DialogueScene."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'DialogueScene', "Tutorial should have dialogue")
 
     def test_dialogue_is_visible(self, game_page: Page):
         """Test that dialogue box is actually visible on screen."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
+        wait_for_scene(game_page, 'DialogueScene')
+        
+        # Wait for dialogue to actually be showing
+        game_page.wait_for_function("""() => {
+            const dialogueScene = window.game?.scene?.getScene('DialogueScene');
+            return dialogueScene?.container?.visible === true;
+        }""", timeout=5000)
         
         # Check if dialogue is showing and container is visible
         dialogue_visible = game_page.evaluate("""() => {
@@ -527,7 +545,7 @@ class TestDialogueSystem:
     def test_dialogue_dismisses_on_click(self, game_page: Page):
         """Test dialogues advance on click."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'DialogueScene')
         
@@ -536,7 +554,7 @@ class TestDialogueSystem:
         box = canvas.bounding_box()
         for _ in range(10):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(300)
+            game_page.wait_for_timeout(100)
         
         # Dialogue should eventually be dismissed or hidden
         # (DialogueScene may still be active but not visible)
@@ -549,17 +567,17 @@ class TestPauseMenu:
     def test_escape_opens_pause_menu(self, game_page: Page):
         """Test that Escape opens PauseScene."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Dismiss dialogues first
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
         for _ in range(8):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
+            game_page.wait_for_timeout(100)
         
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'PauseScene')
         
         assert_scene_active(game_page, 'PauseScene', "Escape should open pause menu")
         game_page.screenshot(path="tests/screenshots/pause_menu.png")
@@ -567,39 +585,39 @@ class TestPauseMenu:
     def test_escape_toggles_pause(self, game_page: Page):
         """Test Escape toggles pause on/off."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Dismiss dialogues
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
         for _ in range(8):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
+            game_page.wait_for_timeout(100)
         
         # Pause
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'PauseScene')
         assert_scene_active(game_page, 'PauseScene')
         
         # Unpause
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(500)
+        wait_for_scene_inactive(game_page, 'PauseScene')
         assert_scene_not_active(game_page, 'PauseScene', "Pause should close on second Escape")
 
     def test_pause_menu_buttons_visible(self, game_page: Page):
         """Test that pause menu shows all expected buttons."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Dismiss dialogues first
         canvas = game_page.locator("canvas")
         box = canvas.bounding_box()
         for _ in range(8):
             game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
+            game_page.wait_for_timeout(100)
         
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'PauseScene')
         
         assert_scene_active(game_page, 'PauseScene', "Pause menu should be open")
         
@@ -629,13 +647,16 @@ class TestLevelComplete:
     def test_skip_triggers_level_advance(self, game_page: Page):
         """Test that skipping advances to next level."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         initial_level = get_current_level(game_page)
         assert initial_level == 0
         
         game_page.keyboard.press("n")
-        game_page.wait_for_timeout(1500)
+        game_page.wait_for_function(
+            "() => window.game?.scene?.getScene('GameScene')?.levelIndex === 1",
+            timeout=5000
+        )
         
         # Should now be on next level
         new_level = get_current_level(game_page)
@@ -648,14 +669,10 @@ class TestCreditsScreen:
     def test_credits_has_required_elements(self, game_page: Page):
         """Test credits screen appears with proper scene."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
-        # Skip all levels
-        for _ in range(9):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1200)
-        
-        game_page.wait_for_timeout(2000)
+        # Skip all levels using deterministic helper
+        skip_to_credits(game_page)
         
         assert_scene_active(game_page, 'CreditsScene', "Credits should be showing")
         assert_scene_not_active(game_page, 'GameScene', "GameScene should not be active during credits")
@@ -664,22 +681,19 @@ class TestCreditsScreen:
         """Test full cycle: play through credits, return to menu, start new game."""
         # Complete game
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
-        for _ in range(9):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
+        skip_to_credits(game_page)
         
-        game_page.wait_for_timeout(3000)
         assert_scene_active(game_page, 'CreditsScene')
         
         # Return to menu
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'MenuScene')
         assert_scene_active(game_page, 'MenuScene')
         
         # Start new game
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(3000)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')
         level = get_current_level(game_page)
@@ -692,7 +706,7 @@ class TestAccessibility:
     def test_settings_has_accessibility_options(self, game_page: Page):
         """Test that settings scene has accessibility toggles."""
         click_button(game_page, BUTTON_SETTINGS, "Settings")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'SettingsScene')
         
         assert_scene_active(game_page, 'SettingsScene')
         game_page.screenshot(path="tests/screenshots/settings_accessibility.png")
@@ -713,7 +727,7 @@ class TestAccessibility:
         game_page.keyboard.press("Escape")
         game_page.wait_for_timeout(300)
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Check that colorblind filter SVG exists
         filter_exists = game_page.evaluate("""() => {
@@ -737,7 +751,7 @@ class TestAccessibility:
         game_page.keyboard.press("Escape")
         game_page.wait_for_timeout(300)
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Check for high-contrast class
         has_class = game_page.evaluate("""() => {
@@ -752,14 +766,14 @@ class TestHUD:
     def test_hud_scene_active_during_gameplay(self, game_page: Page):
         """Test that HUDScene is active during gameplay."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'HUDScene', "HUD should be active during gameplay")
 
     def test_hud_displays_game_stats(self, game_page: Page):
         """Test that HUD has fuel, stamina, coverage values."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Check HUD scene has expected properties
         hud_data = game_page.evaluate("""() => {
@@ -786,7 +800,7 @@ class TestSceneLayering:
     def test_hud_renders_on_top_of_game(self, game_page: Page):
         """Test HUD scene is above GameScene in render order."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         
         # Check scene order - HUD should be after GameScene (rendered on top)
         scene_order = game_page.evaluate("""() => {
@@ -803,7 +817,7 @@ class TestSceneLayering:
     def test_pause_menu_renders_on_top(self, game_page: Page):
         """Test PauseScene renders on top of all other scenes."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Dismiss dialogues
         canvas = game_page.locator("canvas")
@@ -831,7 +845,7 @@ class TestSnowContrast:
     def test_grooming_changes_tile_texture(self, game_page: Page):
         """Test that grooming changes tile from ungroomed to groomed."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(1500)
+        wait_for_scene(game_page, 'GameScene')
         
         # Dismiss dialogues
         canvas = game_page.locator("canvas")
@@ -868,7 +882,7 @@ class TestBackgroundRendering:
     def test_game_renders_without_errors(self, game_page: Page):
         """Test game scene renders completely without JS errors."""
         click_button(game_page, BUTTON_START, "Start Game")
-        game_page.wait_for_timeout(2000)
+        wait_for_scene(game_page, 'GameScene')
         
         assert_no_error_message(game_page)
         assert_scene_active(game_page, 'GameScene')
