@@ -94,11 +94,15 @@ if (activePointers.length === 0) {
 
 ## Queued Items (from plan.md)
 ### Infrastructure
-- Version number on home screen (date + git hash)
+- [x] Version number on home screen (date + git hash)
 - Code cleanup audit (unused assets, dead code)
 - Scene readability QA (remaining scenes)
 - Consider rexUI library for UI
 - Evaluate other Phaser plugins
+- Changelog / upcoming features view
+- Bundle size optimization (rexUI added ~900KB)
+- Queue audit (review plan.md and history for missed items)
+- Flaky E2E tests (credits, dialogue, movement use timing - need explicit waits)
 
 ### Gameplay
 - Game progression persistence (Resume vs Start)

@@ -3,8 +3,8 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 
 /**
- * Les Aiguilles Blanches - Settings Scene
- * Language, accessibility, and control rebinding
+ * RexUI Settings Scene - Full responsive implementation using rexUI
+ * Replaces manual layout with Sizer-based automatic positioning
  */
 
 interface SettingsSceneData {
@@ -21,32 +21,25 @@ interface KeyBindings {
   winch: number;
 }
 
-interface LangButton {
-  btn: Phaser.GameObjects.Text;
-  code: string;
-}
-
-interface ColorblindButton {
-  btn: Phaser.GameObjects.Text;
-  id: string;
-}
-
-// Storage version - increment when making breaking changes to binding format
 const BINDINGS_VERSION = 2;
 
 export default class SettingsScene extends Phaser.Scene {
   private returnTo: string | null = null;
   private levelIndex = 0;
-  private rebindingAction: string | null = null;
   private bindings: KeyBindings = this.getDefaultBindings();
-  private displayNames: Record<number, string> = {}; // Store display names for keyCodes
+  private displayNames: Record<number, string> = {};
+  private rebindingAction: string | null = null;
   private rebindButtons: Record<string, Phaser.GameObjects.Text> = {};
-  private rebindStatus: Phaser.GameObjects.Text | null = null;
-  private langButtons: LangButton[] = [];
-  private colorblindButtons: ColorblindButton[] = [];
-  private scaleFactor = 1;
-  private minTouchTarget = 44; // Minimum touch target in canvas pixels
+  private statusText: Phaser.GameObjects.Text | null = null;
+  private mainSizer: any = null;
+  
+  // Responsive settings
   private dpr = 1;
+  private fontSize = 16;
+  private smallFont = 14;
+  private minTouchTarget = 44;
+  private useSingleColumn = false;
+  private contentWidth = 300; // Available width for content
 
   constructor() {
     super({ key: 'SettingsScene' });
@@ -59,168 +52,189 @@ export default class SettingsScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.cameras.main;
-
     this.cameras.main.setBackgroundColor(0x1a2a3e);
     this.loadBindings();
 
-    // DPI-aware layout: use logical pixels (CSS pixels)
+    // DPI-aware sizing (matches SettingsScene logic)
     this.dpr = window.devicePixelRatio || 1;
     const logicalWidth = width / this.dpr;
     const logicalHeight = height / this.dpr;
-    
-    // Detect touch device for larger touch targets on buttons
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    // Use single column when logical width < 500 CSS pixels or tall aspect ratio
     const aspectRatio = logicalHeight / logicalWidth;
-    const useSingleColumn = logicalWidth < 500 || aspectRatio > 1.5;
+    this.useSingleColumn = logicalWidth < 500 || aspectRatio > 1.5;
     
-    // Minimum touch target: 44 CSS pixels for buttons (achieved via padding)
-    this.minTouchTarget = hasTouch ? 44 * this.dpr : 28 * this.dpr;
+    // Touch detection for larger touch targets
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    // Scale touch target with DPR but cap to prevent overflow
+    this.minTouchTarget = Math.min(hasTouch ? 44 : 28, width * 0.1);
+
+    // Font sizing: use smaller of DPI-based or width-based
+    const dprBasedFont = 16 * Math.sqrt(this.dpr);
+    const widthBasedFont = width / 25; // ~25 chars per line minimum
+    const baseFontSize = Math.min(dprBasedFont, widthBasedFont);
+    this.fontSize = Math.round(Math.max(14, Math.min(24, baseFontSize)));
+    this.smallFont = Math.max(14, Math.round(this.fontSize * 0.85));
     
-    // Calculate font size based on available space
-    // Count actual content rows:
-    // Single column: Title(1) + Lang(2) + Access(5) + Colorblind(3) + Controls(12) = ~23 rows
-    // Two column: Right column has ~12 rows (controls header, hint, 6 bindings, layout, reset, input hints)
-    const contentRows = useSingleColumn ? 22 : 13;
-    const availableHeight = height * 0.78; // Use 78% of screen, reserve for back button
-    const optimalLineHeight = availableHeight / contentRows;
-    const optimalFontSize = optimalLineHeight / 2.4;
+    const padding = Math.max(10, Math.min(width * 0.03, 25));
+    const itemSpacing = Math.round(this.fontSize * 0.5);
     
-    // Font size bounds (in canvas pixels, scaled by sqrt of DPR for readability)
-    const baseFontSize = 16 * Math.sqrt(this.dpr);
-    const minFontSize = Math.max(14, baseFontSize * 0.5);
-    const maxFontSize = baseFontSize * 1.5;
-    const fontSize = Math.round(Math.max(minFontSize, Math.min(maxFontSize, optimalFontSize)));
-    this.scaleFactor = fontSize / baseFontSize;
+    // Available width for content (used by fixWidthSizers to know when to wrap)
+    this.contentWidth = width - padding * 2;
+
+    // Create scrollable panel for content
+    const contentHeight = height * 0.85; // Reserve space for back button
     
-    // Line height based on available space per row
-    const lineHeight = Math.round(optimalLineHeight);
+    if (this.useSingleColumn) {
+      this.createSingleColumnLayout(width, height, padding, itemSpacing);
+    } else {
+      this.createTwoColumnLayout(width, height, padding, itemSpacing);
+    }
+
+    // Back button (fixed at bottom)
+    this.createBackButton(width, height, padding);
+
+    // Keyboard input for rebinding
+    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+      if (this.rebindingAction) {
+        this.finishRebind(event.keyCode, event.key, event.code);
+      } else if (event.code === 'Escape') {
+        this.goBack();
+      }
+    });
+
+    // Handle resize
+    this.scale.on('resize', this.handleResize, this);
     
-    const padding = Math.max(15, Math.round(width * 0.03));
-    const startX = padding;
-    const colWidth = useSingleColumn ? width - padding * 2 : (width - padding * 3) / 2;
+    Accessibility.announce((t('settings') || 'Settings'));
+  }
+
+  private handleResize(): void {
+    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+  }
+
+  private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
+    // Single scrollable column for narrow/portrait screens
+    // Reserve space for back button at bottom
+    const backButtonSpace = this.fontSize * 2.5;
+    const availableHeight = height - padding * 2 - backButtonSpace;
+    
+    // Reduce spacing further on very small screens
+    const tightSpacing = height < 600 ? Math.max(2, itemSpacing * 0.5) : itemSpacing;
+    
+    // Position at top-left corner with origin at top-left (0, 0)
+    const sizerWidth = width - padding * 2;
+    this.mainSizer = this.rexUI.add.sizer({
+      x: padding,
+      y: padding,
+      width: sizerWidth,
+      orientation: 'vertical',
+      space: { item: tightSpacing },
+      origin: 0  // Top-left origin
+    });
 
     // Title
-    this.add.text(width / 2, padding, '⚙️ ' + (t('settings') || 'Settings'), {
-      fontFamily: 'Courier New, monospace',
-      fontSize: Math.round(fontSize * 1.2) + 'px',
-      fontStyle: 'bold',
-      color: '#87CEEB',
-    }).setOrigin(0.5, 0);
+    this.mainSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.1, '#87CEEB', true), 
+      { align: 'center' });
 
-    let curY = padding + lineHeight;
+    // All sections in single column
+    this.addLanguageSection(this.mainSizer);
+    this.addAccessibilitySection(this.mainSizer);
+    
+    // Only add controls section if there's enough space
+    if (height >= 500) {
+      this.addControlsSection(this.mainSizer);
+    }
 
-    // === LANGUAGE SECTION ===
+    // Status text
+    this.statusText = this.createText('', this.fontSize, '#FFFF00');
+    this.mainSizer.add(this.statusText, { align: 'center' });
 
-    // Language
-    this.add.text(startX, curY, '🌐 ' + (t('language') || 'Language'), {
-      fontFamily: 'Courier New',
-      fontSize: fontSize + 'px',
-      fontStyle: 'bold',
-      color: '#ffffff',
+    this.mainSizer.layout();
+  }
+
+  private createTwoColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
+    // Two-column layout for wide screens
+    const colWidth = (width - padding * 3) / 2;
+    
+    // Update contentWidth for child elements in two-column mode
+    this.contentWidth = colWidth;
+    
+    // Root horizontal sizer - position at top-left with origin at top-left
+    const rootSizer = this.rexUI.add.sizer({
+      x: padding,
+      y: padding,
+      width: width - padding * 2,
+      orientation: 'horizontal',
+      space: { item: padding },
+      origin: 0  // Top-left origin
     });
-    curY += lineHeight;
 
-    const languages: { code: SupportedLanguage; name: string }[] = [
-      { code: 'fr', name: '🇫🇷' },
-      { code: 'en', name: '🇬🇧' },
-      { code: 'de', name: '🇩🇪' },
-      { code: 'it', name: '🇮🇹' },
-      { code: 'es', name: '🇪🇸' },
-    ];
-
-    const currentLang = getLanguage();
-    this.langButtons = [];
-    // Use full fontSize for language buttons and space them based on touch targets
-    const langBtnSpacing = Math.max(lineHeight * 0.8, 50 * this.scaleFactor);
-    languages.forEach((lang, i) => {
-      const isActive = currentLang === lang.code;
-      const btn = this.add.text(startX + i * langBtnSpacing, curY, lang.name, {
-        fontFamily: 'Courier New',
-        fontSize: fontSize + 'px',
-        backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
-        padding: { x: Math.round(8 * this.scaleFactor), y: Math.round(4 * this.scaleFactor) },
-      }).setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.setLang(lang.code));
-      this.langButtons.push({ btn, code: lang.code });
+    // Left column: Language + Accessibility
+    const leftCol = this.rexUI.add.sizer({
+      width: colWidth,
+      orientation: 'vertical',
+      space: { item: itemSpacing }
     });
-    curY += lineHeight;
-
-    // === ACCESSIBILITY SECTION ===
-    this.add.text(startX, curY, '♿ ' + (t('accessibility') || 'Accessibility'), {
-      fontFamily: 'Courier New',
-      fontSize: fontSize + 'px',
-      fontStyle: 'bold',
-      color: '#ffffff',
+    
+    leftCol.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.2, '#87CEEB', true), 
+      { align: 'center' });
+    this.addLanguageSection(leftCol);
+    this.addAccessibilitySection(leftCol);
+    
+    // Right column: Controls
+    const rightCol = this.rexUI.add.sizer({
+      width: colWidth,
+      orientation: 'vertical',
+      space: { item: itemSpacing }
     });
-    curY += lineHeight;
+    
+    this.addControlsSection(rightCol);
 
-    // High Contrast
-    this.createToggle(startX, curY, t('highContrast') || 'High Contrast',
-      Accessibility.settings.highContrast, fontSize,
-      (val) => { Accessibility.settings.highContrast = val; Accessibility.saveSettings(); },
-      colWidth);
-    curY += lineHeight;
+    // Status text in right column
+    this.statusText = this.createText('', this.fontSize, '#FFFF00');
+    rightCol.add(this.statusText, { align: 'center' });
 
-    // Reduced Motion
-    this.createToggle(startX, curY, t('reducedMotion') || 'Reduced Motion',
-      Accessibility.settings.reducedMotion, fontSize,
-      (val) => { Accessibility.settings.reducedMotion = val; Accessibility.saveSettings(); },
-      colWidth);
-    curY += lineHeight;
+    rootSizer.add(leftCol, { align: 'top' });
+    rootSizer.add(rightCol, { align: 'top' });
+    
+    this.mainSizer = rootSizer;
+    this.mainSizer.layout();
+  }
 
-    // Colorblind
-    this.add.text(startX, curY, t('colorblindMode') || 'Colorblind:', {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 1) + 'px',
-      color: '#aaaaaa',
-    });
-    curY += lineHeight;
+  private addLanguageSection(sizer: any): void {
+    sizer.add(this.createText('🌐 ' + (t('language') || 'Language'), this.fontSize, '#ffffff', true), 
+      { align: 'left' });
+    sizer.add(this.createLanguageButtons(), { align: 'left' });
+  }
 
-    const cbModes: ColorblindMode[] = ['none', 'deuteranopia', 'protanopia', 'tritanopia'];
-    this.colorblindButtons = [];
-    // In single column, show 2x2 grid; in two column, show inline
-    const cbPerRow = useSingleColumn ? 2 : 4;
-    cbModes.forEach((mode, i) => {
-      const isActive = Accessibility.settings.colorblindMode === mode;
-      const label = (t(mode) || mode).substring(0, 8);
-      const col = i % cbPerRow;
-      const row = Math.floor(i / cbPerRow);
-      const btn = this.add.text(startX + col * (colWidth / cbPerRow), curY + row * lineHeight, label, {
-        fontFamily: 'Courier New',
-        fontSize: (fontSize - 2) + 'px',
-        color: isActive ? '#00FF00' : '#aaa',
-        backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
-        padding: { x: Math.round(6 * this.scaleFactor), y: Math.round(3 * this.scaleFactor) },
-      }).setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.setColorblindMode(mode));
-      this.colorblindButtons.push({ btn, id: mode });
-    });
-    curY += Math.ceil(cbModes.length / cbPerRow) * lineHeight;
+  private addAccessibilitySection(sizer: any): void {
+    sizer.add(this.createText('♿ ' + (t('accessibility') || 'Accessibility'), this.fontSize, '#ffffff', true), 
+      { align: 'left' });
+    
+    sizer.add(this.createToggleRow(t('highContrast') || 'High Contrast', 
+      Accessibility.settings.highContrast, (val) => {
+        Accessibility.settings.highContrast = val;
+        Accessibility.saveSettings();
+      }), { align: 'left' });
+    
+    sizer.add(this.createToggleRow(t('reducedMotion') || 'Reduced Motion',
+      Accessibility.settings.reducedMotion, (val) => {
+        Accessibility.settings.reducedMotion = val;
+        Accessibility.saveSettings();
+      }), { align: 'left' });
 
-    // === CONTROLS SECTION ===
-    // In two-column mode, start controls in right column; in single column, continue below
-    const controlsX = useSingleColumn ? startX : width / 2 + padding;
-    let controlsY = useSingleColumn ? curY : padding + lineHeight;
-    const controlsColWidth = useSingleColumn ? colWidth : (width - padding * 3) / 2;
+    // Colorblind modes
+    sizer.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, '#aaaaaa'), 
+      { align: 'left' });
+    sizer.add(this.createColorblindButtons(), { align: 'left' });
+  }
 
-    this.add.text(controlsX, controlsY, '🎮 ' + (t('controls') || 'Controls'), {
-      fontFamily: 'Courier New',
-      fontSize: fontSize + 'px',
-      fontStyle: 'bold',
-      color: '#ffffff',
-    });
-    controlsY += lineHeight;
+  private addControlsSection(sizer: any): void {
+    sizer.add(this.createText('🎮 ' + (t('controls') || 'Controls'), this.fontSize, '#ffffff', true), 
+      { align: 'left' });
+    sizer.add(this.createText(t('clickToRebind') || 'Click to rebind', this.smallFont, '#666666'), 
+      { align: 'left' });
 
-    this.add.text(controlsX, controlsY, t('clickToRebind') || 'Click to rebind', {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 2) + 'px',
-      color: '#666666',
-    });
-    controlsY += lineHeight;
-
-    this.rebindButtons = {};
+    // Key bindings
     const actions = [
       { id: 'up', label: t('moveUp') || 'Up' },
       { id: 'down', label: t('moveDown') || 'Down' },
@@ -229,135 +243,223 @@ export default class SettingsScene extends Phaser.Scene {
       { id: 'groom', label: t('groom') || 'Groom' },
       { id: 'winch', label: t('winch') || 'Winch' },
     ];
-
-    const bindingRowHeight = lineHeight;
-    actions.forEach((action, i) => {
-      const y = controlsY + i * bindingRowHeight;
-
-      this.add.text(controlsX, y, action.label + ':', {
-        fontFamily: 'Courier New',
-        fontSize: (fontSize - 1) + 'px',
-        color: '#cccccc',
-      });
-
-      const currentBinding = this.bindings[action.id as keyof KeyBindings];
-      const defaultBinding = this.getDefaultBindings()[action.id as keyof KeyBindings];
-      const isCustom = currentBinding !== defaultBinding;
-      
-      const keyName = this.getKeyName(currentBinding);
-      const btn = this.add.text(controlsX + controlsColWidth * 0.45, y, keyName + (isCustom ? ' *' : ''), {
-        fontFamily: 'Courier New',
-        fontSize: (fontSize - 1) + 'px',
-        color: isCustom ? '#FFDD00' : '#87CEEB',
-        backgroundColor: isCustom ? '#5a5a2d' : '#2d5a7b',
-        padding: { x: 6, y: 2 },
-      }).setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.startRebind(action.id, btn));
-
-      this.rebindButtons[action.id] = btn;
+    actions.forEach(action => {
+      sizer.add(this.createBindingRow(action.id, action.label), { align: 'left' });
     });
 
-    controlsY += actions.length * bindingRowHeight;
+    // Layout selector
+    sizer.add(this.createLayoutSelector(), { align: 'left' });
 
-    // Check if user has customized any bindings
-    const hasCustomBindings = actions.some(action => 
-      this.bindings[action.id as keyof KeyBindings] !== this.getDefaultBindings()[action.id as keyof KeyBindings]
-    );
+    // Reset button
+    const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset'), this.smallFont, '#ffaaaa', '#5a2d2d');
+    resetBtn.on('pointerdown', () => this.resetBindings());
+    sizer.add(resetBtn, { align: 'left' });
 
-    // Keyboard layout selector
-    const currentLayout = getKeyboardLayout();
-    
-    this.add.text(controlsX, controlsY, '⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 1) + 'px',
-      color: '#aaaaaa',
-    });
-    controlsY += lineHeight;
-
-    if (hasCustomBindings) {
-      // Show "Custom" when user has overridden bindings
-      this.add.text(controlsX, controlsY, t('customBindings') || 'Custom', {
-        fontFamily: 'Courier New',
-        fontSize: (fontSize - 2) + 'px',
-        color: '#FFDD00',
-        fontStyle: 'italic',
-      });
-    } else {
-      // Show layout selector buttons - space evenly across available width
-      const numLayouts = AVAILABLE_LAYOUTS.length;
-      const layoutBtnWidth = Math.floor(controlsColWidth / numLayouts);
-      AVAILABLE_LAYOUTS.forEach((layout, idx) => {
-        const isActive = currentLayout === layout.id;
-        const btn = this.add.text(controlsX + idx * layoutBtnWidth, controlsY, layout.id.toUpperCase(), {
-          fontFamily: 'Courier New',
-          fontSize: (fontSize - 2) + 'px',
-          color: isActive ? '#000000' : '#ffffff',
-          backgroundColor: isActive ? '#87ceeb' : '#555555',
-          padding: { x: Math.round(4 * this.scaleFactor), y: Math.round(2 * this.scaleFactor) },
-        }).setInteractive({ useHandCursor: true })
-          .on('pointerdown', () => this.setLayout(layout.id));
-      });
-    }
-
-    controlsY += lineHeight;
-
-    // Reset bindings button
-    this.add.text(controlsX, controlsY, '🔄 ' + (t('resetControls') || 'Reset'), {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 1) + 'px',
-      color: '#ffaaaa',
-      backgroundColor: '#5a2d2d',
-      padding: { x: Math.round(8 * this.scaleFactor), y: Math.round(4 * this.scaleFactor) },
-    }).setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.resetBindings());
-
-    controlsY += lineHeight;
-
-    // Show available input methods
+    // Input hints
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const inputHints: string[] = [];
-    if (hasTouch) {
-      inputHints.push('📱 Touch');
-    }
+    if (hasTouch) inputHints.push('📱 Touch');
     inputHints.push('🎮 Gamepad');
-    
-    this.add.text(controlsX, controlsY, inputHints.join('  '), {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 2) + 'px',
-      color: '#88aa88',
-    });
+    sizer.add(this.createText(inputHints.join('  '), this.smallFont, '#88aa88'), { align: 'left' });
+  }
 
-    // Rebinding status text
-    this.rebindStatus = this.add.text(width / 2, height - padding * 3, '', {
-      fontFamily: 'Courier New',
-      fontSize: fontSize + 'px',
-      color: '#FFFF00',
-    }).setOrigin(0.5);
-
-    // Back button
+  private createBackButton(width: number, height: number, padding: number): void {
     const backLabel = this.returnTo ? (t('backToGame') || 'Back to Game') : (t('back') || 'Back');
-    const backBtn = this.add.text(width / 2, height - padding * 1.5, '← ' + backLabel, {
-      fontFamily: 'Courier New',
-      fontSize: Math.round(fontSize * 1.1) + 'px',
-      color: '#ffffff',
-      backgroundColor: '#CC2200',
-      padding: { x: Math.round(24 * this.scaleFactor), y: Math.round(8 * this.scaleFactor) },
-    }).setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => backBtn.setStyle({ backgroundColor: '#FF3300' }))
-      .on('pointerout', () => backBtn.setStyle({ backgroundColor: '#CC2200' }))
-      .on('pointerdown', () => this.goBack());
+    const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, '#ffffff', '#CC2200');
+    backBtn.setPosition(width / 2, height - padding * 1.5);
+    backBtn.setOrigin(0.5);
+    backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: '#FF3300' }));
+    backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: '#CC2200' }));
+    backBtn.on('pointerdown', () => this.goBack());
+  }
 
-    // ESC to go back (only if not rebinding)
-    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      if (this.rebindingAction) {
-        // Store keyCode (character-based) for Phaser compatibility
-        // Store key for display, code for reference
-        this.finishRebind(event.keyCode, event.key, event.code);
-      } else if (event.code === 'Escape') {
-        this.goBack();
-      }
+  // === UI Element Factory Methods ===
+
+  private createText(text: string, fontSize: number, color: string, bold = false): Phaser.GameObjects.Text {
+    return this.add.text(0, 0, text, {
+      fontFamily: 'Courier New, monospace',
+      fontSize: fontSize + 'px',
+      fontStyle: bold ? 'bold' : 'normal',
+      color: color,
     });
   }
+
+  private createTouchButton(text: string, fontSize: number, color: string, bgColor: string): Phaser.GameObjects.Text {
+    // Touch-friendly button with minimum touch target
+    const paddingY = Math.max(5, (this.minTouchTarget - fontSize) / 2);
+    const paddingX = Math.round(paddingY * 1.5);
+    
+    return this.add.text(0, 0, text, {
+      fontFamily: 'Courier New, monospace',
+      fontSize: fontSize + 'px',
+      color: color,
+      backgroundColor: bgColor,
+      padding: { x: paddingX, y: paddingY },
+    }).setInteractive({ useHandCursor: true });
+  }
+
+  private createLanguageButtons(): any {
+    // Use fixWidthSizer for auto-wrapping on narrow screens
+    const row = this.rexUI.add.fixWidthSizer({ 
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.3), line: Math.round(this.fontSize * 0.3) }
+    });
+    
+    const languages: { code: SupportedLanguage; name: string }[] = [
+      { code: 'fr', name: '🇫🇷' },
+      { code: 'en', name: '🇬🇧' },
+      { code: 'de', name: '🇩🇪' },
+      { code: 'it', name: '🇮🇹' },
+      { code: 'es', name: '🇪🇸' },
+    ];
+    const currentLang = getLanguage();
+    
+    languages.forEach(lang => {
+      const isActive = currentLang === lang.code;
+      // Smaller padding on narrow screens
+      const paddingY = Math.max(2, Math.min(6, (this.minTouchTarget - this.fontSize) / 2));
+      const paddingX = Math.max(3, Math.round(paddingY * 0.6));
+      const btn = this.add.text(0, 0, lang.name, {
+        fontFamily: 'Courier New',
+        fontSize: this.fontSize + 'px',
+        backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
+        padding: { x: paddingX, y: paddingY },
+      }).setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.setLang(lang.code));
+      row.add(btn);
+    });
+    return row;
+  }
+
+  private createToggleRow(label: string, initialValue: boolean, onChange: (val: boolean) => void): any {
+    // Use fixWidthSizer for wrapping on narrow screens
+    const row = this.rexUI.add.fixWidthSizer({ 
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.5), line: 2 }
+    });
+    
+    row.add(this.createText(label + ':', this.smallFont, '#cccccc'));
+    
+    const paddingY = Math.max(2, Math.min(6, (this.minTouchTarget - this.smallFont) / 2));
+    const btn = this.add.text(0, 0, initialValue ? '✓ ON' : '✗ OFF', {
+      fontFamily: 'Courier New',
+      fontSize: this.smallFont + 'px',
+      color: initialValue ? '#00FF00' : '#888888',
+      backgroundColor: initialValue ? '#1a5a1a' : '#333333',
+      padding: { x: Math.round(paddingY * 1.5), y: paddingY },
+    }).setInteractive({ useHandCursor: true });
+
+    let value = initialValue;
+    btn.on('pointerdown', () => {
+      value = !value;
+      btn.setText(value ? '✓ ON' : '✗ OFF');
+      btn.setStyle({
+        color: value ? '#00FF00' : '#888888',
+        backgroundColor: value ? '#1a5a1a' : '#333333',
+      });
+      onChange(value);
+      this.mainSizer?.layout();
+    });
+    
+    row.add(btn);
+    return row;
+  }
+
+  private createColorblindButtons(): any {
+    const cbModes: ColorblindMode[] = ['none', 'deuteranopia', 'protanopia', 'tritanopia'];
+    
+    // Always use fixWidthSizer for auto-wrapping with width constraint
+    const container = this.rexUI.add.fixWidthSizer({ 
+      width: this.contentWidth,
+      space: { item: 4, line: 4 }
+    });
+    cbModes.forEach(mode => container.add(this.createColorblindBtn(mode)));
+    return container;
+  }
+
+  private createColorblindBtn(mode: ColorblindMode): Phaser.GameObjects.Text {
+    const isActive = Accessibility.settings.colorblindMode === mode;
+    const label = (t(mode) || mode).substring(0, 8);
+    const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
+    
+    return this.add.text(0, 0, label, {
+      fontFamily: 'Courier New',
+      fontSize: this.smallFont + 'px',
+      color: isActive ? '#00FF00' : '#aaa',
+      backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
+      padding: { x: Math.round(paddingY * 1.5), y: paddingY },
+    }).setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => {
+        Accessibility.settings.colorblindMode = mode;
+        Accessibility.saveSettings();
+        this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+      });
+  }
+
+  private createBindingRow(actionId: string, label: string): any {
+    // Use fixWidthSizer for wrapping with width constraint
+    const row = this.rexUI.add.fixWidthSizer({ 
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.5), line: 2 }
+    });
+    
+    row.add(this.createText(label + ':', this.smallFont, '#cccccc'));
+    
+    const currentBinding = this.bindings[actionId as keyof KeyBindings];
+    const defaultBinding = this.getDefaultBindings()[actionId as keyof KeyBindings];
+    const isCustom = currentBinding !== defaultBinding;
+    const keyName = this.getKeyName(currentBinding);
+    
+    const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
+    const btn = this.add.text(0, 0, keyName + (isCustom ? ' *' : ''), {
+      fontFamily: 'Courier New',
+      fontSize: this.smallFont + 'px',
+      color: isCustom ? '#FFDD00' : '#87CEEB',
+      backgroundColor: isCustom ? '#5a5a2d' : '#2d5a7b',
+      padding: { x: Math.round(paddingY * 2), y: paddingY },
+    }).setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.startRebind(actionId, btn));
+    
+    this.rebindButtons[actionId] = btn;
+    row.add(btn);
+    return row;
+  }
+
+  private createLayoutSelector(): any {
+    const row = this.rexUI.add.fixWidthSizer({ 
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.4), line: 2 }
+    });
+    
+    row.add(this.createText('⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', this.smallFont, '#aaaaaa'));
+    
+    // Check for custom bindings
+    const hasCustomBindings = Object.keys(this.bindings).some(key => 
+      this.bindings[key as keyof KeyBindings] !== this.getDefaultBindings()[key as keyof KeyBindings]
+    );
+
+    if (hasCustomBindings) {
+      row.add(this.createText(t('customBindings') || 'Custom', this.smallFont, '#FFDD00'));
+    } else {
+      const currentLayout = getKeyboardLayout();
+      AVAILABLE_LAYOUTS.forEach(layout => {
+        const isActive = currentLayout === layout.id;
+        const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
+        const btn = this.add.text(0, 0, layout.id.toUpperCase(), {
+          fontFamily: 'Courier New',
+          fontSize: this.smallFont + 'px',
+          color: isActive ? '#000000' : '#ffffff',
+          backgroundColor: isActive ? '#87ceeb' : '#555555',
+          padding: { x: Math.round(paddingY * 2), y: paddingY },
+        }).setInteractive({ useHandCursor: true })
+          .on('pointerdown', () => this.setLayout(layout.id));
+        row.add(btn);
+      });
+    }
+    return row;
+  }
+
+  // === Logic Methods ===
 
   private loadBindings(): void {
     const savedVersion = localStorage.getItem('snowGroomer_bindingsVersion');
@@ -365,10 +467,7 @@ export default class SettingsScene extends Phaser.Scene {
     const savedNames = localStorage.getItem('snowGroomer_displayNames');
     const defaults = this.getDefaultBindings();
 
-    // If version doesn't match, clear old bindings and use defaults
     if (savedVersion !== String(BINDINGS_VERSION)) {
-      localStorage.removeItem('snowGroomer_bindings');
-      localStorage.removeItem('snowGroomer_displayNames');
       this.bindings = defaults;
       this.displayNames = {};
       return;
@@ -377,7 +476,6 @@ export default class SettingsScene extends Phaser.Scene {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Only use saved values if they are valid numbers
         this.bindings = { ...defaults };
         for (const key of Object.keys(defaults) as Array<keyof KeyBindings>) {
           if (typeof parsed[key] === 'number' && parsed[key] > 0) {
@@ -401,12 +499,7 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private getDefaultBindings(): KeyBindings {
-    // Use layout-specific defaults from utility
     return getLayoutDefaults();
-  }
-
-  private detectKeyboardLayout(): string {
-    return getKeyboardLayout();
   }
 
   private saveBindings(): void {
@@ -417,44 +510,30 @@ export default class SettingsScene extends Phaser.Scene {
 
   private getKeyName(keyCode: number): string {
     if (!keyCode) return '?';
+    if (this.displayNames[keyCode]) return this.displayNames[keyCode];
     
-    // Use stored display name if available (from user's actual keyboard)
-    if (this.displayNames[keyCode]) {
-      return this.displayNames[keyCode];
-    }
-    
-    // Fallback to special key names by keyCode
     const specialKeys: Record<number, string> = {
       38: '↑', 40: '↓', 37: '←', 39: '→',
       32: 'SPACE', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT',
-      13: 'ENTER', 9: 'TAB', 27: 'ESC',
-      8: '⌫', 46: 'DEL',
+      13: 'ENTER', 9: 'TAB', 27: 'ESC', 8: '⌫', 46: 'DEL',
     };
     if (specialKeys[keyCode]) return specialKeys[keyCode];
-    
-    // For letter/number keys, return the character
-    if (keyCode >= 65 && keyCode <= 90) {
-      return String.fromCharCode(keyCode); // A-Z
-    }
-    if (keyCode >= 48 && keyCode <= 57) {
-      return String.fromCharCode(keyCode); // 0-9
-    }
-    
+    if (keyCode >= 65 && keyCode <= 90) return String.fromCharCode(keyCode);
+    if (keyCode >= 48 && keyCode <= 57) return String.fromCharCode(keyCode);
     return keyCode.toString();
   }
 
   private startRebind(actionId: string, btn: Phaser.GameObjects.Text): void {
     if (this.rebindingAction) return;
-
     this.rebindingAction = actionId;
     btn.setText('...');
     btn.setStyle({ backgroundColor: '#5a5a2d' });
-    this.rebindStatus?.setText(t('pressKey') || 'Press a key...');
+    this.statusText?.setText(t('pressKey') || 'Press a key...');
+    this.mainSizer?.layout();
   }
 
   private finishRebind(keyCode: number, keyChar: string, eventCode: string): void {
     if (!this.rebindingAction) return;
-
     if (eventCode === 'Escape') {
       this.cancelRebind();
       return;
@@ -462,15 +541,11 @@ export default class SettingsScene extends Phaser.Scene {
 
     const actionId = this.rebindingAction as keyof KeyBindings;
     this.bindings[actionId] = keyCode;
-    
-    // Store display name from the actual keyboard character
     if (keyChar.length === 1) {
       this.displayNames[keyCode] = keyChar.toUpperCase();
     } else {
-      // For special keys, store a readable name
       this.displayNames[keyCode] = keyChar;
     }
-    
     this.saveBindings();
 
     const btn = this.rebindButtons[actionId];
@@ -478,105 +553,41 @@ export default class SettingsScene extends Phaser.Scene {
     btn.setStyle({ backgroundColor: '#5a5a2d', color: '#FFDD00' });
 
     this.rebindingAction = null;
-    this.rebindStatus?.setText(t('saved') || 'Saved!');
-    
-    // Restart scene to refresh layout selector (shows "Custom" when bindings differ from defaults)
-    this.time.delayedCall(800, () => this.scene.restart());
+    this.statusText?.setText(t('saved') || 'Saved!');
+    this.mainSizer?.layout();
+    this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
   }
 
   private cancelRebind(): void {
     if (!this.rebindingAction) return;
-
     const btn = this.rebindButtons[this.rebindingAction];
     btn.setText(this.getKeyName(this.bindings[this.rebindingAction as keyof KeyBindings]));
     btn.setStyle({ backgroundColor: '#2d5a7b' });
-
     this.rebindingAction = null;
-    this.rebindStatus?.setText('');
+    this.statusText?.setText('');
+    this.mainSizer?.layout();
   }
 
   private resetBindings(): void {
-    // Reset keyboard layout to default (qwerty)
     setKeyboardLayout('qwerty');
-    // Reset bindings to defaults for that layout
     this.bindings = this.getDefaultBindings();
-    this.displayNames = {}; // Clear custom display names
+    this.displayNames = {};
     this.saveBindings();
-
-    this.rebindStatus?.setText(t('controlsReset') || 'Controls reset!');
-    // Restart scene to refresh all UI elements
-    this.time.delayedCall(800, () => this.scene.restart());
+    this.statusText?.setText(t('controlsReset') || 'Controls reset!');
+    this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
   }
 
   private setLayout(layout: KeyboardLayout): void {
     setKeyboardLayout(layout);
-    // Reset bindings to new layout defaults
     this.bindings = this.getDefaultBindings();
-    this.displayNames = {}; // Clear custom display names
+    this.displayNames = {};
     this.saveBindings();
-    // Refresh the scene to show updated buttons
-    this.scene.restart();
-  }
-
-  private createToggle(
-    x: number,
-    y: number,
-    label: string,
-    initialValue: boolean,
-    fontSize: number,
-    onChange: (val: boolean) => void,
-    maxWidth?: number
-  ): void {
-    // Create label
-    this.add.text(x, y, label + ':', {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 1) + 'px',
-      color: '#cccccc',
-    });
-    
-    // Touch-friendly button padding
-    const btnPaddingY = Math.max(4, Math.min(10, (this.minTouchTarget - fontSize) / 2));
-    const btnPaddingX = Math.round(8 * this.scaleFactor);
-    
-    // Position toggle at 70% of available width (leaves room for button)
-    const availableWidth = maxWidth || 250 * this.scaleFactor;
-    const toggleX = x + availableWidth * 0.65;
-    
-    const btn = this.add.text(toggleX, y, initialValue ? '✓ ON' : '✗ OFF', {
-      fontFamily: 'Courier New',
-      fontSize: (fontSize - 1) + 'px',
-      color: initialValue ? '#00FF00' : '#888888',
-      backgroundColor: initialValue ? '#1a5a1a' : '#333333',
-      padding: { x: btnPaddingX, y: btnPaddingY },
-    }).setInteractive({ useHandCursor: true });
-
-    let value = initialValue;
-    btn.on('pointerdown', () => {
-      value = !value;
-      btn.setText(value ? '✓ ON' : '✗ OFF');
-      btn.setStyle({
-        color: value ? '#00FF00' : '#888888',
-        backgroundColor: value ? '#1a5a1a' : '#333333',
-      });
-      onChange(value);
-    });
+    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
   }
 
   private setLang(code: SupportedLanguage): void {
     setLanguage(code);
     this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
-  }
-
-  private setColorblindMode(mode: ColorblindMode): void {
-    Accessibility.settings.colorblindMode = mode;
-    Accessibility.saveSettings();
-    this.colorblindButtons.forEach(({ btn, id }) => {
-      const isActive = mode === id;
-      btn.setStyle({
-        color: isActive ? '#00FF00' : '#aaa',
-        backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
-      });
-    });
   }
 
   private goBack(): void {
@@ -590,5 +601,9 @@ export default class SettingsScene extends Phaser.Scene {
     } else {
       this.scene.start('MenuScene');
     }
+  }
+
+  shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
   }
 }

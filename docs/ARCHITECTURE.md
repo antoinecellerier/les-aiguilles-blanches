@@ -14,8 +14,9 @@ The architecture prioritizes:
 ## Technology Stack
 
 - **Framework**: Phaser 3.90.0
+- **UI Library**: rexUI (phaser3-rex-plugins) for responsive layouts
 - **Bundler**: Vite 7.x with TypeScript
-- **Language**: TypeScript (config/utils), JavaScript (scenes - gradual migration)
+- **Language**: TypeScript (all scenes and utilities)
 - **Rendering**: Canvas (forced for Firefox compatibility)
 - **Physics**: Arcade Physics
 - **Input**: Built-in keyboard, gamepad, touch support
@@ -276,13 +277,36 @@ const logicalHeight = height / dpr;
 
 ### SettingsScene Layout
 
-The Settings scene uses adaptive layout based on screen dimensions:
+The Settings scene uses rexUI Sizer components for responsive layout:
 
 - **Single column mode**: Activated when `logicalWidth < 500` or `aspectRatio > 1.5` (portrait)
 - **Two column mode**: Used on wider landscape displays
-- **Line height**: Calculated as `availableHeight / contentRows` to fill available space
-- **Font sizing**: Scales with `sqrt(dpr)` for readability on high-DPI devices
-- **Touch targets**: Minimum 44 CSS pixels on touch devices (via button padding)
+- **FixWidthSizer**: Auto-wraps content when it exceeds available width
+- **Origin positioning**: Use `origin: 0` for top-left anchoring
+- **Font sizing**: Scales with viewport width and DPR for readability
+- **Touch targets**: Minimum touch target calculated from viewport
+
+**rexUI Components Used:**
+- `Sizer`: Vertical/horizontal layout containers
+- `FixWidthSizer`: Auto-wrapping for buttons and toggles
+
+**Key Patterns:**
+```typescript
+// Set origin for correct positioning
+this.rexUI.add.sizer({
+  x: padding,
+  y: padding,
+  width: contentWidth,
+  orientation: 'vertical',
+  origin: 0  // Top-left origin
+});
+
+// FixWidthSizer needs explicit width to wrap
+this.rexUI.add.fixWidthSizer({
+  width: this.contentWidth,  // Must set for wrapping
+  space: { item: 4, line: 4 }
+});
+```
 
 ### MenuScene Scaling
 

@@ -4,6 +4,7 @@
  */
 
 import Phaser from 'phaser';
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 // Setup globals first (side-effect import)
 import './setup';
@@ -25,6 +26,13 @@ declare global {
   }
 }
 
+// Extend Phaser.Scene to include rexUI
+declare module 'phaser' {
+  interface Scene {
+    rexUI: RexUIPlugin;
+  }
+}
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.CANVAS,
   parent: 'game-container',
@@ -38,6 +46,13 @@ const config: Phaser.Types.Core.GameConfig = {
   input: {
     activePointers: 3, // Enable multitouch (D-pad + action buttons)
     gamepad: true, // Enable gamepad support
+  },
+  plugins: {
+    scene: [{
+      key: 'rexUI',
+      plugin: RexUIPlugin,
+      mapping: 'rexUI'
+    }]
   },
   physics: {
     default: 'arcade',
