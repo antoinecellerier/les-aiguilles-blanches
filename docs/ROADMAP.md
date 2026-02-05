@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Bugs
 
-- [ ] Settings don't render when accessed through pause menu
+(None currently tracked)
 
 ## Polish (Medium Priority)
 
@@ -35,6 +35,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Art style guide** - Comprehensive visual style documentation preventing future inconsistencies
 - ✅ **Cliff system** - Shared CliffSegment architecture with physics/visual alignment, organic edges, variable offset/extent
 - ✅ **Pre-commit checklist** - Workflow skill ensuring docs, tests, and commit quality
 - ✅ **Night rendering** - Night overlay with directional groomer headlights

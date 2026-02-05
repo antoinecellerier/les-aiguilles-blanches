@@ -190,6 +190,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         fullscreen: "Fullscreen",
         exitFullscreen: "Exit Fullscreen",
         back: "Back",
+        backToGame: "Back to Game",
         
         // Settings
         language: "Language",
@@ -357,6 +358,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         fullscreen: "Vollbild",
         exitFullscreen: "Vollbild beenden",
         back: "Zurück",
+        backToGame: "Zurück zum Spiel",
         
         // Settings
         language: "Sprache",
@@ -437,6 +439,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         fullscreen: "Schermo intero",
         exitFullscreen: "Esci schermo intero",
         back: "Indietro",
+        backToGame: "Torna al gioco",
         
         // Settings
         language: "Lingua",
@@ -517,6 +520,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         fullscreen: "Pantalla completa",
         exitFullscreen: "Salir pantalla completa",
         back: "Volver",
+        backToGame: "Volver al juego",
         
         // Settings
         language: "Idioma",
