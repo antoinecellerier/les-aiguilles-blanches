@@ -27,6 +27,21 @@ export default class DialogueScene extends Phaser.Scene {
     super({ key: 'DialogueScene' });
   }
 
+  // Track dialogue Y positions (calculated dynamically based on touch controls visibility)
+  private get dialogueY(): number {
+    return this.cameras.main.height - (this.areTouchControlsVisible() ? 300 : 150);
+  }
+  
+  private get dialogueShowY(): number {
+    return this.cameras.main.height - (this.areTouchControlsVisible() ? 280 : 130);
+  }
+  
+  // Check if HUDScene's touch controls are currently visible
+  private areTouchControlsVisible(): boolean {
+    const hudScene = this.scene.get('HUDScene') as { touchControlsContainer?: Phaser.GameObjects.Container } | null;
+    return hudScene?.touchControlsContainer?.visible === true;
+  }
+
   create(): void {
     this.dialogueQueue = [];
     this.isShowing = false;
@@ -52,7 +67,7 @@ export default class DialogueScene extends Phaser.Scene {
       if (this.isShowing) this.advanceDialogue();
     });
 
-    this.container = this.add.container(0, height - 150);
+    this.container = this.add.container(0, this.dialogueY);
     this.container.setVisible(false);
     this.container.setDepth(100); // Above hit zone
 
@@ -173,13 +188,17 @@ export default class DialogueScene extends Phaser.Scene {
 
     this.speakerText.setText(speaker);
     this.dialogueText.setText(dialogue.text);
+    
+    // Position container at starting Y (off-screen), then tween to show position
+    // Position is dynamic based on whether touch controls are currently visible
+    this.container.setY(this.dialogueY);
     this.container.setVisible(true);
 
     Accessibility.announce(speaker + ': ' + dialogue.text);
 
     this.tweens.add({
       targets: this.container,
-      y: this.cameras.main.height - 130,
+      y: this.dialogueShowY,
       duration: 200,
       ease: 'Power2',
     });

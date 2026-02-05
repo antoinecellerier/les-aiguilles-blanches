@@ -24,6 +24,9 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Bring pause menu to top so it renders above dialogue and HUD
+    this.scene.bringToTop();
+    
     const { width, height } = this.cameras.main;
 
     // Dim overlay

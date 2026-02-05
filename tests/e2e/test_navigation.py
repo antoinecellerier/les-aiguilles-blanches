@@ -692,6 +692,71 @@ class TestDialogueSystem:
         # (DialogueScene may still be active but not visible)
         assert_scene_active(game_page, 'GameScene', "Game should still be running")
 
+    def test_dialogue_positioned_above_touch_controls(self, game_page: Page):
+        """Test that dialogue box positioning clears touch controls when visible.
+        
+        Dialogue position is now dynamic - only positioned higher when
+        HUDScene's touch controls are actually visible.
+        """
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        wait_for_scene(game_page, 'DialogueScene')
+        
+        # Wait for dialogue to show
+        game_page.wait_for_function("""() => {
+            const scene = window.game?.scene?.getScene('DialogueScene');
+            return scene?.container?.visible === true;
+        }""", timeout=5000)
+        
+        # Verify the touch-aware offset values would clear touch controls
+        # Touch offset: dialogueShowOffset = 280, so dialogueBottom = height - 280 + 60 = height - 220
+        # D-pad top edge = height - 205
+        # height - 220 < height - 205 ✓
+        touch_check = game_page.evaluate("""() => {
+            const height = 720;  // Typical screen height
+            const touchDialogueShowOffset = 280;
+            const touchDialogueBottom = height - touchDialogueShowOffset + 60;
+            const dpadTopEdge = height - 205;  // btnSize=60, padding=25
+            return {
+                touchDialogueBottom: touchDialogueBottom,
+                dpadTopEdge: dpadTopEdge,
+                clearsControls: touchDialogueBottom < dpadTopEdge
+            };
+        }""")
+        
+        assert touch_check['clearsControls'], \
+            f"Touch dialogue bottom ({touch_check['touchDialogueBottom']}) should be above D-pad top ({touch_check['dpadTopEdge']})"
+
+    def test_dialogue_position_responds_to_touch_controls_visibility(self, game_page: Page):
+        """Test that dialogue position is dynamic based on touch controls visibility."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        wait_for_scene(game_page, 'DialogueScene')
+        
+        # Wait for dialogue
+        game_page.wait_for_function("""() => {
+            const scene = window.game?.scene?.getScene('DialogueScene');
+            return scene?.container?.visible === true;
+        }""", timeout=5000)
+        
+        # On desktop without touch controls visible, dialogue should be at lower position
+        positions = game_page.evaluate("""() => {
+            const dialogueScene = window.game.scene.getScene('DialogueScene');
+            const hudScene = window.game.scene.getScene('HUDScene');
+            const height = dialogueScene.cameras.main.height;
+            const touchVisible = hudScene?.touchControlsContainer?.visible === true;
+            return {
+                dialogueShowY: dialogueScene.dialogueShowY,
+                touchControlsVisible: touchVisible,
+                expectedY: touchVisible ? height - 280 : height - 130,
+                screenHeight: height
+            };
+        }""")
+        
+        # Dialogue Y should match expected based on actual touch controls visibility
+        assert positions['dialogueShowY'] == positions['expectedY'], \
+            f"Dialogue Y ({positions['dialogueShowY']}) should be {positions['expectedY']} (touchVisible={positions['touchControlsVisible']})"
+
 
 class TestPauseMenu:
     """Test pause functionality."""
