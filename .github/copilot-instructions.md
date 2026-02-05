@@ -8,6 +8,7 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 - `docs/GAMEPLAY.md` - Game mechanics, controls, level guide
 - `docs/TESTING.md` - Test helpers, debugging, visual issue reproduction
 - `docs/ROADMAP.md` - Work queue, bugs, future features (**source of truth**)
+- `docs/ART_STYLE.md` - Visual style guide, color palettes, texture patterns
 
 ## Quick Commands
 ```bash
