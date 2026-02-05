@@ -1188,3 +1188,123 @@ class TestDynamicKeyHints:
                 f"Winch hint should show rebound key X, got: {winch_hint_text}"
             assert 'SHIFT' not in winch_hint_text, \
                 f"Winch hint should NOT show SHIFT when rebound, got: {winch_hint_text}"
+
+
+class TestNightLevel:
+    """Tests for night level rendering and headlight mechanics."""
+    
+    def test_night_overlay_exists_on_night_level(self, game_page: Page):
+        """Test that night overlay is created on night levels (level 6)."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 6 (Black Piste - night level)
+        for _ in range(6):
+            game_page.keyboard.press("n")
+            game_page.wait_for_timeout(400)
+        
+        wait_for_scene(game_page, 'GameScene')
+        game_page.wait_for_timeout(300)
+        
+        # Check nightOverlay exists
+        has_night_overlay = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            return gameScene && gameScene.nightOverlay !== null;
+        }""")
+        
+        assert has_night_overlay, "Night overlay should exist on night level"
+    
+    def test_headlight_direction_updates_with_movement(self, game_page: Page):
+        """Test that headlight direction changes when groomer moves."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 6 (night level)
+        for _ in range(6):
+            game_page.keyboard.press("n")
+            game_page.wait_for_timeout(400)
+        
+        wait_for_scene(game_page, 'GameScene')
+        game_page.wait_for_timeout(300)
+        
+        # Get initial headlight direction
+        initial_dir = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            return gameScene?.headlightDirection ? {...gameScene.headlightDirection} : null;
+        }""")
+        
+        # Move right
+        game_page.keyboard.down("ArrowRight")
+        game_page.wait_for_timeout(300)
+        game_page.keyboard.up("ArrowRight")
+        
+        # Get updated direction
+        new_dir = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            return gameScene?.headlightDirection ? {...gameScene.headlightDirection} : null;
+        }""")
+        
+        assert new_dir is not None, "Headlight direction should exist"
+        # After moving right, x component should be positive
+        assert new_dir['x'] > 0, f"Headlight should face right after moving right, got x={new_dir['x']}"
+
+
+class TestWinchMechanics:
+    """Tests for winch attachment and slack mechanics."""
+    
+    def test_winch_only_attaches_near_anchor(self, game_page: Page):
+        """Test that winch only attaches when groomer is near anchor base."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 6 (has winch)
+        for _ in range(6):
+            game_page.keyboard.press("n")
+            game_page.wait_for_timeout(400)
+        
+        wait_for_scene(game_page, 'GameScene')
+        game_page.wait_for_timeout(300)
+        
+        # Try to activate winch (should fail - not near anchor)
+        game_page.keyboard.down("ShiftLeft")
+        game_page.wait_for_timeout(200)
+        
+        winch_active = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            return gameScene?.winchActive ?? false;
+        }""")
+        
+        game_page.keyboard.up("ShiftLeft")
+        
+        # Groomer starts at bottom, anchors are at top - should not attach
+        assert not winch_active, "Winch should not attach when far from anchor"
+    
+    def test_winch_anchor_interface_has_base_y(self, game_page: Page):
+        """Test that winch anchors have baseY property for proximity detection."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 6 (has winch)
+        for _ in range(6):
+            game_page.keyboard.press("n")
+            game_page.wait_for_timeout(400)
+        
+        wait_for_scene(game_page, 'GameScene')
+        game_page.wait_for_timeout(300)
+        
+        # Check anchor structure
+        anchor_info = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            if (!gameScene?.winchAnchors?.length) return null;
+            const anchor = gameScene.winchAnchors[0];
+            return {
+                hasX: 'x' in anchor,
+                hasY: 'y' in anchor,
+                hasBaseY: 'baseY' in anchor,
+                hasNumber: 'number' in anchor
+            };
+        }""")
+        
+        assert anchor_info is not None, "Should have winch anchors on level 6"
+        assert anchor_info['hasBaseY'], "Anchor should have baseY for proximity detection"
+        assert anchor_info['hasY'], "Anchor should have y (hook position) for cable"

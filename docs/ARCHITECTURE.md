@@ -224,8 +224,16 @@ Frame Update:
 4. drawObstacles()   - Trees, rocks, buildings
 5. drawGroomer()     - Player vehicle
 6. drawWeatherEffects() - Snow particles
-7. drawNightOverlay() - Visibility reduction
+7. drawNightOverlay() - Visibility reduction + headlights
 ```
+
+**Night Overlay System:**
+- Dark overlay (0x000022, 70% opacity) covers entire viewport
+- Directional flood lights rendered as layered circles
+- Front lights: Wide 108° spread, 5 tile range (warm white)
+- Rear lights: 5 tile range (slightly warm tint)
+- Light direction tracks groomer velocity
+- Lights originate from front/back of sprite, not center
 
 **Camera System**:
 - Camera centered on groomer
@@ -488,6 +496,56 @@ checkSteepness() {
     // Then check steep zones...
 }
 ```
+
+## Winch System
+
+### Anchor Structure
+
+```typescript
+interface WinchAnchor {
+  x: number;      // Horizontal position
+  y: number;      // Hook position (top) - for cable attachment
+  baseY: number;  // Base position - for proximity detection
+  number: number; // Anchor identifier
+}
+```
+
+### Proximity Detection
+
+Winch only attaches when groomer is within 3 tiles of anchor **base** (not hook):
+
+```javascript
+const maxAttachDistance = this.tileSize * 3;
+const dist = Phaser.Math.Distance.Between(
+    groomer.x, groomer.y,
+    anchor.x, anchor.baseY  // Use baseY for proximity
+);
+```
+
+### Cable Tension / Slack
+
+Cable state depends on relative altitude of groomer vs anchor:
+
+```javascript
+// Screen coords: lower Y = higher altitude
+const groomerY = this.groomer.y - 10;
+const hasSlack = groomerY <= this.winchAnchor.y;
+
+if (hasSlack) {
+    // Groomer above anchor - cable sags
+    // Draw quadratic bezier curve drooping down
+    // NO physics assist, normal stamina drain
+} else {
+    // Groomer below anchor - cable taut
+    // Draw straight line with tension coloring
+    // Apply winch pulling force, reduced stamina drain
+}
+```
+
+### Visual Feedback
+
+- **Taut cable**: Straight line, color shifts gray→red with distance
+- **Slack cable**: Curved/sagging line, thinner, grayer (0.7 opacity)
 
 ## HUD Scaling
 

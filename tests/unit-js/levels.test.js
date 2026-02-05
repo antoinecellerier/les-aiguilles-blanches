@@ -66,4 +66,18 @@ describe('Level Configuration', () => {
             });
         });
     });
+
+    it('level 6 should be a night level with winch', () => {
+        expect(LEVELS[6].isNight).toBe(true);
+        expect(LEVELS[6].hasWinch).toBe(true);
+        expect(LEVELS[6].winchAnchors?.length).toBeGreaterThan(0);
+    });
+
+    it('levels with hasWinch should have winch anchors', () => {
+        LEVELS.forEach((level, i) => {
+            if (level.hasWinch) {
+                expect(level.winchAnchors?.length, `Level ${i} has hasWinch but no anchors`).toBeGreaterThan(0);
+            }
+        });
+    });
 });

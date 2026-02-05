@@ -50,7 +50,8 @@ interface AccessEntryZone {
 
 interface WinchAnchor {
   x: number;
-  y: number;
+  y: number;      // Hook position (top) - for cable attachment
+  baseY: number;  // Base position - for proximity detection
   number: number;
 }
 
@@ -129,6 +130,10 @@ export default class GameScene extends Phaser.Scene {
   // Weather
   private weatherParticles: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
   private windStreaks: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
+
+  // Night/headlight
+  private nightOverlay: Phaser.GameObjects.Graphics | null = null;
+  private headlightDirection: { x: number; y: number } = { x: 0, y: -1 }; // Default facing up (toward slope)
 
   // Input
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -258,6 +263,10 @@ export default class GameScene extends Phaser.Scene {
     this.winchActive = false;
     this.winchCableGraphics = null;
     this.winchAnchor = null;
+
+    // Night state
+    this.nightOverlay = null;
+    this.headlightDirection = { x: 0, y: -1 };
 
     // Avalanche state
     this.avalancheZones = [];
@@ -1078,7 +1087,8 @@ export default class GameScene extends Phaser.Scene {
       padding: { x: 2, y: 1 }
     }).setOrigin(0.5);
 
-    this.winchAnchors.push({ x, y: y - 22, number });
+    // Store hook position (y - 22) for cable, base position (y + 8) for proximity
+    this.winchAnchors.push({ x, y: y - 22, baseY: y + 8, number });
   }
 
   private getNearestAnchor(): WinchAnchor | null {
@@ -1086,13 +1096,17 @@ export default class GameScene extends Phaser.Scene {
 
     let nearest: WinchAnchor | null = null;
     let nearestDist = Infinity;
+    
+    // Max distance to attach winch (about 3 tiles from the base)
+    const maxAttachDistance = this.tileSize * 3;
 
     this.winchAnchors.forEach(anchor => {
+      // Use baseY for proximity check (where groomer would physically attach)
       const dist = Phaser.Math.Distance.Between(
         this.groomer.x, this.groomer.y,
-        anchor.x, anchor.y
+        anchor.x, anchor.baseY
       );
-      if (dist < nearestDist) {
+      if (dist < nearestDist && dist <= maxAttachDistance) {
         nearestDist = dist;
         nearest = anchor;
       }
@@ -1129,30 +1143,54 @@ export default class GameScene extends Phaser.Scene {
 
     if (this.winchActive && this.winchAnchor && this.winchCableGraphics) {
       this.winchCableGraphics.clear();
-      this.winchCableGraphics.lineStyle(3, 0x888888, 1);
-      this.winchCableGraphics.beginPath();
-      this.winchCableGraphics.moveTo(this.winchAnchor.x, this.winchAnchor.y);
-      this.winchCableGraphics.lineTo(this.groomer.x, this.groomer.y - 10);
-      this.winchCableGraphics.strokePath();
-
-      const dist = Phaser.Math.Distance.Between(
-        this.groomer.x, this.groomer.y,
-        this.winchAnchor.x, this.winchAnchor.y
-      );
-      const maxDist = this.level.height * this.tileSize * 0.8;
-      const tension = Math.min(1, dist / maxDist);
-      const cableColor = Phaser.Display.Color.Interpolate.ColorWithColor(
-        new Phaser.Display.Color(136, 136, 136),
-        new Phaser.Display.Color(255, 100, 100),
-        100,
-        tension * 100
-      );
-      this.winchCableGraphics.lineStyle(3,
-        Phaser.Display.Color.GetColor(cableColor.r, cableColor.g, cableColor.b), 1);
-      this.winchCableGraphics.beginPath();
-      this.winchCableGraphics.moveTo(this.winchAnchor.x, this.winchAnchor.y);
-      this.winchCableGraphics.lineTo(this.groomer.x, this.groomer.y - 10);
-      this.winchCableGraphics.strokePath();
+      
+      const anchorX = this.winchAnchor.x;
+      const anchorY = this.winchAnchor.y;
+      const groomerX = this.groomer.x;
+      const groomerY = this.groomer.y - 10;
+      
+      // Check if cable has slack (groomer is above or at same level as anchor)
+      // In screen coords, lower Y = higher altitude
+      const hasSlack = groomerY <= anchorY;
+      
+      if (hasSlack) {
+        // Draw sagging cable - quadratic curve drooping down
+        const midX = (anchorX + groomerX) / 2;
+        const dist = Math.abs(groomerX - anchorX);
+        const sag = Math.max(30, dist * 0.3); // Sag amount based on horizontal distance
+        const midY = Math.max(anchorY, groomerY) + sag;
+        
+        this.winchCableGraphics.lineStyle(2, 0x666666, 0.7); // Thinner, grayer for slack
+        this.winchCableGraphics.beginPath();
+        this.winchCableGraphics.moveTo(anchorX, anchorY);
+        // Draw curved line using segments
+        const segments = 12;
+        for (let i = 1; i <= segments; i++) {
+          const t = i / segments;
+          // Quadratic bezier: P = (1-t)²P0 + 2(1-t)tP1 + t²P2
+          const px = (1 - t) * (1 - t) * anchorX + 2 * (1 - t) * t * midX + t * t * groomerX;
+          const py = (1 - t) * (1 - t) * anchorY + 2 * (1 - t) * t * midY + t * t * groomerY;
+          this.winchCableGraphics.lineTo(px, py);
+        }
+        this.winchCableGraphics.strokePath();
+      } else {
+        // Taut cable - straight line with tension coloring
+        const dist = Phaser.Math.Distance.Between(groomerX, groomerY, anchorX, anchorY);
+        const maxDist = this.level.height * this.tileSize * 0.8;
+        const tension = Math.min(1, dist / maxDist);
+        const cableColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+          new Phaser.Display.Color(136, 136, 136),
+          new Phaser.Display.Color(255, 100, 100),
+          100,
+          tension * 100
+        );
+        this.winchCableGraphics.lineStyle(3,
+          Phaser.Display.Color.GetColor(cableColor.r, cableColor.g, cableColor.b), 1);
+        this.winchCableGraphics.beginPath();
+        this.winchCableGraphics.moveTo(anchorX, anchorY);
+        this.winchCableGraphics.lineTo(groomerX, groomerY);
+        this.winchCableGraphics.strokePath();
+      }
     }
   }
 
@@ -1556,6 +1594,7 @@ export default class GameScene extends Phaser.Scene {
     this.groomer.setCollideWorldBounds(true);
     this.groomer.setDrag(200);
     this.groomer.setScale(this.tileSize / 16);
+    this.groomer.setDepth(101); // Above night overlay
 
     this.physics.add.collider(this.groomer, this.obstacles);
     this.physics.add.collider(this.groomer, this.boundaryWalls);
@@ -1666,15 +1705,92 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private createNightOverlay(): void {
-    const darkness = this.add.graphics();
-    darkness.fillStyle(0x000000, 0.7);
-    darkness.fillRect(0, 0,
-      this.level.width * this.tileSize,
-      this.level.height * this.tileSize
-    );
+    // Simple approach: dark tinted overlay covering the whole level
+    // The groomer's headlight creates a brighter area via a separate sprite
+    this.nightOverlay = this.add.graphics();
+    this.nightOverlay.setDepth(100);
+    this.nightOverlay.setScrollFactor(0);
+    
+    this.updateNightOverlay();
+  }
 
-    darkness.setScrollFactor(0);
-    darkness.setDepth(100);
+  private updateNightOverlay(): void {
+    if (!this.nightOverlay || !this.groomer) return;
+    
+    const cam = this.cameras.main;
+    const viewWidth = cam.width;
+    const viewHeight = cam.height;
+    
+    // Convert groomer world position to screen position
+    const screenX = this.groomer.x - cam.scrollX;
+    const screenY = this.groomer.y - cam.scrollY;
+    
+    // Update facing direction based on velocity
+    const body = this.groomer.body as Phaser.Physics.Arcade.Body;
+    if (body && (Math.abs(body.velocity.x) > 10 || Math.abs(body.velocity.y) > 10)) {
+      const len = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
+      this.headlightDirection = { x: body.velocity.x / len, y: body.velocity.y / len };
+    }
+    
+    // Groomer work lights - wide flood pattern front and back
+    const radiusFront = this.tileSize * 5;   // Length in front
+    const radiusBack = this.tileSize * 4;    // Length behind
+    const spreadAngle = Math.PI * 0.6;       // Wide 108° spread (work lights, not focused)
+    
+    // Offset lights from groomer center (half the sprite size)
+    const groomerRadius = this.tileSize * 0.5;
+    const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
+    
+    // Front and rear light origins
+    const frontX = screenX + Math.cos(angle) * groomerRadius;
+    const frontY = screenY + Math.sin(angle) * groomerRadius;
+    const rearX = screenX - Math.cos(angle) * groomerRadius;
+    const rearY = screenY - Math.sin(angle) * groomerRadius;
+    
+    this.nightOverlay.clear();
+    
+    // Draw darker overlay everywhere
+    const darkness = 0x000022;
+    const alpha = 0.7;
+    
+    this.nightOverlay.fillStyle(darkness, alpha);
+    this.nightOverlay.fillRect(0, 0, viewWidth, viewHeight);
+    
+    // Draw wide fan-shaped work lights
+    const steps = 6;
+    for (let i = steps - 1; i >= 0; i--) {
+      const t = (i + 1) / steps;
+      const stepAlpha = 0.1 * (steps - i) / steps;
+      
+      // Front work lights - wide flood pattern
+      this.nightOverlay.fillStyle(0xffffee, stepAlpha);
+      this.drawFloodLight(frontX, frontY, angle, radiusFront * t, spreadAngle);
+      
+      // Rear work lights - also wide  
+      this.nightOverlay.fillStyle(0xffddcc, stepAlpha * 0.7);
+      this.drawFloodLight(rearX, rearY, angle + Math.PI, radiusBack * t, spreadAngle * 0.9);
+    }
+  }
+
+  private drawFloodLight(cx: number, cy: number, angle: number, radius: number, spread: number): void {
+    if (!this.nightOverlay) return;
+    
+    // Draw a fan/wedge shape by filling circles along arcs at different distances
+    const distSteps = 8;
+    const arcSteps = 12;
+    
+    for (let d = 1; d <= distSteps; d++) {
+      const dist = radius * (d / distSteps);
+      // Circle size decreases with distance, but stays substantial for flood effect
+      const circleRadius = radius * 0.25 * (1 - d / distSteps * 0.5);
+      
+      for (let a = -arcSteps / 2; a <= arcSteps / 2; a++) {
+        const arcAngle = angle + (a / arcSteps) * spread;
+        const px = cx + Math.cos(arcAngle) * dist;
+        const py = cy + Math.sin(arcAngle) * dist;
+        this.nightOverlay.fillCircle(px, py, Math.max(circleRadius, 4));
+      }
+    }
   }
 
   private createWeatherEffects(): void {
@@ -1775,6 +1891,11 @@ export default class GameScene extends Phaser.Scene {
     this.updateResources(delta);
     this.checkTutorialProgress();
     this.checkWinCondition();
+    
+    // Update night overlay with headlight position
+    if (this.level.isNight) {
+      this.updateNightOverlay();
+    }
   }
 
   private checkSteepness(): void {
@@ -1902,8 +2023,13 @@ export default class GameScene extends Phaser.Scene {
       const dx = this.winchAnchor.x - this.groomer.x;
       const dy = this.winchAnchor.y - this.groomer.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      // Only apply winch force when cable is taut (groomer below anchor)
+      // In screen coords, groomer.y > anchor.y means groomer is lower/below
+      const groomerY = this.groomer.y - 10;
+      const isTaut = groomerY > this.winchAnchor.y;
 
-      if (dist > 50) {
+      if (dist > 50 && isTaut) {
         const winchForce = 0.3;
         vx += (dx / dist) * speed * winchForce;
         vy += (dy / dist) * speed * winchForce;
@@ -1986,7 +2112,11 @@ export default class GameScene extends Phaser.Scene {
       const currentSlope = this.getSlopeAtPosition(this.groomer.x, this.groomer.y);
       const isOnSteep = currentSlope >= 30;
       
-      if (this.winchActive) {
+      // Check if winch is actually helping (taut, not slack)
+      const winchHelping = this.winchActive && this.winchAnchor && 
+        (this.groomer.y - 10) > this.winchAnchor.y;
+      
+      if (winchHelping) {
         // Winch does the work - minimal operator effort
         staminaDrain *= 0.3;
       } else if (isOnSteep) {
@@ -2368,5 +2498,6 @@ export default class GameScene extends Phaser.Scene {
     this.winchCableGraphics = null;
     this.weatherParticles = null;
     this.windStreaks = null;
+    this.nightOverlay = null;
   }
 }

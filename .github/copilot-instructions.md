@@ -132,13 +132,16 @@ if (activePointers.length === 0) {
 - **Reduced motion**: Skips weather particle effects
 - **Screen reader**: ARIA live region announcements
 
+## Documentation
+- `docs/ARCHITECTURE.md` - Technical patterns, night rendering, winch system, scene lifecycle
+- `docs/GAMEPLAY.md` - Game mechanics, controls, level guide, troubleshooting
+
 ## Queued Items (from plan.md)
 ### Polish
+- Background padding graphics more similar to off-piste
 - Gamepad button rebinding
-- Night scene rendering + groomer headlights
 - Keyboard-only menu navigation
 - Level differentiation (varied objectives)
-- Winch anchor proximity requirement
 - Character avatars
 - Show connected gamepad name in settings
 - Localize How to Play WASD directions

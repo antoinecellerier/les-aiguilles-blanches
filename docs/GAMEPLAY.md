@@ -168,7 +168,7 @@ The game's difficulty naturally increases as you progress:
 - **Time**: 6 minutes
 - **Skills**: Night visibility, winch operation
 
-**Tips**: Use headlights to see. Deploy winch on the steepest sections to prevent sliding.
+**Tips**: Your groomer has directional headlights that illuminate the area in front and behind you. The lights rotate as you move, so they always shine where you're headed. Deploy the winch on steep sections - it only provides pulling force when you're downhill from the anchor.
 
 ### Level 7: Avalanche Zone - Col Dangereux
 *"High risk, high reward."*
@@ -283,7 +283,10 @@ A: Check fuel level. If at 0%, find the nearest fuel station.
 A: Focus on coverage, not perfection. 80% groomed is better than 50% perfect.
 
 **Q: The winch won't work!**
-A: Winch is only available on levels 4-8 where terrain requires it. You must be near a ⚓ anchor.
+A: Winch is only available on levels with steep terrain. You must be near an ⚓ anchor base (within 3 tiles) to attach. The cable shows slack when you're above the anchor, and only provides pulling force when you're below it.
+
+**Q: The winch cable looks loose!**
+A: When your groomer is above or level with the anchor, the cable has slack and doesn't provide any pulling assistance. Move below the anchor to tension the cable and get winch assist.
 
 **Q: I can't reach the winch anchor!**
 A: Look for service roads (orange/black poles) on the side of the piste. These provide safe access to anchors.
