@@ -35,6 +35,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Marker placement & pole sizing** - Markers skip cliffs, warning poles on snow, all poles standardized to 28×5px
 - ✅ **Art style guide** - Comprehensive visual style documentation preventing future inconsistencies
 - ✅ **Cliff system** - Shared CliffSegment architecture with physics/visual alignment, organic edges, variable offset/extent
 - ✅ **Pre-commit checklist** - Workflow skill ensuring docs, tests, and commit quality

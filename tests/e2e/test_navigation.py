@@ -202,6 +202,114 @@ class TestMenuNavigation:
         
         # Menu should still be active (overlay on top)
         assert_scene_active(game_page, 'MenuScene')
+        
+        # Verify overlay is open
+        overlay_open = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('MenuScene');
+            return scene?.overlayOpen === true;
+        }""")
+        assert overlay_open, "Overlay should be open after clicking How to Play"
+
+    def test_how_to_play_dismiss_with_enter(self, game_page: Page):
+        """Test How to Play overlay dismissed with Enter without triggering menu action."""
+        assert_scene_active(game_page, 'MenuScene')
+        
+        # Navigate to How To Play with keyboard and activate it
+        game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
+        game_page.wait_for_timeout(100)
+        game_page.keyboard.press("Enter")  # Open overlay
+        game_page.wait_for_timeout(200)
+        
+        # Verify overlay is open
+        overlay_open = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('MenuScene');
+            return scene?.overlayOpen === true;
+        }""")
+        assert overlay_open, "Overlay should be open"
+        
+        # Press Enter to dismiss - this should ONLY close overlay, not trigger menu
+        game_page.keyboard.press("Enter")
+        game_page.wait_for_timeout(200)
+        
+        # Verify overlay is closed
+        overlay_closed = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('MenuScene');
+            return scene?.overlayOpen === false;
+        }""")
+        assert overlay_closed, "Overlay should be closed after Enter"
+        
+        # CRITICAL: Menu should still be active (not GameScene from accidental activation)
+        assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Enter should only close overlay")
+
+    def test_how_to_play_dismiss_with_space(self, game_page: Page):
+        """Test How to Play overlay dismissed with Space without triggering menu action."""
+        assert_scene_active(game_page, 'MenuScene')
+        
+        # Navigate to How To Play with keyboard and activate it
+        game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
+        game_page.wait_for_timeout(100)
+        game_page.keyboard.press("Enter")  # Open overlay
+        game_page.wait_for_timeout(200)
+        
+        # Verify overlay is open
+        overlay_open = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('MenuScene');
+            return scene?.overlayOpen === true;
+        }""")
+        assert overlay_open, "Overlay should be open"
+        
+        # Press Space to dismiss - this should ONLY close overlay, not trigger menu
+        game_page.keyboard.press("Space")
+        game_page.wait_for_timeout(200)
+        
+        # Verify overlay is closed
+        overlay_closed = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('MenuScene');
+            return scene?.overlayOpen === false;
+        }""")
+        assert overlay_closed, "Overlay should be closed after Space"
+        
+        # CRITICAL: Menu should still be active (not GameScene from accidental activation)
+        assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Space should only close overlay")
+
+    def test_overlay_blocks_menu_navigation(self, game_page: Page):
+        """Test that arrow keys don't change menu selection while overlay is open."""
+        assert_scene_active(game_page, 'MenuScene')
+        
+        # Get initial selection
+        initial_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.selectedIndex;
+        }""")
+        assert initial_index == 0, "Should start with first button selected"
+        
+        # Open How To Play overlay via keyboard (not mouse) to avoid hover effects
+        game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
+        game_page.wait_for_timeout(100)
+        game_page.keyboard.press("Enter")  # Open overlay
+        game_page.wait_for_timeout(200)
+        
+        # Selection should be 1 (How To Play) after we navigated there
+        pre_nav_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.selectedIndex;
+        }""")
+        assert pre_nav_index == 1, "Should be on How To Play button"
+        
+        # Verify overlay is open
+        overlay_open = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.overlayOpen === true;
+        }""")
+        assert overlay_open, "Overlay should be open"
+        
+        # Try to navigate with arrows while overlay is open
+        game_page.keyboard.press("ArrowDown")
+        game_page.keyboard.press("ArrowDown")
+        game_page.wait_for_timeout(100)
+        
+        # Selection should NOT have changed from 1
+        current_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.selectedIndex;
+        }""")
+        assert current_index == pre_nav_index, f"Menu selection should not change while overlay is open (was {pre_nav_index}, now {current_index})"
 
     def test_settings_button(self, game_page: Page):
         """Test Settings button opens SettingsScene."""
@@ -713,6 +821,105 @@ class TestFailScreen:
         }""")
         assert scene_data is not None, "LevelCompleteScene should exist"
         assert scene_data['won'] == False, "Should be a fail screen"
+
+    def test_level_complete_keyboard_navigation(self, game_page: Page):
+        """Test that LevelCompleteScene supports keyboard navigation between buttons."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Trigger fail to get to LevelCompleteScene with 2 buttons (Retry, Menu)
+        game_page.evaluate("""() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            if (gameScene && gameScene.gameOver) {
+                gameScene.gameOver(false, 'fuel');
+            }
+        }""")
+        
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        
+        # Check initial state - first button should be selected
+        initial_state = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('LevelCompleteScene');
+            return {
+                selectedIndex: scene?.selectedIndex,
+                buttonCount: scene?.menuButtons?.length
+            };
+        }""")
+        
+        assert initial_state['buttonCount'] == 2, "Should have 2 buttons (Retry, Menu)"
+        assert initial_state['selectedIndex'] == 0, "First button should be selected initially"
+        
+        # Press RIGHT to select second button
+        game_page.keyboard.press("ArrowRight")
+        game_page.wait_for_timeout(100)
+        
+        new_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('LevelCompleteScene')?.selectedIndex;
+        }""")
+        assert new_index == 1, "RIGHT should select second button"
+        
+        # Press LEFT to go back to first button
+        game_page.keyboard.press("ArrowLeft")
+        game_page.wait_for_timeout(100)
+        
+        final_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('LevelCompleteScene')?.selectedIndex;
+        }""")
+        assert final_index == 0, "LEFT should return to first button"
+
+    def test_credits_keyboard_navigation(self, game_page: Page):
+        """Test that CreditsScene supports keyboard navigation between buttons."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Jump to credits by starting CreditsScene directly
+        game_page.evaluate("""() => {
+            window.game.scene.start('CreditsScene');
+        }""")
+        
+        wait_for_scene(game_page, 'CreditsScene', timeout=3000)
+        
+        # Skip credits animation by pressing any key
+        game_page.keyboard.press("s")
+        game_page.wait_for_timeout(300)
+        
+        # Wait for buttons to be visible
+        game_page.wait_for_function("""() => {
+            const scene = window.game.scene.getScene('CreditsScene');
+            return scene?.buttonsContainer?.visible === true;
+        }""", timeout=3000)
+        
+        # Check initial state - first button should be selected
+        initial_state = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('CreditsScene');
+            return {
+                selectedIndex: scene?.selectedIndex,
+                buttonCount: scene?.menuButtons?.length,
+                buttonsVisible: scene?.buttonsContainer?.visible
+            };
+        }""")
+        
+        assert initial_state['buttonsVisible'] == True, "Buttons should be visible after skip"
+        assert initial_state['buttonCount'] == 2, "Should have 2 buttons (Play Again, Menu)"
+        assert initial_state['selectedIndex'] == 0, "First button should be selected initially"
+        
+        # Press RIGHT to select second button
+        game_page.keyboard.press("ArrowRight")
+        game_page.wait_for_timeout(100)
+        
+        new_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('CreditsScene')?.selectedIndex;
+        }""")
+        assert new_index == 1, "RIGHT should select second button"
+        
+        # Press LEFT to go back to first button
+        game_page.keyboard.press("ArrowLeft")
+        game_page.wait_for_timeout(100)
+        
+        final_index = game_page.evaluate("""() => {
+            return window.game.scene.getScene('CreditsScene')?.selectedIndex;
+        }""")
+        assert final_index == 0, "LEFT should return to first button"
 
     def test_fail_screen_has_retry_option(self, game_page: Page):
         """Test that fail screen has retry button."""

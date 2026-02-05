@@ -15,6 +15,11 @@ export default class CreditsScene extends Phaser.Scene {
   private buttonsContainer!: Phaser.GameObjects.Container;
   private skipHint!: Phaser.GameObjects.Text;
   private creditsHeight = 0;
+  
+  // Keyboard navigation
+  private menuButtons: Phaser.GameObjects.Text[] = [];
+  private buttonCallbacks: (() => void)[] = [];
+  private selectedIndex = 0;
 
   constructor() {
     super({ key: 'CreditsScene' });
@@ -22,6 +27,11 @@ export default class CreditsScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.cameras.main;
+    
+    // Reset navigation state
+    this.menuButtons = [];
+    this.buttonCallbacks = [];
+    this.selectedIndex = 0;
 
     this.cameras.main.setBackgroundColor(THEME.colors.darkBg);
     this.createStars();
@@ -120,37 +130,23 @@ export default class CreditsScene extends Phaser.Scene {
 
     const btnStyle = buttonStyle(THEME.fonts.sizes.medium, 20, 10);
 
+    // Play Again button
     const playAgainBtn = this.add.text(
       width / 2 - 100,
       height - 60,
-      (t('playAgain') || 'Rejouer') + ' [ENTER]',
+      t('playAgain') || 'Rejouer',
       btnStyle
-    )
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
-      })
-      .on('pointerout', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
-      })
-      .on('pointerdown', () => this.restartGame());
+    ).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.setupButton(playAgainBtn, 0, () => this.restartGame());
 
+    // Menu button
     const menuBtn = this.add.text(
       width / 2 + 100,
       height - 60,
-      (t('menu') || 'Menu') + ' [ESC]',
+      t('menu') || 'Menu',
       btnStyle
-    )
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
-      })
-      .on('pointerout', function (this: Phaser.GameObjects.Text) {
-        this.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
-      })
-      .on('pointerdown', () => this.returnToMenu());
+    ).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.setupButton(menuBtn, 1, () => this.returnToMenu());
 
     this.buttonsContainer.add([playAgainBtn, menuBtn]);
 
@@ -202,9 +198,51 @@ export default class CreditsScene extends Phaser.Scene {
     this.skipHint.setVisible(false);
 
     this.input.keyboard?.removeAllListeners();
-    this.input.keyboard?.on('keydown-ENTER', () => this.restartGame());
-    this.input.keyboard?.on('keydown-SPACE', () => this.restartGame());
+    this.input.keyboard?.on('keydown-LEFT', () => this.navigateMenu(-1));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.navigateMenu(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
     this.input.keyboard?.on('keydown-ESC', () => this.returnToMenu());
+    
+    // Initialize selection highlight
+    this.updateButtonStyles();
+  }
+  
+  private setupButton(btn: Phaser.GameObjects.Text, index: number, callback: () => void): void {
+    btn.on('pointerover', () => this.selectButton(index));
+    btn.on('pointerout', () => this.updateButtonStyles());
+    btn.on('pointerdown', callback);
+    this.menuButtons.push(btn);
+    this.buttonCallbacks.push(callback);
+  }
+  
+  private selectButton(index: number): void {
+    this.selectedIndex = index;
+    this.updateButtonStyles();
+  }
+  
+  private navigateMenu(direction: number): void {
+    if (this.menuButtons.length === 0) return;
+    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
+    this.updateButtonStyles();
+  }
+  
+  private activateSelected(): void {
+    if (this.buttonCallbacks[this.selectedIndex]) {
+      this.buttonCallbacks[this.selectedIndex]();
+    }
+  }
+  
+  private updateButtonStyles(): void {
+    this.menuButtons.forEach((btn, i) => {
+      if (i === this.selectedIndex) {
+        btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
+        btn.setScale(1.05);
+      } else {
+        btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
+        btn.setScale(1);
+      }
+    });
   }
 
   private restartGame(): void {

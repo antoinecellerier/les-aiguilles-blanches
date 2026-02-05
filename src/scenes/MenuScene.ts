@@ -14,11 +14,14 @@ import PauseScene from './PauseScene';
  */
 
 export default class MenuScene extends Phaser.Scene {
+  private overlayOpen = false;
+  
   constructor() {
     super({ key: 'MenuScene' });
   }
 
   create(): void {
+    this.overlayOpen = false;
     const { width, height } = this.cameras.main;
 
     // Calculate scale factor for responsive text
@@ -207,11 +210,13 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private navigateMenu(direction: number): void {
+    if (this.overlayOpen) return;
     this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
     this.updateButtonStyles();
   }
 
   private activateSelected(): void {
+    if (this.overlayOpen) return;
     if (this.buttonCallbacks[this.selectedIndex]) {
       this.buttonCallbacks[this.selectedIndex]();
     }
@@ -442,6 +447,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showOverlay(titleKey: string, lines: string[]): void {
+    this.overlayOpen = true;
     const { width, height } = this.cameras.main;
 
     // Scale based on available height for optimal legibility
@@ -496,17 +502,21 @@ export default class MenuScene extends Phaser.Scene {
     const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
     overlay.setDepth(dialog.depth - 1);
 
-    // Handle button click
-    dialog.on('button.click', () => {
+    // ESC, ENTER, or SPACE to close
+    const closeOverlay = () => {
+      this.overlayOpen = false;
+      this.input.keyboard?.off('keydown-ESC', closeOverlay);
+      this.input.keyboard?.off('keydown-ENTER', closeOverlay);
+      this.input.keyboard?.off('keydown-SPACE', closeOverlay);
       overlay.destroy();
       dialog.destroy();
-    });
+    };
+    this.input.keyboard?.on('keydown-ESC', closeOverlay);
+    this.input.keyboard?.on('keydown-ENTER', closeOverlay);
+    this.input.keyboard?.on('keydown-SPACE', closeOverlay);
 
-    // ESC to close
-    this.input.keyboard?.once('keydown-ESC', () => {
-      overlay.destroy();
-      dialog.destroy();
-    });
+    // Handle button click
+    dialog.on('button.click', closeOverlay);
   }
 
   private createDialogButton(text: string, fontSize: number, scaleFactor: number): Phaser.GameObjects.Text {

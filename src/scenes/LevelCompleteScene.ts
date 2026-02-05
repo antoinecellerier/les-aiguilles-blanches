@@ -22,6 +22,11 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private coverage = 0;
   private timeUsed = 0;
   private failReason?: string;
+  
+  // Keyboard/gamepad navigation
+  private menuButtons: Phaser.GameObjects.Text[] = [];
+  private buttonCallbacks: (() => void)[] = [];
+  private selectedIndex = 0;
 
   constructor() {
     super({ key: 'LevelCompleteScene' });
@@ -33,6 +38,11 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.coverage = data.coverage;
     this.timeUsed = data.timeUsed;
     this.failReason = data.failReason;
+    
+    // Reset navigation state
+    this.menuButtons = [];
+    this.buttonCallbacks = [];
+    this.selectedIndex = 0;
   }
 
   create(): void {
@@ -133,62 +143,50 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Check if gamepad is connected for button hints
     const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
-    const confirmHint = hasGamepad ? 'Ⓐ' : 'ENTER';
+    const confirmHint = hasGamepad ? 'Ⓐ' : '↵';
     const backHint = hasGamepad ? 'Ⓑ' : 'ESC';
 
     if (this.won && this.levelIndex < LEVELS.length - 1) {
       // Won, more levels: Next Level + Menu
-      buttonSizer.add(this.createButton(t('nextLevel') + ` [${confirmHint}]`, buttonFontSize, buttonPadding, () => {
-        this.scene.start('GameScene', { level: this.levelIndex + 1 });
-      }));
-      buttonSizer.add(this.createButton(t('menu') + ` [${backHint}]`, buttonFontSize, buttonPadding, () => {
-        this.scene.start('MenuScene');
-      }));
-
-      this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('GameScene', { level: this.levelIndex + 1 }));
-      this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('GameScene', { level: this.levelIndex + 1 }));
-      this.input.keyboard?.once('keydown-ESC', () => this.scene.start('MenuScene'));
+      this.addButton(buttonSizer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding, 
+        () => this.scene.start('GameScene', { level: this.levelIndex + 1 }));
+      this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
+        () => this.scene.start('MenuScene'));
 
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
-      // Won final level: View Credits
-      buttonSizer.add(this.createButton(t('viewCredits') + ` [${confirmHint}]`, buttonFontSize, buttonPadding, () => {
-        this.scene.start('CreditsScene');
-      }));
-
-      this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('CreditsScene'));
-      this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('CreditsScene'));
-      this.input.keyboard?.once('keydown-ESC', () => this.scene.start('MenuScene'));
+      // Won final level: View Credits + Menu
+      this.addButton(buttonSizer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding,
+        () => this.scene.start('CreditsScene'));
+      this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
+        () => this.scene.start('MenuScene'));
 
     } else {
       // Failed: Retry + Menu
-      buttonSizer.add(this.createButton(t('retry') + ` [${confirmHint}]`, buttonFontSize, buttonPadding, () => {
-        this.scene.start('GameScene', { level: this.levelIndex });
-      }));
-      buttonSizer.add(this.createButton(t('menu') + ` [${backHint}]`, buttonFontSize, buttonPadding, () => {
-        this.scene.start('MenuScene');
-      }));
-
-      this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('GameScene', { level: this.levelIndex }));
-      this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('GameScene', { level: this.levelIndex }));
-      this.input.keyboard?.once('keydown-ESC', () => this.scene.start('MenuScene'));
+      this.addButton(buttonSizer, t('retry') || 'Retry', buttonFontSize, buttonPadding,
+        () => this.scene.start('GameScene', { level: this.levelIndex }));
+      this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
+        () => this.scene.start('MenuScene'));
     }
+    
+    // Keyboard navigation (horizontal layout)
+    this.input.keyboard?.on('keydown-LEFT', () => this.navigateMenu(-1));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.navigateMenu(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-ESC', () => this.scene.start('MenuScene'));
+    
+    // Initialize selection
+    this.updateButtonStyles();
 
     mainSizer.add(buttonSizer, { align: 'center', padding: { top: 30 } });
     mainSizer.layout();
 
-    // Setup gamepad tracking
-    this.primaryAction = this.won && this.levelIndex < LEVELS.length - 1 
-      ? () => this.scene.start('GameScene', { level: this.levelIndex + 1 })
-      : this.won && this.levelIndex === LEVELS.length - 1
-        ? () => this.scene.start('CreditsScene')
-        : () => this.scene.start('GameScene', { level: this.levelIndex });
-    
-    // Initialize to current state to prevent phantom presses from previous scene
+    // Initialize gamepad state to prevent phantom presses from previous scene
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
-        this.gamepadBPressed = pad.buttons[1]?.pressed || false;
+        this.gamepadAPressed = isConfirmPressed(pad);
+        this.gamepadBPressed = isBackPressed(pad);
       }
     } else {
       this.gamepadAPressed = false;
@@ -198,19 +196,36 @@ export default class LevelCompleteScene extends Phaser.Scene {
     Accessibility.announce(t(titleKey) + '. ' + t('coverage') + ' ' + this.coverage + '%');
   }
 
-  private primaryAction: (() => void) | null = null;
   private gamepadAPressed = false;
   private gamepadBPressed = false;
+  private gamepadNavCooldown = 0;
 
-  update(): void {
-    // Gamepad support for level complete
+  update(_time: number, delta: number): void {
+    // Gamepad navigation cooldown
+    if (this.gamepadNavCooldown > 0) {
+      this.gamepadNavCooldown -= delta;
+    }
+    
+    // Gamepad support
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        // Use controller-aware button mapping (handles Nintendo swap)
+        // D-pad / stick navigation (horizontal layout)
+        if (this.gamepadNavCooldown <= 0) {
+          const stickX = pad.leftStick?.x ?? 0;
+          if (pad.left || stickX < -0.5) {
+            this.navigateMenu(-1);
+            this.gamepadNavCooldown = 200;
+          } else if (pad.right || stickX > 0.5) {
+            this.navigateMenu(1);
+            this.gamepadNavCooldown = 200;
+          }
+        }
+        
+        // Confirm button activates selected
         const confirmPressed = isConfirmPressed(pad);
-        if (confirmPressed && !this.gamepadAPressed && this.primaryAction) {
-          this.primaryAction();
+        if (confirmPressed && !this.gamepadAPressed) {
+          this.activateSelected();
         }
         this.gamepadAPressed = confirmPressed;
 
@@ -222,6 +237,59 @@ export default class LevelCompleteScene extends Phaser.Scene {
         this.gamepadBPressed = backPressed;
       }
     }
+  }
+  
+  private addButton(
+    sizer: any,
+    text: string,
+    fontSize: number,
+    padding: { x: number; y: number },
+    callback: () => void
+  ): void {
+    const index = this.menuButtons.length;
+    const btn = this.add.text(0, 0, text, {
+      fontFamily: THEME.fonts.family,
+      fontSize: `${fontSize}px`,
+      color: THEME.colors.textPrimary,
+      backgroundColor: THEME.colors.buttonPrimaryHex,
+      padding,
+    }).setInteractive({ useHandCursor: true })
+      .on('pointerover', () => this.selectButton(index))
+      .on('pointerout', () => this.updateButtonStyles())
+      .on('pointerdown', callback);
+    
+    this.menuButtons.push(btn);
+    this.buttonCallbacks.push(callback);
+    sizer.add(btn);
+  }
+  
+  private selectButton(index: number): void {
+    this.selectedIndex = index;
+    this.updateButtonStyles();
+  }
+  
+  private navigateMenu(direction: number): void {
+    if (this.menuButtons.length === 0) return;
+    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
+    this.updateButtonStyles();
+  }
+  
+  private activateSelected(): void {
+    if (this.buttonCallbacks[this.selectedIndex]) {
+      this.buttonCallbacks[this.selectedIndex]();
+    }
+  }
+  
+  private updateButtonStyles(): void {
+    this.menuButtons.forEach((btn, i) => {
+      if (i === this.selectedIndex) {
+        btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
+        btn.setScale(1.05);
+      } else {
+        btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
+        btn.setScale(1);
+      }
+    });
   }
 
   private createButton(
