@@ -125,27 +125,27 @@ export default class HUDScene extends Phaser.Scene {
     this.add.text(padding, row2Y, '⛽', { fontSize: fontIcon }).setScrollFactor(0);
     this.fuelBarBg = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
     this.fuelBar = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0xcc2200).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelText = this.add.text(barOffset + padding + barWidth + 5, row2Y + Math.round(8 * this.uiScale), '100%', {
+    this.fuelText = this.add.text(barOffset + padding + barWidth + 5, row2Y, '100%', {
       fontFamily: 'Courier New',
       fontSize: fontSmall,
       color: '#ffffff',
-    }).setOrigin(0, 0.5).setScrollFactor(0);
+    }).setScrollFactor(0);
 
     this.add.text(padding, row3Y, '💪', { fontSize: fontIcon }).setScrollFactor(0);
     this.staminaBarBg = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
     this.staminaBar = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x22aa22).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaText = this.add.text(barOffset + padding + barWidth + 5, row3Y + Math.round(8 * this.uiScale), '100%', {
+    this.staminaText = this.add.text(barOffset + padding + barWidth + 5, row3Y, '100%', {
       fontFamily: 'Courier New',
       fontSize: fontSmall,
       color: '#ffffff',
-    }).setOrigin(0, 0.5).setScrollFactor(0);
+    }).setScrollFactor(0);
 
     this.add.text(padding, row4Y, '❄️', { fontSize: fontIcon }).setScrollFactor(0);
-    this.coverageText = this.add.text(barOffset + padding, row4Y + Math.round(7 * this.uiScale), (t('coverage') || 'Coverage') + ': 0%', {
+    this.coverageText = this.add.text(barOffset + padding, row4Y, (t('coverage') || 'Coverage') + ': 0%', {
       fontFamily: 'Courier New, monospace',
       fontSize: fontMed,
       color: '#87CEEB',
-    }).setOrigin(0, 0.5).setScrollFactor(0);
+    }).setScrollFactor(0);
 
     // Right panel
     this.add.rectangle(width, 0, rightPanelWidth, rightPanelHeight, 0x000000, 0.75).setOrigin(1, 0).setScrollFactor(0);
@@ -208,7 +208,7 @@ export default class HUDScene extends Phaser.Scene {
         ? (t('winchHintTouch') || 'Hold 🔗 for winch')
         : (t('winchHint') || `${winchKey} = Winch`);
       const winchHintText = '🔗 ' + winchHintRaw.replace('{winchKey}', winchKey);
-      this.winchHint = this.add.text(width / 2, Math.round(12 * this.uiScale), winchHintText, {
+      this.winchHint = this.add.text(Math.round(width / 2), Math.round(12 * this.uiScale), winchHintText, {
         fontFamily: 'Courier New',
         fontSize: fontSmall,
         color: '#FFD700',
@@ -293,10 +293,10 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Virtual joystick (bottom-left)
-    const joystickRadius = btnSize * 1.8;
-    const thumbRadius = btnSize * 0.6;
-    const joystickX = padding + joystickRadius;
-    const joystickY = height - padding - joystickRadius;
+    const joystickRadius = Math.round(btnSize * 1.8);
+    const thumbRadius = Math.round(btnSize * 0.6);
+    const joystickX = Math.round(padding + joystickRadius);
+    const joystickY = Math.round(height - padding - joystickRadius);
     
     // Calculate top edge of touch controls (joystick top + margin)
     // This is used by DialogueScene to position dialogues above touch controls
@@ -310,7 +310,7 @@ export default class HUDScene extends Phaser.Scene {
       .setStrokeStyle(3, 0x555555, alpha);
     
     // Direction indicators on base
-    const indicatorDist = joystickRadius * 0.7;
+    const indicatorDist = Math.round(joystickRadius * 0.7);
     const indicators = [
       { x: 0, y: -indicatorDist, label: '▲' },
       { x: 0, y: indicatorDist, label: '▼' },
@@ -352,11 +352,11 @@ export default class HUDScene extends Phaser.Scene {
     this.touchControlsContainer.add(joystickZone);
 
     // Action buttons (bottom-right)
-    const actionX = width - padding - btnSize;
-    const actionY = height - padding - btnSize;
+    const actionX = Math.round(width - padding - btnSize);
+    const actionY = Math.round(height - padding - btnSize);
 
     // Groom button (SPACE equivalent)
-    this.createTouchButton(actionX - btnSize - padding / 2, actionY, btnSize * 1.2, '❄️', alpha,
+    this.createTouchButton(Math.round(actionX - btnSize - padding / 2), actionY, Math.round(btnSize * 1.2), '❄️', alpha,
       () => { this.touchGroom = true; },
       () => { this.touchGroom = false; },
       0x2266aa
@@ -364,7 +364,7 @@ export default class HUDScene extends Phaser.Scene {
 
     // Winch button (SHIFT equivalent) - only if level has winch
     if (this.level.hasWinch) {
-      this.createTouchButton(actionX, actionY - btnSize - padding / 2, btnSize * 1.2, '🔗', alpha,
+      this.createTouchButton(actionX, Math.round(actionY - btnSize - padding / 2), Math.round(btnSize * 1.2), '🔗', alpha,
         () => { this.touchWinch = true; },
         () => { this.touchWinch = false; },
         0xaa6622

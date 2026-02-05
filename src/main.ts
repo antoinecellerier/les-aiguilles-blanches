@@ -43,6 +43,11 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  render: {
+    pixelArt: false,
+    antialias: true,
+    roundPixels: true, // Prevents sub-pixel rendering for crisp text
+  },
   input: {
     activePointers: 3, // Enable multitouch (D-pad + action buttons)
     gamepad: true, // Enable gamepad support
