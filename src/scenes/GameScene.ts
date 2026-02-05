@@ -118,6 +118,16 @@ export default class GameScene extends Phaser.Scene {
   private steepZoneRects: SteepZoneRect[] = [];
   private accessPathRects: AccessPathRect[] = [];
   private accessEntryZones: AccessEntryZone[] = [];
+  
+  // Cliff data - shared between physics and visuals for consistency
+  private cliffSegments: {
+    side: 'left' | 'right';
+    startY: number;
+    endY: number;
+    offset: number;  // Distance from piste edge where cliff starts
+    extent: number;  // Width of cliff
+    getX: (y: number) => number;  // Piste edge position at Y
+  }[] = [];
 
   // Winch
   private winchAnchors: WinchAnchor[] = [];
@@ -562,6 +572,7 @@ export default class GameScene extends Phaser.Scene {
     this.totalTiles = this.groomableTiles;
 
     this.calculateAccessPathZones();
+    this.calculateCliffSegments();  // Calculate cliff data before physics/visuals
     this.createBoundaryColliders();
   }
 
@@ -595,6 +606,115 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Calculate cliff segments with variable offset and extent.
+   * Called before createBoundaryColliders so both physics and visuals use same data.
+   */
+  private calculateCliffSegments(): void {
+    if (!this.level.hasDangerousBoundaries) return;
+    
+    this.cliffSegments = [];
+    const tileSize = this.tileSize;
+    const worldWidth = this.level.width * tileSize;
+    
+    // Seeded random for consistent cliff appearance
+    const rand = (seed: number) => {
+      const n = Math.sin(seed * 127.1) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    
+    // Build continuous cliff segments for each side
+    type EdgeData = { y: number; x: number };
+    const leftEdges: EdgeData[] = [];
+    const rightEdges: EdgeData[] = [];
+    let leftStart: number | null = null;
+    let rightStart: number | null = null;
+    
+    for (let y = 3; y < this.level.height - 2; y++) {
+      const path = this.pistePath[y];
+      if (!path) continue;
+      
+      const leftEdge = (path.centerX - path.width / 2) * tileSize;
+      const rightEdge = (path.centerX + path.width / 2) * tileSize;
+      const yPos = y * tileSize;
+      
+      // Check access paths - cliffs should not overlap service roads
+      const isLeftAccess = this.accessEntryZones?.some(z => 
+        z.side === 'left' && yPos >= z.startY - tileSize * 2 && yPos <= z.endY + tileSize * 2
+      );
+      const isRightAccess = this.accessEntryZones?.some(z => 
+        z.side === 'right' && yPos >= z.startY - tileSize * 2 && yPos <= z.endY + tileSize * 2
+      );
+      
+      // Left cliff segments - anywhere piste doesn't touch left edge
+      const hasLeftCliff = leftEdge > tileSize && !isLeftAccess;
+      if (hasLeftCliff) {
+        if (leftStart === null) leftStart = yPos;
+        leftEdges.push({ y: yPos, x: leftEdge });
+      } else if (leftStart !== null) {
+        this.finalizeCliffSegmentWithParams(leftStart, (y - 1) * tileSize, leftEdges, 'left', rand, tileSize, worldWidth);
+        leftStart = null;
+        leftEdges.length = 0;
+      }
+      
+      // Right cliff segments - anywhere piste doesn't touch right edge
+      const hasRightCliff = rightEdge < worldWidth - tileSize && !isRightAccess;
+      if (hasRightCliff) {
+        if (rightStart === null) rightStart = yPos;
+        rightEdges.push({ y: yPos, x: rightEdge });
+      } else if (rightStart !== null) {
+        this.finalizeCliffSegmentWithParams(rightStart, (y - 1) * tileSize, rightEdges, 'right', rand, tileSize, worldWidth);
+        rightStart = null;
+        rightEdges.length = 0;
+      }
+    }
+    
+    // Close remaining segments
+    if (leftStart !== null) {
+      this.finalizeCliffSegmentWithParams(leftStart, (this.level.height - 3) * tileSize, leftEdges, 'left', rand, tileSize, worldWidth);
+    }
+    if (rightStart !== null) {
+      this.finalizeCliffSegmentWithParams(rightStart, (this.level.height - 3) * tileSize, rightEdges, 'right', rand, tileSize, worldWidth);
+    }
+  }
+  
+  private finalizeCliffSegmentWithParams(
+    startY: number,
+    endY: number,
+    edges: { y: number; x: number }[],
+    side: 'left' | 'right',
+    rand: (seed: number) => number,
+    tileSize: number,
+    worldWidth: number
+  ): void {
+    if (edges.length < 2) return;
+    
+    // CRITICAL: Copy edges array since caller clears it after this call
+    // The closure needs its own copy to work correctly
+    const edgesCopy = edges.map(e => ({ y: e.y, x: e.x }));
+    
+    // Variable offset from piste edge: 1.5-3 tiles minimum
+    // Ensures cliffs never overlap with piste area
+    const offsetVariation = rand(startY * 0.5 + 77);
+    const offset = tileSize * (1.5 + offsetVariation * 1.5);
+    
+    // Finite extent: 3-5 tiles wide
+    const extent = tileSize * (3 + rand(startY * 0.3 + 99) * 2);
+    
+    // Interpolation function for edge position using copied edges
+    const getX = (y: number): number => {
+      const idx = edgesCopy.findIndex(e => e.y >= y);
+      if (idx <= 0) return edgesCopy[0].x;
+      if (idx >= edgesCopy.length) return edgesCopy[edgesCopy.length - 1].x;
+      const prev = edgesCopy[idx - 1];
+      const next = edgesCopy[idx];
+      const t = (y - prev.y) / (next.y - prev.y || 1);
+      return prev.x + (next.x - prev.x) * t;
+    };
+    
+    this.cliffSegments.push({ side, startY, endY, offset, extent, getX });
+  }
+
   private createBoundaryColliders(): void {
     this.boundaryWalls = this.physics.add.staticGroup();
     this.dangerZones = this.physics.add.staticGroup();
@@ -620,42 +740,83 @@ export default class GameScene extends Phaser.Scene {
 
     const segmentHeight = tileSize * 4;
 
-    for (let y = 0; y < this.level.height; y += 4) {
-      if (y >= this.level.height - 2) continue;
-
-      const yPos = y * tileSize;
-      const path = this.pistePath[y] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
-      const leftEdge = (path.centerX - path.width / 2) * tileSize;
-      const rightEdge = (path.centerX + path.width / 2) * tileSize;
-
-      if (leftEdge > tileSize && !isAccessZone(yPos, 'left')) {
-        const leftWall = this.add.rectangle(
-          leftEdge / 2,
-          yPos + segmentHeight / 2,
-          leftEdge,
-          segmentHeight,
-          0x000000, 0
-        );
-        this.physics.add.existing(leftWall, true);
-        if (isDangerous) {
-          this.dangerZones.add(leftWall);
-        } else {
-          this.boundaryWalls.add(leftWall);
+    // For dangerous levels, use cliff segments with offset for physics
+    // For non-dangerous levels, use piste edge directly
+    if (isDangerous && this.cliffSegments.length > 0) {
+      // Create danger zones based on cliff segments (with offset from piste)
+      for (const cliff of this.cliffSegments) {
+        // Create physics bodies for each segment of the cliff
+        for (let y = cliff.startY; y < cliff.endY; y += segmentHeight) {
+          const pisteEdge = cliff.getX(y);
+          const yEnd = Math.min(y + segmentHeight, cliff.endY);
+          const height = yEnd - y;
+          
+          if (cliff.side === 'left') {
+            // Left cliff: danger zone from (pisteEdge - offset - extent) to (pisteEdge - offset)
+            const cliffEnd = pisteEdge - cliff.offset;
+            const cliffStart = Math.max(0, cliffEnd - cliff.extent);
+            const width = cliffEnd - cliffStart;
+            if (width > 0) {
+              const wall = this.add.rectangle(
+                cliffStart + width / 2,
+                y + height / 2,
+                width,
+                height,
+                0x000000, 0
+              );
+              this.physics.add.existing(wall, true);
+              this.dangerZones.add(wall);
+            }
+          } else {
+            // Right cliff: danger zone from (pisteEdge + offset) to (pisteEdge + offset + extent)
+            const cliffStart = pisteEdge + cliff.offset;
+            const cliffEnd = Math.min(worldWidth, cliffStart + cliff.extent);
+            const width = cliffEnd - cliffStart;
+            if (width > 0) {
+              const wall = this.add.rectangle(
+                cliffStart + width / 2,
+                y + height / 2,
+                width,
+                height,
+                0x000000, 0
+              );
+              this.physics.add.existing(wall, true);
+              this.dangerZones.add(wall);
+            }
+          }
         }
       }
+    } else {
+      // Non-dangerous or no cliff segments: use original piste edge physics
+      for (let y = 0; y < this.level.height; y += 4) {
+        if (y >= this.level.height - 2) continue;
 
-      if (rightEdge < worldWidth - tileSize && !isAccessZone(yPos, 'right')) {
-        const rightWall = this.add.rectangle(
-          rightEdge + (worldWidth - rightEdge) / 2,
-          yPos + segmentHeight / 2,
-          worldWidth - rightEdge,
-          segmentHeight,
-          0x000000, 0
-        );
-        this.physics.add.existing(rightWall, true);
-        if (isDangerous) {
-          this.dangerZones.add(rightWall);
-        } else {
+        const yPos = y * tileSize;
+        const path = this.pistePath[y] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
+        const leftEdge = (path.centerX - path.width / 2) * tileSize;
+        const rightEdge = (path.centerX + path.width / 2) * tileSize;
+
+        if (leftEdge > tileSize && !isAccessZone(yPos, 'left')) {
+          const leftWall = this.add.rectangle(
+            leftEdge / 2,
+            yPos + segmentHeight / 2,
+            leftEdge,
+            segmentHeight,
+            0x000000, 0
+          );
+          this.physics.add.existing(leftWall, true);
+          this.boundaryWalls.add(leftWall);
+        }
+
+        if (rightEdge < worldWidth - tileSize && !isAccessZone(yPos, 'right')) {
+          const rightWall = this.add.rectangle(
+            rightEdge + (worldWidth - rightEdge) / 2,
+            yPos + segmentHeight / 2,
+            worldWidth - rightEdge,
+            segmentHeight,
+            0x000000, 0
+          );
+          this.physics.add.existing(rightWall, true);
           this.boundaryWalls.add(rightWall);
         }
       }
@@ -684,6 +845,276 @@ export default class GameScene extends Phaser.Scene {
     } else {
       this.boundaryWalls.add(bottomWall);
     }
+    
+    // Draw cliff edge visuals if level has dangerous boundaries
+    if (isDangerous) {
+      this.createCliffEdgeVisuals();
+    }
+  }
+
+  private createCliffEdgeVisuals(): void {
+    // Use pre-calculated cliff segments (same data as physics)
+    for (const cliff of this.cliffSegments) {
+      this.drawContinuousCliff(cliff);
+    }
+    
+    // Draw warning at bottom
+    this.drawBottomCliffWarning();
+  }
+
+  // Natural alpine rock colors - increased contrast
+  private readonly CLIFF_COLORS = {
+    darkRock: 0x2d2822,      // Very dark base (darker)
+    midRock: 0x4a423a,       // Medium brown-gray
+    lightRock: 0x6a5e52,     // Lighter brown-gray
+    shadowRock: 0x1a1612,    // Deep shadow (almost black)
+    highlight: 0x8a7e6a,     // Rock highlight (tan)
+    accent: 0x5a4a3a,        // Warm brown accent
+    snow: 0xf0f5f8,          // Snow white
+    snowShadow: 0xd8e0e8,    // Shadowed snow
+  };
+
+  private drawContinuousCliff(
+    cliff: { side: 'left' | 'right'; startY: number; endY: number; offset: number; extent: number; getX: (y: number) => number }
+  ): void {
+    const g = this.add.graphics();
+    g.setDepth(5);
+    
+    const tileSize = this.tileSize;
+    const { side, startY, endY, offset, extent, getX } = cliff;
+    
+    // Seeded random for consistent look
+    const rand = (i: number) => {
+      const n = Math.sin(startY * 0.01 + i * 127.1) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    
+    if (endY > startY) {
+      // Draw cliff using tile-sized cells matching snow texture style
+      const detailSize = Math.max(2, Math.floor(tileSize * 0.2));
+      const detailLarge = Math.max(3, Math.floor(tileSize * 0.3));
+      const worldWidth = this.level.width * tileSize;
+      
+      // Fill cliff area tile by tile with rock texture - organic edges
+      for (let y = startY; y <= endY; y += tileSize) {
+        const pisteEdge = getX(y);
+        
+        // Per-row edge variation for organic look - only AWAY from piste, never into it
+        const rowVariation = Math.abs(rand(y * 0.3 + 55) - 0.5) * tileSize;
+        
+        // Calculate cliff bounds using shared offset and extent (matches physics)
+        // Cliffs must NEVER overlap piste - variation only extends them further out
+        let cliffStart: number, cliffEnd: number;
+        if (side === 'left') {
+          // Left cliff: edge at pisteEdge - offset, can only go further left (smaller x)
+          cliffEnd = pisteEdge - offset - rowVariation * 0.3;
+          cliffStart = Math.max(0, cliffEnd - extent - rowVariation);
+        } else {
+          // Right cliff: edge at pisteEdge + offset, can only go further right (larger x)
+          cliffStart = pisteEdge + offset + rowVariation * 0.3;
+          cliffEnd = Math.min(worldWidth, cliffStart + extent + rowVariation);
+        }
+        
+        for (let x = cliffStart; x < cliffEnd; x += tileSize) {
+          // Skip some edge tiles for organic look
+          const isEdgeTile = (side === 'left' && x < cliffStart + tileSize * 1.5) ||
+                            (side === 'right' && x > cliffEnd - tileSize * 1.5) ||
+                            (y < startY + tileSize * 1.5) ||
+                            (y > endY - tileSize * 1.5);
+          if (isEdgeTile && rand(x * 0.1 + y * 0.2 + 33) > 0.7) continue;
+          
+          // Base rock color
+          g.fillStyle(this.CLIFF_COLORS.midRock, 1);
+          g.fillRect(x, y, tileSize + 1, tileSize + 1);
+          
+          // Detail rectangles matching snow texture pattern
+          const seed = x * 0.1 + y * 0.07;
+          
+          // Lighter patches
+          g.fillStyle(this.CLIFF_COLORS.lightRock, 1);
+          g.fillRect(x + detailSize, y + detailSize, detailLarge, detailSize);
+          if (rand(seed + 1) > 0.4) {
+            g.fillRect(x + tileSize * 0.5, y + detailSize * 2, detailLarge + detailSize, detailLarge);
+          }
+          if (rand(seed + 2) > 0.5) {
+            g.fillRect(x + detailSize * 2, y + tileSize * 0.5, detailLarge, detailLarge);
+          }
+          
+          // Shadow details
+          g.fillStyle(this.CLIFF_COLORS.darkRock, 1);
+          if (rand(seed + 3) > 0.3) {
+            g.fillRect(x + tileSize * 0.3, y + detailSize, detailSize, detailSize);
+          }
+          if (rand(seed + 4) > 0.4) {
+            g.fillRect(x + tileSize * 0.7, y + tileSize * 0.4, detailSize, detailLarge);
+          }
+          if (rand(seed + 5) > 0.5) {
+            g.fillRect(x + tileSize * 0.5, y + tileSize * 0.7, detailSize, detailSize);
+          }
+        }
+      }
+    
+      // Sparse trees on cliff (matching off-piste tree density)
+      const treeSpacing = tileSize * 2.5;
+      for (let y = startY + treeSpacing; y < endY - treeSpacing; y += treeSpacing) {
+        if (rand(y + 300) < 0.65) continue;
+        
+        const offsetY = (rand(y + 301) - 0.5) * treeSpacing * 0.5;
+        const pisteEdge = getX(y + offsetY);
+        // Place trees within the cliff area (respecting offset and extent)
+        const treeDist = offset + rand(y + 302) * extent * 0.8;
+        const treeX = side === 'left' 
+          ? Math.max(tileSize, pisteEdge - treeDist)
+          : Math.min(worldWidth - tileSize, pisteEdge + treeDist);
+        this.createTree(treeX, y + offsetY);
+      }
+    
+      // Sparse snow patches (similar size to snow texture details)
+      const snowSpacing = tileSize * 2;
+      for (let y = startY + snowSpacing; y < endY - snowSpacing; y += snowSpacing) {
+        if (rand(y + 200) < 0.65) continue;
+        
+        const pisteEdge = getX(y);
+        // Place snow patches within the cliff area
+        const snowDist = offset + rand(y + 201) * extent * 0.6;
+        const snowX = side === 'left' 
+          ? Math.max(tileSize, pisteEdge - snowDist)
+          : Math.min(worldWidth - tileSize, pisteEdge + snowDist);
+        
+        // Snow patch sizes matching texture detail scale
+        g.fillStyle(this.CLIFF_COLORS.snow, 1);
+        g.fillRect(snowX, y, detailLarge * 2, detailSize);
+        if (rand(y + 202) > 0.5) {
+          g.fillRect(snowX + detailSize, y + detailSize, detailLarge, detailSize);
+        }
+      }
+    
+      // Warning poles at cliff edge (where danger zone starts)
+      for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
+        const pisteEdge = getX(y);
+        // Place poles at the danger zone edge (pisteEdge + offset for right, pisteEdge - offset for left)
+        const poleX = side === 'left' ? pisteEdge - offset : pisteEdge + offset;
+        const poleHeight = tileSize * 0.7;
+        
+        g.fillStyle(0x000000, 1);
+        g.fillRect(poleX - 2, y, 4, poleHeight);
+        
+        const stripeH = poleHeight / 5;
+        for (let j = 0; j < 5; j++) {
+          g.fillStyle(j % 2 === 0 ? 0xff0000 : 0xffcc00, 1);
+          g.fillRect(poleX - 3, y + j * stripeH, 6, stripeH);
+        }
+      }
+    }
+  }
+
+  private drawBottomCliffWarning(): void {
+    const tileSize = this.tileSize;
+    const worldWidth = this.level.width * tileSize;
+    const worldHeight = this.level.height * tileSize;
+    
+    const g = this.add.graphics();
+    g.setDepth(5);
+    
+    // Seeded random for consistent appearance
+    const rand = (i: number) => {
+      const n = Math.sin(i * 127.1 + 9999) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    
+    // Cliff edge Y position
+    const cliffEdgeY = worldHeight - tileSize * 2;
+    
+    // Detail sizes matching snow texture style (16x16 base with 2-5px details)
+    const detailSize = Math.max(2, Math.floor(tileSize * 0.2));
+    const detailLarge = Math.max(3, Math.floor(tileSize * 0.3));
+    
+    // Draw cliff using tile-sized cells with rock texture
+    for (let y = cliffEdgeY; y < worldHeight; y += tileSize) {
+      for (let x = 0; x < worldWidth; x += tileSize) {
+        // Base rock color
+        g.fillStyle(this.CLIFF_COLORS.midRock, 1);
+        g.fillRect(x, y, tileSize + 1, tileSize + 1);
+        
+        // Detail rectangles matching snow texture pattern
+        const seed = x * 0.1 + y * 0.07;
+        
+        // Lighter patches
+        g.fillStyle(this.CLIFF_COLORS.lightRock, 1);
+        g.fillRect(x + detailSize, y + detailSize, detailLarge, detailSize);
+        if (rand(seed + 1) > 0.4) {
+          g.fillRect(x + tileSize * 0.5, y + detailSize * 2, detailLarge + detailSize, detailLarge);
+        }
+        if (rand(seed + 2) > 0.5) {
+          g.fillRect(x + detailSize * 2, y + tileSize * 0.5, detailLarge, detailLarge);
+        }
+        
+        // Shadow details
+        g.fillStyle(this.CLIFF_COLORS.darkRock, 1);
+        if (rand(seed + 3) > 0.3) {
+          g.fillRect(x + tileSize * 0.3, y + detailSize, detailSize, detailSize);
+        }
+        if (rand(seed + 4) > 0.4) {
+          g.fillRect(x + tileSize * 0.7, y + tileSize * 0.4, detailSize, detailLarge);
+        }
+        if (rand(seed + 5) > 0.5) {
+          g.fillRect(x + tileSize * 0.5, y + tileSize * 0.7, detailSize, detailSize);
+        }
+      }
+    }
+    
+    // Sparse snow patches
+    const snowSpacing = tileSize * 2;
+    for (let x = snowSpacing; x < worldWidth - snowSpacing; x += snowSpacing) {
+      if (rand(x + 200) < 0.7) continue;
+      const snowY = cliffEdgeY + tileSize * 0.5 + rand(x + 201) * tileSize;
+      
+      g.fillStyle(this.CLIFF_COLORS.snow, 1);
+      g.fillRect(x, snowY, detailLarge * 2, detailSize);
+      if (rand(x + 202) > 0.5) {
+        g.fillRect(x + detailSize, snowY + detailSize, detailLarge, detailSize);
+      }
+    }
+    
+    // Sparse trees on bottom cliff (matching off-piste density)
+    const treeSpacing = tileSize * 3;
+    for (let x = treeSpacing; x < worldWidth - treeSpacing; x += treeSpacing) {
+      if (rand(x + 300) < 0.7) continue;
+      const offsetX = (rand(x + 301) - 0.5) * treeSpacing * 0.5;
+      const treeY = cliffEdgeY + tileSize * 0.3 + rand(x + 302) * tileSize * 0.5;
+      this.createTree(x + offsetX, treeY);
+    }
+    
+    // Warning poles along cliff edge
+    for (let x = tileSize * 3; x < worldWidth - tileSize * 3; x += tileSize * 4) {
+      const poleY = cliffEdgeY - tileSize * 0.5;
+      const poleHeight = tileSize * 0.7;
+      
+      g.fillStyle(0x000000, 1);
+      g.fillRect(x - 2, poleY, 4, poleHeight);
+      
+      const stripeH = poleHeight / 5;
+      for (let j = 0; j < 5; j++) {
+        g.fillStyle(j % 2 === 0 ? 0xff0000 : 0xffcc00, 1);
+        g.fillRect(x - 3, poleY + j * stripeH, 6, stripeH);
+      }
+    }
+    
+    // Warning text
+    const warningText = this.add.text(
+      worldWidth / 2,
+      cliffEdgeY - tileSize * 1.2,
+      '⚠️ FALAISE - DANGER ⚠️',
+      {
+        fontSize: Math.round(tileSize * 0.5) + 'px',
+        color: '#ff0000',
+        fontStyle: 'bold',
+        backgroundColor: '#000000',
+        padding: { x: 6, y: 3 }
+      }
+    );
+    warningText.setOrigin(0.5);
+    warningText.setDepth(6);
   }
 
   private createPisteBoundaries(_worldWidth: number, _worldHeight: number): void {

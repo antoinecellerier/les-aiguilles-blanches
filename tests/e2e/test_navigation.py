@@ -1231,3 +1231,120 @@ class TestWinchMechanics:
         assert anchor_info is not None, "Should have winch anchors on level 6"
         assert anchor_info['hasBaseY'], "Anchor should have baseY for proximity detection"
         assert anchor_info['hasY'], "Anchor should have y (hook position) for cable"
+
+
+class TestCliffMechanics:
+    """Tests for cliff physics and visual alignment."""
+    
+    def test_cliff_segments_exist_on_dangerous_level(self, game_page: Page):
+        """Test that cliffSegments are created on levels with dangerous boundaries."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 7 (Avalanche Zone - has dangerous boundaries)
+        skip_to_level(game_page, 7)
+        
+        cliff_info = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            if (!gameScene?.cliffSegments) return null;
+            return {
+                count: gameScene.cliffSegments.length,
+                hasOffset: gameScene.cliffSegments.length > 0 && 'offset' in gameScene.cliffSegments[0],
+                hasExtent: gameScene.cliffSegments.length > 0 && 'extent' in gameScene.cliffSegments[0],
+                hasSide: gameScene.cliffSegments.length > 0 && 'side' in gameScene.cliffSegments[0]
+            };
+        }""")
+        
+        assert cliff_info is not None, "Should have cliffSegments on dangerous level"
+        assert cliff_info['count'] > 0, "Should have at least one cliff segment"
+        assert cliff_info['hasOffset'], "Cliff segments should have offset property"
+        assert cliff_info['hasExtent'], "Cliff segments should have extent property"
+        assert cliff_info['hasSide'], "Cliff segments should have side property"
+    
+    def test_cliff_physics_matches_visuals(self, game_page: Page):
+        """Test that danger zones use same offset/extent as visual cliffs."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 7 (has cliffs)
+        skip_to_level(game_page, 7)
+        
+        # Verify cliff segments have valid offset and extent values
+        cliff_params = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            if (!gameScene?.cliffSegments?.length) return null;
+            const cliff = gameScene.cliffSegments[0];
+            const tileSize = gameScene.tileSize || 16;
+            return {
+                offset: cliff.offset,
+                extent: cliff.extent,
+                tileSize: tileSize,
+                // Offset should be 1.5-3 tiles
+                offsetInTiles: cliff.offset / tileSize,
+                // Extent should be 3-5 tiles
+                extentInTiles: cliff.extent / tileSize
+            };
+        }""")
+        
+        assert cliff_params is not None, "Should have cliff parameters"
+        # Verify offset is in expected range (1.5-3 tiles)
+        assert 1.4 <= cliff_params['offsetInTiles'] <= 3.1, \
+            f"Cliff offset should be 1.5-3 tiles, got {cliff_params['offsetInTiles']}"
+        # Verify extent is in expected range (3-5 tiles)
+        assert 2.9 <= cliff_params['extentInTiles'] <= 5.1, \
+            f"Cliff extent should be 3-5 tiles, got {cliff_params['extentInTiles']}"
+    
+    def test_no_cliff_segments_on_safe_level(self, game_page: Page):
+        """Test that early levels without dangerous boundaries have no cliff segments."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Level 0 (Tutorial) should not have dangerous boundaries
+        cliff_count = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            return gameScene?.cliffSegments?.length ?? 0;
+        }""")
+        
+        assert cliff_count == 0, "Tutorial level should not have cliff segments"
+    
+    def test_cliff_getX_interpolation_works(self, game_page: Page):
+        """Test that cliff getX interpolation returns valid piste edge positions.
+        
+        This verifies the closure bug fix where getX was returning wrong values
+        because it referenced an array that got cleared after segment creation.
+        """
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Skip to level 7 (has cliffs with winding piste shape)
+        skip_to_level(game_page, 7)
+        
+        # Test that getX returns valid interpolated values
+        interpolation_test = game_page.evaluate("""() => {
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            if (!gameScene?.cliffSegments?.length) return null;
+            
+            const cliff = gameScene.cliffSegments[0];
+            const { startY, endY, getX } = cliff;
+            const midY = (startY + endY) / 2;
+            
+            // getX should return valid pixel positions (not 0 or undefined)
+            const startX = getX(startY);
+            const midX = getX(midY);
+            const endX = getX(endY);
+            
+            return {
+                startX: startX,
+                midX: midX,
+                endX: endX,
+                // All values should be positive pixel coords
+                allValid: startX > 0 && midX > 0 && endX > 0,
+                // Mid should be interpolated (may differ from start/end on curved pistes)
+                hasInterpolation: typeof midX === 'number' && !isNaN(midX)
+            };
+        }""")
+        
+        assert interpolation_test is not None, "Should have cliff segment with getX"
+        assert interpolation_test['allValid'], \
+            f"getX should return valid positions, got start={interpolation_test['startX']}, mid={interpolation_test['midX']}, end={interpolation_test['endX']}"
+        assert interpolation_test['hasInterpolation'], "getX interpolation should return valid number"

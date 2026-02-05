@@ -138,6 +138,57 @@ print(game_page.evaluate("""() => ({
 })"""))
 ```
 
+## Visual Debugging (Screenshots)
+
+For debugging visual issues (e.g., cliff placement, rendering bugs), capture screenshots at specific levels:
+
+### Manual Screenshot Capture
+
+```bash
+# Start dev server
+npm run dev &
+
+# Run headed test, pause at specific level
+./run-tests.sh --headed -k "test_cliff"
+```
+
+### Automated Screenshot Test Pattern
+
+```python
+def test_cliff_visuals(self, game_page: Page):
+    """Capture cliff rendering for visual verification."""
+    click_button(game_page, BUTTON_START, "Start Game")
+    wait_for_scene(game_page, 'GameScene')
+    
+    # Jump to level with cliffs (6, 7, or 8 have hasDangerousBoundaries)
+    skip_to_level(game_page, 7)
+    dismiss_dialogues(game_page)
+    
+    # Move camera to see cliff areas
+    game_page.keyboard.down("ArrowUp")
+    game_page.wait_for_timeout(2000)  # Let camera pan
+    game_page.keyboard.up("ArrowUp")
+    
+    # Capture screenshot for visual inspection
+    # Store in session files directory (no git commit needed)
+    game_page.screenshot(path="/home/antoine/.copilot/session-state/.../files/cliff_test.png")
+```
+
+### Levels for Visual Testing
+
+| Level | Feature | What to Check |
+|-------|---------|---------------|
+| 6 | Black Piste (serpentine) | Left/right cliffs, night overlay |
+| 7 | Avalanche Zone (winding) | Cliff curves follow piste shape |
+| 8 | Storm Recovery (gentle_curve) | Cliffs + weather effects |
+
+### Common Visual Issues
+
+1. **Cliffs overlapping piste** - Check `calculateCliffSegments()` edge array copying
+2. **Invisible death zones** - Verify physics uses same `cliffSegments` as visuals
+3. **Boxy cliff edges** - Check organic variation only pushes away from piste
+4. **Cliff gaps at access roads** - Verify `accessEntryZones` exclusion logic
+
 ## Level Reference
 
 | Index | Level | Notable Features |

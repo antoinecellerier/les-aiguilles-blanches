@@ -497,6 +497,71 @@ checkSteepness() {
 }
 ```
 
+## Cliff System
+
+Levels with `hasDangerousBoundaries: true` have cliff areas that kill the player on contact.
+
+### Cliff Segments
+
+Cliffs are calculated once and shared between physics and visuals to ensure alignment:
+
+```typescript
+interface CliffSegment {
+  side: 'left' | 'right';
+  startY: number;          // Vertical start position (pixels)
+  endY: number;            // Vertical end position (pixels)
+  offset: number;          // Distance from piste edge (1.5-3 tiles)
+  extent: number;          // Width of cliff area (3-5 tiles)
+  getX: (y: number) => number;  // Piste edge position interpolator
+}
+```
+
+### Implementation Flow
+
+1. **generatePistePath()** - Creates piste boundary data
+   - Stores `{ centerX, width }` per row in tile coordinates
+   - Used by `isInPiste()` for snow tile rendering
+
+2. **calculateCliffSegments()** - Called after piste path generation
+   - Builds segments from piste path data
+   - Converts tile coords to pixel coords for cliff edges
+   - Calculates variable offset/extent per segment
+   - **CRITICAL**: Makes deep copy of edge arrays for getX closure (see below)
+   - Stores in `this.cliffSegments`
+
+3. **createBoundaryColliders()** - Uses cliffSegments for physics
+   - Creates danger zones matching visual cliff bounds exactly
+   - No invisible death zones
+
+4. **createCliffEdgeVisuals()** - Uses same cliffSegments for rendering
+   - Organic edges (per-row variation, edge tile skipping)
+   - Warning poles at danger zone boundary
+
+### Critical Implementation Detail: Closure Bug
+
+The `getX()` interpolation function is a closure that references the edges array. Since the same edges array is reused and cleared after each segment, the closure **must** receive a deep copy:
+
+```typescript
+// WRONG - closure references array that gets cleared
+const getX = (y: number) => edges.findIndex(...);
+leftEdges.length = 0;  // Breaks getX!
+
+// CORRECT - closure has its own copy
+const edgesCopy = edges.map(e => ({ y: e.y, x: e.x }));
+const getX = (y: number) => edgesCopy.findIndex(...);
+leftEdges.length = 0;  // Safe, getX uses edgesCopy
+```
+
+Without this fix, cliffs render at incorrect positions (often overlapping the piste) because `getX()` returns wrong values after the source array is cleared.
+
+### Visual Style
+
+- Tile-based rock texture (SkiFree aesthetic)
+- Warm brown color palette (alpine rock)
+- Sparse trees on cliff areas
+- Per-row edge variation for organic look (only pushes cliffs away from piste)
+- ~30% of edge tiles randomly skipped for organic boundaries
+
 ## Winch System
 
 ### Anchor Structure
