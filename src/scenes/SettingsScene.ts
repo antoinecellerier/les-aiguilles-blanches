@@ -33,6 +33,8 @@ export default class SettingsScene extends Phaser.Scene {
   private rebindButtons: Record<string, Phaser.GameObjects.Text> = {};
   private statusText: Phaser.GameObjects.Text | null = null;
   private mainSizer: any = null;
+  private gamepadNameText: Phaser.GameObjects.Text | null = null;
+  private lastGamepadName: string = '';
   
   // Responsive settings
   private dpr = 1;
@@ -115,58 +117,79 @@ export default class SettingsScene extends Phaser.Scene {
   private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
     // Single scrollable column for narrow/portrait screens
     // Reserve space for back button at bottom
-    const backButtonSpace = this.fontSize * 2.5;
+    const backButtonSpace = this.fontSize * 3;
     const availableHeight = height - padding * 2 - backButtonSpace;
     
     // Reduce spacing further on very small screens
     const tightSpacing = height < 600 ? Math.max(2, itemSpacing * 0.5) : itemSpacing;
     
-    // Position at top-left corner with origin at top-left (0, 0)
     const sizerWidth = width - padding * 2;
-    this.mainSizer = this.rexUI.add.sizer({
-      x: padding,
-      y: padding,
-      width: sizerWidth,
+    
+    // Create content sizer (will be placed inside scrollable panel)
+    const contentSizer = this.rexUI.add.sizer({
+      width: sizerWidth - 10, // Account for potential scrollbar
       orientation: 'vertical',
       space: { item: tightSpacing },
-      origin: 0  // Top-left origin
     });
 
     // Title
-    this.mainSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.1, '#87CEEB', true), 
+    contentSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.1, '#87CEEB', true), 
       { align: 'center' });
 
     // All sections in single column
-    this.addLanguageSection(this.mainSizer);
-    this.addAccessibilitySection(this.mainSizer);
+    this.addLanguageSection(contentSizer);
+    this.addAccessibilitySection(contentSizer);
     
-    // Only add controls section if there's enough space
-    if (height >= 500) {
-      this.addControlsSection(this.mainSizer);
-    }
+    // Always add controls section (scrollable now handles overflow)
+    this.addControlsSection(contentSizer);
 
     // Status text
     this.statusText = this.createText('', this.fontSize, '#FFFF00');
-    this.mainSizer.add(this.statusText, { align: 'center' });
+    contentSizer.add(this.statusText, { align: 'center' });
 
-    this.mainSizer.layout();
+    // Layout content to measure height
+    contentSizer.layout();
+    const contentHeight = contentSizer.height;
+    const needsScroll = contentHeight > availableHeight;
+
+    // Wrap in scrollable panel
+    this.mainSizer = this.rexUI.add.scrollablePanel({
+      x: padding,
+      y: padding,
+      width: sizerWidth,
+      height: availableHeight,
+      origin: 0,
+      scrollMode: 'y',
+      panel: { child: contentSizer },
+      slider: needsScroll ? {
+        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
+        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
+      } : false,
+      mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
+      space: { panel: needsScroll ? 5 : 0 },
+    }).layout();
+
+    // Enable touch/mouse scrolling only if needed
+    if (needsScroll) {
+      this.mainSizer.setChildrenInteractive();
+    }
   }
 
   private createTwoColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
     // Two-column layout for wide screens
+    // Reserve space for back button at bottom
+    const backButtonSpace = this.fontSize * 3;
+    const availableHeight = height - padding * 2 - backButtonSpace;
     const colWidth = (width - padding * 3) / 2;
     
     // Update contentWidth for child elements in two-column mode
     this.contentWidth = colWidth;
     
-    // Root horizontal sizer - position at top-left with origin at top-left
+    // Root horizontal sizer for both columns
     const rootSizer = this.rexUI.add.sizer({
-      x: padding,
-      y: padding,
-      width: width - padding * 2,
+      width: width - padding * 2 - 10, // Account for potential scrollbar
       orientation: 'horizontal',
       space: { item: padding },
-      origin: 0  // Top-left origin
     });
 
     // Left column: Language + Accessibility
@@ -197,8 +220,32 @@ export default class SettingsScene extends Phaser.Scene {
     rootSizer.add(leftCol, { align: 'top' });
     rootSizer.add(rightCol, { align: 'top' });
     
-    this.mainSizer = rootSizer;
-    this.mainSizer.layout();
+    // Layout to measure content height
+    rootSizer.layout();
+    const contentHeight = rootSizer.height;
+    const needsScroll = contentHeight > availableHeight;
+    
+    // Wrap in scrollable panel
+    this.mainSizer = this.rexUI.add.scrollablePanel({
+      x: padding,
+      y: padding,
+      width: width - padding * 2,
+      height: availableHeight,
+      origin: 0,
+      scrollMode: 'y',
+      panel: { child: rootSizer },
+      slider: needsScroll ? {
+        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
+        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
+      } : false,
+      mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
+      space: { panel: needsScroll ? 5 : 0 },
+    }).layout();
+
+    // Enable touch/mouse scrolling only if needed
+    if (needsScroll) {
+      this.mainSizer.setChildrenInteractive();
+    }
   }
 
   private addLanguageSection(sizer: any): void {
@@ -262,6 +309,11 @@ export default class SettingsScene extends Phaser.Scene {
     if (hasTouch) inputHints.push('📱 Touch');
     inputHints.push('🎮 Gamepad');
     sizer.add(this.createText(inputHints.join('  '), this.smallFont, '#88aa88'), { align: 'left' });
+
+    // Connected gamepad name (updates dynamically)
+    this.gamepadNameText = this.createText('', this.smallFont, '#aaaaff');
+    this.updateGamepadName();
+    sizer.add(this.gamepadNameText, { align: 'left' });
   }
 
   private createBackButton(width: number, height: number, padding: number): void {
@@ -606,6 +658,35 @@ export default class SettingsScene extends Phaser.Scene {
 
   private gamepadBPressed = false;
 
+  private updateGamepadName(): void {
+    if (!this.gamepadNameText) return;
+    
+    let gamepadName = '';
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad && pad.id) {
+        // Clean up the gamepad name (remove vendor/product IDs)
+        gamepadName = pad.id
+          .replace(/\s*\(.*?\)\s*/g, ' ')  // Remove parenthesized vendor IDs
+          .replace(/\s+/g, ' ')             // Collapse whitespace
+          .trim();
+        // Truncate if too long
+        if (gamepadName.length > 35) {
+          gamepadName = gamepadName.substring(0, 32) + '...';
+        }
+      }
+    }
+    
+    if (gamepadName !== this.lastGamepadName) {
+      this.lastGamepadName = gamepadName;
+      if (gamepadName) {
+        this.gamepadNameText.setText('🎮 ' + gamepadName);
+      } else {
+        this.gamepadNameText.setText(t('noGamepadConnected') || '🎮 No gamepad connected');
+      }
+    }
+  }
+
   update(): void {
     // Gamepad B button to go back (handles Nintendo swap)
     if (this.input.gamepad && this.input.gamepad.total > 0) {
@@ -618,6 +699,9 @@ export default class SettingsScene extends Phaser.Scene {
         this.gamepadBPressed = backPressed;
       }
     }
+    
+    // Update gamepad name display
+    this.updateGamepadName();
   }
 
   shutdown(): void {

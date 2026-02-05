@@ -52,6 +52,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         touchSupported: "Tactile OK",
         keyboardLayout: "Disposition clavier",
         customBindings: "Personnalisé",
+        noGamepadConnected: "Aucune manette connectée",
         
         // How to Play hints
         howToPlayMove: "{keys} ou Flèches pour se déplacer",
@@ -218,6 +219,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         customBindings: "Custom",
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
+        noGamepadConnected: "No gamepad connected",
         
         // How to Play hints
         howToPlayMove: "{keys} or Arrows to move",
@@ -383,6 +385,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         customBindings: "Benutzerdefiniert",
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
+        noGamepadConnected: "Kein Gamepad verbunden",
         
         // Game
         paused: "Pausiert",
@@ -462,6 +465,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         customBindings: "Personalizzato",
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
+        noGamepadConnected: "Nessun gamepad connesso",
         
         // Game
         paused: "Pausa",
@@ -541,6 +545,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         customBindings: "Personalizado",
         gamepadSupported: "Gamepad OK",
         touchSupported: "Táctil OK",
+        noGamepadConnected: "Ningún gamepad conectado",
         
         // Game
         paused: "Pausado",
