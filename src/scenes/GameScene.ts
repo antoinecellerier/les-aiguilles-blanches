@@ -410,54 +410,37 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private createExtendedBackground(screenWidth: number, screenHeight: number, worldWidth: number, worldHeight: number): void {
-    const g = this.add.graphics();
-    g.setDepth(-100);
-
     const extraLeft = this.worldOffsetX;
     const extraTop = this.worldOffsetY;
     const extraRight = Math.max(0, screenWidth - worldWidth - this.worldOffsetX);
     const extraBottom = Math.max(0, screenHeight - worldHeight - this.worldOffsetY);
+    const tileSize = this.tileSize;
 
-    const snowBase = 0xE0EAF0;
-    const snowShadow = 0xC8D8E0;
-
-    g.fillStyle(snowBase, 1);
-
-    if (extraLeft > 0) {
-      g.fillRect(-extraLeft, -extraTop, extraLeft, screenHeight);
-    }
-    if (extraRight > 0) {
-      g.fillRect(worldWidth, -extraTop, extraRight, screenHeight);
-    }
-    if (extraTop > 0) {
-      g.fillRect(0, -extraTop, worldWidth, extraTop);
-    }
-    if (extraBottom > 0) {
-      g.fillRect(0, worldHeight, worldWidth, extraBottom);
-    }
-
-    const patchSize = this.tileSize * 4;
-    for (let x = -extraLeft; x < worldWidth + extraRight; x += patchSize) {
-      for (let y = -extraTop; y < worldHeight + extraBottom; y += patchSize) {
-        const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
-        if (isOutside && Math.random() > 0.7) {
-          g.fillStyle(snowShadow, 0.5);
-          const px = x + Math.random() * patchSize * 0.5;
-          const py = y + Math.random() * patchSize * 0.5;
-          const pw = patchSize * (0.3 + Math.random() * 0.4);
-          const ph = patchSize * (0.3 + Math.random() * 0.4);
-          g.fillRect(px, py, pw, ph);
+    // Use same snow_offpiste tiles as the off-piste areas inside the level
+    // This ensures visual consistency
+    for (let x = Math.floor(-extraLeft / tileSize) - 1; x < Math.ceil((worldWidth + extraRight) / tileSize) + 1; x++) {
+      for (let y = Math.floor(-extraTop / tileSize) - 1; y < Math.ceil((worldHeight + extraBottom) / tileSize) + 1; y++) {
+        const isOutside = x < 0 || x >= this.level.width || y < 0 || y >= this.level.height;
+        if (isOutside) {
+          const tile = this.add.image(
+            x * tileSize + tileSize / 2,
+            y * tileSize + tileSize / 2,
+            'snow_offpiste'
+          );
+          tile.setDisplaySize(tileSize, tileSize);
+          tile.setDepth(-100);
         }
       }
     }
 
-    const treeSpacing = this.tileSize * 2.5;
+    // Add dense forest of trees on top
+    const treeSpacing = this.tileSize * 2;
     const margin = this.tileSize;
 
     for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing) {
       for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing) {
         const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
-        if (isOutside && Math.random() > 0.5) {
+        if (isOutside && Math.random() > 0.35) {
           const offsetX = (Math.random() - 0.5) * treeSpacing * 0.8;
           const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
           this.createTree(x + offsetX, y + offsetY);
@@ -465,10 +448,11 @@ export default class GameScene extends Phaser.Scene {
       }
     }
 
+    // Add occasional rocks
     for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing * 2) {
       for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing * 2) {
         const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
-        if (isOutside && Math.random() > 0.9) {
+        if (isOutside && Math.random() > 0.85) {
           const offsetX = (Math.random() - 0.5) * treeSpacing;
           const offsetY = (Math.random() - 0.5) * treeSpacing;
           this.createRock(x + offsetX, y + offsetY);
@@ -560,11 +544,6 @@ export default class GameScene extends Phaser.Scene {
           isGroomable ? 'snow_ungroomed' : 'snow_offpiste'
         );
         tile.setDisplaySize(tileSize, tileSize);
-
-        // Tint off-piste areas slightly green to show forest/nature
-        if (!isGroomable) {
-          tile.setTint(0x7a9a71);
-        }
 
         this.snowGrid[y][x] = {
           tile: tile,

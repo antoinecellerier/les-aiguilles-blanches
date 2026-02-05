@@ -1,7 +1,7 @@
 """E2E tests for game navigation and basic flows."""
 import pytest
 from playwright.sync_api import Page, expect
-from conftest import wait_for_scene, wait_for_scene_inactive, skip_to_credits, wait_for_level_or_credits
+from conftest import wait_for_scene, wait_for_scene_inactive, skip_to_credits, wait_for_level_or_credits, skip_to_level, dismiss_dialogues
 
 
 def click_menu_button(page: Page, button_index: int, button_name: str = "button"):
@@ -405,63 +405,37 @@ class TestTutorial:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        
-        # Dismiss initial dialogues (welcome, controls, move instruction)
-        for _ in range(6):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
-        
-        # Verify dialogue is dismissed
-        dialogue_hidden = game_page.evaluate("""() => {
-            const ds = window.game.scene.getScene('DialogueScene');
-            return !ds || !ds.isDialogueShowing || !ds.isDialogueShowing();
-        }""")
-        if not dialogue_hidden:
-            # Click more if dialogue still showing
-            for _ in range(4):
-                game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-                game_page.wait_for_timeout(400)
+        # Dismiss tutorial dialogues (this test just validates movement works)
+        dismiss_dialogues(game_page)
         
         # Get initial position
         initial_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
-            return gs && gs.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
+            return gs?.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
         }""")
         
-        # Move groomer
+        # Move groomer and wait for position change
         game_page.keyboard.down("ArrowUp")
-        game_page.wait_for_timeout(500)
+        try:
+            game_page.wait_for_function(f"""() => {{
+                const gs = window.game?.scene?.getScene('GameScene');
+                return gs?.groomer && gs.groomer.y !== {initial_pos['y']};
+            }}""", timeout=3000)
+            moved = True
+        except:
+            moved = False
         game_page.keyboard.up("ArrowUp")
-        game_page.wait_for_timeout(300)
         
-        new_pos = game_page.evaluate("""() => {
-            const gs = window.game.scene.getScene('GameScene');
-            return gs && gs.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
-        }""")
-        
-        # Groomer should have moved (position change)
-        assert new_pos is not None, "Groomer should exist after movement"
-        assert new_pos['y'] != initial_pos['y'], \
-            f"Groomer should have moved. Initial: {initial_pos}, New: {new_pos}"
+        assert moved, f"Groomer should have moved from y={initial_pos['y']}"
 
     def test_tutorial_grooming_increases_coverage(self, game_page: Page):
         """Test that grooming increases coverage (on level 1 for cleaner test)."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip tutorial to level 1 for cleaner grooming test
-        game_page.keyboard.press("n")
-        wait_for_scene(game_page, 'GameScene')
-        
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        
-        # Dismiss intro dialogue
-        for _ in range(3):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(300)
+        # Skip directly to level 1 for cleaner grooming test
+        skip_to_level(game_page, 1)
+        dismiss_dialogues(game_page)
         
         # Get initial groomed count
         initial_count = game_page.evaluate("""() => {
@@ -495,88 +469,61 @@ class TestGroomerMovement:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip tutorial to level 1 (simpler, no tutorial dialogues blocking)
-        game_page.keyboard.press("n")
-        wait_for_scene(game_page, 'GameScene')
+        # Skip directly to level 1
+        skip_to_level(game_page, 1)
         
-        assert_scene_active(game_page, 'GameScene')
-        level = get_current_level(game_page)
-        assert level == 1, f"Should be on level 1, got {level}"
-        
-        # Dismiss intro dialogue if any
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(5):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(350)
-        
-        # Ensure dialogue is dismissed before testing movement
-        game_page.wait_for_timeout(200)
+        # Dismiss any dialogues programmatically
+        dismiss_dialogues(game_page)
         
         # Get initial groomer position
         initial_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
-            if (gs && gs.groomer) {
-                return { x: gs.groomer.x, y: gs.groomer.y };
-            }
-            return null;
+            return gs?.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
         }""")
         assert initial_pos is not None, "Groomer should exist"
         
-        # Move groomer (hold key for longer)
+        # Move groomer and wait for position to change
         game_page.keyboard.down("ArrowUp")
-        game_page.wait_for_timeout(300)
+        
+        # Wait for position to actually change (deterministic)
+        try:
+            game_page.wait_for_function(f"""() => {{
+                const gs = window.game?.scene?.getScene('GameScene');
+                return gs?.groomer && gs.groomer.y !== {initial_pos['y']};
+            }}""", timeout=3000)
+            moved = True
+        except:
+            moved = False
+        
         game_page.keyboard.up("ArrowUp")
-        game_page.wait_for_timeout(200)
         
-        # Check position changed
-        new_pos = game_page.evaluate("""() => {
-            const gs = window.game.scene.getScene('GameScene');
-            if (gs && gs.groomer) {
-                return { x: gs.groomer.x, y: gs.groomer.y };
-            }
-            return null;
-        }""")
-        
-        assert new_pos['y'] != initial_pos['y'], \
-            f"Groomer should have moved. Initial: {initial_pos}, New: {new_pos}"
+        assert moved, f"Groomer should have moved from y={initial_pos['y']}"
 
     def test_wasd_controls(self, game_page: Page):
         """Test WASD movement controls work."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip tutorial to level 1 to avoid tutorial dialogues
-        game_page.keyboard.press("n")
-        wait_for_level_or_credits(game_page, 1, timeout=5000)
-        
-        # Dismiss any remaining dialogues
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(5):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(150)
+        # Skip directly to level 1 and dismiss dialogues
+        skip_to_level(game_page, 1)
+        dismiss_dialogues(game_page)
         
         initial_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
-            return gs && gs.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
+            return gs?.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
         }""")
         
-        # Hold key longer for movement - give physics time to update
+        # Hold key and wait for movement
         game_page.keyboard.down("w")
-        game_page.wait_for_timeout(500)
-        game_page.keyboard.up("w")
-        
-        # Wait for position to actually change (deterministic)
         game_page.wait_for_function(f"""() => {{
             const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs || !gs.groomer) return false;
-            return gs.groomer.y !== {initial_pos['y']};
-        }}""", timeout=2000)
+            return gs?.groomer && gs.groomer.y !== {initial_pos['y']};
+        }}""", timeout=3000)
+        game_page.keyboard.up("w")
         
         new_pos = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
-            return gs && gs.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
+            return gs?.groomer ? { x: gs.groomer.x, y: gs.groomer.y } : null;
         }""")
         
         assert new_pos['y'] != initial_pos['y'], "WASD controls should move groomer"
@@ -1163,17 +1110,12 @@ class TestDynamicKeyHints:
         game_page.wait_for_function("() => window.game && window.game.isBooted", timeout=10000)
         wait_for_scene(game_page, 'MenuScene')
         
-        # Skip to a level with winch (level 7 - La Verticale has winch)
+        # Skip to a level with winch (level 6 - La Verticale has winch)
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip to level 7 (has winch anchors)
-        for _ in range(7):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(500)
-        
-        wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(500)
+        # Skip directly to level 6 (has winch anchors)
+        skip_to_level(game_page, 6)
         
         # Check winch hint text in HUD
         winch_hint_text = game_page.evaluate("""() => {
@@ -1198,13 +1140,8 @@ class TestNightLevel:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip to level 6 (Black Piste - night level)
-        for _ in range(6):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(400)
-        
-        wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(300)
+        # Skip directly to level 6 (Black Piste - night level)
+        skip_to_level(game_page, 6)
         
         # Check nightOverlay exists
         has_night_overlay = game_page.evaluate("""() => {
@@ -1219,13 +1156,8 @@ class TestNightLevel:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip to level 6 (night level)
-        for _ in range(6):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(400)
-        
-        wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(300)
+        # Skip directly to level 6 (night level)
+        skip_to_level(game_page, 6)
         
         # Get initial headlight direction
         initial_dir = game_page.evaluate("""() => {
@@ -1233,16 +1165,17 @@ class TestNightLevel:
             return gameScene?.headlightDirection ? {...gameScene.headlightDirection} : null;
         }""")
         
-        # Move right
+        # Move right (hold longer to ensure velocity triggers direction update)
         game_page.keyboard.down("ArrowRight")
-        game_page.wait_for_timeout(300)
-        game_page.keyboard.up("ArrowRight")
+        game_page.wait_for_timeout(500)
         
-        # Get updated direction
+        # Get updated direction while still moving
         new_dir = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
             return gameScene?.headlightDirection ? {...gameScene.headlightDirection} : null;
         }""")
+        
+        game_page.keyboard.up("ArrowRight")
         
         assert new_dir is not None, "Headlight direction should exist"
         # After moving right, x component should be positive
@@ -1257,13 +1190,8 @@ class TestWinchMechanics:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip to level 6 (has winch)
-        for _ in range(6):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(400)
-        
-        wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(300)
+        # Skip directly to level 6 (has winch)
+        skip_to_level(game_page, 6)
         
         # Try to activate winch (should fail - not near anchor)
         game_page.keyboard.down("ShiftLeft")
@@ -1284,13 +1212,8 @@ class TestWinchMechanics:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Skip to level 6 (has winch)
-        for _ in range(6):
-            game_page.keyboard.press("n")
-            game_page.wait_for_timeout(400)
-        
-        wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(300)
+        # Skip directly to level 6 (has winch)
+        skip_to_level(game_page, 6)
         
         # Check anchor structure
         anchor_info = game_page.evaluate("""() => {

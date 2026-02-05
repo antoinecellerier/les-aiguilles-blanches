@@ -6,23 +6,28 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 ## Documentation
 - `docs/ARCHITECTURE.md` - Technical patterns, scene lifecycle, rendering, winch/night systems
 - `docs/GAMEPLAY.md` - Game mechanics, controls, level guide, troubleshooting
+- `docs/TESTING.md` - Test helpers, writing reliable tests, debugging
 
 ## Testing
-- **Dev server**: `npm run dev` then open `http://localhost:3000`
-- **Skip levels**: Press `N` to skip to next level (useful for testing)
-- **E2E tests**: `./run-tests.sh` (Playwright, parallel on Chromium + Firefox)
-- **Headed tests**: `./run-tests.sh --headed` (sequential, visible browser)
-- **Single browser**: `./run-tests.sh --browser chromium` (skip Firefox)
-- **Specific test**: `./run-tests.sh -k "test_name"` (uses pytest -k filter)
-- **Test script auto-starts dev server** if not already running
+See `docs/TESTING.md` for full details. Quick reference:
+```bash
+./run-tests.sh                    # All tests
+./run-tests.sh --browser chromium # Single browser
+./run-tests.sh -k "test_name"     # Specific test
+```
+
+Key helpers in `tests/e2e/conftest.py`:
+- `skip_to_level(page, n)` - Jump to level n directly
+- `dismiss_dialogues(page)` - Clear active dialogues
+- `wait_for_scene(page, name)` - Wait for scene to be active
 
 ## Workflow
-1. **Commit early, commit often** - After each validated fix or feature, commit with descriptive message
-2. **Co-author commits** - Always include: `Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>`
-3. **Update docs after changes** - Update `README.md`, `docs/ARCHITECTURE.md`, `docs/GAMEPLAY.md` as needed
-4. **Update localizations** - Add strings to `src/config/localization.ts` for ALL languages (FR, EN, DE, IT, ES)
+1. **Commit early, commit often** - After each validated fix or feature
+2. **Co-author commits** - Include: `Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>`
+3. **Update docs** - `README.md`, `docs/ARCHITECTURE.md`, `docs/GAMEPLAY.md`, `docs/TESTING.md`
+4. **Update localizations** - Add to `src/config/localization.ts` for ALL languages
 5. **Add/update tests** - E2E in `tests/e2e/`, unit in `tests/unit-js/`
-6. **Queue non-urgent items** - Use plan.md for tracking; update Queued Items below
+6. **Queue non-urgent items** - Use plan.md; update Queued Items below
 
 ## Critical Patterns
 
@@ -37,10 +42,7 @@ localStorage.setItem('snowgroomer-keyboard-layout', 'azerty');
 Localized strings support `{keys}`, `{groomKey}`, `{winchKey}` - replaced via `keyboardLayout.ts` utilities.
 
 ### Scene Patterns
-See `docs/ARCHITECTURE.md` for details on:
-- Scene transitions (remove/recreate to avoid texture corruption)
-- Scene layering (HUDScene on top for input priority)
-- Overlay input handling (disable interactivity when hidden)
+See `docs/ARCHITECTURE.md` for scene transitions, layering, overlay input handling.
 
 ## Key Files
 - `src/config/levels.ts` - Level definitions, accessPaths, steepZones, winchAnchors
@@ -49,6 +51,7 @@ See `docs/ARCHITECTURE.md` for details on:
 - `src/scenes/HUDScene.ts` - UI overlay, touch controls
 - `src/utils/gamepad.ts` - Controller detection, `isConfirmPressed()`, `isBackPressed()`
 - `src/utils/keyboardLayout.ts` - Layout detection, `getGroomKeyName()`, `getWinchKeyName()`
+- `tests/e2e/conftest.py` - Test helpers (`skip_to_level`, `dismiss_dialogues`, etc.)
 
 ## Domain Knowledge
 - **French piste markers**: Green ●, Blue ■, Red ◆, Black ◆◆
@@ -57,16 +60,15 @@ See `docs/ARCHITECTURE.md` for details on:
 
 ## Queued Items (from plan.md)
 ### Polish
-- Background padding graphics more similar to off-piste
+- Cliff area graphics - Make clearly distinct
+- Move speed consistency across input methods
 - Gamepad button rebinding
 - Keyboard-only menu navigation
 - Level differentiation (varied objectives)
 - Character avatars
-- Show connected gamepad name in settings
-- Localize How to Play WASD directions
 
 ### Future
-- Localization audit (verify all scenes use t() except intentional French)
-- Easter eggs (5G towers, slipping cars, wildlife, Candide Thovex)
+- Localization audit (verify all scenes use t())
+- Easter eggs (5G towers, wildlife, Candide Thovex)
 - Sound effects and music
 - Leaderboards

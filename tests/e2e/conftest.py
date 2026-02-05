@@ -105,6 +105,61 @@ def skip_to_credits(page, timeout_per_level: int = 10000):
     wait_for_scene(page, 'CreditsScene', timeout=timeout_per_level)
 
 
+def skip_to_level(page, level_index: int, timeout: int = 10000):
+    """Skip directly to a specific level using game's internal transition.
+    
+    More reliable than pressing 'n' multiple times.
+    
+    Args:
+        page: Playwright page object
+        level_index: Target level (0=tutorial, 1=green, ..., 6=black night, etc.)
+        timeout: Max wait time in ms
+    """
+    # Use the game's transitionToLevel method directly
+    page.evaluate(f"""() => {{
+        const gameScene = window.game?.scene?.getScene('GameScene');
+        if (gameScene && gameScene.transitionToLevel) {{
+            gameScene.transitionToLevel({level_index});
+        }}
+    }}""")
+    
+    # Wait for the level to be loaded
+    page.wait_for_function(
+        f"""() => {{
+            const gameScene = window.game?.scene?.getScene('GameScene');
+            return gameScene && 
+                   gameScene.sys && 
+                   gameScene.sys.isActive() && 
+                   gameScene.levelIndex === {level_index};
+        }}""",
+        timeout=timeout
+    )
+    # Extra wait for scene to fully initialize
+    page.wait_for_timeout(300)
+
+
+def dismiss_dialogues(page, timeout: int = 5000):
+    """Dismiss any active dialogues programmatically.
+    
+    Directly calls hideDialogue() on DialogueScene if showing.
+    More reliable than clicking.
+    """
+    page.evaluate("""() => {
+        const ds = window.game?.scene?.getScene('DialogueScene');
+        if (ds && ds.isDialogueShowing && ds.isDialogueShowing()) {
+            // Clear dialogue queue and hide
+            if (ds.dialogueQueue) ds.dialogueQueue = [];
+            if (ds.hideDialogue) ds.hideDialogue();
+        }
+    }""")
+    # Wait for dialogue to be hidden
+    page.wait_for_function("""() => {
+        const ds = window.game?.scene?.getScene('DialogueScene');
+        return !ds || !ds.isDialogueShowing || !ds.isDialogueShowing();
+    }""", timeout=timeout)
+    page.wait_for_timeout(100)
+
+
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
     """Configure browser context for game testing."""
