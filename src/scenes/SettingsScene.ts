@@ -394,7 +394,7 @@ export default class SettingsScene extends Phaser.Scene {
     row.add(this.createText(label + ':', this.smallFont, '#cccccc'));
     
     const paddingY = Math.max(2, Math.min(6, (this.minTouchTarget - this.smallFont) / 2));
-    const btn = this.add.text(0, 0, initialValue ? '✓ ON' : '✗ OFF', {
+    const btn = this.add.text(0, 0, initialValue ? t('on') : t('off'), {
       fontFamily: 'Courier New',
       fontSize: this.smallFont + 'px',
       color: initialValue ? '#00FF00' : '#888888',
@@ -405,7 +405,7 @@ export default class SettingsScene extends Phaser.Scene {
     let value = initialValue;
     btn.on('pointerdown', () => {
       value = !value;
-      btn.setText(value ? '✓ ON' : '✗ OFF');
+      btn.setText(value ? t('on') : t('off'));
       btn.setStyle({
         color: value ? '#00FF00' : '#888888',
         backgroundColor: value ? '#1a5a1a' : '#333333',

@@ -118,6 +118,14 @@ inputManager.isPressed('groom') // true/false
 - No build step required
 - Easy to add languages by extending TRANSLATIONS object
 - Supports dynamic placeholders for key rebindings
+- All 5 languages (FR, EN, DE, IT, ES) have complete translations
+
+**Supported Languages**:
+- French (fr) - Primary locale, fallback source
+- English (en)
+- German (de)
+- Italian (it)
+- Spanish (es)
 
 **Dynamic Placeholders**:
 - `{keys}` - Movement keys (WASD/ZQSD based on layout/rebinding)
@@ -132,6 +140,8 @@ tutorialControls: "🎮 CONTROLS: Use {keys} or arrows to move."
 text = text.replace('{keys}', getMovementKeysString());
 text = text.replace('{groomKey}', getGroomKeyName());
 ```
+
+**Testing**: Unit tests in `tests/unit-js/localization.test.js` ensure all languages have all keys from FR (primary locale). Test fails if any translation is missing.
 
 ### 5. Accessibility Architecture
 

@@ -1577,7 +1577,7 @@ export default class GameScene extends Phaser.Scene {
 
       this.createRiskIndicator(zoneX + zoneWidth / 2 + 15, zoneY - zoneHeight / 2 + 30);
 
-      this.add.text(zoneX, zoneY + zoneHeight / 2 + 8, '🚫 ZONE FERMÉE', {
+      this.add.text(zoneX, zoneY + zoneHeight / 2 + 8, t('zoneClosed'), {
         fontFamily: 'Arial, sans-serif',
         fontSize: '8px',
         fontStyle: 'bold',

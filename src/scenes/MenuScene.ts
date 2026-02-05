@@ -171,7 +171,7 @@ export default class MenuScene extends Phaser.Scene {
       });
 
     // Made in Savoie credit on second line
-    this.add.text(width / 2, height - 18, 'Made with ❄️ in Savoie', {
+    this.add.text(width / 2, height - 18, t('madeIn'), {
       fontFamily: 'Courier New, monospace',
       fontSize: '10px',
       color: '#4a6a7b',

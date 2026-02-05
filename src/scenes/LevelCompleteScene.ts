@@ -331,33 +331,23 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private getFailTaunt(): string {
     const taunts: Record<string, string[]> = {
       cliff: [
-        t('tauntCliff1') || "La gravité, c'est pas ton truc ?",
-        t('tauntCliff2') || "Jean-Pierre va devoir expliquer ça à l'assurance...",
-        t('tauntCliff3') || "Le ravin était pourtant bien visible !",
+        t('tauntCliff1'), t('tauntCliff2'), t('tauntCliff3'), t('tauntCliff4'), t('tauntCliff5'),
       ],
       fuel: [
-        t('tauntFuel1') || "Tu as oublié où était la station-service ?",
-        t('tauntFuel2') || "Même les marmottes savent faire le plein...",
-        t('tauntFuel3') || "La prochaine fois, vérifie la jauge AVANT de partir !",
+        t('tauntFuel1'), t('tauntFuel2'), t('tauntFuel3'), t('tauntFuel4'), t('tauntFuel5'),
       ],
       time: [
-        t('tauntTime1') || "Les skieurs arrivent... et la piste n'est pas prête !",
-        t('tauntTime2') || "Tu damais quoi, des croissants ?",
-        t('tauntTime3') || "Jean-Pierre est très déçu. Très, très déçu.",
+        t('tauntTime1'), t('tauntTime2'), t('tauntTime3'), t('tauntTime4'), t('tauntTime5'),
       ],
       avalanche: [
-        t('tauntAvalanche1') || "Tu as réveillé la montagne...",
-        t('tauntAvalanche2') || "Les pisteurs t'avaient pourtant prévenu !",
-        t('tauntAvalanche3') || "La neige, ça se respecte.",
+        t('tauntAvalanche1'), t('tauntAvalanche2'), t('tauntAvalanche3'), t('tauntAvalanche4'), t('tauntAvalanche5'),
       ],
       tumble: [
-        t('tauntTumble1') || "La physique, ça s'apprend...",
-        t('tauntTumble2') || "Le treuil existe pour une raison.",
-        t('tauntTumble3') || "Jean-Pierre t'avait dit d'utiliser le câble !",
+        t('tauntTumble1'), t('tauntTumble2'), t('tauntTumble3'), t('tauntTumble4'), t('tauntTumble5'),
       ],
     };
 
-    const options = taunts[this.failReason || ''] || [t('tryAgain') || "Réessaie !"];
+    const options = taunts[this.failReason || ''] || [t('tryAgain')];
     return options[Math.floor(Math.random() * options.length)];
   }
 

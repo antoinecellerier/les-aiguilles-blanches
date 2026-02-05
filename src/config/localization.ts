@@ -22,6 +22,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         exitFullscreen: "Quitter plein écran",
         back: "Retour",
         backToGame: "Retour au jeu",
+        loading: "Chargement...",
+        madeIn: "Fait avec ❄️ en Savoie",
+        on: "✓ OUI",
+        off: "✗ NON",
+        zoneClosed: "🚫 ZONE FERMÉE",
         
         // Settings
         language: "Langue",
@@ -72,16 +77,26 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         accessPath: "Route de service",
         toPiste: "Vers la piste",
         
-        // Taunts
-        tauntCliff1: "La gravité, c'est pas ton truc ?",
-        tauntCliff2: "Jean-Pierre va devoir expliquer ça à l'assurance...",
-        tauntCliff3: "Le ravin était pourtant bien visible !",
-        tauntFuel1: "Tu as oublié où était la station-service ?",
-        tauntFuel2: "Même les marmottes savent faire le plein...",
-        tauntFuel3: "La prochaine fois, vérifie la jauge AVANT de partir !",
-        tauntTime1: "Les skieurs arrivent... et la piste n'est pas prête !",
-        tauntTime2: "Tu damais quoi, des croissants ?",
-        tauntTime3: "Jean-Pierre est très déçu. Très, très déçu.",
+        // Taunts - Cliff falls (emphasize the dramatic fall, insurance headaches, rescue hassle)
+        tauntCliff1: "9 tonnes dans le ravin. L'assurance va adorer.",
+        tauntCliff2: "Jean-Pierre t'avait dit : 'Pas trop près du bord !' Tu te souviens ?",
+        tauntCliff3: "Les pisteurs descendent avec les cordes. Encore.",
+        tauntCliff4: "Marie annule ta réservation pour la raclette de ce soir.",
+        tauntCliff5: "Thierry calcule déjà le coût des réparations...",
+        
+        // Taunts - Fuel empty (emphasize planning failure, team disappointment)
+        tauntFuel1: "La jauge était sur rouge depuis 10 minutes. Tu regardais quoi ?",
+        tauntFuel2: "Émilie t'avait pourtant mis 'FAIRE LE PLEIN' en majuscules.",
+        tauntFuel3: "Même le diesel a ses limites. Toi aussi, apparemment.",
+        tauntFuel4: "Jean-Pierre soupire. Il envoie Thierry avec un jerrican.",
+        tauntFuel5: "Le soleil se lève. La piste n'est pas damée. Les skieurs arrivent.",
+        
+        // Taunts - Time limit (emphasize consequences for skiers and competition)
+        tauntTime1: "Premier télésiège dans 3... 2... 1... Raté.",
+        tauntTime2: "Les skieurs découvrent ta piste. Bosselée. Verglacée. Magnifique.",
+        tauntTime3: "Jean-Pierre regarde sa montre, puis toi, puis sa montre.",
+        tauntTime4: "La FIS demande pourquoi le slalom est sur de la soupe.",
+        tauntTime5: "Tu entends les moniteurs ESF expliquer aux clients pourquoi c'est 'pas de ta faute'.",
         
         // Game
         paused: "Pause",
@@ -159,12 +174,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         avalancheTrigger: "🏔️💨 AVALANCHE DÉCLENCHÉE ! Évacuation impossible !",
         steepWarning: "⚠️ PENTE RAIDE ! Utilisez le treuil (SHIFT) ou vous allez glisser !",
         tumble: "🔄 TONNEAU ! La dameuse a basculé sur la pente !",
-        tauntTumble1: "La physique, ça s'apprend...",
-        tauntTumble2: "Le treuil existe pour une raison, tu sais.",
-        tauntTumble3: "Jean-Pierre t'avait pourtant dit d'utiliser le câble !",
-        tauntAvalanche1: "Tu as réveillé la montagne... Elle n'est pas contente.",
-        tauntAvalanche2: "Les pisteurs t'avaient pourtant prévenu !",
-        tauntAvalanche3: "La neige, ça se respecte. Maintenant tu sais.",
+        
+        // Taunts - Tumble/Rollover (emphasize winch lesson, expensive damage)
+        tauntTumble1: "Le treuil, c'est pas décoratif. C'est pour les pentes comme ça.",
+        tauntTumble2: "Thierry contemple les dégâts. Il ne dit rien. C'est pire.",
+        tauntTumble3: "Jean-Pierre t'avait montré comment s'ancrer. Tu dormais ?",
+        tauntTumble4: "Une PistenBully, ça coûte 400 000€. Enfin, ça coûtait.",
+        tauntTumble5: "La pente te semblait gérable ? La dameuse n'était pas d'accord.",
+        
+        // Taunts - Avalanche (emphasize danger, respect for mountain)
+        tauntAvalanche1: "La montagne pardonne rarement. Elle n'a pas pardonné.",
+        tauntAvalanche2: "Le bulletin Météo France disait risque 4. Tu l'as lu ?",
+        tauntAvalanche3: "Les pisteurs retrouveront la dameuse au printemps. Peut-être.",
+        tauntAvalanche4: "Marie écoute l'alerte radio. Elle sait déjà que c'est toi.",
+        tauntAvalanche5: "Le PIDA avait sécurisé le secteur. Tu l'as dé-sécurisé.",
         
         // Dialogues
         jeanPierreIntro: "Bienvenue aux Aiguilles Blanches, petit ! Je suis Jean-Pierre, le chef dameur.",
@@ -191,6 +214,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         exitFullscreen: "Exit Fullscreen",
         back: "Back",
         backToGame: "Back to Game",
+        loading: "Loading...",
+        madeIn: "Made with ❄️ in Savoie",
+        on: "✓ ON",
+        off: "✗ OFF",
+        zoneClosed: "🚫 ZONE CLOSED",
         
         // Settings
         language: "Language",
@@ -238,17 +266,28 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         winchHint: "Press {winchKey} near an anchor ⚓ to use winch",
         winchHintTouch: "Hold 🔗 for winch",
         accessPath: "Service Road",
+        toPiste: "To the piste",
         
-        // Taunts
-        tauntCliff1: "Gravity isn't your strong suit, is it?",
-        tauntCliff2: "Jean-Pierre will have to explain this to insurance...",
-        tauntCliff3: "The cliff was clearly visible!",
-        tauntFuel1: "Forgot where the fuel station was?",
-        tauntFuel2: "Even the marmots know how to refuel...",
-        tauntFuel3: "Next time, check the gauge BEFORE leaving!",
-        tauntTime1: "Skiers are arriving... and the piste isn't ready!",
-        tauntTime2: "Were you grooming croissants?",
-        tauntTime3: "Jean-Pierre is very disappointed. Very, very disappointed.",
+        // Taunts - Cliff falls (emphasize the dramatic fall, insurance headaches, rescue hassle)
+        tauntCliff1: "9 tons into the ravine. Insurance will love this.",
+        tauntCliff2: "Jean-Pierre said 'not too close to the edge!' Remember?",
+        tauntCliff3: "Ski patrol is coming down with ropes. Again.",
+        tauntCliff4: "Marie cancels your raclette reservation for tonight.",
+        tauntCliff5: "Thierry is already calculating repair costs...",
+        
+        // Taunts - Fuel empty (emphasize planning failure, team disappointment)
+        tauntFuel1: "The gauge was on red for 10 minutes. What were you looking at?",
+        tauntFuel2: "Émilie wrote 'REFUEL' in capital letters on the board.",
+        tauntFuel3: "Even diesel has limits. So do you, apparently.",
+        tauntFuel4: "Jean-Pierre sighs. He's sending Thierry with a jerry can.",
+        tauntFuel5: "Sun's rising. Piste isn't groomed. Skiers are arriving.",
+        
+        // Taunts - Time limit (emphasize consequences for skiers and competition)
+        tauntTime1: "First chairlift in 3... 2... 1... Missed it.",
+        tauntTime2: "Skiers discover your piste. Bumpy. Icy. Magnificent.",
+        tauntTime3: "Jean-Pierre looks at his watch, then at you, then his watch.",
+        tauntTime4: "FIS is asking why the slalom is on soup.",
+        tauntTime5: "You hear ski instructors explaining to clients why it's 'not their fault'.",
         
         paused: "Paused",
         resume: "Resume",
@@ -324,12 +363,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         avalancheTrigger: "🏔️💨 AVALANCHE TRIGGERED! No escape!",
         steepWarning: "⚠️ STEEP SLOPE! Use the winch (SHIFT) or you'll slide!",
         tumble: "🔄 ROLLOVER! The groomer tumbled on the slope!",
-        tauntTumble1: "Physics lessons are expensive...",
-        tauntTumble2: "The winch exists for a reason, you know.",
-        tauntTumble3: "Jean-Pierre told you to use the cable!",
-        tauntAvalanche1: "You woke the mountain... She's not happy.",
-        tauntAvalanche2: "The ski patrol warned you!",
-        tauntAvalanche3: "Snow demands respect. Now you know.",
+        
+        // Taunts - Tumble/Rollover (emphasize winch lesson, expensive damage)
+        tauntTumble1: "The winch isn't decorative. It's for slopes like this.",
+        tauntTumble2: "Thierry stares at the damage. Says nothing. That's worse.",
+        tauntTumble3: "Jean-Pierre showed you how to anchor. Were you asleep?",
+        tauntTumble4: "A PistenBully costs €400,000. Well, it did.",
+        tauntTumble5: "The slope seemed manageable? The groomer disagreed.",
+        
+        // Taunts - Avalanche (emphasize danger, respect for mountain)
+        tauntAvalanche1: "The mountain rarely forgives. It didn't forgive.",
+        tauntAvalanche2: "Météo France said risk level 4. Did you read it?",
+        tauntAvalanche3: "Ski patrol will find the groomer in spring. Maybe.",
+        tauntAvalanche4: "Marie hears the radio alert. She already knows it's you.",
+        tauntAvalanche5: "The avalanche team had secured that sector. You un-secured it.",
         
         jeanPierreIntro: "Welcome to Les Aiguilles Blanches! I'm Jean-Pierre, head groomer.",
         level2Intro: "Nice work! Today we tackle the blue run.",
@@ -359,6 +406,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         exitFullscreen: "Vollbild beenden",
         back: "Zurück",
         backToGame: "Zurück zum Spiel",
+        loading: "Laden...",
+        madeIn: "Mit ❄️ in Savoyen gemacht",
+        on: "✓ AN",
+        off: "✗ AUS",
+        zoneClosed: "🚫 ZONE GESPERRT",
         
         // Settings
         language: "Sprache",
@@ -389,6 +441,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         touchSupported: "Touch OK",
         noGamepadConnected: "Kein Gamepad verbunden",
         
+        // How to Play hints
+        howToPlayMoveTouch: "Verwende das virtuelle D-Pad",
+        howToPlayMoveGamepad: "Stick oder D-Pad zum Bewegen",
+        howToPlayGroomTouch: "Tippe ❄️ zum Präparieren",
+        howToPlayGroomGamepad: "zum Präparieren",
+        howToPlayFuel: "Achte auf Kraftstoff und Ausdauer!",
+        
+        // Winch
+        winchAttached: "🔗 Winde befestigt! Halte {winchKey} für Unterstützung.",
+        winchHint: "Drücke {winchKey} bei einem Ankerpunkt ⚓ für die Winde",
+        winchHintTouch: "Halte 🔗 für die Winde",
+        accessPath: "Zufahrtsweg",
+        toPiste: "Zur Piste",
+        
         // Game
         paused: "Pausiert",
         resume: "Fortsetzen",
@@ -399,6 +465,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         coverage: "Abdeckung",
         time: "Zeit",
         target: "Ziel",
+        rating: "Bewertung",
+        nextLevel: "Nächstes Level",
+        replay: "Wiederholen",
+        pressContinue: "Leertaste oder tippen zum Fortfahren",
+        pauseTitle: "⏸️ Pause",
+        restart: "Neustart",
+        quit: "Beenden",
+        menu: "Menü",
+        tutorial: "Tutorial",
+        timeUsed: "Benötigte Zeit",
+        excellent: "Ausgezeichnet!",
+        good: "Gut gemacht!",
+        passed: "Geschafft",
+        retry: "Wiederholen",
+        gameComplete: "Spiel beendet!",
+        viewCredits: "Credits anzeigen",
+        creditsTitle: "Glückwunsch!",
+        creditsSubtitle: "Du hast Les Aiguilles Blanches gemeistert",
+        playAgain: "Nochmal spielen",
+        skipCredits: "Taste drücken zum Überspringen",
+        fr: "Französisch",
         
         // Levels - Tutorial step by step
         tutorialName: "Tutorial - Erste Schritte",
@@ -406,9 +493,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tutorialIntro: "Willkommen in Les Aiguilles Blanches!",
         tutorialWelcome: "🏔️ Willkommen, Neuling! Ich bin Jean-Pierre, Chefpräparierer. Ich bringe dir das Handwerk bei.",
         tutorialControls: "🎮 STEUERUNG: Benutze {keys} oder Pfeiltasten ↑↓←→ um den Pistenbully zu bewegen.",
+        tutorialControlsTouch: "🎮 STEUERUNG: Benutze das D-Pad ◀▲▼▶ links zum Bewegen.",
+        tutorialControlsGamepad: "🎮 STEUERUNG: Linker Stick oder D-Pad zum Bewegen.",
         tutorialMove: "👆 PROBIER ES: Bewege dich auf der Piste. Der weiße Schnee muss präpariert werden!",
         tutorialGroomIntro: "✅ Gut gemacht! Jetzt lernen wir das Präparieren.",
         tutorialGroomAction: "❄️ PRÄPARIEREN: Halte {groomKey} während der Fahrt, um den Schnee zu glätten.",
+        tutorialGroomActionTouch: "❄️ PRÄPARIEREN: Halte den ❄️ Knopf rechts zum Präparieren.",
+        tutorialGroomActionGamepad: "❄️ PRÄPARIEREN: Halte Ⓐ während der Fahrt zum Präparieren.",
         tutorialCoverage: "📊 Siehst du? Der Schnee wird glatter! Präpariere weiter!",
         tutorialHUD: "📈 ANZEIGE: Oben links: ⛽ Kraftstoff, 💪 Ausdauer, ❄️ Abdeckung. Oben rechts: ⏱️ Zeit und 🎯 Ziel.",
         tutorialGoal: "🎯 ZIEL: Präpariere mindestens 40% der Piste vor Zeitablauf. Die Skifahrer kommen!",
@@ -418,9 +509,69 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level1Task: "Präpariere die Anfängerpiste",
         level2Name: "Blaue Piste - Le Chamois",
         level2Task: "Präpariere effizient vor der Öffnung",
+        level3Name: "Snowpark - Air Zone",
+        level3Task: "Bereite die Freestyle-Module vor",
+        level4Name: "Rote Piste - L'Aigle",
+        level4Task: "Steiles Terrain, Kraftstoff managen",
+        level5Name: "Halfpipe - Le Tube",
+        level5Task: "Halfpipe für den Wettkampf vorbereiten",
+        level6Name: "Schwarze Piste - La Verticale",
+        level6Task: "Nachteinsatz mit Winde",
+        level7Name: "Lawinenzone - Col Dangereux",
+        level7Task: "Hochrisikogebiet vorbereiten",
+        level8Name: "Sturm - Bergung",
+        level8Task: "Pisten nach dem Sturm räumen",
         
         // Hazards
-        cliffFall: "⚠️ ACHTUNG! Sie sind in die Schlucht gefallen! Mission gescheitert."
+        cliffFall: "⚠️ ACHTUNG! Sie sind in die Schlucht gefallen! Mission gescheitert.",
+        fuelEmpty: "⛽ LEER! Kein Tropfen Diesel mehr...",
+        avalancheZone: "LAWINENZONE",
+        avalancheWarning: "⚠️ GEFAHR! Instabile Schneedecke! Verlasse die Zone!",
+        avalancheTrigger: "🏔️💨 LAWINE AUSGELÖST! Keine Flucht möglich!",
+        steepWarning: "⚠️ STEILER HANG! Benutze die Winde (SHIFT) oder du rutschst ab!",
+        tumble: "🔄 ÜBERSCHLAG! Der Pistenbully ist umgekippt!",
+        
+        // Dialogues
+        jeanPierreIntro: "Willkommen in Les Aiguilles Blanches, Kleiner! Ich bin Jean-Pierre, der Chefpräparierer.",
+        level2Intro: "Gut gemacht gestern! Heute geht's zur blauen Piste.",
+        level3Intro: "Der Snowpark braucht Liebe. Präzision!",
+        level4Intro: "L'Aigle ist ernst. Achte auf den Kraftstoff.",
+        level5Intro: "Morgen ist Wettkampf! Die Halfpipe muss perfekt sein.",
+        level6Intro: "Nachteinsatz auf La Verticale. Benutze die Winde.",
+        thierryWarning: "Achtung, die Lawinenzone ist empfindlich. Sei vorsichtig.",
+        level8Intro: "Der Sturm ist vorbei. Nimm einen Glühwein, das wird lang!",
+        marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
+        
+        // Taunts - Cliff
+        tauntCliff1: "9 Tonnen in der Schlucht. Die Versicherung wird begeistert sein.",
+        tauntCliff2: "Jean-Pierre sagte: 'Nicht zu nah am Rand!' Erinnerst du dich?",
+        tauntCliff3: "Die Bergwacht kommt mit Seilen. Wieder.",
+        tauntCliff4: "Marie storniert deine Raclette-Reservierung für heute Abend.",
+        tauntCliff5: "Thierry rechnet bereits die Reparaturkosten...",
+        // Taunts - Fuel
+        tauntFuel1: "Die Anzeige war 10 Minuten lang auf Rot. Was hast du angeschaut?",
+        tauntFuel2: "Émilie hatte 'TANKEN' in Großbuchstaben geschrieben.",
+        tauntFuel3: "Selbst Diesel hat Grenzen. Du offenbar auch.",
+        tauntFuel4: "Jean-Pierre seufzt. Er schickt Thierry mit einem Kanister.",
+        tauntFuel5: "Die Sonne geht auf. Die Piste ist nicht präpariert.",
+        // Taunts - Time
+        tauntTime1: "Erster Sessellift in 3... 2... 1... Verpasst.",
+        tauntTime2: "Skifahrer entdecken deine Piste. Buckelig. Vereist. Toll.",
+        tauntTime3: "Jean-Pierre schaut auf seine Uhr, dann auf dich.",
+        tauntTime4: "Die FIS fragt, warum der Slalom auf Suppe stattfindet.",
+        tauntTime5: "Du hörst Skilehrer den Gästen erklären, dass es 'nicht ihre Schuld' ist.",
+        // Taunts - Tumble
+        tauntTumble1: "Die Winde ist nicht zur Dekoration da.",
+        tauntTumble2: "Thierry starrt auf den Schaden. Sagt nichts. Das ist schlimmer.",
+        tauntTumble3: "Jean-Pierre hat dir gezeigt, wie man ankert. Hast du geschlafen?",
+        tauntTumble4: "Ein PistenBully kostet 400.000€. Naja, kostete.",
+        tauntTumble5: "Der Hang schien machbar? Die Raupe war anderer Meinung.",
+        // Taunts - Avalanche
+        tauntAvalanche1: "Der Berg verzeiht selten. Er hat nicht verziehen.",
+        tauntAvalanche2: "Météo France sagte Risikostufe 4. Hast du gelesen?",
+        tauntAvalanche3: "Die Bergwacht findet die Raupe im Frühling. Vielleicht.",
+        tauntAvalanche4: "Marie hört den Funkalarm. Sie weiß schon, dass du es warst.",
+        tauntAvalanche5: "Das Lawinenteam hatte den Sektor gesichert. Du hast ihn ent-sichert."
     },
     
     it: {
@@ -440,6 +591,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         exitFullscreen: "Esci schermo intero",
         back: "Indietro",
         backToGame: "Torna al gioco",
+        loading: "Caricamento...",
+        madeIn: "Fatto con ❄️ in Savoia",
+        on: "✓ SÌ",
+        off: "✗ NO",
+        zoneClosed: "🚫 ZONA CHIUSA",
         
         // Settings
         language: "Lingua",
@@ -470,6 +626,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         touchSupported: "Touch OK",
         noGamepadConnected: "Nessun gamepad connesso",
         
+        // How to Play hints
+        howToPlayMoveTouch: "Usa il D-pad virtuale",
+        howToPlayMoveGamepad: "Stick o D-pad per muoversi",
+        howToPlayGroomTouch: "Tocca ❄️ per preparare",
+        howToPlayGroomGamepad: "per preparare la neve",
+        howToPlayFuel: "Controlla carburante e resistenza!",
+        
+        // Winch
+        winchAttached: "🔗 Verricello agganciato! Tieni {winchKey} per assistenza.",
+        winchHint: "Premi {winchKey} vicino a un ancoraggio ⚓ per il verricello",
+        winchHintTouch: "Tieni 🔗 per il verricello",
+        accessPath: "Strada di servizio",
+        toPiste: "Verso la pista",
+        
         // Game
         paused: "Pausa",
         resume: "Riprendi",
@@ -480,6 +650,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         coverage: "Copertura",
         time: "Tempo",
         target: "Obiettivo",
+        rating: "Voto",
+        nextLevel: "Prossimo livello",
+        replay: "Rigiocare",
+        pressContinue: "Premi Spazio o tocca per continuare",
+        pauseTitle: "⏸️ Pausa",
+        restart: "Ricomincia",
+        quit: "Esci",
+        menu: "Menu",
+        tutorial: "Tutorial",
+        timeUsed: "Tempo impiegato",
+        excellent: "Eccellente!",
+        good: "Ben fatto!",
+        passed: "Superato",
+        retry: "Riprova",
+        gameComplete: "Gioco completato!",
+        viewCredits: "Vedi crediti",
+        creditsTitle: "Complimenti!",
+        creditsSubtitle: "Hai padroneggiato Les Aiguilles Blanches",
+        playAgain: "Rigiocare",
+        skipCredits: "Premi un tasto per saltare",
+        fr: "Francese",
         
         // Levels - Tutorial step by step
         tutorialName: "Tutorial - Primi Passi",
@@ -487,9 +678,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tutorialIntro: "Benvenuto a Les Aiguilles Blanches!",
         tutorialWelcome: "🏔️ Benvenuto, novellino! Sono Jean-Pierre, capo gattista. Ti insegnerò il mestiere.",
         tutorialControls: "🎮 COMANDI: Usa {keys} o le frecce ↑↓←→ per muovere il gatto delle nevi.",
+        tutorialControlsTouch: "🎮 COMANDI: Usa il D-pad ◀▲▼▶ a sinistra per muoversi.",
+        tutorialControlsGamepad: "🎮 COMANDI: Stick sinistro o D-pad per muoversi.",
         tutorialMove: "👆 PROVA: Muoviti sulla pista. La neve bianca deve essere battuta!",
         tutorialGroomIntro: "✅ Ottimo! Ora impariamo a battere la neve.",
         tutorialGroomAction: "❄️ BATTIPISTA: Tieni {groomKey} mentre ti muovi per lisciare la neve.",
+        tutorialGroomActionTouch: "❄️ BATTIPISTA: Tieni il pulsante ❄️ a destra per preparare.",
+        tutorialGroomActionGamepad: "❄️ BATTIPISTA: Tieni Ⓐ mentre ti muovi per preparare.",
         tutorialCoverage: "📊 Vedi? La neve diventa più liscia! Continua a battere!",
         tutorialHUD: "📈 HUD: In alto a sinistra: ⛽ Carburante, 💪 Resistenza, ❄️ Copertura. In alto a destra: ⏱️ Tempo e 🎯 Obiettivo.",
         tutorialGoal: "🎯 OBIETTIVO: Batti almeno il 40% della pista prima che scada il tempo. Gli sciatori stanno arrivando!",
@@ -499,9 +694,69 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level1Task: "Prepara la pista principianti",
         level2Name: "Pista Blu - Le Chamois",
         level2Task: "Prepara prima dell'apertura",
+        level3Name: "Snowpark - Air Zone",
+        level3Task: "Prepara i moduli freestyle",
+        level4Name: "Pista Rossa - L'Aigle",
+        level4Task: "Terreno ripido, gestisci il carburante",
+        level5Name: "Halfpipe - Le Tube",
+        level5Task: "Prepara l'halfpipe per la gara",
+        level6Name: "Pista Nera - La Verticale",
+        level6Task: "Operazione notturna con verricello",
+        level7Name: "Zona Valanghe - Col Dangereux",
+        level7Task: "Prepara la zona ad alto rischio",
+        level8Name: "Tempesta - Recupero",
+        level8Task: "Libera le piste dopo la tempesta",
         
         // Hazards
-        cliffFall: "⚠️ ATTENZIONE! Sei caduto nel dirupo! Missione fallita."
+        cliffFall: "⚠️ ATTENZIONE! Sei caduto nel dirupo! Missione fallita.",
+        fuelEmpty: "⛽ SERBATOIO VUOTO! Neanche una goccia di diesel...",
+        avalancheZone: "ZONA VALANGHE",
+        avalancheWarning: "⚠️ PERICOLO! Manto nevoso instabile! Esci dalla zona!",
+        avalancheTrigger: "🏔️💨 VALANGA INNESCATA! Impossibile evacuare!",
+        steepWarning: "⚠️ PENDIO RIPIDO! Usa il verricello (SHIFT) o scivolerai!",
+        tumble: "🔄 RIBALTAMENTO! Il gatto delle nevi si è rovesciato!",
+        
+        // Dialogues
+        jeanPierreIntro: "Benvenuto a Les Aiguilles Blanches, piccolo! Sono Jean-Pierre, il capo gattista.",
+        level2Intro: "Ben fatto ieri! Oggi si passa alla pista blu.",
+        level3Intro: "Lo snowpark ha bisogno di cure. Precisione!",
+        level4Intro: "L'Aigle è roba seria. Occhio al carburante.",
+        level5Intro: "Domani c'è la gara! L'halfpipe deve essere perfetto.",
+        level6Intro: "Operazione notturna su La Verticale. Usa il verricello.",
+        thierryWarning: "Attenzione, la zona valanghe è sensibile. Fai attenzione.",
+        level8Intro: "La tempesta è passata. Prendi un vin brulé, sarà lunga!",
+        marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
+        
+        // Taunts - Cliff
+        tauntCliff1: "9 tonnellate nel burrone. L'assicurazione sarà entusiasta.",
+        tauntCliff2: "Jean-Pierre aveva detto: 'Non troppo vicino al bordo!' Ricordi?",
+        tauntCliff3: "Il soccorso alpino arriva con le corde. Di nuovo.",
+        tauntCliff4: "Marie cancella la tua prenotazione per la raclette di stasera.",
+        tauntCliff5: "Thierry sta già calcolando i costi di riparazione...",
+        // Taunts - Fuel
+        tauntFuel1: "L'indicatore era rosso da 10 minuti. Cosa guardavi?",
+        tauntFuel2: "Émilie aveva scritto 'FARE RIFORNIMENTO' in maiuscolo.",
+        tauntFuel3: "Anche il diesel ha i suoi limiti. Tu pure, a quanto pare.",
+        tauntFuel4: "Jean-Pierre sospira. Manda Thierry con una tanica.",
+        tauntFuel5: "Il sole sorge. La pista non è preparata.",
+        // Taunts - Time
+        tauntTime1: "Prima seggiovia tra 3... 2... 1... Persa.",
+        tauntTime2: "Gli sciatori scoprono la tua pista. Dissestata. Ghiacciata. Magnifica.",
+        tauntTime3: "Jean-Pierre guarda l'orologio, poi te.",
+        tauntTime4: "La FIS chiede perché lo slalom è su una zuppa.",
+        tauntTime5: "Senti i maestri di sci spiegare ai clienti che 'non è colpa loro'.",
+        // Taunts - Tumble
+        tauntTumble1: "Il verricello non è decorativo. È per pendii come questo.",
+        tauntTumble2: "Thierry fissa i danni. Non dice niente. È peggio.",
+        tauntTumble3: "Jean-Pierre ti ha mostrato come ancorarti. Dormivi?",
+        tauntTumble4: "Un PistenBully costa 400.000€. Beh, costava.",
+        tauntTumble5: "Il pendio sembrava gestibile? Il gatto non era d'accordo.",
+        // Taunts - Avalanche
+        tauntAvalanche1: "La montagna perdona raramente. Non ha perdonato.",
+        tauntAvalanche2: "Météo France diceva rischio 4. L'hai letto?",
+        tauntAvalanche3: "Il soccorso troverà il gatto in primavera. Forse.",
+        tauntAvalanche4: "Marie sente l'allarme radio. Sa già che sei tu.",
+        tauntAvalanche5: "La squadra valanghe aveva messo in sicurezza il settore. Tu l'hai de-sicurato."
     },
     
     es: {
@@ -521,6 +776,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         exitFullscreen: "Salir pantalla completa",
         back: "Volver",
         backToGame: "Volver al juego",
+        loading: "Cargando...",
+        madeIn: "Hecho con ❄️ en Saboya",
+        on: "✓ SÍ",
+        off: "✗ NO",
+        zoneClosed: "🚫 ZONA CERRADA",
         
         // Settings
         language: "Idioma",
@@ -551,6 +811,20 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         touchSupported: "Táctil OK",
         noGamepadConnected: "Ningún gamepad conectado",
         
+        // How to Play hints
+        howToPlayMoveTouch: "Usa el D-pad virtual",
+        howToPlayMoveGamepad: "Stick o D-pad para mover",
+        howToPlayGroomTouch: "Toca ❄️ para preparar",
+        howToPlayGroomGamepad: "para preparar la nieve",
+        howToPlayFuel: "¡Vigila el combustible y la resistencia!",
+        
+        // Winch
+        winchAttached: "🔗 ¡Cabrestante enganchado! Mantén {winchKey} para asistencia.",
+        winchHint: "Pulsa {winchKey} cerca de un anclaje ⚓ para usar el cabrestante",
+        winchHintTouch: "Mantén 🔗 para el cabrestante",
+        accessPath: "Camino de servicio",
+        toPiste: "Hacia la pista",
+        
         // Game
         paused: "Pausado",
         resume: "Reanudar",
@@ -561,6 +835,27 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         coverage: "Cobertura",
         time: "Tiempo",
         target: "Objetivo",
+        rating: "Puntuación",
+        nextLevel: "Siguiente nivel",
+        replay: "Rejugar",
+        pressContinue: "Pulsa Espacio o toca para continuar",
+        pauseTitle: "⏸️ Pausa",
+        restart: "Reiniciar",
+        quit: "Salir",
+        menu: "Menú",
+        tutorial: "Tutorial",
+        timeUsed: "Tiempo usado",
+        excellent: "¡Excelente!",
+        good: "¡Bien hecho!",
+        passed: "Aprobado",
+        retry: "Reintentar",
+        gameComplete: "¡Juego completado!",
+        viewCredits: "Ver créditos",
+        creditsTitle: "¡Felicidades!",
+        creditsSubtitle: "Has dominado Les Aiguilles Blanches",
+        playAgain: "Jugar de nuevo",
+        skipCredits: "Pulsa una tecla para saltar",
+        fr: "Francés",
         
         // Levels - Tutorial step by step
         tutorialName: "Tutorial - Primeros Pasos",
@@ -568,9 +863,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tutorialIntro: "¡Bienvenido a Les Aiguilles Blanches!",
         tutorialWelcome: "🏔️ ¡Bienvenido, novato! Soy Jean-Pierre, jefe pisador. Te enseñaré el oficio.",
         tutorialControls: "🎮 CONTROLES: Usa {keys} o las flechas ↑↓←→ para mover la máquina pisanieves.",
+        tutorialControlsTouch: "🎮 CONTROLES: Usa el D-pad ◀▲▼▶ a la izquierda para moverte.",
+        tutorialControlsGamepad: "🎮 CONTROLES: Stick izquierdo o D-pad para moverte.",
         tutorialMove: "👆 PRUEBA: Muévete por la pista. ¡La nieve blanca debe ser pisada!",
         tutorialGroomIntro: "✅ ¡Genial! Ahora aprendamos a pisar la nieve.",
         tutorialGroomAction: "❄️ PISAR: Mantén {groomKey} mientras te mueves para alisar la nieve.",
+        tutorialGroomActionTouch: "❄️ PISAR: Mantén el botón ❄️ a la derecha para preparar.",
+        tutorialGroomActionGamepad: "❄️ PISAR: Mantén Ⓐ mientras te mueves para preparar.",
         tutorialCoverage: "📊 ¿Ves? ¡La nieve se vuelve más lisa! ¡Sigue pisando!",
         tutorialHUD: "📈 HUD: Arriba izquierda: ⛽ Combustible, 💪 Resistencia, ❄️ Cobertura. Arriba derecha: ⏱️ Tiempo y 🎯 Objetivo.",
         tutorialGoal: "🎯 META: Pisa al menos el 40% de la pista antes de que acabe el tiempo. ¡Los esquiadores vienen!",
@@ -580,9 +879,69 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level1Task: "Prepara la pista de principiantes",
         level2Name: "Pista Azul - Le Chamois",
         level2Task: "Prepara antes de la apertura",
+        level3Name: "Snowpark - Air Zone",
+        level3Task: "Prepara los módulos de freestyle",
+        level4Name: "Pista Roja - L'Aigle",
+        level4Task: "Terreno empinado, gestiona el combustible",
+        level5Name: "Halfpipe - Le Tube",
+        level5Task: "Prepara el halfpipe para la competición",
+        level6Name: "Pista Negra - La Verticale",
+        level6Task: "Operación nocturna con cabrestante",
+        level7Name: "Zona de Avalanchas - Col Dangereux",
+        level7Task: "Prepara la zona de alto riesgo",
+        level8Name: "Tormenta - Recuperación",
+        level8Task: "Despeja las pistas tras la tormenta",
         
         // Hazards
-        cliffFall: "⚠️ ¡CUIDADO! ¡Has caído al precipicio! Misión fallida."
+        cliffFall: "⚠️ ¡CUIDADO! ¡Has caído al precipicio! Misión fallida.",
+        fuelEmpty: "⛽ ¡SIN COMBUSTIBLE! Ni una gota de diésel...",
+        avalancheZone: "ZONA DE AVALANCHAS",
+        avalancheWarning: "⚠️ ¡PELIGRO! ¡Manto de nieve inestable! ¡Sal de la zona!",
+        avalancheTrigger: "🏔️💨 ¡AVALANCHA DESENCADENADA! ¡Evacuación imposible!",
+        steepWarning: "⚠️ ¡PENDIENTE EMPINADA! ¡Usa el cabrestante (SHIFT) o resbalarás!",
+        tumble: "🔄 ¡VUELCO! ¡La máquina ha volcado en la pendiente!",
+        
+        // Dialogues
+        jeanPierreIntro: "¡Bienvenido a Les Aiguilles Blanches, pequeño! Soy Jean-Pierre, el jefe pisador.",
+        level2Intro: "¡Bien hecho ayer! Hoy pasamos a la pista azul.",
+        level3Intro: "El snowpark necesita cariño. ¡Precisión!",
+        level4Intro: "L'Aigle es serio. Vigila el combustible.",
+        level5Intro: "¡Mañana hay competición! El halfpipe debe estar perfecto.",
+        level6Intro: "Operación nocturna en La Verticale. Usa el cabrestante.",
+        thierryWarning: "Cuidado, la zona de avalanchas es sensible. Ten cuidado.",
+        level8Intro: "La tormenta ha pasado. ¡Toma un vino caliente, va a ser largo!",
+        marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
+        
+        // Taunts - Cliff
+        tauntCliff1: "9 toneladas en el barranco. Al seguro le va a encantar.",
+        tauntCliff2: "Jean-Pierre dijo: '¡No tan cerca del borde!' ¿Recuerdas?",
+        tauntCliff3: "El equipo de rescate baja con cuerdas. Otra vez.",
+        tauntCliff4: "Marie cancela tu reserva de raclette para esta noche.",
+        tauntCliff5: "Thierry ya está calculando los costes de reparación...",
+        // Taunts - Fuel
+        tauntFuel1: "El indicador llevaba 10 minutos en rojo. ¿Qué mirabas?",
+        tauntFuel2: "Émilie escribió 'REPOSTAR' en mayúsculas en la pizarra.",
+        tauntFuel3: "Hasta el diésel tiene límites. Tú también, al parecer.",
+        tauntFuel4: "Jean-Pierre suspira. Envía a Thierry con un bidón.",
+        tauntFuel5: "Sale el sol. La pista no está preparada.",
+        // Taunts - Time
+        tauntTime1: "Primer telesilla en 3... 2... 1... Perdido.",
+        tauntTime2: "Los esquiadores descubren tu pista. Con baches. Helada. Magnífica.",
+        tauntTime3: "Jean-Pierre mira su reloj, luego a ti.",
+        tauntTime4: "La FIS pregunta por qué el slalom está sobre sopa.",
+        tauntTime5: "Oyes a los monitores explicar a los clientes que 'no es culpa suya'.",
+        // Taunts - Tumble
+        tauntTumble1: "El cabrestante no es decorativo. Es para pendientes así.",
+        tauntTumble2: "Thierry contempla los daños. No dice nada. Es peor.",
+        tauntTumble3: "Jean-Pierre te enseñó cómo anclarte. ¿Estabas dormido?",
+        tauntTumble4: "Una PistenBully cuesta 400.000€. Bueno, costaba.",
+        tauntTumble5: "¿La pendiente parecía manejable? La máquina no estaba de acuerdo.",
+        // Taunts - Avalanche
+        tauntAvalanche1: "La montaña rara vez perdona. No perdonó.",
+        tauntAvalanche2: "Météo France dijo nivel de riesgo 4. ¿Lo leíste?",
+        tauntAvalanche3: "El rescate encontrará la máquina en primavera. Quizás.",
+        tauntAvalanche4: "Marie oye la alerta por radio. Ya sabe que eres tú.",
+        tauntAvalanche5: "El equipo de avalanchas había asegurado el sector. Tú lo des-aseguraste."
     }
 };
 
