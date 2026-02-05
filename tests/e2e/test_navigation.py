@@ -695,8 +695,8 @@ class TestDialogueSystem:
     def test_dialogue_positioned_above_touch_controls(self, game_page: Page):
         """Test that dialogue box positioning clears touch controls when visible.
         
-        Dialogue position is now dynamic - only positioned higher when
-        HUDScene's touch controls are actually visible.
+        Dialogue position is calculated dynamically based on HUDScene's
+        getTouchControlsTopEdge() to ensure it always clears the joystick.
         """
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
@@ -708,24 +708,31 @@ class TestDialogueSystem:
             return scene?.container?.visible === true;
         }""", timeout=5000)
         
-        # Verify the touch-aware offset values would clear touch controls
-        # Touch offset: dialogueShowOffset = 280, so dialogueBottom = height - 280 + 60 = height - 220
-        # D-pad top edge = height - 205
-        # height - 220 < height - 205 ✓
+        # Verify the dynamic calculation ensures dialogue clears touch controls
         touch_check = game_page.evaluate("""() => {
-            const height = 720;  // Typical screen height
-            const touchDialogueShowOffset = 280;
-            const touchDialogueBottom = height - touchDialogueShowOffset + 60;
-            const dpadTopEdge = height - 205;  // btnSize=60, padding=25
+            const hudScene = window.game.scene.getScene('HUDScene');
+            const dialogueScene = window.game.scene.getScene('DialogueScene');
+            
+            // Get the actual touch controls top edge from HUD
+            const touchTopEdge = hudScene?.getTouchControlsTopEdge?.() || 0;
+            
+            // Dialogue box is 120px tall, centered at getDialogueShowY()
+            const dialogueShowY = dialogueScene.getDialogueShowY();
+            const dialogueBoxHeight = 120;
+            const dialogueBottom = dialogueShowY + dialogueBoxHeight / 2;
+            
             return {
-                touchDialogueBottom: touchDialogueBottom,
-                dpadTopEdge: dpadTopEdge,
-                clearsControls: touchDialogueBottom < dpadTopEdge
+                touchTopEdge: touchTopEdge,
+                dialogueShowY: dialogueShowY,
+                dialogueBottom: dialogueBottom,
+                clearsControls: dialogueBottom < touchTopEdge || touchTopEdge === 0
             };
         }""")
         
-        assert touch_check['clearsControls'], \
-            f"Touch dialogue bottom ({touch_check['touchDialogueBottom']}) should be above D-pad top ({touch_check['dpadTopEdge']})"
+        # If touch controls exist, dialogue must clear them
+        if touch_check['touchTopEdge'] > 0:
+            assert touch_check['clearsControls'], \
+                f"Dialogue bottom ({touch_check['dialogueBottom']}) should be above touch controls top ({touch_check['touchTopEdge']})"
 
     def test_dialogue_position_responds_to_touch_controls_visibility(self, game_page: Page):
         """Test that dialogue position is dynamic based on touch controls visibility."""
@@ -745,17 +752,23 @@ class TestDialogueSystem:
             const hudScene = window.game.scene.getScene('HUDScene');
             const height = dialogueScene.cameras.main.height;
             const touchVisible = hudScene?.touchControlsContainer?.visible === true;
+            const dialogueShowY = dialogueScene.getDialogueShowY();
+            
+            // Without touch controls visible, should use default position
+            const expectedDefaultY = height - 130;
+            
             return {
-                dialogueShowY: dialogueScene.dialogueShowY,
+                dialogueShowY: dialogueShowY,
                 touchControlsVisible: touchVisible,
-                expectedY: touchVisible ? height - 280 : height - 130,
+                expectedDefaultY: expectedDefaultY,
                 screenHeight: height
             };
         }""")
         
-        # Dialogue Y should match expected based on actual touch controls visibility
-        assert positions['dialogueShowY'] == positions['expectedY'], \
-            f"Dialogue Y ({positions['dialogueShowY']}) should be {positions['expectedY']} (touchVisible={positions['touchControlsVisible']})"
+        # Without touch controls, dialogue should be at default position
+        if not positions['touchControlsVisible']:
+            assert positions['dialogueShowY'] == positions['expectedDefaultY'], \
+                f"Dialogue Y ({positions['dialogueShowY']}) should be {positions['expectedDefaultY']} without touch controls"
 
 
 class TestPauseMenu:

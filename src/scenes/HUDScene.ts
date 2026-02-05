@@ -36,6 +36,14 @@ export default class HUDScene extends Phaser.Scene {
   private targetText: Phaser.GameObjects.Text | null = null;
   private winchHint: Phaser.GameObjects.Text | null = null;
   private touchControlsContainer: Phaser.GameObjects.Container | null = null;
+  
+  // Virtual joystick components
+  private joystickBase: Phaser.GameObjects.Arc | null = null;
+  private joystickThumb: Phaser.GameObjects.Arc | null = null;
+  private joystickPointer: Phaser.Input.Pointer | null = null;
+  
+  // Touch controls bounds (for dialogue positioning)
+  private touchControlsTopEdge = 0;
 
   // Touch controls state (public for GameScene to read)
   public touchUp = false;
@@ -47,6 +55,11 @@ export default class HUDScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'HUDScene' });
+  }
+  
+  /** Get the Y coordinate of the top edge of touch controls (for dialogue positioning) */
+  public getTouchControlsTopEdge(): number {
+    return this.touchControlsTopEdge;
   }
 
   init(data: HUDSceneData): void {
@@ -258,13 +271,9 @@ export default class HUDScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     
     // Scale touch controls for high-DPI screens
-    // On mobile, we want buttons to be at least ~15mm physical size for comfortable touch
-    // devicePixelRatio helps approximate physical size
-    const dpr = window.devicePixelRatio || 1;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     
-    // Base size: larger on mobile, especially high-DPI screens
-    // Minimum 60px on mobile, scale up with uiScale but cap the reduction from DPI
+    // Base size: larger on mobile
     const baseSize = isMobile ? Math.max(60, 50 * Math.max(1, this.uiScale)) : 50 * this.uiScale;
     const btnSize = Math.round(baseSize);
     const padding = Math.round(25 * this.uiScale);
@@ -276,7 +285,6 @@ export default class HUDScene extends Phaser.Scene {
     
     if (startHidden) {
       this.touchControlsContainer.setVisible(false);
-      // Show on first touch anywhere
       this.input.once('pointerdown', () => {
         if (this.touchControlsContainer) {
           this.touchControlsContainer.setVisible(true);
@@ -284,56 +292,64 @@ export default class HUDScene extends Phaser.Scene {
       });
     }
 
-    // D-pad (bottom-left)
-    const dpadX = padding + btnSize * 1.5;
-    const dpadY = height - padding - btnSize * 1.5;
-    const diagSize = btnSize * 0.7; // Slightly smaller for diagonals
+    // Virtual joystick (bottom-left)
+    const joystickRadius = btnSize * 1.8;
+    const thumbRadius = btnSize * 0.6;
+    const joystickX = padding + joystickRadius;
+    const joystickY = height - padding - joystickRadius;
+    
+    // Calculate top edge of touch controls (joystick top + margin)
+    // This is used by DialogueScene to position dialogues above touch controls
+    const joystickTopEdge = joystickY - joystickRadius;
+    const margin = 15; // Extra margin between dialogue and controls
+    this.touchControlsTopEdge = joystickTopEdge - margin;
 
-    // Up button
-    this.createTouchButton(dpadX, dpadY - btnSize, btnSize, '▲', alpha,
-      () => { this.touchUp = true; },
-      () => { this.touchUp = false; }
-    );
+    // Joystick base (outer circle)
+    this.joystickBase = this.add.circle(joystickX, joystickY, joystickRadius, 0x333333, alpha * 0.5)
+      .setScrollFactor(0)
+      .setStrokeStyle(3, 0x555555, alpha);
+    
+    // Direction indicators on base
+    const indicatorDist = joystickRadius * 0.7;
+    const indicators = [
+      { x: 0, y: -indicatorDist, label: '▲' },
+      { x: 0, y: indicatorDist, label: '▼' },
+      { x: -indicatorDist, y: 0, label: '◀' },
+      { x: indicatorDist, y: 0, label: '▶' },
+    ];
+    indicators.forEach(ind => {
+      this.add.text(joystickX + ind.x, joystickY + ind.y, ind.label, {
+        fontSize: Math.round(btnSize * 0.35) + 'px',
+        color: '#888888',
+      }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.6);
+    });
 
-    // Down button
-    this.createTouchButton(dpadX, dpadY + btnSize, btnSize, '▼', alpha,
-      () => { this.touchDown = true; },
-      () => { this.touchDown = false; }
-    );
+    // Joystick thumb (inner circle that moves)
+    this.joystickThumb = this.add.circle(joystickX, joystickY, thumbRadius, 0x666666, alpha)
+      .setScrollFactor(0)
+      .setStrokeStyle(2, 0x888888, alpha);
 
-    // Left button
-    this.createTouchButton(dpadX - btnSize, dpadY, btnSize, '◀', alpha,
-      () => { this.touchLeft = true; },
-      () => { this.touchLeft = false; }
-    );
+    // Add to container
+    this.touchControlsContainer.add([this.joystickBase, this.joystickThumb]);
 
-    // Right button
-    this.createTouchButton(dpadX + btnSize, dpadY, btnSize, '▶', alpha,
-      () => { this.touchRight = true; },
-      () => { this.touchRight = false; }
-    );
-
-    // Diagonal buttons (corners)
-    // Up-Left
-    this.createTouchButton(dpadX - btnSize, dpadY - btnSize, diagSize, '◤', alpha * 0.8,
-      () => { this.touchUp = true; this.touchLeft = true; },
-      () => { this.touchUp = false; this.touchLeft = false; }
-    );
-    // Up-Right
-    this.createTouchButton(dpadX + btnSize, dpadY - btnSize, diagSize, '◥', alpha * 0.8,
-      () => { this.touchUp = true; this.touchRight = true; },
-      () => { this.touchUp = false; this.touchRight = false; }
-    );
-    // Down-Left
-    this.createTouchButton(dpadX - btnSize, dpadY + btnSize, diagSize, '◣', alpha * 0.8,
-      () => { this.touchDown = true; this.touchLeft = true; },
-      () => { this.touchDown = false; this.touchLeft = false; }
-    );
-    // Down-Right
-    this.createTouchButton(dpadX + btnSize, dpadY + btnSize, diagSize, '◢', alpha * 0.8,
-      () => { this.touchDown = true; this.touchRight = true; },
-      () => { this.touchDown = false; this.touchRight = false; }
-    );
+    // Create interactive zone for joystick (larger than visual)
+    const joystickZone = this.add.circle(joystickX, joystickY, joystickRadius * 1.2, 0x000000, 0)
+      .setScrollFactor(0)
+      .setInteractive()
+      .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        this.joystickPointer = pointer;
+        this.updateJoystick(pointer, joystickX, joystickY, joystickRadius, thumbRadius);
+      })
+      .on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        if (this.joystickPointer === pointer) {
+          this.updateJoystick(pointer, joystickX, joystickY, joystickRadius, thumbRadius);
+        }
+      })
+      .on('pointerup', () => this.resetJoystick(joystickX, joystickY))
+      .on('pointerout', () => this.resetJoystick(joystickX, joystickY))
+      .on('pointercancel', () => this.resetJoystick(joystickX, joystickY));
+    
+    this.touchControlsContainer.add(joystickZone);
 
     // Action buttons (bottom-right)
     const actionX = width - padding - btnSize;
@@ -356,23 +372,118 @@ export default class HUDScene extends Phaser.Scene {
     }
   }
 
+  private updateJoystick(pointer: Phaser.Input.Pointer, centerX: number, centerY: number, maxRadius: number, thumbRadius: number): void {
+    if (!this.joystickThumb) return;
+
+    // Calculate offset from center
+    const dx = pointer.x - centerX;
+    const dy = pointer.y - centerY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Clamp thumb position to joystick radius
+    const clampedDist = Math.min(distance, maxRadius - thumbRadius);
+    const angle = Math.atan2(dy, dx);
+    
+    const thumbX = centerX + Math.cos(angle) * clampedDist;
+    const thumbY = centerY + Math.sin(angle) * clampedDist;
+    
+    this.joystickThumb.setPosition(thumbX, thumbY);
+    
+    // Update visual feedback - highlight thumb when active
+    this.joystickThumb.setFillStyle(0x88aaff, 0.9);
+    
+    // Determine direction based on angle and distance
+    // Dead zone: 20% of radius
+    const deadZone = maxRadius * 0.2;
+    
+    // Reset all directions
+    this.touchUp = false;
+    this.touchDown = false;
+    this.touchLeft = false;
+    this.touchRight = false;
+    
+    if (distance > deadZone) {
+      // Convert angle to 8-direction
+      // Angle: 0 = right, PI/2 = down, PI = left, -PI/2 = up
+      const deg = angle * 180 / Math.PI;
+      
+      // 8 directions with 45° sectors
+      if (deg > -22.5 && deg <= 22.5) {
+        this.touchRight = true;
+      } else if (deg > 22.5 && deg <= 67.5) {
+        this.touchRight = true;
+        this.touchDown = true;
+      } else if (deg > 67.5 && deg <= 112.5) {
+        this.touchDown = true;
+      } else if (deg > 112.5 && deg <= 157.5) {
+        this.touchLeft = true;
+        this.touchDown = true;
+      } else if (deg > 157.5 || deg <= -157.5) {
+        this.touchLeft = true;
+      } else if (deg > -157.5 && deg <= -112.5) {
+        this.touchLeft = true;
+        this.touchUp = true;
+      } else if (deg > -112.5 && deg <= -67.5) {
+        this.touchUp = true;
+      } else if (deg > -67.5 && deg <= -22.5) {
+        this.touchRight = true;
+        this.touchUp = true;
+      }
+    }
+  }
+
+  private resetJoystick(centerX: number, centerY: number): void {
+    this.joystickPointer = null;
+    
+    if (this.joystickThumb) {
+      this.joystickThumb.setPosition(centerX, centerY);
+      this.joystickThumb.setFillStyle(0x666666, 0.7);
+    }
+    
+    // Reset all directions
+    this.touchUp = false;
+    this.touchDown = false;
+    this.touchLeft = false;
+    this.touchRight = false;
+  }
+
   private createTouchButton(
     x: number, y: number, size: number, label: string, alpha: number,
     onDown: () => void, onUp: () => void, color = 0x333333
   ): void {
+    // Lighter color for pressed state
+    const pressedColor = Phaser.Display.Color.ValueToColor(color).lighten(40).color;
+    
     const bg = this.add.circle(x, y, size / 2, color, alpha)
       .setScrollFactor(0)
       .setInteractive()
-      .on('pointerdown', onDown)
-      .on('pointerup', onUp)
-      .on('pointerout', onUp)
+      .on('pointerdown', () => {
+        bg.setFillStyle(pressedColor, alpha + 0.2);
+        bg.setScale(1.1);
+        onDown();
+      })
+      .on('pointerup', () => {
+        bg.setFillStyle(color, alpha);
+        bg.setScale(1);
+        onUp();
+      })
+      .on('pointerout', () => {
+        bg.setFillStyle(color, alpha);
+        bg.setScale(1);
+        onUp();
+      })
       .on('pointerover', (pointer: Phaser.Input.Pointer) => {
-        // Trigger onDown when finger slides onto button while pressed
         if (pointer.isDown) {
+          bg.setFillStyle(pressedColor, alpha + 0.2);
+          bg.setScale(1.1);
           onDown();
         }
       })
-      .on('pointercancel', onUp);  // Handle touch cancel events
+      .on('pointercancel', () => {
+        bg.setFillStyle(color, alpha);
+        bg.setScale(1);
+        onUp();
+      });
 
     const text = this.add.text(x, y, label, {
       fontSize: Math.round(size * 0.5) + 'px',

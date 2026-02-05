@@ -27,13 +27,32 @@ export default class DialogueScene extends Phaser.Scene {
     super({ key: 'DialogueScene' });
   }
 
-  // Track dialogue Y positions (calculated dynamically based on touch controls visibility)
-  private get dialogueY(): number {
-    return this.cameras.main.height - (this.areTouchControlsVisible() ? 300 : 150);
+  // Dialogue box height (for positioning calculations)
+  private readonly dialogueBoxHeight = 120;
+  
+  // Get the Y position for dialogue based on touch controls
+  private getDialogueShowY(): number {
+    const height = this.cameras.main.height;
+    const defaultY = height - 130; // Default position without touch controls
+    
+    if (!this.areTouchControlsVisible()) {
+      return defaultY;
+    }
+    
+    // Get touch controls top edge from HUDScene
+    const hudScene = this.scene.get('HUDScene') as { getTouchControlsTopEdge?: () => number } | null;
+    if (hudScene?.getTouchControlsTopEdge) {
+      const touchTop = hudScene.getTouchControlsTopEdge();
+      // Position dialogue so its bottom edge (Y + boxHeight/2) is above touch controls
+      return touchTop - this.dialogueBoxHeight / 2;
+    }
+    
+    return defaultY;
   }
   
-  private get dialogueShowY(): number {
-    return this.cameras.main.height - (this.areTouchControlsVisible() ? 280 : 130);
+  // Get starting Y position (slightly below show position for animation)
+  private getDialogueY(): number {
+    return this.getDialogueShowY() + 20;
   }
   
   // Check if HUDScene's touch controls are currently visible
@@ -67,12 +86,12 @@ export default class DialogueScene extends Phaser.Scene {
       if (this.isShowing) this.advanceDialogue();
     });
 
-    this.container = this.add.container(0, this.dialogueY);
+    this.container = this.add.container(0, this.getDialogueY());
     this.container.setVisible(false);
     this.container.setDepth(100); // Above hit zone
 
     const boxWidth = width - 40;
-    const boxHeight = 120;
+    const boxHeight = this.dialogueBoxHeight;
     this.bg = this.add.rectangle(width / 2, 0, boxWidth, boxHeight, 0x222222, 0.95);
     this.bg.setStrokeStyle(2, 0x87ceeb);
 
@@ -191,14 +210,14 @@ export default class DialogueScene extends Phaser.Scene {
     
     // Position container at starting Y (off-screen), then tween to show position
     // Position is dynamic based on whether touch controls are currently visible
-    this.container.setY(this.dialogueY);
+    this.container.setY(this.getDialogueY());
     this.container.setVisible(true);
 
     Accessibility.announce(speaker + ': ' + dialogue.text);
 
     this.tweens.add({
       targets: this.container,
-      y: this.dialogueShowY,
+      y: this.getDialogueShowY(),
       duration: 200,
       ease: 'Power2',
     });
