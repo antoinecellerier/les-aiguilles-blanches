@@ -10,12 +10,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Polish (Medium Priority)
 
-- [ ] Move speed consistency - Verify same speed across keyboard/touch/gamepad
+- [x] Move speed consistency - Verified: Phaser physics handles delta time; 150px/s across all inputs (analog stick is proportional by design)
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
 - [ ] Keyboard-only menu navigation - Full menu access without mouse
 - [ ] Level differentiation - Varied objectives beyond coverage percentage
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
-- [ ] Marker placement validation - Ensure piste/danger markers only placed on snow, not rock
+- [x] Marker placement validation - Markers skip cliff areas via isOnCliff() check
 - [ ] Service roads - Improve legibility and practical usability
 - [ ] Touch controls - Move dialogues so they don't overlap with D-pad
 - [ ] Touch controls - Make direction controls more stick-like with visual feedback

@@ -535,6 +535,35 @@ export default class GameScene extends Phaser.Scene {
     return x >= path.centerX - halfWidth && x < path.centerX + halfWidth;
   }
 
+  /**
+   * Check if a position (in pixels) falls within a cliff area.
+   * Used to avoid placing markers on rocks.
+   */
+  private isOnCliff(x: number, y: number): boolean {
+    if (!this.cliffSegments || this.cliffSegments.length === 0) return false;
+    
+    for (const cliff of this.cliffSegments) {
+      // Check if y is within this cliff segment's vertical range
+      if (y < cliff.startY || y > cliff.endY) continue;
+      
+      const pisteEdge = cliff.getX(y);
+      
+      if (cliff.side === 'left') {
+        // Left cliff extends from (pisteEdge - offset - extent) to (pisteEdge - offset)
+        const cliffEnd = pisteEdge - cliff.offset;
+        const cliffStart = cliffEnd - cliff.extent;
+        if (x >= cliffStart && x <= cliffEnd) return true;
+      } else {
+        // Right cliff extends from (pisteEdge + offset) to (pisteEdge + offset + extent)
+        const cliffStart = pisteEdge + cliff.offset;
+        const cliffEnd = cliffStart + cliff.extent;
+        if (x >= cliffStart && x <= cliffEnd) return true;
+      }
+    }
+    
+    return false;
+  }
+
   private createSnowGrid(): void {
     this.snowTiles = this.add.group();
     const tileSize = this.tileSize;
@@ -840,13 +869,10 @@ export default class GameScene extends Phaser.Scene {
       0x000000, 0
     );
     this.physics.add.existing(bottomWall, true);
-    if (isDangerous) {
-      this.dangerZones.add(bottomWall);
-    } else {
-      this.boundaryWalls.add(bottomWall);
-    }
+    // Bottom is always a boundary wall (not a danger zone) - just stops the player
+    this.boundaryWalls.add(bottomWall);
     
-    // Draw cliff edge visuals if level has dangerous boundaries
+    // Draw cliff edge visuals if level has dangerous boundaries (side cliffs only)
     if (isDangerous) {
       this.createCliffEdgeVisuals();
     }
@@ -857,9 +883,6 @@ export default class GameScene extends Phaser.Scene {
     for (const cliff of this.cliffSegments) {
       this.drawContinuousCliff(cliff);
     }
-    
-    // Draw warning at bottom
-    this.drawBottomCliffWarning();
   }
 
   // Natural alpine rock colors - increased contrast
@@ -989,132 +1012,28 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     
-      // Warning poles at cliff edge (where danger zone starts)
+      // Warning poles on snow BEFORE the cliff (between piste edge and danger zone)
+      // Place poles slightly away from piste edge but NOT on the cliff
       for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
         const pisteEdge = getX(y);
-        // Place poles at the danger zone edge (pisteEdge + offset for right, pisteEdge - offset for left)
-        const poleX = side === 'left' ? pisteEdge - offset : pisteEdge + offset;
-        const poleHeight = tileSize * 0.7;
+        // Place poles in the snow zone between piste and cliff (at 1/3 of offset distance)
+        const poleOffset = offset * 0.3;  // Pole is 30% of the way from piste to cliff
+        const poleX = side === 'left' ? pisteEdge - poleOffset : pisteEdge + poleOffset;
+        // Match piste marker sizing (28px height, 5px width)
+        const poleHeight = 28;
+        const poleWidth = 5;
         
         g.fillStyle(0x000000, 1);
-        g.fillRect(poleX - 2, y, 4, poleHeight);
+        g.fillRect(poleX - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
         
+        // Red/yellow danger stripes
         const stripeH = poleHeight / 5;
         for (let j = 0; j < 5; j++) {
           g.fillStyle(j % 2 === 0 ? 0xff0000 : 0xffcc00, 1);
-          g.fillRect(poleX - 3, y + j * stripeH, 6, stripeH);
+          g.fillRect(poleX - poleWidth / 2 - 1, y - poleHeight + j * stripeH, poleWidth + 2, stripeH);
         }
       }
     }
-  }
-
-  private drawBottomCliffWarning(): void {
-    const tileSize = this.tileSize;
-    const worldWidth = this.level.width * tileSize;
-    const worldHeight = this.level.height * tileSize;
-    
-    const g = this.add.graphics();
-    g.setDepth(5);
-    
-    // Seeded random for consistent appearance
-    const rand = (i: number) => {
-      const n = Math.sin(i * 127.1 + 9999) * 43758.5453;
-      return n - Math.floor(n);
-    };
-    
-    // Cliff edge Y position
-    const cliffEdgeY = worldHeight - tileSize * 2;
-    
-    // Detail sizes matching snow texture style (16x16 base with 2-5px details)
-    const detailSize = Math.max(2, Math.floor(tileSize * 0.2));
-    const detailLarge = Math.max(3, Math.floor(tileSize * 0.3));
-    
-    // Draw cliff using tile-sized cells with rock texture
-    for (let y = cliffEdgeY; y < worldHeight; y += tileSize) {
-      for (let x = 0; x < worldWidth; x += tileSize) {
-        // Base rock color
-        g.fillStyle(this.CLIFF_COLORS.midRock, 1);
-        g.fillRect(x, y, tileSize + 1, tileSize + 1);
-        
-        // Detail rectangles matching snow texture pattern
-        const seed = x * 0.1 + y * 0.07;
-        
-        // Lighter patches
-        g.fillStyle(this.CLIFF_COLORS.lightRock, 1);
-        g.fillRect(x + detailSize, y + detailSize, detailLarge, detailSize);
-        if (rand(seed + 1) > 0.4) {
-          g.fillRect(x + tileSize * 0.5, y + detailSize * 2, detailLarge + detailSize, detailLarge);
-        }
-        if (rand(seed + 2) > 0.5) {
-          g.fillRect(x + detailSize * 2, y + tileSize * 0.5, detailLarge, detailLarge);
-        }
-        
-        // Shadow details
-        g.fillStyle(this.CLIFF_COLORS.darkRock, 1);
-        if (rand(seed + 3) > 0.3) {
-          g.fillRect(x + tileSize * 0.3, y + detailSize, detailSize, detailSize);
-        }
-        if (rand(seed + 4) > 0.4) {
-          g.fillRect(x + tileSize * 0.7, y + tileSize * 0.4, detailSize, detailLarge);
-        }
-        if (rand(seed + 5) > 0.5) {
-          g.fillRect(x + tileSize * 0.5, y + tileSize * 0.7, detailSize, detailSize);
-        }
-      }
-    }
-    
-    // Sparse snow patches
-    const snowSpacing = tileSize * 2;
-    for (let x = snowSpacing; x < worldWidth - snowSpacing; x += snowSpacing) {
-      if (rand(x + 200) < 0.7) continue;
-      const snowY = cliffEdgeY + tileSize * 0.5 + rand(x + 201) * tileSize;
-      
-      g.fillStyle(this.CLIFF_COLORS.snow, 1);
-      g.fillRect(x, snowY, detailLarge * 2, detailSize);
-      if (rand(x + 202) > 0.5) {
-        g.fillRect(x + detailSize, snowY + detailSize, detailLarge, detailSize);
-      }
-    }
-    
-    // Sparse trees on bottom cliff (matching off-piste density)
-    const treeSpacing = tileSize * 3;
-    for (let x = treeSpacing; x < worldWidth - treeSpacing; x += treeSpacing) {
-      if (rand(x + 300) < 0.7) continue;
-      const offsetX = (rand(x + 301) - 0.5) * treeSpacing * 0.5;
-      const treeY = cliffEdgeY + tileSize * 0.3 + rand(x + 302) * tileSize * 0.5;
-      this.createTree(x + offsetX, treeY);
-    }
-    
-    // Warning poles along cliff edge
-    for (let x = tileSize * 3; x < worldWidth - tileSize * 3; x += tileSize * 4) {
-      const poleY = cliffEdgeY - tileSize * 0.5;
-      const poleHeight = tileSize * 0.7;
-      
-      g.fillStyle(0x000000, 1);
-      g.fillRect(x - 2, poleY, 4, poleHeight);
-      
-      const stripeH = poleHeight / 5;
-      for (let j = 0; j < 5; j++) {
-        g.fillStyle(j % 2 === 0 ? 0xff0000 : 0xffcc00, 1);
-        g.fillRect(x - 3, poleY + j * stripeH, 6, stripeH);
-      }
-    }
-    
-    // Warning text
-    const warningText = this.add.text(
-      worldWidth / 2,
-      cliffEdgeY - tileSize * 1.2,
-      '⚠️ FALAISE - DANGER ⚠️',
-      {
-        fontSize: Math.round(tileSize * 0.5) + 'px',
-        color: '#ff0000',
-        fontStyle: 'bold',
-        backgroundColor: '#000000',
-        padding: { x: 6, y: 3 }
-      }
-    );
-    warningText.setOrigin(0.5);
-    warningText.setDepth(6);
   }
 
   private createPisteBoundaries(_worldWidth: number, _worldHeight: number): void {
@@ -1140,8 +1059,16 @@ export default class GameScene extends Phaser.Scene {
       const rightX = (path.centerX + path.width / 2) * tileSize;
       const y = yi * tileSize;
 
-      this.createMarkerPole(leftX - tileSize * 0.5, y, markerColor, markerSymbol, 'left');
-      this.createMarkerPole(rightX + tileSize * 0.5, y, markerColor, markerSymbol, 'right');
+      // Only place markers if position is not on a cliff
+      const leftMarkerX = leftX - tileSize * 0.5;
+      const rightMarkerX = rightX + tileSize * 0.5;
+      
+      if (!this.isOnCliff(leftMarkerX, y)) {
+        this.createMarkerPole(leftMarkerX, y, markerColor, markerSymbol, 'left');
+      }
+      if (!this.isOnCliff(rightMarkerX, y)) {
+        this.createMarkerPole(rightMarkerX, y, markerColor, markerSymbol, 'right');
+      }
     }
   }
 
@@ -1435,18 +1362,21 @@ export default class GameScene extends Phaser.Scene {
     const g = this.add.graphics();
     g.setDepth(8);
 
-    const poleHeight = 14;
-    const poleWidth = 3;
-    const stripeHeight = 3;
+    // Match piste marker sizing (28px height, 5px width)
+    const poleHeight = 28;
+    const poleWidth = 5;
+    const stripeHeight = Math.floor(poleHeight / 5);
 
+    // Orange/black stripes (French service road standard)
     for (let i = 0; i < poleHeight; i += stripeHeight) {
       const isOrange = (Math.floor(i / stripeHeight) % 2 === 0);
       g.fillStyle(isOrange ? 0xFF6600 : 0x111111, 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight + i, poleWidth, stripeHeight);
     }
 
+    // Orange top cap
     g.fillStyle(0xFF6600, 1);
-    g.fillCircle(x, y - poleHeight, poleWidth);
+    g.fillCircle(x, y - poleHeight, poleWidth * 0.8);
   }
 
   private createWinchAnchors(): void {
