@@ -279,6 +279,10 @@ export default class MenuScene extends Phaser.Scene {
     });
   }
 
+  shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
+  }
+
   private toggleFullscreen(): void {
     if (document.fullscreenElement) {
       document.exitFullscreen();

@@ -280,79 +280,45 @@ class TestOrientationChanges:
 
     def test_portrait_to_landscape_resize(self, page: Page):
         """Game should resize when switching from portrait to landscape."""
-        # Start in portrait mode (phone held vertically)
         page.set_viewport_size({"width": 390, "height": 844})
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
         page.wait_for_timeout(2000)
         
-        # Get initial canvas size
-        portrait_size = page.evaluate("""
-            () => {
-                const canvas = document.querySelector('canvas');
-                if (!canvas) return null;
-                return { width: canvas.width, height: canvas.height };
-            }
-        """)
-        assert portrait_size is not None, "Canvas should exist in portrait mode"
-        
-        # Switch to landscape (phone held horizontally)
+        # Switch to landscape
         page.set_viewport_size({"width": 844, "height": 390})
-        # Trigger resize handler (viewport change in Playwright doesn't fire resize event)
-        page.evaluate("() => window.resizeGame && window.resizeGame()")
+        page.evaluate("() => window.resizeGame?.()")
         page.wait_for_timeout(300)
         
-        # Get new canvas size
-        landscape_size = page.evaluate("""
-            () => {
-                const canvas = document.querySelector('canvas');
-                if (!canvas) return null;
-                return { width: canvas.width, height: canvas.height };
-            }
-        """)
-        assert landscape_size is not None, "Canvas should exist in landscape mode"
-        
-        # Canvas should resize to match new viewport
-        assert landscape_size["width"] != portrait_size["width"], \
-            f"Canvas width should change: portrait={portrait_size}, landscape={landscape_size}"
+        # Phaser game size should match new viewport
+        game_size = page.evaluate("""() => {
+            const s = window.game?.scale;
+            return s ? { width: s.gameSize.width, height: s.gameSize.height } : null;
+        }""")
+        assert game_size is not None, "Game should exist"
+        assert game_size["width"] > game_size["height"], \
+            f"Game should be landscape: {game_size}"
 
     def test_landscape_to_portrait_resize(self, page: Page):
         """Game should resize when switching from landscape to portrait."""
-        # Start in landscape mode
         page.set_viewport_size({"width": 844, "height": 390})
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
         page.wait_for_timeout(2000)
         
-        # Get initial canvas size
-        landscape_size = page.evaluate("""
-            () => {
-                const canvas = document.querySelector('canvas');
-                if (!canvas) return null;
-                return { width: canvas.width, height: canvas.height };
-            }
-        """)
-        assert landscape_size is not None, "Canvas should exist in landscape mode"
-        
         # Switch to portrait
         page.set_viewport_size({"width": 390, "height": 844})
-        # Trigger resize handler (viewport change in Playwright doesn't fire resize event)
-        page.evaluate("() => window.resizeGame && window.resizeGame()")
+        page.evaluate("() => window.resizeGame?.()")
         page.wait_for_timeout(300)
         
-        # Get new canvas size
-        portrait_size = page.evaluate("""
-            () => {
-                const canvas = document.querySelector('canvas');
-                if (!canvas) return null;
-                return { width: canvas.width, height: canvas.height };
-            }
-        """)
-        assert portrait_size is not None, "Canvas should exist in portrait mode"
-        
-        # Canvas should resize
-        assert portrait_size["height"] != landscape_size["height"], \
-            f"Canvas height should change: landscape={landscape_size}, portrait={portrait_size}"
+        # Phaser game size should match new viewport
+        game_size = page.evaluate("""() => {
+            const s = window.game?.scale;
+            return s ? { width: s.gameSize.width, height: s.gameSize.height } : null;
+        }""")
+        assert game_size is not None, "Game should exist"
+        assert game_size["height"] > game_size["width"], \
+            f"Game should be portrait: {game_size}"
 
     def test_game_playable_after_orientation_change(self, page: Page):
         """Game should remain playable after orientation change."""

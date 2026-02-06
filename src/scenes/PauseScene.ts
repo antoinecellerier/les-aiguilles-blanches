@@ -196,4 +196,8 @@ export default class PauseScene extends Phaser.Scene {
     this.scene.stop('DialogueScene');
     this.scene.start('MenuScene');
   }
+
+  shutdown(): void {
+    this.input.keyboard?.removeAllListeners();
+  }
 }

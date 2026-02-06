@@ -266,6 +266,7 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);
     this.dialogueQueue = [];

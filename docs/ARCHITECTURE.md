@@ -395,6 +395,36 @@ shutdown() {
 
 **Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern.
 
+### Scene Lifecycle & Cleanup
+
+Every scene that registers event listeners **must** clean them up in `shutdown()`:
+
+```typescript
+create() {
+  this.scale.on('resize', this.handleResize, this);
+  this.input.keyboard?.on('keydown-ESC', this.onEscape, this);
+}
+
+shutdown(): void {
+  this.scale.off('resize', this.handleResize, this);
+  this.input.keyboard?.removeAllListeners();
+  this.tweens.killAll();
+  this.children.removeAll(true);
+}
+```
+
+**All scenes have shutdown cleanup:**
+| Scene | Cleans up |
+|-------|-----------|
+| MenuScene | Scale resize listener |
+| SettingsScene | Scale resize listener |
+| GameScene | Scale resize, gamepad listeners |
+| HUDScene | Scale resize, custom events, gameScene refs |
+| LevelCompleteScene | Scale resize listener |
+| DialogueScene | Keyboard listeners, tweens, children |
+| PauseScene | Keyboard listeners |
+| CreditsScene | Keyboard listeners, tweens, children |
+
 ## Browser Compatibility Notes
 
 ### Firefox Rendering

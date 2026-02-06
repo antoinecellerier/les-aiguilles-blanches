@@ -267,6 +267,12 @@ export default class CreditsScene extends Phaser.Scene {
     }, 100);
   }
 
+  shutdown(): void {
+    this.input.keyboard?.removeAllListeners();
+    this.tweens.killAll();
+    this.children.removeAll(true);
+  }
+
   private returnToMenu(): void {
     const game = this.game;
     this.scene.stop('CreditsScene');

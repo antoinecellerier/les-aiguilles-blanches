@@ -2828,6 +2828,9 @@ export default class GameScene extends Phaser.Scene {
   shutdown(): void {
     console.log('GameScene.shutdown');
 
+    this.scale.off('resize', this.handleResize, this);
+    this.input.gamepad?.removeAllListeners();
+
     this.tweens.killAll();
     this.time.removeAllEvents();
 

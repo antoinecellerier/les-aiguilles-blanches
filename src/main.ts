@@ -92,7 +92,10 @@ window.addEventListener('load', () => {
   // don't trigger real browser resize events).
   (window as unknown as { resizeGame: () => void }).resizeGame = () => {
     if (window.game && window.game.scale) {
-      window.game.scale.resize(window.innerWidth, window.innerHeight);
+      const container = document.getElementById('game-container');
+      const w = container?.clientWidth || window.innerWidth;
+      const h = container?.clientHeight || window.innerHeight;
+      window.game.scale.resize(w, h);
     }
   };
 });
