@@ -69,22 +69,49 @@ export default class BootScene extends Phaser.Scene {
   }
 
   private generateTextures(): void {
-    // Groomer sprite
+    // Groomer sprite (top-down view, 36x58px, centered on 36px width)
+    // Layout: tiller at top (rear), tracks+body middle, blade at bottom (front)
     const groomerGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
-    groomerGraphics.fillStyle(0x333333);
-    groomerGraphics.fillRect(0, 0, 8, 40);
-    groomerGraphics.fillRect(24, 0, 8, 40);
-    groomerGraphics.fillStyle(0xcc2200);
-    groomerGraphics.fillRect(4, 5, 24, 25);
-    groomerGraphics.fillStyle(0x1e90ff);
-    groomerGraphics.fillRect(8, 10, 16, 12);
-    groomerGraphics.fillStyle(0x87ceeb);
-    groomerGraphics.fillRect(10, 12, 12, 6);
+    const xo = 2; // X offset to center 32px body in 36px texture
+    // Rear tiller — finisher comb at very top (wider than body, centered)
+    groomerGraphics.fillStyle(0x999999);
+    for (let tx = 1; tx < 35; tx += 3) {
+      groomerGraphics.fillRect(tx, 0, 1, 3); // Comb teeth
+    }
     groomerGraphics.fillStyle(0x888888);
-    groomerGraphics.fillRect(2, 38, 28, 6);
+    groomerGraphics.fillRect(0, 2, 36, 2); // Comb bar
+    // Tiller drum
+    groomerGraphics.fillStyle(0x555555);
+    groomerGraphics.fillRect(1, 4, 34, 3); // Drum body
     groomerGraphics.fillStyle(0x666666);
-    groomerGraphics.fillRect(0, 44, 32, 4);
-    groomerGraphics.generateTexture('groomer', 32, 48);
+    for (let tx = 2; tx < 34; tx += 4) {
+      groomerGraphics.fillRect(tx, 4, 2, 3); // Teeth detail
+    }
+    // Tiller arm connecting to body
+    groomerGraphics.fillStyle(0x777777);
+    groomerGraphics.fillRect(xo + 2, 7, 28, 3);
+    // --- Original groomer shifted down by 10px, right by 2px ---
+    const yo = 10; // Y offset for tiller space
+    // Tracks (left and right)
+    groomerGraphics.fillStyle(0x333333);
+    groomerGraphics.fillRect(xo, yo, 8, 40);
+    groomerGraphics.fillRect(xo + 24, yo, 8, 40);
+    // Body
+    groomerGraphics.fillStyle(0xcc2200);
+    groomerGraphics.fillRect(xo + 4, yo + 5, 24, 25);
+    // Cabin window frame
+    groomerGraphics.fillStyle(0x1e90ff);
+    groomerGraphics.fillRect(xo + 8, yo + 10, 16, 12);
+    // Window glass
+    groomerGraphics.fillStyle(0x87ceeb);
+    groomerGraphics.fillRect(xo + 10, yo + 12, 12, 6);
+    // Undercarriage
+    groomerGraphics.fillStyle(0x888888);
+    groomerGraphics.fillRect(xo + 2, yo + 38, 28, 6);
+    // Front blade
+    groomerGraphics.fillStyle(0x666666);
+    groomerGraphics.fillRect(xo, yo + 44, 32, 4);
+    groomerGraphics.generateTexture('groomer', 36, 58);
     groomerGraphics.destroy();
 
     // Tree sprite

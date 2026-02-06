@@ -527,6 +527,25 @@ export default class MenuScene extends Phaser.Scene {
     // Exhaust pipe
     g.fillStyle(0x555555);
     g.fillRect(gx + 10 * s, groundY - 38 * s, 3 * s, 8 * s);
+    // Rear tiller — behind the tracks
+    // Tiller arm connecting to body
+    g.fillStyle(0x777777);
+    g.fillRect(gx + 22 * s, groundY - 12 * s, 8 * s, 3 * s);
+    // Tiller drum with teeth
+    g.fillStyle(0x555555);
+    g.fillRect(gx + 28 * s, groundY - 14 * s, 6 * s, 8 * s);
+    g.fillStyle(0x666666);
+    for (let ty = -13; ty < -6; ty += 3) {
+      g.fillRect(gx + 29 * s, groundY + ty * s, 4 * s, 2 * s);
+    }
+    // Finisher comb trailing behind
+    g.fillStyle(0x888888);
+    g.fillRect(gx + 34 * s, groundY - 6 * s, 3 * s, 6 * s);
+    // Comb teeth (horizontal lines = corduroy pattern)
+    g.fillStyle(0x999999);
+    for (let ty = -5; ty < 0; ty += 2) {
+      g.fillRect(gx + 34 * s, groundY + ty * s, 3 * s, 1 * s);
+    }
   }
 
   private createSnowParticles(width: number, snowLineY: number): void {
