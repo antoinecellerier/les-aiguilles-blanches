@@ -15,7 +15,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Service roads - Improve legibility and practical usability
 - [x] Responsive design - All scenes handle resize/orientation change
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
-- [ ] Rework home screen styling
+- [x] Rework home screen styling
+- [ ] Styling consistency audit - Check settings, pause, credits, level-complete scenes match menu aesthetic
 - [x] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
 
 ## Future (Backlog)
@@ -29,6 +30,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Menu screen restyle** - Retro SkiFree aesthetic: stepped pixel mountains, side-view groomer, animated snow, 3D buttons, dark footer, aspect-ratio-aware layout
 - ✅ **Changelog overlay** - Daily entries with localized dates, dynamic key discovery, font scaling for small screens
 - ✅ **Full localization** - All 5 languages (FR/EN/DE/IT/ES) with ~170 keys each, coverage tests, hardcoded strings removed
 - ✅ **HUD text crispness** - roundPixels config, integer positions, removed sub-pixel origins

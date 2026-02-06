@@ -5,25 +5,32 @@ from conftest import wait_for_scene, wait_for_scene_inactive, skip_to_credits, w
 
 
 def click_menu_button(page: Page, button_index: int, button_name: str = "button"):
-    """Click a menu button by index (0=Start, 1=How to Play, 2=Settings).
+    """Click a menu button by index (0=Start, 1=How to Play, 2=Changelog, 3=Settings).
     
-    Menu buttons are positioned proportionally based on viewport height.
-    menuY = height * 0.55, buttonSpacing = 55 * scaleFactor
+    Queries actual button positions from the game scene for reliability across layouts.
     """
     canvas = page.locator("canvas")
     box = canvas.bounding_box()
     assert box, "Canvas not found"
     
-    height = box["height"]
-    # Scale factor based on 768px reference height
-    scale_factor = max(0.7, min(height / 768, 1.5))
-    button_spacing = 55 * scale_factor
-    menu_y = height * 0.55
+    # Query the button's position directly from the game scene
+    pos = page.evaluate(f"""() => {{
+        const scene = window.game?.scene?.getScene('MenuScene');
+        if (!scene || !scene.menuButtons) return null;
+        const btn = scene.menuButtons[{button_index}];
+        if (!btn) return null;
+        return {{ x: btn.x, y: btn.y }};
+    }}""")
     
-    # Button Y = menuY - buttonSpacing * 0.5 + index * buttonSpacing
-    button_y = menu_y - button_spacing * 0.5 + button_index * button_spacing
-    
-    page.mouse.click(box["x"] + box["width"] / 2, box["y"] + button_y)
+    if pos:
+        # Convert game coordinates to page coordinates
+        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
+    else:
+        # Fallback: use keyboard navigation
+        for _ in range(button_index):
+            page.keyboard.press("ArrowDown")
+            page.wait_for_timeout(50)
+        page.keyboard.press("Enter")
 
 
 # Legacy constants for backward compatibility

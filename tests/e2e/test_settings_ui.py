@@ -23,21 +23,18 @@ def navigate_to_settings(page: Page):
         navigate_to_settings_via_keyboard(page)
         return
     
-    height = box["height"]
-    width = box["width"]
+    # Settings is button index 3 (Start=0, How to Play=1, Changelog=2, Settings=3)
+    pos = page.evaluate("""() => {
+        const scene = window.game?.scene?.getScene('MenuScene');
+        if (!scene || !scene.menuButtons) return null;
+        const btn = scene.menuButtons[3];
+        if (!btn) return null;
+        return { x: btn.x, y: btn.y };
+    }""")
     
-    # Match MenuScene scaling logic exactly
-    dpr = page.evaluate("() => window.devicePixelRatio || 1")
-    logical_height = height / dpr
-    scale_factor = max(0.7, min(logical_height / 768, 1.5))
-    button_spacing = 55 * scale_factor
-    menu_y = height * 0.55
-    
-    # Settings is button index 2 (Start=0, How to Play=1, Settings=2)
-    settings_y = menu_y - button_spacing * 0.5 + 2 * button_spacing
-    
-    page.mouse.click(box["x"] + width / 2, box["y"] + settings_y)
-    page.wait_for_timeout(500)
+    if pos:
+        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
+        page.wait_for_timeout(500)
     
     # Check if it worked, fallback to direct scene start if not
     scenes = get_active_scenes(page)

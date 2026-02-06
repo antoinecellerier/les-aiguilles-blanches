@@ -92,11 +92,27 @@ Alpine rock with warm brown tones (NOT gray):
 |---------|-------|-----|
 | Button | Slate blue | `0x2d5a7b` |
 | Button hover | Lighter blue | `0x3d7a9b` |
+| Button shadow | Dark slate | `0x1a3a5c` |
+| Selection arrow | Gold | `0xffd700` |
 | Panel background | Dark gray | `0x222222` |
 | Dialog background | Navy | `0x1a2a3e` |
+| Footer panel | Navy | `0x1a2a3e` |
 | Success/positive | Green | `0x22aa22` |
 | Warning/danger | Red | `0xcc2200` |
 | Gold/highlight | Gold | `0xffd700` |
+
+### Menu Screen
+
+The menu uses a **side-view alpine scene** with pixel-art elements:
+- Sky gradient: `0x5bb8e8` → `0x87ceeb` → `0xa8ddf0` (bands proportional to snow line)
+- Stepped pixel mountains using rock palette with snow caps (max 4 steps)
+- White snow ground (`0xffffff`) with subtle grooming lines (`0xf0f6fa`)
+- Animated falling snow particles (2-4px white rects, 40 particles)
+- Pixel-art pine trees clustered along snow line
+- Side-view groomer: tracks, red body, blue cabin, front blade, exhaust
+- Retro 3D buttons with shadow offset
+- Dark footer panel with gold "Made with ❄️" text
+- Layout adapts to aspect ratio (portrait vs landscape)
 
 ### Difficulty Markers (French Standard)
 

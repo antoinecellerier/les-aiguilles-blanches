@@ -11,23 +11,22 @@ from conftest import GAME_URL, skip_to_level, dismiss_dialogues, wait_for_scene
 
 
 def click_start_button(page: Page):
-    """Click the Start Game button with proper scaling calculation."""
+    """Click the Start Game button by querying its position from the game scene."""
     box = page.locator("canvas").bounding_box()
-    w, h = box["width"], box["height"]
     
-    # Match MenuScene scaling: min of width and height based scales
-    # Note: In tests, devicePixelRatio is typically 1, so dprBoost = 1
-    scale_h = max(0.7, min(h / 768, 1.5))
-    scale_w = max(0.5, min(w / 1024, 1.5))
-    dpr = page.evaluate("window.devicePixelRatio || 1")
-    dpr_boost = (min(dpr, 2)) ** 0.5
-    scale = min(scale_h, scale_w) * dpr_boost
+    pos = page.evaluate("""() => {
+        const scene = window.game?.scene?.getScene('MenuScene');
+        if (!scene || !scene.menuButtons) return null;
+        const btn = scene.menuButtons[0];
+        if (!btn) return null;
+        return { x: btn.x, y: btn.y };
+    }""")
     
-    menu_y = h * 0.55
-    btn_spacing = 55 * scale
-    start_y = menu_y - btn_spacing * 0.5
-    
-    page.mouse.click(box["x"] + w / 2, box["y"] + start_y)
+    if pos:
+        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
+    else:
+        # Fallback: keyboard
+        page.keyboard.press("Enter")
 
 
 @pytest.fixture
