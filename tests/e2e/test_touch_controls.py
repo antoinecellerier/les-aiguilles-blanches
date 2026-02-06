@@ -285,19 +285,14 @@ class TestOrientationChanges:
         page.wait_for_selector("canvas", timeout=10000)
         page.wait_for_timeout(2000)
         
-        # Switch to landscape
+        # Switch to landscape and wait for resize to propagate
         page.set_viewport_size({"width": 844, "height": 390})
+        page.wait_for_timeout(100)
         page.evaluate("() => window.resizeGame?.()")
-        page.wait_for_timeout(300)
-        
-        # Phaser game size should match new viewport
-        game_size = page.evaluate("""() => {
-            const s = window.game?.scale;
-            return s ? { width: s.gameSize.width, height: s.gameSize.height } : null;
-        }""")
-        assert game_size is not None, "Game should exist"
-        assert game_size["width"] > game_size["height"], \
-            f"Game should be landscape: {game_size}"
+        page.wait_for_function(
+            "() => window.game?.scale?.gameSize?.width > window.game?.scale?.gameSize?.height",
+            timeout=3000
+        )
 
     def test_landscape_to_portrait_resize(self, page: Page):
         """Game should resize when switching from landscape to portrait."""
@@ -306,19 +301,14 @@ class TestOrientationChanges:
         page.wait_for_selector("canvas", timeout=10000)
         page.wait_for_timeout(2000)
         
-        # Switch to portrait
+        # Switch to portrait and wait for resize to propagate
         page.set_viewport_size({"width": 390, "height": 844})
+        page.wait_for_timeout(100)
         page.evaluate("() => window.resizeGame?.()")
-        page.wait_for_timeout(300)
-        
-        # Phaser game size should match new viewport
-        game_size = page.evaluate("""() => {
-            const s = window.game?.scale;
-            return s ? { width: s.gameSize.width, height: s.gameSize.height } : null;
-        }""")
-        assert game_size is not None, "Game should exist"
-        assert game_size["height"] > game_size["width"], \
-            f"Game should be portrait: {game_size}"
+        page.wait_for_function(
+            "() => window.game?.scale?.gameSize?.height > window.game?.scale?.gameSize?.width",
+            timeout=3000
+        )
 
     def test_game_playable_after_orientation_change(self, page: Page):
         """Game should remain playable after orientation change."""

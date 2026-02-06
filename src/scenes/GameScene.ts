@@ -2830,6 +2830,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.scale.off('resize', this.handleResize, this);
     this.input.gamepad?.removeAllListeners();
+    this.input.keyboard?.removeAllListeners();
+    this.input.removeAllListeners();
 
     this.tweens.killAll();
     this.time.removeAllEvents();

@@ -621,6 +621,7 @@ export default class HUDScene extends Phaser.Scene {
 
   shutdown(): void {
     this.scale.off('resize', this.handleResize, this);
+    this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);
 

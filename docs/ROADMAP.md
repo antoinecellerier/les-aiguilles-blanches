@@ -16,7 +16,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Responsive design - All scenes handle resize/orientation change
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
 - [ ] Rework home screen styling
-- [ ] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
+- [x] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
 
 ## Future (Backlog)
 
