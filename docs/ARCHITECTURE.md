@@ -313,6 +313,39 @@ All scenes import THEME: MenuScene, SettingsScene, DialogueScene, HUDScene, Paus
 ### Adding New Colors
 Add both hex number (`0x...`) and string (`'#...'`) variants to THEME. Hex numbers are used for Phaser Graphics/Rectangle fills; strings are used for Text styles.
 
+## Retro 3D Bevel Pattern
+
+HUD panels and dialogue boxes use a consistent 3D bevel effect inspired by '90s game UIs (SimCity 2000, Theme Hospital):
+
+```typescript
+bevelLight = 0x555555  // top + left edges (highlight)
+bevelDark  = 0x111111  // bottom + right edges (shadow)
+panelFill  = 0x1a1a1a  // opaque background
+bevelWidth = Math.max(2, Math.round(2 * uiScale))
+```
+
+A thin accent stripe (1px, THEME color) runs inside the top bevel for visual polish. All HUD panels, dialogue frames, and touch controls use this same bevel pattern to maintain visual consistency.
+
+## Dialogue System
+
+### Character Portraits
+Each speaker gets a colored portrait box with their initial letter:
+- Jean-Pierre / Tutorial: `0x2d5a7b` (blue)
+- Marie: `0x7b2d5a` (purple)
+- Thierry: `0x5a7b2d` (green)
+- Émilie: `0x7b5a2d` (brown)
+
+### Typewriter Text Effect
+Dialogue text reveals character-by-character at 25ms intervals:
+- First click/Enter/tap during typing → skips to full text
+- Second click → advances to next dialogue line
+- `fullText` property holds the complete string (public, used by tests)
+- Timer cleaned up in `hideDialogue()` and `shutdown()`
+- Continue indicator `>>` appears only after typewriter finishes
+
+### Phaser Text `font:` Shorthand Bug
+**Never use the `font:` shorthand property** (e.g., `font: 'bold 16px Courier New, monospace'`). Phaser misparses the font family as the fontSize. Always use explicit `fontFamily`, `fontSize`, `fontStyle` properties separately.
+
 ## Responsive UI Design
 
 ### DPI-Aware Layout

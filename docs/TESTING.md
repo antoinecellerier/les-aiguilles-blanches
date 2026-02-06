@@ -100,6 +100,7 @@ def test_example(self, game_page: Page):
 - Fixed `wait_for_timeout()` for game state changes
 - `skip_to_level()` when testing progression
 - `dismiss_dialogues()` when testing dialogue behavior
+- Reading `ds.dialogueText.text` for assertions — use `ds.fullText` instead (typewriter reveals text gradually)
 
 ## localStorage Keys
 

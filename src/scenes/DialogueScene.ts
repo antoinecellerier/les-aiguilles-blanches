@@ -23,13 +23,21 @@ export default class DialogueScene extends Phaser.Scene {
   private speakerText: Phaser.GameObjects.Text | null = null;
   private dialogueText: Phaser.GameObjects.Text | null = null;
   private continueText: Phaser.GameObjects.Text | null = null;
+  private portraitBg: Phaser.GameObjects.Rectangle | null = null;
+  private portraitText: Phaser.GameObjects.Text | null = null;
+
+  // Typewriter state
+  public fullText = '';
+  private typewriterTimer: Phaser.Time.TimerEvent | null = null;
+  private typewriterIndex = 0;
+  private isTyping = false;
 
   constructor() {
     super({ key: 'DialogueScene' });
   }
 
   // Dialogue box height (for positioning calculations)
-  private readonly dialogueBoxHeight = 120;
+  private readonly dialogueBoxHeight = 130;
   
   // Get the Y position for dialogue based on touch controls
   private getDialogueShowY(): number {
@@ -93,29 +101,68 @@ export default class DialogueScene extends Phaser.Scene {
 
     const boxWidth = width - 40;
     const boxHeight = this.dialogueBoxHeight;
-    this.bg = this.add.rectangle(width / 2, 0, boxWidth, boxHeight, THEME.colors.panelBg, THEME.opacity.panelBg);
-    this.bg.setStrokeStyle(2, THEME.colors.infoHex);
+    const bevelWidth = 3;
+    const bevelLight = 0x555555;
+    const bevelDark = 0x111111;
+    const panelFill = 0x1a1a1a;
+    const portraitSize = Math.round(boxHeight * 0.6);
+    const portraitMargin = Math.round((boxHeight - portraitSize) / 2);
+    const textStartX = 20 + portraitSize + portraitMargin + 10;
 
-    this.speakerText = this.add.text(40, -40, '', {
-      font: `bold ${THEME.fonts.sizes.medium}px ${THEME.fonts.family}`,
-      color: THEME.colors.info,
-    });
+    // Main background
+    const bgX = width / 2;
+    this.bg = this.add.rectangle(bgX, 0, boxWidth, boxHeight, panelFill);
+    // Bevel edges (top=light, left=light, bottom=dark, right=dark)
+    const bevelTop = this.add.rectangle(bgX, -boxHeight / 2, boxWidth, bevelWidth, bevelLight).setOrigin(0.5, 0);
+    const bevelLeft = this.add.rectangle(bgX - boxWidth / 2, 0, bevelWidth, boxHeight, bevelLight).setOrigin(0, 0.5);
+    const bevelBottom = this.add.rectangle(bgX, boxHeight / 2 - bevelWidth, boxWidth, bevelWidth, bevelDark).setOrigin(0.5, 0);
+    const bevelRight = this.add.rectangle(bgX + boxWidth / 2 - bevelWidth, 0, bevelWidth, boxHeight, bevelDark).setOrigin(0, 0.5);
+    // Accent stripe inside top bevel
+    const accent = this.add.rectangle(bgX, -boxHeight / 2 + bevelWidth, boxWidth - bevelWidth * 2, 1, THEME.colors.infoHex).setOrigin(0.5, 0);
 
-    this.dialogueText = this.add.text(40, -10, '', {
-      font: `${THEME.fonts.sizes.small}px ${THEME.fonts.family}`,
+    // Character portrait (colored initial in a small beveled box)
+    const pX = bgX - boxWidth / 2 + 20 + portraitSize / 2;
+    this.portraitBg = this.add.rectangle(pX, 0, portraitSize, portraitSize, 0x2d5a7b);
+    this.portraitBg.setStrokeStyle(2, 0x87ceeb);
+    this.portraitText = this.add.text(pX, 0, '', {
+      fontFamily: THEME.fonts.family,
+      fontSize: Math.round(portraitSize * 0.65) + 'px',
+      fontStyle: 'bold',
       color: THEME.colors.textPrimary,
-      wordWrap: { width: width - 120 },
+    }).setOrigin(0.5);
+
+    this.speakerText = this.add.text(textStartX, -boxHeight / 2 + 12, '', {
+      fontFamily: THEME.fonts.family,
+      fontSize: THEME.fonts.sizes.medium + 'px',
+      fontStyle: 'bold',
+      color: THEME.colors.info,
     });
 
-    // Continue indicator - show gamepad hint if connected
-    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
-    const continueHint = hasGamepad ? '▶ Ⓐ' : '▶ tap';
-    this.continueText = this.add.text(width / 2 + boxWidth / 2 - 35, boxHeight / 2 - 25, continueHint, {
-      font: `${THEME.fonts.sizes.small}px ${THEME.fonts.family}`,
-      color: THEME.colors.info,
-    }).setAlpha(0.8);
+    // Separator line under speaker name
+    const separator = this.add.rectangle(textStartX, -boxHeight / 2 + 32, boxWidth - textStartX - 40, 1, THEME.colors.infoHex, 0.4).setOrigin(0, 0.5);
 
-    this.container.add([this.bg, this.speakerText, this.dialogueText, this.continueText]);
+    this.dialogueText = this.add.text(textStartX, -boxHeight / 2 + 40, '', {
+      fontFamily: THEME.fonts.family,
+      fontSize: THEME.fonts.sizes.small + 'px',
+      color: THEME.colors.textPrimary,
+      wordWrap: { width: boxWidth - textStartX - 50 },
+    });
+
+    // Continue indicator
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+    const continueHint = hasGamepad ? '[A]' : '>>';
+    this.continueText = this.add.text(bgX + boxWidth / 2 - 30, boxHeight / 2 - 20, continueHint, {
+      fontFamily: THEME.fonts.family,
+      fontSize: THEME.fonts.sizes.small + 'px',
+      fontStyle: 'bold',
+      color: THEME.colors.info,
+    }).setOrigin(0.5).setAlpha(0);
+
+    this.container.add([
+      this.bg, bevelTop, bevelLeft, bevelBottom, bevelRight, accent,
+      this.portraitBg, this.portraitText, this.speakerText, separator,
+      this.dialogueText, this.continueText,
+    ]);
 
     this.bg.setInteractive({ useHandCursor: true });
     this.bg.on('pointerdown', () => {
@@ -201,13 +248,45 @@ export default class DialogueScene extends Phaser.Scene {
     }
 
     let speaker = 'Jean-Pierre';
-    if (dialogue.key.includes('marie')) speaker = 'Marie';
-    else if (dialogue.key.includes('thierry')) speaker = 'Thierry';
-    else if (dialogue.key.includes('emilie')) speaker = 'Émilie';
-    else if (dialogue.key.includes('tutorial')) speaker = t('tutorial');
+    let portraitColor = 0x2d5a7b; // blue (Jean-Pierre default)
+    if (dialogue.key.includes('marie')) { speaker = 'Marie'; portraitColor = 0x7b2d5a; }
+    else if (dialogue.key.includes('thierry')) { speaker = 'Thierry'; portraitColor = 0x5a7b2d; }
+    else if (dialogue.key.includes('emilie')) { speaker = 'Émilie'; portraitColor = 0x7b5a2d; }
+    else if (dialogue.key.includes('tutorial')) { speaker = t('tutorial'); portraitColor = 0x2d5a7b; }
 
     this.speakerText.setText(speaker);
-    this.dialogueText.setText(dialogue.text);
+    
+    // Set portrait — first letter of speaker in colored box
+    if (this.portraitBg) this.portraitBg.setFillStyle(portraitColor);
+    if (this.portraitText) this.portraitText.setText(speaker.charAt(0).toUpperCase());
+
+    // Typewriter effect — reveal text character by character
+    this.fullText = dialogue.text;
+    this.typewriterIndex = 0;
+    this.isTyping = true;
+    this.dialogueText.setText('');
+    if (this.continueText) this.continueText.setAlpha(0);
+    
+    // Stop any existing typewriter
+    if (this.typewriterTimer) {
+      this.typewriterTimer.destroy();
+      this.typewriterTimer = null;
+    }
+    
+    this.typewriterTimer = this.time.addEvent({
+      delay: 25,
+      repeat: this.fullText.length - 1,
+      callback: () => {
+        this.typewriterIndex++;
+        if (this.dialogueText) {
+          this.dialogueText.setText(this.fullText.substring(0, this.typewriterIndex));
+        }
+        if (this.typewriterIndex >= this.fullText.length) {
+          this.isTyping = false;
+          if (this.continueText) this.continueText.setAlpha(0.8);
+        }
+      },
+    });
     
     // Position container at starting Y (off-screen), then tween to show position
     // Position is dynamic based on whether touch controls are currently visible
@@ -226,11 +305,30 @@ export default class DialogueScene extends Phaser.Scene {
 
   private advanceDialogue(): void {
     if (!this.isShowing) return;
+    
+    // If typewriter is still running, skip to full text
+    if (this.isTyping) {
+      if (this.typewriterTimer) {
+        this.typewriterTimer.destroy();
+        this.typewriterTimer = null;
+      }
+      this.isTyping = false;
+      this.typewriterIndex = this.fullText.length;
+      if (this.dialogueText) this.dialogueText.setText(this.fullText);
+      if (this.continueText) this.continueText.setAlpha(0.8);
+      return;
+    }
+    
     this.displayNextDialogue();
   }
 
   private hideDialogue(): void {
     this.isShowing = false;
+    this.isTyping = false;
+    if (this.typewriterTimer) {
+      this.typewriterTimer.destroy();
+      this.typewriterTimer = null;
+    }
 
     if (!this.container) return;
 
@@ -268,15 +366,22 @@ export default class DialogueScene extends Phaser.Scene {
 
   shutdown(): void {
     this.input.keyboard?.removeAllListeners();
+    if (this.typewriterTimer) {
+      this.typewriterTimer.destroy();
+      this.typewriterTimer = null;
+    }
     this.tweens.killAll();
     this.children.removeAll(true);
     this.dialogueQueue = [];
     this.isShowing = false;
+    this.isTyping = false;
     this.container = null;
     this.bg = null;
     this.hitZone = null;
     this.speakerText = null;
     this.dialogueText = null;
     this.continueText = null;
+    this.portraitBg = null;
+    this.portraitText = null;
   }
 }

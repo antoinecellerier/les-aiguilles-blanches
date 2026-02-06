@@ -101,20 +101,33 @@ export default class HUDScene extends Phaser.Scene {
     const fontTiny = Math.round(12 * this.uiScale) + 'px';
     const fontSmall = Math.round(14 * this.uiScale) + 'px';
     const fontMed = Math.round(16 * this.uiScale) + 'px';
-    const fontIcon = Math.round(18 * this.uiScale) + 'px';
-    const fontIconLg = Math.round(22 * this.uiScale) + 'px';
     const fontLarge = Math.round(26 * this.uiScale) + 'px';
 
-    // Left panel
-    this.add.rectangle(0, 0, leftPanelWidth, leftPanelHeight, 0x000000, 0.75).setOrigin(0).setScrollFactor(0);
-    this.add.rectangle(0, 0, leftPanelWidth, 3, THEME.colors.infoHex).setOrigin(0).setScrollFactor(0);
-    this.add.rectangle(leftPanelWidth, 0, 2, leftPanelHeight, THEME.colors.infoHex, 0.5).setOrigin(0).setScrollFactor(0);
+    // Left panel — 3D beveled retro style
+    const bevelLight = 0x555555;
+    const bevelDark = 0x111111;
+    const panelFill = 0x1a1a1a;
+    const bevelWidth = Math.max(2, Math.round(2 * this.uiScale));
+
+    // Left panel background + bevel
+    this.add.rectangle(0, 0, leftPanelWidth, leftPanelHeight, panelFill).setOrigin(0).setScrollFactor(0);
+    // Top edge (light)
+    this.add.rectangle(0, 0, leftPanelWidth, bevelWidth, bevelLight).setOrigin(0).setScrollFactor(0);
+    // Left edge (light)
+    this.add.rectangle(0, 0, bevelWidth, leftPanelHeight, bevelLight).setOrigin(0).setScrollFactor(0);
+    // Bottom edge (dark)
+    this.add.rectangle(0, leftPanelHeight - bevelWidth, leftPanelWidth, bevelWidth, bevelDark).setOrigin(0).setScrollFactor(0);
+    // Right edge (dark)
+    this.add.rectangle(leftPanelWidth - bevelWidth, 0, bevelWidth, leftPanelHeight, bevelDark).setOrigin(0).setScrollFactor(0);
+    // Color accent stripe (info blue, thin, just inside top bevel)
+    this.add.rectangle(bevelWidth, bevelWidth, leftPanelWidth - bevelWidth * 2, Math.max(1, Math.round(1 * this.uiScale)), THEME.colors.infoHex).setOrigin(0).setScrollFactor(0);
 
     const row1Y = Math.round(8 * this.uiScale);
     const row2Y = Math.round(32 * this.uiScale);
     const row3Y = Math.round(58 * this.uiScale);
     const row4Y = Math.round(90 * this.uiScale);
-    const barOffset = Math.round(35 * this.uiScale);
+    const labelWidth = Math.round(48 * this.uiScale);
+    const barStartX = labelWidth + padding;
 
     this.add.text(padding, row1Y, t(this.level.nameKey) || 'Level', {
       fontFamily: THEME.fonts.family,
@@ -123,47 +136,65 @@ export default class HUDScene extends Phaser.Scene {
       color: THEME.colors.info,
     }).setScrollFactor(0);
 
-    this.add.text(padding, row2Y, '⛽', { fontSize: fontIcon }).setScrollFactor(0);
-    this.fuelBarBg = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelBar = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.dangerHex).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelText = this.add.text(barOffset + padding + barWidth + 5, row2Y, '100%', {
+    // Fuel row — retro text label instead of emoji
+    this.add.text(padding, row2Y + Math.round(2 * this.uiScale), 'FUEL', {
+      fontFamily: THEME.fonts.family,
+      fontSize: fontTiny,
+      fontStyle: 'bold',
+      color: THEME.colors.danger,
+    }).setScrollFactor(0);
+    this.fuelBarBg = this.add.rectangle(barStartX, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelBar = this.add.rectangle(barStartX, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.dangerHex).setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelText = this.add.text(barStartX + barWidth + 5, row2Y, '100%', {
       fontFamily: THEME.fonts.family,
       fontSize: fontSmall,
       color: THEME.colors.textPrimary,
     }).setScrollFactor(0);
 
-    this.add.text(padding, row3Y, '💪', { fontSize: fontIcon }).setScrollFactor(0);
-    this.staminaBarBg = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaBar = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.successHex).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaText = this.add.text(barOffset + padding + barWidth + 5, row3Y, '100%', {
+    // Stamina row
+    this.add.text(padding, row3Y + Math.round(2 * this.uiScale), 'STAM', {
+      fontFamily: THEME.fonts.family,
+      fontSize: fontTiny,
+      fontStyle: 'bold',
+      color: THEME.colors.success,
+    }).setScrollFactor(0);
+    this.staminaBarBg = this.add.rectangle(barStartX, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaBar = this.add.rectangle(barStartX, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.successHex).setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaText = this.add.text(barStartX + barWidth + 5, row3Y, '100%', {
       fontFamily: THEME.fonts.family,
       fontSize: fontSmall,
       color: THEME.colors.textPrimary,
     }).setScrollFactor(0);
 
-    this.add.text(padding, row4Y, '❄️', { fontSize: fontIcon }).setScrollFactor(0);
-    this.coverageText = this.add.text(barOffset + padding, row4Y, (t('coverage') || 'Coverage') + ': 0%', {
+    // Coverage row
+    this.coverageText = this.add.text(padding, row4Y, (t('coverage') || 'Coverage') + ': 0%', {
       fontFamily: THEME.fonts.family,
       fontSize: fontMed,
       color: THEME.colors.info,
     }).setScrollFactor(0);
 
-    // Right panel
-    this.add.rectangle(width, 0, rightPanelWidth, rightPanelHeight, 0x000000, 0.75).setOrigin(1, 0).setScrollFactor(0);
-    this.add.rectangle(width, 0, rightPanelWidth, 3, THEME.colors.accentHex).setOrigin(1, 0).setScrollFactor(0);
-    this.add.rectangle(width - rightPanelWidth, 0, 2, rightPanelHeight, THEME.colors.accentHex, 0.5).setOrigin(0).setScrollFactor(0);
+    // Right panel — 3D beveled retro style
+    const rpX = width - rightPanelWidth;
+    this.add.rectangle(rpX, 0, rightPanelWidth, rightPanelHeight, panelFill).setOrigin(0).setScrollFactor(0);
+    // Top edge (light)
+    this.add.rectangle(rpX, 0, rightPanelWidth, bevelWidth, bevelLight).setOrigin(0).setScrollFactor(0);
+    // Left edge (light) — note: left side of right panel
+    this.add.rectangle(rpX, 0, bevelWidth, rightPanelHeight, bevelLight).setOrigin(0).setScrollFactor(0);
+    // Bottom edge (dark)
+    this.add.rectangle(rpX, rightPanelHeight - bevelWidth, rightPanelWidth, bevelWidth, bevelDark).setOrigin(0).setScrollFactor(0);
+    // Right edge (dark)
+    this.add.rectangle(width - bevelWidth, 0, bevelWidth, rightPanelHeight, bevelDark).setOrigin(0).setScrollFactor(0);
+    // Accent stripe (gold)
+    this.add.rectangle(rpX + bevelWidth, bevelWidth, rightPanelWidth - bevelWidth * 2, Math.max(1, Math.round(1 * this.uiScale)), THEME.colors.accentHex).setOrigin(0).setScrollFactor(0);
 
-    const timerIconX = width - rightPanelWidth + padding;
-    this.add.text(timerIconX, Math.round(15 * this.uiScale), '⏱️', { fontSize: fontIconLg }).setOrigin(0, 0).setScrollFactor(0);
-    this.timerText = this.add.text(width - padding, Math.round(18 * this.uiScale), '00:00', {
+    this.timerText = this.add.text(width - padding, Math.round(12 * this.uiScale), '00:00', {
       fontFamily: THEME.fonts.family,
       fontSize: fontLarge,
       fontStyle: 'bold',
       color: THEME.colors.textPrimary,
     }).setOrigin(1, 0).setScrollFactor(0);
 
-    this.add.text(timerIconX, Math.round(50 * this.uiScale), '🎯', { fontSize: fontIcon }).setOrigin(0, 0).setScrollFactor(0);
-    this.targetText = this.add.text(timerIconX + Math.round(25 * this.uiScale), Math.round(53 * this.uiScale), (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
+    this.targetText = this.add.text(rpX + padding, Math.round(50 * this.uiScale), (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
       fontFamily: THEME.fonts.family,
       fontSize: fontMed,
       color: THEME.colors.accent,
@@ -179,7 +210,7 @@ export default class HUDScene extends Phaser.Scene {
     const skipFontSize = (hasTouch && isMobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
     const skipPadX = (hasTouch && isMobile) ? Math.max(10, Math.round(8 * this.uiScale)) : Math.round(6 * this.uiScale);
     const skipPadY = (hasTouch && isMobile) ? Math.max(6, Math.round(5 * this.uiScale)) : Math.round(3 * this.uiScale);
-    const skipLabel = (hasTouch && isMobile) ? '⏭ Skip' : '⏭ Skip Level [N]';
+    const skipLabel = (hasTouch && isMobile) ? '>> Skip' : '>> Skip Level [N]';
     
     // Track Y position for stacked buttons
     let nextButtonY = rightPanelHeight + Math.round(5 * this.uiScale);
@@ -208,7 +239,7 @@ export default class HUDScene extends Phaser.Scene {
       const winchHintRaw = showTouchHint
         ? (t('winchHintTouch') || 'Hold 🔗 for winch')
         : (t('winchHint') || `${winchKey} = Winch`);
-      const winchHintText = '🔗 ' + winchHintRaw.replace('{winchKey}', winchKey);
+      const winchHintText = 'WINCH: ' + winchHintRaw.replace('{winchKey}', winchKey);
       this.winchHint = this.add.text(Math.round(width / 2), Math.round(12 * this.uiScale), winchHintText, {
         fontFamily: THEME.fonts.family,
         fontSize: fontSmall,
@@ -243,7 +274,7 @@ export default class HUDScene extends Phaser.Scene {
     
     // Pause/Menu button (touch devices)
     if (hasTouch) {
-      const pauseBtn = this.add.text(width - padding, nextButtonY, '☰', {
+      const pauseBtn = this.add.text(width - padding, nextButtonY, '||', {
         fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
         color: '#CCCCCC',
@@ -257,7 +288,7 @@ export default class HUDScene extends Phaser.Scene {
 
     // Fullscreen button (touch devices or when in fullscreen)
     if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
-      const fsLabel = isFullscreen ? '✕' : '⛶';
+      const fsLabel = isFullscreen ? 'X' : '[]';
       this.add.text(width - padding, nextButtonY, fsLabel, {
         fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
@@ -308,10 +339,10 @@ export default class HUDScene extends Phaser.Scene {
     const margin = 15; // Extra margin between dialogue and controls
     this.touchControlsTopEdge = joystickTopEdge - margin;
 
-    // Joystick base (outer circle)
-    this.joystickBase = this.add.circle(joystickX, joystickY, joystickRadius, 0x333333, alpha * 0.5)
+    // Joystick base (outer circle) — beveled retro style
+    this.joystickBase = this.add.circle(joystickX, joystickY, joystickRadius, 0x222222, alpha * 0.7)
       .setScrollFactor(0)
-      .setStrokeStyle(3, 0x555555, alpha);
+      .setStrokeStyle(Math.max(3, Math.round(3 * this.uiScale)), 0x555555, alpha);
     
     // Direction indicators on base
     const indicatorDist = Math.round(joystickRadius * 0.7);
@@ -328,10 +359,10 @@ export default class HUDScene extends Phaser.Scene {
       }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.6);
     });
 
-    // Joystick thumb (inner circle that moves)
-    this.joystickThumb = this.add.circle(joystickX, joystickY, thumbRadius, 0x666666, alpha)
+    // Joystick thumb (inner circle that moves) — beveled
+    this.joystickThumb = this.add.circle(joystickX, joystickY, thumbRadius, 0x555555, alpha)
       .setScrollFactor(0)
-      .setStrokeStyle(2, 0x888888, alpha);
+      .setStrokeStyle(Math.max(2, Math.round(2 * this.uiScale)), 0x888888, alpha);
 
     // Add to container
     this.touchControlsContainer.add([this.joystickBase, this.joystickThumb]);
@@ -360,7 +391,7 @@ export default class HUDScene extends Phaser.Scene {
     const actionY = Math.round(height - padding - btnSize);
 
     // Groom button (SPACE equivalent)
-    this.createTouchButton(Math.round(actionX - btnSize - padding / 2), actionY, Math.round(btnSize * 1.2), '❄️', alpha,
+    this.createTouchButton(Math.round(actionX - btnSize - padding / 2), actionY, Math.round(btnSize * 1.2), 'GRM', alpha,
       () => { this.touchGroom = true; },
       () => { this.touchGroom = false; },
       0x2266aa
@@ -368,7 +399,7 @@ export default class HUDScene extends Phaser.Scene {
 
     // Winch button (SHIFT equivalent) - only if level has winch
     if (this.level.hasWinch) {
-      this.createTouchButton(actionX, Math.round(actionY - btnSize - padding / 2), Math.round(btnSize * 1.2), '🔗', alpha,
+      this.createTouchButton(actionX, Math.round(actionY - btnSize - padding / 2), Math.round(btnSize * 1.2), 'WCH', alpha,
         () => { this.touchWinch = true; },
         () => { this.touchWinch = false; },
         0xaa6622
@@ -460,6 +491,7 @@ export default class HUDScene extends Phaser.Scene {
     
     const bg = this.add.circle(x, y, size / 2, color, alpha)
       .setScrollFactor(0)
+      .setStrokeStyle(Math.max(2, Math.round(2 * this.uiScale)), Phaser.Display.Color.ValueToColor(color).lighten(30).color, alpha)
       .setInteractive()
       .on('pointerdown', () => {
         bg.setFillStyle(pressedColor, alpha + 0.2);
@@ -490,7 +522,10 @@ export default class HUDScene extends Phaser.Scene {
       });
 
     const text = this.add.text(x, y, label, {
-      fontSize: Math.round(size * 0.5) + 'px',
+      fontFamily: THEME.fonts.family,
+      fontSize: Math.round(size * 0.35) + 'px',
+      fontStyle: 'bold',
+      color: THEME.colors.textPrimary,
     }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.9);
 
     // Add to container if it exists
@@ -576,12 +611,12 @@ export default class HUDScene extends Phaser.Scene {
     if (this.winchHint && this.gameScene.winchActive) {
       const winchKey = getWinchKeyName();
       const winchAttachedRaw = t('winchAttached') || 'Winch ACTIVE';
-      this.winchHint.setText('🔗 ' + winchAttachedRaw.replace('{winchKey}', winchKey));
+      this.winchHint.setText('WINCH: ' + winchAttachedRaw.replace('{winchKey}', winchKey));
       this.winchHint.setStyle({ color: '#00FF00' });
     } else if (this.winchHint) {
       const winchKey = getWinchKeyName();
       const winchHintRaw = t('winchHint') || `${winchKey} = Winch`;
-      this.winchHint.setText('🔗 ' + winchHintRaw.replace('{winchKey}', winchKey));
+      this.winchHint.setText('WINCH: ' + winchHintRaw.replace('{winchKey}', winchKey));
       this.winchHint.setStyle({ color: THEME.colors.accent });
     }
 

@@ -1431,7 +1431,7 @@ class TestDynamicKeyHints:
             dialogue_text = game_page.evaluate("""() => {
                 const ds = window.game?.scene?.getScene('DialogueScene');
                 if (!ds || !ds.dialogueText) return '';
-                const text = ds.dialogueText.text || '';
+                const text = ds.fullText || ds.dialogueText.text || '';
                 if (text.includes('DAMER') || text.includes('GROOMING')) {
                     return text;
                 }
@@ -1477,10 +1477,10 @@ class TestDynamicKeyHints:
             if (!ds) return '';
             // Show the tutorialGroomAction dialogue directly
             ds.showDialogue('tutorialGroomAction');
-            // Wait a moment for the text to be set
+            // Wait for typewriter to finish (fullText has the complete string)
             return new Promise(resolve => {
                 setTimeout(() => {
-                    resolve(ds.dialogueText?.text || '');
+                    resolve(ds.fullText || ds.dialogueText?.text || '');
                 }, 100);
             });
         }""")
@@ -1520,7 +1520,7 @@ class TestDynamicKeyHints:
         dialogue_text = game_page.evaluate("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             if (!ds || !ds.dialogueText) return '';
-            const text = ds.dialogueText.text || '';
+            const text = ds.fullText || ds.dialogueText.text || '';
             if (text.includes('CONTRÔLES') || text.includes('CONTROLS')) {
                 return text;
             }

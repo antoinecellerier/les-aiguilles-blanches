@@ -202,6 +202,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
         
         // Changelog
+        changelogDate5: "7 février 2026",
+        changelogDay5: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis",
         changelogDate4: "6 février 2026",
         changelogDay4: "🛤️ Chemins de dameuse praticables\n🕹️ Joystick virtuel\n🌍 5 langues complètes",
         changelogDate3: "5 février 2026",
@@ -401,6 +403,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
         
         // Changelog
+        changelogDate5: "February 7, 2026",
+        changelogDay5: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis",
         changelogDate4: "February 6, 2026",
         changelogDay4: "🛤️ Traversable cat tracks\n🕹️ Virtual joystick\n🌍 5 complete languages",
         changelogDate3: "February 5, 2026",
@@ -566,6 +570,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
         
         // Changelog
+        changelogDate5: "7. Februar 2026",
+        changelogDay5: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis",
         changelogDate4: "6. Februar 2026",
         changelogDay4: "🛤️ Befahrbare Pistenraupenspuren\n🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen",
         changelogDate3: "5. Februar 2026",
@@ -762,6 +768,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
         
         // Changelog
+        changelogDate5: "7 febbraio 2026",
+        changelogDay5: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji",
         changelogDate4: "6 febbraio 2026",
         changelogDay4: "🛤️ Tracciati battipista percorribili\n🕹️ Joystick virtuale\n🌍 5 lingue complete",
         changelogDate3: "5 febbraio 2026",
@@ -958,6 +966,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
         
         // Changelog
+        changelogDate5: "7 de febrero de 2026",
+        changelogDay5: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis",
         changelogDate4: "6 de febrero de 2026",
         changelogDay4: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
         changelogDate3: "5 de febrero de 2026",
