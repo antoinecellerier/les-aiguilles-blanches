@@ -6,28 +6,20 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Bugs
 
-(None currently tracked)
+- [ ] Nintendo B-button back navigation - Flaky in full test suite (timing-sensitive gamepad stick navigation)
 
 ## Polish (Medium Priority)
 
-- [x] Move speed consistency - Verified: Phaser physics handles delta time; 150px/s across all inputs (analog stick is proportional by design)
-- [ ] Gamepad button rebinding - Allow customizing controller buttons
-- [ ] Keyboard-only menu navigation - Full menu access without mouse
 - [ ] Level differentiation - Varied objectives beyond coverage percentage
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
-- [x] Marker placement validation - Markers skip cliff areas via isOnCliff() check
 - [ ] Service roads - Improve legibility and practical usability
-- [ ] Touch controls - Move dialogues so they don't overlap with D-pad
-- [ ] Touch controls - Make direction controls more stick-like with visual feedback
-- [ ] Taunts - Make failure taunts more topical and personal
-- [ ] Changelog view - Accessible from main menu
+- [ ] Responsive design - Ensure all screens work on resize/orientation change
+- [ ] Gamepad button rebinding - Allow customizing controller buttons
 
 ## Future (Backlog)
 
-- [ ] Localization audit - Verify all UI text uses t() function
 - [ ] Sound effects and music
 - [ ] More character dialogues per level
-- [ ] Complete translations for DE/IT/ES
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, wildlife, Candide Thovex cameo)
@@ -35,14 +27,17 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Changelog overlay** - Daily entries with localized dates, dynamic key discovery, font scaling for small screens
+- ✅ **Full localization** - All 5 languages (FR/EN/DE/IT/ES) with ~170 keys each, coverage tests, hardcoded strings removed
+- ✅ **HUD text crispness** - roundPixels config, integer positions, removed sub-pixel origins
+- ✅ **Taunts overhaul** - 5 per failure type, character references, removed hardcoded FR fallbacks
+- ✅ **Virtual joystick** - Replaced D-pad with stick + thumb, button press feedback
+- ✅ **Keyboard-only menu navigation** - Arrow keys + Enter/Space across all scenes
 - ✅ **Marker placement & pole sizing** - Markers skip cliffs, warning poles on snow, all poles standardized to 28×5px
 - ✅ **Art style guide** - Comprehensive visual style documentation preventing future inconsistencies
 - ✅ **Cliff system** - Shared CliffSegment architecture with physics/visual alignment, organic edges, variable offset/extent
-- ✅ **Pre-commit checklist** - Workflow skill ensuring docs, tests, and commit quality
 - ✅ **Night rendering** - Night overlay with directional groomer headlights
 - ✅ **Winch mechanics** - Anchor proximity detection, cable slack/tension physics
-- ✅ **Settings scene** - Scrollable layout with gamepad name display
-- ✅ **Dynamic key placeholders** - {keys}, {groomKey}, {winchKey} in tutorials/HUD
 - ✅ **Gamepad support** - Nintendo/PlayStation/Xbox detection, D-pad, full test coverage
 - ✅ **Touch controls** - Diagonal D-pad with multitouch support
 - ✅ **Game progression** - Save/load level progress
@@ -62,6 +57,5 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Test Coverage Gaps
 
-- Pause menu settings access (blocked by render bug)
 - Gamepad rebinding (feature not implemented)
-- Full localization coverage verification
+- Nintendo B-button back navigation flaky under parallel test execution

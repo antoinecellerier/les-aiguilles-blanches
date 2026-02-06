@@ -146,19 +146,19 @@ class TestGamepadMenuNavigation:
 
     def test_b_button_in_settings_goes_back(self, gamepad_page: Page):
         """Test B button goes back from settings."""
-        # Navigate to settings: Start(0) -> HowToPlay(1) -> Settings(2)
+        # Navigate to settings: Start(0) -> HowToPlay(1) -> Changelog(2) -> Settings(3)
         # Use quick pulses to avoid multiple navigations per pulse
-        for _ in range(2):
+        for _ in range(3):
             set_gamepad_stick(gamepad_page, 'left', 0, 0.8)
             gamepad_page.wait_for_timeout(50)  # Very short pulse
             set_gamepad_stick(gamepad_page, 'left', 0, 0)
             gamepad_page.wait_for_timeout(250)  # Wait for cooldown to reset
         
-        # Verify we're on Settings (index 2)
+        # Verify we're on Settings (index 3)
         selected = gamepad_page.evaluate(
             "() => window.game.scene.getScene('MenuScene').selectedIndex"
         )
-        assert selected == 2, f"Should be on Settings (index 2), got {selected}"
+        assert selected == 3, f"Should be on Settings (index 3), got {selected}"
         
         # Press A to enter settings
         press_gamepad_button(gamepad_page, 0)
@@ -286,8 +286,8 @@ class TestNintendoControllerSwap:
 
     def test_nintendo_b_button_goes_back(self, nintendo_page: Page):
         """On Nintendo, physical B button (index 0) should go back."""
-        # First enter settings
-        for _ in range(2):
+        # First enter settings (index 3)
+        for _ in range(3):
             set_gamepad_stick(nintendo_page, 'left', 0, 0.8)
             nintendo_page.wait_for_timeout(50)
             set_gamepad_stick(nintendo_page, 'left', 0, 0)
@@ -367,8 +367,8 @@ class TestPlayStationController:
 
     def test_playstation_circle_button_goes_back(self, playstation_page: Page):
         """On PlayStation, Circle button (index 1) should go back."""
-        # First enter settings
-        for _ in range(2):
+        # First enter settings (index 3)
+        for _ in range(3):
             set_gamepad_stick(playstation_page, 'left', 0, 0.8)
             playstation_page.wait_for_timeout(50)
             set_gamepad_stick(playstation_page, 'left', 0, 0)

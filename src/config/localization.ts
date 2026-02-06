@@ -17,6 +17,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         continue: "Continuer",
         settings: "Paramètres",
         controls: "Contrôles",
+        changelog: "Nouveautés",
         howToPlay: "Comment jouer",
         fullscreen: "Plein écran",
         exitFullscreen: "Quitter plein écran",
@@ -198,7 +199,17 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level6Intro: "Opération de nuit sur La Verticale. Utilise le treuil.",
         thierryWarning: "Attention, la zone avalanche est sensible. Soyez prudent.",
         level8Intro: "La tempête est passée. Prends un vin chaud, ça va être long !",
-        marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !"
+        marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
+        
+        // Changelog
+        changelogDate4: "6 février 2026",
+        changelogDay4: "🕹️ Joystick virtuel\n🌍 5 langues complètes\n🔤 Texte HUD net",
+        changelogDate3: "5 février 2026",
+        changelogDay3: "🏔️ Falaises rocheuses\n🌙 Phares de nuit\n⚓ Mécanique de treuil\n⌨️ Navigation clavier",
+        changelogDate2: "4 février 2026",
+        changelogDay2: "🎮 Support manette\n📱 Contrôles tactiles\n💪 Endurance\n💾 Sauvegarde\n♿ Accessibilité",
+        changelogDate1: "3 février 2026",
+        changelogDay1: "🚜 Lancement : 9 niveaux, tutoriel\n❄️ Damage, carburant, avalanches\n🏆 Crédits et progression"
     },
     
     en: {
@@ -209,6 +220,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         continue: "Continue",
         settings: "Settings",
         controls: "Controls",
+        changelog: "What's New",
         howToPlay: "How to Play",
         fullscreen: "Fullscreen",
         exitFullscreen: "Exit Fullscreen",
@@ -386,7 +398,17 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level6Intro: "Night ops on La Verticale. Use the winch.",
         thierryWarning: "Careful, avalanche zone is sensitive today.",
         level8Intro: "Storm's passed. Grab a vin chaud - this'll take a while!",
-        marieWelcome: "Come warm up at Chez Marie. A good tartiflette!"
+        marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
+        
+        // Changelog
+        changelogDate4: "February 6, 2026",
+        changelogDay4: "🕹️ Virtual joystick\n🌍 5 complete languages\n🔤 Crisp HUD text",
+        changelogDate3: "February 5, 2026",
+        changelogDay3: "🏔️ Rocky cliffs\n🌙 Night headlights\n⚓ Winch mechanics\n⌨️ Keyboard navigation",
+        changelogDate2: "February 4, 2026",
+        changelogDay2: "🎮 Gamepad support\n📱 Touch controls\n💪 Stamina\n💾 Save progress\n♿ Accessibility",
+        changelogDate1: "February 3, 2026",
+        changelogDay1: "🚜 Launch: 9 levels, tutorial\n❄️ Grooming, fuel, avalanches\n🏆 Credits and progression"
     },
     
     de: {
@@ -397,6 +419,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         continue: "Fortfahren",
         settings: "Einstellungen",
         controls: "Steuerung",
+        changelog: "Neuigkeiten",
         howToPlay: "Anleitung",
         howToPlayMove: "{keys} oder Pfeiltasten bewegen",
         howToPlayMoveHybrid: "{keys}/Pfeile oder Touch-D-pad",
@@ -542,6 +565,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level8Intro: "Der Sturm ist vorbei. Nimm einen Glühwein, das wird lang!",
         marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
         
+        // Changelog
+        changelogDate4: "6. Februar 2026",
+        changelogDay4: "🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen\n🔤 Scharfer HUD-Text",
+        changelogDate3: "5. Februar 2026",
+        changelogDay3: "🏔️ Felsige Klippen\n🌙 Nachtscheinwerfer\n⚓ Windenmechanik\n⌨️ Tastaturnavigation",
+        changelogDate2: "4. Februar 2026",
+        changelogDay2: "🎮 Gamepad-Unterstützung\n📱 Touch-Steuerung\n💪 Ausdauer\n💾 Speicherung\n♿ Barrierefreiheit",
+        changelogDate1: "3. Februar 2026",
+        changelogDay1: "🚜 Start: 9 Level, Tutorial\n❄️ Präparieren, Kraftstoff, Lawinen\n🏆 Credits und Fortschritt",
+
         // Taunts - Cliff
         tauntCliff1: "9 Tonnen in der Schlucht. Die Versicherung wird begeistert sein.",
         tauntCliff2: "Jean-Pierre sagte: 'Nicht zu nah am Rand!' Erinnerst du dich?",
@@ -582,6 +615,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         continue: "Continua",
         settings: "Impostazioni",
         controls: "Comandi",
+        changelog: "Novità",
         howToPlay: "Come Giocare",
         howToPlayMove: "{keys} o Frecce per muoversi",
         howToPlayMoveHybrid: "{keys}/Frecce o D-pad touch",
@@ -727,6 +761,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level8Intro: "La tempesta è passata. Prendi un vin brulé, sarà lunga!",
         marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
         
+        // Changelog
+        changelogDate4: "6 febbraio 2026",
+        changelogDay4: "🕹️ Joystick virtuale\n🌍 5 lingue complete\n🔤 Testo HUD nitido",
+        changelogDate3: "5 febbraio 2026",
+        changelogDay3: "🏔️ Scogliere rocciose\n🌙 Fari notturni\n⚓ Meccanica verricello\n⌨️ Navigazione tastiera",
+        changelogDate2: "4 febbraio 2026",
+        changelogDay2: "🎮 Supporto gamepad\n📱 Controlli touch\n💪 Resistenza\n💾 Salvataggio\n♿ Accessibilità",
+        changelogDate1: "3 febbraio 2026",
+        changelogDay1: "🚜 Lancio: 9 livelli, tutorial\n❄️ Preparazione, carburante, valanghe\n🏆 Crediti e progressione",
+
         // Taunts - Cliff
         tauntCliff1: "9 tonnellate nel burrone. L'assicurazione sarà entusiasta.",
         tauntCliff2: "Jean-Pierre aveva detto: 'Non troppo vicino al bordo!' Ricordi?",
@@ -767,6 +811,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         continue: "Continuar",
         settings: "Ajustes",
         controls: "Controles",
+        changelog: "Novedades",
         howToPlay: "Cómo Jugar",
         howToPlayMove: "{keys} o Flechas para mover",
         howToPlayMoveHybrid: "{keys}/Flechas o D-pad táctil",
@@ -912,6 +957,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level8Intro: "La tormenta ha pasado. ¡Toma un vino caliente, va a ser largo!",
         marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
         
+        // Changelog
+        changelogDate4: "6 de febrero de 2026",
+        changelogDay4: "🕹️ Joystick virtual\n🌍 5 idiomas completos\n🔤 Texto HUD nítido",
+        changelogDate3: "5 de febrero de 2026",
+        changelogDay3: "🏔️ Acantilados rocosos\n🌙 Faros nocturnos\n⚓ Mecánica cabrestante\n⌨️ Navegación teclado",
+        changelogDate2: "4 de febrero de 2026",
+        changelogDay2: "🎮 Soporte mando\n📱 Controles táctiles\n💪 Resistencia\n💾 Guardado\n♿ Accesibilidad",
+        changelogDate1: "3 de febrero de 2026",
+        changelogDay1: "🚜 Lanzamiento: 9 niveles, tutorial\n❄️ Preparación, combustible, avalanchas\n🏆 Créditos y progresión",
+
         // Taunts - Cliff
         tauntCliff1: "9 toneladas en el barranco. Al seguro le va a encantar.",
         tauntCliff2: "Jean-Pierre dijo: '¡No tan cerca del borde!' ¿Recuerdas?",

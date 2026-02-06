@@ -29,7 +29,8 @@ def click_menu_button(page: Page, button_index: int, button_name: str = "button"
 # Legacy constants for backward compatibility
 BUTTON_START = 0
 BUTTON_HOW_TO_PLAY = 1
-BUTTON_SETTINGS = 2
+BUTTON_CHANGELOG = 2
+BUTTON_SETTINGS = 3
 
 
 def get_active_scenes(page: Page) -> list:
@@ -324,6 +325,115 @@ class TestMenuNavigation:
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'MenuScene')
         assert_scene_active(game_page, 'MenuScene', "Should return to menu")
+
+    def test_changelog_overlay_renders_content(self, game_page: Page):
+        """Test Changelog overlay opens and renders visible text content."""
+        assert_scene_active(game_page, 'MenuScene')
+        
+        click_button(game_page, BUTTON_CHANGELOG, "Changelog")
+        game_page.wait_for_timeout(300)
+        
+        # Overlay should be open
+        overlay_open = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.overlayOpen === true;
+        }""")
+        assert overlay_open, "Changelog overlay should be open"
+        
+        # Verify changelog content is actually rendered (not empty/invisible)
+        # Sample the canvas for non-background pixels in the overlay area
+        has_text = game_page.evaluate("""() => {
+            const canvas = document.querySelector('canvas');
+            if (!canvas) return false;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return false;
+            const w = canvas.width, h = canvas.height;
+            // Sample the center region where changelog text should appear
+            const data = ctx.getImageData(Math.floor(w * 0.2), Math.floor(h * 0.3),
+                                          Math.floor(w * 0.6), Math.floor(h * 0.4)).data;
+            // Count pixels that are not near-black (overlay bg is dark blue ~0x1a2a3e)
+            let textPixels = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i+1], b = data[i+2];
+                // Text is light colored (#cccccc or #87ceeb) - check for bright pixels
+                if (r > 100 || g > 100 || b > 100) textPixels++;
+            }
+            return textPixels > 50;  // Should have many bright text pixels
+        }""")
+        assert has_text, "Changelog overlay should render visible text content"
+        
+        # ESC should close it
+        game_page.keyboard.press("Escape")
+        game_page.wait_for_timeout(200)
+        
+        overlay_closed = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.overlayOpen !== true;
+        }""")
+        assert overlay_closed, "Changelog overlay should close with ESC"
+
+    def test_changelog_fits_small_screen(self, game_page: Page):
+        """Test Changelog overlay renders visible content on phone-sized screen."""
+        # Resize to phone dimensions
+        game_page.set_viewport_size({"width": 375, "height": 667})
+        game_page.evaluate("window.resizeGame?.()")
+        game_page.wait_for_timeout(500)
+        
+        # Re-enter menu to re-layout with new size
+        game_page.evaluate("""() => {
+            window.game.scene.getScene('MenuScene')?.scene.restart();
+        }""")
+        game_page.wait_for_timeout(500)
+        assert_scene_active(game_page, 'MenuScene')
+        
+        # Use keyboard navigation to reach changelog (index 2)
+        game_page.keyboard.press("ArrowDown")  # index 1 = How to Play
+        game_page.wait_for_timeout(100)
+        game_page.keyboard.press("ArrowDown")  # index 2 = Changelog
+        game_page.wait_for_timeout(100)
+        game_page.keyboard.press("Enter")
+        game_page.wait_for_timeout(300)
+        
+        # Overlay should be open
+        overlay_open = game_page.evaluate("""() => {
+            return window.game.scene.getScene('MenuScene')?.overlayOpen === true;
+        }""")
+        assert overlay_open, "Changelog overlay should be open on small screen"
+        
+        # Content should be visible (not clipped or invisible)
+        has_text = game_page.evaluate("""() => {
+            const canvas = document.querySelector('canvas');
+            if (!canvas) return false;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return false;
+            const w = canvas.width, h = canvas.height;
+            const data = ctx.getImageData(Math.floor(w * 0.15), Math.floor(h * 0.25),
+                                          Math.floor(w * 0.7), Math.floor(h * 0.5)).data;
+            let textPixels = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i+1], b = data[i+2];
+                if (r > 100 || g > 100 || b > 100) textPixels++;
+            }
+            return textPixels > 50;
+        }""")
+        assert has_text, "Changelog should render visible text on small screen (375x667)"
+        
+        # Content should fit within the screen (dialog not taller than viewport)
+        fits_screen = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('MenuScene');
+            if (!scene) return false;
+            const h = scene.cameras.main.height;
+            // Check all text objects are within viewport bounds
+            const texts = scene.children.list.filter(c => c.type === 'Text' && c.visible);
+            return texts.every(t => t.y >= -10 && t.y <= h + 10);
+        }""")
+        assert fits_screen, "Changelog content should fit within phone screen"
+        
+        game_page.keyboard.press("Escape")
+        game_page.wait_for_timeout(200)
+        
+        # Restore original viewport
+        game_page.set_viewport_size({"width": 1280, "height": 720})
+        game_page.evaluate("window.resizeGame?.()")
+        game_page.wait_for_timeout(300)
 
 
 class TestGameProgress:

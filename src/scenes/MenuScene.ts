@@ -108,6 +108,7 @@ export default class MenuScene extends Phaser.Scene {
       buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
     }
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
+    buttonDefs.push({ text: 'changelog', callback: () => this.showChangelog(), primary: false });
     buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
     
     // Add fullscreen option if supported
@@ -405,6 +406,20 @@ export default class MenuScene extends Phaser.Scene {
     this.scene.start('SettingsScene');
   }
 
+  private showChangelog(): void {
+    // Dynamically collect changelog day entries (newest first)
+    const entries: string[] = [];
+    for (let i = 1; ; i++) {
+      const date = t(`changelogDate${i}`);
+      if (date === `changelogDate${i}`) break;
+      const day = t(`changelogDay${i}`);
+      entries.push(`━━ ${date} ━━`, day, '');
+    }
+    entries.reverse(); // newest first (highest index = most recent)
+    if (entries.length > 0 && entries[0] === '') entries.shift(); // trim leading blank
+    this.showOverlay('changelog', entries);
+  }
+
   private showControls(): void {
     // Detect capabilities
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -450,17 +465,17 @@ export default class MenuScene extends Phaser.Scene {
     this.overlayOpen = true;
     const { width, height } = this.cameras.main;
 
-    // Scale based on available height for optimal legibility
-    const contentLines = lines.filter(l => l.trim()).length + 3;
-    const availableHeight = height * 0.7;
-    const optimalLineHeight = availableHeight / contentLines;
+    // Count actual rendered lines (entries may contain \n)
+    const fullText = lines.join('\n');
+    const renderedLines = fullText.split('\n').filter(l => l.trim()).length + 3;
+    const availableHeight = height * 0.85;
+    const optimalLineHeight = availableHeight / renderedLines;
     const optimalFontSize = optimalLineHeight / 2.2;
-    const fontSize = Math.round(Math.max(16, Math.min(28, optimalFontSize)));
+    const fontSize = Math.round(Math.max(10, Math.min(28, optimalFontSize)));
     const titleSize = Math.round(fontSize * 1.4);
     const scaleFactor = fontSize / 18;
 
     const panelWidth = Math.min(700 * scaleFactor, width - 40);
-    const panelHeight = Math.min(500 * scaleFactor, height - 60);
 
     // Create dialog using rexUI
     const dialog = this.rexUI.add.dialog({
