@@ -623,7 +623,7 @@ Steep piste levels require service roads for groomer access to winch anchors.
 ### Configuration
 
 ```javascript
-// In levels.js
+// In levels.ts
 {
     id: 4,
     accessPaths: [
@@ -634,16 +634,35 @@ Steep piste levels require service roads for groomer access to winch anchors.
 }
 ```
 
-### Implementation
+### Implementation (two-phase)
 
-1. **Pre-calculate entry zones** before boundary walls are created
-2. **Skip boundary walls** at entry/exit zones
-3. **Draw curved switchback paths** with smooth S-curves
-4. **Place orange/black striped poles** along path edges (French standard)
-5. **Exclude trees** from path areas
+**Phase 1 — Geometry** (`calculateAccessPathGeometry()`, called early):
+1. Compute switchback curve points from piste edge to off-piste and back
+2. Build left/right edge arrays (road width = 5 tiles)
+3. Store `accessPathRects` for collision exemption and tree avoidance
+4. Store `accessPathCurves` for visual rendering
+
+**Phase 2 — Visuals** (`createAccessPaths()`, called during piste boundary setup):
+1. Place `snow_packed` tiles along curve (distinct from groomed piste surface)
+2. Place amber-yellow/black striped poles with minimum screen-distance spacing
+3. No signs — level intro dialog explains service roads on first appearance (level 4)
+
+### Initialization Order
+
+`calculateAccessPathGeometry()` must run BEFORE:
+- `createBoundaryColliders()` — boundary walls check `accessPathRects` to exempt road area
+- `createExtendedBackground()` — trees/rocks check `accessPathRects` to avoid road
+- `calculateCliffSegments()` — cliff gaps check `accessEntryZones` AND `accessPathRects`
+
+**Critical**: `createBoundaryColliders()` was moved OUT of `createSnowGrid()` and into `_createLevel()` AFTER `calculateAccessPathGeometry()`. This ensures `accessPathRects` are populated when walls are created. Order in `_createLevel()`:
+1. `createSnowGrid()` (builds `pistePath`, calls `calculateAccessPathZones()` + `calculateCliffSegments()`)
+2. `calculateAccessPathGeometry()` (populates `accessPathRects`)
+3. `createBoundaryColliders()` (uses `accessPathRects` to skip walls on roads)
+4. `createExtendedBackground()` (uses `isOnAccessPath()` to skip trees/rocks)
 
 ### Physics
 
+Boundary walls exempt the full road switchback area (not just entry/exit zones).
 Groomer on access path bypasses steep zone effects:
 ```javascript
 checkSteepness() {

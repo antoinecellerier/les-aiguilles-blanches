@@ -7,12 +7,14 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Bugs
 
 - [ ] Nintendo B-button back navigation - Flaky in full test suite (timing-sensitive gamepad stick navigation)
+- [ ] Forest not blocking groomer - Groomer can freely traverse off-piste forest areas (should be stopped by trees)
+- [ ] Service road width vs piste width - Roads should be visibly narrower than piste; widen piste if needed to ensure contrast
 
 ## Polish (Medium Priority)
 
 - [ ] Level differentiation - Varied objectives beyond coverage percentage
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
-- [ ] Service roads - Improve legibility and practical usability
+- [x] Service roads - Improved legibility and practical usability (packed snow texture, amber poles, tree clearing, boundary wall exemption, intro dialog)
 - [x] Responsive design - All scenes handle resize/orientation change
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
 - [x] Rework home screen styling

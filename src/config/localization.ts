@@ -194,7 +194,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         jeanPierreIntro: "Bienvenue aux Aiguilles Blanches, petit ! Je suis Jean-Pierre, le chef dameur.",
         level2Intro: "Bien joué hier ! Aujourd'hui, on passe à la piste bleue.",
         level3Intro: "Le snowpark a besoin d'amour. Précision !",
-        level4Intro: "L'Aigle, c'est du sérieux. Surveille ton carburant.",
+        level4Intro: "L'Aigle, c'est du sérieux. Surveille ton carburant. Les chemins de dameuse permettent de remonter la piste — repère les piquets jaunes et noirs.",
         level5Intro: "Compétition demain ! Le half-pipe doit être impeccable.",
         level6Intro: "Opération de nuit sur La Verticale. Utilise le treuil.",
         thierryWarning: "Attention, la zone avalanche est sensible. Soyez prudent.",
@@ -203,7 +203,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate4: "6 février 2026",
-        changelogDay4: "🕹️ Joystick virtuel\n🌍 5 langues complètes\n🔤 Texte HUD net",
+        changelogDay4: "🛤️ Chemins de dameuse praticables\n🕹️ Joystick virtuel\n🌍 5 langues complètes",
         changelogDate3: "5 février 2026",
         changelogDay3: "🏔️ Falaises rocheuses\n🌙 Phares de nuit\n⚓ Mécanique de treuil\n⌨️ Navigation clavier",
         changelogDate2: "4 février 2026",
@@ -393,7 +393,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         jeanPierreIntro: "Welcome to Les Aiguilles Blanches! I'm Jean-Pierre, head groomer.",
         level2Intro: "Nice work! Today we tackle the blue run.",
         level3Intro: "The snowpark needs love. Precision is key!",
-        level4Intro: "L'Aigle is serious. Watch your fuel.",
+        level4Intro: "L'Aigle is serious. Watch your fuel. Cat tracks let you drive back up — look for the amber and black striped poles.",
         level5Intro: "Competition tomorrow! Half-pipe must be spotless.",
         level6Intro: "Night ops on La Verticale. Use the winch.",
         thierryWarning: "Careful, avalanche zone is sensitive today.",
@@ -402,7 +402,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate4: "February 6, 2026",
-        changelogDay4: "🕹️ Virtual joystick\n🌍 5 complete languages\n🔤 Crisp HUD text",
+        changelogDay4: "🛤️ Traversable cat tracks\n🕹️ Virtual joystick\n🌍 5 complete languages",
         changelogDate3: "February 5, 2026",
         changelogDay3: "🏔️ Rocky cliffs\n🌙 Night headlights\n⚓ Winch mechanics\n⌨️ Keyboard navigation",
         changelogDate2: "February 4, 2026",
@@ -558,7 +558,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         jeanPierreIntro: "Willkommen in Les Aiguilles Blanches, Kleiner! Ich bin Jean-Pierre, der Chefpräparierer.",
         level2Intro: "Gut gemacht gestern! Heute geht's zur blauen Piste.",
         level3Intro: "Der Snowpark braucht Liebe. Präzision!",
-        level4Intro: "L'Aigle ist ernst. Achte auf den Kraftstoff.",
+        level4Intro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Pistenraupenspuren führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",
         level5Intro: "Morgen ist Wettkampf! Die Halfpipe muss perfekt sein.",
         level6Intro: "Nachteinsatz auf La Verticale. Benutze die Winde.",
         thierryWarning: "Achtung, die Lawinenzone ist empfindlich. Sei vorsichtig.",
@@ -567,7 +567,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate4: "6. Februar 2026",
-        changelogDay4: "🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen\n🔤 Scharfer HUD-Text",
+        changelogDay4: "🛤️ Befahrbare Pistenraupenspuren\n🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen",
         changelogDate3: "5. Februar 2026",
         changelogDay3: "🏔️ Felsige Klippen\n🌙 Nachtscheinwerfer\n⚓ Windenmechanik\n⌨️ Tastaturnavigation",
         changelogDate2: "4. Februar 2026",
@@ -754,7 +754,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         jeanPierreIntro: "Benvenuto a Les Aiguilles Blanches, piccolo! Sono Jean-Pierre, il capo gattista.",
         level2Intro: "Ben fatto ieri! Oggi si passa alla pista blu.",
         level3Intro: "Lo snowpark ha bisogno di cure. Precisione!",
-        level4Intro: "L'Aigle è roba seria. Occhio al carburante.",
+        level4Intro: "L'Aigle è roba seria. Occhio al carburante. I tracciati battipista permettono di risalire — cerca i pali a strisce gialle e nere.",
         level5Intro: "Domani c'è la gara! L'halfpipe deve essere perfetto.",
         level6Intro: "Operazione notturna su La Verticale. Usa il verricello.",
         thierryWarning: "Attenzione, la zona valanghe è sensibile. Fai attenzione.",
@@ -763,7 +763,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate4: "6 febbraio 2026",
-        changelogDay4: "🕹️ Joystick virtuale\n🌍 5 lingue complete\n🔤 Testo HUD nitido",
+        changelogDay4: "🛤️ Tracciati battipista percorribili\n🕹️ Joystick virtuale\n🌍 5 lingue complete",
         changelogDate3: "5 febbraio 2026",
         changelogDay3: "🏔️ Scogliere rocciose\n🌙 Fari notturni\n⚓ Meccanica verricello\n⌨️ Navigazione tastiera",
         changelogDate2: "4 febbraio 2026",
@@ -950,7 +950,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         jeanPierreIntro: "¡Bienvenido a Les Aiguilles Blanches, pequeño! Soy Jean-Pierre, el jefe pisador.",
         level2Intro: "¡Bien hecho ayer! Hoy pasamos a la pista azul.",
         level3Intro: "El snowpark necesita cariño. ¡Precisión!",
-        level4Intro: "L'Aigle es serio. Vigila el combustible.",
+        level4Intro: "L'Aigle es serio. Vigila el combustible. Los caminos de pisapistas permiten subir — busca los postes con rayas amarillas y negras.",
         level5Intro: "¡Mañana hay competición! El halfpipe debe estar perfecto.",
         level6Intro: "Operación nocturna en La Verticale. Usa el cabrestante.",
         thierryWarning: "Cuidado, la zona de avalanchas es sensible. Ten cuidado.",
@@ -959,7 +959,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate4: "6 de febrero de 2026",
-        changelogDay4: "🕹️ Joystick virtual\n🌍 5 idiomas completos\n🔤 Texto HUD nítido",
+        changelogDay4: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
         changelogDate3: "5 de febrero de 2026",
         changelogDay3: "🏔️ Acantilados rocosos\n🌙 Faros nocturnos\n⚓ Mecánica cabrestante\n⌨️ Navegación teclado",
         changelogDate2: "4 de febrero de 2026",

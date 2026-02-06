@@ -200,6 +200,44 @@ def test_cliff_visuals(self, game_page: Page):
 2. **Invisible death zones** - Verify physics uses same `cliffSegments` as visuals
 3. **Boxy cliff edges** - Check organic variation only pushes away from piste
 4. **Cliff gaps at access roads** - Verify `accessEntryZones` exclusion logic
+5. **Road blocked by walls** - Check init order: `calculateAccessPathGeometry()` must run before `createBoundaryColliders()`
+
+### Physics Debugging with Automated Screenshots
+
+For issues where visuals don't match physics (e.g., groomer blocked by invisible walls), make colliders visible and capture screenshots programmatically:
+
+```python
+# In a Python script (activate .venv first: source .venv/bin/activate)
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={'width': 1280, 'height': 720})
+    page.goto('http://localhost:3000/index.html')
+    # ... wait for menu, start game ...
+
+    skip_to_level(page, 4)   # Use conftest helper or evaluate transitionToLevel
+    dismiss_dialogues(page)   # Clear intro dialogs
+
+    # Teleport groomer to area of interest
+    page.evaluate("() => { const gs = ...; gs.groomer.setPosition(x, y); }")
+
+    # Move and check position changed
+    page.keyboard.down("a")
+    page.wait_for_timeout(2000)
+    page.keyboard.up("a")
+
+    # Read groomer position to verify traversal
+    pos = page.evaluate("() => { const gs = ...; return { x: gs.groomer.x, y: gs.groomer.y }; }")
+```
+
+**Tip**: To visualize physics colliders, temporarily change wall creation from `0x000000, 0` (invisible) to `0xff0000, 0.3` (red, semi-transparent) with `setDepth(50)`.
+
+| Level | Access Paths | Boundaries | What to Check |
+|-------|-------------|------------|---------------|
+| 4 | Left + Right | Non-dangerous (walls) | Walls exempt road Y ranges |
+| 6 | Left + Right + Left | Dangerous (cliffs) | Cliff segments skip road areas |
+| 7 | Left + Right | Dangerous (cliffs) | Same as 6, different layout |
 
 ## Level Reference
 

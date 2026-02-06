@@ -169,9 +169,15 @@ Cliffs use tile-sized (16×16) rock cells with layered detail:
 
 ### Service Roads
 
-Orange/black striped poles along edges (French mountain standard):
-- Pole: `0xff6600` (orange) with `0x333333` (black) stripes
-- Spacing: Every 3-4 tiles along path edges
+Switchback paths through off-piste forest, allowing groomer to travel between piste sections:
+- **Surface**: `snow_packed` tile (`0xd8e4e8` base) — distinct from groomed piste (white) and off-piste
+- **Poles**: Amber-yellow/black stripes, matching piste marker size (28×5px)
+  - Amber: `0xFFAA00` (distinct from red `0xFF0000` piste markers)
+  - Black: `0x111111`
+  - Spacing: minimum 12 tiles screen-distance between poles (prevents clustering at turns)
+- **Tree clearance**: Trees and rocks avoid `accessPathRects` zones
+- **Physics**: Boundary walls exempt road area so groomer can traverse
+- **Introduction**: Level 4 intro dialog explains service roads (first appearance)
 
 ### Winch Anchors
 

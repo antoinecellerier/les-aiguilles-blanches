@@ -216,5 +216,24 @@ export default class BootScene extends Phaser.Scene {
     groomedGraphics.fillRect(0, 14, 16, 1);
     groomedGraphics.generateTexture('snow_groomed', 16, 16);
     groomedGraphics.destroy();
+
+    // Packed snow (service roads — compacted by vehicle traffic, between off-piste and groomed)
+    const packedGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
+    packedGraphics.fillStyle(0xd8e4e8);  // Slightly blue-gray base
+    packedGraphics.fillRect(0, 0, 16, 16);
+    // Irregular tire/track marks
+    packedGraphics.fillStyle(0xc8d4d8);
+    packedGraphics.fillRect(2, 1, 3, 2);
+    packedGraphics.fillRect(10, 4, 4, 2);
+    packedGraphics.fillRect(1, 8, 5, 2);
+    packedGraphics.fillRect(9, 11, 3, 3);
+    // Lighter patches (exposed compressed snow)
+    packedGraphics.fillStyle(0xe0eaf0);
+    packedGraphics.fillRect(6, 2, 3, 2);
+    packedGraphics.fillRect(0, 5, 2, 2);
+    packedGraphics.fillRect(12, 8, 3, 2);
+    packedGraphics.fillRect(5, 12, 4, 2);
+    packedGraphics.generateTexture('snow_packed', 16, 16);
+    packedGraphics.destroy();
   }
 }
