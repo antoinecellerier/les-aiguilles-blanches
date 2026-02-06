@@ -18,7 +18,7 @@
     "ski"
   ],
   "author": "Antoine",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^25.2.0",
     "rollup-plugin-visualizer": "^6.0.5",
