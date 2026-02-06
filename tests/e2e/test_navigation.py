@@ -1006,7 +1006,7 @@ class TestLevelComplete:
         # Resize viewport
         game_page.set_viewport_size({"width": 800, "height": 600})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(300)
+        game_page.wait_for_timeout(600)
 
         # LevelCompleteScene should still be active
         assert_scene_active(game_page, 'LevelCompleteScene', "after resize")

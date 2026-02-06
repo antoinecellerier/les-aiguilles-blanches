@@ -17,6 +17,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
 - [x] Rework home screen styling
 - [ ] Styling consistency audit - Check settings, pause, credits, level-complete scenes match menu aesthetic
+- [ ] Add "lame" (tiller/grooming attachment) to groomer visuals - See https://zapdu26.jimdofree.com/secrets-de-dameuse/fonctionnement-d-une-dameuse/
+- [ ] Make test script robust to stale sessions
 - [x] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
 
 ## Future (Backlog)

@@ -219,6 +219,8 @@ export default class HUDScene extends Phaser.Scene {
 
     this.barWidth = barWidth;
     this.gameScene?.events.on('timerUpdate', this.updateTimer, this);
+    this.lastResizeWidth = width;
+    this.lastResizeHeight = height;
     this.scale.on('resize', this.handleResize, this);
 
     // Create touch controls - show on mobile, or on first touch for PC with touchscreen
@@ -606,21 +608,32 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   private resizing = false;
+  private lastResizeWidth = 0;
+  private lastResizeHeight = 0;
+  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
 
   private handleResize(): void {
-    if (this.resizing) return;
-    this.resizing = true;
-    // Use requestAnimationFrame to avoid restart-during-create loops
-    requestAnimationFrame(() => {
+    if (!this.cameras?.main) return;
+    const { width, height } = this.cameras.main;
+    // Ignore tiny resize changes (mobile URL bar, soft keyboard)
+    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
+      return;
+    }
+    // Debounce: wait for resize events to settle
+    if (this.resizeTimer) clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      this.resizeTimer = null;
       if (this.scene.isActive()) {
+        this.lastResizeWidth = width;
+        this.lastResizeHeight = height;
         this.scene.restart({ level: this.level, gameScene: this.gameScene });
       }
-      this.resizing = false;
-    });
+    }, 300);
   }
 
   shutdown(): void {
     this.scale.off('resize', this.handleResize, this);
+    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);

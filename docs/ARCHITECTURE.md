@@ -291,6 +291,8 @@ groomer.buffs = {
 2. **Object pooling**: Reuse particle objects for weather
 3. **RequestAnimationFrame**: Synchronized with display refresh
 4. **Reduced motion**: Skip particle effects when enabled
+5. **Extended background sizing**: Use `screen * 1.3` — enough for URL bar/viewport jitter, not `max(screen, 2560) * 1.5` which creates thousands of unnecessary game objects and tanks mobile FPS
+6. **HUD resize debounce**: Mobile browsers fire frequent resize events (URL bar, soft keyboard); debounce with 300ms + 10px threshold to prevent rapid scene restarts
 
 ## Responsive UI Design
 
@@ -361,15 +363,24 @@ scale: {
 }
 ```
 
-Scenes listen for resize events and restart with a `requestAnimationFrame` guard to prevent restart-during-create loops:
+Scenes listen for resize events and restart. **HUDScene uses debounced resize** (300ms + 10px threshold) to prevent rapid restarts from mobile viewport jitter (URL bar show/hide, soft keyboard). Other scenes use `requestAnimationFrame` guard:
 
 ```typescript
-private resizing = false;
-
-create() {
-  this.scale.on('resize', this.handleResize, this);
+// HUDScene — debounced resize (mobile-critical)
+private handleResize(): void {
+  if (!this.cameras?.main) return;
+  const { width, height } = this.cameras.main;
+  if (Math.abs(width - this.lastResizeWidth) < 10 &&
+      Math.abs(height - this.lastResizeHeight) < 10) return;
+  if (this.resizeTimer) clearTimeout(this.resizeTimer);
+  this.resizeTimer = setTimeout(() => {
+    if (this.scene.isActive()) {
+      this.scene.restart({ level: this.level, gameScene: this.gameScene });
+    }
+  }, 300);
 }
 
+// Other scenes — requestAnimationFrame guard
 private handleResize(): void {
   if (this.resizing) return;
   this.resizing = true;
@@ -389,8 +400,8 @@ shutdown() {
 |-------|----------|
 | MenuScene | Restart scene |
 | SettingsScene | Restart scene (preserves navigation state) |
-| GameScene | Update camera zoom/bounds + oversized background |
-| HUDScene | Restart scene (re-reads state from GameScene) |
+| GameScene | Update camera zoom/bounds (no restart) |
+| HUDScene | Debounced restart (300ms, 10px threshold) |
 | LevelCompleteScene | Restart scene (preserves result data via `scene.settings.data`) |
 
 **Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern.

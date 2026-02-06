@@ -359,7 +359,7 @@ class TestOrientationChanges:
         # Resize viewport significantly
         game_page.set_viewport_size({"width": 800, "height": 600})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(300)
+        game_page.wait_for_timeout(600)
 
         # HUDScene should still be active
         scenes = game_page.evaluate("""() => {
@@ -391,7 +391,7 @@ class TestOrientationChanges:
         # Start in portrait phone dimensions
         game_page.set_viewport_size({"width": 390, "height": 844})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(300)
+        game_page.wait_for_timeout(600)
 
         skip_to_level(game_page, 0)
         wait_for_scene(game_page, 'HUDScene')
@@ -400,7 +400,7 @@ class TestOrientationChanges:
         # Rotate to landscape
         game_page.set_viewport_size({"width": 844, "height": 390})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(300)
+        game_page.wait_for_timeout(600)
 
         # HUDScene should still be active
         scenes = game_page.evaluate("""() => {

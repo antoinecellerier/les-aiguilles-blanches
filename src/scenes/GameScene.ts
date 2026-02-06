@@ -420,9 +420,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private createExtendedBackground(screenWidth: number, screenHeight: number, worldWidth: number, worldHeight: number): void {
-    // Oversize background to cover viewport after resizes (up to 2x original)
-    const bgWidth = Math.max(screenWidth, 2560) * 1.5;
-    const bgHeight = Math.max(screenHeight, 1440) * 1.5;
+    // Moderate oversizing to cover minor viewport changes (URL bar, orientation)
+    // without creating thousands of unnecessary game objects on mobile
+    const bgWidth = screenWidth * 1.3;
+    const bgHeight = screenHeight * 1.3;
     const extraLeft = Math.max(this.worldOffsetX, (bgWidth - worldWidth) / 2);
     const extraTop = Math.max(this.worldOffsetY, (bgHeight - worldHeight) / 2);
     const extraRight = Math.max(0, bgWidth - worldWidth - extraLeft);

@@ -7,8 +7,13 @@ import { visualizer } from 'rollup-plugin-visualizer';
 function getVersion() {
   try {
     const hash = execSync('git rev-parse --short HEAD').toString().trim();
-    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    return `${date}-${hash}`;
+    const dirty = execSync('git status --porcelain').toString().trim();
+    if (dirty) {
+      const buildTime = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+      return `${buildTime} ${hash}-dirty`;
+    }
+    const commitDate = execSync('TZ=UTC git log -1 --format=%cd --date=format-local:"%Y-%m-%d %H:%M:%S UTC"').toString().trim();
+    return `${commitDate} ${hash}`;
   } catch {
     return 'dev';
   }
