@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
+import { THEME } from '../config/theme';
 
 /**
  * Les Aiguilles Blanches - Dialogue Scene
@@ -92,17 +93,17 @@ export default class DialogueScene extends Phaser.Scene {
 
     const boxWidth = width - 40;
     const boxHeight = this.dialogueBoxHeight;
-    this.bg = this.add.rectangle(width / 2, 0, boxWidth, boxHeight, 0x222222, 0.95);
-    this.bg.setStrokeStyle(2, 0x87ceeb);
+    this.bg = this.add.rectangle(width / 2, 0, boxWidth, boxHeight, THEME.colors.panelBg, THEME.opacity.panelBg);
+    this.bg.setStrokeStyle(2, THEME.colors.infoHex);
 
     this.speakerText = this.add.text(40, -40, '', {
-      font: 'bold 16px Courier New',
-      color: '#87CEEB',
+      font: `bold ${THEME.fonts.sizes.medium}px ${THEME.fonts.family}`,
+      color: THEME.colors.info,
     });
 
     this.dialogueText = this.add.text(40, -10, '', {
-      font: '14px Courier New',
-      color: '#ffffff',
+      font: `${THEME.fonts.sizes.small}px ${THEME.fonts.family}`,
+      color: THEME.colors.textPrimary,
       wordWrap: { width: width - 120 },
     });
 
@@ -110,8 +111,8 @@ export default class DialogueScene extends Phaser.Scene {
     const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
     const continueHint = hasGamepad ? '▶ Ⓐ' : '▶ tap';
     this.continueText = this.add.text(width / 2 + boxWidth / 2 - 35, boxHeight / 2 - 25, continueHint, {
-      font: '14px Courier New',
-      color: '#87CEEB',
+      font: `${THEME.fonts.sizes.small}px ${THEME.fonts.family}`,
+      color: THEME.colors.info,
     }).setAlpha(0.8);
 
     this.container.add([this.bg, this.speakerText, this.dialogueText, this.continueText]);

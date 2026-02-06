@@ -43,18 +43,21 @@ export default class PauseScene extends Phaser.Scene {
     const btnStyle = buttonStyle();
 
     const buttonDefs = [
-      { text: 'resume', callback: () => this.resumeGame() },
-      { text: 'restart', callback: () => this.restartLevel() },
-      { text: 'settings', callback: () => this.openSettings() },
-      { text: 'quit', callback: () => this.quitToMenu() },
+      { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
+      { text: 'restart', callback: () => this.restartLevel(), isCTA: false },
+      { text: 'settings', callback: () => this.openSettings(), isCTA: false },
+      { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
     ];
 
     this.menuButtons = [];
     this.buttonCallbacks = [];
+    this.buttonIsCTA = [];
     this.selectedIndex = 0;
 
     buttonDefs.forEach((btn, i) => {
-      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, btnStyle)
+      const style = { ...btnStyle };
+      if (btn.isCTA) style.backgroundColor = THEME.colors.buttonCTAHex;
+      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, style)
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => this.selectButton(i))
@@ -63,6 +66,7 @@ export default class PauseScene extends Phaser.Scene {
       
       this.menuButtons.push(button);
       this.buttonCallbacks.push(btn.callback);
+      this.buttonIsCTA.push(btn.isCTA);
     });
 
     this.updateButtonStyles();
@@ -93,6 +97,7 @@ export default class PauseScene extends Phaser.Scene {
 
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
+  private buttonIsCTA: boolean[] = [];
   private selectedIndex = 0;
   private gamepadAPressed = false;
   private gamepadBPressed = false;
@@ -117,11 +122,14 @@ export default class PauseScene extends Phaser.Scene {
 
   private updateButtonStyles(): void {
     this.menuButtons.forEach((btn, i) => {
+      const isCTA = this.buttonIsCTA[i];
+      const baseColor = isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
+      const hoverColor = isCTA ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex;
       if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
+        btn.setStyle({ backgroundColor: hoverColor });
         btn.setScale(1.1);
       } else {
-        btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
+        btn.setStyle({ backgroundColor: baseColor });
         btn.setScale(1);
       }
     });

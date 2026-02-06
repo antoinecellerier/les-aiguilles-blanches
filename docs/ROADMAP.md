@@ -18,7 +18,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Responsive design - All scenes handle resize/orientation change
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
 - [x] Rework home screen styling
-- [ ] Styling consistency audit - Check settings, pause, credits, level-complete scenes match menu aesthetic
+- [x] Styling consistency audit - All scenes use centralized THEME; green CTA hierarchy for primary actions
 - [ ] Advanced tiller mechanics - Tiller raise/lower, speed-dependent grooming quality for harder levels
 - [ ] Make test script robust to stale sessions
 - [x] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
@@ -34,6 +34,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Styling consistency audit** - All 7 UI scenes now import centralized THEME; green CTA buttons for primary actions (Start, Resume, Next Level, Retry); SettingsScene/DialogueScene/HUDScene/MenuScene colors migrated from hardcoded to THEME references
 - ✅ **Menu screen restyle** - Retro SkiFree aesthetic: stepped pixel mountains, side-view groomer, animated snow, 3D buttons, dark footer, aspect-ratio-aware layout
 - ✅ **Changelog overlay** - Daily entries with localized dates, dynamic key discovery, font scaling for small screens
 - ✅ **Full localization** - All 5 languages (FR/EN/DE/IT/ES) with ~170 keys each, coverage tests, hardcoded strings removed

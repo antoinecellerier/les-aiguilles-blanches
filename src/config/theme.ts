@@ -6,11 +6,23 @@
 export const THEME = {
   // Color palette
   colors: {
-    // Primary button colors
+    // Primary button colors (navigation/secondary actions)
     buttonPrimary: 0x2d5a7b,
     buttonPrimaryHex: '#2d5a7b',
     buttonHover: 0x3d7a9b,
     buttonHoverHex: '#3d7a9b',
+
+    // CTA button colors (Start Game, Next Level, Retry — "green = go")
+    buttonCTA: 0x228b22,
+    buttonCTAHex: '#228b22',
+    buttonCTAHover: 0x33bb33,
+    buttonCTAHoverHex: '#33bb33',
+
+    // Destructive/back button colors
+    buttonDanger: 0xcc2200,
+    buttonDangerHex: '#CC2200',
+    buttonDangerHover: 0xff3300,
+    buttonDangerHoverHex: '#FF3300',
 
     // Backgrounds
     panelBg: 0x222222,
@@ -19,6 +31,8 @@ export const THEME = {
     darkBg: 0x0a1628,
     dialogBg: 0x1a2a3e,
     dialogBgHex: '#1a2a3e',
+    winBg: 0x1a3a2e,
+    failBg: 0x3a1a1a,
 
     // Text colors
     textPrimary: '#ffffff',
@@ -41,6 +55,8 @@ export const THEME = {
     border: 0x3d7a9b,
     borderHex: '#3d7a9b',
     disabled: '#666666',
+    toggleActive: '#1a5a1a',
+    toggleActiveText: '#00FF00',
   },
 
   // Font configuration

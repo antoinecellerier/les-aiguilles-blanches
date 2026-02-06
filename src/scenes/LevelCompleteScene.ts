@@ -26,6 +26,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   // Keyboard/gamepad navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
+  private buttonIsCTA: boolean[] = [];
   private selectedIndex = 0;
 
   constructor() {
@@ -42,6 +43,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // Reset navigation state
     this.menuButtons = [];
     this.buttonCallbacks = [];
+    this.buttonIsCTA = [];
     this.selectedIndex = 0;
   }
 
@@ -50,7 +52,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const level = LEVELS[this.levelIndex] as Level;
     const padding = Math.min(20, width * 0.03, height * 0.03);
 
-    this.cameras.main.setBackgroundColor(this.won ? 0x1a3a2e : 0x3a1a1a);
+    this.cameras.main.setBackgroundColor(this.won ? THEME.colors.winBg : THEME.colors.failBg);
 
     // Calculate responsive font sizes
     const baseFontSize = Math.min(16, width / 40, height / 35);
@@ -75,8 +77,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Title
     mainSizer.add(this.add.text(0, 0, t(titleKey), {
-      font: `bold ${titleFontSize}px Courier New`,
-      color: '#ffffff',
+      font: `bold ${titleFontSize}px ${THEME.fonts.family}`,
+      color: THEME.colors.textPrimary,
     }), { align: 'center' });
 
     // Fail taunt if applicable - prominent styling with background
@@ -105,8 +107,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Level name
     mainSizer.add(this.add.text(0, 0, t(level.nameKey), {
-      font: `${baseFontSize}px Courier New`,
-      color: '#aaaaaa',
+      font: `${baseFontSize}px ${THEME.fonts.family}`,
+      color: THEME.colors.textSecondary,
     }), { align: 'center', padding: { top: 10 } });
 
     // Stats
@@ -119,8 +121,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     ].join('\n');
 
     mainSizer.add(this.add.text(0, 0, statsText, {
-      font: `${baseFontSize}px Courier New`,
-      color: '#ffffff',
+      font: `${baseFontSize}px ${THEME.fonts.family}`,
+      color: THEME.colors.textPrimary,
       align: 'center',
       lineSpacing: 8,
     }), { align: 'center', padding: { top: 20 } });
@@ -128,8 +130,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // Game complete message for final level win
     if (this.won && this.levelIndex === LEVELS.length - 1) {
       mainSizer.add(this.add.text(0, 0, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
-        font: `bold ${baseFontSize * 1.25}px Courier New`,
-        color: '#FFD700',
+        font: `bold ${baseFontSize * 1.25}px ${THEME.fonts.family}`,
+        color: THEME.colors.accent,
       }), { align: 'center', padding: { top: 20 } });
     }
 
@@ -149,21 +151,21 @@ export default class LevelCompleteScene extends Phaser.Scene {
     if (this.won && this.levelIndex < LEVELS.length - 1) {
       // Won, more levels: Next Level + Menu
       this.addButton(buttonSizer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding, 
-        () => this.scene.start('GameScene', { level: this.levelIndex + 1 }));
+        () => this.scene.start('GameScene', { level: this.levelIndex + 1 }), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
         () => this.scene.start('MenuScene'));
 
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       // Won final level: View Credits + Menu
       this.addButton(buttonSizer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding,
-        () => this.scene.start('CreditsScene'));
+        () => this.scene.start('CreditsScene'), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
         () => this.scene.start('MenuScene'));
 
     } else {
       // Failed: Retry + Menu
       this.addButton(buttonSizer, t('retry') || 'Retry', buttonFontSize, buttonPadding,
-        () => this.scene.start('GameScene', { level: this.levelIndex }));
+        () => this.scene.start('GameScene', { level: this.levelIndex }), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
         () => this.scene.start('MenuScene'));
     }
@@ -262,14 +264,16 @@ export default class LevelCompleteScene extends Phaser.Scene {
     text: string,
     fontSize: number,
     padding: { x: number; y: number },
-    callback: () => void
+    callback: () => void,
+    isCTA: boolean = false
   ): void {
     const index = this.menuButtons.length;
+    const bgColor = isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
     const btn = this.add.text(0, 0, text, {
       fontFamily: THEME.fonts.family,
       fontSize: `${fontSize}px`,
       color: THEME.colors.textPrimary,
-      backgroundColor: THEME.colors.buttonPrimaryHex,
+      backgroundColor: bgColor,
       padding,
     }).setInteractive({ useHandCursor: true })
       .on('pointerover', () => this.selectButton(index))
@@ -278,6 +282,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);
+    this.buttonIsCTA.push(isCTA);
     sizer.add(btn);
   }
   
@@ -300,11 +305,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
   
   private updateButtonStyles(): void {
     this.menuButtons.forEach((btn, i) => {
+      const isCTA = this.buttonIsCTA[i];
+      const baseColor = isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
+      const hoverColor = isCTA ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex;
       if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
+        btn.setStyle({ backgroundColor: hoverColor });
         btn.setScale(1.05);
       } else {
-        btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
+        btn.setStyle({ backgroundColor: baseColor });
         btn.setScale(1);
       }
     });

@@ -294,6 +294,25 @@ groomer.buffs = {
 5. **Extended background sizing**: Use `screen * 1.3` — enough for URL bar/viewport jitter, not `max(screen, 2560) * 1.5` which creates thousands of unnecessary game objects and tanks mobile FPS
 6. **HUD resize debounce**: Mobile browsers fire frequent resize events (URL bar, soft keyboard); debounce with 300ms + 10px threshold to prevent rapid scene restarts
 
+## Centralized Theme System
+
+All UI styling references `src/config/theme.ts` (`THEME` constant) for consistent colors, fonts, and spacing across scenes.
+
+### Color Hierarchy
+- **`buttonCTA`** (green #228b22): Primary action buttons — "Start Game", "Resume", "Next Level", "Retry"
+- **`buttonPrimary`** (blue #2d5a7b): Navigation/secondary buttons — "Menu", "Settings", "How to Play"
+- **`buttonDanger`** (red #CC2200): Destructive actions — "Back" from settings
+- **`toggleActive`** (dark green #1a5a1a): Active toggle/selection state
+
+### Rule: "Green = Go"
+The CTA color is reserved for the primary forward action in every scene. This teaches players that green always means "continue playing."
+
+### Scenes Using THEME
+All scenes import THEME: MenuScene, SettingsScene, DialogueScene, HUDScene, PauseScene, LevelCompleteScene, CreditsScene.
+
+### Adding New Colors
+Add both hex number (`0x...`) and string (`'#...'`) variants to THEME. Hex numbers are used for Phaser Graphics/Rectangle fills; strings are used for Text styles.
+
 ## Responsive UI Design
 
 ### DPI-Aware Layout

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level } from '../setup';
 import { getWinchKeyName } from '../utils/keyboardLayout';
+import { THEME } from '../config/theme';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -106,8 +107,8 @@ export default class HUDScene extends Phaser.Scene {
 
     // Left panel
     this.add.rectangle(0, 0, leftPanelWidth, leftPanelHeight, 0x000000, 0.75).setOrigin(0).setScrollFactor(0);
-    this.add.rectangle(0, 0, leftPanelWidth, 3, 0x87ceeb).setOrigin(0).setScrollFactor(0);
-    this.add.rectangle(leftPanelWidth, 0, 2, leftPanelHeight, 0x87ceeb, 0.5).setOrigin(0).setScrollFactor(0);
+    this.add.rectangle(0, 0, leftPanelWidth, 3, THEME.colors.infoHex).setOrigin(0).setScrollFactor(0);
+    this.add.rectangle(leftPanelWidth, 0, 2, leftPanelHeight, THEME.colors.infoHex, 0.5).setOrigin(0).setScrollFactor(0);
 
     const row1Y = Math.round(8 * this.uiScale);
     const row2Y = Math.round(32 * this.uiScale);
@@ -116,56 +117,56 @@ export default class HUDScene extends Phaser.Scene {
     const barOffset = Math.round(35 * this.uiScale);
 
     this.add.text(padding, row1Y, t(this.level.nameKey) || 'Level', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontSmall,
       fontStyle: 'bold',
-      color: '#87CEEB',
+      color: THEME.colors.info,
     }).setScrollFactor(0);
 
     this.add.text(padding, row2Y, '⛽', { fontSize: fontIcon }).setScrollFactor(0);
     this.fuelBarBg = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelBar = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0xcc2200).setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelBar = this.add.rectangle(barOffset + padding, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.dangerHex).setOrigin(0, 0.5).setScrollFactor(0);
     this.fuelText = this.add.text(barOffset + padding + barWidth + 5, row2Y, '100%', {
-      fontFamily: 'Courier New',
+      fontFamily: THEME.fonts.family,
       fontSize: fontSmall,
-      color: '#ffffff',
+      color: THEME.colors.textPrimary,
     }).setScrollFactor(0);
 
     this.add.text(padding, row3Y, '💪', { fontSize: fontIcon }).setScrollFactor(0);
     this.staminaBarBg = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaBar = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x22aa22).setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaBar = this.add.rectangle(barOffset + padding, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.successHex).setOrigin(0, 0.5).setScrollFactor(0);
     this.staminaText = this.add.text(barOffset + padding + barWidth + 5, row3Y, '100%', {
-      fontFamily: 'Courier New',
+      fontFamily: THEME.fonts.family,
       fontSize: fontSmall,
-      color: '#ffffff',
+      color: THEME.colors.textPrimary,
     }).setScrollFactor(0);
 
     this.add.text(padding, row4Y, '❄️', { fontSize: fontIcon }).setScrollFactor(0);
     this.coverageText = this.add.text(barOffset + padding, row4Y, (t('coverage') || 'Coverage') + ': 0%', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontMed,
-      color: '#87CEEB',
+      color: THEME.colors.info,
     }).setScrollFactor(0);
 
     // Right panel
     this.add.rectangle(width, 0, rightPanelWidth, rightPanelHeight, 0x000000, 0.75).setOrigin(1, 0).setScrollFactor(0);
-    this.add.rectangle(width, 0, rightPanelWidth, 3, 0xffd700).setOrigin(1, 0).setScrollFactor(0);
-    this.add.rectangle(width - rightPanelWidth, 0, 2, rightPanelHeight, 0xffd700, 0.5).setOrigin(0).setScrollFactor(0);
+    this.add.rectangle(width, 0, rightPanelWidth, 3, THEME.colors.accentHex).setOrigin(1, 0).setScrollFactor(0);
+    this.add.rectangle(width - rightPanelWidth, 0, 2, rightPanelHeight, THEME.colors.accentHex, 0.5).setOrigin(0).setScrollFactor(0);
 
     const timerIconX = width - rightPanelWidth + padding;
     this.add.text(timerIconX, Math.round(15 * this.uiScale), '⏱️', { fontSize: fontIconLg }).setOrigin(0, 0).setScrollFactor(0);
     this.timerText = this.add.text(width - padding, Math.round(18 * this.uiScale), '00:00', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontLarge,
       fontStyle: 'bold',
-      color: '#ffffff',
+      color: THEME.colors.textPrimary,
     }).setOrigin(1, 0).setScrollFactor(0);
 
     this.add.text(timerIconX, Math.round(50 * this.uiScale), '🎯', { fontSize: fontIcon }).setOrigin(0, 0).setScrollFactor(0);
     this.targetText = this.add.text(timerIconX + Math.round(25 * this.uiScale), Math.round(53 * this.uiScale), (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontMed,
-      color: '#FFD700',
+      color: THEME.colors.accent,
     }).setOrigin(0, 0).setScrollFactor(0);
 
     // Touch detection for button sizing
@@ -184,15 +185,15 @@ export default class HUDScene extends Phaser.Scene {
     let nextButtonY = rightPanelHeight + Math.round(5 * this.uiScale);
     
     const skipBtn = this.add.text(width - padding, nextButtonY, skipLabel, {
-      fontFamily: 'Courier New',
+      fontFamily: THEME.fonts.family,
       fontSize: skipFontSize,
-      color: '#888888',
+      color: THEME.colors.textMuted,
       backgroundColor: '#333333',
       padding: { x: skipPadX, y: skipPadY },
     }).setOrigin(1, 0).setScrollFactor(0)
       .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => skipBtn.setStyle({ color: '#ffffff' }))
-      .on('pointerout', () => skipBtn.setStyle({ color: '#888888' }))
+      .on('pointerover', () => skipBtn.setStyle({ color: THEME.colors.textPrimary }))
+      .on('pointerout', () => skipBtn.setStyle({ color: THEME.colors.textMuted }))
       .on('pointerdown', () => this.skipLevel());
     
     nextButtonY += skipBtn.height + Math.round(5 * this.uiScale);
@@ -209,9 +210,9 @@ export default class HUDScene extends Phaser.Scene {
         : (t('winchHint') || `${winchKey} = Winch`);
       const winchHintText = '🔗 ' + winchHintRaw.replace('{winchKey}', winchKey);
       this.winchHint = this.add.text(Math.round(width / 2), Math.round(12 * this.uiScale), winchHintText, {
-        fontFamily: 'Courier New',
+        fontFamily: THEME.fonts.family,
         fontSize: fontSmall,
-        color: '#FFD700',
+        color: THEME.colors.accent,
         backgroundColor: '#000000',
         padding: { x: Math.round(8 * this.uiScale), y: Math.round(4 * this.uiScale) },
       }).setOrigin(0.5, 0).setScrollFactor(0).setAlpha(0.8);
@@ -243,7 +244,7 @@ export default class HUDScene extends Phaser.Scene {
     // Pause/Menu button (touch devices)
     if (hasTouch) {
       const pauseBtn = this.add.text(width - padding, nextButtonY, '☰', {
-        fontFamily: 'Courier New',
+        fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
         color: '#CCCCCC',
         backgroundColor: '#333333',
@@ -258,7 +259,7 @@ export default class HUDScene extends Phaser.Scene {
     if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
       const fsLabel = isFullscreen ? '✕' : '⛶';
       this.add.text(width - padding, nextButtonY, fsLabel, {
-        fontFamily: 'Courier New',
+        fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
         color: isFullscreen ? '#FF6666' : '#CCCCCC',
         backgroundColor: '#333333',
@@ -323,7 +324,7 @@ export default class HUDScene extends Phaser.Scene {
     indicators.forEach(ind => {
       this.add.text(joystickX + ind.x, joystickY + ind.y, ind.label, {
         fontSize: Math.round(btnSize * 0.35) + 'px',
-        color: '#888888',
+        color: THEME.colors.textMuted,
       }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.6);
     });
 
@@ -561,8 +562,8 @@ export default class HUDScene extends Phaser.Scene {
     this.fuelText.setText(Math.round(this.gameScene.fuel) + '%');
     this.staminaText?.setText(Math.round(this.gameScene.stamina) + '%');
 
-    this.fuelBar.setFillStyle(fuelPercent > 0.3 ? 0xcc2200 : 0xff0000);
-    this.staminaBar?.setFillStyle(staminaPercent > 0.3 ? 0x22aa22 : 0xffaa00);
+    this.fuelBar.setFillStyle(fuelPercent > 0.3 ? THEME.colors.dangerHex : 0xff0000);
+    this.staminaBar?.setFillStyle(staminaPercent > 0.3 ? THEME.colors.successHex : 0xffaa00);
 
     const coverage = this.gameScene.getCoverage();
     if (this.coverageText) {
@@ -581,7 +582,7 @@ export default class HUDScene extends Phaser.Scene {
       const winchKey = getWinchKeyName();
       const winchHintRaw = t('winchHint') || `${winchKey} = Winch`;
       this.winchHint.setText('🔗 ' + winchHintRaw.replace('{winchKey}', winchKey));
-      this.winchHint.setStyle({ color: '#FFD700' });
+      this.winchHint.setStyle({ color: THEME.colors.accent });
     }
 
     // Safety: reset touch states if no active pointers (prevents stuck controls)

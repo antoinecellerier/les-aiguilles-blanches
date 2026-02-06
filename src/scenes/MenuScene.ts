@@ -3,6 +3,7 @@ import { t, Accessibility } from '../setup';
 import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
 import { getMappingFromGamepad, isConfirmPressed } from '../utils/gamepad';
+import { THEME } from '../config/theme';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
@@ -105,13 +106,13 @@ export default class MenuScene extends Phaser.Scene {
     tbg.strokeRect(width / 2 - titleBgWidth / 2, titleY - titleBgHeight / 2, titleBgWidth, titleBgHeight);
     // Shadow text
     this.add.text(width / 2 + 3, titleY + 3, 'Les Aiguilles Blanches', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#2d2822',
     }).setOrigin(0.5);
     this.add.text(width / 2, titleY, 'Les Aiguilles Blanches', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#ffffff',
@@ -122,7 +123,7 @@ export default class MenuScene extends Phaser.Scene {
     const subtitleY = titleY + titleBgHeight / 2 + Math.round(12 * scaleFactor);
     // Measure subtitle text width for ribbon sizing
     const subtitleMeasure = this.add.text(0, -100, subtitleText, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
     });
     const stw = subtitleMeasure.width;
@@ -169,12 +170,12 @@ export default class MenuScene extends Phaser.Scene {
     ribbonG.fillRect(cx - ribbonW / 2 + stripe, rBot - stripe - 2, ribbonW - stripe * 2, 1);
     // Subtitle text with shadow
     this.add.text(cx + 2, subtitleY + 2, subtitleText, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
       color: '#660000',
     }).setOrigin(0.5);
     this.add.text(cx, subtitleY, subtitleText, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
       color: '#FFD700',
     }).setOrigin(0.5);
@@ -223,7 +224,7 @@ export default class MenuScene extends Phaser.Scene {
     // Selection arrow
     const arrowSize = Math.round(22 * scaleFactor);
     this.selectionArrow = this.add.text(0, 0, '▶', {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: arrowSize + 'px',
       color: '#FFD700',
       stroke: '#2d2822',
@@ -236,14 +237,12 @@ export default class MenuScene extends Phaser.Scene {
       const shadowOffset = Math.round(4 * scaleFactor);
       
       // Uniform blue theme with slight emphasis on primary
-      // Standard: #2d5a7b (Slate Blue), Selected: #3d7a9b (Lighter)
-      // Primary: #22aa22 (Forest Green), Selected: #33bb33 (Lighter Green)
-      const bgColor = btn.primary ? '#228b22' : '#2d5a7b';
+      const bgColor = btn.primary ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
       const shadowColor = btn.primary ? '#115511' : '#1a3a5c';
 
       // Shadow rectangle (darker offset)
       const shadow = this.add.text(width / 2 + shadowOffset, yPos + shadowOffset, btnText, {
-        fontFamily: 'Courier New, monospace',
+        fontFamily: THEME.fonts.family,
         fontSize: buttonSize + 'px',
         color: '#ffffff',
         backgroundColor: shadowColor,
@@ -252,7 +251,7 @@ export default class MenuScene extends Phaser.Scene {
 
       // Main button
       const button = this.add.text(width / 2, yPos, btnText, {
-        fontFamily: 'Courier New, monospace',
+        fontFamily: THEME.fonts.family,
         fontSize: buttonSize + 'px',
         color: '#ffffff',
         backgroundColor: bgColor,
@@ -277,27 +276,27 @@ export default class MenuScene extends Phaser.Scene {
 
     // Footer — dark panel strip (lifted by safe area on portrait mobile)
     const footerTop = height - footerHeight - safeAreaBottom;
-    this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, 0x1a2a3e).setOrigin(0.5, 0);
-    this.add.rectangle(width / 2, footerTop, width, 2, 0x3d7a9b).setOrigin(0.5, 0);
+    this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, THEME.colors.dialogBg).setOrigin(0.5, 0);
+    this.add.rectangle(width / 2, footerTop, width, 2, THEME.colors.border).setOrigin(0.5, 0);
     
     const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
     const footerFontSize = Math.round(Math.max(11, 13 * scaleFactor));
     const githubLink = this.add.text(width / 2, footerTop + footerHeight / 2 - Math.round(7 * scaleFactor), `GitHub  ·  v${version}`, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: footerFontSize + 'px',
-      color: '#87CEEB',
+      color: THEME.colors.info,
     }).setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => githubLink.setColor('#FFD700'))
-      .on('pointerout', () => githubLink.setColor('#87CEEB'))
+      .on('pointerover', () => githubLink.setColor(THEME.colors.accent))
+      .on('pointerout', () => githubLink.setColor(THEME.colors.info))
       .on('pointerdown', () => {
         window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank');
       });
 
     this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: Math.round(Math.max(10, 12 * scaleFactor)) + 'px',
-      color: '#FFD700',
+      color: THEME.colors.accent,
     }).setOrigin(0.5);
 
     // Keyboard navigation
@@ -347,13 +346,10 @@ export default class MenuScene extends Phaser.Scene {
 
   private updateButtonStyles(): void {
     this.menuButtons.forEach((btn, i) => {
-      const isPrimary = this.buttonCallbacks[i] && (i === 0 || this.buttonCallbacks[i].name === 'bound startGame'); // Heuristic as we lost the struct
-      // Actually we need to store the primary status or re-infer it. 
-      // Simplest is to check color.
-      const baseColor = (btn.style.backgroundColor === '#228b22' || btn.style.backgroundColor === '#33bb33') ? 'primary' : 'standard';
+      const baseColor = (btn.style.backgroundColor === THEME.colors.buttonCTAHex || btn.style.backgroundColor === THEME.colors.buttonCTAHoverHex) ? 'primary' : 'standard';
       
       if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: baseColor === 'primary' ? '#33bb33' : '#3d7a9b' });
+        btn.setStyle({ backgroundColor: baseColor === 'primary' ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex });
         // Hide shadow on selected button to avoid peek-through
         if (this.buttonShadows[i]) this.buttonShadows[i].setVisible(false);
         if (this.selectionArrow) {
@@ -361,7 +357,7 @@ export default class MenuScene extends Phaser.Scene {
           this.selectionArrow.setVisible(true);
         }
       } else {
-        btn.setStyle({ backgroundColor: baseColor === 'primary' ? '#228b22' : '#2d5a7b' });
+        btn.setStyle({ backgroundColor: baseColor === 'primary' ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex });
         if (this.buttonShadows[i]) this.buttonShadows[i].setVisible(true);
       }
       btn.setScale(1);
@@ -717,13 +713,13 @@ export default class MenuScene extends Phaser.Scene {
       width: panelWidth,
       background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 8, 0x1a2a3e).setStrokeStyle(4, 0x3d7a9b),
       title: this.add.text(0, 0, t(titleKey) || titleKey, {
-        fontFamily: 'Courier New, monospace',
+        fontFamily: THEME.fonts.family,
         fontSize: titleSize + 'px',
         fontStyle: 'bold',
         color: '#87CEEB',
       }),
       content: this.add.text(0, 0, lines.join('\n'), {
-        fontFamily: 'Courier New, monospace',
+        fontFamily: THEME.fonts.family,
         fontSize: fontSize + 'px',
         color: '#cccccc',
         align: 'center',
@@ -769,7 +765,7 @@ export default class MenuScene extends Phaser.Scene {
 
   private createDialogButton(text: string, fontSize: number, scaleFactor: number): Phaser.GameObjects.Text {
     const btn = this.add.text(0, 0, text, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
       color: '#ffffff',
       backgroundColor: '#CC2200',

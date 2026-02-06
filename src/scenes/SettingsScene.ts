@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed } from '../utils/gamepad';
+import { THEME } from '../config/theme';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -55,7 +56,7 @@ export default class SettingsScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.cameras.main;
-    this.cameras.main.setBackgroundColor(0x1a2a3e);
+    this.cameras.main.setBackgroundColor(THEME.colors.dialogBg);
     this.loadBindings();
 
     // DPI-aware sizing (matches SettingsScene logic)
@@ -140,7 +141,7 @@ export default class SettingsScene extends Phaser.Scene {
     });
 
     // Title
-    contentSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.1, '#87CEEB', true), 
+    contentSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.1, THEME.colors.info, true), 
       { align: 'center' });
 
     // All sections in single column
@@ -151,7 +152,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.addControlsSection(contentSizer);
 
     // Status text
-    this.statusText = this.createText('', this.fontSize, '#FFFF00');
+    this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
     contentSizer.add(this.statusText, { align: 'center' });
 
     // Layout content to measure height
@@ -206,7 +207,7 @@ export default class SettingsScene extends Phaser.Scene {
       space: { item: itemSpacing }
     });
     
-    leftCol.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.2, '#87CEEB', true), 
+    leftCol.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.2, THEME.colors.info, true), 
       { align: 'center' });
     this.addLanguageSection(leftCol);
     this.addAccessibilitySection(leftCol);
@@ -221,7 +222,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.addControlsSection(rightCol);
 
     // Status text in right column
-    this.statusText = this.createText('', this.fontSize, '#FFFF00');
+    this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
     rightCol.add(this.statusText, { align: 'center' });
 
     rootSizer.add(leftCol, { align: 'top' });
@@ -256,13 +257,13 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private addLanguageSection(sizer: any): void {
-    sizer.add(this.createText('🌐 ' + (t('language') || 'Language'), this.fontSize, '#ffffff', true), 
+    sizer.add(this.createText('🌐 ' + (t('language') || 'Language'), this.fontSize, THEME.colors.textPrimary, true), 
       { align: 'left' });
     sizer.add(this.createLanguageButtons(), { align: 'left' });
   }
 
   private addAccessibilitySection(sizer: any): void {
-    sizer.add(this.createText('♿ ' + (t('accessibility') || 'Accessibility'), this.fontSize, '#ffffff', true), 
+    sizer.add(this.createText('♿ ' + (t('accessibility') || 'Accessibility'), this.fontSize, THEME.colors.textPrimary, true), 
       { align: 'left' });
     
     sizer.add(this.createToggleRow(t('highContrast') || 'High Contrast', 
@@ -278,15 +279,15 @@ export default class SettingsScene extends Phaser.Scene {
       }), { align: 'left' });
 
     // Colorblind modes
-    sizer.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, '#aaaaaa'), 
+    sizer.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, THEME.colors.textSecondary), 
       { align: 'left' });
     sizer.add(this.createColorblindButtons(), { align: 'left' });
   }
 
   private addControlsSection(sizer: any): void {
-    sizer.add(this.createText('🎮 ' + (t('controls') || 'Controls'), this.fontSize, '#ffffff', true), 
+    sizer.add(this.createText('🎮 ' + (t('controls') || 'Controls'), this.fontSize, THEME.colors.textPrimary, true), 
       { align: 'left' });
-    sizer.add(this.createText(t('clickToRebind') || 'Click to rebind', this.smallFont, '#666666'), 
+    sizer.add(this.createText(t('clickToRebind') || 'Click to rebind', this.smallFont, THEME.colors.disabled), 
       { align: 'left' });
 
     // Key bindings
@@ -325,11 +326,11 @@ export default class SettingsScene extends Phaser.Scene {
 
   private createBackButton(width: number, height: number, padding: number): void {
     const backLabel = this.returnTo ? (t('backToGame') || 'Back to Game') : (t('back') || 'Back');
-    const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, '#ffffff', '#CC2200');
+    const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, THEME.colors.textPrimary, THEME.colors.buttonDangerHex);
     backBtn.setPosition(width / 2, height - padding * 1.5);
     backBtn.setOrigin(0.5);
-    backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: '#FF3300' }));
-    backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: '#CC2200' }));
+    backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHoverHex }));
+    backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHex }));
     backBtn.on('pointerdown', () => this.goBack());
   }
 
@@ -337,7 +338,7 @@ export default class SettingsScene extends Phaser.Scene {
 
   private createText(text: string, fontSize: number, color: string, bold = false): Phaser.GameObjects.Text {
     return this.add.text(0, 0, text, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
       fontStyle: bold ? 'bold' : 'normal',
       color: color,
@@ -350,7 +351,7 @@ export default class SettingsScene extends Phaser.Scene {
     const paddingX = Math.round(paddingY * 1.5);
     
     return this.add.text(0, 0, text, {
-      fontFamily: 'Courier New, monospace',
+      fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
       color: color,
       backgroundColor: bgColor,
@@ -380,9 +381,9 @@ export default class SettingsScene extends Phaser.Scene {
       const paddingY = Math.max(2, Math.min(6, (this.minTouchTarget - this.fontSize) / 2));
       const paddingX = Math.max(3, Math.round(paddingY * 0.6));
       const btn = this.add.text(0, 0, lang.name, {
-        fontFamily: 'Courier New',
+        fontFamily: THEME.fonts.family,
         fontSize: this.fontSize + 'px',
-        backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
+        backgroundColor: isActive ? THEME.colors.toggleActive : THEME.colors.buttonPrimaryHex,
         padding: { x: paddingX, y: paddingY },
       }).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.setLang(lang.code));
@@ -398,14 +399,14 @@ export default class SettingsScene extends Phaser.Scene {
       space: { item: Math.round(this.fontSize * 0.5), line: 2 }
     });
     
-    row.add(this.createText(label + ':', this.smallFont, '#cccccc'));
+    row.add(this.createText(label + ':', this.smallFont, THEME.colors.textSecondary));
     
     const paddingY = Math.max(2, Math.min(6, (this.minTouchTarget - this.smallFont) / 2));
     const btn = this.add.text(0, 0, initialValue ? t('on') : t('off'), {
-      fontFamily: 'Courier New',
+      fontFamily: THEME.fonts.family,
       fontSize: this.smallFont + 'px',
-      color: initialValue ? '#00FF00' : '#888888',
-      backgroundColor: initialValue ? '#1a5a1a' : '#333333',
+      color: initialValue ? THEME.colors.toggleActiveText : THEME.colors.textMuted,
+      backgroundColor: initialValue ? THEME.colors.toggleActive : THEME.colors.textDark,
       padding: { x: Math.round(paddingY * 1.5), y: paddingY },
     }).setInteractive({ useHandCursor: true });
 
@@ -414,8 +415,8 @@ export default class SettingsScene extends Phaser.Scene {
       value = !value;
       btn.setText(value ? t('on') : t('off'));
       btn.setStyle({
-        color: value ? '#00FF00' : '#888888',
-        backgroundColor: value ? '#1a5a1a' : '#333333',
+        color: value ? THEME.colors.toggleActiveText : THEME.colors.textMuted,
+        backgroundColor: value ? THEME.colors.toggleActive : THEME.colors.textDark,
       });
       onChange(value);
       this.mainSizer?.layout();
@@ -443,10 +444,10 @@ export default class SettingsScene extends Phaser.Scene {
     const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
     
     return this.add.text(0, 0, label, {
-      fontFamily: 'Courier New',
+      fontFamily: THEME.fonts.family,
       fontSize: this.smallFont + 'px',
-      color: isActive ? '#00FF00' : '#aaa',
-      backgroundColor: isActive ? '#1a5a1a' : '#2d5a7b',
+      color: isActive ? THEME.colors.toggleActiveText : THEME.colors.textSecondary,
+      backgroundColor: isActive ? THEME.colors.toggleActive : THEME.colors.buttonPrimaryHex,
       padding: { x: Math.round(paddingY * 1.5), y: paddingY },
     }).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
@@ -463,7 +464,7 @@ export default class SettingsScene extends Phaser.Scene {
       space: { item: Math.round(this.fontSize * 0.5), line: 2 }
     });
     
-    row.add(this.createText(label + ':', this.smallFont, '#cccccc'));
+    row.add(this.createText(label + ':', this.smallFont, THEME.colors.textSecondary));
     
     const currentBinding = this.bindings[actionId as keyof KeyBindings];
     const defaultBinding = this.getDefaultBindings()[actionId as keyof KeyBindings];
@@ -472,10 +473,10 @@ export default class SettingsScene extends Phaser.Scene {
     
     const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
     const btn = this.add.text(0, 0, keyName + (isCustom ? ' *' : ''), {
-      fontFamily: 'Courier New',
+      fontFamily: THEME.fonts.family,
       fontSize: this.smallFont + 'px',
-      color: isCustom ? '#FFDD00' : '#87CEEB',
-      backgroundColor: isCustom ? '#5a5a2d' : '#2d5a7b',
+      color: isCustom ? THEME.colors.accent : THEME.colors.info,
+      backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
       padding: { x: Math.round(paddingY * 2), y: paddingY },
     }).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.startRebind(actionId, btn));
@@ -491,7 +492,7 @@ export default class SettingsScene extends Phaser.Scene {
       space: { item: Math.round(this.fontSize * 0.4), line: 2 }
     });
     
-    row.add(this.createText('⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', this.smallFont, '#aaaaaa'));
+    row.add(this.createText('⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', this.smallFont, THEME.colors.textSecondary));
     
     // Check for custom bindings
     const hasCustomBindings = Object.keys(this.bindings).some(key => 
@@ -499,17 +500,17 @@ export default class SettingsScene extends Phaser.Scene {
     );
 
     if (hasCustomBindings) {
-      row.add(this.createText(t('customBindings') || 'Custom', this.smallFont, '#FFDD00'));
+      row.add(this.createText(t('customBindings') || 'Custom', this.smallFont, THEME.colors.accent));
     } else {
       const currentLayout = getKeyboardLayout();
       AVAILABLE_LAYOUTS.forEach(layout => {
         const isActive = currentLayout === layout.id;
         const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
         const btn = this.add.text(0, 0, layout.id.toUpperCase(), {
-          fontFamily: 'Courier New',
+          fontFamily: THEME.fonts.family,
           fontSize: this.smallFont + 'px',
-          color: isActive ? '#000000' : '#ffffff',
-          backgroundColor: isActive ? '#87ceeb' : '#555555',
+          color: isActive ? THEME.colors.textDark : THEME.colors.textPrimary,
+          backgroundColor: isActive ? THEME.colors.info : '#555555',
           padding: { x: Math.round(paddingY * 2), y: paddingY },
         }).setInteractive({ useHandCursor: true })
           .on('pointerdown', () => this.setLayout(layout.id));
@@ -610,7 +611,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     const btn = this.rebindButtons[actionId];
     btn.setText(this.getKeyName(keyCode) + ' *');
-    btn.setStyle({ backgroundColor: '#5a5a2d', color: '#FFDD00' });
+    btn.setStyle({ backgroundColor: '#5a5a2d', color: THEME.colors.accent });
 
     this.rebindingAction = null;
     this.statusText?.setText(t('saved') || 'Saved!');
@@ -622,7 +623,7 @@ export default class SettingsScene extends Phaser.Scene {
     if (!this.rebindingAction) return;
     const btn = this.rebindButtons[this.rebindingAction];
     btn.setText(this.getKeyName(this.bindings[this.rebindingAction as keyof KeyBindings]));
-    btn.setStyle({ backgroundColor: '#2d5a7b' });
+    btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
     this.rebindingAction = null;
     this.statusText?.setText('');
     this.mainSizer?.layout();
