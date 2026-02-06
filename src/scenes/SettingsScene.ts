@@ -110,8 +110,15 @@ export default class SettingsScene extends Phaser.Scene {
     Accessibility.announce((t('settings') || 'Settings'));
   }
 
+  private resizing = false;
+
   private handleResize(): void {
-    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+    if (this.resizing) return;
+    this.resizing = true;
+    requestAnimationFrame(() => {
+      this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+      this.resizing = false;
+    });
   }
 
   private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {

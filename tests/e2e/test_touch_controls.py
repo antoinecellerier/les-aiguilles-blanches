@@ -7,7 +7,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 # Import the base URL from conftest
-from conftest import GAME_URL
+from conftest import GAME_URL, skip_to_level, dismiss_dialogues, wait_for_scene
 
 
 def click_start_button(page: Page):
@@ -394,3 +394,80 @@ class TestOrientationChanges:
         
         # Verify HUD is still visible
         assert 'HUDScene' in scenes_after, "HUDScene should still be active after orientation change"
+
+    def test_hud_controls_reposition_on_resize(self, game_page: Page):
+        """HUD elements should stay within bounds after viewport resize."""
+        skip_to_level(game_page, 0)
+        wait_for_scene(game_page, 'HUDScene')
+        dismiss_dialogues(game_page)
+
+        # Resize viewport significantly
+        game_page.set_viewport_size({"width": 800, "height": 600})
+        game_page.evaluate("() => window.resizeGame?.()")
+        game_page.wait_for_timeout(300)
+
+        # HUDScene should still be active
+        scenes = game_page.evaluate("""() => {
+            return window.game?.scene?.getScenes(true).map(s => s.scene.key) || [];
+        }""")
+        assert 'HUDScene' in scenes, f"HUDScene should be active after resize. Active: {scenes}"
+
+        # Verify any visible touch controls are within the new viewport bounds
+        bounds_ok = game_page.evaluate("""() => {
+            const hud = window.game?.scene?.getScene('HUDScene');
+            if (!hud) return true;
+            const cam = hud.cameras?.main;
+            if (!cam) return true;
+            const w = cam.width, h = cam.height;
+            const children = hud.children?.list || [];
+            for (const child of children) {
+                if (child.visible && child.x !== undefined && child.y !== undefined) {
+                    if (child.x < -50 || child.x > w + 50 || child.y < -50 || child.y > h + 50) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }""")
+        assert bounds_ok, "HUD elements should be within viewport bounds after resize"
+
+    def test_hud_relayout_on_orientation_change(self, game_page: Page):
+        """HUD should relayout correctly when simulating orientation change."""
+        # Start in portrait phone dimensions
+        game_page.set_viewport_size({"width": 390, "height": 844})
+        game_page.evaluate("() => window.resizeGame?.()")
+        game_page.wait_for_timeout(300)
+
+        skip_to_level(game_page, 0)
+        wait_for_scene(game_page, 'HUDScene')
+        dismiss_dialogues(game_page)
+
+        # Rotate to landscape
+        game_page.set_viewport_size({"width": 844, "height": 390})
+        game_page.evaluate("() => window.resizeGame?.()")
+        game_page.wait_for_timeout(300)
+
+        # HUDScene should still be active
+        scenes = game_page.evaluate("""() => {
+            return window.game?.scene?.getScenes(true).map(s => s.scene.key) || [];
+        }""")
+        assert 'HUDScene' in scenes, f"HUDScene should survive orientation change. Active: {scenes}"
+
+        # Verify controls are within landscape viewport bounds
+        bounds_ok = game_page.evaluate("""() => {
+            const hud = window.game?.scene?.getScene('HUDScene');
+            if (!hud) return true;
+            const cam = hud.cameras?.main;
+            if (!cam) return true;
+            const w = cam.width, h = cam.height;
+            const children = hud.children?.list || [];
+            for (const child of children) {
+                if (child.visible && child.x !== undefined && child.y !== undefined) {
+                    if (child.x < -50 || child.x > w + 50 || child.y < -50 || child.y > h + 50) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }""")
+        assert bounds_ok, "HUD elements should be within landscape viewport bounds"

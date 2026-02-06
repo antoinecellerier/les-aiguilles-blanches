@@ -348,6 +348,53 @@ const dprBoost = Math.sqrt(Math.min(dpr, 2));
 const scaleFactor = Math.min(scaleByHeight, scaleByWidth) * dprBoost;
 ```
 
+### Resize & Orientation Handling
+
+Phaser's `Scale.RESIZE` mode automatically resizes the canvas to fill its parent container on window resize and orientation change. **Do not manually call `scale.resize()`** — this conflicts with the built-in handler and causes double-resize bugs.
+
+The game config uses percentage-based sizing:
+```typescript
+scale: {
+  mode: Phaser.Scale.RESIZE,
+  width: '100%',
+  height: '100%',
+}
+```
+
+Scenes listen for resize events and restart with a `requestAnimationFrame` guard to prevent restart-during-create loops:
+
+```typescript
+private resizing = false;
+
+create() {
+  this.scale.on('resize', this.handleResize, this);
+}
+
+private handleResize(): void {
+  if (this.resizing) return;
+  this.resizing = true;
+  requestAnimationFrame(() => {
+    this.scene.restart();
+    this.resizing = false;
+  });
+}
+
+shutdown() {
+  this.scale.off('resize', this.handleResize, this);
+}
+```
+
+**Scene resize behavior:**
+| Scene | Strategy |
+|-------|----------|
+| MenuScene | Restart scene |
+| SettingsScene | Restart scene (preserves navigation state) |
+| GameScene | Update camera zoom/bounds + oversized background |
+| HUDScene | Restart scene (re-reads state from GameScene) |
+| LevelCompleteScene | Restart scene (preserves result data via `scene.settings.data`) |
+
+**Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern.
+
 ## Browser Compatibility Notes
 
 ### Firefox Rendering

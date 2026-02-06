@@ -420,10 +420,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private createExtendedBackground(screenWidth: number, screenHeight: number, worldWidth: number, worldHeight: number): void {
-    const extraLeft = this.worldOffsetX;
-    const extraTop = this.worldOffsetY;
-    const extraRight = Math.max(0, screenWidth - worldWidth - this.worldOffsetX);
-    const extraBottom = Math.max(0, screenHeight - worldHeight - this.worldOffsetY);
+    // Oversize background to cover viewport after resizes (up to 2x original)
+    const bgWidth = Math.max(screenWidth, 2560) * 1.5;
+    const bgHeight = Math.max(screenHeight, 1440) * 1.5;
+    const extraLeft = Math.max(this.worldOffsetX, (bgWidth - worldWidth) / 2);
+    const extraTop = Math.max(this.worldOffsetY, (bgHeight - worldHeight) / 2);
+    const extraRight = Math.max(0, bgWidth - worldWidth - extraLeft);
+    const extraBottom = Math.max(0, bgHeight - worldHeight - extraTop);
     const tileSize = this.tileSize;
 
     // Use same snow_offpiste tiles as the off-piste areas inside the level
@@ -2694,6 +2697,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleResize(gameSize: Phaser.Structs.Size): void {
+    if (!this.cameras?.main || !this.level) return;
+
     const width = gameSize.width;
     const height = gameSize.height;
     
@@ -2734,14 +2739,7 @@ export default class GameScene extends Phaser.Scene {
       this.cameras.main.startFollow(this.groomer, true, 0.1, 0.1);
       this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
     }
-    
-    // Restart HUD to recalculate layout
-    if (this.scene.isActive('HUDScene')) {
-      this.scene.stop('HUDScene');
-      this.scene.launch('HUDScene', { level: this.level, gameScene: this });
-      // HUD must be on top for input priority over DialogueScene
-      this.scene.bringToTop('HUDScene');
-    }
+    // HUDScene handles its own restart via this.scale.on('resize')
   }
 
   gameOver(won: boolean, failReason: string | null = null): void {

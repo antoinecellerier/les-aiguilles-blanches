@@ -117,9 +117,21 @@ game_page.evaluate("""() => {
 
 | File | Tests |
 |------|-------|
-| `test_navigation.py` | Menu, scenes, levels, progression |
+| `test_navigation.py` | Menu, scenes, levels, progression, changelog |
 | `test_gamepad.py` | Controller detection, button mapping |
+| `test_touch_controls.py` | Touch input, orientation changes, resize |
+| `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
 | Classes: `TestNightLevel`, `TestWinchMechanics` | Night overlay, headlights, winch |
+
+### Viewport / Resize Testing
+
+Use `set_viewport_size` + `resizeGame()` for testing responsive behavior. Phaser's `Scale.RESIZE` doesn't react to Playwright viewport changes alone — `resizeGame()` forces a manual refresh for test purposes only.
+
+```python
+game_page.set_viewport_size({"width": 375, "height": 667})
+game_page.evaluate("() => window.resizeGame?.()")
+game_page.wait_for_timeout(300)
+```
 
 ## Debugging
 

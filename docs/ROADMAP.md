@@ -13,8 +13,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Level differentiation - Varied objectives beyond coverage percentage
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
 - [ ] Service roads - Improve legibility and practical usability
-- [ ] Responsive design - Ensure all screens work on resize/orientation change
+- [x] Responsive design - All scenes handle resize/orientation change
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
+- [ ] Rework home screen styling
+- [ ] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
 
 ## Future (Backlog)
 

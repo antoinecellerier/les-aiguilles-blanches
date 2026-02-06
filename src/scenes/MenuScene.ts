@@ -268,9 +268,15 @@ export default class MenuScene extends Phaser.Scene {
     }
   }
 
+  private resizing = false;
+
   private handleResize(): void {
-    // Restart scene to recalculate all positions
-    this.scene.restart();
+    if (this.resizing) return;
+    this.resizing = true;
+    requestAnimationFrame(() => {
+      this.scene.restart();
+      this.resizing = false;
+    });
   }
 
   private toggleFullscreen(): void {

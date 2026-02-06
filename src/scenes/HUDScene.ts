@@ -219,6 +219,7 @@ export default class HUDScene extends Phaser.Scene {
 
     this.barWidth = barWidth;
     this.gameScene?.events.on('timerUpdate', this.updateTimer, this);
+    this.scale.on('resize', this.handleResize, this);
 
     // Create touch controls - show on mobile, or on first touch for PC with touchscreen
     if (isMobile && hasTouch) {
@@ -604,7 +605,22 @@ export default class HUDScene extends Phaser.Scene {
     }
   }
 
+  private resizing = false;
+
+  private handleResize(): void {
+    if (this.resizing) return;
+    this.resizing = true;
+    // Use requestAnimationFrame to avoid restart-during-create loops
+    requestAnimationFrame(() => {
+      if (this.scene.isActive()) {
+        this.scene.restart({ level: this.level, gameScene: this.gameScene });
+      }
+      this.resizing = false;
+    });
+  }
+
   shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
     this.tweens.killAll();
     this.children.removeAll(true);
 

@@ -982,6 +982,47 @@ class TestLevelComplete:
         new_level = get_current_level(game_page)
         assert new_level == initial_level + 1, f"Should advance to level 1, got {new_level}"
 
+    def test_level_complete_resize(self, game_page: Page):
+        """LevelCompleteScene should survive viewport resize with elements in bounds."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        # Trigger fail to get LevelCompleteScene
+        game_page.evaluate("""() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            if (gameScene && gameScene.gameOver) {
+                gameScene.gameOver(false, 'fuel');
+            }
+        }""")
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+
+        # Resize viewport
+        game_page.set_viewport_size({"width": 800, "height": 600})
+        game_page.evaluate("() => window.resizeGame?.()")
+        game_page.wait_for_timeout(300)
+
+        # LevelCompleteScene should still be active
+        assert_scene_active(game_page, 'LevelCompleteScene', "after resize")
+
+        # Verify buttons/text are within viewport bounds
+        bounds_ok = game_page.evaluate("""() => {
+            const scene = window.game?.scene?.getScene('LevelCompleteScene');
+            if (!scene) return true;
+            const cam = scene.cameras?.main;
+            if (!cam) return true;
+            const w = cam.width, h = cam.height;
+            const children = scene.children?.list || [];
+            for (const child of children) {
+                if (child.visible && child.x !== undefined && child.y !== undefined) {
+                    if (child.x < -50 || child.x > w + 50 || child.y < -50 || child.y > h + 50) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }""")
+        assert bounds_ok, "LevelCompleteScene elements should be within viewport after resize"
+
 
 class TestFailScreen:
     """Test fail screen with taunt messages."""

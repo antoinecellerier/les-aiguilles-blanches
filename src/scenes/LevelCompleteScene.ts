@@ -193,7 +193,25 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.gamepadBPressed = false;
     }
 
+    // Handle resize
+    this.scale.on('resize', this.handleResize, this);
+
     Accessibility.announce(t(titleKey) + '. ' + t('coverage') + ' ' + this.coverage + '%');
+  }
+
+  private resizing = false;
+
+  private handleResize(): void {
+    if (this.resizing) return;
+    this.resizing = true;
+    requestAnimationFrame(() => {
+      this.scene.restart(this.scene.settings.data);
+      this.resizing = false;
+    });
+  }
+
+  shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
   }
 
   private gamepadAPressed = false;

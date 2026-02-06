@@ -37,11 +37,10 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.CANVAS,
   parent: 'game-container',
   backgroundColor: '#1a2a3e',
-  width: window.innerWidth,
-  height: window.innerHeight,
   scale: {
     mode: Phaser.Scale.RESIZE,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: '100%',
+    height: '100%',
   },
   render: {
     pixelArt: false,
@@ -88,36 +87,14 @@ window.addEventListener('load', () => {
 
   window.game = new Phaser.Game(config);
 
-  // Handle fullscreen changes - resize game to match new screen size
-  document.addEventListener('fullscreenchange', () => {
-    setTimeout(() => {
-      if (window.game && window.game.scale) {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        window.game.scale.resize(width, height);
-      }
-    }, 100); // Small delay to let browser settle
-  });
-
-  // Handle window resize (including viewport changes in tests)
-  const handleResize = () => {
+  // Phaser Scale.RESIZE mode handles window resize automatically.
+  // We only expose resizeGame() for test automation (Playwright viewport changes
+  // don't trigger real browser resize events).
+  (window as unknown as { resizeGame: () => void }).resizeGame = () => {
     if (window.game && window.game.scale) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      window.game.scale.resize(width, height);
+      window.game.scale.resize(window.innerWidth, window.innerHeight);
     }
   };
-  
-  window.addEventListener('resize', handleResize);
-  
-  // Handle orientation changes on mobile
-  window.addEventListener('orientationchange', () => {
-    // Delay to let browser complete orientation change
-    setTimeout(handleResize, 100);
-  });
-  
-  // Also expose resize function for testing
-  (window as unknown as { resizeGame: () => void }).resizeGame = handleResize;
 });
 
 export { config };
