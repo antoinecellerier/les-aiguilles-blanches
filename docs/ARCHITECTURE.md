@@ -541,6 +541,70 @@ displayNextDialogue() {
 }
 ```
 
+## Phaser Best Practices (Audited)
+
+This section documents Phaser 3 patterns audited and verified in this codebase. Follow these when making changes.
+
+### Scale & Resize
+
+- Use `Phaser.Scale.RESIZE` with `width: '100%', height: '100%'` in the game config
+- **Never call `scale.resize()` manually** — it conflicts with RESIZE mode and causes double-resize, one-frame-late rendering, or stuck states
+- The only exception is `window.resizeGame()` exposed for test automation (Playwright viewport changes don't trigger real browser resize events)
+- Scenes handle resize via `this.scale.on('resize')` with a `requestAnimationFrame` guard to prevent restart-during-create loops
+
+### Shutdown & Event Cleanup
+
+Every scene that registers listeners **must** remove them in `shutdown()`:
+
+| Listener type | Cleanup method |
+|---------------|---------------|
+| `this.scale.on('resize', fn, this)` | `this.scale.off('resize', fn, this)` |
+| `this.input.keyboard?.on(...)` | `this.input.keyboard?.removeAllListeners()` |
+| `this.input.gamepad?.on(...)` | `this.input.gamepad?.removeAllListeners()` |
+| `this.input.on('pointermove', ...)` | `this.input.removeAllListeners()` |
+| Custom events via `scene.events.on(...)` | `scene.events.off(...)` |
+
+Also call `this.tweens.killAll()` and `this.children.removeAll(true)` in shutdown for scenes with animations or dynamically created objects.
+
+### Physics & Movement
+
+- Use `setVelocity()` for all movement — never set `x`/`y` directly (bypasses physics)
+- Use `physics.add.collider()` for solid obstacles, `physics.add.overlap()` for trigger zones
+- Use `physics.add.staticGroup()` for immovable obstacles
+- Apply `setDrag()` for natural deceleration
+- Set `setCollideWorldBounds(true)` on the player
+
+### Input Handling
+
+- **Gameplay input** (movement, actions): Use `keyboard.addKey()` + `.isDown` checks in `update()` for continuous polling
+- **Menu/UI input** (button presses): Use `keyboard.on('keydown-X', ...)` event listeners in `create()`
+- **Gamepad**: Poll state in `update()` (stick axes, button pressed), use events only for `connected`/`disconnected`
+- **Touch**: Use pointer events on game objects (auto-cleanup), track pointer identity for multitouch
+
+### Game Object Creation
+
+- Create all objects in `create()`, never in `update()` — the update loop runs 60fps
+- Use `generateTexture()` in `preload()` for procedural textures, destroy the temp Graphics immediately
+- Reuse Graphics objects with `.clear()` for things drawn every frame (e.g., night overlay, winch cable)
+- Use consistent depth values with gaps between layers for future insertions
+
+### Timers
+
+- For in-game timers: use `this.time.delayedCall()` or `this.time.addEvent()` — these pause with the scene
+- For post-shutdown work (scene removal/re-addition): use native `setTimeout` — Phaser timers are destroyed with the scene
+
+### Tweens
+
+- All tweens should be finite (no `repeat: -1` without explicit cleanup)
+- Call `this.tweens.killAll()` in `shutdown()`
+- Use `onComplete` callbacks for one-shot effects
+
+### Debug Logging
+
+- Use `console.log` freely during development — it's stripped from production builds via Vite `esbuild.pure` config
+- Use `console.error`/`console.warn` for messages that must appear in production
+- Never use `console.log` for user-visible feedback — use the localization system instead
+
 ## Service Road System
 
 Steep piste levels require service roads for groomer access to winch anchors.
