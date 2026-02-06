@@ -39,6 +39,10 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    // Strip console.log/debug in production; keep console.error/warn
+    pure: process.env.NODE_ENV === 'production' ? ['console.log', 'console.debug'] : [],
+  },
   plugins: [
     // Generate bundle analysis (run: npm run build && open stats.html)
     visualizer({
