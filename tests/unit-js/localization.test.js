@@ -102,4 +102,21 @@ describe('Localization', () => {
         
         expect(totalMissing, `Missing translations:\n\n${report}`).toHaveLength(0);
     });
+
+    it('changelog dates should have no duplicates within any language', () => {
+        const duplicates = [];
+        ALL_LANGS.forEach(lang => {
+            const dateKeys = Object.keys(TRANSLATIONS[lang])
+                .filter(key => key.match(/^changelog_\d{8}_date$/));
+            const dates = dateKeys.map(key => TRANSLATIONS[lang][key]);
+            const seen = new Set();
+            dates.forEach((date, i) => {
+                if (seen.has(date)) {
+                    duplicates.push(`${lang}: "${date}" appears multiple times (${dateKeys[i]})`);
+                }
+                seen.add(date);
+            });
+        });
+        expect(duplicates, `Duplicate changelog dates:\n${duplicates.join('\n')}`).toHaveLength(0);
+    });
 });

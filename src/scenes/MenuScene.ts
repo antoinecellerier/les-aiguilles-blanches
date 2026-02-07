@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { t, Accessibility } from '../setup';
+import { t, Accessibility, TRANSLATIONS, getLanguage as getCurrentLanguage } from '../setup';
 import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
@@ -598,16 +598,23 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showChangelog(): void {
-    // Dynamically collect changelog day entries (newest first)
+    // Discover changelog entries by scanning for changelog_YYYYMMDD_date keys
+    const lang = TRANSLATIONS[getCurrentLanguage()] || TRANSLATIONS.fr;
+    const dateKeys = Object.keys(lang)
+      .filter(k => k.match(/^changelog_\d{8}_date$/))
+      .sort(); // chronological order (YYYYMMDD sorts naturally)
+
     const entries: string[] = [];
-    for (let i = 1; ; i++) {
-      const date = t(`changelogDate${i}`);
-      if (date === `changelogDate${i}`) break;
-      const day = t(`changelogDay${i}`);
-      entries.push(`━━ ${date} ━━`, day, '');
+    for (const dk of dateKeys) {
+      const contentKey = dk.replace('_date', '');
+      const date = t(dk);
+      const day = t(contentKey);
+      if (date && date !== dk && day && day !== contentKey) {
+        entries.push(`━━ ${date} ━━`, day, '');
+      }
     }
-    entries.reverse(); // newest first (highest index = most recent)
-    if (entries.length > 0 && entries[0] === '') entries.shift(); // trim leading blank
+    entries.reverse(); // newest first
+    if (entries.length > 0 && entries[0] === '') entries.shift();
     this.showOverlay('changelog', entries);
   }
 

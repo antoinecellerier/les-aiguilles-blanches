@@ -215,18 +215,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
         
         // Changelog
-        changelogDate6: "7 février 2026",
-        changelogDay6: "🔧 Correction bouton pause tactile\n🛡️ Menus : clic bloqué derrière les fenêtres superposées\n💬 Correction dialogue bloqué (ESC pendant la frappe)",
-        changelogDate5: "7 février 2026",
-        changelogDay5: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus",
-        changelogDate4: "6 février 2026",
-        changelogDay4: "🛤️ Chemins de dameuse praticables\n🕹️ Joystick virtuel\n🌍 5 langues complètes",
-        changelogDate3: "5 février 2026",
-        changelogDay3: "🏔️ Falaises rocheuses\n🌙 Phares de nuit\n🔗 Mécanique de treuil\n⌨️ Navigation clavier",
-        changelogDate2: "4 février 2026",
-        changelogDay2: "🎮 Support manette\n📱 Contrôles tactiles\n💪 Endurance\n💾 Sauvegarde\n♿ Accessibilité",
-        changelogDate1: "3 février 2026",
-        changelogDay1: "🚜 Lancement : 9 niveaux, tutoriel\n❄️ Damage, carburant, avalanches\n🏆 Crédits et progression"
+        changelog_20260207_date: "7 février 2026",
+        changelog_20260207: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus\n🔧 Corrections : pause tactile, dialogues, menus",
+        changelog_20260206_date: "6 février 2026",
+        changelog_20260206: "🛤️ Chemins de dameuse praticables\n🕹️ Joystick virtuel\n🌍 5 langues complètes",
+        changelog_20260205_date: "5 février 2026",
+        changelog_20260205: "🏔️ Falaises rocheuses\n🌙 Phares de nuit\n🔗 Mécanique de treuil\n⌨️ Navigation clavier",
+        changelog_20260204_date: "4 février 2026",
+        changelog_20260204: "🎮 Support manette\n📱 Contrôles tactiles\n💪 Endurance\n💾 Sauvegarde\n♿ Accessibilité",
+        changelog_20260203_date: "3 février 2026",
+        changelog_20260203: "🚜 Lancement : 9 niveaux, tutoriel\n❄️ Damage, carburant, avalanches\n🏆 Crédits et progression"
     },
     
     en: {
@@ -429,18 +427,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
         
         // Changelog
-        changelogDate6: "February 7, 2026",
-        changelogDay6: "🔧 Fixed touch pause button crash\n🛡️ Menus: blocked click bleed-through behind overlays\n💬 Fixed dialogue stuck when pressing ESC during typewriter",
-        changelogDate5: "February 7, 2026",
-        changelogDay5: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation",
-        changelogDate4: "February 6, 2026",
-        changelogDay4: "🛤️ Traversable cat tracks\n🕹️ Virtual joystick\n🌍 5 complete languages",
-        changelogDate3: "February 5, 2026",
-        changelogDay3: "🏔️ Rocky cliffs\n🌙 Night headlights\n🔗 Winch mechanics\n⌨️ Keyboard navigation",
-        changelogDate2: "February 4, 2026",
-        changelogDay2: "🎮 Gamepad support\n📱 Touch controls\n💪 Stamina\n💾 Save progress\n♿ Accessibility",
-        changelogDate1: "February 3, 2026",
-        changelogDay1: "🚜 Launch: 9 levels, tutorial\n❄️ Grooming, fuel, avalanches\n🏆 Credits and progression"
+        changelog_20260207_date: "February 7, 2026",
+        changelog_20260207: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation\n🔧 Fixes: touch pause, dialogues, menus",
+        changelog_20260206_date: "February 6, 2026",
+        changelog_20260206: "🛤️ Traversable cat tracks\n🕹️ Virtual joystick\n🌍 5 complete languages",
+        changelog_20260205_date: "February 5, 2026",
+        changelog_20260205: "🏔️ Rocky cliffs\n🌙 Night headlights\n🔗 Winch mechanics\n⌨️ Keyboard navigation",
+        changelog_20260204_date: "February 4, 2026",
+        changelog_20260204: "🎮 Gamepad support\n📱 Touch controls\n💪 Stamina\n💾 Save progress\n♿ Accessibility",
+        changelog_20260203_date: "February 3, 2026",
+        changelog_20260203: "🚜 Launch: 9 levels, tutorial\n❄️ Grooming, fuel, avalanches\n🏆 Credits and progression"
     },
     
     de: {
@@ -609,18 +605,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
         
         // Changelog
-        changelogDate6: "7. Februar 2026",
-        changelogDay6: "🔧 Touch-Pause-Taste repariert\n🛡️ Menüs: Klick-Durchbluten hinter Overlays blockiert\n💬 Dialog-Blockade bei ESC während Schreibeffekt behoben",
-        changelogDate5: "7. Februar 2026",
-        changelogDay5: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs",
-        changelogDate4: "6. Februar 2026",
-        changelogDay4: "🛤️ Befahrbare Pistenraupenspuren\n🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen",
-        changelogDate3: "5. Februar 2026",
-        changelogDay3: "🏔️ Felsige Klippen\n🌙 Nachtscheinwerfer\n🔗 Windenmechanik\n⌨️ Tastaturnavigation",
-        changelogDate2: "4. Februar 2026",
-        changelogDay2: "🎮 Gamepad-Unterstützung\n📱 Touch-Steuerung\n💪 Ausdauer\n💾 Speicherung\n♿ Barrierefreiheit",
-        changelogDate1: "3. Februar 2026",
-        changelogDay1: "🚜 Start: 9 Level, Tutorial\n❄️ Präparieren, Kraftstoff, Lawinen\n🏆 Credits und Fortschritt",
+        changelog_20260207_date: "7. Februar 2026",
+        changelog_20260207: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs\n🔧 Korrekturen: Touch-Pause, Dialoge, Menüs",
+        changelog_20260206_date: "6. Februar 2026",
+        changelog_20260206: "🛤️ Befahrbare Pistenraupenspuren\n🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen",
+        changelog_20260205_date: "5. Februar 2026",
+        changelog_20260205: "🏔️ Felsige Klippen\n🌙 Nachtscheinwerfer\n🔗 Windenmechanik\n⌨️ Tastaturnavigation",
+        changelog_20260204_date: "4. Februar 2026",
+        changelog_20260204: "🎮 Gamepad-Unterstützung\n📱 Touch-Steuerung\n💪 Ausdauer\n💾 Speicherung\n♿ Barrierefreiheit",
+        changelog_20260203_date: "3. Februar 2026",
+        changelog_20260203: "🚜 Start: 9 Level, Tutorial\n❄️ Präparieren, Kraftstoff, Lawinen\n🏆 Credits und Fortschritt",
 
         // Taunts - Cliff
         tauntCliff1: "9 Tonnen in der Schlucht. Die Versicherung wird begeistert sein.",
@@ -820,18 +814,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
         
         // Changelog
-        changelogDate6: "7 febbraio 2026",
-        changelogDay6: "🔧 Corretto crash pulsante pausa touch\n🛡️ Menu: bloccato click attraverso gli overlay\n💬 Corretto dialogo bloccato premendo ESC durante la scrittura",
-        changelogDate5: "7 febbraio 2026",
-        changelogDay5: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu",
-        changelogDate4: "6 febbraio 2026",
-        changelogDay4: "🛤️ Tracciati battipista percorribili\n🕹️ Joystick virtuale\n🌍 5 lingue complete",
-        changelogDate3: "5 febbraio 2026",
-        changelogDay3: "🏔️ Scogliere rocciose\n🌙 Fari notturni\n🔗 Meccanica verricello\n⌨️ Navigazione tastiera",
-        changelogDate2: "4 febbraio 2026",
-        changelogDay2: "🎮 Supporto gamepad\n📱 Controlli touch\n💪 Resistenza\n💾 Salvataggio\n♿ Accessibilità",
-        changelogDate1: "3 febbraio 2026",
-        changelogDay1: "🚜 Lancio: 9 livelli, tutorial\n❄️ Preparazione, carburante, valanghe\n🏆 Crediti e progressione",
+        changelog_20260207_date: "7 febbraio 2026",
+        changelog_20260207: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu\n🔧 Correzioni: pausa touch, dialoghi, menu",
+        changelog_20260206_date: "6 febbraio 2026",
+        changelog_20260206: "🛤️ Tracciati battipista percorribili\n🕹️ Joystick virtuale\n🌍 5 lingue complete",
+        changelog_20260205_date: "5 febbraio 2026",
+        changelog_20260205: "🏔️ Scogliere rocciose\n🌙 Fari notturni\n🔗 Meccanica verricello\n⌨️ Navigazione tastiera",
+        changelog_20260204_date: "4 febbraio 2026",
+        changelog_20260204: "🎮 Supporto gamepad\n📱 Controlli touch\n💪 Resistenza\n💾 Salvataggio\n♿ Accessibilità",
+        changelog_20260203_date: "3 febbraio 2026",
+        changelog_20260203: "🚜 Lancio: 9 livelli, tutorial\n❄️ Preparazione, carburante, valanghe\n🏆 Crediti e progressione",
 
         // Taunts - Cliff
         tauntCliff1: "9 tonnellate nel burrone. L'assicurazione sarà entusiasta.",
@@ -1031,18 +1023,16 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
         
         // Changelog
-        changelogDate6: "7 de febrero de 2026",
-        changelogDay6: "🔧 Corregido fallo del botón pausa táctil\n🛡️ Menús: bloqueado clic a través de ventanas superpuestas\n💬 Corregido diálogo bloqueado al pulsar ESC durante escritura",
-        changelogDate5: "7 de febrero de 2026",
-        changelogDay5: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús",
-        changelogDate4: "6 de febrero de 2026",
-        changelogDay4: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
-        changelogDate3: "5 de febrero de 2026",
-        changelogDay3: "🏔️ Acantilados rocosos\n🌙 Faros nocturnos\n🔗 Mecánica cabrestante\n⌨️ Navegación teclado",
-        changelogDate2: "4 de febrero de 2026",
-        changelogDay2: "🎮 Soporte mando\n📱 Controles táctiles\n💪 Resistencia\n💾 Guardado\n♿ Accesibilidad",
-        changelogDate1: "3 de febrero de 2026",
-        changelogDay1: "🚜 Lanzamiento: 9 niveles, tutorial\n❄️ Preparación, combustible, avalanchas\n🏆 Créditos y progresión",
+        changelog_20260207_date: "7 de febrero de 2026",
+        changelog_20260207: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús\n🔧 Correcciones: pausa táctil, diálogos, menús",
+        changelog_20260206_date: "6 de febrero de 2026",
+        changelog_20260206: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
+        changelog_20260205_date: "5 de febrero de 2026",
+        changelog_20260205: "🏔️ Acantilados rocosos\n🌙 Faros nocturnos\n🔗 Mecánica cabrestante\n⌨️ Navegación teclado",
+        changelog_20260204_date: "4 de febrero de 2026",
+        changelog_20260204: "🎮 Soporte mando\n📱 Controles táctiles\n💪 Resistencia\n💾 Guardado\n♿ Accesibilidad",
+        changelog_20260203_date: "3 de febrero de 2026",
+        changelog_20260203: "🚜 Lanzamiento: 9 niveles, tutorial\n❄️ Preparación, combustible, avalanchas\n🏆 Créditos y progresión",
 
         // Taunts - Cliff
         tauntCliff1: "9 toneladas en el barranco. Al seguro le va a encantar.",
