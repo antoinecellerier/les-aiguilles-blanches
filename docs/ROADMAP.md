@@ -8,6 +8,9 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [ ] Nintendo B-button back navigation - Flaky in full test suite (timing-sensitive gamepad stick navigation)
 - [ ] Service road width vs piste width - Roads should be visibly narrower than piste; widen piste if needed to ensure contrast
+- [ ] Avalanche zones overlap service roads - Avalanche zones should never overlap service roads
+- [ ] Anchor point accessibility - Every winch anchor must be reachable via piste or service road without blocking avalanche/steep obstacles
+- [ ] Groomer fall mechanics - Only fall when tracks (front) are over cliff/steep edge, not tiller (rear); add probability-based tip-over instead of instant fall
 
 ## Polish (Medium Priority)
 

@@ -190,13 +190,26 @@ Switchback paths through off-piste forest, allowing groomer to travel between pi
 
 ### Depth/Layering (Phaser depth values)
 
-| Layer | Depth | Contents |
-|-------|-------|----------|
-| Terrain | 0 | Snow tiles, cliffs |
-| Ground objects | 1-2 | Trees, rocks, buildings |
-| Player | 3 | Groomer |
-| Effects | 4-5 | Cliff edges, markers |
-| UI overlays | 10+ | HUD, dialogues |
+All depth values are centralized in `DEPTHS` from `src/config/gameConfig.ts`:
+
+| Layer | Depth | Constant | Contents |
+|-------|-------|----------|----------|
+| Background tiles | -100 | `BG_FOREST_TILES` | Off-piste snow beyond world bounds |
+| Background rocks | -50 | `BG_FOREST_ROCKS` | Rocks beyond world bounds |
+| Terrain | 0 | `TERRAIN` | Off-piste snow tiles (base layer) |
+| Access roads | 1 | `ACCESS_ROAD` | Packed snow on service roads |
+| Piste | 2 | `PISTE` | Piste snow tiles (above access roads) |
+| Ground objects | 2 | `GROUND_OBJECTS` | Chalets, anchor posts |
+| Cliffs | 3 | `CLIFFS` | Cliff rock textures |
+| Trees | 4 | `TREES` | Trees (above cliffs in top-down view) |
+| Ground labels | 5 | `GROUND_LABELS` | Anchor numbers, text on objects |
+| Signage | 6 | `SIGNAGE` | Steep zones, warnings |
+| Markers | 8 | `MARKERS` | Piste marker poles, road poles |
+| Winch cable | 50 | `WINCH_CABLE` | Cable graphics |
+| Night overlay | 100 | `NIGHT_OVERLAY` | Night/weather darkening |
+| Player | 101 | `PLAYER` | Groomer (above night for headlights) |
+| Feedback/Weather | 200 | `FEEDBACK`/`WEATHER` | Floating text, snow particles |
+| Victory | 500 | `VICTORY` | Victory text (topmost) |
 
 ### Organic Edges
 

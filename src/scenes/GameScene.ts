@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
-import { BALANCE } from '../config/gameConfig';
+import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS } from '../config/storageKeys';
@@ -426,7 +426,7 @@ export default class GameScene extends Phaser.Scene {
             'snow_offpiste'
           );
           tile.setDisplaySize(tileSize, tileSize);
-          tile.setDepth(-100);
+          tile.setDepth(DEPTHS.BG_FOREST_TILES);
         }
       }
     }
@@ -465,7 +465,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createRock(x: number, y: number): void {
     const g = this.add.graphics();
-    g.setDepth(-50);
+    g.setDepth(DEPTHS.BG_FOREST_ROCKS);
     const size = 6 + Math.random() * 8;
 
     g.fillStyle(0x6B6B6B, 1);
@@ -575,6 +575,7 @@ export default class GameScene extends Phaser.Scene {
           isGroomable ? 'snow_ungroomed' : 'snow_offpiste'
         );
         tile.setDisplaySize(tileSize, tileSize);
+        if (isGroomable) tile.setDepth(DEPTHS.PISTE);
 
         this.snowGrid[y][x] = {
           tile: tile,
@@ -929,11 +930,11 @@ export default class GameScene extends Phaser.Scene {
     cliff: { side: 'left' | 'right'; startY: number; endY: number; offset: number; extent: number; getX: (y: number) => number }
   ): void {
     const g = this.add.graphics();
-    g.setDepth(5);
+    g.setDepth(DEPTHS.CLIFFS);
     
     const tileSize = this.tileSize;
     const { side, startY, endY, offset, extent, getX } = cliff;
-    
+
     // Seeded random for consistent look
     const rand = (i: number) => {
       const n = Math.sin(startY * 0.01 + i * 127.1) * 43758.5453;
@@ -1005,19 +1006,29 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     
-      // Sparse trees on cliff (matching off-piste tree density)
-      const treeSpacing = tileSize * 2.5;
+      // Sparse trees on cliff (sparser than off-piste — rocky terrain)
+      // When a tree spawns, 40% chance of a small cluster (2-3 trees)
+      const treeSpacing = tileSize * 4;
       for (let y = startY + treeSpacing; y < endY - treeSpacing; y += treeSpacing) {
-        if (rand(y + 300) < 0.65) continue;
+        if (rand(y + 300) < 0.95) continue;
         
         const offsetY = (rand(y + 301) - 0.5) * treeSpacing * 0.5;
         const pisteEdge = getX(y + offsetY);
-        // Place trees within the cliff area (respecting offset and extent)
         const treeDist = offset + rand(y + 302) * extent * 0.8;
         const treeX = side === 'left' 
           ? Math.max(tileSize, pisteEdge - treeDist)
           : Math.min(worldWidth - tileSize, pisteEdge + treeDist);
         this.createTree(treeX, y + offsetY);
+        
+        // Cluster: add 1-2 nearby trees
+        if (rand(y + 303) > 0.6) {
+          const clusterCount = rand(y + 304) > 0.5 ? 2 : 1;
+          for (let c = 0; c < clusterCount; c++) {
+            const cx = treeX + (rand(y + 305 + c) - 0.5) * tileSize * 1.5;
+            const cy = y + offsetY + (rand(y + 306 + c) - 0.5) * tileSize * 1.5;
+            this.createTree(cx, cy);
+          }
+        }
       }
     
       // Sparse snow patches (similar size to snow texture details)
@@ -1102,6 +1113,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createMarkerPole(x: number, y: number, color: number, _symbol: string, side: string): void {
     const g = this.add.graphics();
+    g.setDepth(DEPTHS.MARKERS);
     const poleHeight = 28;
     const poleWidth = 5;
     const orangeTopHeight = Math.floor(poleHeight * 0.15);
@@ -1164,6 +1176,7 @@ export default class GameScene extends Phaser.Scene {
         const treeX = tx + Math.random() * tileSize;
         const treeY = y + Math.random() * tileSize;
         if (this.isOnAccessPath(treeX, treeY)) continue;
+        if (this.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
           this.createTree(treeX, treeY);
         }
@@ -1173,6 +1186,7 @@ export default class GameScene extends Phaser.Scene {
         const treeX = tx + Math.random() * tileSize;
         const treeY = y + Math.random() * tileSize;
         if (this.isOnAccessPath(treeX, treeY)) continue;
+        if (this.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
           this.createTree(treeX, treeY);
         }
@@ -1182,6 +1196,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createTree(x: number, y: number): void {
     const g = this.add.graphics();
+    g.setDepth(DEPTHS.TREES);
     const size = 8 + Math.random() * 6;
 
     g.fillStyle(0x4a3728, 1);
@@ -1209,6 +1224,7 @@ export default class GameScene extends Phaser.Scene {
       const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
       const g = this.add.graphics();
+      g.setDepth(DEPTHS.SIGNAGE);
       g.lineStyle(1, 0x4a423a, 0.3);
 
       for (let ly = startY; ly < endY; ly += tileSize) {
@@ -1227,6 +1243,7 @@ export default class GameScene extends Phaser.Scene {
       const markerX = (leftEdge + rightEdge) / 2;
       const markerY = startY - 15;
       const mg = this.add.graphics();
+      mg.setDepth(DEPTHS.SIGNAGE);
       // Yellow warning rectangle
       mg.fillStyle(0xffcc00, 1);
       mg.fillRect(markerX - 10, markerY - 6, 20, 12);
@@ -1244,7 +1261,7 @@ export default class GameScene extends Phaser.Scene {
         color: '#FF6600',
         backgroundColor: '#000000',
         padding: { x: 3, y: 1 }
-      }).setOrigin(0, 0.5).setAlpha(0.8);
+      }).setOrigin(0, 0.5).setAlpha(0.8).setDepth(DEPTHS.SIGNAGE);
 
       this.steepZoneRects.push({
         startY: startY,
@@ -1408,7 +1425,7 @@ export default class GameScene extends Phaser.Scene {
                 'snow_packed'
               );
               tile.setDisplaySize(tileSize, tileSize);
-              tile.setDepth(1);
+              tile.setDepth(DEPTHS.ACCESS_ROAD);
             }
           }
         }
@@ -1452,7 +1469,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createServiceRoadPole(x: number, y: number): void {
     const g = this.add.graphics();
-    g.setDepth(8);
+    g.setDepth(DEPTHS.MARKERS);
 
     // Match piste marker sizing (28×5)
     const poleHeight = 28;
@@ -1478,7 +1495,7 @@ export default class GameScene extends Phaser.Scene {
     this.winchAnchors = [];
 
     this.winchCableGraphics = this.add.graphics();
-    this.winchCableGraphics.setDepth(50);
+    this.winchCableGraphics.setDepth(DEPTHS.WINCH_CABLE);
 
     if (anchorDefs.length === 0) {
       const anchorY = tileSize * 4;
@@ -1499,6 +1516,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createAnchorPost(x: number, y: number, number: number): void {
     const g = this.add.graphics();
+    g.setDepth(DEPTHS.GROUND_OBJECTS);
 
     // Base plate
     g.fillStyle(0x888888, 1);
@@ -1523,7 +1541,7 @@ export default class GameScene extends Phaser.Scene {
       fontFamily: 'Courier New, monospace',
       fontSize: '8px',
       color: '#000000',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(DEPTHS.GROUND_LABELS);
 
     // Store hook position (y - 22) for cable, base position (y + 8) for proximity
     this.winchAnchors.push({ x, y: y - 22, baseY: y + 8, number });
@@ -1683,8 +1701,8 @@ export default class GameScene extends Phaser.Scene {
           y = Phaser.Math.Between(this.tileSize * 10, worldHeight - this.tileSize * 10);
         }
         attempts++;
-      } while (this.isOnAccessPath(x, y) && attempts < 10);
-      if (this.isOnAccessPath(x, y)) continue;
+      } while ((this.isOnAccessPath(x, y) || this.isOnCliff(x, y)) && attempts < 10);
+      if (this.isOnAccessPath(x, y) || this.isOnCliff(x, y)) continue;
 
       let texture = 'tree';
       if (type === 'rocks') texture = 'rock';
@@ -1692,6 +1710,7 @@ export default class GameScene extends Phaser.Scene {
       const obstacle = this.obstacles.create(x, y, texture);
       obstacle.setImmovable(true);
       obstacle.setScale(this.tileSize / 16);
+      obstacle.setDepth(DEPTHS.TREES);
     }
 
     const restaurant = this.interactables.create(
@@ -1701,6 +1720,7 @@ export default class GameScene extends Phaser.Scene {
     );
     restaurant.interactionType = 'food';
     restaurant.setScale(this.tileSize / 16);
+    restaurant.setDepth(DEPTHS.GROUND_OBJECTS);
 
     // Fuel station at bottom of level (maintenance area in resort)
     const fuelStation = this.interactables.create(
@@ -1710,6 +1730,7 @@ export default class GameScene extends Phaser.Scene {
     );
     fuelStation.interactionType = 'fuel';
     fuelStation.setScale(this.tileSize / 16);
+    fuelStation.setDepth(DEPTHS.GROUND_OBJECTS);
 
     // Add resort buildings on easier pistes (near resort)
     if (['tutorial', 'green', 'blue'].includes(this.level.difficulty)) {
@@ -1764,6 +1785,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createChalet(x: number, y: number): void {
     const g = this.add.graphics();
+    g.setDepth(DEPTHS.GROUND_OBJECTS);
     const size = this.tileSize * 2;
 
     // Chalet body (wooden)
@@ -1832,7 +1854,7 @@ export default class GameScene extends Phaser.Scene {
     this.groomer.setCollideWorldBounds(true);
     this.groomer.setDrag(BALANCE.GROOMER_DRAG);
     this.groomer.setScale(this.tileSize / 16);
-    this.groomer.setDepth(101); // Above night overlay
+    this.groomer.setDepth(DEPTHS.PLAYER); // Above night overlay
 
     this.physics.add.collider(this.groomer, this.obstacles);
     this.physics.add.collider(this.groomer, this.boundaryWalls);
@@ -2299,7 +2321,7 @@ export default class GameScene extends Phaser.Scene {
       color: '#' + color.toString(16).padStart(6, '0'),
       stroke: '#000000',
       strokeThickness: 3,
-    }).setOrigin(0.5).setDepth(200);
+    }).setOrigin(0.5).setDepth(DEPTHS.FEEDBACK);
 
     this.tweens.add({
       targets: feedback,
@@ -2405,7 +2427,7 @@ export default class GameScene extends Phaser.Scene {
         backgroundColor: '#000000',
         padding: { x: 20, y: 10 }
       }
-    ).setOrigin(0.5).setDepth(500);
+    ).setOrigin(0.5).setDepth(DEPTHS.VICTORY);
 
     // Fade in text
     victoryText.setAlpha(0);

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Accessibility, type Level } from '../setup';
-import { BALANCE } from '../config/gameConfig';
+import { BALANCE, DEPTHS } from '../config/gameConfig';
 
 export class WeatherSystem {
   private scene: Phaser.Scene;
@@ -84,7 +84,7 @@ export class WeatherSystem {
       blendMode: 'ADD'
     });
     this.weatherParticles.setScrollFactor(0);
-    this.weatherParticles.setDepth(200);
+    this.weatherParticles.setDepth(DEPTHS.WEATHER);
 
     if (isStorm) {
       this.windStreaks = this.scene.add.particles(0, 0, 'snow_ungroomed', {
@@ -101,13 +101,13 @@ export class WeatherSystem {
         blendMode: 'ADD'
       });
       this.windStreaks.setScrollFactor(0);
-      this.windStreaks.setDepth(199);
+      this.windStreaks.setDepth(DEPTHS.WEATHER - 1);
     }
   }
 
   createNightOverlay(): void {
     this.nightOverlay = this.scene.add.graphics();
-    this.nightOverlay.setDepth(100);
+    this.nightOverlay.setDepth(DEPTHS.NIGHT_OVERLAY);
     this.nightOverlay.setScrollFactor(0);
   }
 

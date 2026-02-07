@@ -44,6 +44,28 @@ export const GAME_CONFIG: GameConfigType = {
   },
 };
 
+/** Phaser depth (z-order) constants for GameScene rendering layers */
+export const DEPTHS = {
+  // Extended background (outside game world, fills screen edges)
+  BG_FOREST_TILES: -100, // Off-piste snow beyond world bounds
+  BG_FOREST_ROCKS: -50,  // Rocks beyond world bounds
+  TERRAIN: 0,         // Off-piste snow tiles (base layer)
+  ACCESS_ROAD: 1,     // Packed snow on service roads (above off-piste, below piste)
+  PISTE: 2,           // Piste snow tiles (above access roads so grooming is visible)
+  GROUND_OBJECTS: 2,  // Chalets, anchor posts
+  CLIFFS: 3,          // Cliff rock textures
+  TREES: 4,           // Trees (render above cliffs — in front in top-down view)
+  GROUND_LABELS: 5,   // Anchor numbers, text on ground objects
+  SIGNAGE: 6,         // Steep zone indicators, warning markers
+  MARKERS: 8,         // Piste marker poles, service road poles
+  WINCH_CABLE: 50,    // Winch cable graphics
+  NIGHT_OVERLAY: 100, // Night/weather darkening
+  PLAYER: 101,        // Groomer (above night overlay so headlights work)
+  FEEDBACK: 200,      // Floating text (+fuel, stamina, etc.)
+  WEATHER: 200,       // Snow particles (same layer as feedback)
+  VICTORY: 500,       // Victory text (topmost)
+} as const;
+
 /** Gameplay balance constants — centralized for easy tuning */
 export const BALANCE = {
   // Stamina
