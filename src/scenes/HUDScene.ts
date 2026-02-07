@@ -139,6 +139,10 @@ export default class HUDScene extends Phaser.Scene {
         fontStyle: 'bold',
         color: '#EEEEEE',
       }).setScrollFactor(0);
+    } else {
+      // Compact: tiny colored dot as bar identifier
+      const dotR = Math.round(3 * this.uiScale);
+      this.add.circle(padding + dotR, row2Y + Math.round(7 * this.uiScale), dotR, THEME.colors.dangerHex).setScrollFactor(0);
     }
     const fuelBarY = row2Y + Math.round(7 * this.uiScale);
     this.add.rectangle(barStartX - barBorder, fuelBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
@@ -159,6 +163,9 @@ export default class HUDScene extends Phaser.Scene {
         fontStyle: 'bold',
         color: '#EEEEEE',
       }).setScrollFactor(0);
+    } else {
+      const dotR = Math.round(3 * this.uiScale);
+      this.add.circle(padding + dotR, row3Y + Math.round(7 * this.uiScale), dotR, THEME.colors.successHex).setScrollFactor(0);
     }
     const stamBarY = row3Y + Math.round(7 * this.uiScale);
     this.add.rectangle(barStartX - barBorder, stamBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);

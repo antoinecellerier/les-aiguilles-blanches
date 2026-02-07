@@ -95,7 +95,7 @@ export default class MenuScene extends Phaser.Scene {
 
     // Title — adapts to aspect ratio
     const titleY = isPortrait ? height * 0.08 : height * 0.12;
-    const titleBgWidth = Math.round(520 * scaleFactor);
+    const titleBgWidth = Math.round(Math.min(520 * scaleFactor, width - 20));
     const titleBgHeight = Math.round(80 * scaleFactor);
     // Title background — softer semi-transparent with pixel border
     this.add.rectangle(width / 2, titleY, titleBgWidth + 8, titleBgHeight + 8, 0x2d2822, 0.45).setOrigin(0.5);
@@ -212,6 +212,11 @@ export default class MenuScene extends Phaser.Scene {
     const menuAvailableH = menuEndY - menuStartY;
     const minButtonHeight = buttonSize + buttonPadding * 2;
     const minSpacing = minButtonHeight + (isPortrait ? 4 : 10); // comfortable gap between buttons
+    // Drop fullscreen button if all buttons can't fit in available vertical space
+    if (buttonDefs.length * minSpacing > menuAvailableH) {
+      const fsIdx = buttonDefs.findIndex(b => b.text === 'fullscreen' || b.text === 'exitFullscreen');
+      if (fsIdx !== -1) buttonDefs.splice(fsIdx, 1);
+    }
     const buttonSpacing = Math.max(minSpacing, Math.min(Math.round(46 * scaleFactor), Math.round(menuAvailableH / (buttonDefs.length + 0.5))));
     const menuY = menuStartY + buttonSpacing * 0.5;
 

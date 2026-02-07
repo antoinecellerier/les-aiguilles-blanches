@@ -64,7 +64,7 @@ export default class SettingsScene extends Phaser.Scene {
     const logicalWidth = width / this.dpr;
     const logicalHeight = height / this.dpr;
     const aspectRatio = logicalHeight / logicalWidth;
-    this.useSingleColumn = logicalWidth < 500 || aspectRatio > 1.5;
+    this.useSingleColumn = logicalWidth < 500 || aspectRatio > 1.5 || logicalHeight < 400;
     
     // Touch detection for larger touch targets
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;

@@ -55,10 +55,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(this.won ? THEME.colors.winBg : THEME.colors.failBg);
 
     // Calculate responsive font sizes
-    const baseFontSize = Math.min(16, width / 40, height / 35);
+    const baseFontSize = Math.min(20, width / 40, height / 30);
     const titleFontSize = Math.min(36, baseFontSize * 2.2);
     const iconFontSize = Math.min(80, baseFontSize * 4.5);
-    const buttonFontSize = Math.min(18, baseFontSize * 1.1);
+    const buttonFontSize = Math.min(20, baseFontSize * 1.1);
 
     const icon = this.won ? '🏆' : this.getFailIcon();
     const titleKey = this.won ? 'levelComplete' : 'levelFailed';

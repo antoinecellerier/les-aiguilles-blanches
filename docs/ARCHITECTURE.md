@@ -342,7 +342,7 @@ Scaling: `baseScale = max(0.6, min(2.0, min(width/1024, height/768)))`. On high-
 
 | Mode | Condition | Behaviour |
 |------|-----------|-----------|
-| Compact | `isNarrow` (width < 600) or `isShort` (height < 500) | Drops FUEL/STAM labels, uses smaller coverage font, tighter row gaps |
+| Compact | `isNarrow` (width < 600) or `isShort` (height < 500) | Drops FUEL/STAM labels (replaced by colored dots: red=fuel, green=stamina), uses smaller coverage font, tighter row gaps |
 | Very narrow | width ≤ 360 + touch | Skip button repositioned left of coverage text to avoid crowding pause/fullscreen |
 | Joystick cap | width < 600 | Joystick radius capped to `(width - actionBtnSpace - padding*2 - 10) / 2` to prevent overlap with action buttons |
 
@@ -389,8 +389,8 @@ const logicalHeight = height / dpr;
 
 The Settings scene uses rexUI Sizer components for responsive layout:
 
-- **Single column mode**: Activated when `logicalWidth < 500` or `aspectRatio > 1.5` (portrait)
-- **Two column mode**: Used on wider landscape displays
+- **Single column mode**: Activated when `logicalWidth < 500`, `aspectRatio > 1.5` (portrait), or `logicalHeight < 400` (landscape phones)
+- **Two column mode**: Used on wider landscape displays with sufficient height
 - **FixWidthSizer**: Auto-wraps content when it exceeds available width
 - **Origin positioning**: Use `origin: 0` for top-left anchoring
 - **Font sizing**: Scales with viewport width and DPR for readability
@@ -420,7 +420,7 @@ this.rexUI.add.fixWidthSizer({
 
 ### MenuScene Scaling
 
-Menu uses responsive scaling based on viewport:
+Menu uses responsive scaling based on viewport. On landscape phones where buttons overflow the available vertical space, the Fullscreen button is automatically dropped. Title background width is clamped to `width - 20` to prevent overflow on narrow screens.
 
 ```typescript
 const scaleByHeight = Math.max(0.7, Math.min(height / 768, 1.5));

@@ -15,7 +15,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Level differentiation - Varied objectives beyond coverage percentage
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
 - [x] Service roads - Improved legibility and practical usability (packed snow texture, amber poles, tree clearing, boundary wall exemption, intro dialog)
-- [x] Responsive design - All scenes handle resize/orientation change
+- [x] Responsive design - All scenes handle resize/orientation change; form factor fixes for landscape phones, narrow portrait, compact HUD
 - [ ] Gamepad button rebinding - Allow customizing controller buttons
 - [x] Rework home screen styling
 - [x] Styling consistency audit - All scenes use centralized THEME; green CTA hierarchy for primary actions
@@ -34,6 +34,9 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Form factor fixes** - Menu drops Fullscreen button on landscape phones; title bg clamped; Settings single-column on landscape phones; HUD colored dots in compact mode; Win/Fail font sizes increased for desktop
+- ✅ **Auto-paginate long dialogues** - `splitTextToPages()` breaks dialogue text that exceeds 30% of screen height into multiple pages
+- ✅ **Steep slope dialogue once only** - Warning dialogue no longer repeats after entering/exiting steep zones within the same level
 - ✅ **Visor HUD redesign** - Replaced beveled panels with semi-transparent dark visor strip, pixel art touch button icons, winch hint moved to dialogue, dynamic dialogue box height for mobile
 - ✅ **HUD & dialogue retro overhaul** - Replaced emoji icons with text labels (FUEL, STAM, WINCH, etc.), added 3D beveled panels, character portraits with colored initials, typewriter text effect, retro touch control styling
 - ✅ **Styling consistency audit** - All 7 UI scenes now import centralized THEME; green CTA buttons for primary actions (Start, Resume, Next Level, Retry); SettingsScene/DialogueScene/HUDScene/MenuScene colors migrated from hardcoded to THEME references
