@@ -216,7 +216,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate6: "7 février 2026",
-        changelogDay6: "🔧 Correction bouton pause tactile\n🛡️ Menus : clic bloqué derrière les fenêtres superposées",
+        changelogDay6: "🔧 Correction bouton pause tactile\n🛡️ Menus : clic bloqué derrière les fenêtres superposées\n💬 Correction dialogue bloqué (ESC pendant la frappe)",
         changelogDate5: "7 février 2026",
         changelogDay5: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus",
         changelogDate4: "6 février 2026",
@@ -430,7 +430,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate6: "February 7, 2026",
-        changelogDay6: "🔧 Fixed touch pause button crash\n🛡️ Menus: blocked click bleed-through behind overlays",
+        changelogDay6: "🔧 Fixed touch pause button crash\n🛡️ Menus: blocked click bleed-through behind overlays\n💬 Fixed dialogue stuck when pressing ESC during typewriter",
         changelogDate5: "February 7, 2026",
         changelogDay5: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation",
         changelogDate4: "February 6, 2026",
@@ -610,7 +610,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate6: "7. Februar 2026",
-        changelogDay6: "🔧 Touch-Pause-Taste repariert\n🛡️ Menüs: Klick-Durchbluten hinter Overlays blockiert",
+        changelogDay6: "🔧 Touch-Pause-Taste repariert\n🛡️ Menüs: Klick-Durchbluten hinter Overlays blockiert\n💬 Dialog-Blockade bei ESC während Schreibeffekt behoben",
         changelogDate5: "7. Februar 2026",
         changelogDay5: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs",
         changelogDate4: "6. Februar 2026",
@@ -821,7 +821,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate6: "7 febbraio 2026",
-        changelogDay6: "🔧 Corretto crash pulsante pausa touch\n🛡️ Menu: bloccato click attraverso gli overlay",
+        changelogDay6: "🔧 Corretto crash pulsante pausa touch\n🛡️ Menu: bloccato click attraverso gli overlay\n💬 Corretto dialogo bloccato premendo ESC durante la scrittura",
         changelogDate5: "7 febbraio 2026",
         changelogDay5: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu",
         changelogDate4: "6 febbraio 2026",
@@ -1032,7 +1032,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate6: "7 de febrero de 2026",
-        changelogDay6: "🔧 Corregido fallo del botón pausa táctil\n🛡️ Menús: bloqueado clic a través de ventanas superpuestas",
+        changelogDay6: "🔧 Corregido fallo del botón pausa táctil\n🛡️ Menús: bloqueado clic a través de ventanas superpuestas\n💬 Corregido diálogo bloqueado al pulsar ESC durante escritura",
         changelogDate5: "7 de febrero de 2026",
         changelogDay5: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús",
         changelogDate4: "6 de febrero de 2026",

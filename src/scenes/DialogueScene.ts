@@ -34,6 +34,7 @@ export default class DialogueScene extends Phaser.Scene {
   private typewriterTimer: Phaser.Time.TimerEvent | null = null;
   private typewriterIndex = 0;
   private isTyping = false;
+  private typewriterSafetyTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
     super({ key: 'DialogueScene' });
@@ -270,15 +271,19 @@ export default class DialogueScene extends Phaser.Scene {
   private splitTextToPages(text: string): string[] {
     if (!this.dialogueText) return [text];
 
+    // Save current typewriter text to restore after measuring
+    const savedText = this.isTyping
+      ? this.fullText.substring(0, this.typewriterIndex)
+      : this.dialogueText.text;
+
     // Measure full text height
-    const origText = this.dialogueText.text;
     this.dialogueText.setText(text);
     const fullHeight = this.dialogueText.height;
     // Available text height inside box: maxBoxHeight - 65 (top padding 40 + bottom padding 25)
     const maxTextHeight = this.maxBoxHeight - 65;
 
     if (fullHeight <= maxTextHeight) {
-      this.dialogueText.setText(origText);
+      this.dialogueText.setText(savedText);
       return [text];
     }
 
@@ -301,7 +306,7 @@ export default class DialogueScene extends Phaser.Scene {
       pages.push(currentWords.join(' '));
     }
 
-    this.dialogueText.setText(origText);
+    this.dialogueText.setText(savedText);
     return pages.length > 0 ? pages : [text];
   }
 
@@ -371,21 +376,43 @@ export default class DialogueScene extends Phaser.Scene {
       this.typewriterTimer.destroy();
       this.typewriterTimer = null;
     }
+    if (this.typewriterSafetyTimer) {
+      this.typewriterSafetyTimer.destroy();
+      this.typewriterSafetyTimer = null;
+    }
     
-    this.typewriterTimer = this.time.addEvent({
-      delay: 25,
-      repeat: this.fullText.length - 1,
-      callback: () => {
-        this.typewriterIndex++;
-        if (this.dialogueText) {
-          this.dialogueText.setText(this.fullText.substring(0, this.typewriterIndex));
+    // Capture text in closure so mutations to this.fullText can't desync the timer
+    const targetText = this.fullText;
+    const targetLength = targetText.length;
+    
+    if (targetLength > 0) {
+      this.typewriterTimer = this.time.addEvent({
+        delay: 25,
+        repeat: targetLength - 1,
+        callback: () => {
+          this.typewriterIndex++;
+          if (this.dialogueText) {
+            this.dialogueText.setText(targetText.substring(0, this.typewriterIndex));
+          }
+          if (this.typewriterIndex >= targetLength) {
+            this.isTyping = false;
+            if (this.continueText) this.continueText.setAlpha(0.8);
+          }
+        },
+      });
+      
+      // Safety timeout: force-complete if timer doesn't finish in time
+      const safetyMs = targetLength * 25 + 2000;
+      this.typewriterSafetyTimer = this.time.delayedCall(safetyMs, () => {
+        if (this.isTyping) {
+          this.completeTypewriter();
         }
-        if (this.typewriterIndex >= this.fullText.length) {
-          this.isTyping = false;
-          if (this.continueText) this.continueText.setAlpha(0.8);
-        }
-      },
-    });
+      });
+    } else {
+      // Empty text — show continue hint immediately
+      this.isTyping = false;
+      if (this.continueText) this.continueText.setAlpha(0.8);
+    }
     
     // Position container at starting Y (off-screen), then tween to show position
     // Position is dynamic based on whether touch controls are currently visible
@@ -402,19 +429,28 @@ export default class DialogueScene extends Phaser.Scene {
     });
   }
 
+  /** Force-complete the typewriter effect, showing full text immediately */
+  private completeTypewriter(): void {
+    if (this.typewriterTimer) {
+      this.typewriterTimer.destroy();
+      this.typewriterTimer = null;
+    }
+    if (this.typewriterSafetyTimer) {
+      this.typewriterSafetyTimer.destroy();
+      this.typewriterSafetyTimer = null;
+    }
+    this.isTyping = false;
+    this.typewriterIndex = this.fullText.length;
+    if (this.dialogueText) this.dialogueText.setText(this.fullText);
+    if (this.continueText) this.continueText.setAlpha(0.8);
+  }
+
   private advanceDialogue(): void {
     if (!this.isShowing) return;
     
     // If typewriter is still running, skip to full text
     if (this.isTyping) {
-      if (this.typewriterTimer) {
-        this.typewriterTimer.destroy();
-        this.typewriterTimer = null;
-      }
-      this.isTyping = false;
-      this.typewriterIndex = this.fullText.length;
-      if (this.dialogueText) this.dialogueText.setText(this.fullText);
-      if (this.continueText) this.continueText.setAlpha(0.8);
+      this.completeTypewriter();
       return;
     }
     
@@ -427,6 +463,10 @@ export default class DialogueScene extends Phaser.Scene {
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();
       this.typewriterTimer = null;
+    }
+    if (this.typewriterSafetyTimer) {
+      this.typewriterSafetyTimer.destroy();
+      this.typewriterSafetyTimer = null;
     }
 
     if (!this.container) return;
@@ -468,6 +508,10 @@ export default class DialogueScene extends Phaser.Scene {
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();
       this.typewriterTimer = null;
+    }
+    if (this.typewriterSafetyTimer) {
+      this.typewriterSafetyTimer.destroy();
+      this.typewriterSafetyTimer = null;
     }
     this.tweens.killAll();
     this.children.removeAll(true);

@@ -359,7 +359,10 @@ export default class GameScene extends Phaser.Scene {
       this.touchInput = data;
     });
     this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, () => {
-      this.pauseGame();
+      const dlg = this.scene.get('DialogueScene') as DialogueScene;
+      if (!dlg?.isDialogueShowing()) {
+        this.pauseGame();
+      }
     });
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, () => {
       this.resumeGame();
@@ -394,8 +397,12 @@ export default class GameScene extends Phaser.Scene {
     this.scale.on('resize', this.handleResize, this);
 
     console.log('GameScene._createLevel complete!');
-    // Pause on ESC
-    this.input.keyboard?.on('keydown-ESC', () => this.pauseGame());
+    // Pause on ESC (but not while dialogue is showing — ESC dismisses dialogue first)
+    this.input.keyboard?.on('keydown-ESC', () => {
+      const dlg = this.scene.get('DialogueScene') as DialogueScene;
+      if (dlg?.isDialogueShowing()) return;
+      this.pauseGame();
+    });
 
     Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
   }
@@ -1946,7 +1953,10 @@ export default class GameScene extends Phaser.Scene {
     if (this.gamepad) {
       const startPressed = this.gamepad.buttons[this.gamepadBindings.pause]?.pressed ?? false;
       if (startPressed && !this.gamepadStartPressed && !this.isGameOver) {
-        this.pauseGame();
+        const dlg = this.scene.get('DialogueScene') as DialogueScene;
+        if (!dlg?.isDialogueShowing()) {
+          this.pauseGame();
+        }
       }
       this.gamepadStartPressed = startPressed;
     }

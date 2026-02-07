@@ -59,6 +59,9 @@ Pro tip: Plan your route to pass by Chez Marie before tackling steep sections!
 | Groom Snow | Space | - |
 | Use Winch | Shift | - |
 | Pause | Escape | P |
+| Dismiss dialogue | Escape / Space / Enter / Click | - |
+
+**Note:** If a dialogue is showing, Escape dismisses it instead of pausing.
 
 All controls can be rebound in the Settings menu.
 

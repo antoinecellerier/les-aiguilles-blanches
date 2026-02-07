@@ -35,6 +35,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Dialogue typewriter freeze fix** - ESC during dialogue typing simultaneously dismissed dialogue and paused game, causing stuck state. ESC/Start/pause button now dismiss dialogue first; pause only fires on next press. Added safety timeout and closure-captured text to prevent timer desync
+
 - ✅ **Code health audit v4 — architecture refactors** - Extracted WeatherSystem and HazardSystem from GameScene (2960→2570 lines). Decoupled GameScene↔HUDScene via event-based communication (GAME_EVENTS). Centralized 40+ physics magic numbers into BALANCE config. Unified button navigation across 4 scenes (menuButtonNav.ts). Eliminated `as any` type casts via global.d.ts and GameSceneInterface. All audit items resolved (11/12 done, 1 deferred: depth constants)
 
 - ✅ **Code health audit v3** - Fixed HUD pause button crash (passed wrong data to PauseScene), added .catch() to async keyboard layout detection, removed dead code (`detectLayoutFromEvent`), blocked overlay click bleed-through in MenuScene, standardized button hover scale to 1.05×. Updated code-health skill to always use best available models for cross-referencing
