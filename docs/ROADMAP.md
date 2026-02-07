@@ -57,6 +57,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ **Full localization** - All 5 languages (FR/EN/DE/IT/ES) with ~170 keys each, coverage tests, hardcoded strings removed
 - ✅ **HUD text crispness** - roundPixels config, integer positions, removed sub-pixel origins
 - ✅ **Taunts overhaul** - 5 per failure type, character references, removed hardcoded FR fallbacks
+- ✅ **Input method hints** - Keyboard/Touch/Gamepad indicators in footer with forbidden sign overlay for unavailable methods
 - ✅ **Virtual joystick** - Replaced D-pad with stick + thumb, button press feedback
 - ✅ **Keyboard-only menu navigation** - Arrow keys + Enter/Space across all scenes
 - ✅ **Marker placement & pole sizing** - Markers skip cliffs, warning poles on snow, all poles standardized to 28×5px

@@ -216,7 +216,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260207_date: "7 février 2026",
-        changelog_20260207: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus\n🔧 Corrections : pause tactile, dialogues, menus",
+        changelog_20260207: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus\n🕹️ Indicateurs de méthodes de contrôle sur l'écran d'accueil\n🔧 Corrections : pause tactile, dialogues, menus",
         changelog_20260206_date: "6 février 2026",
         changelog_20260206: "🛤️ Chemins de dameuse praticables\n🕹️ Joystick virtuel\n🌍 5 langues complètes",
         changelog_20260205_date: "5 février 2026",
@@ -428,7 +428,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260207_date: "February 7, 2026",
-        changelog_20260207: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation\n🔧 Fixes: touch pause, dialogues, menus",
+        changelog_20260207: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation\n🕹️ Input method indicators on home screen\n🔧 Fixes: touch pause, dialogues, menus",
         changelog_20260206_date: "February 6, 2026",
         changelog_20260206: "🛤️ Traversable cat tracks\n🕹️ Virtual joystick\n🌍 5 complete languages",
         changelog_20260205_date: "February 5, 2026",
@@ -606,7 +606,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260207_date: "7. Februar 2026",
-        changelog_20260207: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs\n🔧 Korrekturen: Touch-Pause, Dialoge, Menüs",
+        changelog_20260207: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs\n🕹️ Eingabemethoden-Anzeige auf dem Startbildschirm\n🔧 Korrekturen: Touch-Pause, Dialoge, Menüs",
         changelog_20260206_date: "6. Februar 2026",
         changelog_20260206: "🛤️ Befahrbare Pistenraupenspuren\n🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen",
         changelog_20260205_date: "5. Februar 2026",
@@ -815,7 +815,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260207_date: "7 febbraio 2026",
-        changelog_20260207: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu\n🔧 Correzioni: pausa touch, dialoghi, menu",
+        changelog_20260207: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu\n🕹️ Indicatori metodi di input nella schermata iniziale\n🔧 Correzioni: pausa touch, dialoghi, menu",
         changelog_20260206_date: "6 febbraio 2026",
         changelog_20260206: "🛤️ Tracciati battipista percorribili\n🕹️ Joystick virtuale\n🌍 5 lingue complete",
         changelog_20260205_date: "5 febbraio 2026",
@@ -1024,7 +1024,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260207_date: "7 de febrero de 2026",
-        changelog_20260207: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús\n🔧 Correcciones: pausa táctil, diálogos, menús",
+        changelog_20260207: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús\n🕹️ Indicadores de métodos de entrada en pantalla de inicio\n🔧 Correcciones: pausa táctil, diálogos, menús",
         changelog_20260206_date: "6 de febrero de 2026",
         changelog_20260206: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
         changelog_20260205_date: "5 de febrero de 2026",

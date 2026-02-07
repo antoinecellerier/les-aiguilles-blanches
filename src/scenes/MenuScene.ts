@@ -19,6 +19,11 @@ export default class MenuScene extends Phaser.Scene {
   private snowflakes: { rect: Phaser.GameObjects.Rectangle; speed: number; wobbleOffset: number }[] = [];
   private selectionArrow: Phaser.GameObjects.Text | null = null;
   private snowLineY = 0;
+  private inputHintTexts: Phaser.GameObjects.GameObject[] = [];
+  private gamepadConnectHandler: (() => void) | null = null;
+  private footerGithubRight = 0;
+  private footerHintStyle: Phaser.Types.GameObjects.Text.TextStyle = {};
+  private footerHintY = 0;
   
   constructor() {
     super({ key: 'MenuScene' });
@@ -27,6 +32,13 @@ export default class MenuScene extends Phaser.Scene {
   create(): void {
     this.overlayOpen = false;
     this.snowflakes = [];
+    this.inputHintTexts = [];
+    // Clean up previous gamepad handlers if scene is restarting
+    if (this.gamepadConnectHandler) {
+      window.removeEventListener('gamepadconnected', this.gamepadConnectHandler);
+      window.removeEventListener('gamepaddisconnected', this.gamepadConnectHandler);
+      this.gamepadConnectHandler = null;
+    }
     const { width, height } = this.cameras.main;
 
     // Calculate scale factor for responsive text
@@ -329,6 +341,21 @@ export default class MenuScene extends Phaser.Scene {
       color: THEME.colors.accent,
     }).setOrigin(0.5);
 
+    // Input method hints — individual text objects for per-hint alpha
+    this.footerGithubRight = githubLink.x + githubLink.width / 2;
+    this.footerHintY = footerTop + footerHeight / 2;
+    this.footerHintStyle = {
+      fontFamily: THEME.fonts.family,
+      fontSize: Math.round(Math.max(11, 13 * scaleFactor)) + 'px',
+      color: THEME.colors.info,
+    };
+    this.updateInputHints();
+
+    // Update hints when gamepad connects/disconnects
+    this.gamepadConnectHandler = () => this.updateInputHints();
+    window.addEventListener('gamepadconnected', this.gamepadConnectHandler);
+    window.addEventListener('gamepaddisconnected', this.gamepadConnectHandler);
+
     // Keyboard navigation
     this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
@@ -360,6 +387,70 @@ export default class MenuScene extends Phaser.Scene {
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
 
+  private updateInputHints(): void {
+    // Destroy previous hint objects
+    this.inputHintTexts.forEach(t => { if (t.active) t.destroy(); });
+    this.inputHintTexts = [];
+
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasGamepad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(g => g !== null);
+
+    // Define all hints: [icon, label, isAvailable] — always show all three
+    const allHints: [string, string, boolean][] = [
+      ['💻', 'Keyboard', !isMobile],
+      ['✋', 'Touch', hasTouch],
+      ['🎮', 'Gamepad', hasGamepad],
+    ];
+
+    const width = this.scale.width;
+    const scaleFactor = Math.min(width / 960, 1);
+    const rightMargin = Math.round(12 * scaleFactor);
+    const gap = Math.round(12 * scaleFactor);
+    const activeAlpha = 0.6;
+    const inactiveAlpha = 0.2;
+
+    // Build full labels first to check if they fit
+    const fullLabels = allHints.map(([icon, label]) => `${icon} ${label}`);
+    // Measure total width with full labels
+    const measureText = this.add.text(0, 0, fullLabels.join('   '), this.footerHintStyle).setVisible(false);
+    const totalWidth = measureText.width;
+    measureText.destroy();
+
+    const hintsLeftEdge = width - rightMargin - totalWidth;
+    const useCompact = hintsLeftEdge < this.footerGithubRight + 16;
+    
+    // Place hints right-to-left
+    let cursorX = width - rightMargin;
+    for (let i = allHints.length - 1; i >= 0; i--) {
+      const [icon, label, available] = allHints[i];
+      const text = useCompact ? icon : `${icon} ${label}`;
+      const hint = this.add.text(cursorX, this.footerHintY, text, this.footerHintStyle)
+        .setOrigin(1, 0.5)
+        .setAlpha(available ? activeAlpha : inactiveAlpha);
+      this.inputHintTexts.push(hint);
+      // Forbidden sign overlay centered on the icon
+      if (!available) {
+        // Measure just the icon to find its center
+        const iconMeasure = this.add.text(0, 0, icon, this.footerHintStyle).setVisible(false);
+        const iconWidth = iconMeasure.width;
+        iconMeasure.destroy();
+        const r = Math.round(hint.height * 0.7);
+        // Icon is at the left edge of the hint text
+        const cx = cursorX - hint.width + iconWidth / 2;
+        const cy = this.footerHintY;
+        const gfx = this.add.graphics();
+        gfx.lineStyle(1.5, 0xcc2200, 0.6);
+        gfx.strokeCircle(cx, cy, r);
+        const dx = r * Math.cos(Math.PI / 4);
+        const dy = r * Math.sin(Math.PI / 4);
+        gfx.lineBetween(cx + dx, cy - dy, cx - dx, cy + dy);
+        this.inputHintTexts.push(gfx);
+      }
+      cursorX -= hint.width + gap;
+    }
+  }
+
   update(time: number, delta: number): void {
     // Animate snow particles
     for (const flake of this.snowflakes) {
@@ -389,6 +480,11 @@ export default class MenuScene extends Phaser.Scene {
   shutdown(): void {
     this.input.keyboard?.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
+    if (this.gamepadConnectHandler) {
+      window.removeEventListener('gamepadconnected', this.gamepadConnectHandler);
+      window.removeEventListener('gamepaddisconnected', this.gamepadConnectHandler);
+      this.gamepadConnectHandler = null;
+    }
   }
 
   private toggleFullscreen(): void {
