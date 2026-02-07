@@ -1,10 +1,8 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle, titleStyle } from '../config/theme';
-import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
-import GameScene from './GameScene';
-import HUDScene from './HUDScene';
-import DialogueScene from './DialogueScene';
+import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -80,19 +78,18 @@ export default class PauseScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
     this.input.keyboard?.on('keydown-ESC', () => this.resumeGame());
 
-    // Initialize gamepad button state to current state (prevent phantom presses)
-    this.gamepadNavCooldown = 0;
+    // Initialize gamepad navigation
+    this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
+      onNavigate: (dir) => this.navigateMenu(dir),
+      onConfirm: () => this.activateSelected(),
+      onBack: () => this.resumeGame(),
+    });
+    this.gamepadNav.initState();
+    // Track Start button separately (also resumes)
+    this.gamepadStartPressed = false;
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        this.gamepadAPressed = pad.buttons[0]?.pressed || false;
-        this.gamepadBPressed = pad.buttons[1]?.pressed || false;
-        this.gamepadStartPressed = pad.buttons[9]?.pressed || false;
-      }
-    } else {
-      this.gamepadAPressed = false;
-      this.gamepadBPressed = false;
-      this.gamepadStartPressed = false;
+      if (pad) this.gamepadStartPressed = pad.buttons[9]?.pressed || false;
     }
 
     Accessibility.announce(t('pauseTitle'));
@@ -102,10 +99,8 @@ export default class PauseScene extends Phaser.Scene {
   private buttonCallbacks: (() => void)[] = [];
   private buttonIsCTA: boolean[] = [];
   private selectedIndex = 0;
-  private gamepadAPressed = false;
-  private gamepadBPressed = false;
+  private gamepadNav!: GamepadMenuNav;
   private gamepadStartPressed = false;
-  private gamepadNavCooldown = 0;
 
   private selectButton(index: number): void {
     this.selectedIndex = Math.max(0, Math.min(index, this.menuButtons.length - 1));
@@ -139,41 +134,15 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    // Gamepad support for pause menu
+    this.gamepadNav.update(delta);
+    // Start button also resumes (in addition to Back handled by gamepadNav)
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        // Navigation cooldown
-        this.gamepadNavCooldown = Math.max(0, this.gamepadNavCooldown - delta);
-        
-        // D-pad or stick navigation
-        const stickY = pad.leftStick.y;
-        if (this.gamepadNavCooldown <= 0) {
-          if (stickY < -0.5 || pad.up) {
-            this.navigateMenu(-1);
-            this.gamepadNavCooldown = 200;
-          } else if (stickY > 0.5 || pad.down) {
-            this.navigateMenu(1);
-            this.gamepadNavCooldown = 200;
-          }
-        }
-        
-        // Use controller-aware button mapping (handles Nintendo swap)
-        const confirmPressed = isConfirmPressed(pad);
-        if (confirmPressed && !this.gamepadAPressed) {
-          this.activateSelected();
-        }
-        this.gamepadAPressed = confirmPressed;
-
-        // Back button or Start to resume
-        const backPressed = isBackPressed(pad);
         const startPressed = pad.buttons[9]?.pressed ?? false;
-        
-        if ((backPressed && !this.gamepadBPressed) || (startPressed && !this.gamepadStartPressed)) {
+        if (startPressed && !this.gamepadStartPressed) {
           this.resumeGame();
         }
-        
-        this.gamepadBPressed = backPressed;
         this.gamepadStartPressed = startPressed;
       }
     }
@@ -191,21 +160,7 @@ export default class PauseScene extends Phaser.Scene {
     this.scene.stop('GameScene');
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
-
-    setTimeout(() => {
-      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
-        if (game.scene.getScene(key)) {
-          game.scene.remove(key);
-        }
-      });
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-      game.scene.add('PauseScene', PauseScene, false);
-
-      game.scene.start('GameScene', { level: levelIndex });
-    }, 100);
+    resetGameScenes(game, 'GameScene', { level: levelIndex });
   }
 
   private openSettings(): void {
@@ -225,21 +180,7 @@ export default class PauseScene extends Phaser.Scene {
     this.scene.stop('GameScene');
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
-
-    setTimeout(() => {
-      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
-        if (game.scene.getScene(key)) {
-          game.scene.remove(key);
-        }
-      });
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-      game.scene.add('PauseScene', PauseScene, false);
-
-      game.scene.start('MenuScene');
-    }, 100);
+    resetGameScenes(game, 'MenuScene');
   }
 
   shutdown(): void {

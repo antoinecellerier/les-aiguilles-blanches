@@ -607,8 +607,8 @@ export default class HUDScene extends Phaser.Scene {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      document.documentElement.requestFullscreen().catch(() => {
-        // Fullscreen not supported or denied
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.warn('Fullscreen request denied:', e);
       });
     }
     // Resize handler will restart HUD to update button appearance

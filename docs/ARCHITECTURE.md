@@ -41,8 +41,10 @@ snow-groomer/
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
 │   │   ├── gamepad.ts      # Controller detection, button mapping
+│   │   ├── gamepadMenu.ts  # Reusable gamepad menu navigation controller
 │   │   ├── gameProgress.ts # Save/load game progress
-│   │   └── keyboardLayout.ts # Keyboard layout detection, key name utilities
+│   │   ├── keyboardLayout.ts # Keyboard layout detection, key name utilities
+│   │   └── sceneTransitions.ts # Centralized scene cleanup and transitions
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
@@ -568,35 +570,22 @@ TypeError: can't access property "cut", data is null
 
 **Problem:** When `scene.stop()` is called, the scene instance is preserved but paused. When `scene.launch()` is called again, the SAME instance is reused with potentially corrupted texture references.
 
-**Solution:** Remove and recreate ALL game scenes completely during level transitions:
+**Solution:** Use the centralized `resetGameScenes()` utility from `src/utils/sceneTransitions.ts`:
 
 ```javascript
-// In GameScene.transitionToLevel():
-this.scene.stop('HUDScene');
-this.scene.stop('DialogueScene');
-this.scene.stop('GameScene');
+import { resetGameScenes } from '../utils/sceneTransitions';
 
-setTimeout(() => {
-    // Remove ALL scene instances to clear corrupted textures
-    game.scene.remove('HUDScene');
-    game.scene.remove('DialogueScene');
-    game.scene.remove('GameScene');
-    
-    // Re-add fresh scene instances (order matters for layering)
-    game.scene.add('GameScene', GameScene, false);
-    game.scene.add('HUDScene', HUDScene, false);
-    game.scene.add('DialogueScene', DialogueScene, false);
-    
-    // Start GameScene with new level
-    game.scene.start('GameScene', { level: nextLevel });
-}, 100);
+// In any scene that needs to restart game scenes:
+resetGameScenes(this.game, 'GameScene', { level: nextLevel });
 ```
 
+The utility stops all registered game scenes, removes them, re-adds fresh instances, and starts the target scene. Game scenes are registered at boot via `registerGameScenes()` in `main.ts`.
+
 **Key Points:**
-- Always stop scenes before removing them
-- Use setTimeout to allow render frame to complete
-- Create fresh scene instances via `scene.add()` rather than reusing
-- Reset instance variables (like `isSkipping`) in `init()` not just `create()`
+- All game scene cleanup is centralized — no duplicate scene lists
+- Registration pattern in `main.ts` avoids circular imports between scenes and utility
+- Always pass explicit data to prevent stale `sys.settings.data` reuse
+- Uses `setTimeout(100ms)` to allow render frame to complete
 
 ### Stale Scene Data (Critical)
 
@@ -646,6 +635,25 @@ shutdown() {
     this.time.removeAllEvents();      // Cancel all timers
     this.children.removeAll(true);    // Destroy all game objects
 }
+```
+
+### Gamepad Menu Navigation
+
+All menu scenes use `createGamepadMenuNav()` from `src/utils/gamepadMenu.ts` to handle D-pad/stick navigation, A-confirm, B-back with debounce and phantom-press prevention:
+
+```javascript
+import { createGamepadMenuNav } from '../utils/gamepadMenu';
+
+this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
+    onNavigate: (dir) => this.navigateMenu(dir),
+    onConfirm: () => this.activateSelected(),
+    onBack: () => this.goBack(),
+    isBlocked: () => this.overlayOpen,  // Optional: suppress during overlays
+});
+this.gamepadNav.initState();  // Capture current button state to prevent phantom presses
+
+// In update():
+this.gamepadNav.update(delta);
 ```
 
 ### Overlay Scene Input Handling

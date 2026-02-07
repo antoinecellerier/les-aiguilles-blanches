@@ -3,10 +3,7 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
-import GameScene from './GameScene';
-import HUDScene from './HUDScene';
-import DialogueScene from './DialogueScene';
-import PauseScene from './PauseScene';
+import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -762,25 +759,9 @@ export default class SettingsScene extends Phaser.Scene {
       game.scene.start('DialogueScene');
       game.scene.start('PauseScene', { gameScene });
     } else if (this.returnTo === 'GameScene') {
-      // Clean restart: remove stale game scenes and start fresh
       const game = this.game;
-      const levelIndex = this.levelIndex;
       this.scene.stop('SettingsScene');
-
-      setTimeout(() => {
-        ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
-          if (game.scene.getScene(key)) {
-            game.scene.remove(key);
-          }
-        });
-
-        game.scene.add('GameScene', GameScene, false);
-        game.scene.add('HUDScene', HUDScene, false);
-        game.scene.add('DialogueScene', DialogueScene, false);
-        game.scene.add('PauseScene', PauseScene, false);
-
-        game.scene.start('GameScene', { level: levelIndex });
-      }, 100);
+      resetGameScenes(game, 'GameScene', { level: this.levelIndex });
     } else {
       this.scene.start('MenuScene');
     }

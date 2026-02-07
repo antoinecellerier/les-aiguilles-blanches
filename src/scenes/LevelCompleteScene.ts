@@ -1,11 +1,9 @@
 import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from '../setup';
 import { THEME } from '../config/theme';
-import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
-import GameScene from './GameScene';
-import HUDScene from './HUDScene';
-import DialogueScene from './DialogueScene';
-import PauseScene from './PauseScene';
+import { getMappingFromGamepad } from '../utils/gamepad';
+import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -222,17 +220,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
     mainSizer.add(buttonSizer, { align: 'center', padding: { top: 30 } });
     mainSizer.layout();
 
-    // Initialize gamepad state to prevent phantom presses from previous scene
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        this.gamepadAPressed = isConfirmPressed(pad);
-        this.gamepadBPressed = isBackPressed(pad);
-      }
-    } else {
-      this.gamepadAPressed = false;
-      this.gamepadBPressed = false;
-    }
+    // Initialize gamepad navigation
+    this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
+      onNavigate: (dir) => this.navigateMenu(dir),
+      onConfirm: () => this.activateSelected(),
+      onBack: () => this.navigateTo('MenuScene'),
+    });
+    this.gamepadNav.initState();
 
     // Handle resize
     this.scale.on('resize', this.handleResize, this);
@@ -255,47 +249,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.scale.off('resize', this.handleResize, this);
   }
 
-  private gamepadAPressed = false;
-  private gamepadBPressed = false;
-  private gamepadNavCooldown = 0;
+  private gamepadNav!: GamepadMenuNav;
 
   update(_time: number, delta: number): void {
-    // Gamepad navigation cooldown
-    if (this.gamepadNavCooldown > 0) {
-      this.gamepadNavCooldown -= delta;
-    }
-    
-    // Gamepad support
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        // D-pad / stick navigation (horizontal layout)
-        if (this.gamepadNavCooldown <= 0) {
-          const stickX = pad.leftStick?.x ?? 0;
-          if (pad.left || stickX < -0.5) {
-            this.navigateMenu(-1);
-            this.gamepadNavCooldown = 200;
-          } else if (pad.right || stickX > 0.5) {
-            this.navigateMenu(1);
-            this.gamepadNavCooldown = 200;
-          }
-        }
-        
-        // Confirm button activates selected
-        const confirmPressed = isConfirmPressed(pad);
-        if (confirmPressed && !this.gamepadAPressed) {
-          this.activateSelected();
-        }
-        this.gamepadAPressed = confirmPressed;
-
-        // Back button to return to menu
-        const backPressed = isBackPressed(pad);
-        if (backPressed && !this.gamepadBPressed) {
-          this.navigateTo('MenuScene');
-        }
-        this.gamepadBPressed = backPressed;
-      }
-    }
+    this.gamepadNav.update(delta);
   }
   
   private addButton(
@@ -380,21 +337,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private navigateTo(targetKey: string, data?: Record<string, unknown>): void {
     const game = this.game;
     this.scene.stop('LevelCompleteScene');
-
-    setTimeout(() => {
-      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
-        if (game.scene.getScene(key)) {
-          game.scene.remove(key);
-        }
-      });
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-      game.scene.add('PauseScene', PauseScene, false);
-
-      game.scene.start(targetKey, data);
-    }, 100);
+    resetGameScenes(game, targetKey, data);
   }
 
   private formatTime(seconds: number): string {

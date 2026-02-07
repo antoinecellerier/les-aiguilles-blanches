@@ -4,6 +4,7 @@ import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
+import { resetGameScenes } from '../utils/sceneTransitions';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
 
@@ -2919,36 +2920,13 @@ export default class GameScene extends Phaser.Scene {
     this.isTransitioning = true;
     this.isGameOver = true;
 
-    // Save progress when advancing to next level
     saveProgress(nextLevel);
 
-    console.log('GameScene.transitionToLevel:', nextLevel);
-
     const game = this.game;
-
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
     this.scene.stop('GameScene');
-
-    setTimeout(() => {
-      console.log('GameScene.transitionToLevel: removing and restarting scenes for level', nextLevel);
-
-      try {
-        game.scene.remove('HUDScene');
-        game.scene.remove('DialogueScene');
-        game.scene.remove('GameScene');
-      } catch (e) {
-        if (e instanceof Error) {
-          console.warn('Scene removal warning:', e.message);
-        }
-      }
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-
-      game.scene.start('GameScene', { level: nextLevel });
-    }, 100);
+    resetGameScenes(game, 'GameScene', { level: nextLevel });
   }
 
   returnToMenu(): void {
@@ -2957,28 +2935,10 @@ export default class GameScene extends Phaser.Scene {
     this.isGameOver = true;
 
     const game = this.game;
-
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
     this.scene.stop('GameScene');
-
-    setTimeout(() => {
-      try {
-        game.scene.remove('HUDScene');
-        game.scene.remove('DialogueScene');
-        game.scene.remove('GameScene');
-      } catch (e) {
-        if (e instanceof Error) {
-          console.warn('Scene removal warning:', e.message);
-        }
-      }
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-
-      game.scene.start('MenuScene');
-    }, 100);
+    resetGameScenes(game, 'MenuScene');
   }
 
   shutdown(): void {

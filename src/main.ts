@@ -9,6 +9,9 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 // Setup globals first (side-effect import)
 import './setup';
 
+// Scene transition registry (must be before scene imports to avoid circular deps)
+import { registerGameScenes } from './utils/sceneTransitions';
+
 // TypeScript scenes
 import BootScene from './scenes/BootScene';
 import DialogueScene from './scenes/DialogueScene';
@@ -19,6 +22,14 @@ import HUDScene from './scenes/HUDScene';
 import MenuScene from './scenes/MenuScene';
 import SettingsScene from './scenes/SettingsScene';
 import GameScene from './scenes/GameScene';
+
+// Register game scenes for centralized cleanup (single source of truth)
+registerGameScenes([
+  { key: 'GameScene', ctor: GameScene },
+  { key: 'HUDScene', ctor: HUDScene },
+  { key: 'DialogueScene', ctor: DialogueScene },
+  { key: 'PauseScene', ctor: PauseScene },
+]);
 
 declare global {
   interface Window {

@@ -2,12 +2,10 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
-import { isConfirmPressed, loadGamepadBindings, getButtonName, getConnectedControllerType, isBackPressed } from '../utils/gamepad';
+import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
+import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { THEME } from '../config/theme';
-import GameScene from './GameScene';
-import HUDScene from './HUDScene';
-import DialogueScene from './DialogueScene';
-import PauseScene from './PauseScene';
+import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
  * Les Aiguilles Blanches - Menu Scene
@@ -318,13 +316,16 @@ export default class MenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
     this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
 
-    // Initialize gamepad button state
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        this.gamepadAPressed = isConfirmPressed(pad);
-      }
-    }
+    // Initialize gamepad navigation
+    this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
+      onNavigate: (dir) => this.navigateMenu(dir),
+      onConfirm: () => {
+        if (this.overlayOpen) { this.overlayCloseCallback?.(); return; }
+        this.activateSelected();
+      },
+      onBack: () => { if (this.overlayOpen) this.overlayCloseCallback?.(); },
+    });
+    this.gamepadNav.initState();
 
     this.scale.on('resize', this.handleResize, this);
 
@@ -335,10 +336,7 @@ export default class MenuScene extends Phaser.Scene {
   private buttonShadows: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
   private selectedIndex = 0;
-  private gamepadAPressed = false;
-  private gamepadBPressed = false;
-  private gamepadStickY = 0;
-  private gamepadNavCooldown = 0;
+  private gamepadNav!: GamepadMenuNav;
 
   private selectButton(index: number): void {
     this.selectedIndex = Math.max(0, Math.min(index, this.menuButtons.length - 1));
@@ -390,44 +388,7 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     // Gamepad support for menu
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        // Close overlay with A or B
-        if (this.overlayOpen) {
-          const confirmPressed = isConfirmPressed(pad);
-          const backPressed = isBackPressed(pad);
-          if ((confirmPressed && !this.gamepadAPressed) || (backPressed && !this.gamepadBPressed)) {
-            this.overlayCloseCallback?.();
-          }
-          this.gamepadAPressed = confirmPressed;
-          this.gamepadBPressed = backPressed;
-          return;
-        }
-
-        this.gamepadNavCooldown = Math.max(0, this.gamepadNavCooldown - delta);
-        
-        const stickY = pad.leftStick.y;
-        const dpadUp = pad.up;
-        const dpadDown = pad.down;
-        
-        if (this.gamepadNavCooldown <= 0) {
-          if (stickY < -0.5 || dpadUp) {
-            this.navigateMenu(-1);
-            this.gamepadNavCooldown = 200;
-          } else if (stickY > 0.5 || dpadDown) {
-            this.navigateMenu(1);
-            this.gamepadNavCooldown = 200;
-          }
-        }
-        
-        const confirmPressed = isConfirmPressed(pad);
-        if (confirmPressed && !this.gamepadAPressed) {
-          this.activateSelected();
-        }
-        this.gamepadAPressed = confirmPressed;
-      }
-    }
+    this.gamepadNav.update(delta);
   }
 
   private resizing = false;
@@ -449,8 +410,8 @@ export default class MenuScene extends Phaser.Scene {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      document.documentElement.requestFullscreen().catch(() => {
-        // Fullscreen not supported or denied
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.warn('Fullscreen request denied:', e);
       });
     }
     // Resize handler will restart scene to update button layout
@@ -588,19 +549,7 @@ export default class MenuScene extends Phaser.Scene {
   private startGame(level: number = 0): void {
     const game = this.game;
     this.scene.stop('MenuScene');
-
-    setTimeout(() => {
-      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
-        if (game.scene.getScene(key)) {
-          game.scene.remove(key);
-        }
-      });
-
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-      game.scene.add('PauseScene', PauseScene, false);
-      game.scene.add('GameScene', GameScene, true, { level });
-    }, 100);
+    resetGameScenes(game, 'GameScene', { level });
   }
 
   private confirmNewGame(): void {

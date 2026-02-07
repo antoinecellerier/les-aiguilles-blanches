@@ -30,9 +30,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, wildlife, Candide Thovex cameo)
-- [ ] Code cleanup audit
 
 ## Recently Completed
+
+- ✅ **Code health audit** - Centralized scene transitions (`sceneTransitions.ts`) and gamepad menu navigation (`gamepadMenu.ts`). Eliminated 273 lines of duplicated cleanup/polling code across 8 files. Fixed inconsistent scene lists (CreditsScene/GameScene were missing PauseScene cleanup). Registration pattern breaks circular imports
 
 - ✅ **Scene navigation fixes** - Fixed zombie resize handlers, stale scene data, and broken Settings→PauseScene return. All scene transitions now use remove+re-add cleanup pattern. Documented SceneManager vs ScenePlugin API differences in ARCHITECTURE.md
 - ✅ **Art style consistency** - Winch anchors: rectangle-only cable hook, correct gray post, yellow number plate. Steep/avalanche zones: replaced emoji/polygon shapes with rectangle-only pixel art, localized risk labels, THEME fonts throughout
@@ -69,11 +70,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 2. **Firefox compatibility** - Avoid complex Phaser scale/render options, Graphics.fillTriangle()
 
-3. **Scene transitions** - Remove and recreate scenes to avoid texture corruption. Always pass explicit data to `scene.start()` — omitting data reuses previous init data (see ARCHITECTURE.md "Stale Scene Data")
+3. **Scene transitions** - Use `resetGameScenes()` from `sceneTransitions.ts` for all game scene transitions. Registered scenes are the single source of truth (see `main.ts`). Always pass explicit data to `scene.start()` — omitting data reuses previous init data (see ARCHITECTURE.md "Stale Scene Data")
 
 4. **SceneManager vs ScenePlugin** - `game.scene` (SceneManager) has `start`/`run` but NOT `launch`. Use `game.scene.start()` after stopping self. See ARCHITECTURE.md
 
+5. **Gamepad menu navigation** - Use `createGamepadMenuNav()` from `gamepadMenu.ts` for all menu scenes. Handles debounce, cooldown, and phantom-press prevention. Override behavior via `isBlocked` callback
+
 ### Test Coverage Gaps
 
-- Gamepad rebinding (feature not implemented)
 - Nintendo B-button back navigation flaky under parallel test execution

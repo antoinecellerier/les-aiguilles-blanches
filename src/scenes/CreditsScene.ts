@@ -2,9 +2,8 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle } from '../config/theme';
 import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
-import GameScene from './GameScene';
-import HUDScene from './HUDScene';
-import DialogueScene from './DialogueScene';
+import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
  * Les Aiguilles Blanches - Credits Scene
@@ -24,9 +23,7 @@ export default class CreditsScene extends Phaser.Scene {
   private buttonsShown = false;
   
   // Gamepad state
-  private gamepadAPressed = false;
-  private gamepadBPressed = false;
-  private gamepadNavCooldown = 0;
+  private gamepadNav!: GamepadMenuNav;
 
   constructor() {
     super({ key: 'CreditsScene' });
@@ -40,18 +37,15 @@ export default class CreditsScene extends Phaser.Scene {
     this.buttonCallbacks = [];
     this.selectedIndex = 0;
     this.buttonsShown = false;
-    this.gamepadAPressed = false;
-    this.gamepadBPressed = false;
-    this.gamepadNavCooldown = 0;
 
-    // Initialize gamepad state to prevent phantom presses
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        this.gamepadAPressed = isConfirmPressed(pad);
-        this.gamepadBPressed = isBackPressed(pad);
-      }
-    }
+    // Initialize gamepad navigation (blocked during scroll, active after buttons shown)
+    this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
+      onNavigate: (dir) => this.navigateMenu(dir),
+      onConfirm: () => this.activateSelected(),
+      onBack: () => this.returnToMenu(),
+      isBlocked: () => !this.buttonsShown,
+    });
+    this.gamepadNav.initState();
 
     this.cameras.main.setBackgroundColor(THEME.colors.darkBg);
     this.createStars();
@@ -269,23 +263,7 @@ export default class CreditsScene extends Phaser.Scene {
   private restartGame(): void {
     const game = this.game;
     this.scene.stop('CreditsScene');
-
-    setTimeout(() => {
-      // Remove and re-add all game scenes for clean restart
-      try {
-        game.scene.remove('HUDScene');
-        game.scene.remove('DialogueScene');
-        game.scene.remove('GameScene');
-      } catch (e) {
-        // Scenes may not exist
-      }
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-
-      game.scene.start('GameScene', { level: 0 });
-    }, 100);
+    resetGameScenes(game, 'GameScene', { level: 0 });
   }
 
   update(_time: number, delta: number): void {
@@ -293,37 +271,17 @@ export default class CreditsScene extends Phaser.Scene {
     const pad = this.input.gamepad.getPad(0);
     if (!pad) return;
 
-    const confirmPressed = isConfirmPressed(pad);
-    const backPressed = isBackPressed(pad);
-
+    // During scroll, any button skips (before gamepadNav.update tracks state)
     if (!this.buttonsShown) {
-      // Any button skips credits scroll
-      if ((confirmPressed && !this.gamepadAPressed) || (backPressed && !this.gamepadBPressed)) {
+      const confirmNow = isConfirmPressed(pad);
+      const backNow = isBackPressed(pad);
+      if ((confirmNow && !this.gamepadNav.confirmPressed) || (backNow && !this.gamepadNav.backPressed)) {
         this.skipCredits();
-      }
-    } else {
-      // Navigate buttons
-      this.gamepadNavCooldown = Math.max(0, this.gamepadNavCooldown - delta);
-      if (this.gamepadNavCooldown <= 0) {
-        const stickX = pad.leftStick?.x ?? 0;
-        if (pad.left || stickX < -0.5) {
-          this.navigateMenu(-1);
-          this.gamepadNavCooldown = 200;
-        } else if (pad.right || stickX > 0.5) {
-          this.navigateMenu(1);
-          this.gamepadNavCooldown = 200;
-        }
-      }
-      if (confirmPressed && !this.gamepadAPressed) {
-        this.activateSelected();
-      }
-      if (backPressed && !this.gamepadBPressed) {
-        this.returnToMenu();
       }
     }
 
-    this.gamepadAPressed = confirmPressed;
-    this.gamepadBPressed = backPressed;
+    // Handles nav/confirm/back when buttonsShown (isBlocked returns false)
+    this.gamepadNav.update(delta);
   }
 
   shutdown(): void {
@@ -335,22 +293,6 @@ export default class CreditsScene extends Phaser.Scene {
   private returnToMenu(): void {
     const game = this.game;
     this.scene.stop('CreditsScene');
-
-    setTimeout(() => {
-      // Remove game scenes for clean state
-      try {
-        game.scene.remove('HUDScene');
-        game.scene.remove('DialogueScene');
-        game.scene.remove('GameScene');
-      } catch (e) {
-        // Scenes may not exist
-      }
-
-      game.scene.add('GameScene', GameScene, false);
-      game.scene.add('HUDScene', HUDScene, false);
-      game.scene.add('DialogueScene', DialogueScene, false);
-
-      game.scene.start('MenuScene');
-    }, 100);
+    resetGameScenes(game, 'MenuScene');
   }
 }
