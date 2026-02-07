@@ -37,10 +37,9 @@ export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
   }
 
   // Try Keyboard Layout Map API (Chrome/Edge, requires secure context)
-  if ('keyboard' in navigator && 'getLayoutMap' in (navigator as any).keyboard) {
+  if (navigator.keyboard) {
     try {
-      const keyboard = (navigator as any).keyboard;
-      const layoutMap = await keyboard.getLayoutMap();
+      const layoutMap = await navigator.keyboard.getLayoutMap();
       
       // Check what character is on the physical 'KeyQ' position
       const qKey = layoutMap.get('KeyQ');

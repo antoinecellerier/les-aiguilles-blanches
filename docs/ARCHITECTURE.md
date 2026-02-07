@@ -35,17 +35,24 @@ snow-groomer/
 │   ├── main.ts             # Phaser init, game creation
 │   ├── setup.ts            # Window globals initialization
 │   ├── config/
-│   │   ├── gameConfig.ts   # Game constants, colors
+│   │   ├── gameConfig.ts   # Game constants, colors, BALANCE tuning values
 │   │   ├── levels.ts       # Level definitions
 │   │   ├── localization.ts # i18n translations (uses {placeholder} syntax)
 │   │   ├── storageKeys.ts  # Centralized localStorage key constants
 │   │   └── theme.ts        # UI colors, fonts, button styles
+│   ├── systems/
+│   │   ├── WeatherSystem.ts  # Night overlay, headlights, weather particles
+│   │   └── HazardSystem.ts   # Avalanche zones, risk handling
+│   ├── types/
+│   │   ├── global.d.ts           # Window/navigator type augmentations
+│   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
 │   │   ├── gamepad.ts      # Controller detection, button mapping
 │   │   ├── gamepadMenu.ts  # Reusable gamepad menu navigation controller
 │   │   ├── gameProgress.ts # Save/load game progress
 │   │   ├── keyboardLayout.ts # Keyboard layout detection, key name utilities
+│   │   ├── menuButtonNav.ts  # Reusable button selection/navigation controller
 │   │   └── sceneTransitions.ts # Centralized scene cleanup and transitions
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
@@ -63,10 +70,16 @@ snow-groomer/
 ├── .github/
 │   ├── agents/
 │   │   └── code-health.agent.md  # Code audit custom agent
+│   ├── skills/
+│   │   ├── code-health/    # Auto-invoked code audit skill
+│   │   └── docs-update/    # Auto-invoked docs sync skill
 │   └── copilot-instructions.md   # Copilot custom instructions
 └── docs/
     ├── ARCHITECTURE.md     # This file
-    └── GAMEPLAY.md         # Game mechanics
+    ├── GAMEPLAY.md         # Game mechanics
+    ├── TESTING.md          # Test helpers, debugging
+    ├── ART_STYLE.md        # Visual style guide
+    └── ROADMAP.md          # Work queue, bugs, future features
 ```
 
 ### Scene Flow
@@ -651,8 +664,8 @@ All menu scenes use `createGamepadMenuNav()` from `src/utils/gamepadMenu.ts` to 
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
 
 this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
-    onNavigate: (dir) => this.navigateMenu(dir),
-    onConfirm: () => this.activateSelected(),
+    onNavigate: (dir) => this.buttonNav.navigate(dir),
+    onConfirm: () => this.buttonNav.activate(),
     onBack: () => this.goBack(),
     isBlocked: () => this.overlayOpen,  // Optional: suppress during overlays
 });
@@ -661,6 +674,53 @@ this.gamepadNav.initState();  // Capture current button state to prevent phantom
 // In update():
 this.gamepadNav.update(delta);
 ```
+
+### Menu Button Navigation
+
+All menu scenes use `createMenuButtonNav()` from `src/utils/menuButtonNav.ts` to manage button selection state, keyboard navigation, and hover styling. Preset stylers handle common patterns:
+
+```javascript
+import { createMenuButtonNav, ctaStyler } from '../utils/menuButtonNav';
+
+this.buttonNav = createMenuButtonNav(
+  this.menuButtons, this.buttonCallbacks, ctaStyler(this.buttonIsCTA),
+  { canNavigate: () => !this.overlayOpen },
+);
+
+// Hook into keyboard and pointer events:
+this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
+btn.on('pointerover', () => this.buttonNav.select(i));
+```
+
+Available stylers: `ctaStyler(isCTA[])` (green CTA / blue standard), `simpleStyler()` (uniform blue), or pass a custom `ButtonStyler` function for scene-specific visuals (e.g. MenuScene's shadow+arrow pattern).
+
+### Cross-Scene Communication (GAME_EVENTS)
+
+GameScene and HUDScene communicate via Phaser's global event emitter (`game.events`) using typed events defined in `src/types/GameSceneInterface.ts`. No scene holds a direct reference to another scene.
+
+| Event | Direction | Payload | Frequency |
+|-------|-----------|---------|-----------|
+| `GAME_STATE` | GameScene → HUD | fuel, stamina, coverage, winchActive, levelIndex | Every frame |
+| `TIMER_UPDATE` | GameScene → HUD | seconds remaining | Every second |
+| `TOUCH_INPUT` | HUD → GameScene | left, right, up, down, groom, winch | Every frame |
+| `PAUSE_REQUEST` | HUD/Pause → GameScene | — | On button press |
+| `RESUME_REQUEST` | Pause → GameScene | — | On button press |
+| `SKIP_LEVEL` | HUD → GameScene | nextLevel | On button press |
+
+Always clean up listeners in `shutdown()` with `this.game.events.off(GAME_EVENTS.*)`.
+
+### GameScene System Extraction
+
+GameScene delegates to extracted subsystems in `src/systems/`:
+
+- **WeatherSystem** — Night overlay rendering, headlight cones, weather particle emitters, accessibility filters
+- **HazardSystem** — Avalanche zone creation, risk tracking, avalanche trigger sequence
+
+Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `_createLevel()` and `update()`.
+
+### Balance Constants
+
+All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights. Never hardcode magic numbers in GameScene — add them to `BALANCE`.
 
 ### Overlay Scene Input Handling
 

@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle, titleStyle } from '../config/theme';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { resetGameScenes } from '../utils/sceneTransitions';
+import { GAME_EVENTS } from '../types/GameSceneInterface';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -10,18 +12,18 @@ import { resetGameScenes } from '../utils/sceneTransitions';
  */
 
 interface PauseSceneData {
-  gameScene: Phaser.Scene & { levelIndex: number; resumeGame: () => void };
+  levelIndex: number;
 }
 
 export default class PauseScene extends Phaser.Scene {
-  private gameScene!: PauseSceneData['gameScene'];
+  private levelIndex = 0;
 
   constructor() {
     super({ key: 'PauseScene' });
   }
 
   init(data: PauseSceneData): void {
-    this.gameScene = data.gameScene;
+    this.levelIndex = data.levelIndex;
   }
 
   create(): void {
@@ -53,7 +55,6 @@ export default class PauseScene extends Phaser.Scene {
     this.menuButtons = [];
     this.buttonCallbacks = [];
     this.buttonIsCTA = [];
-    this.selectedIndex = 0;
 
     buttonDefs.forEach((btn, i) => {
       const style = { ...btnStyle };
@@ -61,8 +62,8 @@ export default class PauseScene extends Phaser.Scene {
       const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, style)
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
-        .on('pointerover', () => this.selectButton(i))
-        .on('pointerout', () => this.updateButtonStyles())
+        .on('pointerover', () => this.buttonNav.select(i))
+        .on('pointerout', () => this.buttonNav.refreshStyles())
         .on('pointerdown', btn.callback);
       
       this.menuButtons.push(button);
@@ -70,18 +71,21 @@ export default class PauseScene extends Phaser.Scene {
       this.buttonIsCTA.push(btn.isCTA);
     });
 
-    this.updateButtonStyles();
+    this.buttonNav = createMenuButtonNav(
+      this.menuButtons, this.buttonCallbacks, ctaStyler(this.buttonIsCTA),
+    );
+    this.buttonNav.refreshStyles();
 
     // Keyboard navigation
-    this.input.keyboard?.on('keydown-UP', () => this.navigateMenu(-1));
-    this.input.keyboard?.on('keydown-DOWN', () => this.navigateMenu(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
+    this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
     this.input.keyboard?.on('keydown-ESC', () => this.resumeGame());
 
     // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
-      onNavigate: (dir) => this.navigateMenu(dir),
-      onConfirm: () => this.activateSelected(),
+      onNavigate: (dir) => this.buttonNav.navigate(dir),
+      onConfirm: () => this.buttonNav.activate(),
       onBack: () => this.resumeGame(),
     });
     this.gamepadNav.initState();
@@ -98,40 +102,12 @@ export default class PauseScene extends Phaser.Scene {
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
   private buttonIsCTA: boolean[] = [];
-  private selectedIndex = 0;
+  private buttonNav!: MenuButtonNav;
   private gamepadNav!: GamepadMenuNav;
   private gamepadStartPressed = false;
 
-  private selectButton(index: number): void {
-    this.selectedIndex = Math.max(0, Math.min(index, this.menuButtons.length - 1));
-    this.updateButtonStyles();
-  }
-
-  private navigateMenu(direction: number): void {
-    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
-    this.updateButtonStyles();
-  }
-
-  private activateSelected(): void {
-    if (this.buttonCallbacks[this.selectedIndex]) {
-      this.buttonCallbacks[this.selectedIndex]();
-    }
-  }
-
-  private updateButtonStyles(): void {
-    this.menuButtons.forEach((btn, i) => {
-      const isCTA = this.buttonIsCTA[i];
-      const baseColor = isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
-      const hoverColor = isCTA ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex;
-      if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: hoverColor });
-        btn.setScale(1.05);
-      } else {
-        btn.setStyle({ backgroundColor: baseColor });
-        btn.setScale(1);
-      }
-    });
-  }
+  /** Expose for tests */
+  get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
 
   update(_time: number, delta: number): void {
     this.gamepadNav.update(delta);
@@ -150,12 +126,12 @@ export default class PauseScene extends Phaser.Scene {
 
   private resumeGame(): void {
     this.scene.stop();
-    this.gameScene.resumeGame();
+    this.game.events.emit(GAME_EVENTS.RESUME_REQUEST);
   }
 
   private restartLevel(): void {
     const game = this.game;
-    const levelIndex = this.gameScene.levelIndex;
+    const levelIndex = this.levelIndex;
     this.scene.stop();
     this.scene.stop('GameScene');
     this.scene.stop('HUDScene');
@@ -166,7 +142,7 @@ export default class PauseScene extends Phaser.Scene {
   private openSettings(): void {
     // Keep GameScene paused; just stop overlays and open Settings
     const game = this.game;
-    const levelIndex = this.gameScene.levelIndex;
+    const levelIndex = this.levelIndex;
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
     this.scene.stop('PauseScene');

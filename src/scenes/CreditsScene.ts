@@ -3,6 +3,7 @@ import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle } from '../config/theme';
 import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { createMenuButtonNav, simpleStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
@@ -19,8 +20,11 @@ export default class CreditsScene extends Phaser.Scene {
   // Keyboard navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
-  private selectedIndex = 0;
+  private buttonNav!: MenuButtonNav;
   private buttonsShown = false;
+
+  /** Expose for tests */
+  get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
   
   // Gamepad state
   private gamepadNav!: GamepadMenuNav;
@@ -35,13 +39,12 @@ export default class CreditsScene extends Phaser.Scene {
     // Reset navigation state
     this.menuButtons = [];
     this.buttonCallbacks = [];
-    this.selectedIndex = 0;
     this.buttonsShown = false;
 
     // Initialize gamepad navigation (blocked during scroll, active after buttons shown)
     this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
-      onNavigate: (dir) => this.navigateMenu(dir),
-      onConfirm: () => this.activateSelected(),
+      onNavigate: (dir) => this.buttonNav.navigate(dir),
+      onConfirm: () => this.buttonNav.activate(),
       onBack: () => this.returnToMenu(),
       isBlocked: () => !this.buttonsShown,
     });
@@ -212,52 +215,27 @@ export default class CreditsScene extends Phaser.Scene {
     this.buttonsContainer.setVisible(true);
     this.skipHint.setVisible(false);
 
+    this.buttonNav = createMenuButtonNav(
+      this.menuButtons, this.buttonCallbacks, simpleStyler(),
+    );
+
     this.input.keyboard?.removeAllListeners();
-    this.input.keyboard?.on('keydown-LEFT', () => this.navigateMenu(-1));
-    this.input.keyboard?.on('keydown-RIGHT', () => this.navigateMenu(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
-    this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-LEFT', () => this.buttonNav.navigate(-1));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.buttonNav.navigate(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
+    this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
     this.input.keyboard?.on('keydown-ESC', () => this.returnToMenu());
     
     // Initialize selection highlight
-    this.updateButtonStyles();
+    this.buttonNav.refreshStyles();
   }
   
   private setupButton(btn: Phaser.GameObjects.Text, index: number, callback: () => void): void {
-    btn.on('pointerover', () => this.selectButton(index));
-    btn.on('pointerout', () => this.updateButtonStyles());
+    btn.on('pointerover', () => this.buttonNav?.select(index));
+    btn.on('pointerout', () => this.buttonNav?.refreshStyles());
     btn.on('pointerdown', callback);
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);
-  }
-  
-  private selectButton(index: number): void {
-    this.selectedIndex = index;
-    this.updateButtonStyles();
-  }
-  
-  private navigateMenu(direction: number): void {
-    if (this.menuButtons.length === 0) return;
-    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
-    this.updateButtonStyles();
-  }
-  
-  private activateSelected(): void {
-    if (this.buttonCallbacks[this.selectedIndex]) {
-      this.buttonCallbacks[this.selectedIndex]();
-    }
-  }
-  
-  private updateButtonStyles(): void {
-    this.menuButtons.forEach((btn, i) => {
-      if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex });
-        btn.setScale(1.05);
-      } else {
-        btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
-        btn.setScale(1);
-      }
-    });
   }
 
   private restartGame(): void {

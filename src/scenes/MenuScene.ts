@@ -4,6 +4,7 @@ import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout'
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
 
@@ -223,7 +224,6 @@ export default class MenuScene extends Phaser.Scene {
     this.menuButtons = [];
     this.buttonShadows = [];
     this.buttonCallbacks = [];
-    this.selectedIndex = 0;
 
     // Selection arrow
     const arrowSize = Math.round(22 * scaleFactor);
@@ -264,10 +264,10 @@ export default class MenuScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => {
-          this.selectButton(i);
+          this.buttonNav.select(i);
         })
         .on('pointerout', () => {
-          this.updateButtonStyles();
+          this.buttonNav.refreshStyles();
         })
         .on('pointerup', () => {
           btn.callback();
@@ -278,7 +278,31 @@ export default class MenuScene extends Phaser.Scene {
       this.buttonCallbacks.push(btn.callback);
     });
 
-    this.updateButtonStyles();
+    // Create button nav with custom styler for shadows + arrow
+    const shadows = this.buttonShadows;
+    const arrow = this.selectionArrow;
+    this.buttonNav = createMenuButtonNav(
+      this.menuButtons, this.buttonCallbacks,
+      (buttons, selectedIndex) => {
+        buttons.forEach((btn, i) => {
+          const isCTA = btn.style.backgroundColor === THEME.colors.buttonCTAHex || btn.style.backgroundColor === THEME.colors.buttonCTAHoverHex;
+          if (i === selectedIndex) {
+            btn.setStyle({ backgroundColor: isCTA ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex });
+            if (shadows[i]) shadows[i].setVisible(false);
+            if (arrow) {
+              arrow.setPosition(btn.x - btn.width / 2 - 20, btn.y);
+              arrow.setVisible(true);
+            }
+          } else {
+            btn.setStyle({ backgroundColor: isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex });
+            if (shadows[i]) shadows[i].setVisible(true);
+          }
+          btn.setScale(1);
+        });
+      },
+      { canNavigate: () => !this.overlayOpen },
+    );
+    this.buttonNav.refreshStyles();
 
     // Footer — dark panel strip (lifted by safe area on portrait mobile)
     const footerTop = height - footerHeight - safeAreaBottom;
@@ -311,17 +335,17 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Keyboard navigation
-    this.input.keyboard?.on('keydown-UP', () => this.navigateMenu(-1));
-    this.input.keyboard?.on('keydown-DOWN', () => this.navigateMenu(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
-    this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
+    this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
+    this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
+    this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
 
     // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
-      onNavigate: (dir) => this.navigateMenu(dir),
+      onNavigate: (dir) => this.buttonNav.navigate(dir),
       onConfirm: () => {
         if (this.overlayOpen) { this.overlayCloseCallback?.(); return; }
-        this.activateSelected();
+        this.buttonNav.activate();
       },
       onBack: () => { if (this.overlayOpen) this.overlayCloseCallback?.(); },
     });
@@ -335,46 +359,11 @@ export default class MenuScene extends Phaser.Scene {
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonShadows: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
-  private selectedIndex = 0;
+  private buttonNav!: MenuButtonNav;
   private gamepadNav!: GamepadMenuNav;
 
-  private selectButton(index: number): void {
-    this.selectedIndex = Math.max(0, Math.min(index, this.menuButtons.length - 1));
-    this.updateButtonStyles();
-  }
-
-  private navigateMenu(direction: number): void {
-    if (this.overlayOpen) return;
-    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
-    this.updateButtonStyles();
-  }
-
-  private activateSelected(): void {
-    if (this.overlayOpen) return;
-    if (this.buttonCallbacks[this.selectedIndex]) {
-      this.buttonCallbacks[this.selectedIndex]();
-    }
-  }
-
-  private updateButtonStyles(): void {
-    this.menuButtons.forEach((btn, i) => {
-      const baseColor = (btn.style.backgroundColor === THEME.colors.buttonCTAHex || btn.style.backgroundColor === THEME.colors.buttonCTAHoverHex) ? 'primary' : 'standard';
-      
-      if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: baseColor === 'primary' ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex });
-        // Hide shadow on selected button to avoid peek-through
-        if (this.buttonShadows[i]) this.buttonShadows[i].setVisible(false);
-        if (this.selectionArrow) {
-          this.selectionArrow.setPosition(btn.x - btn.width / 2 - 20, btn.y);
-          this.selectionArrow.setVisible(true);
-        }
-      } else {
-        btn.setStyle({ backgroundColor: baseColor === 'primary' ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex });
-        if (this.buttonShadows[i]) this.buttonShadows[i].setVisible(true);
-      }
-      btn.setScale(1);
-    });
-  }
+  /** Expose for tests */
+  get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
 
   update(time: number, delta: number): void {
     // Animate snow particles

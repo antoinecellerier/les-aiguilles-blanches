@@ -3,6 +3,7 @@ import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusOb
 import { THEME } from '../config/theme';
 import { getMappingFromGamepad } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
+import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
@@ -39,7 +40,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
   private buttonIsCTA: boolean[] = [];
-  private selectedIndex = 0;
+  private buttonNav!: MenuButtonNav;
+
+  /** Expose for tests */
+  get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
 
   constructor() {
     super({ key: 'LevelCompleteScene' });
@@ -61,7 +65,6 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.menuButtons = [];
     this.buttonCallbacks = [];
     this.buttonIsCTA = [];
-    this.selectedIndex = 0;
   }
 
   create(): void {
@@ -208,22 +211,25 @@ export default class LevelCompleteScene extends Phaser.Scene {
     }
     
     // Keyboard navigation (horizontal layout)
-    this.input.keyboard?.on('keydown-LEFT', () => this.navigateMenu(-1));
-    this.input.keyboard?.on('keydown-RIGHT', () => this.navigateMenu(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
-    this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
+    this.buttonNav = createMenuButtonNav(
+      this.menuButtons, this.buttonCallbacks, ctaStyler(this.buttonIsCTA),
+    );
+    this.input.keyboard?.on('keydown-LEFT', () => this.buttonNav.navigate(-1));
+    this.input.keyboard?.on('keydown-RIGHT', () => this.buttonNav.navigate(1));
+    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
+    this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
     this.input.keyboard?.on('keydown-ESC', () => this.navigateTo('MenuScene'));
     
     // Initialize selection
-    this.updateButtonStyles();
+    this.buttonNav.refreshStyles();
 
     mainSizer.add(buttonSizer, { align: 'center', padding: { top: 30 } });
     mainSizer.layout();
 
     // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
-      onNavigate: (dir) => this.navigateMenu(dir),
-      onConfirm: () => this.activateSelected(),
+      onNavigate: (dir) => this.buttonNav.navigate(dir),
+      onConfirm: () => this.buttonNav.activate(),
       onBack: () => this.navigateTo('MenuScene'),
     });
     this.gamepadNav.initState();
@@ -273,46 +279,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
       backgroundColor: bgColor,
       padding,
     }).setInteractive({ useHandCursor: true })
-      .on('pointerover', () => this.selectButton(index))
-      .on('pointerout', () => this.updateButtonStyles())
+      .on('pointerover', () => this.buttonNav.select(index))
+      .on('pointerout', () => this.buttonNav.refreshStyles())
       .on('pointerdown', callback);
     
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);
     this.buttonIsCTA.push(isCTA);
     sizer.add(btn);
-  }
-  
-  private selectButton(index: number): void {
-    this.selectedIndex = index;
-    this.updateButtonStyles();
-  }
-  
-  private navigateMenu(direction: number): void {
-    if (this.menuButtons.length === 0) return;
-    this.selectedIndex = (this.selectedIndex + direction + this.menuButtons.length) % this.menuButtons.length;
-    this.updateButtonStyles();
-  }
-  
-  private activateSelected(): void {
-    if (this.buttonCallbacks[this.selectedIndex]) {
-      this.buttonCallbacks[this.selectedIndex]();
-    }
-  }
-  
-  private updateButtonStyles(): void {
-    this.menuButtons.forEach((btn, i) => {
-      const isCTA = this.buttonIsCTA[i];
-      const baseColor = isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
-      const hoverColor = isCTA ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex;
-      if (i === this.selectedIndex) {
-        btn.setStyle({ backgroundColor: hoverColor });
-        btn.setScale(1.05);
-      } else {
-        btn.setStyle({ backgroundColor: baseColor });
-        btn.setScale(1);
-      }
-    });
   }
 
   private createButton(

@@ -44,6 +44,70 @@ export const GAME_CONFIG: GameConfigType = {
   },
 };
 
+/** Gameplay balance constants — centralized for easy tuning */
+export const BALANCE = {
+  // Stamina
+  LOW_STAMINA_THRESHOLD: 30,
+  STAMINA_WINCH_MULTIPLIER: 0.3,
+  STAMINA_STEEP_MULTIPLIER: 3.0,
+  STAMINA_GROOMING_MULTIPLIER: 1.5,
+  STAMINA_REGEN_RATE: 0.1,
+
+  // Fuel & food
+  FUEL_REFILL_RATE: 0.5,
+  FUEL_REFILL_RATE_BUFFED: 0.3,
+  FOOD_STAMINA_REFILL_RATE: 0.3,
+  FOOD_BUFF_DURATION: 60000,
+
+  // Movement
+  SPEED_BUFF_MULTIPLIER: 1.5,
+  GAMEPAD_DEADZONE: 0.2,
+  GROOMER_DRAG: 200,
+  WINCH_FORCE: 0.3,
+  WINCH_MIN_DISTANCE: 50,
+
+  // Slopes
+  TUMBLE_SLOPE_THRESHOLD: 40,
+  SLIDE_SLOPE_THRESHOLD: 30,
+  STEEP_STAMINA_THRESHOLD: 30,
+  SLIDE_GRAVITY_OFFSET: 25,
+  SLIDE_GRAVITY_MULTIPLIER: 2,
+  TUMBLE_SLIDE_SPEED: 300,
+
+  // Avalanche
+  AVALANCHE_RISK_PER_FRAME: 0.015,
+  AVALANCHE_RISK_GROOMING: 0.04,
+  AVALANCHE_WARNING_1: 0.5,
+  AVALANCHE_WARNING_2: 0.8,
+
+  // Camera
+  CAMERA_LERP: 0.1,
+  SHAKE_WARNING_1: { duration: 200, intensity: 0.005 },
+  SHAKE_WARNING_2: { duration: 300, intensity: 0.01 },
+  SHAKE_AVALANCHE: { duration: 1000, intensity: 0.02 },
+  SHAKE_TUMBLE: { duration: 500, intensity: 0.015 },
+  VICTORY_FLASH_DURATION: 300,
+  VICTORY_ZOOM: 1.2,
+  VICTORY_ZOOM_DURATION: 500,
+
+  // Timing
+  TUMBLE_ROTATION_DURATION: 1500,
+  GAME_OVER_DELAY: 2000,
+  FUEL_EMPTY_DELAY: 1500,
+  VICTORY_DELAY: 1500,
+  FEEDBACK_THROTTLE: 500,
+  FEEDBACK_FADE_DURATION: 1000,
+
+  // Night / headlights (in tile units)
+  HEADLIGHT_FRONT_TILES: 5,
+  HEADLIGHT_REAR_TILES: 4,
+  HEADLIGHT_SPREAD: Math.PI * 0.6,
+  NIGHT_DARKNESS_ALPHA: 0.7,
+  HEADLIGHT_STEPS: 6,
+  HEADLIGHT_DIST_STEPS: 8,
+  HEADLIGHT_ARC_STEPS: 12,
+} as const;
+
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';
 
 export interface DifficultyMarker {

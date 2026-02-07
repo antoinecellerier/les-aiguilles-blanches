@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode } from '../setup';
+import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode, LEVELS } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
@@ -756,13 +756,11 @@ export default class SettingsScene extends Phaser.Scene {
     if (this.returnTo === 'PauseScene') {
       // Return to pause menu — GameScene is still paused, just resume overlays
       const game = this.game;
-      const gameScene = game.scene.getScene('GameScene') as any;
       const levelIndex = this.levelIndex;
       this.scene.stop('SettingsScene');
-      // Use SceneManager.start() (not launch — SceneManager doesn't have launch)
-      game.scene.start('HUDScene', { level: levelIndex, gameScene });
+      game.scene.start('HUDScene', { level: LEVELS[levelIndex] });
       game.scene.start('DialogueScene');
-      game.scene.start('PauseScene', { gameScene });
+      game.scene.start('PauseScene', { levelIndex });
     } else if (this.returnTo === 'GameScene') {
       const game = this.game;
       this.scene.stop('SettingsScene');

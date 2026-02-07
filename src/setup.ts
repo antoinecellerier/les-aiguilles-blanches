@@ -9,17 +9,17 @@ import { TRANSLATIONS, t, setLanguage, getLanguage, detectLanguage, getSavedLang
 import { Accessibility, type ColorblindMode } from './utils/accessibility';
 
 // Make globals available on window for JS scene files
-(window as any).GAME_CONFIG = GAME_CONFIG;
-(window as any).DIFFICULTY_MARKERS = DIFFICULTY_MARKERS;
-(window as any).FOOD_ITEMS = FOOD_ITEMS;
-(window as any).LEVELS = LEVELS;
-(window as any).TRANSLATIONS = TRANSLATIONS;
-(window as any).t = t;
-(window as any).setLanguage = setLanguage;
-(window as any).getLanguage = getLanguage;
-(window as any).detectLanguage = detectLanguage;
-(window as any).getSavedLanguage = getSavedLanguage;
-(window as any).Accessibility = Accessibility;
+window.GAME_CONFIG = GAME_CONFIG;
+window.DIFFICULTY_MARKERS = DIFFICULTY_MARKERS;
+window.FOOD_ITEMS = FOOD_ITEMS;
+window.LEVELS = LEVELS;
+window.TRANSLATIONS = TRANSLATIONS;
+window.t = t;
+window.setLanguage = setLanguage;
+window.getLanguage = getLanguage;
+window.detectLanguage = detectLanguage;
+window.getSavedLanguage = getSavedLanguage;
+window.Accessibility = Accessibility;
 
 // Export for TypeScript scene files
 export {

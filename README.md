@@ -78,10 +78,17 @@ snow-groomer/
 │   ├── main.ts         # Phaser initialization
 │   ├── setup.ts        # Global setup
 │   ├── config/         # Config files
-│   │   ├── gameConfig.ts
+│   │   ├── gameConfig.ts   # Constants + BALANCE tuning
 │   │   ├── levels.ts
 │   │   ├── localization.ts
+│   │   ├── storageKeys.ts
 │   │   └── theme.ts
+│   ├── systems/        # Extracted subsystems
+│   │   ├── WeatherSystem.ts
+│   │   └── HazardSystem.ts
+│   ├── types/          # TypeScript declarations
+│   │   ├── global.d.ts
+│   │   └── GameSceneInterface.ts
 │   ├── scenes/         # Phaser scenes
 │   │   ├── BootScene.ts
 │   │   ├── MenuScene.ts
@@ -93,6 +100,7 @@ snow-groomer/
 │       ├── gamepadMenu.ts
 │       ├── gameProgress.ts
 │       ├── keyboardLayout.ts
+│       ├── menuButtonNav.ts
 │       └── sceneTransitions.ts
 ├── tests/
 │   ├── e2e/            # Playwright E2E tests

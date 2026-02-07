@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level } from '../setup';
 import { THEME } from '../config/theme';
+import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -9,18 +10,11 @@ import { THEME } from '../config/theme';
 
 interface HUDSceneData {
   level: Level;
-  gameScene: Phaser.Scene & {
-    fuel: number;
-    stamina: number;
-    winchActive: boolean;
-    getCoverage: () => number;
-    transitionToLevel: (level: number) => void;
-  };
 }
 
 export default class HUDScene extends Phaser.Scene {
   private level!: Level;
-  private gameScene!: HUDSceneData['gameScene'] | null;
+  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0 };
   private isSkipping = false;
   private gamepadSelectPressed = false;
   private uiScale = 1;
@@ -46,13 +40,13 @@ export default class HUDScene extends Phaser.Scene {
   // Touch controls bounds (for dialogue positioning)
   private touchControlsTopEdge = 0;
 
-  // Touch controls state (public for GameScene to read)
-  public touchUp = false;
-  public touchDown = false;
-  public touchLeft = false;
-  public touchRight = false;
-  public touchGroom = false;
-  public touchWinch = false;
+  // Touch controls state (emitted via GAME_EVENTS.TOUCH_INPUT)
+  private touchUp = false;
+  private touchDown = false;
+  private touchLeft = false;
+  private touchRight = false;
+  private touchGroom = false;
+  private touchWinch = false;
 
   constructor() {
     super({ key: 'HUDScene' });
@@ -65,7 +59,6 @@ export default class HUDScene extends Phaser.Scene {
 
   init(data: HUDSceneData): void {
     this.level = data.level;
-    this.gameScene = data.gameScene;
     this.isSkipping = false;
   }
 
@@ -251,7 +244,8 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     this.barWidth = barWidth;
-    this.gameScene?.events.on('timerUpdate', this.updateTimer, this);
+    this.game.events.on(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
+    this.game.events.on(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
     this.lastResizeWidth = width;
     this.lastResizeHeight = height;
     this.scale.on('resize', this.handleResize, this);
@@ -593,9 +587,8 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   private openPauseMenu(): void {
-    // Delegate to GameScene.pauseGame() so PauseScene receives the correct data
-    if (this.gameScene && !this.scene.isActive('PauseScene')) {
-      (this.gameScene as unknown as { pauseGame: () => void }).pauseGame();
+    if (!this.scene.isActive('PauseScene')) {
+      this.game.events.emit(GAME_EVENTS.PAUSE_REQUEST);
     }
   }
 
@@ -617,14 +610,7 @@ export default class HUDScene extends Phaser.Scene {
     this.isSkipping = true;
 
     if (nextLevel < LEVELS.length) {
-      if (this.gameScene && typeof this.gameScene.transitionToLevel === 'function') {
-        this.gameScene.transitionToLevel(nextLevel);
-      } else {
-        this.scene.stop('HUDScene');
-        this.scene.stop('DialogueScene');
-        this.game.scene.stop('GameScene');
-        this.game.scene.start('GameScene', { level: nextLevel });
-      }
+      this.game.events.emit(GAME_EVENTS.SKIP_LEVEL, nextLevel);
     } else {
       this.scene.stop('HUDScene');
       this.scene.stop('DialogueScene');
@@ -634,22 +620,22 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   update(): void {
-    if (!this.gameScene || !this.scene.isActive()) return;
+    if (!this.scene.isActive()) return;
     if (!this.fuelBar || !this.fuelText) return;
 
-    const fuelPercent = this.gameScene.fuel / 100;
-    const staminaPercent = this.gameScene.stamina / 100;
+    const { fuel, stamina, coverage, winchActive } = this.gameState;
+    const fuelPercent = fuel / 100;
+    const staminaPercent = stamina / 100;
 
     this.fuelBar.width = this.barWidth * fuelPercent;
     if (this.staminaBar) this.staminaBar.width = this.barWidth * staminaPercent;
 
-    this.fuelText.setText(Math.round(this.gameScene.fuel) + '%');
-    this.staminaText?.setText(Math.round(this.gameScene.stamina) + '%');
+    this.fuelText.setText(Math.round(fuel) + '%');
+    this.staminaText?.setText(Math.round(stamina) + '%');
 
     this.fuelBar.setFillStyle(fuelPercent > 0.3 ? THEME.colors.dangerHex : 0xff0000);
     this.staminaBar?.setFillStyle(staminaPercent > 0.3 ? THEME.colors.successHex : 0xffaa00);
 
-    const coverage = this.gameScene.getCoverage();
     if (this.coverageText) {
       this.coverageText.setText((t('coverage') || 'Coverage') + ': ' + coverage + '%');
       if (coverage >= this.level.targetCoverage) {
@@ -659,7 +645,7 @@ export default class HUDScene extends Phaser.Scene {
 
     // Show/hide winch status indicator
     if (this.winchStatus) {
-      if (this.gameScene.winchActive) {
+      if (winchActive) {
         this.winchStatus.setText('🔗 ' + (t('winchActive') || 'WINCH'));
         this.winchStatus.setVisible(true);
       } else {
@@ -678,6 +664,16 @@ export default class HUDScene extends Phaser.Scene {
       this.touchWinch = false;
     }
 
+    // Emit touch state for GameScene
+    this.game.events.emit(GAME_EVENTS.TOUCH_INPUT, {
+      left: this.touchLeft,
+      right: this.touchRight,
+      up: this.touchUp,
+      down: this.touchDown,
+      groom: this.touchGroom,
+      winch: this.touchWinch,
+    });
+
     // Gamepad Select/Back button (button 8) for level skip
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
@@ -689,6 +685,10 @@ export default class HUDScene extends Phaser.Scene {
         this.gamepadSelectPressed = selectPressed;
       }
     }
+  }
+
+  private handleGameState(state: GameStateEvent): void {
+    this.gameState = state;
   }
 
   private updateTimer(seconds: number): void {
@@ -721,7 +721,7 @@ export default class HUDScene extends Phaser.Scene {
       if (this.scene.isActive()) {
         this.lastResizeWidth = width;
         this.lastResizeHeight = height;
-        this.scene.restart({ level: this.level, gameScene: this.gameScene });
+        this.scene.restart({ level: this.level });
       }
     }, 300);
   }
@@ -733,11 +733,9 @@ export default class HUDScene extends Phaser.Scene {
     this.tweens.killAll();
     this.children.removeAll(true);
 
-    if (this.gameScene) {
-      this.gameScene.events.off('timerUpdate', this.updateTimer, this);
-    }
+    this.game.events.off(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
+    this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
 
-    this.gameScene = null;
     this.fuelBar = null;
     this.fuelText = null;
     this.staminaBar = null;

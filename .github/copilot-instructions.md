@@ -52,10 +52,20 @@ All keys are centralized in `src/config/storageKeys.ts`. Always use `STORAGE_KEY
 ### Closure Array References
 Deep copy arrays before creating closures if the array is reused/cleared (see cliff system in ARCHITECTURE.md)
 
+### Balance Constants
+All gameplay tuning values are in `BALANCE` (from `src/config/gameConfig.ts`). Never hardcode magic numbers in GameScene.
+
+### Cross-Scene Communication
+GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/types/GameSceneInterface.ts`). No scene should hold a direct reference to another scene.
+
 ## Key Files
 - `src/scenes/GameScene.ts` - Main gameplay, physics, cliff system
+- `src/config/gameConfig.ts` - Game constants, BALANCE tuning values
 - `src/config/levels.ts` - Level definitions
 - `src/config/localization.ts` - All UI strings
+- `src/systems/WeatherSystem.ts` - Night overlay, headlights, weather
+- `src/systems/HazardSystem.ts` - Avalanche zones, risk tracking
+- `src/types/GameSceneInterface.ts` - Cross-scene event types
 - `tests/e2e/conftest.py` - Test helpers
 
 ## Domain
