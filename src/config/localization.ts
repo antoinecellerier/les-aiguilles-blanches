@@ -73,6 +73,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Winch
         winchAttached: "🔗 Treuil attaché ! Maintenir {winchKey} pour assistance.",
+        winchActive: "TREUIL",
         winchHint: "Appuyez sur {winchKey} près d'un ancrage ⚓ pour utiliser le treuil",
         winchHintTouch: "Maintenir 🔗 pour le treuil",
         accessPath: "Route de service",
@@ -195,6 +196,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level2Intro: "Bien joué hier ! Aujourd'hui, on passe à la piste bleue.",
         level3Intro: "Le snowpark a besoin d'amour. Précision !",
         level4Intro: "L'Aigle, c'est du sérieux. Surveille ton carburant. Les chemins de dameuse permettent de remonter la piste — repère les piquets jaunes et noirs.",
+        level4WinchIntro: "Tu vas voir des ancrages ⚓ sur les pentes raides. Appuie sur {winchKey} à côté pour accrocher le treuil — ça t'évitera de glisser.",
+        level4WinchIntroTouch: "Tu vas voir des ancrages ⚓ sur les pentes raides. Appuie sur le bouton treuil à côté pour t'accrocher — ça t'évitera de glisser.",
         level5Intro: "Compétition demain ! Le half-pipe doit être impeccable.",
         level6Intro: "Opération de nuit sur La Verticale. Utilise le treuil.",
         thierryWarning: "Attention, la zone avalanche est sensible. Soyez prudent.",
@@ -277,6 +280,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Winch
         winchAttached: "🔗 Winch attached! Hold {winchKey} for assistance.",
+        winchActive: "WINCH",
         winchHint: "Press {winchKey} near an anchor ⚓ to use winch",
         winchHintTouch: "Hold 🔗 for winch",
         accessPath: "Service Road",
@@ -396,6 +400,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level2Intro: "Nice work! Today we tackle the blue run.",
         level3Intro: "The snowpark needs love. Precision is key!",
         level4Intro: "L'Aigle is serious. Watch your fuel. Cat tracks let you drive back up — look for the amber and black striped poles.",
+        level4WinchIntro: "You'll see anchor points ⚓ on steep slopes. Press {winchKey} nearby to attach the winch — it'll keep you from sliding.",
+        level4WinchIntroTouch: "You'll see anchor points ⚓ on steep slopes. Tap the winch button nearby to attach — it'll keep you from sliding.",
         level5Intro: "Competition tomorrow! Half-pipe must be spotless.",
         level6Intro: "Night ops on La Verticale. Use the winch.",
         thierryWarning: "Careful, avalanche zone is sensitive today.",
@@ -477,6 +483,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Winch
         winchAttached: "🔗 Winde befestigt! Halte {winchKey} für Unterstützung.",
+        winchActive: "WINDE",
         winchHint: "Drücke {winchKey} bei einem Ankerpunkt ⚓ für die Winde",
         winchHintTouch: "Halte 🔗 für die Winde",
         accessPath: "Zufahrtsweg",
@@ -563,6 +570,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level2Intro: "Gut gemacht gestern! Heute geht's zur blauen Piste.",
         level3Intro: "Der Snowpark braucht Liebe. Präzision!",
         level4Intro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Pistenraupenspuren führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",
+        level4WinchIntro: "Du wirst Ankerpunkte ⚓ an steilen Hängen sehen. Drücke {winchKey} daneben, um die Winde einzuhaken — damit rutscht du nicht ab.",
+        level4WinchIntroTouch: "Du wirst Ankerpunkte ⚓ an steilen Hängen sehen. Tippe auf den Winden-Button, um einzuhaken — damit rutscht du nicht ab.",
         level5Intro: "Morgen ist Wettkampf! Die Halfpipe muss perfekt sein.",
         level6Intro: "Nachteinsatz auf La Verticale. Benutze die Winde.",
         thierryWarning: "Achtung, die Lawinenzone ist empfindlich. Sei vorsichtig.",
@@ -675,6 +684,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Winch
         winchAttached: "🔗 Verricello agganciato! Tieni {winchKey} per assistenza.",
+        winchActive: "VERRICELLO",
         winchHint: "Premi {winchKey} vicino a un ancoraggio ⚓ per il verricello",
         winchHintTouch: "Tieni 🔗 per il verricello",
         accessPath: "Strada di servizio",
@@ -761,6 +771,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level2Intro: "Ben fatto ieri! Oggi si passa alla pista blu.",
         level3Intro: "Lo snowpark ha bisogno di cure. Precisione!",
         level4Intro: "L'Aigle è roba seria. Occhio al carburante. I tracciati battipista permettono di risalire — cerca i pali a strisce gialle e nere.",
+        level4WinchIntro: "Vedrai punti di ancoraggio ⚓ sui pendii ripidi. Premi {winchKey} vicino per agganciare il verricello — eviterai di scivolare.",
+        level4WinchIntroTouch: "Vedrai punti di ancoraggio ⚓ sui pendii ripidi. Tocca il pulsante verricello vicino per agganciarti — eviterai di scivolare.",
         level5Intro: "Domani c'è la gara! L'halfpipe deve essere perfetto.",
         level6Intro: "Operazione notturna su La Verticale. Usa il verricello.",
         thierryWarning: "Attenzione, la zona valanghe è sensibile. Fai attenzione.",
@@ -873,6 +885,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Winch
         winchAttached: "🔗 ¡Cabrestante enganchado! Mantén {winchKey} para asistencia.",
+        winchActive: "CABRESTANTE",
         winchHint: "Pulsa {winchKey} cerca de un anclaje ⚓ para usar el cabrestante",
         winchHintTouch: "Mantén 🔗 para el cabrestante",
         accessPath: "Camino de servicio",
@@ -959,6 +972,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         level2Intro: "¡Bien hecho ayer! Hoy pasamos a la pista azul.",
         level3Intro: "El snowpark necesita cariño. ¡Precisión!",
         level4Intro: "L'Aigle es serio. Vigila el combustible. Los caminos de pisapistas permiten subir — busca los postes con rayas amarillas y negras.",
+        level4WinchIntro: "Verás puntos de anclaje ⚓ en las pendientes pronunciadas. Pulsa {winchKey} cerca para enganchar el cabrestante — evitarás resbalar.",
+        level4WinchIntroTouch: "Verás puntos de anclaje ⚓ en las pendientes pronunciadas. Toca el botón de cabrestante cerca para engancharte — evitarás resbalar.",
         level5Intro: "¡Mañana hay competición! El halfpipe debe estar perfecto.",
         level6Intro: "Operación nocturna en La Verticale. Usa el cabrestante.",
         thierryWarning: "Cuidado, la zona de avalanchas es sensible. Ten cuidado.",

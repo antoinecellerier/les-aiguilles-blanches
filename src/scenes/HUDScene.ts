@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level } from '../setup';
-import { getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
 
 /**
@@ -35,7 +34,7 @@ export default class HUDScene extends Phaser.Scene {
   private coverageText: Phaser.GameObjects.Text | null = null;
   private timerText: Phaser.GameObjects.Text | null = null;
   private targetText: Phaser.GameObjects.Text | null = null;
-  private winchHint: Phaser.GameObjects.Text | null = null;
+  private winchStatus: Phaser.GameObjects.Text | null = null;
   private touchControlsContainer: Phaser.GameObjects.Container | null = null;
   
   // Virtual joystick components
@@ -90,115 +89,113 @@ export default class HUDScene extends Phaser.Scene {
     }
     this.uiScale = baseScale;
 
-    const padding = Math.round(12 * this.uiScale);
-    const barWidth = Math.round(130 * this.uiScale);
-    const barHeight = Math.round(18 * this.uiScale);
-    const leftPanelWidth = Math.round(220 * this.uiScale);
-    const leftPanelHeight = Math.round(140 * this.uiScale);
-    const rightPanelWidth = Math.round(150 * this.uiScale);
-    const rightPanelHeight = Math.round(90 * this.uiScale);
+    const padding = Math.round(10 * this.uiScale);
+    const isNarrow = width < 600; // Portrait phone or small screen
+    const isShort = height < 500; // Landscape phone
+    const isCompact = isNarrow || isShort; // Drop labels, tighten spacing
+    const barWidth = Math.round((isCompact ? 90 : 110) * this.uiScale);
+    const barHeight = Math.round(14 * this.uiScale);
+    const barBorder = Math.max(1, Math.round(1.5 * this.uiScale));
 
-    const fontTiny = Math.round(12 * this.uiScale) + 'px';
-    const fontSmall = Math.round(14 * this.uiScale) + 'px';
-    const fontMed = Math.round(16 * this.uiScale) + 'px';
-    const fontLarge = Math.round(26 * this.uiScale) + 'px';
+    // Minimum readable font sizes (CSS pixels)
+    const fontTiny = Math.max(11, Math.round(12 * this.uiScale)) + 'px';
+    const fontSmall = Math.max(12, Math.round(14 * this.uiScale)) + 'px';
+    const fontMed = Math.max(14, Math.round(16 * this.uiScale)) + 'px';
+    const fontLarge = Math.max(18, Math.round(24 * this.uiScale)) + 'px';
 
-    // Left panel — 3D beveled retro style
-    const bevelLight = 0x555555;
-    const bevelDark = 0x111111;
-    const panelFill = 0x1a1a1a;
-    const bevelWidth = Math.max(2, Math.round(2 * this.uiScale));
+    // === VISOR: semi-transparent dark strip across top ===
+    // Generous row spacing for clear visual separation
+    const rowGap = isShort ? Math.round(19 * this.uiScale) : Math.round(22 * this.uiScale);
+    const row1Y = padding;
+    // Extra gap after piste name for clear visual separation from bars
+    const nameGap = isShort ? Math.round(24 * this.uiScale) : Math.round(28 * this.uiScale);
+    const row2Y = row1Y + nameGap;
+    const row3Y = row2Y + rowGap;
+    const row4Y = row3Y + Math.round((isShort ? 21 : 24) * this.uiScale);
+    const visorHeight = row4Y + Math.round((isShort ? 26 : 26) * this.uiScale);
 
-    // Left panel background + bevel
-    this.add.rectangle(0, 0, leftPanelWidth, leftPanelHeight, panelFill).setOrigin(0).setScrollFactor(0);
-    // Top edge (light)
-    this.add.rectangle(0, 0, leftPanelWidth, bevelWidth, bevelLight).setOrigin(0).setScrollFactor(0);
-    // Left edge (light)
-    this.add.rectangle(0, 0, bevelWidth, leftPanelHeight, bevelLight).setOrigin(0).setScrollFactor(0);
-    // Bottom edge (dark)
-    this.add.rectangle(0, leftPanelHeight - bevelWidth, leftPanelWidth, bevelWidth, bevelDark).setOrigin(0).setScrollFactor(0);
-    // Right edge (dark)
-    this.add.rectangle(leftPanelWidth - bevelWidth, 0, bevelWidth, leftPanelHeight, bevelDark).setOrigin(0).setScrollFactor(0);
-    // Color accent stripe (info blue, thin, just inside top bevel)
-    this.add.rectangle(bevelWidth, bevelWidth, leftPanelWidth - bevelWidth * 2, Math.max(1, Math.round(1 * this.uiScale)), THEME.colors.infoHex).setOrigin(0).setScrollFactor(0);
+    this.add.rectangle(0, 0, width, visorHeight, 0x000000)
+      .setOrigin(0).setScrollFactor(0).setAlpha(0.55);
+    // Thin bottom edge accent
+    this.add.rectangle(0, visorHeight - 1, width, 1, THEME.colors.infoHex)
+      .setOrigin(0).setScrollFactor(0).setAlpha(0.4);
 
-    const row1Y = Math.round(8 * this.uiScale);
-    const row2Y = Math.round(32 * this.uiScale);
-    const row3Y = Math.round(58 * this.uiScale);
-    const row4Y = Math.round(90 * this.uiScale);
-    const labelWidth = Math.round(48 * this.uiScale);
-    const barStartX = labelWidth + padding;
+    // On compact screens, drop labels and start bars at padding
+    const barStartX = isCompact ? padding : padding + Math.round(44 * this.uiScale);
 
+    // Level name
     this.add.text(padding, row1Y, t(this.level.nameKey) || 'Level', {
       fontFamily: THEME.fonts.family,
       fontSize: fontSmall,
       fontStyle: 'bold',
-      color: THEME.colors.info,
+      color: '#FFFFFF',
     }).setScrollFactor(0);
 
-    // Fuel row — retro text label instead of emoji
-    this.add.text(padding, row2Y + Math.round(2 * this.uiScale), 'FUEL', {
+    // Fuel bar
+    if (!isCompact) {
+      this.add.text(padding, row2Y, 'FUEL', {
+        fontFamily: THEME.fonts.family,
+        fontSize: fontTiny,
+        fontStyle: 'bold',
+        color: '#EEEEEE',
+      }).setScrollFactor(0);
+    }
+    const fuelBarY = row2Y + Math.round(7 * this.uiScale);
+    this.add.rectangle(barStartX - barBorder, fuelBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelBarBg = this.add.rectangle(barStartX, fuelBarY, barWidth, barHeight, 0x222222).setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelBar = this.add.rectangle(barStartX, fuelBarY, barWidth, barHeight, THEME.colors.dangerHex).setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelText = this.add.text(barStartX + barWidth + Math.round(6 * this.uiScale), row2Y, '100%', {
       fontFamily: THEME.fonts.family,
       fontSize: fontTiny,
       fontStyle: 'bold',
-      color: THEME.colors.danger,
-    }).setScrollFactor(0);
-    this.fuelBarBg = this.add.rectangle(barStartX, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelBar = this.add.rectangle(barStartX, row2Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.dangerHex).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelText = this.add.text(barStartX + barWidth + 5, row2Y, '100%', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontSmall,
-      color: THEME.colors.textPrimary,
+      color: '#FFFFFF',
     }).setScrollFactor(0);
 
-    // Stamina row
-    this.add.text(padding, row3Y + Math.round(2 * this.uiScale), 'STAM', {
+    // Stamina bar
+    if (!isCompact) {
+      this.add.text(padding, row3Y, 'STAM', {
+        fontFamily: THEME.fonts.family,
+        fontSize: fontTiny,
+        fontStyle: 'bold',
+        color: '#EEEEEE',
+      }).setScrollFactor(0);
+    }
+    const stamBarY = row3Y + Math.round(7 * this.uiScale);
+    this.add.rectangle(barStartX - barBorder, stamBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaBarBg = this.add.rectangle(barStartX, stamBarY, barWidth, barHeight, 0x222222).setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaBar = this.add.rectangle(barStartX, stamBarY, barWidth, barHeight, THEME.colors.successHex).setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaText = this.add.text(barStartX + barWidth + Math.round(6 * this.uiScale), row3Y, '100%', {
       fontFamily: THEME.fonts.family,
       fontSize: fontTiny,
       fontStyle: 'bold',
-      color: THEME.colors.success,
-    }).setScrollFactor(0);
-    this.staminaBarBg = this.add.rectangle(barStartX, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, 0x333333).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaBar = this.add.rectangle(barStartX, row3Y + Math.round(8 * this.uiScale), barWidth, barHeight, THEME.colors.successHex).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaText = this.add.text(barStartX + barWidth + 5, row3Y, '100%', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontSmall,
-      color: THEME.colors.textPrimary,
+      color: '#FFFFFF',
     }).setScrollFactor(0);
 
-    // Coverage row
+    // Coverage — white for contrast, smaller on compact screens
     this.coverageText = this.add.text(padding, row4Y, (t('coverage') || 'Coverage') + ': 0%', {
       fontFamily: THEME.fonts.family,
-      fontSize: fontMed,
-      color: THEME.colors.info,
+      fontSize: isCompact ? fontSmall : fontMed,
+      fontStyle: 'bold',
+      color: '#FFFFFF',
     }).setScrollFactor(0);
 
-    // Right panel — 3D beveled retro style
-    const rpX = width - rightPanelWidth;
-    this.add.rectangle(rpX, 0, rightPanelWidth, rightPanelHeight, panelFill).setOrigin(0).setScrollFactor(0);
-    // Top edge (light)
-    this.add.rectangle(rpX, 0, rightPanelWidth, bevelWidth, bevelLight).setOrigin(0).setScrollFactor(0);
-    // Left edge (light) — note: left side of right panel
-    this.add.rectangle(rpX, 0, bevelWidth, rightPanelHeight, bevelLight).setOrigin(0).setScrollFactor(0);
-    // Bottom edge (dark)
-    this.add.rectangle(rpX, rightPanelHeight - bevelWidth, rightPanelWidth, bevelWidth, bevelDark).setOrigin(0).setScrollFactor(0);
-    // Right edge (dark)
-    this.add.rectangle(width - bevelWidth, 0, bevelWidth, rightPanelHeight, bevelDark).setOrigin(0).setScrollFactor(0);
-    // Accent stripe (gold)
-    this.add.rectangle(rpX + bevelWidth, bevelWidth, rightPanelWidth - bevelWidth * 2, Math.max(1, Math.round(1 * this.uiScale)), THEME.colors.accentHex).setOrigin(0).setScrollFactor(0);
-
-    this.timerText = this.add.text(width - padding, Math.round(12 * this.uiScale), '00:00', {
+    // === TOP-RIGHT: Timer + target ===
+    this.timerText = this.add.text(width - padding, row1Y, '00:00', {
       fontFamily: THEME.fonts.family,
       fontSize: fontLarge,
       fontStyle: 'bold',
-      color: THEME.colors.textPrimary,
+      color: '#FFFFFF',
     }).setOrigin(1, 0).setScrollFactor(0);
 
-    this.targetText = this.add.text(rpX + padding, Math.round(50 * this.uiScale), (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
+    // On compact screens, stack target below timer at row3Y to avoid overlap
+    const targetY = isCompact ? row3Y : row1Y + Math.round(26 * this.uiScale);
+    this.targetText = this.add.text(width - padding, targetY,
+      (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
       fontFamily: THEME.fonts.family,
-      fontSize: fontMed,
+      fontSize: fontSmall,
+      fontStyle: 'bold',
       color: THEME.colors.accent,
-    }).setOrigin(0, 0).setScrollFactor(0);
+    }).setOrigin(1, 0).setScrollFactor(0);
 
     // Touch detection for button sizing
     const phaserTouch = this.sys.game.device.input.touch;
@@ -206,47 +203,42 @@ export default class HUDScene extends Phaser.Scene {
     const hasTouch = phaserTouch || browserTouch;
     // isMobile already defined at top of create()
     
-    // Skip level button - larger and more visible on touch devices
+    // Skip level button — inside visor
+    // On narrow mobile, use abbreviated ">>" to save space
+    // On very narrow (<=360px), position skip on left to avoid crowding pause/fullscreen
     const skipFontSize = (hasTouch && isMobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
-    const skipPadX = (hasTouch && isMobile) ? Math.max(10, Math.round(8 * this.uiScale)) : Math.round(6 * this.uiScale);
-    const skipPadY = (hasTouch && isMobile) ? Math.max(6, Math.round(5 * this.uiScale)) : Math.round(3 * this.uiScale);
-    const skipLabel = (hasTouch && isMobile) ? '>> Skip' : '>> Skip Level [N]';
+    const isVeryNarrow = width <= 360;
+    const skipLabel = isNarrow ? '>>' : (hasTouch && isMobile) ? '>> Skip' : '>> Skip [N]';
+    let nextButtonY = row4Y;
     
-    // Track Y position for stacked buttons
-    let nextButtonY = rightPanelHeight + Math.round(5 * this.uiScale);
-    
-    const skipBtn = this.add.text(width - padding, nextButtonY, skipLabel, {
+    const skipOriginX = (isVeryNarrow && hasTouch) ? 0 : 1;
+    const skipX = (isVeryNarrow && hasTouch)
+      ? padding + (this.coverageText?.width ?? 0) + Math.round(8 * this.uiScale)
+      : width - padding;
+    const skipBtn = this.add.text(skipX, nextButtonY, skipLabel, {
       fontFamily: THEME.fonts.family,
       fontSize: skipFontSize,
       color: THEME.colors.textMuted,
-      backgroundColor: '#333333',
-      padding: { x: skipPadX, y: skipPadY },
-    }).setOrigin(1, 0).setScrollFactor(0)
+    }).setOrigin(skipOriginX, 0).setScrollFactor(0)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', () => skipBtn.setStyle({ color: THEME.colors.textPrimary }))
       .on('pointerout', () => skipBtn.setStyle({ color: THEME.colors.textMuted }))
       .on('pointerdown', () => this.skipLevel());
     
-    nextButtonY += skipBtn.height + Math.round(5 * this.uiScale);
+    nextButtonY = visorHeight + Math.round(4 * this.uiScale);
 
     this.input.keyboard?.on('keydown-N', () => this.skipLevel());
     
     // Show keyboard hint on desktop (even with touchscreen), touch hint on mobile
-    const showTouchHint = hasTouch && isMobile;
 
+    // Winch status indicator (hidden by default, shown when winch is active)
     if (this.level.hasWinch) {
-      const winchKey = getWinchKeyName();
-      const winchHintRaw = showTouchHint
-        ? (t('winchHintTouch') || 'Hold 🔗 for winch')
-        : (t('winchHint') || `${winchKey} = Winch`);
-      const winchHintText = 'WINCH: ' + winchHintRaw.replace('{winchKey}', winchKey);
-      this.winchHint = this.add.text(Math.round(width / 2), Math.round(12 * this.uiScale), winchHintText, {
+      this.winchStatus = this.add.text(padding, row4Y + Math.round(20 * this.uiScale), '', {
         fontFamily: THEME.fonts.family,
         fontSize: fontSmall,
-        color: THEME.colors.accent,
-        backgroundColor: '#000000',
-        padding: { x: Math.round(8 * this.uiScale), y: Math.round(4 * this.uiScale) },
-      }).setOrigin(0.5, 0).setScrollFactor(0).setAlpha(0.8);
+        fontStyle: 'bold',
+        color: '#00FF00',
+      }).setScrollFactor(0).setVisible(false);
     }
 
     this.barWidth = barWidth;
@@ -268,35 +260,45 @@ export default class HUDScene extends Phaser.Scene {
     
     // Larger font for touch buttons on mobile (minimum 24px for easy tapping)
     const touchBtnSize = isMobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
-    const touchBtnPadX = isMobile ? Math.max(12, Math.round(10 * this.uiScale)) : Math.round(8 * this.uiScale);
-    const touchBtnPadY = isMobile ? Math.max(8, Math.round(6 * this.uiScale)) : Math.round(4 * this.uiScale);
-    const touchBtnAlpha = 0.6;
     
     // Pause/Menu button (touch devices)
+    const touchBtnPad = Math.round(6 * this.uiScale);
     if (hasTouch) {
       const pauseBtn = this.add.text(width - padding, nextButtonY, '||', {
         fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
-        color: '#CCCCCC',
-        backgroundColor: '#333333',
-        padding: { x: touchBtnPadX, y: touchBtnPadY },
-      }).setOrigin(1, 0).setScrollFactor(0).setDepth(100).setAlpha(touchBtnAlpha)
-        .setInteractive({ useHandCursor: true })
+        fontStyle: 'bold',
+        color: '#FFFFFF',
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+      const pbBg = this.add.rectangle(
+        pauseBtn.x - pauseBtn.width / 2, pauseBtn.y + pauseBtn.height / 2,
+        pauseBtn.width + touchBtnPad * 2, pauseBtn.height + touchBtnPad,
+        0x000000
+      ).setScrollFactor(0).setDepth(100).setAlpha(0.55);
+      pbBg.setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.openPauseMenu());
-      nextButtonY += pauseBtn.height + Math.round(5 * this.uiScale);
+      pauseBtn.setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.openPauseMenu());
+      nextButtonY += pauseBtn.height + touchBtnPad + Math.round(5 * this.uiScale);
     }
 
     // Fullscreen button (touch devices or when in fullscreen)
     if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
       const fsLabel = isFullscreen ? 'X' : '[]';
-      this.add.text(width - padding, nextButtonY, fsLabel, {
+      const fsBtn = this.add.text(width - padding, nextButtonY, fsLabel, {
         fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
-        color: isFullscreen ? '#FF6666' : '#CCCCCC',
-        backgroundColor: '#333333',
-        padding: { x: touchBtnPadX, y: touchBtnPadY },
-      }).setOrigin(1, 0).setScrollFactor(0).setDepth(100).setAlpha(touchBtnAlpha)
-        .setInteractive({ useHandCursor: true })
+        fontStyle: 'bold',
+        color: isFullscreen ? '#FF6666' : '#FFFFFF',
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+      const fsBg = this.add.rectangle(
+        fsBtn.x - fsBtn.width / 2, fsBtn.y + fsBtn.height / 2,
+        fsBtn.width + touchBtnPad * 2, fsBtn.height + touchBtnPad,
+        0x000000
+      ).setScrollFactor(0).setDepth(100).setAlpha(0.55);
+      fsBg.setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.toggleFullscreen());
+      fsBtn.setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.toggleFullscreen());
     }
   }
@@ -328,7 +330,13 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Virtual joystick (bottom-left)
-    const joystickRadius = Math.round(btnSize * 1.8);
+    // On narrow screens, cap joystick radius so it doesn't overlap action buttons
+    const isNarrowTouch = width < 600;
+    const actionBtnSpace = isNarrowTouch ? (btnSize * 2.4 + padding * 1.5) : 0;
+    const maxJoystickRadius = isNarrowTouch
+      ? Math.floor((width - actionBtnSpace - padding * 2 - 10) / 2) // 10px gap
+      : Infinity;
+    const joystickRadius = Math.min(Math.round(btnSize * 1.8), maxJoystickRadius);
     const thumbRadius = Math.round(btnSize * 0.6);
     const joystickX = Math.round(padding + joystickRadius);
     const joystickY = Math.round(height - padding - joystickRadius);
@@ -521,17 +529,58 @@ export default class HUDScene extends Phaser.Scene {
         onUp();
       });
 
-    const text = this.add.text(x, y, label, {
-      fontFamily: THEME.fonts.family,
-      fontSize: Math.round(size * 0.35) + 'px',
-      fontStyle: 'bold',
-      color: THEME.colors.textPrimary,
-    }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.9);
+    // Draw pixel art icon instead of text label
+    const icon = this.drawButtonIcon(x, y, size, label);
 
     // Add to container if it exists
     if (this.touchControlsContainer) {
-      this.touchControlsContainer.add([bg, text]);
+      const items: Phaser.GameObjects.GameObject[] = [bg];
+      if (icon) items.push(icon);
+      this.touchControlsContainer.add(items);
     }
+  }
+
+  /** Draw a pixel art icon for touch buttons using Phaser Graphics */
+  private drawButtonIcon(x: number, y: number, size: number, label: string): Phaser.GameObjects.Graphics | null {
+    const g = this.add.graphics().setScrollFactor(0).setAlpha(0.9);
+    const px = Math.max(2, Math.round(size * 0.06)); // pixel size
+    const cx = x;
+    const cy = y;
+
+    if (label === 'GRM') {
+      // Tiller/grooming icon: a rake-like pattern (3 teeth + handle)
+      const color = 0xddddff;
+      g.fillStyle(color);
+      // Handle (vertical bar)
+      g.fillRect(cx - px * 0.5, cy - px * 3, px, px * 6);
+      // Crossbar
+      g.fillRect(cx - px * 3, cy + px * 2, px * 6, px);
+      // Teeth (3 prongs hanging down)
+      for (const offset of [-2, 0, 2]) {
+        g.fillRect(cx + offset * px - px * 0.5, cy + px * 3, px, px * 2);
+      }
+    } else if (label === 'WCH') {
+      // Winch/anchor icon: simplified anchor shape
+      const color = 0xffddaa;
+      g.fillStyle(color);
+      // Vertical shaft
+      g.fillRect(cx - px * 0.5, cy - px * 3, px, px * 5);
+      // Top crossbar (anchor ring)
+      g.fillRect(cx - px * 2, cy - px * 3, px * 4, px);
+      // Bottom curved arms (simplified as angled lines)
+      // Left arm
+      g.fillRect(cx - px * 3, cy + px * 1, px, px);
+      g.fillRect(cx - px * 2, cy + px * 2, px, px);
+      // Right arm
+      g.fillRect(cx + px * 2, cy + px * 1, px, px);
+      g.fillRect(cx + px * 1, cy + px * 2, px, px);
+      // Bottom point
+      g.fillRect(cx - px * 0.5, cy + px * 2, px, px * 2);
+    } else {
+      return null;
+    }
+
+    return g;
   }
 
   private openPauseMenu(): void {
@@ -604,20 +653,18 @@ export default class HUDScene extends Phaser.Scene {
     if (this.coverageText) {
       this.coverageText.setText((t('coverage') || 'Coverage') + ': ' + coverage + '%');
       if (coverage >= this.level.targetCoverage) {
-        this.coverageText.setStyle({ color: '#00FF00' });
+        this.coverageText.setColor('#00FF00');
       }
     }
 
-    if (this.winchHint && this.gameScene.winchActive) {
-      const winchKey = getWinchKeyName();
-      const winchAttachedRaw = t('winchAttached') || 'Winch ACTIVE';
-      this.winchHint.setText('WINCH: ' + winchAttachedRaw.replace('{winchKey}', winchKey));
-      this.winchHint.setStyle({ color: '#00FF00' });
-    } else if (this.winchHint) {
-      const winchKey = getWinchKeyName();
-      const winchHintRaw = t('winchHint') || `${winchKey} = Winch`;
-      this.winchHint.setText('WINCH: ' + winchHintRaw.replace('{winchKey}', winchKey));
-      this.winchHint.setStyle({ color: THEME.colors.accent });
+    // Show/hide winch status indicator
+    if (this.winchStatus) {
+      if (this.gameScene.winchActive) {
+        this.winchStatus.setText('🔗 ' + (t('winchActive') || 'WINCH'));
+        this.winchStatus.setVisible(true);
+      } else {
+        this.winchStatus.setVisible(false);
+      }
     }
 
     // Safety: reset touch states if no active pointers (prevents stuck controls)
@@ -684,7 +731,7 @@ export default class HUDScene extends Phaser.Scene {
     this.staminaBar = null;
     this.staminaText = null;
     this.coverageText = null;
-    this.winchHint = null;
+    this.winchStatus = null;
     this.timerText = null;
   }
 }

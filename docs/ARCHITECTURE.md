@@ -315,7 +315,7 @@ Add both hex number (`0x...`) and string (`'#...'`) variants to THEME. Hex numbe
 
 ## Retro 3D Bevel Pattern
 
-HUD panels and dialogue boxes use a consistent 3D bevel effect inspired by '90s game UIs (SimCity 2000, Theme Hospital):
+Dialogue boxes use a 3D bevel effect inspired by '90s game UIs (SimCity 2000, Theme Hospital):
 
 ```typescript
 bevelLight = 0x555555  // top + left edges (highlight)
@@ -324,9 +324,36 @@ panelFill  = 0x1a1a1a  // opaque background
 bevelWidth = Math.max(2, Math.round(2 * uiScale))
 ```
 
-A thin accent stripe (1px, THEME color) runs inside the top bevel for visual polish. All HUD panels, dialogue frames, and touch controls use this same bevel pattern to maintain visual consistency.
+A thin accent stripe (1px, THEME color) runs inside the top bevel for visual polish.
+
+## HUD: Visor Style
+
+The HUD uses a "visor" pattern: a full-width semi-transparent dark strip across the top of the screen (alpha 0.55). All HUD text sits inside this strip without stroke — the dark background provides contrast against snow/terrain. A thin cyan accent line marks the bottom edge.
+
+- **Left side**: Level name, FUEL/STAM bars with labels, coverage percentage
+- **Right side**: Timer (large), target percentage, skip button
+- **Winch status**: Small green "🔗 WINCH" text appears inside visor only when winch is active
+- **Touch buttons**: Pixel art icons on circular buttons (rake = groom, anchor = winch)
+- **No permanent winch hint**: Winch instructions are delivered via Jean-Pierre dialogue on the first winch level (level 4)
+
+### Responsive Layout
+
+Scaling: `baseScale = max(0.6, min(2.0, min(width/1024, height/768)))`. On high-DPI mobile (dpr > 1.5), boosted ×1.2.
+
+| Mode | Condition | Behaviour |
+|------|-----------|-----------|
+| Compact | `isNarrow` (width < 600) or `isShort` (height < 500) | Drops FUEL/STAM labels, uses smaller coverage font, tighter row gaps |
+| Very narrow | width ≤ 360 + touch | Skip button repositioned left of coverage text to avoid crowding pause/fullscreen |
+| Joystick cap | width < 600 | Joystick radius capped to `(width - actionBtnSpace - padding*2 - 10) / 2` to prevent overlap with action buttons |
+
+### Pause/Fullscreen Pill Buttons
+
+On touch devices, pause (`||`) and fullscreen (`[]`) buttons sit below the visor with pill-shaped dark backgrounds (black, alpha 0.55) for contrast against any terrain or lighting condition.
 
 ## Dialogue System
+
+### Dynamic Box Height
+The dialogue box has a base height of 130px. On narrow screens where text wraps to many lines, `displayNextDialogue()` measures the full text height and calls `resizeDialogueBox()` to grow the box, repositioning the bottom bevel and continue indicator.
 
 ### Character Portraits
 Each speaker gets a colored portrait box with their initial letter:

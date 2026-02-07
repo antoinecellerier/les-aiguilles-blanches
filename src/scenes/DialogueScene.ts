@@ -25,6 +25,9 @@ export default class DialogueScene extends Phaser.Scene {
   private continueText: Phaser.GameObjects.Text | null = null;
   private portraitBg: Phaser.GameObjects.Rectangle | null = null;
   private portraitText: Phaser.GameObjects.Text | null = null;
+  private bevelBottom: Phaser.GameObjects.Rectangle | null = null;
+  private bevelRight: Phaser.GameObjects.Rectangle | null = null;
+  private currentBoxHeight = 130;
 
   // Typewriter state
   public fullText = '';
@@ -36,13 +39,13 @@ export default class DialogueScene extends Phaser.Scene {
     super({ key: 'DialogueScene' });
   }
 
-  // Dialogue box height (for positioning calculations)
+  // Dialogue box base height (minimum)
   private readonly dialogueBoxHeight = 130;
   
   // Get the Y position for dialogue based on touch controls
   private getDialogueShowY(): number {
     const height = this.cameras.main.height;
-    const defaultY = height - 130; // Default position without touch controls
+    const defaultY = height - this.currentBoxHeight; // Default position without touch controls
     
     if (!this.areTouchControlsVisible()) {
       return defaultY;
@@ -53,7 +56,7 @@ export default class DialogueScene extends Phaser.Scene {
     if (hudScene?.getTouchControlsTopEdge) {
       const touchTop = hudScene.getTouchControlsTopEdge();
       // Position dialogue so its bottom edge (Y + boxHeight/2) is above touch controls
-      return touchTop - this.dialogueBoxHeight / 2;
+      return touchTop - this.currentBoxHeight / 2;
     }
     
     return defaultY;
@@ -62,6 +65,24 @@ export default class DialogueScene extends Phaser.Scene {
   // Get starting Y position (slightly below show position for animation)
   private getDialogueY(): number {
     return this.getDialogueShowY() + 20;
+  }
+
+  /** Resize the dialogue box to fit longer text */
+  private resizeDialogueBox(newHeight: number): void {
+    if (!this.bg) return;
+    const oldH = this.currentBoxHeight;
+    this.currentBoxHeight = newHeight;
+    // Resize bg (origin is center)
+    this.bg.height = newHeight;
+    // Move bottom bevel
+    if (this.bevelBottom) this.bevelBottom.setY(newHeight / 2 - 3);
+    // Resize side bevels
+    if (this.bevelRight) this.bevelRight.height = newHeight;
+    // Move continue indicator
+    if (this.continueText) this.continueText.setY(newHeight / 2 - 20);
+    // Resize portrait to stay centered
+    if (this.portraitBg) this.portraitBg.setY((newHeight - oldH) / 4);
+    if (this.portraitText) this.portraitText.setY((newHeight - oldH) / 4);
   }
   
   // Check if HUDScene's touch controls are currently visible
@@ -115,8 +136,9 @@ export default class DialogueScene extends Phaser.Scene {
     // Bevel edges (top=light, left=light, bottom=dark, right=dark)
     const bevelTop = this.add.rectangle(bgX, -boxHeight / 2, boxWidth, bevelWidth, bevelLight).setOrigin(0.5, 0);
     const bevelLeft = this.add.rectangle(bgX - boxWidth / 2, 0, bevelWidth, boxHeight, bevelLight).setOrigin(0, 0.5);
-    const bevelBottom = this.add.rectangle(bgX, boxHeight / 2 - bevelWidth, boxWidth, bevelWidth, bevelDark).setOrigin(0.5, 0);
-    const bevelRight = this.add.rectangle(bgX + boxWidth / 2 - bevelWidth, 0, bevelWidth, boxHeight, bevelDark).setOrigin(0, 0.5);
+    this.bevelBottom = this.add.rectangle(bgX, boxHeight / 2 - bevelWidth, boxWidth, bevelWidth, bevelDark).setOrigin(0.5, 0);
+    this.bevelRight = this.add.rectangle(bgX + boxWidth / 2 - bevelWidth, 0, bevelWidth, boxHeight, bevelDark).setOrigin(0, 0.5);
+    this.currentBoxHeight = boxHeight;
     // Accent stripe inside top bevel
     const accent = this.add.rectangle(bgX, -boxHeight / 2 + bevelWidth, boxWidth - bevelWidth * 2, 1, THEME.colors.infoHex).setOrigin(0.5, 0);
 
@@ -159,7 +181,7 @@ export default class DialogueScene extends Phaser.Scene {
     }).setOrigin(0.5).setAlpha(0);
 
     this.container.add([
-      this.bg, bevelTop, bevelLeft, bevelBottom, bevelRight, accent,
+      this.bg, bevelTop, bevelLeft, this.bevelBottom, this.bevelRight, accent,
       this.portraitBg, this.portraitText, this.speakerText, separator,
       this.dialogueText, this.continueText,
     ]);
@@ -248,11 +270,10 @@ export default class DialogueScene extends Phaser.Scene {
     }
 
     let speaker = 'Jean-Pierre';
-    let portraitColor = 0x2d5a7b; // blue (Jean-Pierre default)
+    let portraitColor = 0x2d5a7b; // blue (Jean-Pierre default, also used for tutorial)
     if (dialogue.key.includes('marie')) { speaker = 'Marie'; portraitColor = 0x7b2d5a; }
     else if (dialogue.key.includes('thierry')) { speaker = 'Thierry'; portraitColor = 0x5a7b2d; }
     else if (dialogue.key.includes('emilie')) { speaker = 'Émilie'; portraitColor = 0x7b5a2d; }
-    else if (dialogue.key.includes('tutorial')) { speaker = t('tutorial'); portraitColor = 0x2d5a7b; }
 
     this.speakerText.setText(speaker);
     
@@ -264,6 +285,23 @@ export default class DialogueScene extends Phaser.Scene {
     this.fullText = dialogue.text;
     this.typewriterIndex = 0;
     this.isTyping = true;
+    
+    // Reset box to base height, then grow if needed
+    if (this.currentBoxHeight !== this.dialogueBoxHeight) {
+      this.resizeDialogueBox(this.dialogueBoxHeight);
+    }
+    
+    // Measure required height by setting full text, then clear for typewriter
+    this.dialogueText.setText(this.fullText);
+    const textHeight = this.dialogueText.height;
+    // Text starts at -boxHeight/2 + 40, must end before boxHeight/2 - 25
+    // So: textHeight must be < boxHeight - 65
+    const minBoxForText = textHeight + 65;
+    const neededHeight = Math.max(this.dialogueBoxHeight, minBoxForText);
+    if (neededHeight > this.currentBoxHeight) {
+      this.resizeDialogueBox(neededHeight);
+    }
+
     this.dialogueText.setText('');
     if (this.continueText) this.continueText.setAlpha(0);
     

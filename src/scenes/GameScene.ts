@@ -333,6 +333,10 @@ export default class GameScene extends Phaser.Scene {
       if (this.level.introDialogue) {
         this.time.delayedCall(500, () => {
           this.showDialogue(this.level.introDialogue!);
+          // On the first winch level, chain a winch tutorial dialogue
+          if (this.level.id === 4) {
+            this.showDialogue('level4WinchIntro');
+          }
         });
       }
     });

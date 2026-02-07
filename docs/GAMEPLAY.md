@@ -80,16 +80,16 @@ All controls can be rebound in the Settings menu.
 
 Touch controls appear automatically on mobile devices. On desktop with touchscreen, they appear after first touch.
 
-- **Left side**: Virtual D-pad (◀▲▼▶) for movement
-- **Right side**: ❄️ (Groom) and 🔗 (Winch) action buttons
-- **Multitouch**: Move and groom simultaneously
-- **Top-right buttons** (stacked vertically):
-  - ⏭ **Skip**: Skip to next level (for testing)
-  - ☰ **Menu**: Open pause menu
-  - ⛶ **Fullscreen**: Enter fullscreen mode
-  - ✕ **Exit Fullscreen**: Exit fullscreen mode (shown when in fullscreen)
-
-Buttons are semi-transparent to avoid blocking gameplay view.
+- **Left side**: Virtual joystick (8-directional) with directional indicators (▲▼◀▶)
+- **Right side**: Action buttons with pixel art icons:
+  - ❄️ **Groom**: Rake icon (3-prong tiller graphic)
+  - 🔗 **Winch**: Anchor icon (stylized anchor shape)
+  - Both buttons: Circular, beveled retro style, highlight on press
+- **Multitouch**: Move and groom simultaneously (up to 3 active pointers)
+- **Top-right buttons** (stacked vertically, semi-transparent pill backgrounds):
+  - ⏭ **Skip**: `>>` on narrow screens, `>> Skip` on wider mobile (repositioned left on ≤360px)
+  - ☰ **Pause**: `||` button with dark pill background
+  - ⛶ **Fullscreen**: `[]` (enter) or `X` (exit) with dark pill background
 
 **Tutorial**: The tutorial adapts to your input method - showing keyboard, touch, or gamepad controls based on what's detected.
 

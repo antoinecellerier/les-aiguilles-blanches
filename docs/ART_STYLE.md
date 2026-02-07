@@ -205,6 +205,26 @@ For natural-looking boundaries (cliffs, terrain transitions):
 3. Skip ~30% of edge tiles randomly
 4. Use seeded random for consistency across renders
 
+### HUD / Visor Strip
+
+The HUD uses a "visor" pattern: full-width semi-transparent dark bar across the top.
+
+| Property | Value |
+|----------|-------|
+| Background | Black `0x000000`, alpha 0.55 |
+| Bottom accent | Cyan (`THEME.colors.infoHex`), alpha 0.40, 1px |
+| Text | White `#FFFFFF` (main), muted `#EEEEEE` (skip) |
+| Coverage | White, green `#00FF00` when target met |
+| Timer | White, red when ≤60s remaining |
+| Target | Accent yellow (`THEME.colors.accent`) |
+
+Touch button icons are pixel art drawn with `fillRect` calls:
+- **Groom**: 3-prong rake/tiller in light blue (`0xddddff`)
+- **Winch**: Simplified anchor shape in warm gold (`0xffddaa`)
+- Both on circular dark backgrounds with beveled edge highlight
+
+Pause/fullscreen buttons use pill-shaped backgrounds (black, alpha 0.55) for contrast against any terrain.
+
 ### Night Rendering
 
 - Dark overlay: `0x000022` at 70% opacity
