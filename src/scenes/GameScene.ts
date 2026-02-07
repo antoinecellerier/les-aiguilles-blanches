@@ -41,6 +41,7 @@ interface AccessPathRect {
   leftX: number;
   rightX: number;
   side: 'left' | 'right';
+  pathIndex: number;
 }
 
 interface AccessEntryZone {
@@ -96,6 +97,12 @@ export default class GameScene extends Phaser.Scene {
   private timeRemaining = 0;
   private isGrooming = false;
   private buffs: Buffs = {};
+
+  // Stats tracking for bonus objectives
+  private fuelUsed = 0;
+  private tumbleCount = 0;
+  private winchUseCount = 0;
+  private accessPathsVisited = new Set<number>();
 
   // Tutorial
   private tutorialStep = 0;
@@ -278,6 +285,12 @@ export default class GameScene extends Phaser.Scene {
     this.timeRemaining = this.level.timeLimit;
     this.isGrooming = false;
     this.buffs = {};
+
+    // Stats tracking
+    this.fuelUsed = 0;
+    this.tumbleCount = 0;
+    this.winchUseCount = 0;
+    this.accessPathsVisited = new Set<number>();
 
     // Winch state
     this.winchActive = false;
@@ -1284,7 +1297,7 @@ export default class GameScene extends Phaser.Scene {
     const worldWidth = this.level.width * tileSize;
     const roadWidth = tileSize * 5;
 
-    accessPaths.forEach((path) => {
+    accessPaths.forEach((path, pathIdx) => {
       const entryY = path.endY * worldHeight;
       const exitY = path.startY * worldHeight;
       const onLeft = path.side === 'left';
@@ -1381,6 +1394,7 @@ export default class GameScene extends Phaser.Scene {
           leftX: Math.min(p1.x, p2.x) - margin,
           rightX: Math.max(p1.x, p2.x) + margin,
           side: onLeft ? 'left' : 'right',
+          pathIndex: pathIdx,
         });
       }
     });
@@ -1581,6 +1595,7 @@ export default class GameScene extends Phaser.Scene {
       this.winchAnchor = this.getNearestAnchor();
       if (this.winchAnchor) {
         this.winchActive = true;
+        this.winchUseCount++;
         Accessibility.announce(t('winchAttached') || 'Winch attached');
       }
     } else if (!isWinchPressed && this.winchActive) {
@@ -2356,6 +2371,7 @@ export default class GameScene extends Phaser.Scene {
       for (const path of this.accessPathRects) {
         if (groomerY >= path.startY && groomerY <= path.endY &&
           groomerX >= path.leftX && groomerX <= path.rightX) {
+          this.accessPathsVisited.add(path.pathIndex);
           return;
         }
       }
@@ -2398,6 +2414,7 @@ export default class GameScene extends Phaser.Scene {
   private triggerTumble(_slope: number): void {
     if (this.isTumbling) return;
     this.isTumbling = true;
+    this.tumbleCount++;
 
     this.cameras.main.shake(500, 0.015);
 
@@ -2547,7 +2564,9 @@ export default class GameScene extends Phaser.Scene {
     const isMoving = (this.groomer.body as Phaser.Physics.Arcade.Body).velocity.length() > 0;
 
     if (isMoving) {
-      this.fuel -= GAME_CONFIG.FUEL_CONSUMPTION * dt * 100;
+      const fuelCost = GAME_CONFIG.FUEL_CONSUMPTION * dt * 100;
+      this.fuel -= fuelCost;
+      this.fuelUsed += fuelCost;
       
       // Stamina drain varies based on work difficulty
       let staminaDrain = GAME_CONFIG.STAMINA_CONSUMPTION;
@@ -2850,12 +2869,19 @@ export default class GameScene extends Phaser.Scene {
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
 
+    const totalPaths = (this.level.accessPaths || []).length;
+
     this.scene.start('LevelCompleteScene', {
       won: won,
       level: this.levelIndex,
       coverage: this.getCoverage(),
       timeUsed: this.level.timeLimit - this.timeRemaining,
-      failReason: failReason
+      failReason: failReason,
+      fuelUsed: Math.round(this.fuelUsed),
+      tumbleCount: this.tumbleCount,
+      winchUseCount: this.winchUseCount,
+      pathsVisited: this.accessPathsVisited.size,
+      totalPaths: totalPaths,
     });
   }
 

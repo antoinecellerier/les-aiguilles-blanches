@@ -214,8 +214,20 @@ Each level awards 1-3 stars based on:
 | Stars | Requirements |
 |-------|--------------|
 | ⭐ | Complete the level |
-| ⭐⭐ | Reach 90%+ coverage |
-| ⭐⭐⭐ | Complete in under 70% of time limit |
+| ⭐⭐ | Reach 90%+ coverage, or meet half the bonus objectives |
+| ⭐⭐⭐ | Complete quickly with high coverage, or meet all bonus objectives |
+
+### Bonus Objectives
+
+Most levels have optional bonus challenges shown on the results screen:
+
+| Objective | Description |
+|-----------|-------------|
+| **Fuel efficiency** | Complete using ≤ target % of fuel |
+| **No tumbles** | Finish without tumbling on steep slopes |
+| **Speed run** | Complete within a time target |
+| **Winch mastery** | Successfully use the winch N times |
+| **Exploration** | Visit all service roads on the level |
 
 ## 🎭 Characters
 

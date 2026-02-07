@@ -12,7 +12,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Polish (Medium Priority)
 
-- [ ] Level differentiation - Varied objectives beyond coverage percentage
+- [x] Level differentiation - Bonus objectives (fuel efficiency, no tumble, speed run, winch mastery, exploration) with per-level assignments and grade integration
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
 - [x] Service roads - Improved legibility and practical usability (packed snow texture, amber poles, tree clearing, boundary wall exemption, intro dialog)
 - [x] Responsive design - All scenes handle resize/orientation change; form factor fixes for landscape phones, narrow portrait, compact HUD

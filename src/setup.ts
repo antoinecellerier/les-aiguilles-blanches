@@ -4,7 +4,7 @@
  */
 
 import { GAME_CONFIG, DIFFICULTY_MARKERS, FOOD_ITEMS } from './config/gameConfig';
-import { LEVELS, type Level } from './config/levels';
+import { LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from './config/levels';
 import { TRANSLATIONS, t, setLanguage, getLanguage, detectLanguage, getSavedLanguage, type SupportedLanguage } from './config/localization';
 import { Accessibility, type ColorblindMode } from './utils/accessibility';
 
@@ -37,5 +37,6 @@ export {
 };
 
 export type { Level };
+export type { BonusObjective, BonusObjectiveType };
 export type { SupportedLanguage };
 export type { ColorblindMode };

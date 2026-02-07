@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { t, Accessibility, LEVELS, type Level } from '../setup';
+import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from '../setup';
 import { THEME } from '../config/theme';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 
@@ -14,6 +14,11 @@ interface LevelCompleteData {
   coverage: number;
   timeUsed: number;
   failReason?: string;
+  fuelUsed?: number;
+  tumbleCount?: number;
+  winchUseCount?: number;
+  pathsVisited?: number;
+  totalPaths?: number;
 }
 
 export default class LevelCompleteScene extends Phaser.Scene {
@@ -22,6 +27,11 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private coverage = 0;
   private timeUsed = 0;
   private failReason?: string;
+  private fuelUsed = 0;
+  private tumbleCount = 0;
+  private winchUseCount = 0;
+  private pathsVisited = 0;
+  private totalPaths = 0;
   
   // Keyboard/gamepad navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -39,6 +49,11 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.coverage = data.coverage;
     this.timeUsed = data.timeUsed;
     this.failReason = data.failReason;
+    this.fuelUsed = data.fuelUsed ?? 0;
+    this.tumbleCount = data.tumbleCount ?? 0;
+    this.winchUseCount = data.winchUseCount ?? 0;
+    this.pathsVisited = data.pathsVisited ?? 0;
+    this.totalPaths = data.totalPaths ?? 0;
     
     // Reset navigation state
     this.menuButtons = [];
@@ -126,6 +141,26 @@ export default class LevelCompleteScene extends Phaser.Scene {
       align: 'center',
       lineSpacing: 8,
     }), { align: 'center', padding: { top: 20 } });
+
+    // Bonus objectives
+    if (this.won) {
+      const bonusResults = this.evaluateBonusObjectives();
+      if (bonusResults.length > 0) {
+        const bonusLines = bonusResults.map(r =>
+          (r.met ? '✓ ' : '✗ ') + r.label
+        ).join('\n');
+
+        const allMet = bonusResults.every(r => r.met);
+        const bonusColor = allMet ? THEME.colors.success : THEME.colors.textSecondary;
+
+        mainSizer.add(this.add.text(0, 0, bonusLines, {
+          font: `${baseFontSize}px ${THEME.fonts.family}`,
+          color: bonusColor,
+          align: 'left',
+          lineSpacing: 6,
+        }), { align: 'center', padding: { top: 12 } });
+      }
+    }
 
     // Game complete message for final level win
     if (this.won && this.levelIndex === LEVELS.length - 1) {
@@ -381,9 +416,50 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const level = LEVELS[this.levelIndex] as Level;
     const timePercent = this.timeUsed / level.timeLimit;
     const coverageBonus = this.coverage - level.targetCoverage;
+    const bonusResults = this.evaluateBonusObjectives();
+    const bonusMet = bonusResults.filter(r => r.met).length;
+    const bonusTotal = bonusResults.length;
 
-    if (timePercent < 0.5 && coverageBonus >= 10) return '⭐⭐⭐ ' + t('excellent');
-    if (timePercent < 0.75 && coverageBonus >= 5) return '⭐⭐ ' + t('good');
+    // Bonus objectives boost grade
+    const bonusBoost = bonusTotal > 0 ? bonusMet / bonusTotal : 0;
+
+    if ((timePercent < 0.5 && coverageBonus >= 10) || (bonusBoost === 1 && coverageBonus >= 5)) return '⭐⭐⭐ ' + t('excellent');
+    if ((timePercent < 0.75 && coverageBonus >= 5) || bonusBoost >= 0.5) return '⭐⭐ ' + t('good');
     return '⭐ ' + t('passed');
+  }
+
+  private evaluateBonusObjectives(): { objective: BonusObjective; met: boolean; label: string }[] {
+    const level = LEVELS[this.levelIndex] as Level;
+    if (!level.bonusObjectives || level.bonusObjectives.length === 0) return [];
+
+    return level.bonusObjectives.map(obj => {
+      let met = false;
+      let label = '';
+
+      switch (obj.type) {
+        case 'fuel_efficiency':
+          met = this.fuelUsed <= obj.target;
+          label = t('bonusFuel') + ' ≤' + obj.target + '%';
+          break;
+        case 'no_tumble':
+          met = this.tumbleCount === 0;
+          label = t('bonusNoTumble');
+          break;
+        case 'speed_run':
+          met = this.timeUsed <= obj.target;
+          label = t('bonusSpeed') + ' ≤' + this.formatTime(obj.target);
+          break;
+        case 'winch_mastery':
+          met = this.winchUseCount >= obj.target;
+          label = t('bonusWinch') + ' ×' + obj.target;
+          break;
+        case 'exploration':
+          met = this.pathsVisited >= obj.target;
+          label = t('bonusExplore') + ' ' + this.pathsVisited + '/' + this.totalPaths;
+          break;
+      }
+
+      return { objective: obj, met, label };
+    });
   }
 }
