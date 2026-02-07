@@ -355,6 +355,9 @@ On touch devices, pause (`||`) and fullscreen (`[]`) buttons sit below the visor
 ### Dynamic Box Height
 The dialogue box has a base height of 130px. On narrow screens where text wraps to many lines, `displayNextDialogue()` measures the full text height and calls `resizeDialogueBox()` to grow the box, repositioning the bottom bevel and continue indicator.
 
+### Auto-Pagination
+When dialogue text exceeds 30% of screen height, `splitTextToPages()` breaks it into multiple pages at sentence boundaries. Each page is shown sequentially with the `>>` continue indicator. This prevents text from overflowing the dialogue box on small screens.
+
 ### Character Portraits
 Each speaker gets a colored portrait box with their initial letter:
 - Jean-Pierre / Tutorial: `0x2d5a7b` (blue)
