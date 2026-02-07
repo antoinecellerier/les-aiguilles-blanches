@@ -41,6 +41,11 @@ export default class DialogueScene extends Phaser.Scene {
 
   // Dialogue box base height (minimum)
   private readonly dialogueBoxHeight = 130;
+  // Max box height — capped to avoid covering too much gameplay
+  private maxBoxHeight = 200;
+  // Text area dimensions (set in create)
+  private textAreaWidth = 200;
+  private textStartX = 0;
   
   // Get the Y position for dialogue based on touch controls
   private getDialogueShowY(): number {
@@ -129,6 +134,10 @@ export default class DialogueScene extends Phaser.Scene {
     const portraitSize = Math.round(boxHeight * 0.6);
     const portraitMargin = Math.round((boxHeight - portraitSize) / 2);
     const textStartX = 20 + portraitSize + portraitMargin + 10;
+    this.textStartX = textStartX;
+    this.textAreaWidth = boxWidth - textStartX - 50;
+    // Cap box height to ~30% of screen so gameplay stays visible
+    this.maxBoxHeight = Math.max(this.dialogueBoxHeight, Math.round(height * 0.3));
 
     // Main background
     const bgX = width / 2;
@@ -237,11 +246,54 @@ export default class DialogueScene extends Phaser.Scene {
     text = text.replace('{groomKey}', getGroomKeyName());
     text = text.replace('{winchKey}', getWinchKeyName());
 
-    this.dialogueQueue.push({ key, text });
+    // Split into pages if text would overflow max box height
+    const pages = this.splitTextToPages(text);
+    for (const page of pages) {
+      this.dialogueQueue.push({ key, text: page });
+    }
 
     if (!this.isShowing) {
       this.displayNextDialogue();
     }
+  }
+
+  /** Split text into pages that fit within maxBoxHeight */
+  private splitTextToPages(text: string): string[] {
+    if (!this.dialogueText) return [text];
+
+    // Measure full text height
+    const origText = this.dialogueText.text;
+    this.dialogueText.setText(text);
+    const fullHeight = this.dialogueText.height;
+    // Available text height inside box: maxBoxHeight - 65 (top padding 40 + bottom padding 25)
+    const maxTextHeight = this.maxBoxHeight - 65;
+
+    if (fullHeight <= maxTextHeight) {
+      this.dialogueText.setText(origText);
+      return [text];
+    }
+
+    // Need to split — find word boundaries that fit
+    const words = text.split(' ');
+    const pages: string[] = [];
+    let currentWords: string[] = [];
+
+    for (const word of words) {
+      currentWords.push(word);
+      this.dialogueText.setText(currentWords.join(' '));
+      if (this.dialogueText.height > maxTextHeight && currentWords.length > 1) {
+        // Remove last word, save page
+        currentWords.pop();
+        pages.push(currentWords.join(' '));
+        currentWords = [word];
+      }
+    }
+    if (currentWords.length > 0) {
+      pages.push(currentWords.join(' '));
+    }
+
+    this.dialogueText.setText(origText);
+    return pages.length > 0 ? pages : [text];
   }
 
   private displayNextDialogue(): void {
@@ -297,7 +349,7 @@ export default class DialogueScene extends Phaser.Scene {
     // Text starts at -boxHeight/2 + 40, must end before boxHeight/2 - 25
     // So: textHeight must be < boxHeight - 65
     const minBoxForText = textHeight + 65;
-    const neededHeight = Math.max(this.dialogueBoxHeight, minBoxForText);
+    const neededHeight = Math.min(this.maxBoxHeight, Math.max(this.dialogueBoxHeight, minBoxForText));
     if (neededHeight > this.currentBoxHeight) {
       this.resizeDialogueBox(neededHeight);
     }

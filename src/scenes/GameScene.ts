@@ -2342,7 +2342,6 @@ export default class GameScene extends Phaser.Scene {
       for (const path of this.accessPathRects) {
         if (groomerY >= path.startY && groomerY <= path.endY &&
           groomerX >= path.leftX && groomerX <= path.rightX) {
-          this.steepWarningShown = false;
           return;
         }
       }
@@ -2370,8 +2369,6 @@ export default class GameScene extends Phaser.Scene {
         return;
       }
     }
-
-    this.steepWarningShown = false;
   }
 
   private getSlopeAtPosition(x: number, y: number): number {
