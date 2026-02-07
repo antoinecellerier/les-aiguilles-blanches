@@ -107,20 +107,15 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
 - DOM elements are more accessible for UI (screen readers, focus management)
 - Hybrid approach: Canvas for gameplay, DOM overlays for menus/HUD
 
-### 2. Input Abstraction Layer
+### 2. Input Handling
 
-**Decision**: Unified InputManager that abstracts all input sources
+**Decision**: Distributed input polling — each scene reads its own inputs directly
 
-**Rationale**:
-- Game logic doesn't need to know about input source
-- Easy to add new input methods (e.g., voice, eye tracking)
-- Simplifies rebinding - only one place to manage mappings
-
-```javascript
-// All input sources return the same interface
-inputManager.getMovement() // { dx: 0-1, dy: 0-1 }
-inputManager.isPressed('groom') // true/false
-```
+**Design**:
+- GameScene polls keyboard (`this.cursors`, `this.wasd`) and gamepad in `update()`
+- HUDScene emits touch state via `GAME_EVENTS.TOUCH_INPUT` for GameScene to consume
+- Gamepad button mappings are loaded via `loadGamepadBindings()` from localStorage
+- No unified InputManager — input is handled per-scene for simplicity
 
 ### 3. Physical Key Codes for Keyboard
 
@@ -946,13 +941,18 @@ Without this fix, cliffs render at incorrect positions (often overlapping the pi
 
 ### Anchor Structure
 
+Level config (`levels.ts`) defines anchors with only a fractional `y` position:
+
 ```typescript
-interface WinchAnchor {
-  x: number;      // Horizontal position
-  y: number;      // Hook position (top) - for cable attachment
-  baseY: number;  // Base position - for proximity detection
-  number: number; // Anchor identifier
-}
+// In levels.ts
+interface WinchAnchor { y: number; }  // fractional height (0-1)
+```
+
+GameScene's `createWinchAnchors()` converts these to runtime objects with calculated properties:
+
+```typescript
+// Runtime object (constructed in GameScene)
+{ x, y: hookY, baseY: baseY, number: anchorIndex }
 ```
 
 ### Proximity Detection

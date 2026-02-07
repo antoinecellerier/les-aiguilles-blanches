@@ -92,7 +92,7 @@ Alpine rock with warm brown tones (NOT gray):
 |---------|-------|-----|
 | Button | Slate blue | `0x2d5a7b` |
 | Button hover | Lighter blue | `0x3d7a9b` |
-| Button shadow | Dark slate | `0x1a3a5c` |
+| Button shadow | Dark slate | `#1a3a5c` (hardcoded in MenuScene) |
 | Selection arrow | Gold | `0xffd700` |
 | Panel background | Dark gray | `0x222222` |
 | Dialog background | Navy | `0x1a2a3e` |

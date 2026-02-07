@@ -21,7 +21,7 @@ The test script auto-starts the dev server if not running.
 
 ## Test Helpers
 
-All helpers are in `tests/e2e/conftest.py`.
+Core helpers are in `tests/e2e/conftest.py`. Navigation-specific helpers (`click_button`, `BUTTON_*` constants) are in `tests/e2e/test_navigation.py`.
 
 ### Fixtures
 
@@ -178,7 +178,7 @@ def test_cliff_visuals(self, game_page: Page):
     
     # Capture screenshot for visual inspection
     # Store in session files directory (no git commit needed)
-    game_page.screenshot(path="/home/antoine/.copilot/session-state/.../files/cliff_test.png")
+    game_page.screenshot(path="tests/screenshots/cliff_test.png")
 ```
 
 ### Levels for Visual Testing
@@ -236,13 +236,16 @@ with sync_playwright() as p:
 
 ## Level Reference
 
-| Index | Level | Notable Features |
-|-------|-------|------------------|
+| Index | Difficulty | Notable Features |
+|-------|-----------|------------------|
 | 0 | Tutorial | Intro dialogues |
-| 1 | Green Piste | Good for basic tests |
-| 2-5 | Blue/Park/Red/Halfpipe | Various mechanics |
-| 6 | Black Piste | `isNight`, `hasWinch` |
-| 7 | Avalanche Zone | Danger zones |
-| 8 | Storm Recovery | Weather effects |
+| 1 | Green | Basic grooming |
+| 2 | Blue | Trees, rocks |
+| 3 | Park | Jumps, rails |
+| 4 | Red | `hasWinch`, winding piste |
+| 5 | Park | Halfpipe |
+| 6 | Black | `isNight`, `hasWinch` |
+| 7 | Black | `hasWinch`, light snow, avalanche zones |
+| 8 | Red | `hasWinch`, storm weather |
 
 See [GAMEPLAY.md](./GAMEPLAY.md) for full level details.

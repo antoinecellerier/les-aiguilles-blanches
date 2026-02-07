@@ -7,7 +7,6 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Bugs
 
 - [ ] Nintendo B-button back navigation - Flaky in full test suite (timing-sensitive gamepad stick navigation)
-- [ ] Forest not blocking groomer - Groomer can freely traverse off-piste forest areas (should be stopped by trees)
 - [ ] Service road width vs piste width - Roads should be visibly narrower than piste; widen piste if needed to ensure contrast
 
 ## Polish (Medium Priority)
