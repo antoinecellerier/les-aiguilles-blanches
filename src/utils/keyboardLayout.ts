@@ -2,6 +2,8 @@
  * Keyboard layout detection and key binding utilities
  */
 
+import { loadGamepadBindings, getDefaultGamepadBindings, getButtonName } from './gamepad';
+
 export type KeyboardLayout = 'qwerty' | 'azerty' | 'qwertz';
 
 const LAYOUT_KEY = 'snowGroomer_keyboardLayout';
@@ -197,18 +199,22 @@ export function getGroomKeyName(): string {
   const savedNames = localStorage.getItem('snowGroomer_displayNames');
   const savedBindings = localStorage.getItem('snowGroomer_bindings');
   
+  let keyName = 'SPACE';
   if (savedNames && savedBindings) {
     try {
       const names = JSON.parse(savedNames);
       const bindings = JSON.parse(savedBindings);
       if (names[bindings.groom]) {
-        return names[bindings.groom].toUpperCase();
+        keyName = names[bindings.groom].toUpperCase();
       }
     } catch {
       // Fall through to default
     }
   }
-  return 'SPACE';
+
+  const gpBindings = loadGamepadBindings();
+  const gpBtn = getButtonName(gpBindings.groom);
+  return keyName + ' / ' + gpBtn;
 }
 
 /**
@@ -218,18 +224,22 @@ export function getWinchKeyName(): string {
   const savedNames = localStorage.getItem('snowGroomer_displayNames');
   const savedBindings = localStorage.getItem('snowGroomer_bindings');
   
+  let keyName = 'SHIFT';
   if (savedNames && savedBindings) {
     try {
       const names = JSON.parse(savedNames);
       const bindings = JSON.parse(savedBindings);
       if (names[bindings.winch]) {
-        return names[bindings.winch].toUpperCase();
+        keyName = names[bindings.winch].toUpperCase();
       }
     } catch {
       // Fall through to default
     }
   }
-  return 'SHIFT';
+
+  const gpBindings = loadGamepadBindings();
+  const gpBtn = getButtonName(gpBindings.winch);
+  return keyName + ' / ' + gpBtn;
 }
 
 /**

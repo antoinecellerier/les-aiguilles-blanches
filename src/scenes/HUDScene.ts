@@ -22,6 +22,7 @@ export default class HUDScene extends Phaser.Scene {
   private level!: Level;
   private gameScene!: HUDSceneData['gameScene'] | null;
   private isSkipping = false;
+  private gamepadSelectPressed = false;
   private uiScale = 1;
   private barWidth = 130;
 
@@ -215,7 +216,8 @@ export default class HUDScene extends Phaser.Scene {
     // On very narrow (<=360px), position skip on left to avoid crowding pause/fullscreen
     const skipFontSize = (hasTouch && isMobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
     const isVeryNarrow = width <= 360;
-    const skipLabel = isNarrow ? '>>' : (hasTouch && isMobile) ? '>> Skip' : '>> Skip [N]';
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+    const skipLabel = isNarrow ? '>>' : (hasTouch && isMobile) ? '>> Skip' : hasGamepad ? '>> Skip [Select]' : '>> Skip [N]';
     let nextButtonY = row4Y;
     
     const skipOriginX = (isVeryNarrow && hasTouch) ? 0 : 1;
@@ -683,6 +685,18 @@ export default class HUDScene extends Phaser.Scene {
       this.touchRight = false;
       this.touchGroom = false;
       this.touchWinch = false;
+    }
+
+    // Gamepad Select/Back button (button 8) for level skip
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        const selectPressed = pad.buttons[8]?.pressed ?? false;
+        if (selectPressed && !this.gamepadSelectPressed) {
+          this.skipLevel();
+        }
+        this.gamepadSelectPressed = selectPressed;
+      }
     }
   }
 

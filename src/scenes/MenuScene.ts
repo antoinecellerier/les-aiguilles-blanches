@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
-import { getMappingFromGamepad, isConfirmPressed } from '../utils/gamepad';
+import { isConfirmPressed, loadGamepadBindings, getButtonName } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
@@ -606,10 +606,8 @@ export default class MenuScene extends Phaser.Scene {
     
     if (hasGamepad) {
       // Gamepad connected - show gamepad controls
-      const pad = this.input.gamepad!.getPad(0);
-      const mapping = getMappingFromGamepad(pad);
       moveHint = '🎮 ' + (t('howToPlayMoveGamepad') || 'Left stick or D-pad to move');
-      groomHint = `❄️ ${mapping.confirmLabel} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
+      groomHint = `❄️ ${getButtonName(loadGamepadBindings().groom)} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
     } else if (showTouchHints) {
       moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
       groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
