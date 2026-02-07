@@ -18,11 +18,11 @@ Launch parallel explore agents to investigate these dimensions simultaneously:
 5. **Architecture** — Find circular dependencies, god classes (files with 50+ methods or 2000+ lines), tight coupling between modules.
 6. **Magic values** — Find hardcoded strings, numbers, or config values that should be constants or in config files.
 
-### Phase 2: Cross-model consultation (optional)
+### Phase 2: Cross-model consultation
 
-When the user requests it, consult additional AI models for independent perspectives:
-- Send a concise summary of findings to 1-2 other models (e.g., Gemini Pro, GPT Codex)
-- Ask them to rank findings by impact and suggest any missed issues
+Always consult additional AI models for independent perspectives:
+- Send a concise summary of findings to 2 other models — pick the strongest available models that differ from the current one (prefer premium/standard tiers over fast/cheap)
+- Ask them to rank findings by impact, confirm or refute each, and suggest any missed issues
 - Look for convergence — issues identified by multiple models are highest priority
 
 ### Phase 3: Prioritized findings

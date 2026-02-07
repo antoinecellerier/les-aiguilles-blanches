@@ -593,13 +593,9 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   private openPauseMenu(): void {
-    // Launch pause scene (same as pressing ESC in GameScene)
+    // Delegate to GameScene.pauseGame() so PauseScene receives the correct data
     if (this.gameScene && !this.scene.isActive('PauseScene')) {
-      this.scene.launch('PauseScene', { 
-        returnScene: 'GameScene',
-        levelIndex: this.level.id 
-      });
-      this.scene.bringToTop('PauseScene');
+      (this.gameScene as unknown as { pauseGame: () => void }).pauseGame();
     }
   }
 

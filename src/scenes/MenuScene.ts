@@ -715,8 +715,9 @@ export default class MenuScene extends Phaser.Scene {
       expand: { content: false },
     }).layout();
 
-    // Dark overlay behind dialog
+    // Dark overlay behind dialog — setInteractive() to block pointer events on buttons underneath
     const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
+    overlay.setInteractive();
     overlay.setDepth(dialog.depth - 1);
 
     // ESC, ENTER, or SPACE to close

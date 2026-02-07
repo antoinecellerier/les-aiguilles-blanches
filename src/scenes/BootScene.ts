@@ -49,7 +49,7 @@ export default class BootScene extends Phaser.Scene {
       setLanguage(detectLanguage());
 
       // Detect keyboard layout (async, but we don't wait - it caches for later use)
-      detectKeyboardLayout();
+      detectKeyboardLayout().catch(e => console.warn('Keyboard layout detection failed:', e));
 
       // Generate placeholder textures
       this.generateTextures();

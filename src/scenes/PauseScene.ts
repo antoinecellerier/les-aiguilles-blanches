@@ -125,7 +125,7 @@ export default class PauseScene extends Phaser.Scene {
       const hoverColor = isCTA ? THEME.colors.buttonCTAHoverHex : THEME.colors.buttonHoverHex;
       if (i === this.selectedIndex) {
         btn.setStyle({ backgroundColor: hoverColor });
-        btn.setScale(1.1);
+        btn.setScale(1.05);
       } else {
         btn.setStyle({ backgroundColor: baseColor });
         btn.setScale(1);

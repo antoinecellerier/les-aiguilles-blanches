@@ -68,45 +68,7 @@ export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
   return 'qwerty';
 }
 
-/**
- * Detect layout from a keyboard event (call on first key press)
- * Returns the detected layout if detection was successful
- */
-export function detectLayoutFromEvent(event: KeyboardEvent): KeyboardLayout | null {
-  // Only detect from movement-related keys
-  const code = event.code;
-  const key = event.key.toLowerCase();
-  
-  // If user presses physical Q position (KeyQ) and it produces 'a', it's AZERTY
-  if (code === 'KeyQ' && key === 'a') {
-    setKeyboardLayout('azerty');
-    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
-    return 'azerty';
-  }
-  
-  // If user presses physical W position (KeyW) and it produces 'z', it's QWERTZ
-  if (code === 'KeyW' && key === 'z') {
-    setKeyboardLayout('qwertz');
-    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
-    return 'qwertz';
-  }
-  
-  // If user presses physical Q and it produces 'q', it's QWERTY
-  if (code === 'KeyQ' && key === 'q') {
-    setKeyboardLayout('qwerty');
-    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
-    return 'qwerty';
-  }
-  
-  // If user presses physical A and it produces 'q', it's AZERTY
-  if (code === 'KeyA' && key === 'q') {
-    setKeyboardLayout('azerty');
-    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
-    return 'azerty';
-  }
-  
-  return null; // Could not detect from this event
-}
+
 
 /**
  * Get the stored keyboard layout synchronously (for use in game loop)

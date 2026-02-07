@@ -35,6 +35,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Code health audit v3** - Fixed HUD pause button crash (passed wrong data to PauseScene), added .catch() to async keyboard layout detection, removed dead code (`detectLayoutFromEvent`), blocked overlay click bleed-through in MenuScene, standardized button hover scale to 1.05×. Updated code-health skill to always use best available models for cross-referencing
+
 - ✅ **Code health audit** - Centralized scene transitions (`sceneTransitions.ts`) and gamepad menu navigation (`gamepadMenu.ts`). Eliminated 273 lines of duplicated cleanup/polling code across 8 files. Fixed inconsistent scene lists (CreditsScene/GameScene were missing PauseScene cleanup). Registration pattern breaks circular imports. Created `code-health` custom agent (`.github/agents/`) to make audits repeatable
 
 - ✅ **Scene navigation fixes** - Fixed zombie resize handlers, stale scene data, and broken Settings→PauseScene return. All scene transitions now use remove+re-add cleanup pattern. Documented SceneManager vs ScenePlugin API differences in ARCHITECTURE.md
