@@ -1030,6 +1030,32 @@ class TestLevelComplete:
         }""")
         assert bounds_ok, "LevelCompleteScene elements should be within viewport after resize"
 
+    def test_bonus_objectives_exist_on_levels(self, game_page: Page):
+        """Levels 1-8 should have bonus objectives defined."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        objectives = game_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            if (!gs?.level) return null;
+            return {
+                levelIndex: gs.levelIndex,
+                bonusObjectives: gs.level.bonusObjectives || [],
+            };
+        }""")
+
+        # Level 0 (tutorial) has no bonus objectives
+        assert objectives is not None
+        assert len(objectives['bonusObjectives']) == 0, "Tutorial should have no bonus objectives"
+
+        # Skip to level 1 and check
+        skip_to_level(game_page, 1)
+        obj_l1 = game_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.level?.bonusObjectives?.length ?? 0;
+        }""")
+        assert obj_l1 > 0, "Level 1 should have at least one bonus objective"
+
 
 class TestFailScreen:
     """Test fail screen with taunt messages."""

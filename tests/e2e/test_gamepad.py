@@ -387,3 +387,103 @@ class TestPlayStationController:
         release_gamepad_button(playstation_page, 1)
         
         wait_for_scene(playstation_page, 'MenuScene', timeout=3000)
+
+
+class TestGamepadDialogueDismiss:
+    """Test gamepad B button dismisses dialogue."""
+
+    def test_b_button_dismisses_dialogue(self, gamepad_page: Page):
+        """B button should dismiss all dialogue (like ESC)."""
+        # Start game
+        press_gamepad_button(gamepad_page, 0)
+        gamepad_page.wait_for_timeout(100)
+        release_gamepad_button(gamepad_page, 0)
+        
+        wait_for_scene(gamepad_page, 'GameScene')
+        
+        # Wait for tutorial dialogue
+        gamepad_page.wait_for_function("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds && ds.isDialogueShowing && ds.isDialogueShowing();
+        }""", timeout=5000)
+        
+        # Press B (button 1) to dismiss
+        press_gamepad_button(gamepad_page, 1)
+        gamepad_page.wait_for_timeout(150)
+        release_gamepad_button(gamepad_page, 1)
+        gamepad_page.wait_for_timeout(300)
+        
+        # Dialogue should be dismissed
+        showing = gamepad_page.evaluate("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds?.isDialogueShowing ? ds.isDialogueShowing() : false;
+        }""")
+        
+        assert not showing, "B button should dismiss all dialogue"
+
+
+class TestGamepadSelectSkip:
+    """Test gamepad Select button skips level."""
+
+    def test_select_button_skips_level(self, gamepad_page: Page):
+        """Select button (button 8) should skip to next level."""
+        # Start game
+        press_gamepad_button(gamepad_page, 0)
+        gamepad_page.wait_for_timeout(100)
+        release_gamepad_button(gamepad_page, 0)
+        
+        wait_for_scene(gamepad_page, 'GameScene')
+        gamepad_page.wait_for_timeout(1000)
+        
+        # Get current level
+        level_before = gamepad_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.levelIndex ?? -1;
+        }""")
+        
+        # Press Select (button 8)
+        press_gamepad_button(gamepad_page, 8)
+        gamepad_page.wait_for_timeout(150)
+        release_gamepad_button(gamepad_page, 8)
+        gamepad_page.wait_for_timeout(1000)
+        
+        # Level should have advanced
+        level_after = gamepad_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.levelIndex ?? -1;
+        }""")
+        
+        assert level_after == level_before + 1, \
+            f"Select should skip level: was {level_before}, now {level_after}"
+
+
+class TestDialoguePlaceholders:
+    """Test dialogue placeholders resolve correctly."""
+
+    def test_groom_key_placeholder_resolves(self, gamepad_page: Page):
+        """Dialogue text should show actual key names, not raw {groomKey}."""
+        # Start game
+        press_gamepad_button(gamepad_page, 0)
+        gamepad_page.wait_for_timeout(100)
+        release_gamepad_button(gamepad_page, 0)
+        
+        wait_for_scene(gamepad_page, 'GameScene')
+        gamepad_page.wait_for_timeout(2000)
+        
+        # Advance to groom tutorial dialogue
+        for _ in range(10):
+            press_gamepad_button(gamepad_page, 0)
+            gamepad_page.wait_for_timeout(100)
+            release_gamepad_button(gamepad_page, 0)
+            gamepad_page.wait_for_timeout(400)
+            
+            # Check if current dialogue contains groom key info
+            text = gamepad_page.evaluate("""() => {
+                const ds = window.game?.scene?.getScene('DialogueScene');
+                return ds?.dialogueText?.text ?? '';
+            }""")
+            
+            if '{groomKey}' in text:
+                pytest.fail("Placeholder {groomKey} was not resolved in dialogue text")
+            if '{winchKey}' in text:
+                pytest.fail("Placeholder {winchKey} was not resolved in dialogue text")
