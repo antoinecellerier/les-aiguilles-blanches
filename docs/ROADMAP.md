@@ -35,6 +35,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Game freeze fix** - Added `.active` guards on all HUD game objects, null-safe DialogueScene access, `isActive` guards on pauseGame/resumeGame, fixed skipLevel scene stop order. Removed unreliable `delayedCall(1)` wrapper for overlay scene launches. Winch slack cable no longer prevents steep slope slide. Removed useless below-zone anchors (levels 7-9). Dialogue tween race prevention
+
 - ✅ **Dialogue typewriter freeze fix** - ESC during dialogue typing simultaneously dismissed dialogue and paused game, causing stuck state. ESC/Start/pause button now dismiss dialogue first; pause only fires on next press. Added safety timeout and closure-captured text to prevent timer desync
 
 - ✅ **Code health audit v4 — architecture refactors** - Extracted WeatherSystem and HazardSystem from GameScene (2960→2570 lines). Decoupled GameScene↔HUDScene via event-based communication (GAME_EVENTS). Centralized 40+ physics magic numbers into BALANCE config. Unified button navigation across 4 scenes (menuButtonNav.ts). Eliminated `as any` type casts via global.d.ts and GameSceneInterface. All audit items resolved (11/12 done, 1 deferred: depth constants)

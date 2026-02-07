@@ -329,30 +329,25 @@ export default class GameScene extends Phaser.Scene {
     this.setupInput();
     console.log('Input set up, launching HUD scene...');
 
-    // Delay overlay scene launches to next frame to avoid render queue conflicts
-    this.time.delayedCall(1, () => {
-      // Start dialogue scene first (for rendering below HUD)
-      this.scene.launch('DialogueScene');
-      console.log('Dialogue launched');
+    // Launch overlay scenes directly (no delayedCall — avoids race with rapid level transitions)
+    this.scene.launch('DialogueScene');
+    console.log('Dialogue launched');
 
-      // Start HUD scene - bring to top LAST so its input is processed first
-      this.scene.launch('HUDScene', {
-        level: this.level,
-      });
-      this.scene.bringToTop('HUDScene');
-      console.log('HUD launched on top');
-
-      // Show intro dialogue
-      if (this.level.introDialogue) {
-        this.time.delayedCall(500, () => {
-          this.showDialogue(this.level.introDialogue!);
-          // On the first winch level, chain a winch tutorial dialogue
-          if (this.level.id === 4) {
-            this.showDialogue('level4WinchIntro');
-          }
-        });
-      }
+    this.scene.launch('HUDScene', {
+      level: this.level,
     });
+    this.scene.bringToTop('HUDScene');
+    console.log('HUD launched on top');
+
+    // Show intro dialogue after a short delay to let scenes initialize
+    if (this.level.introDialogue) {
+      this.time.delayedCall(500, () => {
+        this.showDialogue(this.level.introDialogue!);
+        if (this.level.id === 4) {
+          this.showDialogue('level4WinchIntro');
+        }
+      });
+    }
 
     // Cross-scene event listeners
     this.game.events.on(GAME_EVENTS.TOUCH_INPUT, (data: TouchInputEvent) => {
@@ -2007,7 +2002,11 @@ export default class GameScene extends Phaser.Scene {
       if (groomerY >= zone.startY && groomerY <= zone.endY &&
         groomerX >= zone.leftX && groomerX <= zone.rightX) {
 
-        if (!this.winchActive) {
+        // Winch only prevents slide/tumble when cable is taut (groomer below anchor)
+        const winchTaut = this.winchActive && this.winchAnchor && 
+          (groomerY - 10) > this.winchAnchor.y;
+
+        if (!winchTaut) {
           if (zone.slope >= BALANCE.TUMBLE_SLOPE_THRESHOLD) {
             this.triggerTumble(zone.slope);
             return;
@@ -2445,16 +2444,21 @@ export default class GameScene extends Phaser.Scene {
       }
     }
     
-    (this.scene.get('DialogueScene') as DialogueScene).showDialogue(dialogueKey);
+    const dlg = this.scene.get('DialogueScene') as DialogueScene | null;
+    if (dlg?.showDialogue) {
+      dlg.showDialogue(dialogueKey);
+    }
   }
 
   pauseGame(): void {
+    if (!this.scene.isActive()) return;
     this.scene.pause();
     this.scene.launch('PauseScene', { levelIndex: this.levelIndex });
     this.scene.bringToTop('PauseScene');
   }
 
   resumeGame(): void {
+    if (!this.scene.isActive() && !this.scene.isPaused()) return;
     this.scene.resume();
   }
 

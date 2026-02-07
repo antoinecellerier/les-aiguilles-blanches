@@ -323,6 +323,9 @@ export default class DialogueScene extends Phaser.Scene {
     const dialogue = this.dialogueQueue.shift()!;
     this.isShowing = true;
 
+    // Kill any hide tween in progress to prevent race conditions
+    this.tweens.killTweensOf(this.container);
+
     // Bring dialogue scene to top so it renders above HUD
     this.scene.bringToTop();
 
@@ -471,6 +474,9 @@ export default class DialogueScene extends Phaser.Scene {
 
     if (!this.container) return;
 
+    // Kill any existing dialogue tweens to prevent hide/show races
+    this.tweens.killTweensOf(this.container);
+
     // Disable hit zones
     if (this.hitZone) {
       this.hitZone.disableInteractive();
@@ -485,7 +491,8 @@ export default class DialogueScene extends Phaser.Scene {
       duration: 200,
       ease: 'Power2',
       onComplete: () => {
-        if (this.container) {
+        // Only hide if we're still in hidden state (not re-shown during tween)
+        if (this.container && !this.isShowing) {
           this.container.setVisible(false);
         }
       },

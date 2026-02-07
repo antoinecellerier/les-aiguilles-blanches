@@ -47,6 +47,14 @@ export default class HUDScene extends Phaser.Scene {
   private touchRight = false;
   private touchGroom = false;
   private touchWinch = false;
+  
+  // Action button hit areas for multi-touch overlap detection
+  private actionButtons: Array<{
+    x: number; y: number; radius: number;
+    onDown: () => void; onUp: () => void;
+    bg: Phaser.GameObjects.Arc; pressedColor: number; color: number; alpha: number;
+    wasPressed: boolean;
+  }> = [];
 
   constructor() {
     super({ key: 'HUDScene' });
@@ -401,11 +409,11 @@ export default class HUDScene extends Phaser.Scene {
     const actionX = Math.round(width - padding - btnSize);
     const actionY = Math.round(height - padding - btnSize);
 
-    // Groom button (SPACE equivalent)
+    // Groom button (SPACE equivalent) — action button for overlap detection
     this.createTouchButton(Math.round(actionX - btnSize - padding / 2), actionY, Math.round(btnSize * 1.2), 'GRM', alpha,
       () => { this.touchGroom = true; },
       () => { this.touchGroom = false; },
-      0x2266aa
+      0x2266aa, true
     );
 
     // Winch button (SHIFT equivalent) - only if level has winch
@@ -413,7 +421,7 @@ export default class HUDScene extends Phaser.Scene {
       this.createTouchButton(actionX, Math.round(actionY - btnSize - padding / 2), Math.round(btnSize * 1.2), 'WCH', alpha,
         () => { this.touchWinch = true; },
         () => { this.touchWinch = false; },
-        0xaa6622
+        0xaa6622, true
       );
     }
   }
@@ -495,42 +503,52 @@ export default class HUDScene extends Phaser.Scene {
 
   private createTouchButton(
     x: number, y: number, size: number, label: string, alpha: number,
-    onDown: () => void, onUp: () => void, color = 0x333333
+    onDown: () => void, onUp: () => void, color = 0x333333,
+    isActionButton = false
   ): void {
     // Lighter color for pressed state
     const pressedColor = Phaser.Display.Color.ValueToColor(color).lighten(40).color;
     
     const bg = this.add.circle(x, y, size / 2, color, alpha)
       .setScrollFactor(0)
-      .setStrokeStyle(Math.max(2, Math.round(2 * this.uiScale)), Phaser.Display.Color.ValueToColor(color).lighten(30).color, alpha)
-      .setInteractive()
-      .on('pointerdown', () => {
-        bg.setFillStyle(pressedColor, alpha + 0.2);
-        bg.setScale(1.1);
-        onDown();
-      })
-      .on('pointerup', () => {
-        bg.setFillStyle(color, alpha);
-        bg.setScale(1);
-        onUp();
-      })
-      .on('pointerout', () => {
-        bg.setFillStyle(color, alpha);
-        bg.setScale(1);
-        onUp();
-      })
-      .on('pointerover', (pointer: Phaser.Input.Pointer) => {
-        if (pointer.isDown) {
+      .setStrokeStyle(Math.max(2, Math.round(2 * this.uiScale)), Phaser.Display.Color.ValueToColor(color).lighten(30).color, alpha);
+    
+    if (isActionButton) {
+      // Action buttons use manual overlap detection in update() so a single
+      // touch overlapping both groom and winch activates both simultaneously
+      this.actionButtons.push({
+        x, y, radius: size / 2, onDown, onUp, bg, pressedColor, color, alpha, wasPressed: false,
+      });
+    } else {
+      bg.setInteractive()
+        .on('pointerdown', () => {
           bg.setFillStyle(pressedColor, alpha + 0.2);
           bg.setScale(1.1);
           onDown();
-        }
-      })
-      .on('pointercancel', () => {
-        bg.setFillStyle(color, alpha);
-        bg.setScale(1);
-        onUp();
-      });
+        })
+        .on('pointerup', () => {
+          bg.setFillStyle(color, alpha);
+          bg.setScale(1);
+          onUp();
+        })
+        .on('pointerout', () => {
+          bg.setFillStyle(color, alpha);
+          bg.setScale(1);
+          onUp();
+        })
+        .on('pointerover', (pointer: Phaser.Input.Pointer) => {
+          if (pointer.isDown) {
+            bg.setFillStyle(pressedColor, alpha + 0.2);
+            bg.setScale(1.1);
+            onDown();
+          }
+        })
+        .on('pointercancel', () => {
+          bg.setFillStyle(color, alpha);
+          bg.setScale(1);
+          onUp();
+        });
+    }
 
     // Draw pixel art icon instead of text label
     const icon = this.drawButtonIcon(x, y, size, label);
@@ -612,31 +630,32 @@ export default class HUDScene extends Phaser.Scene {
     if (nextLevel < LEVELS.length) {
       this.game.events.emit(GAME_EVENTS.SKIP_LEVEL, nextLevel);
     } else {
+      const game = this.game;
       this.scene.stop('HUDScene');
       this.scene.stop('DialogueScene');
-      this.scene.get('GameScene')?.scene.stop();
-      this.game.scene.start('CreditsScene');
+      game.scene.stop('GameScene');
+      game.scene.start('CreditsScene');
     }
   }
 
   update(): void {
     if (!this.scene.isActive()) return;
-    if (!this.fuelBar || !this.fuelText) return;
+    if (!this.fuelBar?.active || !this.fuelText?.active) return;
 
     const { fuel, stamina, coverage, winchActive } = this.gameState;
     const fuelPercent = fuel / 100;
     const staminaPercent = stamina / 100;
 
     this.fuelBar.width = this.barWidth * fuelPercent;
-    if (this.staminaBar) this.staminaBar.width = this.barWidth * staminaPercent;
+    if (this.staminaBar?.active) this.staminaBar.width = this.barWidth * staminaPercent;
 
     this.fuelText.setText(Math.round(fuel) + '%');
-    this.staminaText?.setText(Math.round(stamina) + '%');
+    if (this.staminaText?.active) this.staminaText.setText(Math.round(stamina) + '%');
 
     this.fuelBar.setFillStyle(fuelPercent > 0.3 ? THEME.colors.dangerHex : 0xff0000);
-    this.staminaBar?.setFillStyle(staminaPercent > 0.3 ? THEME.colors.successHex : 0xffaa00);
+    if (this.staminaBar?.active) this.staminaBar.setFillStyle(staminaPercent > 0.3 ? THEME.colors.successHex : 0xffaa00);
 
-    if (this.coverageText) {
+    if (this.coverageText?.active) {
       this.coverageText.setText((t('coverage') || 'Coverage') + ': ' + coverage + '%');
       if (coverage >= this.level.targetCoverage) {
         this.coverageText.setColor('#00FF00');
@@ -644,7 +663,7 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Show/hide winch status indicator
-    if (this.winchStatus) {
+    if (this.winchStatus?.active) {
       if (winchActive) {
         this.winchStatus.setText('🔗 ' + (t('winchActive') || 'WINCH'));
         this.winchStatus.setVisible(true);
@@ -653,9 +672,47 @@ export default class HUDScene extends Phaser.Scene {
       }
     }
 
+    // Action button overlap detection: check all active pointers against all
+    // action buttons so a thumb overlapping both groom and winch activates both
+    if (this.actionButtons.length > 0) {
+      const pointers = this.input.manager?.pointers;
+      if (!pointers) return;
+      for (const btn of this.actionButtons) {
+        if (!btn.bg?.active) continue;
+        let pressed = false;
+        for (const p of pointers) {
+          if (!p.isDown) continue;
+          const dx = p.x - btn.x;
+          const dy = p.y - btn.y;
+          if (dx * dx + dy * dy <= btn.radius * btn.radius) {
+            pressed = true;
+            break;
+          }
+        }
+        if (pressed && !btn.wasPressed) {
+          btn.bg.setFillStyle(btn.pressedColor, btn.alpha + 0.2);
+          btn.bg.setScale(1.1);
+          btn.onDown();
+        } else if (!pressed && btn.wasPressed) {
+          btn.bg.setFillStyle(btn.color, btn.alpha);
+          btn.bg.setScale(1);
+          btn.onUp();
+        }
+        btn.wasPressed = pressed;
+      }
+    }
+
     // Safety: reset touch states if no active pointers (prevents stuck controls)
-    const activePointers = this.input.manager.pointers.filter(p => p.isDown);
-    if (activePointers.length === 0) {
+    const activePointers = this.input.manager?.pointers?.filter(p => p.isDown);
+    if (!activePointers || activePointers.length === 0) {
+      for (const btn of this.actionButtons) {
+        if (btn.wasPressed && btn.bg?.active) {
+          btn.bg.setFillStyle(btn.color, btn.alpha);
+          btn.bg.setScale(1);
+          btn.onUp();
+          btn.wasPressed = false;
+        }
+      }
       this.touchUp = false;
       this.touchDown = false;
       this.touchLeft = false;
@@ -692,7 +749,7 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   private updateTimer(seconds: number): void {
-    if (!this.timerText) return;
+    if (!this.timerText || !this.timerText.active) return;
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     this.timerText.setText(mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0'));
@@ -727,14 +784,15 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    // Remove global event listeners FIRST to prevent callbacks on destroyed objects
+    this.game.events.off(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
+    this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
+
     this.scale.off('resize', this.handleResize, this);
     if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);
-
-    this.game.events.off(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
-    this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
 
     this.fuelBar = null;
     this.fuelText = null;
@@ -743,5 +801,6 @@ export default class HUDScene extends Phaser.Scene {
     this.coverageText = null;
     this.winchStatus = null;
     this.timerText = null;
+    this.actionButtons = [];
   }
 }

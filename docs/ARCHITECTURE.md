@@ -646,15 +646,20 @@ private handleResize(): void {
 
 ### Cleanup in shutdown()
 
-All scenes should implement `shutdown()` for proper cleanup:
+All scenes should implement `shutdown()` for proper cleanup. **Critical**: remove `game.events` listeners BEFORE destroying children — otherwise global events can fire on destroyed objects between the two calls, crashing Phaser's entire update loop.
 
 ```javascript
 shutdown() {
+    // 1. Remove global event listeners FIRST
+    this.game.events.off(GAME_EVENTS.MY_EVENT, this.handler, this);
+    // 2. Then destroy everything
     this.tweens.killAll();           // Stop all animations
     this.time.removeAllEvents();      // Cancel all timers
     this.children.removeAll(true);    // Destroy all game objects
 }
 ```
+
+In `update()`, always check `.active` on game objects before calling methods (e.g. `setText`, `setFillStyle`) — a race between scene stop and update can cause `setText` on a destroyed Text to throw, killing the game loop.
 
 ### Gamepad Menu Navigation
 

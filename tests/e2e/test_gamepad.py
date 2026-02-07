@@ -191,12 +191,24 @@ class TestGamepadGameplay:
         
         wait_for_scene(gamepad_page, 'GameScene')
         
-        # Dismiss any dialogues
-        for _ in range(5):
+        # Dismiss all dialogues — keep pressing A until dialogue is gone
+        for _ in range(15):
+            is_showing = gamepad_page.evaluate("""() => {
+                const ds = window.game?.scene?.getScene('DialogueScene');
+                return ds?.isDialogueShowing?.() ?? false;
+            }""")
+            if not is_showing:
+                break
             press_gamepad_button(gamepad_page, 0)
             gamepad_page.wait_for_timeout(100)
             release_gamepad_button(gamepad_page, 0)
             gamepad_page.wait_for_timeout(200)
+        
+        # Wait for dialogue to fully clear
+        gamepad_page.wait_for_function("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds && ds.isDialogueShowing && !ds.isDialogueShowing();
+        }""", timeout=3000)
         
         # Press Start to pause
         press_gamepad_button(gamepad_page, 9)

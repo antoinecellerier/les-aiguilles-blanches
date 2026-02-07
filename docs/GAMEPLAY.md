@@ -298,10 +298,10 @@ A: Check fuel level. If at 0%, find the nearest fuel station.
 A: Focus on coverage, not perfection. 80% groomed is better than 50% perfect.
 
 **Q: The winch won't work!**
-A: Winch is only available on levels with steep terrain. You must be near a numbered anchor post (within 3 tiles) to attach. The cable shows slack when you're above the anchor, and only provides pulling force when you're below it.
+A: Winch is only available on levels with steep terrain. You must be near a numbered anchor post (within 3 tiles) to attach. The cable only provides pulling force when you're downhill from the anchor — a slack cable won't prevent sliding.
 
 **Q: The winch cable looks loose!**
-A: When your groomer is above or level with the anchor, the cable has slack and doesn't provide any pulling assistance. Move below the anchor to tension the cable and get winch assist.
+A: When your groomer is above or level with the anchor, the cable has slack and won't prevent steep slope sliding or tumbling. Move below the anchor to tension the cable.
 
 **Q: I can't reach the winch anchor!**
 A: Look for service roads (orange/black poles) on the side of the piste. These provide safe access to anchors.

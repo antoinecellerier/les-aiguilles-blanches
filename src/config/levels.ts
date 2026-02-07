@@ -246,7 +246,7 @@ export const LEVELS: Level[] = [
       { startY: 0.25, endY: 0.6, side: 'right' },
       { startY: 0.5, endY: 0.85, side: 'left' },
     ],
-    winchAnchors: [{ y: 0.05 }, { y: 0.3 }, { y: 0.55 }, { y: 0.8 }],
+    winchAnchors: [{ y: 0.05 }, { y: 0.3 }, { y: 0.55 }],
     introDialogue: 'level6Intro',
     bonusObjectives: [
       { type: 'exploration', target: 3 },
@@ -278,7 +278,7 @@ export const LEVELS: Level[] = [
       { startY: 0.05, endY: 0.4, side: 'left' },
       { startY: 0.35, endY: 0.75, side: 'right' },
     ],
-    winchAnchors: [{ y: 0.1 }, { y: 0.4 }, { y: 0.7 }],
+    winchAnchors: [{ y: 0.1 }, { y: 0.4 }],
     introDialogue: 'thierryWarning',
     bonusObjectives: [
       { type: 'no_tumble', target: 0 },
@@ -302,7 +302,7 @@ export const LEVELS: Level[] = [
     pisteShape: 'gentle_curve',
     pisteWidth: 0.5,
     steepZones: [{ startY: 0.3, endY: 0.45, slope: 35 }],
-    winchAnchors: [{ y: 0.2 }, { y: 0.6 }],
+    winchAnchors: [{ y: 0.2 }],
     introDialogue: 'level8Intro',
     bonusObjectives: [
       { type: 'fuel_efficiency', target: 70 },
