@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle } from '../config/theme';
+import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
@@ -20,6 +21,12 @@ export default class CreditsScene extends Phaser.Scene {
   private menuButtons: Phaser.GameObjects.Text[] = [];
   private buttonCallbacks: (() => void)[] = [];
   private selectedIndex = 0;
+  private buttonsShown = false;
+  
+  // Gamepad state
+  private gamepadAPressed = false;
+  private gamepadBPressed = false;
+  private gamepadNavCooldown = 0;
 
   constructor() {
     super({ key: 'CreditsScene' });
@@ -32,6 +39,19 @@ export default class CreditsScene extends Phaser.Scene {
     this.menuButtons = [];
     this.buttonCallbacks = [];
     this.selectedIndex = 0;
+    this.buttonsShown = false;
+    this.gamepadAPressed = false;
+    this.gamepadBPressed = false;
+    this.gamepadNavCooldown = 0;
+
+    // Initialize gamepad state to prevent phantom presses
+    if (this.input.gamepad && this.input.gamepad.total > 0) {
+      const pad = this.input.gamepad.getPad(0);
+      if (pad) {
+        this.gamepadAPressed = isConfirmPressed(pad);
+        this.gamepadBPressed = isBackPressed(pad);
+      }
+    }
 
     this.cameras.main.setBackgroundColor(THEME.colors.darkBg);
     this.createStars();
@@ -194,6 +214,7 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   private showButtons(): void {
+    this.buttonsShown = true;
     this.buttonsContainer.setVisible(true);
     this.skipHint.setVisible(false);
 
@@ -265,6 +286,44 @@ export default class CreditsScene extends Phaser.Scene {
 
       game.scene.start('GameScene', { level: 0 });
     }, 100);
+  }
+
+  update(_time: number, delta: number): void {
+    if (!this.input.gamepad || this.input.gamepad.total === 0) return;
+    const pad = this.input.gamepad.getPad(0);
+    if (!pad) return;
+
+    const confirmPressed = isConfirmPressed(pad);
+    const backPressed = isBackPressed(pad);
+
+    if (!this.buttonsShown) {
+      // Any button skips credits scroll
+      if ((confirmPressed && !this.gamepadAPressed) || (backPressed && !this.gamepadBPressed)) {
+        this.skipCredits();
+      }
+    } else {
+      // Navigate buttons
+      this.gamepadNavCooldown = Math.max(0, this.gamepadNavCooldown - delta);
+      if (this.gamepadNavCooldown <= 0) {
+        const stickX = pad.leftStick?.x ?? 0;
+        if (pad.left || stickX < -0.5) {
+          this.navigateMenu(-1);
+          this.gamepadNavCooldown = 200;
+        } else if (pad.right || stickX > 0.5) {
+          this.navigateMenu(1);
+          this.gamepadNavCooldown = 200;
+        }
+      }
+      if (confirmPressed && !this.gamepadAPressed) {
+        this.activateSelected();
+      }
+      if (backPressed && !this.gamepadBPressed) {
+        this.returnToMenu();
+      }
+    }
+
+    this.gamepadAPressed = confirmPressed;
+    this.gamepadBPressed = backPressed;
   }
 
   shutdown(): void {

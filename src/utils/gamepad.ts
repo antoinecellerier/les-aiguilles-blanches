@@ -41,10 +41,31 @@ export interface GamepadBindings {
 
 const GAMEPAD_BINDINGS_KEY = 'snowGroomer_gamepadBindings';
 
-const BUTTON_NAMES: Record<number, string> = {
-  0: 'South', 1: 'East', 2: 'West', 3: 'North',
+const BUTTON_NAMES_GENERIC: Record<number, string> = {
+  0: 'Ⓐ', 1: 'Ⓑ', 2: 'Ⓧ', 3: 'Ⓨ',
   4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
   8: 'Select', 9: 'Start',
+  10: 'L3', 11: 'R3',
+};
+
+const BUTTON_NAMES_NINTENDO: Record<number, string> = {
+  0: 'Ⓑ', 1: 'Ⓐ', 2: 'Ⓨ', 3: 'Ⓧ',
+  4: 'L', 5: 'R', 6: 'ZL', 7: 'ZR',
+  8: '⊖', 9: '⊕',
+  10: 'L3', 11: 'R3',
+};
+
+const BUTTON_NAMES_PLAYSTATION: Record<number, string> = {
+  0: '✕', 1: '○', 2: '□', 3: '△',
+  4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
+  8: 'Share', 9: 'Options',
+  10: 'L3', 11: 'R3',
+};
+
+const BUTTON_NAMES_XBOX: Record<number, string> = {
+  0: 'Ⓐ', 1: 'Ⓑ', 2: 'Ⓧ', 3: 'Ⓨ',
+  4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
+  8: 'View', 9: 'Menu',
   10: 'L3', 11: 'R3',
 };
 
@@ -72,8 +93,22 @@ export function saveGamepadBindings(bindings: GamepadBindings): void {
   localStorage.setItem(GAMEPAD_BINDINGS_KEY, JSON.stringify(bindings));
 }
 
-export function getButtonName(index: number): string {
-  return BUTTON_NAMES[index] || 'Btn ' + index;
+/** Get display name for a button index, adapted to the connected controller type. */
+export function getButtonName(index: number, controllerType?: ControllerType): string {
+  const names = controllerType === 'nintendo' ? BUTTON_NAMES_NINTENDO
+    : controllerType === 'playstation' ? BUTTON_NAMES_PLAYSTATION
+    : controllerType === 'xbox' ? BUTTON_NAMES_XBOX
+    : BUTTON_NAMES_GENERIC;
+  return names[index] || 'Btn ' + index;
+}
+
+/** Detect controller type from the first connected gamepad (if any). */
+export function getConnectedControllerType(): ControllerType {
+  const gamepads = navigator.getGamepads?.() || [];
+  for (const gp of gamepads) {
+    if (gp) return detectControllerType(gp.id);
+  }
+  return 'generic';
 }
 
 /**

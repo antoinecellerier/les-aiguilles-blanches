@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
-import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
+import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
 
@@ -215,16 +215,19 @@ export default class DialogueScene extends Phaser.Scene {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
         this.gamepadAPressed = isConfirmPressed(pad);
+        this.gamepadBPressed = isBackPressed(pad);
       }
     } else {
       this.gamepadAPressed = false;
+      this.gamepadBPressed = false;
     }
   }
 
   private gamepadAPressed = false;
+  private gamepadBPressed = false;
 
   update(): void {
-    // Gamepad confirm button to advance dialogue (handles Nintendo swap)
+    // Gamepad buttons to advance/dismiss dialogue (handles Nintendo swap)
     if (this.isShowing && this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
@@ -233,6 +236,12 @@ export default class DialogueScene extends Phaser.Scene {
           this.advanceDialogue();
         }
         this.gamepadAPressed = confirmPressed;
+
+        const backPressed = isBackPressed(pad);
+        if (backPressed && !this.gamepadBPressed) {
+          this.dismissAllDialogue();
+        }
+        this.gamepadBPressed = backPressed;
       }
     }
   }

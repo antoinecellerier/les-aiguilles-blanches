@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
-import { isConfirmPressed, loadGamepadBindings, getButtonName } from '../utils/gamepad';
+import { isConfirmPressed, loadGamepadBindings, getButtonName, getConnectedControllerType, isBackPressed } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 import GameScene from './GameScene';
 import HUDScene from './HUDScene';
@@ -16,6 +16,7 @@ import PauseScene from './PauseScene';
 
 export default class MenuScene extends Phaser.Scene {
   private overlayOpen = false;
+  private overlayCloseCallback: (() => void) | null = null;
   private snowflakes: { rect: Phaser.GameObjects.Rectangle; speed: number; wobbleOffset: number }[] = [];
   private selectionArrow: Phaser.GameObjects.Text | null = null;
   private snowLineY = 0;
@@ -328,6 +329,7 @@ export default class MenuScene extends Phaser.Scene {
   private buttonCallbacks: (() => void)[] = [];
   private selectedIndex = 0;
   private gamepadAPressed = false;
+  private gamepadBPressed = false;
   private gamepadStickY = 0;
   private gamepadNavCooldown = 0;
 
@@ -384,6 +386,18 @@ export default class MenuScene extends Phaser.Scene {
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
+        // Close overlay with A or B
+        if (this.overlayOpen) {
+          const confirmPressed = isConfirmPressed(pad);
+          const backPressed = isBackPressed(pad);
+          if ((confirmPressed && !this.gamepadAPressed) || (backPressed && !this.gamepadBPressed)) {
+            this.overlayCloseCallback?.();
+          }
+          this.gamepadAPressed = confirmPressed;
+          this.gamepadBPressed = backPressed;
+          return;
+        }
+
         this.gamepadNavCooldown = Math.max(0, this.gamepadNavCooldown - delta);
         
         const stickY = pad.leftStick.y;
@@ -607,7 +621,7 @@ export default class MenuScene extends Phaser.Scene {
     if (hasGamepad) {
       // Gamepad connected - show gamepad controls
       moveHint = '🎮 ' + (t('howToPlayMoveGamepad') || 'Left stick or D-pad to move');
-      groomHint = `❄️ ${getButtonName(loadGamepadBindings().groom)} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
+      groomHint = `❄️ ${getButtonName(loadGamepadBindings().groom, getConnectedControllerType())} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
     } else if (showTouchHints) {
       moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
       groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
@@ -752,12 +766,14 @@ export default class MenuScene extends Phaser.Scene {
     // ESC, ENTER, or SPACE to close
     const closeOverlay = () => {
       this.overlayOpen = false;
+      this.overlayCloseCallback = null;
       this.input.keyboard?.off('keydown-ESC', closeOverlay);
       this.input.keyboard?.off('keydown-ENTER', closeOverlay);
       this.input.keyboard?.off('keydown-SPACE', closeOverlay);
       overlay.destroy();
       dialog.destroy();
     };
+    this.overlayCloseCallback = closeOverlay;
     this.input.keyboard?.on('keydown-ESC', closeOverlay);
     this.input.keyboard?.on('keydown-ENTER', closeOverlay);
     this.input.keyboard?.on('keydown-SPACE', closeOverlay);

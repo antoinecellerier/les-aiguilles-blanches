@@ -2,7 +2,7 @@
  * Keyboard layout detection and key binding utilities
  */
 
-import { loadGamepadBindings, getDefaultGamepadBindings, getButtonName } from './gamepad';
+import { loadGamepadBindings, getButtonName, getConnectedControllerType } from './gamepad';
 
 export type KeyboardLayout = 'qwerty' | 'azerty' | 'qwertz';
 
@@ -213,7 +213,7 @@ export function getGroomKeyName(): string {
   }
 
   const gpBindings = loadGamepadBindings();
-  const gpBtn = getButtonName(gpBindings.groom);
+  const gpBtn = getButtonName(gpBindings.groom, getConnectedControllerType());
   return keyName + ' / ' + gpBtn;
 }
 
@@ -238,7 +238,7 @@ export function getWinchKeyName(): string {
   }
 
   const gpBindings = loadGamepadBindings();
-  const gpBtn = getButtonName(gpBindings.winch);
+  const gpBtn = getButtonName(gpBindings.winch, getConnectedControllerType());
   return keyName + ' / ' + gpBtn;
 }
 

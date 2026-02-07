@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
-import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, type GamepadBindings } from '../utils/gamepad';
+import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 
 /**
@@ -513,7 +513,7 @@ export default class SettingsScene extends Phaser.Scene {
     const currentBtn = this.gamepadBindings[actionId as keyof GamepadBindings];
     const defaultBtn = getDefaultGamepadBindings()[actionId as keyof GamepadBindings];
     const isCustom = currentBtn !== defaultBtn;
-    const btnName = getButtonName(currentBtn);
+    const btnName = getButtonName(currentBtn, getConnectedControllerType());
 
     const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
     const btn = this.add.text(0, 0, btnName + (isCustom ? ' *' : ''), {
@@ -702,7 +702,7 @@ export default class SettingsScene extends Phaser.Scene {
 
         const btn = this.gamepadRebindButtons[actionId];
         const isCustom = i !== getDefaultGamepadBindings()[actionId];
-        btn.setText(getButtonName(i) + (isCustom ? ' *' : ''));
+        btn.setText(getButtonName(i, getConnectedControllerType()) + (isCustom ? ' *' : ''));
         btn.setStyle({ backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
                         color: isCustom ? THEME.colors.accent : THEME.colors.info });
 

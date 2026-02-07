@@ -214,7 +214,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate5: "7 février 2026",
-        changelogDay5: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis",
+        changelogDay5: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus",
         changelogDate4: "6 février 2026",
         changelogDay4: "🛤️ Chemins de dameuse praticables\n🕹️ Joystick virtuel\n🌍 5 langues complètes",
         changelogDate3: "5 février 2026",
@@ -426,7 +426,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate5: "February 7, 2026",
-        changelogDay5: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis",
+        changelogDay5: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation",
         changelogDate4: "February 6, 2026",
         changelogDay4: "🛤️ Traversable cat tracks\n🕹️ Virtual joystick\n🌍 5 complete languages",
         changelogDate3: "February 5, 2026",
@@ -604,7 +604,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate5: "7. Februar 2026",
-        changelogDay5: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis",
+        changelogDay5: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs",
         changelogDate4: "6. Februar 2026",
         changelogDay4: "🛤️ Befahrbare Pistenraupenspuren\n🕹️ Virtueller Joystick\n🌍 5 vollständige Sprachen",
         changelogDate3: "5. Februar 2026",
@@ -813,7 +813,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate5: "7 febbraio 2026",
-        changelogDay5: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji",
+        changelogDay5: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu",
         changelogDate4: "6 febbraio 2026",
         changelogDay4: "🛤️ Tracciati battipista percorribili\n🕹️ Joystick virtuale\n🌍 5 lingue complete",
         changelogDate3: "5 febbraio 2026",
@@ -1022,7 +1022,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelogDate5: "7 de febrero de 2026",
-        changelogDay5: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis",
+        changelogDay5: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús",
         changelogDate4: "6 de febrero de 2026",
         changelogDay4: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
         changelogDate3: "5 de febrero de 2026",
