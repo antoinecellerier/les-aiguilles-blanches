@@ -58,6 +58,10 @@ snow-groomer/
 ├── tests/
 │   ├── e2e/                # Playwright browser tests
 │   └── unit-js/            # Vitest config validation
+├── .github/
+│   ├── agents/
+│   │   └── code-health.agent.md  # Code audit custom agent
+│   └── copilot-instructions.md   # Copilot custom instructions
 └── docs/
     ├── ARCHITECTURE.md     # This file
     └── GAMEPLAY.md         # Game mechanics

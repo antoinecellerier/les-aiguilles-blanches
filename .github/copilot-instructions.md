@@ -38,6 +38,9 @@ Commit message structure:
 Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 ```
 
+## Custom Agents
+- `code-health` — Thorough code audit against engineering best practices. Use via `/agent` or `Use the code-health agent to audit the codebase`
+
 ## Critical Patterns
 
 ### localStorage Keys (must match in tests)
