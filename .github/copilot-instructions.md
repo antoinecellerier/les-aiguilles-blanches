@@ -21,10 +21,12 @@ npm run dev                       # Dev server
 
 Before every commit, verify:
 
-1. **Tests** - Regression test exists and passes
-2. **Docs** - ARCHITECTURE/TESTING/GAMEPLAY updated if relevant
-3. **ROADMAP.md** - Work queue synced, completed items moved
-4. **Commit message** - Summarizes functional change, lists all updates
+1. **Code review** - Run the `code-health` agent (or follow `.github/skills/code-health/SKILL.md`) on all changed files to check for duplication, inconsistencies, missing cleanup, and error handling issues. Fix any HIGH/MEDIUM findings before committing.
+2. **Tests** - Regression test exists and passes
+3. **Docs** - ARCHITECTURE/TESTING/GAMEPLAY updated if relevant
+4. **ROADMAP.md** - Work queue synced, completed items moved
+5. **Changelog** - Update in-game changelog (localization.ts) for player-visible changes
+6. **Commit message** - Summarizes functional change, lists all updates
 
 Commit message structure:
 ```
@@ -39,7 +41,7 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 ```
 
 ## Custom Agents
-- `code-health` — Thorough code audit against engineering best practices. Use via `/agent` or `Use the code-health agent to audit the codebase`
+- `code-health` — Thorough code audit against engineering best practices. Auto-activates as a skill when you ask about code quality, duplication, or tech debt. Also available explicitly via `/agent` → `code-health`
 
 ## Critical Patterns
 
