@@ -271,7 +271,9 @@ export default class MenuScene extends Phaser.Scene {
         .on('pointerout', () => {
           this.updateButtonStyles();
         })
-        .on('pointerdown', btn.callback);
+        .on('pointerup', () => {
+          btn.callback();
+        });
       
       this.menuButtons.push(button);
       this.buttonShadows.push(shadow);
@@ -285,7 +287,12 @@ export default class MenuScene extends Phaser.Scene {
     this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, THEME.colors.dialogBg).setOrigin(0.5, 0);
     this.add.rectangle(width / 2, footerTop, width, 2, THEME.colors.border).setOrigin(0.5, 0);
     
-    const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+    let version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+    if (version.startsWith('__DIRTY__')) {
+      const hash = version.slice(9);
+      const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+      version = `${now} ${hash}-dirty`;
+    }
     const footerFontSize = Math.round(Math.max(11, 13 * scaleFactor));
     const githubLink = this.add.text(width / 2, footerTop + footerHeight / 2 - Math.round(7 * scaleFactor), `GitHub  ·  v${version}`, {
       fontFamily: THEME.fonts.family,
@@ -426,7 +433,7 @@ export default class MenuScene extends Phaser.Scene {
   private resizing = false;
 
   private handleResize(): void {
-    if (this.resizing) return;
+    if (this.resizing || !this.scene.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
       this.scene.restart();
@@ -446,8 +453,7 @@ export default class MenuScene extends Phaser.Scene {
         // Fullscreen not supported or denied
       });
     }
-    // Restart scene to update button appearance
-    this.time.delayedCall(200, () => this.scene.restart());
+    // Resize handler will restart scene to update button layout
   }
 
   private createMountains(width: number, height: number, snowLineY: number, scaleFactor: number): void {
@@ -649,7 +655,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showSettings(): void {
-    this.scene.start('SettingsScene');
+    this.scene.start('SettingsScene', { returnTo: null });
   }
 
   private showChangelog(): void {

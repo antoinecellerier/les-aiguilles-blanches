@@ -9,8 +9,8 @@ function getVersion() {
     const hash = execSync('git rev-parse --short HEAD').toString().trim();
     const dirty = execSync('git status --porcelain').toString().trim();
     if (dirty) {
-      const buildTime = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
-      return `${buildTime} ${hash}-dirty`;
+      // In dev mode, use __BUILD_HASH__ and compute time client-side for freshness
+      return `__DIRTY__${hash}`;
     }
     const commitDate = execSync('TZ=UTC git log -1 --format=%cd --date=format-local:"%Y-%m-%d %H:%M:%S UTC"').toString().trim();
     return `${commitDate} ${hash}`;

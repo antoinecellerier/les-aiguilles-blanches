@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle, titleStyle } from '../config/theme';
 import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
+import GameScene from './GameScene';
+import HUDScene from './HUDScene';
+import DialogueScene from './DialogueScene';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -182,27 +185,61 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private restartLevel(): void {
+    const game = this.game;
+    const levelIndex = this.gameScene.levelIndex;
     this.scene.stop();
     this.scene.stop('GameScene');
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
-    this.scene.start('GameScene', { level: this.gameScene.levelIndex });
+
+    setTimeout(() => {
+      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
+        if (game.scene.getScene(key)) {
+          game.scene.remove(key);
+        }
+      });
+
+      game.scene.add('GameScene', GameScene, false);
+      game.scene.add('HUDScene', HUDScene, false);
+      game.scene.add('DialogueScene', DialogueScene, false);
+      game.scene.add('PauseScene', PauseScene, false);
+
+      game.scene.start('GameScene', { level: levelIndex });
+    }, 100);
   }
 
   private openSettings(): void {
-    this.scene.stop();
-    this.scene.stop('GameScene');
+    // Keep GameScene paused; just stop overlays and open Settings
+    const game = this.game;
+    const levelIndex = this.gameScene.levelIndex;
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
-    this.scene.start('SettingsScene', { returnTo: 'GameScene', levelIndex: this.gameScene.levelIndex });
+    this.scene.stop('PauseScene');
+    game.scene.start('SettingsScene', { returnTo: 'PauseScene', levelIndex });
+    game.scene.bringToTop('SettingsScene');
   }
 
   private quitToMenu(): void {
+    const game = this.game;
     this.scene.stop();
     this.scene.stop('GameScene');
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
-    this.scene.start('MenuScene');
+
+    setTimeout(() => {
+      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
+        if (game.scene.getScene(key)) {
+          game.scene.remove(key);
+        }
+      });
+
+      game.scene.add('GameScene', GameScene, false);
+      game.scene.add('HUDScene', HUDScene, false);
+      game.scene.add('DialogueScene', DialogueScene, false);
+      game.scene.add('PauseScene', PauseScene, false);
+
+      game.scene.start('MenuScene');
+    }, 100);
   }
 
   shutdown(): void {

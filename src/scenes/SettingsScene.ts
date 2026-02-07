@@ -3,6 +3,10 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
+import GameScene from './GameScene';
+import HUDScene from './HUDScene';
+import DialogueScene from './DialogueScene';
+import PauseScene from './PauseScene';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -117,7 +121,7 @@ export default class SettingsScene extends Phaser.Scene {
   private resizing = false;
 
   private handleResize(): void {
-    if (this.resizing) return;
+    if (this.resizing || !this.scene.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
       this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
@@ -341,7 +345,9 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private createBackButton(width: number, height: number, padding: number): void {
-    const backLabel = this.returnTo ? (t('backToGame') || 'Back to Game') : (t('back') || 'Back');
+    const backLabel = this.returnTo === 'PauseScene' ? (t('back') || 'Back')
+      : this.returnTo ? (t('backToGame') || 'Back to Game')
+      : (t('back') || 'Back');
     const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, THEME.colors.textPrimary, THEME.colors.buttonDangerHex);
     backBtn.setPosition(width / 2, height - padding * 1.5);
     backBtn.setOrigin(0.5);
@@ -745,8 +751,36 @@ export default class SettingsScene extends Phaser.Scene {
       return;
     }
 
-    if (this.returnTo === 'GameScene') {
-      this.scene.start('GameScene', { level: this.levelIndex });
+    if (this.returnTo === 'PauseScene') {
+      // Return to pause menu — GameScene is still paused, just resume overlays
+      const game = this.game;
+      const gameScene = game.scene.getScene('GameScene') as any;
+      const levelIndex = this.levelIndex;
+      this.scene.stop('SettingsScene');
+      // Use SceneManager.start() (not launch — SceneManager doesn't have launch)
+      game.scene.start('HUDScene', { level: levelIndex, gameScene });
+      game.scene.start('DialogueScene');
+      game.scene.start('PauseScene', { gameScene });
+    } else if (this.returnTo === 'GameScene') {
+      // Clean restart: remove stale game scenes and start fresh
+      const game = this.game;
+      const levelIndex = this.levelIndex;
+      this.scene.stop('SettingsScene');
+
+      setTimeout(() => {
+        ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
+          if (game.scene.getScene(key)) {
+            game.scene.remove(key);
+          }
+        });
+
+        game.scene.add('GameScene', GameScene, false);
+        game.scene.add('HUDScene', HUDScene, false);
+        game.scene.add('DialogueScene', DialogueScene, false);
+        game.scene.add('PauseScene', PauseScene, false);
+
+        game.scene.start('GameScene', { level: levelIndex });
+      }, 100);
     } else {
       this.scene.start('MenuScene');
     }

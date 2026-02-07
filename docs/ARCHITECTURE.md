@@ -598,6 +598,44 @@ setTimeout(() => {
 - Create fresh scene instances via `scene.add()` rather than reusing
 - Reset instance variables (like `isSkipping`) in `init()` not just `create()`
 
+### Stale Scene Data (Critical)
+
+`scene.start(key)` **without data reuses the PREVIOUS init data** from `sys.settings.data`. Always pass explicit data:
+
+```javascript
+// BAD: reuses previous data (e.g., stale returnTo='PauseScene')
+this.scene.start('SettingsScene');
+
+// GOOD: explicitly clear/set data
+this.scene.start('SettingsScene', { returnTo: null });
+```
+
+### SceneManager vs ScenePlugin API
+
+`game.scene` (SceneManager) and `this.scene` (ScenePlugin) have different APIs:
+- `game.scene.start(key)` — starts a scene WITHOUT stopping the caller
+- `this.scene.start(key)` — starts a scene AND stops the calling scene
+- `this.scene.launch(key)` — starts a scene without stopping caller (ScenePlugin only)
+- `game.scene.launch()` — **DOES NOT EXIST** (throws TypeError)
+
+After stopping self, use `game` reference (captured before stop) for subsequent operations:
+```javascript
+const game = this.game;
+this.scene.stop('MyScene');
+game.scene.start('OtherScene', data);  // Safe: uses SceneManager
+```
+
+### Zombie Resize Handlers
+
+`this.scale` is the game-global Scale Manager shared across ALL scenes. `scale.off('resize', handler, this)` in `shutdown()` may fail to properly remove the listener. Guard all resize handlers:
+
+```javascript
+private handleResize(): void {
+    if (this.resizing || !this.scene.isActive()) return;  // Required guard
+    // ...
+}
+```
+
 ### Cleanup in shutdown()
 
 All scenes should implement `shutdown()` for proper cleanup:

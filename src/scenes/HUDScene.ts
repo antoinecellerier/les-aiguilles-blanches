@@ -611,12 +611,7 @@ export default class HUDScene extends Phaser.Scene {
         // Fullscreen not supported or denied
       });
     }
-    // Restart HUD to update button appearance after fullscreen change
-    this.time.delayedCall(200, () => {
-      if (this.scene.isActive()) {
-        this.scene.restart({ level: this.level, gameScene: this.gameScene });
-      }
-    });
+    // Resize handler will restart HUD to update button appearance
   }
 
   private skipLevel(): void {

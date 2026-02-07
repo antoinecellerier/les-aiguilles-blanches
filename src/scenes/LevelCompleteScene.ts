@@ -2,6 +2,10 @@ import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from '../setup';
 import { THEME } from '../config/theme';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
+import GameScene from './GameScene';
+import HUDScene from './HUDScene';
+import DialogueScene from './DialogueScene';
+import PauseScene from './PauseScene';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -186,23 +190,23 @@ export default class LevelCompleteScene extends Phaser.Scene {
     if (this.won && this.levelIndex < LEVELS.length - 1) {
       // Won, more levels: Next Level + Menu
       this.addButton(buttonSizer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding, 
-        () => this.scene.start('GameScene', { level: this.levelIndex + 1 }), true);
+        () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
-        () => this.scene.start('MenuScene'));
+        () => this.navigateTo('MenuScene'));
 
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       // Won final level: View Credits + Menu
       this.addButton(buttonSizer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding,
-        () => this.scene.start('CreditsScene'), true);
+        () => this.navigateTo('CreditsScene'), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
-        () => this.scene.start('MenuScene'));
+        () => this.navigateTo('MenuScene'));
 
     } else {
       // Failed: Retry + Menu
       this.addButton(buttonSizer, t('retry') || 'Retry', buttonFontSize, buttonPadding,
-        () => this.scene.start('GameScene', { level: this.levelIndex }), true);
+        () => this.navigateTo('GameScene', { level: this.levelIndex }), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
-        () => this.scene.start('MenuScene'));
+        () => this.navigateTo('MenuScene'));
     }
     
     // Keyboard navigation (horizontal layout)
@@ -210,7 +214,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-RIGHT', () => this.navigateMenu(1));
     this.input.keyboard?.on('keydown-ENTER', () => this.activateSelected());
     this.input.keyboard?.on('keydown-SPACE', () => this.activateSelected());
-    this.input.keyboard?.on('keydown-ESC', () => this.scene.start('MenuScene'));
+    this.input.keyboard?.on('keydown-ESC', () => this.navigateTo('MenuScene'));
     
     // Initialize selection
     this.updateButtonStyles();
@@ -239,7 +243,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private resizing = false;
 
   private handleResize(): void {
-    if (this.resizing) return;
+    if (this.resizing || !this.scene.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
       this.scene.restart(this.scene.settings.data);
@@ -287,7 +291,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
         // Back button to return to menu
         const backPressed = isBackPressed(pad);
         if (backPressed && !this.gamepadBPressed) {
-          this.scene.start('MenuScene');
+          this.navigateTo('MenuScene');
         }
         this.gamepadBPressed = backPressed;
       }
@@ -370,6 +374,27 @@ export default class LevelCompleteScene extends Phaser.Scene {
       .on('pointerout', () => btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex }))
       .on('pointerdown', callback);
     return btn;
+  }
+
+  /** Clean up all game scenes and navigate to a target scene */
+  private navigateTo(targetKey: string, data?: Record<string, unknown>): void {
+    const game = this.game;
+    this.scene.stop('LevelCompleteScene');
+
+    setTimeout(() => {
+      ['GameScene', 'HUDScene', 'DialogueScene', 'PauseScene'].forEach((key) => {
+        if (game.scene.getScene(key)) {
+          game.scene.remove(key);
+        }
+      });
+
+      game.scene.add('GameScene', GameScene, false);
+      game.scene.add('HUDScene', HUDScene, false);
+      game.scene.add('DialogueScene', DialogueScene, false);
+      game.scene.add('PauseScene', PauseScene, false);
+
+      game.scene.start(targetKey, data);
+    }, 100);
   }
 
   private formatTime(seconds: number): string {

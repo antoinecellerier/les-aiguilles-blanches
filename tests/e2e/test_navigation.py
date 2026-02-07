@@ -967,6 +967,96 @@ class TestPauseMenu:
         assert button_count >= 4, f"Pause menu should have at least 4 buttons, found {button_count}"
         game_page.screenshot(path="tests/screenshots/pause_menu_buttons.png")
 
+    def test_pause_settings_roundtrip(self, game_page: Page):
+        """Test Pause → Settings → Back returns to Pause, then Resume works."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        dismiss_dialogues(game_page)
+
+        # Pause
+        game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'PauseScene')
+
+        # Open Settings from Pause (button index 2 = Settings)
+        game_page.evaluate("""() => {
+            const ps = window.game?.scene?.getScene('PauseScene');
+            for (const child of ps.children.list) {
+                if (child.type === 'Text' && child.input?.enabled) {
+                    // Settings is the 3rd interactive button (Resume=0, Restart=1, Settings=2)
+                    if (child.text.toLowerCase().includes('settings') || child.text.toLowerCase().includes('paramètres')) {
+                        child.emit('pointerdown');
+                        return;
+                    }
+                }
+            }
+        }""")
+        wait_for_scene(game_page, 'SettingsScene')
+        assert_scene_active(game_page, 'SettingsScene', "Settings should open from Pause")
+
+        # Back from Settings (ESC)
+        game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'PauseScene')
+        assert_scene_active(game_page, 'PauseScene', "Should return to Pause after Settings")
+
+        # Resume (ESC)
+        game_page.keyboard.press("Escape")
+        wait_for_scene_inactive(game_page, 'PauseScene')
+        assert_scene_active(game_page, 'GameScene', "Game should resume after Pause")
+
+    def test_quit_then_settings_returns_to_menu(self, game_page: Page):
+        """Regression: Pause→Settings→Back then Quit→Menu→Settings→Back must return to Menu.
+
+        Previously, SettingsScene retained stale returnTo='PauseScene' data from a
+        previous Pause→Settings visit, causing Settings→Back to re-launch game scenes
+        instead of returning to MenuScene.
+        """
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        dismiss_dialogues(game_page)
+
+        # First: Pause → Settings → Back → Resume (sets returnTo='PauseScene' on SettingsScene)
+        game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'PauseScene')
+        game_page.evaluate("""() => {
+            const ps = window.game?.scene?.getScene('PauseScene');
+            for (const child of ps.children.list) {
+                if (child.type === 'Text' && child.input?.enabled &&
+                    (child.text.toLowerCase().includes('settings') || child.text.toLowerCase().includes('paramètres'))) {
+                    child.emit('pointerdown');
+                    return;
+                }
+            }
+        }""")
+        wait_for_scene(game_page, 'SettingsScene')
+        game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'PauseScene')
+        game_page.keyboard.press("Escape")
+        wait_for_scene_inactive(game_page, 'PauseScene')
+
+        # Now: Pause → Quit to menu
+        game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'PauseScene')
+        game_page.evaluate("""() => {
+            const ps = window.game?.scene?.getScene('PauseScene');
+            for (const child of ps.children.list) {
+                if (child.type === 'Text' && child.input?.enabled &&
+                    (child.text.toLowerCase().includes('quit') || child.text.toLowerCase().includes('quitter'))) {
+                    child.emit('pointerdown');
+                    return;
+                }
+            }
+        }""")
+        wait_for_scene(game_page, 'MenuScene')
+
+        # Menu → Settings → Back: must return to Menu (not game scene)
+        click_button(game_page, BUTTON_SETTINGS, "Settings")
+        wait_for_scene(game_page, 'SettingsScene')
+        game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'MenuScene')
+        assert_scene_active(game_page, 'MenuScene', "Should return to Menu, not game scene")
+        assert_scene_not_active(game_page, 'GameScene', "GameScene should not be active")
+        assert_scene_not_active(game_page, 'PauseScene', "PauseScene should not be active")
+
 
 class TestLevelComplete:
     """Test level completion flow."""
