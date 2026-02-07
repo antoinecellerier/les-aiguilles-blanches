@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
+import { drawPortrait } from '../utils/characterPortraits';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
@@ -23,8 +24,9 @@ export default class DialogueScene extends Phaser.Scene {
   private speakerText: Phaser.GameObjects.Text | null = null;
   private dialogueText: Phaser.GameObjects.Text | null = null;
   private continueText: Phaser.GameObjects.Text | null = null;
-  private portraitBg: Phaser.GameObjects.Rectangle | null = null;
-  private portraitText: Phaser.GameObjects.Text | null = null;
+  private portraitGraphics: Phaser.GameObjects.Graphics | null = null;
+  private portraitX = 0;
+  private portraitSize = 0;
   private bevelBottom: Phaser.GameObjects.Rectangle | null = null;
   private bevelRight: Phaser.GameObjects.Rectangle | null = null;
   private currentBoxHeight = 130;
@@ -87,8 +89,7 @@ export default class DialogueScene extends Phaser.Scene {
     // Move continue indicator
     if (this.continueText) this.continueText.setY(newHeight / 2 - 20);
     // Resize portrait to stay centered
-    if (this.portraitBg) this.portraitBg.setY((newHeight - oldH) / 4);
-    if (this.portraitText) this.portraitText.setY((newHeight - oldH) / 4);
+    if (this.portraitGraphics) this.portraitGraphics.setY((newHeight - oldH) / 4);
   }
   
   // Check if HUDScene's touch controls are currently visible
@@ -152,17 +153,12 @@ export default class DialogueScene extends Phaser.Scene {
     // Accent stripe inside top bevel
     const accent = this.add.rectangle(bgX, -boxHeight / 2 + bevelWidth, boxWidth - bevelWidth * 2, 1, THEME.colors.infoHex).setOrigin(0.5, 0);
 
-    // Character portrait (colored initial in a small beveled box)
+    // Character portrait
     const pX = bgX - boxWidth / 2 + 20 + portraitSize / 2;
-    this.portraitBg = this.add.rectangle(pX, 0, portraitSize, portraitSize, 0x2d5a7b);
-    this.portraitBg.setStrokeStyle(2, 0x87ceeb);
-    this.portraitText = this.add.text(pX, 0, '', {
-      fontFamily: THEME.fonts.family,
-      fontSize: Math.round(portraitSize * 0.65) + 'px',
-      fontStyle: 'bold',
-      color: THEME.colors.textPrimary,
-    }).setOrigin(0.5);
-
+    this.portraitX = pX;
+    this.portraitSize = portraitSize;
+    this.portraitGraphics = this.add.graphics();
+    
     this.speakerText = this.add.text(textStartX, -boxHeight / 2 + 12, '', {
       fontFamily: THEME.fonts.family,
       fontSize: THEME.fonts.sizes.medium + 'px',
@@ -192,7 +188,7 @@ export default class DialogueScene extends Phaser.Scene {
 
     this.container.add([
       this.bg, bevelTop, bevelLeft, this.bevelBottom, this.bevelRight, accent,
-      this.portraitBg, this.portraitText, this.speakerText, separator,
+      this.portraitGraphics, this.speakerText, separator,
       this.dialogueText, this.continueText,
     ]);
 
@@ -339,16 +335,23 @@ export default class DialogueScene extends Phaser.Scene {
     }
 
     let speaker = 'Jean-Pierre';
-    let portraitColor = 0x2d5a7b; // blue (Jean-Pierre default, also used for tutorial)
-    if (dialogue.key.includes('marie')) { speaker = 'Marie'; portraitColor = 0x7b2d5a; }
-    else if (dialogue.key.includes('thierry')) { speaker = 'Thierry'; portraitColor = 0x5a7b2d; }
-    else if (dialogue.key.includes('emilie')) { speaker = 'Émilie'; portraitColor = 0x7b5a2d; }
+    if (dialogue.key.includes('marie')) { speaker = 'Marie'; }
+    else if (dialogue.key.includes('thierry')) { speaker = 'Thierry'; }
+    else if (dialogue.key.includes('emilie')) { speaker = 'Émilie'; }
 
     this.speakerText.setText(speaker);
     
-    // Set portrait — first letter of speaker in colored box
-    if (this.portraitBg) this.portraitBg.setFillStyle(portraitColor);
-    if (this.portraitText) this.portraitText.setText(speaker.charAt(0).toUpperCase());
+    // Set portrait
+    if (this.portraitGraphics) {
+      this.portraitGraphics.clear();
+      // Reset Y position in case it was moved by resize
+      this.portraitGraphics.setY(0);
+      try {
+        drawPortrait(this.portraitGraphics, speaker, this.portraitX, 0, this.portraitSize);
+      } catch (e) {
+        console.error('Portrait draw error:', e);
+      }
+    }
 
     // Typewriter effect — reveal text character by character
     this.fullText = dialogue.text;
@@ -531,7 +534,6 @@ export default class DialogueScene extends Phaser.Scene {
     this.speakerText = null;
     this.dialogueText = null;
     this.continueText = null;
-    this.portraitBg = null;
-    this.portraitText = null;
+    this.portraitGraphics = null;
   }
 }

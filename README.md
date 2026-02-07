@@ -96,6 +96,7 @@ snow-groomer/
 │   │   └── ...
 │   └── utils/          # Utilities
 │       ├── accessibility.ts
+│       ├── characterPortraits.ts
 │       ├── gamepad.ts
 │       ├── gamepadMenu.ts
 │       ├── gameProgress.ts

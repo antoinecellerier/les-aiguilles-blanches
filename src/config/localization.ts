@@ -215,7 +215,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
         
         // Changelog
-        changelog_20260208_date: "8 février 2026",
+        changelog_20260209_date: '9 février 2026',
+        changelog_20260209: '🎨 Portraits des personnages dans les dialogues',
+    changelog_20260208_date: "8 février 2026",
         changelog_20260208: "🪧 Signalétique conforme NF S52-102 : triangles danger, jalons orange, poteaux jaune/noir\n🏔️ Profondeur visuelle corrigée : arbres, falaises, bâtiments\n📱 Support tactile Firefox corrigé",
         changelog_20260207_date: "7 février 2026",
         changelog_20260207: "🎨 Interface rétro : panneaux 3D, portraits, machine à écrire\n🏷️ Icônes texte (FUEL, STAM, WINCH) au lieu d'emojis\n🎯 Objectifs bonus par niveau\n🕹️ Remappage boutons manette\n🎮 Navigation manette dans tous les menus\n🕹️ Indicateurs de méthodes de contrôle sur l'écran d'accueil\n🔧 Corrections : pause tactile, dialogues, menus",
@@ -429,7 +431,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
         
         // Changelog
-        changelog_20260208_date: "February 8, 2026",
+        changelog_20260209_date: 'February 9, 2026',
+        changelog_20260209: '🎨 Character portraits in dialogues',
+    changelog_20260208_date: "February 8, 2026",
         changelog_20260208: "🪧 Signage per NF S52-102: warning triangles, orange-capped markers, yellow/black danger poles\n🏔️ Visual depth fixed: trees, cliffs, buildings render correctly\n📱 Firefox touchscreen support fixed",
         changelog_20260207_date: "February 7, 2026",
         changelog_20260207: "🎨 Retro UI: 3D panels, portraits, typewriter text\n🏷️ Text labels (FUEL, STAM, WINCH) replace emojis\n🎯 Bonus objectives per level\n🕹️ Gamepad button rebinding\n🎮 Full gamepad menu navigation\n🕹️ Input method indicators on home screen\n🔧 Fixes: touch pause, dialogues, menus",
@@ -609,7 +613,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
         
         // Changelog
-        changelog_20260208_date: "8. Februar 2026",
+        changelog_20260209_date: '9. Februar 2026',
+        changelog_20260209: '🎨 Charakterporträts in Dialogen',
+    changelog_20260208_date: "8. Februar 2026",
         changelog_20260208: "🪧 Beschilderung nach NF S52-102: Warndreiecke, orange Markierungen, gelb/schwarze Gefahrenpfosten\n🏔️ Visuelle Tiefe korrigiert: Bäume, Klippen, Gebäude\n📱 Firefox-Touchscreen-Unterstützung behoben",
         changelog_20260207_date: "7. Februar 2026",
         changelog_20260207: "🎨 Retro-UI: 3D-Panels, Porträts, Schreibmaschinentext\n🏷️ Textlabels (FUEL, STAM, WINCH) statt Emojis\n🎯 Bonusziele pro Level\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation in allen Menüs\n🕹️ Eingabemethoden-Anzeige auf dem Startbildschirm\n🔧 Korrekturen: Touch-Pause, Dialoge, Menüs",
@@ -820,7 +826,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
         
         // Changelog
-        changelog_20260208_date: "8 febbraio 2026",
+        changelog_20260209_date: '9 febbraio 2026',
+        changelog_20260209: '🎨 Ritratti dei personaggi nei dialoghi',
+    changelog_20260208_date: "8 febbraio 2026",
         changelog_20260208: "🪧 Segnaletica conforme NF S52-102: triangoli pericolo, paletti arancioni, pali giallo/nero\n🏔️ Profondità visiva corretta: alberi, scogliere, edifici\n📱 Supporto touchscreen Firefox corretto",
         changelog_20260207_date: "7 febbraio 2026",
         changelog_20260207: "🎨 UI retro: pannelli 3D, ritratti, effetto macchina da scrivere\n🏷️ Etichette testo (FUEL, STAM, WINCH) al posto degli emoji\n🎯 Obiettivi bonus per livello\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad in tutti i menu\n🕹️ Indicatori metodi di input nella schermata iniziale\n🔧 Correzioni: pausa touch, dialoghi, menu",
@@ -1031,7 +1039,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
         
         // Changelog
-        changelog_20260208_date: "8 de febrero de 2026",
+        changelog_20260209_date: '9 de febrero de 2026',
+        changelog_20260209: '🎨 Retratos de personajes en diálogos',
+    changelog_20260208_date: "8 de febrero de 2026",
         changelog_20260208: "🪧 Señalización según NF S52-102: triángulos de peligro, balizas naranjas, postes amarillo/negro\n🏔️ Profundidad visual corregida: árboles, acantilados, edificios\n📱 Soporte táctil Firefox corregido",
         changelog_20260207_date: "7 de febrero de 2026",
         changelog_20260207: "🎨 UI retro: paneles 3D, retratos, efecto máquina de escribir\n🏷️ Etiquetas texto (FUEL, STAM, WINCH) en vez de emojis\n🎯 Objetivos bonus por nivel\n🕹️ Reasignación botones mando\n🎮 Navegación mando en todos los menús\n🕹️ Indicadores de métodos de entrada en pantalla de inicio\n🔧 Correcciones: pausa táctil, diálogos, menús",

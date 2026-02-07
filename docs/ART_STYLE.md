@@ -127,6 +127,17 @@ Signage follows NF S52-102 (French ski slope marking standard). Reference: [spor
 | Black | Near-black `0x1f2937` | Star | ★ |
 | Park | Orange `0xf59e0b` | Triangle | ▲ |
 
+### Character Portraits
+
+Character faces appear in dialogue boxes using a 12×12 pixel grid system.
+
+| Character | Role | Color Scheme | Features |
+|-----------|------|--------------|----------|
+| **Jean-Pierre** | Head Groomer | Blue `0x2d5a7b` | Mustache, balding grey hair |
+| **Marie** | Chef | Purple `0x7b2d5a` | Chef hat, apron, buns |
+| **Thierry** | Patrol | Green `0x5a7b2d` | Helmet, red badge, sunglasses |
+| **Émilie** | Apprentice | Orange `0x7b5a2d` | Beanie, blonde hair |
+
 **Jalon rules (NF S52-102):**
 - Right-side markers (going downhill) have orange top cap — since camera faces uphill, this is screen-left
 - Danger poles: yellow/black stripes (`0xffcc00`/`0x111111`)

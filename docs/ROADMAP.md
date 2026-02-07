@@ -11,11 +11,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Avalanche zones overlap service roads - Avalanche zones should never overlap service roads
 - [ ] Anchor point accessibility - Every winch anchor must be reachable via piste or service road without blocking avalanche/steep obstacles
 - [ ] Groomer fall mechanics - Only fall when tracks (front) are over cliff/steep edge, not tiller (rear); add probability-based tip-over instead of instant fall
+- [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
 
 ## Polish (Medium Priority)
 
 - [x] Level differentiation - Bonus objectives (fuel efficiency, no tumble, speed run, winch mastery, exploration) with per-level assignments and grade integration
-- [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
+- [x] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
 - [x] Service roads - Improved legibility and practical usability (packed snow texture, amber poles, tree clearing, boundary wall exemption, intro dialog)
 - [x] Responsive design - All scenes handle resize/orientation change; form factor fixes for landscape phones, narrow portrait, compact HUD
 - [x] Gamepad button rebinding - Allow customizing controller buttons

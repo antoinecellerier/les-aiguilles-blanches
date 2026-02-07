@@ -48,6 +48,7 @@ snow-groomer/
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
+│   │   ├── characterPortraits.ts # Procedural 12×12 pixel art portraits
 │   │   ├── gamepad.ts      # Controller detection, button mapping
 │   │   ├── gamepadMenu.ts  # Reusable gamepad menu navigation controller
 │   │   ├── gameProgress.ts # Save/load game progress
