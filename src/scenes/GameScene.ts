@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
+import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
@@ -1221,7 +1222,7 @@ export default class GameScene extends Phaser.Scene {
       const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
       const g = this.add.graphics();
-      g.lineStyle(1, 0x8B4513, 0.3);
+      g.lineStyle(1, 0x4a423a, 0.3);
 
       for (let ly = startY; ly < endY; ly += tileSize) {
         g.beginPath();
@@ -1235,13 +1236,28 @@ export default class GameScene extends Phaser.Scene {
         g.strokePath();
       }
 
-      this.add.text((leftEdge + rightEdge) / 2, startY - 15,
-        '⚠️ ' + zone.slope + '°', {
+      // Pixel art warning marker (rectangle-based, no emoji)
+      const markerX = (leftEdge + rightEdge) / 2;
+      const markerY = startY - 15;
+      const mg = this.add.graphics();
+      // Yellow warning rectangle
+      mg.fillStyle(0xffcc00, 1);
+      mg.fillRect(markerX - 10, markerY - 6, 20, 12);
+      mg.lineStyle(1, 0x000000, 0.8);
+      mg.strokeRect(markerX - 10, markerY - 6, 20, 12);
+      // Black exclamation mark (rectangles only)
+      mg.fillStyle(0x000000, 1);
+      mg.fillRect(markerX - 1, markerY - 4, 2, 6);
+      mg.fillRect(markerX - 1, markerY + 3, 2, 2);
+      mg.setAlpha(0.8);
+
+      this.add.text(markerX + 14, markerY, zone.slope + '°', {
+        fontFamily: THEME.fonts.family,
         fontSize: '9px',
         color: '#FF6600',
         backgroundColor: '#000000',
         padding: { x: 3, y: 1 }
-      }).setOrigin(0.5).setAlpha(0.8);
+      }).setOrigin(0, 0.5).setAlpha(0.8);
 
       this.steepZoneRects.push({
         startY: startY,
@@ -1672,7 +1688,7 @@ export default class GameScene extends Phaser.Scene {
       this.createRiskIndicator(zoneX + zoneWidth / 2 + 15, zoneY - zoneHeight / 2 + 30);
 
       this.add.text(zoneX, zoneY + zoneHeight / 2 + 8, t('zoneClosed'), {
-        fontFamily: 'Arial, sans-serif',
+        fontFamily: THEME.fonts.family,
         fontSize: '8px',
         fontStyle: 'bold',
         color: '#CC0000',
@@ -1703,55 +1719,47 @@ export default class GameScene extends Phaser.Scene {
   private createAvalancheSign(x: number, y: number): void {
     const signSize = 20;
     const g = this.add.graphics();
+    const hs = signSize / 2;
 
+    // Diamond shape built from two overlapping rotated rectangles
     g.fillStyle(0xFFCC00, 1);
-    g.lineStyle(2, 0x000000, 1);
-    g.beginPath();
-    g.moveTo(x, y - signSize / 2);
-    g.lineTo(x + signSize / 2, y);
-    g.lineTo(x, y + signSize / 2);
-    g.lineTo(x - signSize / 2, y);
-    g.closePath();
-    g.fillPath();
-    g.strokePath();
-
-    g.fillStyle(0x000000, 1);
-    g.beginPath();
-    g.moveTo(x, y - 4);
-    g.lineTo(x + 6, y + 5);
-    g.lineTo(x - 6, y + 5);
-    g.closePath();
-    g.fillPath();
-
+    // Top-left half
+    g.fillRect(x - hs, y - 2, hs, 4);
+    g.fillRect(x - 2, y - hs, 4, hs);
+    // Bottom-right half
+    g.fillRect(x, y - 2, hs, 4);
+    g.fillRect(x - 2, y, 4, hs);
+    // Fill center
+    g.fillRect(x - hs + 2, y - hs + 2, signSize - 4, signSize - 4);
+    // Border
     g.lineStyle(1, 0x000000, 1);
-    g.beginPath();
-    g.moveTo(x + 2, y - 1);
-    g.lineTo(x + 5, y + 3);
-    g.strokePath();
+    g.strokeRect(x - hs + 1, y - hs + 1, signSize - 2, signSize - 2);
 
-    g.fillStyle(0x4a3728, 1);
+    // Avalanche symbol — exclamation mark (rectangles only)
+    g.fillStyle(0x000000, 1);
+    g.fillRect(x - 1, y - 4, 2, 6);
+    g.fillRect(x - 1, y + 3, 2, 2);
+
+    // Post — use rock palette brown
+    g.fillStyle(0x4a423a, 1);
     g.fillRect(x - 2, y + signSize / 2, 4, 12);
   }
 
   private createBarrierPole(x: number, y: number): void {
     const g = this.add.graphics();
 
-    g.fillStyle(0x5a4332, 1);
+    // Pole — rock palette brown
+    g.fillStyle(0x4a423a, 1);
     g.fillRect(x - 2, y, 4, 25);
 
+    // Flag — rectangle only (no triangle pennant)
     const flagWidth = 12;
     const flagHeight = 8;
     g.fillStyle(0xFF6600, 1);
     g.fillRect(x + 2, y + 2, flagWidth, flagHeight);
-
-    g.fillStyle(0x000000, 1);
-    g.beginPath();
-    g.moveTo(x + 2, y + 2 + flagHeight);
-    g.lineTo(x + 2 + flagWidth / 2, y + 2);
-    g.lineTo(x + 2 + flagWidth, y + 2);
-    g.lineTo(x + 2 + flagWidth, y + 2 + flagHeight / 2);
-    g.closePath();
-    g.fillPath();
+    // Dark stripe on flag for detail
+    g.fillStyle(0x000000, 0.4);
+    g.fillRect(x + 2, y + 2 + flagHeight - 2, flagWidth, 2);
   }
 
   private createRiskIndicator(x: number, y: number): void {
@@ -1767,14 +1775,14 @@ export default class GameScene extends Phaser.Scene {
     g.fillRect(x - boxSize / 2 + 2, y - boxSize / 2 + 2, boxSize - 4, boxSize - 4);
 
     this.add.text(x, y, '4', {
-      fontFamily: 'Arial',
+      fontFamily: THEME.fonts.family,
       fontSize: '10px',
       fontStyle: 'bold',
       color: '#000000'
     }).setOrigin(0.5);
 
-    this.add.text(x, y + 10, 'FORT', {
-      fontFamily: 'Arial',
+    this.add.text(x, y + 10, t('riskLevelHigh'), {
+      fontFamily: THEME.fonts.family,
       fontSize: '5px',
       color: '#000000'
     }).setOrigin(0.5);
