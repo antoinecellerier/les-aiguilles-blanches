@@ -1065,10 +1065,10 @@ export default class GameScene extends Phaser.Scene {
         g.fillStyle(0x000000, 1);
         g.fillRect(poleX - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
         
-        // Red/yellow danger stripes
+        // Yellow/black danger stripes (per NF S52-102)
         const stripeH = poleHeight / 5;
         for (let j = 0; j < 5; j++) {
-          g.fillStyle(j % 2 === 0 ? 0xff0000 : 0xffcc00, 1);
+          g.fillStyle(j % 2 === 0 ? 0xffcc00 : 0x111111, 1);
           g.fillRect(poleX - poleWidth / 2 - 1, y - poleHeight + j * stripeH, poleWidth + 2, stripeH);
         }
       }
@@ -1118,18 +1118,18 @@ export default class GameScene extends Phaser.Scene {
     const poleWidth = 5;
     const orangeTopHeight = Math.floor(poleHeight * 0.15);
 
-    // French piste marker style:
-    // Left (gauche) when facing downhill: piste color with orange top section
-    // Right (droite) when facing downhill: fully piste color
+    // French piste marker style (NF S52-102):
+    // Right (droite) going downhill has orange top cap for visibility.
+    // Since camera faces uphill, downhill-right = screen-left.
     if (side === 'left') {
-      // Orange top section on LEFT side markers
+      // Orange top on left markers (= right side going downhill per NF S52-102)
       g.fillStyle(color, 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight + orangeTopHeight, poleWidth, poleHeight - orangeTopHeight);
 
       g.fillStyle(0xFF6600, 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, orangeTopHeight);
     } else {
-      // Full piste color on RIGHT side
+      // Full piste color on right markers (= left side going downhill)
       g.fillStyle(color, 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
     }
@@ -1239,20 +1239,31 @@ export default class GameScene extends Phaser.Scene {
         g.strokePath();
       }
 
-      // Pixel art warning marker (rectangle-based, no emoji)
+      // Warning triangle sign (per NF S52-102 — yellow/black triangle)
       const markerX = (leftEdge + rightEdge) / 2;
       const markerY = startY - 15;
       const mg = this.add.graphics();
       mg.setDepth(DEPTHS.SIGNAGE);
-      // Yellow warning rectangle
+      // Yellow triangle (pointing up)
+      const triSize = 12;
       mg.fillStyle(0xffcc00, 1);
-      mg.fillRect(markerX - 10, markerY - 6, 20, 12);
+      mg.beginPath();
+      mg.moveTo(markerX, markerY - triSize);
+      mg.lineTo(markerX - triSize, markerY + triSize * 0.6);
+      mg.lineTo(markerX + triSize, markerY + triSize * 0.6);
+      mg.closePath();
+      mg.fillPath();
       mg.lineStyle(1, 0x000000, 0.8);
-      mg.strokeRect(markerX - 10, markerY - 6, 20, 12);
-      // Black exclamation mark (rectangles only)
+      mg.beginPath();
+      mg.moveTo(markerX, markerY - triSize);
+      mg.lineTo(markerX - triSize, markerY + triSize * 0.6);
+      mg.lineTo(markerX + triSize, markerY + triSize * 0.6);
+      mg.closePath();
+      mg.strokePath();
+      // Black exclamation mark inside triangle
       mg.fillStyle(0x000000, 1);
-      mg.fillRect(markerX - 1, markerY - 4, 2, 6);
-      mg.fillRect(markerX - 1, markerY + 3, 2, 2);
+      mg.fillRect(markerX - 1, markerY - 5, 2, 6);
+      mg.fillRect(markerX - 1, markerY + 2, 2, 2);
       mg.setAlpha(0.8);
 
       this.add.text(markerX + 14, markerY, zone.slope + '°', {

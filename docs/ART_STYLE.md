@@ -116,6 +116,8 @@ The menu uses a **side-view alpine scene** with pixel-art elements:
 
 ### Difficulty Markers (French Standard)
 
+Signage follows NF S52-102 (French ski slope marking standard). Reference: [sports.gouv.fr](https://www.sports.gouv.fr/pratiquer-l-hiver-balisage-et-signalisation-697)
+
 | Difficulty | Color | Shape | Symbol |
 |------------|-------|-------|--------|
 | Tutorial | White `0xffffff` | Circle | ○ |
@@ -124,6 +126,12 @@ The menu uses a **side-view alpine scene** with pixel-art elements:
 | Red | Red `0xef4444` | Diamond | ◆ |
 | Black | Near-black `0x1f2937` | Star | ★ |
 | Park | Orange `0xf59e0b` | Triangle | ▲ |
+
+**Jalon rules (NF S52-102):**
+- Right-side markers (going downhill) have orange top cap — since camera faces uphill, this is screen-left
+- Danger poles: yellow/black stripes (`0xffcc00`/`0x111111`)
+- Warning signs: yellow triangle with exclamation mark
+- Avalanche barrier flags: yellow (`0xffcc00`)
 
 ## Texture Patterns
 

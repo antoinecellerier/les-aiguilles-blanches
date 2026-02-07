@@ -212,10 +212,10 @@ export class HazardSystem {
     g.fillStyle(0x4a423a, 1);
     g.fillRect(x - 2, y, 4, 25);
 
-    // Flag — rectangle only (no triangle pennant)
+    // Flag — yellow per standard avalanche flag colors
     const flagWidth = 12;
     const flagHeight = 8;
-    g.fillStyle(0xFF6600, 1);
+    g.fillStyle(0xFFCC00, 1);
     g.fillRect(x + 2, y + 2, flagWidth, flagHeight);
     // Dark stripe on flag for detail
     g.fillStyle(0x000000, 0.4);

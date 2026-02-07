@@ -35,7 +35,7 @@ snow-groomer/
 │   ├── main.ts             # Phaser init, game creation
 │   ├── setup.ts            # Window globals initialization
 │   ├── config/
-│   │   ├── gameConfig.ts   # Game constants, colors, BALANCE tuning values
+│   │   ├── gameConfig.ts   # Game constants, colors, BALANCE tuning, DEPTHS layering
 │   │   ├── levels.ts       # Level definitions
 │   │   ├── localization.ts # i18n translations (uses {placeholder} syntax)
 │   │   ├── storageKeys.ts  # Centralized localStorage key constants
@@ -730,6 +730,10 @@ Each system takes the Phaser scene in its constructor and exposes methods called
 ### Balance Constants
 
 All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights. Never hardcode magic numbers in GameScene — add them to `BALANCE`.
+
+### Depth Constants
+
+All Phaser depth (z-order) values are centralized in `DEPTHS` (exported from `src/config/gameConfig.ts`). Never use magic depth numbers — always use `DEPTHS.*` constants. See `docs/ART_STYLE.md` for the full layer table.
 
 ### Overlay Scene Input Handling
 

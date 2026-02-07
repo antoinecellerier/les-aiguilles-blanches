@@ -62,6 +62,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ **Taunts overhaul** - 5 per failure type, character references, removed hardcoded FR fallbacks
 - ✅ **Input method hints** - Keyboard/Touch/Gamepad indicators in footer with forbidden sign overlay for unavailable methods
 - ✅ **Firefox touch detection** - Centralized touch detection utility (`touchDetect.ts`), force-enabled Phaser touch input to fix Firefox desktop touchscreen support
+- ✅ **Depth layering audit** - Centralized all depth values in DEPTHS constants (gameConfig.ts). Fixed trees/chalets/markers rendering at wrong depth. Piste renders above access roads. Trees above cliffs with sparse clustered placement
+- ✅ **French signage standards** - Cross-referenced against NF S52-102. Fixed orange cap side, danger pole colors (yellow/black), steep zone triangle signs, avalanche flag colors
 - ✅ **Virtual joystick** - Replaced D-pad with stick + thumb, button press feedback
 - ✅ **Keyboard-only menu navigation** - Arrow keys + Enter/Space across all scenes
 - ✅ **Marker placement & pole sizing** - Markers skip cliffs, warning poles on snow, all poles standardized to 28×5px
