@@ -9,8 +9,18 @@ function getVersion() {
     const hash = execSync('git rev-parse --short HEAD').toString().trim();
     const dirty = execSync('git status --porcelain').toString().trim();
     if (dirty) {
-      // In dev mode, use __BUILD_HASH__ and compute time client-side for freshness
-      return `__DIRTY__${hash}`;
+      // Use mtime of the most recently modified tracked/untracked file
+      const mtime = execSync(
+        'find src/ -type f -newer .git/index -printf "%T@ %p\\n" 2>/dev/null | sort -rn | head -1 | cut -d" " -f1'
+      ).toString().trim();
+      let dirtyDate: string;
+      if (mtime) {
+        dirtyDate = new Date(parseFloat(mtime) * 1000).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+      } else {
+        // Fallback to latest commit date if no files newer than index
+        dirtyDate = execSync('TZ=UTC git log -1 --format=%cd --date=format-local:"%Y-%m-%d %H:%M:%S UTC"').toString().trim();
+      }
+      return `${dirtyDate} ${hash}-dirty`;
     }
     const commitDate = execSync('TZ=UTC git log -1 --format=%cd --date=format-local:"%Y-%m-%d %H:%M:%S UTC"').toString().trim();
     return `${commitDate} ${hash}`;

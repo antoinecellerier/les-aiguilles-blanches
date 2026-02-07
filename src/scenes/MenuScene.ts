@@ -309,12 +309,7 @@ export default class MenuScene extends Phaser.Scene {
     this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, THEME.colors.dialogBg).setOrigin(0.5, 0);
     this.add.rectangle(width / 2, footerTop, width, 2, THEME.colors.border).setOrigin(0.5, 0);
     
-    let version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
-    if (version.startsWith('__DIRTY__')) {
-      const hash = version.slice(9);
-      const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
-      version = `${now} ${hash}-dirty`;
-    }
+    const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
     const footerFontSize = Math.round(Math.max(11, 13 * scaleFactor));
     const githubLink = this.add.text(width / 2, footerTop + footerHeight / 2 - Math.round(7 * scaleFactor), `GitHub  ·  v${version}`, {
       fontFamily: THEME.fonts.family,
