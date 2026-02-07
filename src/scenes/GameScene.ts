@@ -1496,23 +1496,29 @@ export default class GameScene extends Phaser.Scene {
   private createAnchorPost(x: number, y: number, number: number): void {
     const g = this.add.graphics();
 
-    g.fillStyle(0x666666, 1);
+    // Base plate
+    g.fillStyle(0x888888, 1);
     g.fillRect(x - 10, y + 5, 20, 8);
 
+    // Vertical pole
     g.fillStyle(0xFFAA00, 1);
     g.fillRect(x - 4, y - 20, 8, 28);
 
-    g.lineStyle(3, 0xCCCCCC, 1);
-    g.strokeCircle(x, y - 22, 6);
+    // Cable hook ring (rectangle, no circles)
+    g.fillStyle(0xCCCCCC, 1);
+    g.fillRect(x - 6, y - 28, 12, 3);
+    g.fillRect(x - 6, y - 22, 12, 3);
+    g.fillRect(x - 6, y - 28, 3, 9);
+    g.fillRect(x + 3, y - 28, 3, 9);
 
-    g.fillStyle(0xAAAAAA, 1);
-    g.fillRect(x - 2, y - 28, 4, 8);
-
-    this.add.text(x, y + 18, '⚓' + number, {
-      fontSize: '9px',
-      color: '#FFD700',
-      backgroundColor: '#333333',
-      padding: { x: 2, y: 1 }
+    // Yellow number plate with black text
+    g.fillStyle(0xffff00, 1);
+    g.fillRect(x - 8, y + 14, 16, 10);
+    g.fillStyle(0x000000, 1);
+    this.add.text(x, y + 19, '' + number, {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '8px',
+      color: '#000000',
     }).setOrigin(0.5);
 
     // Store hook position (y - 22) for cable, base position (y + 8) for proximity

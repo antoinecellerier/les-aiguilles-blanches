@@ -60,4 +60,4 @@ Deep copy arrays before creating closures if the array is reused/cleared (see cl
 ## Domain
 - **Piste markers**: Green ●, Blue ■, Red ◆, Black ◆◆
 - **Service roads**: Orange/black striped poles
-- **Winch anchors**: ⚓ with numbered posts
+- **Winch anchors**: Numbered posts with yellow plates

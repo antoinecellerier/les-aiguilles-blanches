@@ -181,9 +181,10 @@ Switchback paths through off-piste forest, allowing groomer to travel between pi
 
 ### Winch Anchors
 
-- Post: `0x888888` (gray metal)
-- Number plate: `0xffff00` (yellow) with black text
-- Anchor symbol: ⚓ (displayed as text or simple graphic)
+- Base plate: `0x888888` (gray metal)
+- Pole: `0xFFAA00` (amber)
+- Cable hook: `0xCCCCCC` (light gray), rectangular ring (no circles)
+- Number plate: `0xffff00` (yellow) with black number text
 
 ## Rendering Guidelines
 
