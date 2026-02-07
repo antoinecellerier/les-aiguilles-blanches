@@ -130,13 +130,7 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private restartLevel(): void {
-    const game = this.game;
-    const levelIndex = this.levelIndex;
-    this.scene.stop();
-    this.scene.stop('GameScene');
-    this.scene.stop('HUDScene');
-    this.scene.stop('DialogueScene');
-    resetGameScenes(game, 'GameScene', { level: levelIndex });
+    resetGameScenes(this.game, 'GameScene', { level: this.levelIndex });
   }
 
   private openSettings(): void {
@@ -151,12 +145,7 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private quitToMenu(): void {
-    const game = this.game;
-    this.scene.stop();
-    this.scene.stop('GameScene');
-    this.scene.stop('HUDScene');
-    this.scene.stop('DialogueScene');
-    resetGameScenes(game, 'MenuScene');
+    resetGameScenes(this.game, 'MenuScene');
   }
 
   shutdown(): void {

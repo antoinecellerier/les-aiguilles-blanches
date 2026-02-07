@@ -310,9 +310,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
   /** Clean up all game scenes and navigate to a target scene */
   private navigateTo(targetKey: string, data?: Record<string, unknown>): void {
-    const game = this.game;
-    this.scene.stop('LevelCompleteScene');
-    resetGameScenes(game, targetKey, data);
+    resetGameScenes(this.game, targetKey, data);
   }
 
   private formatTime(seconds: number): string {

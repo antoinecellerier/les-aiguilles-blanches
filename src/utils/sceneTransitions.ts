@@ -43,8 +43,9 @@ export function resetGameScenes(
   if (transitionPending) return;
   transitionPending = true;
 
-  // Use setTimeout — the calling scene is already stopped, so scene.time is unavailable.
-  // The 100ms delay lets the current render frame complete before tearing down scenes.
+  // Defer ALL scene teardown to next event loop tick.
+  // This prevents destroying scenes while their update() is still on the call stack
+  // (e.g. HUDScene.update → skipLevel → emit SKIP_LEVEL → transitionToLevel → stop).
   setTimeout(() => {
     transitionPending = false;
 

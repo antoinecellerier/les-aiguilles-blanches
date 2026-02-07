@@ -2547,11 +2547,9 @@ export default class GameScene extends Phaser.Scene {
 
     saveProgress(nextLevel);
 
-    const game = this.game;
-    this.scene.stop('HUDScene');
-    this.scene.stop('DialogueScene');
-    this.scene.stop('GameScene');
-    resetGameScenes(game, 'GameScene', { level: nextLevel });
+    // Capture game ref — resetGameScenes defers all stops to next tick
+    // so it's safe even when called from within another scene's update()
+    resetGameScenes(this.game, 'GameScene', { level: nextLevel });
   }
 
   returnToMenu(): void {
@@ -2559,11 +2557,7 @@ export default class GameScene extends Phaser.Scene {
     this.isTransitioning = true;
     this.isGameOver = true;
 
-    const game = this.game;
-    this.scene.stop('HUDScene');
-    this.scene.stop('DialogueScene');
-    this.scene.stop('GameScene');
-    resetGameScenes(game, 'MenuScene');
+    resetGameScenes(this.game, 'MenuScene');
   }
 
   shutdown(): void {

@@ -864,12 +864,7 @@ class TestPauseMenu:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Dismiss dialogues first
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(8):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(100)
+        dismiss_dialogues(game_page)
         
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
@@ -882,12 +877,7 @@ class TestPauseMenu:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Dismiss dialogues
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(8):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(100)
+        dismiss_dialogues(game_page)
         
         # Pause
         game_page.keyboard.press("Escape")
@@ -904,12 +894,7 @@ class TestPauseMenu:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Dismiss dialogues first
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(8):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(100)
+        dismiss_dialogues(game_page)
         
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
@@ -1417,12 +1402,7 @@ class TestSceneLayering:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        # Dismiss dialogues
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(8):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
+        dismiss_dialogues(game_page)
         
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')

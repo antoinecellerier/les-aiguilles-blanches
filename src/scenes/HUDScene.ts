@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, LEVELS, type Level } from '../setup';
 import { THEME } from '../config/theme';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
+import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -630,11 +631,7 @@ export default class HUDScene extends Phaser.Scene {
     if (nextLevel < LEVELS.length) {
       this.game.events.emit(GAME_EVENTS.SKIP_LEVEL, nextLevel);
     } else {
-      const game = this.game;
-      this.scene.stop('HUDScene');
-      this.scene.stop('DialogueScene');
-      game.scene.stop('GameScene');
-      game.scene.start('CreditsScene');
+      resetGameScenes(this.game, 'CreditsScene');
     }
   }
 
