@@ -104,15 +104,9 @@ def test_example(self, game_page: Page):
 
 ## localStorage Keys
 
-Tests must match the game's keys (see [ARCHITECTURE.md](./ARCHITECTURE.md#localization-system)):
+All keys are centralized in `src/config/storageKeys.ts`. Tests should use the same key strings.
 
-```python
-game_page.evaluate("""() => {
-    localStorage.setItem('snowGroomer_bindings', JSON.stringify({...}));
-    localStorage.setItem('snowGroomer_displayNames', JSON.stringify({...}));
-    localStorage.setItem('snowgroomer-keyboard-layout', 'qwerty');
-}""")
-```
+The `game_page` fixture automatically clears localStorage after each test to prevent state leakage between tests.
 
 ## Test Categories
 

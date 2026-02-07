@@ -7,7 +7,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 # Import the base URL from conftest
-from conftest import GAME_URL, skip_to_level, dismiss_dialogues, wait_for_scene
+from conftest import GAME_URL, skip_to_level, dismiss_dialogues, wait_for_scene, wait_for_game_ready
 
 
 def click_start_button(page: Page):
@@ -45,7 +45,7 @@ def touch_page(page: Page):
     # Navigate and wait for game to load
     page.goto(GAME_URL)
     page.wait_for_selector("canvas", timeout=10000)
-    page.wait_for_timeout(2000)
+    wait_for_game_ready(page)
     
     return page
 
@@ -54,12 +54,10 @@ def test_touch_controls_visible_on_touch_device(touch_page: Page):
     """Touch controls should appear on touch-capable devices."""
     # Start game
     click_start_button(touch_page)
-    touch_page.wait_for_timeout(3000)  # Wait for game to load
+    wait_for_scene(touch_page, 'GameScene')
     
     # Dismiss any dialogue
-    for _ in range(5):
-        touch_page.click("canvas")
-        touch_page.wait_for_timeout(300)
+    dismiss_dialogues(touch_page)
     
     # Touch controls are rendered on canvas, so we verify via JS
     has_touch_controls = touch_page.evaluate("""
@@ -80,25 +78,10 @@ def test_touch_dpad_movement(touch_page: Page):
     """D-pad buttons should trigger movement in GameScene."""
     # Start game
     click_start_button(touch_page)
-    touch_page.wait_for_timeout(3000)
+    wait_for_scene(touch_page, 'GameScene')
     
-    # Dismiss dialogues - wait longer and click more
-    for _ in range(8):
-        touch_page.click("canvas")
-        touch_page.wait_for_timeout(400)
-    
-    # Extra wait for dialogue to fully hide
-    touch_page.wait_for_timeout(500)
-    
-    # Verify dialogue is not showing
-    dialogue_showing = touch_page.evaluate("""
-        () => {
-            const game = window.game;
-            const dialogueScene = game.scene.getScene('DialogueScene');
-            return dialogueScene && dialogueScene.isDialogueShowing ? dialogueScene.isDialogueShowing() : false;
-        }
-    """)
-    assert not dialogue_showing, "Dialogue should be dismissed before testing movement"
+    # Dismiss dialogues
+    dismiss_dialogues(touch_page)
     
     # Get initial groomer position
     initial_pos = touch_page.evaluate("""
@@ -138,7 +121,14 @@ def test_touch_dpad_movement(touch_page: Page):
     touch_page.wait_for_timeout(500)
     touch_page.keyboard.up("ArrowRight")
     
-    touch_page.wait_for_timeout(100)
+    # Wait for groomer to have moved right
+    touch_page.wait_for_function(
+        """() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.groomer?.x > %d;
+        }""" % int(initial_pos["x"]),
+        timeout=3000
+    )
     
     # Get new position
     new_pos = touch_page.evaluate("""
@@ -158,12 +148,10 @@ def test_touch_groom_button(touch_page: Page):
     """Groom button should trigger grooming action."""
     # Start game
     click_start_button(touch_page)
-    touch_page.wait_for_timeout(3000)
+    wait_for_scene(touch_page, 'GameScene')
     
     # Dismiss dialogues
-    for _ in range(5):
-        touch_page.click("canvas")
-        touch_page.wait_for_timeout(300)
+    dismiss_dialogues(touch_page)
     
     # Get initial coverage
     initial_coverage = touch_page.evaluate("""
@@ -187,7 +175,17 @@ def test_touch_groom_button(touch_page: Page):
         }
     """)
     
-    touch_page.wait_for_timeout(1000)
+    # Wait for coverage to change (or timeout if it doesn't)
+    try:
+        touch_page.wait_for_function(
+            """() => {
+                const gs = window.game?.scene?.getScene('GameScene');
+                return gs && gs.getCoverage() > %f;
+            }""" % initial_coverage,
+            timeout=3000
+        )
+    except Exception:
+        pass  # Coverage may not change; assertion below handles it
     
     # Release
     touch_page.evaluate("""
@@ -200,8 +198,6 @@ def test_touch_groom_button(touch_page: Page):
             }
         }
     """)
-    
-    touch_page.wait_for_timeout(100)
     
     # Get new coverage
     new_coverage = touch_page.evaluate("""
@@ -220,12 +216,10 @@ def test_multitouch_simultaneous_inputs(touch_page: Page):
     """Multiple keyboard inputs should work simultaneously (touch controls use same mechanism)."""
     # Start game
     click_start_button(touch_page)
-    touch_page.wait_for_timeout(3000)
+    wait_for_scene(touch_page, 'GameScene')
     
     # Dismiss dialogues
-    for _ in range(8):
-        touch_page.click("canvas")
-        touch_page.wait_for_timeout(300)
+    dismiss_dialogues(touch_page)
     
     # Get initial state
     initial_pos = touch_page.evaluate("""
@@ -244,6 +238,15 @@ def test_multitouch_simultaneous_inputs(touch_page: Page):
     touch_page.wait_for_timeout(500)
     touch_page.keyboard.up("ArrowRight")
     touch_page.keyboard.up("ArrowDown")
+    
+    # Wait for groomer to have moved diagonally
+    touch_page.wait_for_function(
+        """() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.groomer?.x > %d && gs?.groomer?.y > %d;
+        }""" % (int(initial_pos["x"]), int(initial_pos["y"])),
+        timeout=3000
+    )
     
     # Get new position
     new_pos = touch_page.evaluate("""
@@ -282,7 +285,7 @@ class TestOrientationChanges:
         page.set_viewport_size({"width": 390, "height": 844})
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
-        page.wait_for_timeout(2000)
+        wait_for_game_ready(page)
         
         # Switch to landscape and wait for resize to propagate
         page.set_viewport_size({"width": 844, "height": 390})
@@ -298,7 +301,7 @@ class TestOrientationChanges:
         page.set_viewport_size({"width": 844, "height": 390})
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
-        page.wait_for_timeout(2000)
+        wait_for_game_ready(page)
         
         # Switch to portrait and wait for resize to propagate
         page.set_viewport_size({"width": 390, "height": 844})
@@ -315,11 +318,11 @@ class TestOrientationChanges:
         page.set_viewport_size({"width": 390, "height": 844})
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
-        page.wait_for_timeout(2000)
+        wait_for_game_ready(page)
         
         # Click to start game (calculate button position for small screen)
         click_start_button(page)
-        page.wait_for_timeout(2000)
+        wait_for_scene(page, 'GameScene')
         
         # Verify game is running
         scenes_before = page.evaluate("""
@@ -334,7 +337,7 @@ class TestOrientationChanges:
         
         # Change orientation
         page.set_viewport_size({"width": 844, "height": 390})
-        page.wait_for_timeout(500)
+        page.wait_for_timeout(100)
         
         # Verify game is still running
         scenes_after = page.evaluate("""
@@ -359,7 +362,24 @@ class TestOrientationChanges:
         # Resize viewport significantly
         game_page.set_viewport_size({"width": 800, "height": 600})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(600)
+
+        # Wait for HUD to relayout within new viewport bounds
+        game_page.wait_for_function("""() => {
+            const hud = window.game?.scene?.getScene('HUDScene');
+            if (!hud) return true;
+            const cam = hud.cameras?.main;
+            if (!cam) return true;
+            const w = cam.width, h = cam.height;
+            const children = hud.children?.list || [];
+            for (const child of children) {
+                if (child.visible && child.x !== undefined && child.y !== undefined) {
+                    if (child.x < -50 || child.x > w + 50 || child.y < -50 || child.y > h + 50) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }""", timeout=3000)
 
         # HUDScene should still be active
         scenes = game_page.evaluate("""() => {
@@ -391,7 +411,7 @@ class TestOrientationChanges:
         # Start in portrait phone dimensions
         game_page.set_viewport_size({"width": 390, "height": 844})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(600)
+        game_page.wait_for_timeout(100)
 
         skip_to_level(game_page, 0)
         wait_for_scene(game_page, 'HUDScene')
@@ -400,7 +420,24 @@ class TestOrientationChanges:
         # Rotate to landscape
         game_page.set_viewport_size({"width": 844, "height": 390})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(600)
+
+        # Wait for HUD to relayout within landscape viewport bounds
+        game_page.wait_for_function("""() => {
+            const hud = window.game?.scene?.getScene('HUDScene');
+            if (!hud) return true;
+            const cam = hud.cameras?.main;
+            if (!cam) return true;
+            const w = cam.width, h = cam.height;
+            const children = hud.children?.list || [];
+            for (const child of children) {
+                if (child.visible && child.x !== undefined && child.y !== undefined) {
+                    if (child.x < -50 || child.x > w + 50 || child.y < -50 || child.y > h + 50) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }""", timeout=3000)
 
         # HUDScene should still be active
         scenes = game_page.evaluate("""() => {

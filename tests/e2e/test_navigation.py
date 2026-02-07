@@ -1,7 +1,7 @@
 """E2E tests for game navigation and basic flows."""
 import pytest
 from playwright.sync_api import Page, expect
-from conftest import wait_for_scene, wait_for_scene_inactive, skip_to_credits, wait_for_level_or_credits, skip_to_level, dismiss_dialogues
+from conftest import wait_for_scene, wait_for_scene_inactive, skip_to_credits, wait_for_level_or_credits, skip_to_level, dismiss_dialogues, wait_for_game_ready
 
 
 def click_menu_button(page: Page, button_index: int, button_name: str = "button"):
@@ -170,7 +170,9 @@ class TestCanvasRendering:
         for level in range(9):
             assert_canvas_renders_content(game_page)
             game_page.keyboard.press("n")
-            game_page.wait_for_timeout(1200)
+            result = wait_for_level_or_credits(game_page, level + 1)
+            if result == 'credits':
+                break
         
         # Credits should also render
         assert_scene_active(game_page, 'CreditsScene')
@@ -224,27 +226,13 @@ class TestMenuNavigation:
         
         # Navigate to How To Play with keyboard and activate it
         game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
         game_page.keyboard.press("Enter")  # Open overlay
-        game_page.wait_for_timeout(200)
-        
-        # Verify overlay is open
-        overlay_open = game_page.evaluate("""() => {
-            const scene = window.game.scene.getScene('MenuScene');
-            return scene?.overlayOpen === true;
-        }""")
-        assert overlay_open, "Overlay should be open"
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
         # Press Enter to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Enter")
-        game_page.wait_for_timeout(200)
-        
-        # Verify overlay is closed
-        overlay_closed = game_page.evaluate("""() => {
-            const scene = window.game.scene.getScene('MenuScene');
-            return scene?.overlayOpen === false;
-        }""")
-        assert overlay_closed, "Overlay should be closed after Enter"
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=3000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Enter should only close overlay")
@@ -255,27 +243,13 @@ class TestMenuNavigation:
         
         # Navigate to How To Play with keyboard and activate it
         game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
         game_page.keyboard.press("Enter")  # Open overlay
-        game_page.wait_for_timeout(200)
-        
-        # Verify overlay is open
-        overlay_open = game_page.evaluate("""() => {
-            const scene = window.game.scene.getScene('MenuScene');
-            return scene?.overlayOpen === true;
-        }""")
-        assert overlay_open, "Overlay should be open"
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
         # Press Space to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Space")
-        game_page.wait_for_timeout(200)
-        
-        # Verify overlay is closed
-        overlay_closed = game_page.evaluate("""() => {
-            const scene = window.game.scene.getScene('MenuScene');
-            return scene?.overlayOpen === false;
-        }""")
-        assert overlay_closed, "Overlay should be closed after Space"
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=3000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Space should only close overlay")
@@ -292,9 +266,9 @@ class TestMenuNavigation:
         
         # Open How To Play overlay via keyboard (not mouse) to avoid hover effects
         game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
         game_page.keyboard.press("Enter")  # Open overlay
-        game_page.wait_for_timeout(200)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
         # Selection should be 1 (How To Play) after we navigated there
         pre_nav_index = game_page.evaluate("""() => {
@@ -311,7 +285,7 @@ class TestMenuNavigation:
         # Try to navigate with arrows while overlay is open
         game_page.keyboard.press("ArrowDown")
         game_page.keyboard.press("ArrowDown")
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => window.game?.scene?.getScene('MenuScene')?.selectedIndex !== undefined", timeout=3000)
         
         # Selection should NOT have changed from 1
         current_index = game_page.evaluate("""() => {
@@ -338,13 +312,7 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene')
         
         click_button(game_page, BUTTON_CHANGELOG, "Changelog")
-        game_page.wait_for_timeout(300)
-        
-        # Overlay should be open
-        overlay_open = game_page.evaluate("""() => {
-            return window.game.scene.getScene('MenuScene')?.overlayOpen === true;
-        }""")
-        assert overlay_open, "Changelog overlay should be open"
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
         # Verify changelog content is actually rendered (not empty/invisible)
         # Sample the canvas for non-background pixels in the overlay area
@@ -370,7 +338,7 @@ class TestMenuNavigation:
         
         # ESC should close it
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(200)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=3000)
         
         overlay_closed = game_page.evaluate("""() => {
             return window.game.scene.getScene('MenuScene')?.overlayOpen !== true;
@@ -382,22 +350,22 @@ class TestMenuNavigation:
         # Resize to phone dimensions
         game_page.set_viewport_size({"width": 375, "height": 667})
         game_page.evaluate("window.resizeGame?.()")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'MenuScene')
         
         # Re-enter menu to re-layout with new size
         game_page.evaluate("""() => {
             window.game.scene.getScene('MenuScene')?.scene.restart();
         }""")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'MenuScene')
         assert_scene_active(game_page, 'MenuScene')
         
         # Use keyboard navigation to reach changelog (index 2)
         game_page.keyboard.press("ArrowDown")  # index 1 = How to Play
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
         game_page.keyboard.press("ArrowDown")  # index 2 = Changelog
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 2; }", timeout=3000)
         game_page.keyboard.press("Enter")
-        game_page.wait_for_timeout(300)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
         # Overlay should be open
         overlay_open = game_page.evaluate("""() => {
@@ -435,7 +403,7 @@ class TestMenuNavigation:
         assert fits_screen, "Changelog content should fit within phone screen"
         
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(200)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=3000)
         
         # Restore original viewport
         game_page.set_viewport_size({"width": 1280, "height": 720})
@@ -619,7 +587,7 @@ class TestTutorial:
         
         # Click to advance first dialogue
         game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-        game_page.wait_for_timeout(200)
+        wait_for_scene(game_page, 'GameScene')
         
         # Should still be in tutorial with dialogues
         assert_scene_active(game_page, 'GameScene')
@@ -1096,7 +1064,7 @@ class TestLevelComplete:
         # Resize viewport
         game_page.set_viewport_size({"width": 800, "height": 600})
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(600)
+        wait_for_scene(game_page, 'LevelCompleteScene')
 
         # LevelCompleteScene should still be active
         assert_scene_active(game_page, 'LevelCompleteScene', "after resize")
@@ -1203,7 +1171,7 @@ class TestFailScreen:
         
         # Press RIGHT to select second button
         game_page.keyboard.press("ArrowRight")
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => window.game.scene.getScene('LevelCompleteScene')?.selectedIndex === 1", timeout=3000)
         
         new_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('LevelCompleteScene')?.selectedIndex;
@@ -1212,7 +1180,7 @@ class TestFailScreen:
         
         # Press LEFT to go back to first button
         game_page.keyboard.press("ArrowLeft")
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => window.game.scene.getScene('LevelCompleteScene')?.selectedIndex === 0", timeout=3000)
         
         final_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('LevelCompleteScene')?.selectedIndex;
@@ -1257,7 +1225,7 @@ class TestFailScreen:
         
         # Press RIGHT to select second button
         game_page.keyboard.press("ArrowRight")
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => window.game.scene.getScene('CreditsScene')?.selectedIndex === 1", timeout=3000)
         
         new_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('CreditsScene')?.selectedIndex;
@@ -1266,7 +1234,7 @@ class TestFailScreen:
         
         # Press LEFT to go back to first button
         game_page.keyboard.press("ArrowLeft")
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function("() => window.game.scene.getScene('CreditsScene')?.selectedIndex === 0", timeout=3000)
         
         final_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('CreditsScene')?.selectedIndex;
@@ -1344,7 +1312,7 @@ class TestAccessibility:
     def test_colorblind_filter_applied(self, game_page: Page):
         """Test that colorblind mode applies CSS filter to canvas."""
         click_button(game_page, BUTTON_SETTINGS, "Settings")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'SettingsScene')
         
         # Click deuteranopia button (first colorblind option after 'none')
         canvas = game_page.locator("canvas")
@@ -1355,7 +1323,7 @@ class TestAccessibility:
         
         # Start game and check filter is applied
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(300)
+        wait_for_scene(game_page, 'MenuScene')
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
@@ -1369,7 +1337,7 @@ class TestAccessibility:
     def test_high_contrast_class_applied(self, game_page: Page):
         """Test that high contrast mode adds CSS class."""
         click_button(game_page, BUTTON_SETTINGS, "Settings")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'SettingsScene')
         
         # Click high contrast toggle
         canvas = game_page.locator("canvas")
@@ -1379,7 +1347,7 @@ class TestAccessibility:
         
         # Go back and start game
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(300)
+        wait_for_scene(game_page, 'MenuScene')
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
@@ -1457,7 +1425,7 @@ class TestSceneLayering:
             game_page.wait_for_timeout(200)
         
         game_page.keyboard.press("Escape")
-        game_page.wait_for_timeout(500)
+        wait_for_scene(game_page, 'PauseScene')
         
         # Check scene order - PauseScene should be last (on top)
         scene_order = game_page.evaluate("""() => {
@@ -1976,7 +1944,6 @@ class TestGroomingInputGuard:
         """Grooming should be suppressed while dialogue is visible."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(2000)
 
         # Wait for tutorial dialogue
         game_page.wait_for_function("""() => {
@@ -1995,7 +1962,10 @@ class TestGroomingInputGuard:
         """Holding SPACE to dismiss dialogue must not trigger grooming."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
-        game_page.wait_for_timeout(2000)
+        game_page.wait_for_function("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds && ds.isDialogueShowing && ds.isDialogueShowing();
+        }""", timeout=5000)
         dismiss_dialogues(game_page)
         game_page.wait_for_timeout(500)
 
@@ -2008,14 +1978,10 @@ class TestGroomingInputGuard:
             const ds = window.game?.scene?.getScene('DialogueScene');
             if (ds?.showDialogue) ds.showDialogue('tumble');
         }""")
-        game_page.wait_for_timeout(500)
-
-        showing = game_page.evaluate("""() => {
+        game_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             return ds?.isDialogueShowing ? ds.isDialogueShowing() : false;
-        }""")
-        if not showing:
-            pytest.skip("Dialogue did not appear")
+        }""", timeout=5000)
 
         # Hold SPACE — dismisses dialogue but must not start grooming
         game_page.keyboard.down("Space")

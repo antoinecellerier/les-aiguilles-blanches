@@ -88,10 +88,14 @@ def gamepad_page(page: Page):
     page.goto(GAME_URL)
     wait_for_scene(page, 'MenuScene')
     
-    # Give Phaser a moment to poll gamepads
-    page.wait_for_timeout(200)
+    # Wait for Phaser to detect the mock gamepad via polling
+    page.wait_for_function(
+        "() => navigator.getGamepads()[0]?.connected === true",
+        timeout=3000
+    )
     
-    return page
+    yield page
+    page.evaluate("localStorage.clear()")
 
 
 class TestGamepadMenuNavigation:
@@ -258,8 +262,12 @@ def nintendo_page(page: Page):
     page.add_init_script(MOCK_NINTENDO_GAMEPAD_SCRIPT)
     page.goto(GAME_URL)
     wait_for_scene(page, 'MenuScene')
-    page.wait_for_timeout(200)
-    return page
+    page.wait_for_function(
+        "() => navigator.getGamepads()[0]?.connected === true",
+        timeout=3000
+    )
+    yield page
+    page.evaluate("localStorage.clear()")
 
 
 class TestNintendoControllerSwap:
@@ -340,8 +348,12 @@ def playstation_page(page: Page):
     page.add_init_script(MOCK_PLAYSTATION_GAMEPAD_SCRIPT)
     page.goto(GAME_URL)
     wait_for_scene(page, 'MenuScene')
-    page.wait_for_timeout(200)
-    return page
+    page.wait_for_function(
+        "() => navigator.getGamepads()[0]?.connected === true",
+        timeout=3000
+    )
+    yield page
+    page.evaluate("localStorage.clear()")
 
 
 class TestPlayStationController:

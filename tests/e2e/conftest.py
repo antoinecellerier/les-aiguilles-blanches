@@ -95,8 +95,7 @@ def skip_to_credits(page, timeout_per_level: int = 10000):
     import time
     for i in range(9):
         page.keyboard.press("n")
-        # Brief delay to let the level transition start
-        time.sleep(0.3)
+        time.sleep(0.1)
         result = wait_for_level_or_credits(page, i + 1, timeout=timeout_per_level)
         if result == 'credits':
             return  # Done - credits are showing
@@ -134,8 +133,6 @@ def skip_to_level(page, level_index: int, timeout: int = 10000):
         }}""",
         timeout=timeout
     )
-    # Extra wait for scene to fully initialize
-    page.wait_for_timeout(300)
 
 
 def dismiss_dialogues(page, timeout: int = 5000):
@@ -157,7 +154,6 @@ def dismiss_dialogues(page, timeout: int = 5000):
         const ds = window.game?.scene?.getScene('DialogueScene');
         return !ds || !ds.isDialogueShowing || !ds.isDialogueShowing();
     }""", timeout=timeout)
-    page.wait_for_timeout(100)
 
 
 @pytest.fixture(scope="session")
@@ -177,4 +173,6 @@ def game_page(page):
     page.wait_for_selector("canvas", timeout=10000)
     # Wait for MenuScene to be active (more reliable than timeout)
     wait_for_game_ready(page)
-    return page
+    yield page
+    # Teardown: clear localStorage to prevent state leakage between tests
+    page.evaluate("localStorage.clear()")

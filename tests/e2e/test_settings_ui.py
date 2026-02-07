@@ -1,6 +1,7 @@
 """E2E tests for Settings UI legibility and layout."""
 import pytest
 from playwright.sync_api import Page, expect
+from conftest import wait_for_scene, wait_for_game_ready, GAME_URL
 
 
 def navigate_to_settings_via_keyboard(page: Page):
@@ -11,7 +12,7 @@ def navigate_to_settings_via_keyboard(page: Page):
             window.game.scene.start('SettingsScene');
         }
     }""")
-    page.wait_for_timeout(500)
+    wait_for_scene(page, 'SettingsScene')
 
 
 def navigate_to_settings(page: Page):
@@ -34,7 +35,7 @@ def navigate_to_settings(page: Page):
     
     if pos:
         page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
-        page.wait_for_timeout(500)
+        wait_for_scene(page, 'SettingsScene')
     
     # Check if it worked, fallback to direct scene start if not
     scenes = get_active_scenes(page)
@@ -109,9 +110,9 @@ def check_text_overlap(elements: list) -> list:
 @pytest.fixture
 def settings_page(page: Page):
     """Navigate to Settings screen."""
-    page.goto("http://localhost:3000/")
+    page.goto(GAME_URL)
     page.wait_for_selector("canvas", timeout=10000)
-    page.wait_for_timeout(2000)
+    wait_for_game_ready(page)
     
     # Navigate to Settings
     navigate_to_settings(page)
@@ -204,8 +205,7 @@ class TestSettingsLayout:
             });
         }""")
         
-        settings_page.wait_for_timeout(500)
-        assert_scene_active(settings_page, 'MenuScene')
+        wait_for_scene(settings_page, 'MenuScene')
 
 
 class TestSettingsResponsive:
@@ -219,8 +219,9 @@ class TestSettingsResponsive:
     def test_settings_at_viewport_size(self, page: Page, width: int, height: int):
         """Test Settings legibility at different viewport sizes."""
         page.set_viewport_size({"width": width, "height": height})
-        page.goto("http://localhost:3000/")
-        page.wait_for_timeout(2000)
+        page.goto(GAME_URL)
+        page.wait_for_selector("canvas", timeout=10000)
+        wait_for_game_ready(page)
         
         navigate_to_settings(page)
         assert_scene_active(page, 'SettingsScene')
@@ -285,8 +286,9 @@ class TestSettingsContentBounds:
     def test_content_within_viewport(self, page: Page, width: int, height: int):
         """Test that all content stays within viewport bounds."""
         page.set_viewport_size({"width": width, "height": height})
-        page.goto("http://localhost:3000/")
-        page.wait_for_timeout(2000)
+        page.goto(GAME_URL)
+        page.wait_for_selector("canvas", timeout=10000)
+        wait_for_game_ready(page)
         
         navigate_to_settings(page)
         assert_scene_active(page, 'SettingsScene')
@@ -322,8 +324,9 @@ class TestSettingsContentBounds:
         # Emulate device pixel ratio before navigating
         page.add_init_script(f"Object.defineProperty(window, 'devicePixelRatio', {{ value: {dpr}, writable: true }});")
         
-        page.goto("http://localhost:3000/")
-        page.wait_for_timeout(2000)
+        page.goto(GAME_URL)
+        page.wait_for_selector("canvas", timeout=10000)
+        wait_for_game_ready(page)
         
         navigate_to_settings(page)
         assert_scene_active(page, 'SettingsScene')
@@ -343,8 +346,9 @@ class TestSettingsContentBounds:
     def test_narrow_portrait_layout(self, page: Page):
         """Test single-column layout on narrow portrait screens."""
         page.set_viewport_size({"width": 320, "height": 568})
-        page.goto("http://localhost:3000/")
-        page.wait_for_timeout(2000)
+        page.goto(GAME_URL)
+        page.wait_for_selector("canvas", timeout=10000)
+        wait_for_game_ready(page)
         
         navigate_to_settings(page)
         assert_scene_active(page, 'SettingsScene')
