@@ -3,6 +3,7 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
+import { STORAGE_KEYS } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 
 /**
@@ -570,9 +571,9 @@ export default class SettingsScene extends Phaser.Scene {
   // === Logic Methods ===
 
   private loadBindings(): void {
-    const savedVersion = localStorage.getItem('snowGroomer_bindingsVersion');
-    const saved = localStorage.getItem('snowGroomer_bindings');
-    const savedNames = localStorage.getItem('snowGroomer_displayNames');
+    const savedVersion = localStorage.getItem(STORAGE_KEYS.BINDINGS_VERSION);
+    const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
+    const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
     const defaults = this.getDefaultBindings();
 
     if (savedVersion !== String(BINDINGS_VERSION)) {
@@ -590,7 +591,8 @@ export default class SettingsScene extends Phaser.Scene {
             this.bindings[key] = parsed[key];
           }
         }
-      } catch {
+      } catch (e) {
+        console.warn('Failed to parse key bindings:', e);
         this.bindings = defaults;
       }
     } else {
@@ -600,7 +602,8 @@ export default class SettingsScene extends Phaser.Scene {
     if (savedNames) {
       try {
         this.displayNames = JSON.parse(savedNames);
-      } catch {
+      } catch (e) {
+        console.warn('Failed to parse display names:', e);
         this.displayNames = {};
       }
     }
@@ -611,9 +614,11 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private saveBindings(): void {
-    localStorage.setItem('snowGroomer_bindingsVersion', String(BINDINGS_VERSION));
-    localStorage.setItem('snowGroomer_bindings', JSON.stringify(this.bindings));
-    localStorage.setItem('snowGroomer_displayNames', JSON.stringify(this.displayNames));
+    try {
+      localStorage.setItem(STORAGE_KEYS.BINDINGS_VERSION, String(BINDINGS_VERSION));
+      localStorage.setItem(STORAGE_KEYS.BINDINGS, JSON.stringify(this.bindings));
+      localStorage.setItem(STORAGE_KEYS.DISPLAY_NAMES, JSON.stringify(this.displayNames));
+    } catch { /* Private browsing or quota exceeded */ }
   }
 
   private getKeyName(keyCode: number): string {
@@ -819,6 +824,7 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.input.keyboard?.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
   }
 }

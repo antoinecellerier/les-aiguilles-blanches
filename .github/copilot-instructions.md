@@ -43,10 +43,8 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 
 ## Critical Patterns
 
-### localStorage Keys (must match in tests)
-```javascript
-'snowGroomer_bindings', 'snowGroomer_displayNames', 'snowgroomer-keyboard-layout'
-```
+### localStorage Keys
+All keys are centralized in `src/config/storageKeys.ts`. Always use `STORAGE_KEYS.*` constants — never hardcode key strings.
 
 ### Dynamic Placeholders
 `{keys}`, `{groomKey}`, `{winchKey}` in localized strings - see `keyboardLayout.ts`

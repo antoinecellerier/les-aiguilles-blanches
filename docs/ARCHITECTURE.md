@@ -37,7 +37,9 @@ snow-groomer/
 │   ├── config/
 │   │   ├── gameConfig.ts   # Game constants, colors
 │   │   ├── levels.ts       # Level definitions
-│   │   └── localization.ts # i18n translations (uses {placeholder} syntax)
+│   │   ├── localization.ts # i18n translations (uses {placeholder} syntax)
+│   │   ├── storageKeys.ts  # Centralized localStorage key constants
+│   │   └── theme.ts        # UI colors, fonts, button styles
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
 │   │   ├── gamepad.ts      # Controller detection, button mapping

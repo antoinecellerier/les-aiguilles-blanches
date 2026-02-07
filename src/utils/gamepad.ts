@@ -24,6 +24,8 @@
  * To ensure "A" always confirms on all controllers, we swap button mappings for Nintendo.
  */
 
+import { STORAGE_KEYS } from '../config/storageKeys';
+
 export type ControllerType = 'xbox' | 'nintendo' | 'playstation' | 'generic';
 
 export interface ButtonMapping {
@@ -39,7 +41,7 @@ export interface GamepadBindings {
   pause: number;   // Button index for pause
 }
 
-const GAMEPAD_BINDINGS_KEY = 'snowGroomer_gamepadBindings';
+
 
 const BUTTON_NAMES_GENERIC: Record<number, string> = {
   0: 'Ⓐ', 1: 'Ⓑ', 2: 'Ⓧ', 3: 'Ⓨ',
@@ -75,7 +77,7 @@ export function getDefaultGamepadBindings(): GamepadBindings {
 
 export function loadGamepadBindings(): GamepadBindings {
   try {
-    const saved = localStorage.getItem(GAMEPAD_BINDINGS_KEY);
+    const saved = localStorage.getItem(STORAGE_KEYS.GAMEPAD_BINDINGS);
     if (saved) {
       const parsed = JSON.parse(saved);
       const defaults = getDefaultGamepadBindings();
@@ -85,12 +87,14 @@ export function loadGamepadBindings(): GamepadBindings {
         pause: typeof parsed.pause === 'number' ? parsed.pause : defaults.pause,
       };
     }
-  } catch { /* use defaults */ }
+  } catch (e) { console.warn('Failed to load gamepad bindings:', e); }
   return getDefaultGamepadBindings();
 }
 
 export function saveGamepadBindings(bindings: GamepadBindings): void {
-  localStorage.setItem(GAMEPAD_BINDINGS_KEY, JSON.stringify(bindings));
+  try {
+    localStorage.setItem(STORAGE_KEYS.GAMEPAD_BINDINGS, JSON.stringify(bindings));
+  } catch { /* Private browsing or quota exceeded */ }
 }
 
 /** Get display name for a button index, adapted to the connected controller type. */

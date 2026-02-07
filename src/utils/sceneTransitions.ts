@@ -22,6 +22,9 @@ export function registerGameScenes(
   gameSceneEntries = entries;
 }
 
+/** Guard against double-fire (e.g. rapid button clicks queuing two transitions). */
+let transitionPending = false;
+
 /**
  * Remove all game scenes, re-add fresh instances, then start the target scene.
  *
@@ -37,9 +40,14 @@ export function resetGameScenes(
   target: string,
   data: Record<string, unknown> = {},
 ): void {
+  if (transitionPending) return;
+  transitionPending = true;
+
   // Use setTimeout — the calling scene is already stopped, so scene.time is unavailable.
   // The 100ms delay lets the current render frame complete before tearing down scenes.
   setTimeout(() => {
+    transitionPending = false;
+
     // Remove all game scenes (order doesn't matter for removal)
     for (const { key } of gameSceneEntries) {
       try {

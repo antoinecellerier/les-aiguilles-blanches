@@ -3,6 +3,8 @@
  * Multi-language support for Phaser 3 version
  */
 
+import { STORAGE_KEYS } from './storageKeys';
+
 export type SupportedLanguage = 'fr' | 'en' | 'de' | 'it' | 'es';
 
 let currentLang: SupportedLanguage = 'fr';
@@ -1068,7 +1070,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
 export function setLanguage(lang: SupportedLanguage): void {
     if (TRANSLATIONS[lang]) {
         currentLang = lang;
-        localStorage.setItem('snowGroomer_lang', lang);
+        localStorage.setItem(STORAGE_KEYS.LANG, lang);
     }
 }
 
@@ -1081,7 +1083,7 @@ export function t(key: string): string {
 }
 
 export function detectLanguage(): SupportedLanguage {
-    const saved = localStorage.getItem('snowGroomer_lang');
+    const saved = localStorage.getItem(STORAGE_KEYS.LANG);
     if (saved && saved in TRANSLATIONS) {
         return saved as SupportedLanguage;
     }

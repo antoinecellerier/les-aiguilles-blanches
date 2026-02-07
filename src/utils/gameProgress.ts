@@ -3,7 +3,7 @@
  * Stores current level progress in localStorage
  */
 
-const PROGRESS_KEY = 'snowGroomer_progress';
+import { STORAGE_KEYS } from '../config/storageKeys';
 
 interface GameProgress {
   currentLevel: number;
@@ -12,7 +12,7 @@ interface GameProgress {
 
 export function getSavedProgress(): GameProgress | null {
   try {
-    const saved = localStorage.getItem(PROGRESS_KEY);
+    const saved = localStorage.getItem(STORAGE_KEYS.PROGRESS);
     if (!saved) return null;
     return JSON.parse(saved) as GameProgress;
   } catch {
@@ -25,11 +25,13 @@ export function saveProgress(level: number): void {
     currentLevel: level,
     savedAt: new Date().toISOString(),
   };
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  try {
+    localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
+  } catch { /* Private browsing or quota exceeded */ }
 }
 
 export function clearProgress(): void {
-  localStorage.removeItem(PROGRESS_KEY);
+  localStorage.removeItem(STORAGE_KEYS.PROGRESS);
 }
 
 export function hasSavedProgress(): boolean {

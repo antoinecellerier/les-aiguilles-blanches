@@ -30,6 +30,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, wildlife, Candide Thovex cameo)
+- [ ] Hide gamepad button hints in dialogues when no controller is connected
+- [ ] Alpine wildlife (bouquetin, chamois, lapins, birds) as decorative features on menu screen and in-game — flee when groomer approaches
 
 ## Recently Completed
 

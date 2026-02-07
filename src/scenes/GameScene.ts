@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
+import { STORAGE_KEYS } from '../config/storageKeys';
 import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
@@ -2157,8 +2158,8 @@ export default class GameScene extends Phaser.Scene {
 
   private loadKeyBindings(): { up: number; down: number; left: number; right: number; groom: number; winch: number } {
     const BINDINGS_VERSION = 2; // Must match SettingsScene
-    const savedVersion = localStorage.getItem('snowGroomer_bindingsVersion');
-    const saved = localStorage.getItem('snowGroomer_bindings');
+    const savedVersion = localStorage.getItem(STORAGE_KEYS.BINDINGS_VERSION);
+    const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
     
     // Get layout-specific defaults
     const defaults = getLayoutDefaults();

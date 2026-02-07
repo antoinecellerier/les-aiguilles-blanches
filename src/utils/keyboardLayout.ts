@@ -3,11 +3,14 @@
  */
 
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from './gamepad';
+import { STORAGE_KEYS } from '../config/storageKeys';
 
 export type KeyboardLayout = 'qwerty' | 'azerty' | 'qwertz';
 
-const LAYOUT_KEY = 'snowGroomer_keyboardLayout';
-const LAYOUT_DETECTED_KEY = 'snowGroomer_layoutDetected';
+function safeSetItem(key: string, value: string): void {
+  try { localStorage.setItem(key, value); }
+  catch { /* Private browsing or quota exceeded */ }
+}
 
 // Movement key defaults per layout
 const LAYOUT_DEFAULTS: Record<KeyboardLayout, { up: number; down: number; left: number; right: number }> = {
@@ -28,7 +31,7 @@ const LAYOUT_NAMES: Record<KeyboardLayout, { up: string; down: string; left: str
  */
 export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
   // Check if already detected and stored
-  const stored = localStorage.getItem(LAYOUT_KEY);
+  const stored = localStorage.getItem(STORAGE_KEYS.KEYBOARD_LAYOUT);
   if (stored && isValidLayout(stored)) {
     return stored as KeyboardLayout;
   }
@@ -53,11 +56,11 @@ export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
         detected = 'qwertz';
       }
       
-      localStorage.setItem(LAYOUT_KEY, detected);
-      localStorage.setItem(LAYOUT_DETECTED_KEY, 'true');
+      safeSetItem(STORAGE_KEYS.KEYBOARD_LAYOUT, detected);
+      safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
       return detected;
     } catch (e) {
-      // API not available or failed, continue to fallback
+      console.warn('Keyboard Layout API unavailable:', e);
     }
   }
 
@@ -77,28 +80,28 @@ export function detectLayoutFromEvent(event: KeyboardEvent): KeyboardLayout | nu
   // If user presses physical Q position (KeyQ) and it produces 'a', it's AZERTY
   if (code === 'KeyQ' && key === 'a') {
     setKeyboardLayout('azerty');
-    localStorage.setItem(LAYOUT_DETECTED_KEY, 'true');
+    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
     return 'azerty';
   }
   
   // If user presses physical W position (KeyW) and it produces 'z', it's QWERTZ
   if (code === 'KeyW' && key === 'z') {
     setKeyboardLayout('qwertz');
-    localStorage.setItem(LAYOUT_DETECTED_KEY, 'true');
+    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
     return 'qwertz';
   }
   
   // If user presses physical Q and it produces 'q', it's QWERTY
   if (code === 'KeyQ' && key === 'q') {
     setKeyboardLayout('qwerty');
-    localStorage.setItem(LAYOUT_DETECTED_KEY, 'true');
+    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
     return 'qwerty';
   }
   
   // If user presses physical A and it produces 'q', it's AZERTY
   if (code === 'KeyA' && key === 'q') {
     setKeyboardLayout('azerty');
-    localStorage.setItem(LAYOUT_DETECTED_KEY, 'true');
+    safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
     return 'azerty';
   }
   
@@ -110,7 +113,7 @@ export function detectLayoutFromEvent(event: KeyboardEvent): KeyboardLayout | nu
  * Returns cached value or default
  */
 export function getKeyboardLayout(): KeyboardLayout {
-  const stored = localStorage.getItem(LAYOUT_KEY);
+  const stored = localStorage.getItem(STORAGE_KEYS.KEYBOARD_LAYOUT);
   if (stored && isValidLayout(stored)) {
     return stored as KeyboardLayout;
   }
@@ -121,14 +124,14 @@ export function getKeyboardLayout(): KeyboardLayout {
  * Set the keyboard layout manually
  */
 export function setKeyboardLayout(layout: KeyboardLayout): void {
-  localStorage.setItem(LAYOUT_KEY, layout);
+  safeSetItem(STORAGE_KEYS.KEYBOARD_LAYOUT, layout);
 }
 
 /**
  * Check if layout has been auto-detected
  */
 export function isLayoutDetected(): boolean {
-  return localStorage.getItem(LAYOUT_DETECTED_KEY) === 'true';
+  return localStorage.getItem(STORAGE_KEYS.LAYOUT_DETECTED) === 'true';
 }
 
 /**
@@ -156,8 +159,8 @@ export function getLayoutDefaults(): { up: number; down: number; left: number; r
  */
 export function getMovementKeyNames(): { up: string; down: string; left: string; right: string } {
   // First try to get from saved display names
-  const savedNames = localStorage.getItem('snowGroomer_displayNames');
-  const savedBindings = localStorage.getItem('snowGroomer_bindings');
+  const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
+  const savedBindings = localStorage.getItem(STORAGE_KEYS.BINDINGS);
   
   if (savedNames && savedBindings) {
     try {
@@ -196,8 +199,8 @@ export function getMovementKeysString(): string {
  * Get the display name for the groom key (default: SPACE)
  */
 export function getGroomKeyName(): string {
-  const savedNames = localStorage.getItem('snowGroomer_displayNames');
-  const savedBindings = localStorage.getItem('snowGroomer_bindings');
+  const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
+  const savedBindings = localStorage.getItem(STORAGE_KEYS.BINDINGS);
   
   let keyName = 'SPACE';
   if (savedNames && savedBindings) {
@@ -221,8 +224,8 @@ export function getGroomKeyName(): string {
  * Get the display name for the winch key (default: SHIFT)
  */
 export function getWinchKeyName(): string {
-  const savedNames = localStorage.getItem('snowGroomer_displayNames');
-  const savedBindings = localStorage.getItem('snowGroomer_bindings');
+  const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
+  const savedBindings = localStorage.getItem(STORAGE_KEYS.BINDINGS);
   
   let keyName = 'SHIFT';
   if (savedNames && savedBindings) {

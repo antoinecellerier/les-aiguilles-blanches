@@ -246,6 +246,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.input.keyboard?.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
   }
 
