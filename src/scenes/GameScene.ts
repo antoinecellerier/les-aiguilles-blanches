@@ -320,7 +320,9 @@ export default class GameScene extends Phaser.Scene {
         () => this.isGameOver,
         () => this.isGrooming,
         (key: string) => this.showDialogue(key),
-        (won: boolean, reason: string) => this.gameOver(won, reason)
+        (won: boolean, reason: string) => this.gameOver(won, reason),
+        this.accessPathRects,
+        this.winchAnchors?.map(a => ({ x: a.x, y: a.baseY }))
       );
       console.log('Avalanche zones created');
     }

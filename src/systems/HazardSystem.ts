@@ -33,7 +33,9 @@ export class HazardSystem {
     isGameOver: () => boolean,
     isGrooming: () => boolean,
     showDialogue: (key: string) => void,
-    gameOver: (won: boolean, reason: string) => void
+    gameOver: (won: boolean, reason: string) => void,
+    avoidRects?: { startY: number; endY: number; leftX: number; rightX: number }[],
+    avoidPoints?: { x: number; y: number }[]
   ): Phaser.Physics.Arcade.StaticGroup {
     const worldWidth = level.width * tileSize;
     const worldHeight = level.height * tileSize;
@@ -43,16 +45,49 @@ export class HazardSystem {
     const zoneCount = 3 + Math.floor(Math.random() * 2);
 
     for (let i = 0; i < zoneCount; i++) {
-      const zoneX = Phaser.Math.Between(
-        tileSize * 5,
-        worldWidth - tileSize * 5
-      );
-      const zoneY = Phaser.Math.Between(
-        worldHeight * 0.2,
-        worldHeight * 0.6
-      );
-      const zoneWidth = Phaser.Math.Between(tileSize * 4, tileSize * 8);
-      const zoneHeight = Phaser.Math.Between(tileSize * 6, tileSize * 12);
+      let zoneX: number, zoneY: number, zoneWidth: number, zoneHeight: number;
+      let attempts = 0;
+      let valid = false;
+
+      // Try to place zone avoiding access paths and anchor points
+      do {
+        zoneX = Phaser.Math.Between(tileSize * 5, worldWidth - tileSize * 5);
+        zoneY = Phaser.Math.Between(worldHeight * 0.2, worldHeight * 0.6);
+        zoneWidth = Phaser.Math.Between(tileSize * 4, tileSize * 8);
+        zoneHeight = Phaser.Math.Between(tileSize * 6, tileSize * 12);
+        attempts++;
+
+        valid = true;
+        const margin = tileSize * 2;
+        const zLeft = zoneX - zoneWidth / 2 - margin;
+        const zRight = zoneX + zoneWidth / 2 + margin;
+        const zTop = zoneY - zoneHeight / 2 - margin;
+        const zBottom = zoneY + zoneHeight / 2 + margin;
+
+        // Check overlap with access paths
+        if (avoidRects) {
+          for (const rect of avoidRects) {
+            if (zRight > rect.leftX && zLeft < rect.rightX &&
+                zBottom > rect.startY && zTop < rect.endY) {
+              valid = false;
+              break;
+            }
+          }
+        }
+
+        // Check proximity to anchor points
+        if (valid && avoidPoints) {
+          for (const pt of avoidPoints) {
+            if (pt.x >= zLeft && pt.x <= zRight &&
+                pt.y >= zTop && pt.y <= zBottom) {
+              valid = false;
+              break;
+            }
+          }
+        }
+      } while (!valid && attempts < 20);
+
+      if (!valid) continue; // Skip zone if no valid position found
 
       const zoneVisual = this.scene.add.rectangle(
         zoneX, zoneY, zoneWidth, zoneHeight,
