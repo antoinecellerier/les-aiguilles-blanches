@@ -97,6 +97,7 @@ export default class GameScene extends Phaser.Scene {
   private stamina = 100;
   private timeRemaining = 0;
   private isGrooming = false;
+  private dialogueWasShowing = false;
   private buffs: Buffs = {};
 
   // Stats tracking for bonus objectives
@@ -851,6 +852,14 @@ export default class GameScene extends Phaser.Scene {
               this.physics.add.existing(wall, true);
               this.dangerZones.add(wall);
             }
+            // Forest wall beyond cliff
+            if (cliffStart > tileSize) {
+              const forestWall = this.add.rectangle(
+                cliffStart / 2, y + height / 2, cliffStart, height, 0x000000, 0
+              );
+              this.physics.add.existing(forestWall, true);
+              this.boundaryWalls.add(forestWall);
+            }
           } else {
             // Right cliff: danger zone from (pisteEdge + offset) to (pisteEdge + offset + extent)
             const cliffStart = pisteEdge + cliff.offset;
@@ -866,6 +875,15 @@ export default class GameScene extends Phaser.Scene {
               );
               this.physics.add.existing(wall, true);
               this.dangerZones.add(wall);
+            }
+            // Forest wall beyond cliff
+            if (cliffEnd < worldWidth - tileSize) {
+              const forestWidth = worldWidth - cliffEnd;
+              const forestWall = this.add.rectangle(
+                cliffEnd + forestWidth / 2, y + height / 2, forestWidth, height, 0x000000, 0
+              );
+              this.physics.add.existing(forestWall, true);
+              this.boundaryWalls.add(forestWall);
             }
           }
         }
@@ -2511,7 +2529,17 @@ export default class GameScene extends Phaser.Scene {
     const dialogueScene = this.scene.get('DialogueScene') as DialogueScene;
     if (dialogueScene && dialogueScene.isDialogueShowing()) {
       this.isGrooming = false;
+      this.dialogueWasShowing = true;
       return;
+    }
+    // After dialogue closes, suppress grooming until groom key is released
+    if (this.dialogueWasShowing) {
+      const gamepadGroom = this.gamepad !== null && (this.gamepadBindings ? this.gamepad.buttons[this.gamepadBindings.groom]?.pressed ?? false : false);
+      if (this.groomKey.isDown || gamepadGroom) {
+        this.isGrooming = false;
+        return;
+      }
+      this.dialogueWasShowing = false;
     }
 
     // Check touch input from HUDScene

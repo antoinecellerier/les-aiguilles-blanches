@@ -1824,6 +1824,98 @@ class TestCliffMechanics:
         # Visual verification would be needed to fully confirm markers aren't on cliffs
 
 
+class TestForestBoundaries:
+    """Tests for forest boundary colliders preventing groomer from entering forest."""
+
+    def test_forest_walls_exist_on_dangerous_level(self, game_page: Page):
+        """Dangerous levels should have boundary walls beyond cliff zones to block forest."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        skip_to_level(game_page, 7)
+
+        wall_count = game_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.boundaryWalls?.getLength() ?? 0;
+        }""")
+
+        assert wall_count > 0, "Dangerous level should have boundary walls beyond cliff zones"
+
+    def test_forest_walls_exist_on_safe_level(self, game_page: Page):
+        """Non-dangerous levels should have boundary walls at piste edges."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        wall_count = game_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.boundaryWalls?.getLength() ?? 0;
+        }""")
+
+        assert wall_count > 0, "Safe level should have boundary walls at piste edges"
+
+
+class TestGroomingInputGuard:
+    """Tests that grooming doesn't trigger when dismissing dialogues."""
+
+    def test_no_groom_while_dialogue_showing(self, game_page: Page):
+        """Grooming should be suppressed while dialogue is visible."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        game_page.wait_for_timeout(2000)
+
+        # Wait for tutorial dialogue
+        game_page.wait_for_function("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds && ds.isDialogueShowing && ds.isDialogueShowing();
+        }""", timeout=5000)
+
+        is_grooming = game_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.isGrooming ?? false;
+        }""")
+
+        assert not is_grooming, "Should not be grooming while dialogue is showing"
+
+    def test_hold_space_dismiss_does_not_groom(self, game_page: Page):
+        """Holding SPACE to dismiss dialogue must not trigger grooming."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        game_page.wait_for_timeout(2000)
+        dismiss_dialogues(game_page)
+        game_page.wait_for_timeout(500)
+
+        # Click canvas for keyboard focus
+        game_page.click("canvas")
+        game_page.wait_for_timeout(300)
+
+        # Trigger a standalone dialogue
+        game_page.evaluate("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            if (ds?.showDialogue) ds.showDialogue('tumble');
+        }""")
+        game_page.wait_for_timeout(500)
+
+        showing = game_page.evaluate("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds?.isDialogueShowing ? ds.isDialogueShowing() : false;
+        }""")
+        if not showing:
+            pytest.skip("Dialogue did not appear")
+
+        # Hold SPACE — dismisses dialogue but must not start grooming
+        game_page.keyboard.down("Space")
+        game_page.wait_for_timeout(800)
+
+        result = game_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return { isGrooming: gs?.isGrooming ?? false };
+        }""")
+
+        game_page.keyboard.up("Space")
+
+        assert not result['isGrooming'], \
+            "Grooming must not trigger while holding SPACE used to dismiss dialogue"
+
+
 class TestAccessPaths:
     """Tests for service road (access path) physics and geometry."""
 
