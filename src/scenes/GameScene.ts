@@ -3,7 +3,7 @@ import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { saveProgress } from '../utils/gameProgress';
-import { isConfirmPressed, getMappingFromGamepad } from '../utils/gamepad';
+import { isConfirmPressed, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import HUDScene from './HUDScene';
 import DialogueScene from './DialogueScene';
 
@@ -90,6 +90,7 @@ export default class GameScene extends Phaser.Scene {
   private winchActive = false;
   private winchAnchor: WinchAnchor | null = null;
   private avalancheTriggered = false;
+  private gamepadBindings: GamepadBindings = loadGamepadBindings();
 
   // Resources
   private fuel = 100;
@@ -1586,8 +1587,8 @@ export default class GameScene extends Phaser.Scene {
     const hudScene = this.scene.get('HUDScene') as HUDScene;
     const touchWinch = hudScene?.touchWinch ?? false;
 
-    // Gamepad L1/LB (button 4) for winch
-    const gamepadWinch = this.gamepad?.L1 ?? false;
+    // Gamepad winch button (configurable, default L1)
+    const gamepadWinch = this.gamepad?.buttons[this.gamepadBindings.winch]?.pressed ?? false;
 
     const isWinchPressed = this.winchKey.isDown || touchWinch || gamepadWinch;
 
@@ -2337,7 +2338,7 @@ export default class GameScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     // Check gamepad Start button for pause (with debounce)
     if (this.gamepad) {
-      const startPressed = this.gamepad.buttons[9]?.pressed ?? false; // Start button
+      const startPressed = this.gamepad.buttons[this.gamepadBindings.pause]?.pressed ?? false;
       if (startPressed && !this.gamepadStartPressed && !this.isGameOver) {
         this.pauseGame();
       }
@@ -2476,8 +2477,8 @@ export default class GameScene extends Phaser.Scene {
       if (this.gamepad.right) vx = speed;
       if (this.gamepad.up) vy = -speed;
       if (this.gamepad.down) vy = speed;
-      // Use controller-aware confirm button for grooming (handles Nintendo swap)
-      if (isConfirmPressed(this.gamepad)) this.isGrooming = true;
+      // Use configurable groom button (default: south/A)
+      if (this.gamepad.buttons[this.gamepadBindings.groom]?.pressed) this.isGrooming = true;
     }
 
     if (this.winchActive && this.winchAnchor) {
@@ -2517,8 +2518,8 @@ export default class GameScene extends Phaser.Scene {
     const hudScene = this.scene.get('HUDScene') as HUDScene;
     const touchGroom = hudScene?.touchGroom ?? false;
 
-    // Use controller-aware confirm button for grooming (handles Nintendo swap)
-    const gamepadGroom = this.gamepad !== null && isConfirmPressed(this.gamepad);
+    // Use configurable groom button (default: south/A)
+    const gamepadGroom = this.gamepad !== null && (this.gamepad.buttons[this.gamepadBindings.groom]?.pressed ?? false);
     this.isGrooming = this.groomKey.isDown || gamepadGroom || touchGroom;
 
     if (this.isGrooming && this.fuel > 0) {

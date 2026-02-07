@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
-import { isBackPressed } from '../utils/gamepad';
+import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 
 /**
@@ -32,6 +32,9 @@ export default class SettingsScene extends Phaser.Scene {
   private displayNames: Record<number, string> = {};
   private rebindingAction: string | null = null;
   private rebindButtons: Record<string, Phaser.GameObjects.Text> = {};
+  private gamepadBindings: GamepadBindings = loadGamepadBindings();
+  private rebindingGamepadAction: string | null = null;
+  private gamepadRebindButtons: Record<string, Phaser.GameObjects.Text> = {};
   private statusText: Phaser.GameObjects.Text | null = null;
   private mainSizer: any = null;
   private gamepadNameText: Phaser.GameObjects.Text | null = null;
@@ -306,6 +309,19 @@ export default class SettingsScene extends Phaser.Scene {
     // Layout selector
     sizer.add(this.createLayoutSelector(), { align: 'left' });
 
+    // Gamepad bindings section
+    sizer.add(this.createText('🎮 ' + (t('gamepadButtons') || 'Gamepad Buttons'), this.smallFont, THEME.colors.textSecondary),
+      { align: 'left', padding: { top: 10 } });
+
+    const gpActions = [
+      { id: 'groom', label: t('groom') || 'Groom' },
+      { id: 'winch', label: t('winch') || 'Winch' },
+      { id: 'pause', label: t('pause') || 'Pause' },
+    ];
+    gpActions.forEach(action => {
+      sizer.add(this.createGamepadBindingRow(action.id, action.label), { align: 'left' });
+    });
+
     // Reset button
     const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset'), this.smallFont, '#ffaaaa', '#5a2d2d');
     resetBtn.on('pointerdown', () => this.resetBindings());
@@ -486,6 +502,34 @@ export default class SettingsScene extends Phaser.Scene {
     return row;
   }
 
+  private createGamepadBindingRow(actionId: string, label: string): any {
+    const row = this.rexUI.add.fixWidthSizer({
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.5), line: 2 }
+    });
+
+    row.add(this.createText('🎮 ' + label + ':', this.smallFont, THEME.colors.textSecondary));
+
+    const currentBtn = this.gamepadBindings[actionId as keyof GamepadBindings];
+    const defaultBtn = getDefaultGamepadBindings()[actionId as keyof GamepadBindings];
+    const isCustom = currentBtn !== defaultBtn;
+    const btnName = getButtonName(currentBtn);
+
+    const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
+    const btn = this.add.text(0, 0, btnName + (isCustom ? ' *' : ''), {
+      fontFamily: THEME.fonts.family,
+      fontSize: this.smallFont + 'px',
+      color: isCustom ? THEME.colors.accent : THEME.colors.info,
+      backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
+      padding: { x: Math.round(paddingY * 2), y: paddingY },
+    }).setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.startGamepadRebind(actionId, btn));
+
+    this.gamepadRebindButtons[actionId] = btn;
+    row.add(btn);
+    return row;
+  }
+
   private createLayoutSelector(): any {
     const row = this.rexUI.add.fixWidthSizer({ 
       width: this.contentWidth,
@@ -629,11 +673,55 @@ export default class SettingsScene extends Phaser.Scene {
     this.mainSizer?.layout();
   }
 
+  private startGamepadRebind(actionId: string, btn: Phaser.GameObjects.Text): void {
+    if (this.rebindingGamepadAction || this.rebindingAction) return;
+    if (!this.input.gamepad || this.input.gamepad.total === 0) {
+      this.statusText?.setText(t('noGamepadConnected') || 'No gamepad connected');
+      return;
+    }
+    this.rebindingGamepadAction = actionId;
+    btn.setText('...');
+    btn.setStyle({ backgroundColor: '#5a5a2d' });
+    this.statusText?.setText(t('pressGamepadButton') || 'Press a gamepad button...');
+    this.mainSizer?.layout();
+  }
+
+  private checkGamepadRebind(): void {
+    if (!this.rebindingGamepadAction) return;
+    if (!this.input.gamepad || this.input.gamepad.total === 0) return;
+
+    const pad = this.input.gamepad.getPad(0);
+    if (!pad) return;
+
+    // Check all buttons for a press
+    for (let i = 0; i < pad.buttons.length && i < 16; i++) {
+      if (pad.buttons[i]?.pressed) {
+        const actionId = this.rebindingGamepadAction as keyof GamepadBindings;
+        this.gamepadBindings[actionId] = i;
+        saveGamepadBindings(this.gamepadBindings);
+
+        const btn = this.gamepadRebindButtons[actionId];
+        const isCustom = i !== getDefaultGamepadBindings()[actionId];
+        btn.setText(getButtonName(i) + (isCustom ? ' *' : ''));
+        btn.setStyle({ backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
+                        color: isCustom ? THEME.colors.accent : THEME.colors.info });
+
+        this.rebindingGamepadAction = null;
+        this.statusText?.setText(t('saved') || 'Saved!');
+        this.mainSizer?.layout();
+        this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
+        return;
+      }
+    }
+  }
+
   private resetBindings(): void {
     setKeyboardLayout('qwerty');
     this.bindings = this.getDefaultBindings();
     this.displayNames = {};
     this.saveBindings();
+    this.gamepadBindings = getDefaultGamepadBindings();
+    saveGamepadBindings(this.gamepadBindings);
     this.statusText?.setText(t('controlsReset') || 'Controls reset!');
     this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
   }
@@ -696,8 +784,11 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   update(): void {
+    // Check for gamepad rebinding input
+    this.checkGamepadRebind();
+
     // Gamepad B button to go back (handles Nintendo swap)
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
+    if (!this.rebindingGamepadAction && this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
         const backPressed = isBackPressed(pad);

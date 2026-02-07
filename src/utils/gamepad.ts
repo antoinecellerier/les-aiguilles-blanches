@@ -33,6 +33,49 @@ export interface ButtonMapping {
   backLabel: string;    // Label to show for back
 }
 
+export interface GamepadBindings {
+  groom: number;   // Button index for groom action
+  winch: number;   // Button index for winch action
+  pause: number;   // Button index for pause
+}
+
+const GAMEPAD_BINDINGS_KEY = 'snowGroomer_gamepadBindings';
+
+const BUTTON_NAMES: Record<number, string> = {
+  0: 'South', 1: 'East', 2: 'West', 3: 'North',
+  4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
+  8: 'Select', 9: 'Start',
+  10: 'L3', 11: 'R3',
+};
+
+export function getDefaultGamepadBindings(): GamepadBindings {
+  return { groom: 0, winch: 4, pause: 9 };
+}
+
+export function loadGamepadBindings(): GamepadBindings {
+  try {
+    const saved = localStorage.getItem(GAMEPAD_BINDINGS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const defaults = getDefaultGamepadBindings();
+      return {
+        groom: typeof parsed.groom === 'number' ? parsed.groom : defaults.groom,
+        winch: typeof parsed.winch === 'number' ? parsed.winch : defaults.winch,
+        pause: typeof parsed.pause === 'number' ? parsed.pause : defaults.pause,
+      };
+    }
+  } catch { /* use defaults */ }
+  return getDefaultGamepadBindings();
+}
+
+export function saveGamepadBindings(bindings: GamepadBindings): void {
+  localStorage.setItem(GAMEPAD_BINDINGS_KEY, JSON.stringify(bindings));
+}
+
+export function getButtonName(index: number): string {
+  return BUTTON_NAMES[index] || 'Btn ' + index;
+}
+
 /**
  * Detect controller type from gamepad ID string.
  */

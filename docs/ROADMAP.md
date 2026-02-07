@@ -16,7 +16,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
 - [x] Service roads - Improved legibility and practical usability (packed snow texture, amber poles, tree clearing, boundary wall exemption, intro dialog)
 - [x] Responsive design - All scenes handle resize/orientation change; form factor fixes for landscape phones, narrow portrait, compact HUD
-- [ ] Gamepad button rebinding - Allow customizing controller buttons
+- [x] Gamepad button rebinding - Allow customizing controller buttons
 - [x] Rework home screen styling
 - [x] Styling consistency audit - All scenes use centralized THEME; green CTA hierarchy for primary actions
 - [ ] Advanced tiller mechanics - Tiller raise/lower, speed-dependent grooming quality for harder levels
