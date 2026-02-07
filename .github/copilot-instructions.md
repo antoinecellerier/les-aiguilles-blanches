@@ -21,12 +21,10 @@ npm run dev                       # Dev server
 
 Before every commit, verify:
 
-1. **Code review** - Run the `code-health` agent (or follow `.github/skills/code-health/SKILL.md`) on all changed files to check for duplication, inconsistencies, missing cleanup, and error handling issues. Fix any HIGH/MEDIUM findings before committing.
+1. **Code review** - Run the `code-health` skill (`.github/skills/code-health/SKILL.md`) on all changed files. Fix any HIGH/MEDIUM findings before committing.
 2. **Tests** - Regression test exists and passes
-3. **Docs** - ARCHITECTURE/TESTING/GAMEPLAY updated if relevant
-4. **ROADMAP.md** - Work queue synced, completed items moved
-5. **Changelog** - Update in-game changelog (localization.ts) for player-visible changes
-6. **Commit message** - Summarizes functional change, lists all updates
+3. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
+4. **Commit message** - Summarizes functional change, lists all updates
 
 Commit message structure:
 ```

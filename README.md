@@ -80,20 +80,33 @@ snow-groomer/
 │   ├── config/         # Config files
 │   │   ├── gameConfig.ts
 │   │   ├── levels.ts
-│   │   └── localization.ts
+│   │   ├── localization.ts
+│   │   └── theme.ts
 │   ├── scenes/         # Phaser scenes
 │   │   ├── BootScene.ts
 │   │   ├── MenuScene.ts
 │   │   ├── GameScene.ts
 │   │   └── ...
 │   └── utils/          # Utilities
-│       └── accessibility.ts
+│       ├── accessibility.ts
+│       ├── gamepad.ts
+│       ├── gamepadMenu.ts
+│       ├── gameProgress.ts
+│       ├── keyboardLayout.ts
+│       └── sceneTransitions.ts
 ├── tests/
 │   ├── e2e/            # Playwright E2E tests
 │   └── unit-js/        # Vitest unit tests
-└── docs/
-    ├── ARCHITECTURE.md # Technical architecture
-    └── GAMEPLAY.md     # Detailed gameplay guide
+├── docs/
+│   ├── ARCHITECTURE.md # Technical architecture
+│   ├── GAMEPLAY.md     # Detailed gameplay guide
+│   ├── ART_STYLE.md    # Visual style guide
+│   ├── ROADMAP.md      # Work queue and backlog
+│   └── TESTING.md      # Test helpers and debugging
+└── .github/
+    ├── copilot-instructions.md
+    ├── agents/         # Custom Copilot agents
+    └── skills/         # Auto-invoked Copilot skills
 ```
 
 ## 🚀 Quick Start
