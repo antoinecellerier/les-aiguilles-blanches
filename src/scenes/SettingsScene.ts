@@ -5,6 +5,7 @@ import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGame
 import { THEME } from '../config/theme';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
+import { hasTouch as detectTouch } from '../utils/touchDetect';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -72,7 +73,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.useSingleColumn = logicalWidth < 500 || aspectRatio > 1.5 || logicalHeight < 400;
     
     // Touch detection for larger touch targets
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouch = detectTouch();
     // Scale touch target with DPR but cap to prevent overflow
     this.minTouchTarget = Math.min(hasTouch ? 44 : 28, width * 0.1);
 
@@ -330,9 +331,9 @@ export default class SettingsScene extends Phaser.Scene {
     sizer.add(resetBtn, { align: 'left' });
 
     // Input hints
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouchSetting = detectTouch();
     const inputHints: string[] = [];
-    if (hasTouch) inputHints.push('📱 Touch');
+    if (hasTouchSetting) inputHints.push('📱 Touch');
     inputHints.push('🎮 Gamepad');
     sizer.add(this.createText(inputHints.join('  '), this.smallFont, '#88aa88'), { align: 'left' });
 

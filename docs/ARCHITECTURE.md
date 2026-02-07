@@ -53,7 +53,8 @@ snow-groomer/
 │   │   ├── gameProgress.ts # Save/load game progress
 │   │   ├── keyboardLayout.ts # Keyboard layout detection, key name utilities
 │   │   ├── menuButtonNav.ts  # Reusable button selection/navigation controller
-│   │   └── sceneTransitions.ts # Centralized scene cleanup and transitions
+│   │   ├── sceneTransitions.ts # Centralized scene cleanup and transitions
+│   │   └── touchDetect.ts    # Touch detection with Firefox desktop fallback
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
@@ -535,6 +536,14 @@ shutdown(): void {
 | CreditsScene | Keyboard listeners, tweens, children |
 
 ## Browser Compatibility Notes
+
+### Firefox Touch Detection
+
+Firefox desktop does NOT expose `ontouchstart` or set `navigator.maxTouchPoints > 0` for touchscreen laptops, unlike Chrome/Edge. This breaks both Phaser's built-in `Device.input.touch` detection and standard browser touch checks.
+
+**Solutions applied:**
+1. **Phaser config**: `input.touch: true` force-enables `TouchManager` so Phaser always registers touch event listeners (harmless on non-touch devices)
+2. **Application code**: `src/utils/touchDetect.ts` provides `hasTouch()` with a `touchstart` event listener fallback — all scenes import this instead of inline checks
 
 ### Firefox Rendering
 

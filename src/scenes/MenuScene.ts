@@ -7,6 +7,7 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
+import { hasTouch as detectTouch } from '../utils/touchDetect';
 
 /**
  * Les Aiguilles Blanches - Menu Scene
@@ -33,7 +34,7 @@ export default class MenuScene extends Phaser.Scene {
     this.overlayOpen = false;
     this.snowflakes = [];
     this.inputHintTexts = [];
-    // Clean up previous gamepad handlers if scene is restarting
+    // Clean up previous gamepad/touch handlers if scene is restarting
     if (this.gamepadConnectHandler) {
       window.removeEventListener('gamepadconnected', this.gamepadConnectHandler);
       window.removeEventListener('gamepaddisconnected', this.gamepadConnectHandler);
@@ -393,7 +394,7 @@ export default class MenuScene extends Phaser.Scene {
     this.inputHintTexts = [];
 
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouch = detectTouch();
     const hasGamepad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(g => g !== null);
 
     // Define all hints: [icon, label, isAvailable] — always show all three
@@ -645,7 +646,7 @@ export default class MenuScene extends Phaser.Scene {
     
     // On devices with both touch and keyboard, show keyboard (primary on desktop)
     // Only show touch-specific hints on touch-only devices (no physical keyboard)
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouch = detectTouch();
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const showTouchHints = hasTouch && isMobile && !hasGamepad;
     const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
@@ -711,7 +712,7 @@ export default class MenuScene extends Phaser.Scene {
 
   private showControls(): void {
     // Detect capabilities
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const hasTouch = detectTouch();
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
     

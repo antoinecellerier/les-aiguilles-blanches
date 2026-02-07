@@ -60,6 +60,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   input: {
     activePointers: 3, // Enable multitouch (D-pad + action buttons)
+    touch: true, // Force-enable — Phaser's auto-detect fails on Firefox desktop touchscreens
     gamepad: true, // Enable gamepad support
   },
   plugins: {

@@ -3,6 +3,7 @@ import { t, LEVELS, type Level } from '../setup';
 import { THEME } from '../config/theme';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
+import { hasTouch as detectTouch } from '../utils/touchDetect';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -209,7 +210,7 @@ export default class HUDScene extends Phaser.Scene {
 
     // Touch detection for button sizing
     const phaserTouch = this.sys.game.device.input.touch;
-    const browserTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const browserTouch = detectTouch();
     const hasTouch = phaserTouch || browserTouch;
     // isMobile already defined at top of create()
     
