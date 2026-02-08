@@ -149,6 +149,7 @@ npm run dev &       # Start Vite in background
 ./run-tests.sh      # Parallel, headless (both browsers)
 ./run-tests.sh --headed           # Sequential, visible browser
 ./run-tests.sh --browser chromium # Single browser only
+./run-tests.sh --smart            # Only tests affected by uncommitted changes
 ```
 
 E2E tests cover: menu navigation, all 11 levels, tutorial flow, grooming, pause, credits, and restart cycle.

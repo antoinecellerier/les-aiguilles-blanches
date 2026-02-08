@@ -15,6 +15,7 @@ Snow groomer simulation game set in a fictional Savoie ski resort. Phaser 3 brow
 npm run dev                       # Dev server
 ./run-tests.sh --browser chromium # Fast test run
 ./run-tests.sh -k "test_name"     # Specific test
+./run-tests.sh --smart            # Only tests affected by uncommitted changes
 ```
 
 ## Pre-Commit Checklist

@@ -14,10 +14,28 @@ For architecture details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ./run-tests.sh --browser chromium     # Single browser
 ./run-tests.sh --headed               # Visible browser (sequential)
 ./run-tests.sh -k "test_name"         # Specific test
+./run-tests.sh --smart                # Only tests affected by uncommitted changes
+./run-tests.sh --smart --browser chromium  # Smart + single browser (fastest)
 npm test                              # Unit tests only
 ```
 
 The test script auto-starts the dev server if not running.
+
+## Smart Test Selection
+
+The `--smart` flag runs only tests affected by uncommitted changes (`git diff HEAD`):
+
+- **Unit tests**: Uses Vitest's `--changed` flag which traces the import graph automatically — zero maintenance.
+- **E2E tests**: File-level selection based on which source files changed:
+  - Any `src/` change → always runs `test_navigation.py` (catch-all integration suite)
+  - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
+  - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
+  - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`
+  - `src/scenes/DialogueScene.ts` or `src/utils/characterPortraits.ts` → also runs `test_dialogue_speakers.py`
+  - `tests/e2e/conftest.py` changed → runs all E2E tests
+  - No `src/` or test changes → skips E2E entirely
+
+This is maintenance-free: new source files are covered by the `test_navigation.py` catch-all, and unit test selection uses Vitest's built-in module graph.
 
 ## Test Helpers
 
