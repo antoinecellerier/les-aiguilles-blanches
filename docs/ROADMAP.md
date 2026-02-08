@@ -42,6 +42,16 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Smart test runner** - `run-tests.sh --smart` runs only tests affected by uncommitted changes. Unit tests use `vitest --changed HEAD`; E2E uses file-level selection with `test_navigation.py` as catch-all.
+
+- ✅ **Resize & zoom fixes** - Diagonal-ratio zoom scaling for orientation-independent viewport sizing. Proportional zoom on resize preserves world scale. Groomer depth raised above virtual touch controls on portrait devices via `GAME_EVENTS.TOUCH_CONTROL_HEIGHT` event.
+
+- ✅ **Gamepad phantom press fix** - Added `captureGamepadButtons()` utility for non-menu scenes (GameScene, HUDScene). Captures button state at scene init to suppress held-button phantom presses during transitions.
+
+- ✅ **Xbox LT/RT Firefox fix** - Firefox reports Xbox triggers as axes (indices 4,5) not buttons (6,7). Added `isGamepadButtonPressed()` with axis fallback. Settings rebind UI handles trigger-as-axis display.
+
+- ✅ **Input hints z-order fix** - Input method hints (keyboard/touch/gamepad) now render above footer on MenuScene.
+
 - ✅ **Mobile art review** - PauseScene responsive redesign (viewport-aware scaling, adaptive panel/font/button sizing, touch targets). HUD compact mode circles→rectangles (ART_STYLE compliance). MenuScene title/button font floors for narrow screens. SettingsScene touch target minimum fix (was shrinking below 44px on narrow touch devices).
 
 - ✅ **Level progression redesign** - Split L4 (3 mechanics) into L4 L'Aigle (fuel/roads) + L5 Le Glacier (winch intro). Added L10 Coupe des Aiguilles (FIS finale, night, all mechanics, Jean-Pierre bookend). Removed tutorial time limit. Lowered halfpipe coverage 95%→80%. Renamed all level keys from numbered (level1Name) to descriptive (level_marmottesName). Game now has 11 levels with proper one-mechanic-per-level difficulty curve.
@@ -116,6 +126,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 4. **SceneManager vs ScenePlugin** - `game.scene` (SceneManager) has `start`/`run` but NOT `launch`. Use `game.scene.start()` after stopping self. See ARCHITECTURE.md
 
 5. **Gamepad menu navigation** - Use `createGamepadMenuNav()` from `gamepadMenu.ts` for all menu scenes. Handles debounce, cooldown, and phantom-press prevention. Override behavior via `isBlocked` callback
+
+6. **Gamepad button reads** - Use `isGamepadButtonPressed()` from `gamepad.ts` instead of `pad.buttons[i]?.pressed`. Firefox reports Xbox LT/RT as axes, not buttons. Use `captureGamepadButtons()` at scene init for phantom-press prevention in gameplay scenes
 
 ### Test Coverage Gaps
 

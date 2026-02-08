@@ -522,6 +522,10 @@ shutdown() {
 | PauseScene | Debounced restart (300ms, 10px threshold) — preserves `levelIndex` |
 | CreditsScene | Debounced restart (300ms, 10px threshold) |
 
+**GameScene zoom strategy:** Uses diagonal ratio (`sqrt(w²+h²)`) of current vs original viewport to compute zoom. This is orientation-independent — rotating the device preserves perceived world scale. Zoom is clamped to [0.5, 1.5].
+
+**Groomer depth on portrait:** On portrait devices with virtual touch controls, HUDScene emits `GAME_EVENTS.TOUCH_CONTROL_HEIGHT` with the control area height. GameScene sets `CAMERA_MIN_OFFSET_Y` so the groomer never hides behind touch buttons.
+
 **Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern.
 
 ### Scene Lifecycle & Cleanup
@@ -608,6 +612,10 @@ Firefox desktop does NOT expose `ontouchstart` or set `navigator.maxTouchPoints 
 **Solutions applied:**
 1. **Phaser config**: `input.touch: true` force-enables `TouchManager` so Phaser always registers touch event listeners (harmless on non-touch devices)
 2. **Application code**: `src/utils/touchDetect.ts` provides `hasTouch()` with a `touchstart` event listener fallback — all scenes import this instead of inline checks
+
+### Firefox Gamepad Triggers
+
+Firefox reports Xbox LT/RT as axes (indices 4, 5) instead of buttons (6, 7). Use `isGamepadButtonPressed()` from `src/utils/gamepad.ts` — it checks `pad.buttons[i]?.pressed` first, then falls back to the axis value. Never read `pad.buttons[i]?.pressed` directly for gameplay bindings.
 
 ### Firefox Rendering
 
@@ -747,6 +755,20 @@ this.gamepadNav.initState();  // Capture current button state to prevent phantom
 
 // In update():
 this.gamepadNav.update(delta);
+```
+
+### Gamepad Phantom Press Prevention (Gameplay Scenes)
+
+Non-menu scenes (GameScene, HUDScene) use `captureGamepadButtons()` from `src/utils/gamepad.ts` to snapshot button state at scene init. This prevents a button held from a previous scene from triggering immediate actions:
+
+```javascript
+import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
+
+// In create():
+const padState = captureGamepadButtons(this, [this.gamepadBindings.pause]);
+
+// In update() — only act if button was NOT already held at scene start:
+if (isGamepadButtonPressed(pad, binding) && !padState[binding]) { ... }
 ```
 
 ### Menu Button Navigation
