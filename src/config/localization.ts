@@ -12,7 +12,7 @@ let currentLang: SupportedLanguage = 'fr';
 export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     fr: {
         // Menu
-        subtitle: "Simulation de Damage",
+        subtitle: "Simulateur de Damage",
         startGame: "Commencer",
         resumeGame: "Reprendre",
         newGame: "Nouvelle partie",
@@ -199,18 +199,18 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tauntAvalanche2: "Le bulletin Météo France disait risque 4. Tu l'as lu ?",
         tauntAvalanche3: "Les pisteurs retrouveront la dameuse au printemps. Peut-être.",
         tauntAvalanche4: "Marie écoute l'alerte radio. Elle sait déjà que c'est toi.",
-        tauntAvalanche5: "Le PIDA avait sécurisé le secteur. Tu l'as dé-sécurisé.",
+        tauntAvalanche5: "Le PIDA avait sécurisé le secteur. Tu l'as désécurisé.",
         
         // Dialogues
         jeanPierreIntro: "Bienvenue aux Aiguilles Blanches, petit ! Je suis Jean-Pierre, le chef dameur.",
-        level2Intro: "Bien joué hier ! Aujourd'hui, on passe à la piste bleue.",
-        level3Intro: "Le snowpark a besoin d'amour. Précision !",
+        level2Intro: "Bien joué hier, petit ! Jean-Pierre t'envoie sur la bleue. Montre-moi que t'es pas qu'un dameur de verte.",
+        level3Intro: "Salut ! C'est Émilie. Le snowpark a besoin d'amour — les riders comptent sur nous. Précision !",
         level4Intro: "L'Aigle, c'est du sérieux. Surveille ton carburant. Les chemins de dameuse permettent de remonter la piste — repère les piquets jaunes et noirs.",
         level4WinchIntro: "Tu vas voir des ancrages numérotés sur les pentes raides. Appuie sur {winchKey} à côté pour accrocher le treuil — ça t'évitera de glisser.",
         level4WinchIntroTouch: "Tu vas voir des ancrages numérotés sur les pentes raides. Appuie sur le bouton treuil à côté pour t'accrocher — ça t'évitera de glisser.",
         level5Intro: "Compétition demain ! Le half-pipe doit être impeccable.",
         level6Intro: "Opération de nuit sur La Verticale. Utilise le treuil.",
-        thierryWarning: "Attention, la zone avalanche est sensible. Soyez prudent.",
+        thierryWarning: "Attention, la zone avalanche est sensible. Sois prudent.",
         level8Intro: "La tempête est passée. Prends un vin chaud, ça va être long !",
         marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
         
@@ -419,8 +419,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tauntAvalanche5: "The avalanche team had secured that sector. You un-secured it.",
         
         jeanPierreIntro: "Welcome to Les Aiguilles Blanches! I'm Jean-Pierre, head groomer.",
-        level2Intro: "Nice work! Today we tackle the blue run.",
-        level3Intro: "The snowpark needs love. Precision is key!",
+        level2Intro: "Nice work yesterday! Jean-Pierre's sending you to the blue run. Show him you're more than a green-run groomer.",
+        level3Intro: "Hey! It's Émilie. The snowpark needs some love — riders are counting on us. Precision is key!",
         level4Intro: "L'Aigle is serious. Watch your fuel. Cat tracks let you drive back up — look for the amber and black striped poles.",
         level4WinchIntro: "You'll see numbered anchor posts on steep slopes. Press {winchKey} nearby to attach the winch — it'll keep you from sliding.",
         level4WinchIntroTouch: "You'll see numbered anchor posts on steep slopes. Tap the winch button nearby to attach — it'll keep you from sliding.",
@@ -448,7 +448,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     },
     
     de: {
-        subtitle: "Pistenraupe Simulation",
+        subtitle: "Pistenraupen-Simulation",
         startGame: "Spiel starten",
         resumeGame: "Fortsetzen",
         newGame: "Neues Spiel",
@@ -600,10 +600,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tumble: "🔄 ÜBERSCHLAG! Der Pistenbully ist umgekippt!",
         
         // Dialogues
-        jeanPierreIntro: "Willkommen in Les Aiguilles Blanches, Kleiner! Ich bin Jean-Pierre, der Chefpräparierer.",
-        level2Intro: "Gut gemacht gestern! Heute geht's zur blauen Piste.",
-        level3Intro: "Der Snowpark braucht Liebe. Präzision!",
-        level4Intro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Pistenraupenspuren führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",
+        jeanPierreIntro: "Willkommen in Les Aiguilles Blanches, Kleiner! Ich bin Jean-Pierre, der Pistenchef.",
+        level2Intro: "Gut gemacht gestern, Kleiner! Jean-Pierre schickt dich auf die Blaue. Zeig ihm, dass du mehr als ein Anfänger-Pistenraupe bist.",
+        level3Intro: "Hey! Hier ist Émilie. Der Snowpark braucht Liebe — die Rider zählen auf uns. Präzision!",
+        level4Intro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Ziehwege führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",
         level4WinchIntro: "Du wirst nummerierte Ankerpfosten an steilen Hängen sehen. Drücke {winchKey} daneben, um die Winde einzuhaken — damit rutscht du nicht ab.",
         level4WinchIntroTouch: "Du wirst nummerierte Ankerpfosten an steilen Hängen sehen. Tippe auf den Winden-Button, um einzuhaken — damit rutscht du nicht ab.",
         level5Intro: "Morgen ist Wettkampf! Die Halfpipe muss perfekt sein.",
@@ -639,11 +639,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tauntFuel2: "Émilie hatte 'TANKEN' in Großbuchstaben geschrieben.",
         tauntFuel3: "Selbst Diesel hat Grenzen. Du offenbar auch.",
         tauntFuel4: "Jean-Pierre seufzt. Er schickt Thierry mit einem Kanister.",
-        tauntFuel5: "Die Sonne geht auf. Die Piste ist nicht präpariert.",
+        tauntFuel5: "Die Sonne geht auf. Die Piste ist nicht präpariert. Die Skifahrer kommen.",
         // Taunts - Time
         tauntTime1: "Erster Sessellift in 3... 2... 1... Verpasst.",
         tauntTime2: "Skifahrer entdecken deine Piste. Buckelig. Vereist. Toll.",
-        tauntTime3: "Jean-Pierre schaut auf seine Uhr, dann auf dich.",
+        tauntTime3: "Jean-Pierre schaut auf seine Uhr, dann auf dich, dann auf seine Uhr.",
         tauntTime4: "Die FIS fragt, warum der Slalom auf Suppe stattfindet.",
         tauntTime5: "Du hörst Skilehrer den Gästen erklären, dass es 'nicht ihre Schuld' ist.",
         // Taunts - Tumble
@@ -814,8 +814,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Dialogues
         jeanPierreIntro: "Benvenuto a Les Aiguilles Blanches, piccolo! Sono Jean-Pierre, il capo gattista.",
-        level2Intro: "Ben fatto ieri! Oggi si passa alla pista blu.",
-        level3Intro: "Lo snowpark ha bisogno di cure. Precisione!",
+        level2Intro: "Ben fatto ieri, piccolo! Jean-Pierre ti manda sulla blu. Faglielo vedere che non sei solo un gattista da verde.",
+        level3Intro: "Ciao! Sono Émilie. Lo snowpark ha bisogno di cure — i rider contano su di noi. Precisione!",
         level4Intro: "L'Aigle è roba seria. Occhio al carburante. I tracciati battipista permettono di risalire — cerca i pali a strisce gialle e nere.",
         level4WinchIntro: "Vedrai paletti di ancoraggio numerati sui pendii ripidi. Premi {winchKey} vicino per agganciare il verricello — eviterai di scivolare.",
         level4WinchIntroTouch: "Vedrai paletti di ancoraggio numerati sui pendii ripidi. Tocca il pulsante verricello vicino per agganciarti — eviterai di scivolare.",
@@ -852,11 +852,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tauntFuel2: "Émilie aveva scritto 'FARE RIFORNIMENTO' in maiuscolo.",
         tauntFuel3: "Anche il diesel ha i suoi limiti. Tu pure, a quanto pare.",
         tauntFuel4: "Jean-Pierre sospira. Manda Thierry con una tanica.",
-        tauntFuel5: "Il sole sorge. La pista non è preparata.",
+        tauntFuel5: "Il sole sorge. La pista non è preparata. Gli sciatori stanno arrivando.",
         // Taunts - Time
         tauntTime1: "Prima seggiovia tra 3... 2... 1... Persa.",
         tauntTime2: "Gli sciatori scoprono la tua pista. Dissestata. Ghiacciata. Magnifica.",
-        tauntTime3: "Jean-Pierre guarda l'orologio, poi te.",
+        tauntTime3: "Jean-Pierre guarda l'orologio, poi te, poi di nuovo l'orologio.",
         tauntTime4: "La FIS chiede perché lo slalom è su una zuppa.",
         tauntTime5: "Senti i maestri di sci spiegare ai clienti che 'non è colpa loro'.",
         // Taunts - Tumble
@@ -1026,9 +1026,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tumble: "🔄 ¡VUELCO! ¡La máquina ha volcado en la pendiente!",
         
         // Dialogues
-        jeanPierreIntro: "¡Bienvenido a Les Aiguilles Blanches, pequeño! Soy Jean-Pierre, el jefe pisador.",
-        level2Intro: "¡Bien hecho ayer! Hoy pasamos a la pista azul.",
-        level3Intro: "El snowpark necesita cariño. ¡Precisión!",
+        jeanPierreIntro: "¡Bienvenido a Les Aiguilles Blanches, pequeño! Soy Jean-Pierre, el Jefe de pistas.",
+        level2Intro: "¡Bien hecho ayer, pequeño! Jean-Pierre te envía a la azul. Demuéstrale que no eres solo un pisapistas de verde.",
+        level3Intro: "¡Hola! Soy Émilie. El snowpark necesita cariño — los riders cuentan con nosotros. ¡Precisión!",
         level4Intro: "L'Aigle es serio. Vigila el combustible. Los caminos de pisapistas permiten subir — busca los postes con rayas amarillas y negras.",
         level4WinchIntro: "Verás postes de anclaje numerados en las pendientes pronunciadas. Pulsa {winchKey} cerca para enganchar el cabrestante — evitarás resbalar.",
         level4WinchIntroTouch: "Verás postes de anclaje numerados en las pendientes pronunciadas. Toca el botón de cabrestante cerca para engancharte — evitarás resbalar.",
@@ -1065,11 +1065,11 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         tauntFuel2: "Émilie escribió 'REPOSTAR' en mayúsculas en la pizarra.",
         tauntFuel3: "Hasta el diésel tiene límites. Tú también, al parecer.",
         tauntFuel4: "Jean-Pierre suspira. Envía a Thierry con un bidón.",
-        tauntFuel5: "Sale el sol. La pista no está preparada.",
+        tauntFuel5: "Sale el sol. La pista no está preparada. Llegan los esquiadores.",
         // Taunts - Time
         tauntTime1: "Primer telesilla en 3... 2... 1... Perdido.",
         tauntTime2: "Los esquiadores descubren tu pista. Con baches. Helada. Magnífica.",
-        tauntTime3: "Jean-Pierre mira su reloj, luego a ti.",
+        tauntTime3: "Jean-Pierre mira su reloj, luego a ti, luego a su reloj.",
         tauntTime4: "La FIS pregunta por qué el slalom está sobre sopa.",
         tauntTime5: "Oyes a los monitores explicar a los clientes que 'no es culpa suya'.",
         // Taunts - Tumble
