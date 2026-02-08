@@ -495,7 +495,8 @@ export default class MenuScene extends Phaser.Scene {
       const text = useCompact ? icon : `${icon} ${label}`;
       const hint = this.add.text(cursorX, this.footerHintY, text, this.footerHintStyle)
         .setOrigin(1, 0.5)
-        .setAlpha(available ? activeAlpha : inactiveAlpha);
+        .setAlpha(available ? activeAlpha : inactiveAlpha)
+        .setDepth(10);
       this.inputHintTexts.push(hint);
       // Forbidden sign overlay centered on the icon
       if (!available) {
@@ -507,7 +508,7 @@ export default class MenuScene extends Phaser.Scene {
         // Icon is at the left edge of the hint text
         const cx = cursorX - hint.width + iconWidth / 2;
         const cy = this.footerHintY;
-        const gfx = this.add.graphics();
+        const gfx = this.add.graphics().setDepth(10);
         gfx.lineStyle(1.5, 0xcc2200, 0.6);
         gfx.strokeCircle(cx, cy, r);
         const dx = r * Math.cos(Math.PI / 4);
