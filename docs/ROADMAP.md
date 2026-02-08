@@ -13,6 +13,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Groomer fall mechanics - Center-of-mass based cliff fall instead of instant physics overlap death
 - [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
 - [ ] PauseScene boot crash (not reproducible) - `this.manager is null` in resumeGame during boot; may be HMR artifact. Watch for recurrence
+- [ ] Firefox fullscreen button with gamepad - `requestFullscreen()` requires user-gesture; gamepad events don't qualify in Firefox
+- [ ] BootScene GitHub link - Add a link to the GitHub project on BootScene (and index.html fallback) so users can report issues if game fails to render
 - [x] Firefox desktop touch detection - Touch availability updates on background tap via canvas listener
 - [ ] GameScene→LevelCompleteScene scene transition - Consider refactoring to use resetGameScenes() for consistency (currently uses direct scene.start for overlay cleanup)
 
@@ -39,6 +41,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Hide gamepad button hints in dialogues when no controller is connected
 
 ## Recently Completed
+
+- ✅ **Mobile art review** - PauseScene responsive redesign (viewport-aware scaling, adaptive panel/font/button sizing, touch targets). HUD compact mode circles→rectangles (ART_STYLE compliance). MenuScene title/button font floors for narrow screens. SettingsScene touch target minimum fix (was shrinking below 44px on narrow touch devices).
 
 - ✅ **Level progression redesign** - Split L4 (3 mechanics) into L4 L'Aigle (fuel/roads) + L5 Le Glacier (winch intro). Added L10 Coupe des Aiguilles (FIS finale, night, all mechanics, Jean-Pierre bookend). Removed tutorial time limit. Lowered halfpipe coverage 95%→80%. Renamed all level keys from numbered (level1Name) to descriptive (level_marmottesName). Game now has 11 levels with proper one-mechanic-per-level difficulty curve.
 

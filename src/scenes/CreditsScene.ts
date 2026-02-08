@@ -28,6 +28,9 @@ export default class CreditsScene extends Phaser.Scene {
   
   // Gamepad state
   private gamepadNav!: GamepadMenuNav;
+  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastResizeWidth = 0;
+  private lastResizeHeight = 0;
 
   constructor() {
     super({ key: 'CreditsScene' });
@@ -187,6 +190,27 @@ export default class CreditsScene extends Phaser.Scene {
     this.input.once('pointerdown', () => this.skipCredits());
 
     Accessibility.announce(t('creditsTitle') || 'Félicitations! Vous avez terminé le jeu.');
+
+    this.lastResizeWidth = width;
+    this.lastResizeHeight = height;
+    this.scale.on('resize', this.handleResize, this);
+  }
+
+  private handleResize(): void {
+    if (!this.cameras?.main) return;
+    const { width, height } = this.cameras.main;
+    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
+      return;
+    }
+    if (this.resizeTimer) clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      this.resizeTimer = null;
+      if (this.scene.isActive()) {
+        this.lastResizeWidth = width;
+        this.lastResizeHeight = height;
+        this.scene.restart();
+      }
+    }, 300);
   }
 
   private createStars(): void {
@@ -263,6 +287,8 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
+    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);

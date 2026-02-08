@@ -74,8 +74,8 @@ export default class SettingsScene extends Phaser.Scene {
     
     // Touch detection for larger touch targets
     const hasTouch = detectTouch();
-    // Scale touch target with DPR but cap to prevent overflow
-    this.minTouchTarget = Math.min(hasTouch ? 44 : 28, width * 0.1);
+    // Ensure touch targets meet minimum — never shrink below 44px on touch
+    this.minTouchTarget = hasTouch ? 44 : Math.min(28, width * 0.1);
 
     // Font sizing: use smaller of DPI-based or width-based
     const dprBasedFont = 16 * Math.sqrt(this.dpr);

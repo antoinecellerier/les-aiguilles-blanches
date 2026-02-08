@@ -282,6 +282,7 @@ Touch button icons are pixel art drawn with `fillRect` calls:
 - **Groom**: 3-prong rake/tiller in light blue (`0xddddff`) on dark blue bg (`0x1a4a7a`)
 - **Winch**: Simplified anchor shape in warm gold (`0xffddaa`) on dark brown bg (`0x7a4a1a`)
 - Both on circular dark backgrounds with beveled edge highlight
+- **Compact mode** (narrow/short screens): Colored squares replace text labels next to bars (red for fuel, green for stamina)
 
 Pause/fullscreen buttons use pill-shaped backgrounds (black, alpha 0.55) for contrast against any terrain.
 

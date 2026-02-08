@@ -62,6 +62,9 @@ All gameplay tuning values are in `BALANCE` (from `src/config/gameConfig.ts`). N
 ### Cross-Scene Communication
 GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/types/GameSceneInterface.ts`). No scene should hold a direct reference to another scene.
 
+### ScrollFactor(0) Coordinates
+`setScrollFactor(0)` disables scroll but NOT zoom. Use `worldToOverlay()` and `overlayFullScreen()` from `src/utils/cameraCoords.ts` for any drawing on scrollFactor(0) Graphics objects.
+
 ## Key Files
 - `src/scenes/GameScene.ts` - Main gameplay, physics, cliff system
 - `src/config/gameConfig.ts` - Game constants, BALANCE tuning values

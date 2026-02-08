@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Accessibility, type Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
 
 export class WeatherSystem {
   private scene: Phaser.Scene;
@@ -115,12 +116,9 @@ export class WeatherSystem {
     if (!this.nightOverlay || !groomer) return;
 
     const cam = this.scene.cameras.main;
-    const viewWidth = cam.width;
-    const viewHeight = cam.height;
 
-    // Convert groomer world position to screen position
-    const screenX = groomer.x - cam.scrollX;
-    const screenY = groomer.y - cam.scrollY;
+    // Convert groomer world position to overlay draw-space
+    const { x: screenX, y: screenY } = worldToOverlay(cam, groomer.x, groomer.y);
 
     // Update facing direction based on velocity
     const body = groomer.body as Phaser.Physics.Arcade.Body;
@@ -129,7 +127,7 @@ export class WeatherSystem {
       this.headlightDirection = { x: body.velocity.x / len, y: body.velocity.y / len };
     }
 
-    // Groomer work lights - wide flood pattern front and back
+    // Groomer work lights - world-space distances (camera zoom handles visual scaling)
     const radiusFront = this.tileSize * BALANCE.HEADLIGHT_FRONT_TILES;
     const radiusBack = this.tileSize * BALANCE.HEADLIGHT_REAR_TILES;
     const spreadAngle = BALANCE.HEADLIGHT_SPREAD;
@@ -146,12 +144,13 @@ export class WeatherSystem {
 
     this.nightOverlay.clear();
 
-    // Draw darker overlay everywhere
+    // Draw darker overlay covering entire screen (with margin for resize transitions)
     const darkness = 0x000022;
     const alpha = BALANCE.NIGHT_DARKNESS_ALPHA;
 
     this.nightOverlay.fillStyle(darkness, alpha);
-    this.nightOverlay.fillRect(0, 0, viewWidth, viewHeight);
+    const fullScreen = overlayFullScreen(cam, 10);
+    this.nightOverlay.fillRect(fullScreen.x, fullScreen.y, fullScreen.width, fullScreen.height);
 
     // Draw wide fan-shaped work lights
     const steps = BALANCE.HEADLIGHT_STEPS;

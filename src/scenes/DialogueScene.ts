@@ -119,26 +119,38 @@ export default class DialogueScene extends Phaser.Scene {
     return hudScene?.touchControlsContainer?.visible === true;
   }
 
+  // Saved state for resize restart
+  private savedQueue: DialogueItem[] | null = null;
+  private savedCurrentText: string | null = null;
+  private savedCurrentSpeaker: string | null = null;
+
+  private lastResizeWidth = 0;
+  private lastResizeHeight = 0;
+  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  private excludeSize = 200;
+
   create(): void {
     this.dialogueQueue = [];
     this.isShowing = false;
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
+    this.lastResizeWidth = width;
+    this.lastResizeHeight = height;
 
     // Fullscreen hit zone for clicking anywhere to dismiss (initially disabled)
     // Exclude top-right corner (200x200) where HUD buttons are located
-    const excludeSize = 200;
     
     // Create hit zone that covers most of screen except top-right button area
     // Use a larger zone that starts below the button area
-    this.hitZone = this.add.rectangle(width / 2, height / 2 + excludeSize / 4, width, height - excludeSize / 2, 0x000000, 0);
+    this.hitZone = this.add.rectangle(width / 2, height / 2 + this.excludeSize / 4, width, height - this.excludeSize / 2, 0x000000, 0);
     this.hitZone.setDepth(50); // Above game, below dialogue box
     this.hitZone.setInteractive();
     this.hitZone.disableInteractive(); // Start disabled
     this.hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Extra check: ignore clicks in top-right corner where buttons are
-      if (pointer.x > width - excludeSize && pointer.y < excludeSize) {
+      const w = this.cameras.main.width;
+      if (pointer.x > w - this.excludeSize && pointer.y < this.excludeSize) {
         return;
       }
       if (this.isShowing) this.advanceDialogue();
@@ -239,6 +251,42 @@ export default class DialogueScene extends Phaser.Scene {
       this.gamepadAPressed = false;
       this.gamepadBPressed = false;
     }
+
+    this.scale.on('resize', this.handleResize, this);
+
+    // Restore dialogue state after resize restart
+    if (this.savedQueue && this.savedQueue.length > 0) {
+      this.dialogueQueue = this.savedQueue;
+      this.savedQueue = null;
+      this.displayNextDialogue();
+    }
+  }
+
+  private handleResize(): void {
+    if (!this.cameras?.main) return;
+    const { width, height } = this.cameras.main;
+    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
+      return;
+    }
+    if (this.resizeTimer) clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      this.resizeTimer = null;
+      if (!this.scene.isActive()) return;
+      this.lastResizeWidth = this.cameras.main.width;
+      this.lastResizeHeight = this.cameras.main.height;
+
+      // Save dialogue state before restart
+      if (this.isShowing) {
+        const currentItem: DialogueItem = { key: '', text: this.fullText, speaker: this.speakerText?.text };
+        this.savedQueue = [currentItem, ...this.dialogueQueue];
+        this.savedCurrentText = this.fullText;
+        this.savedCurrentSpeaker = this.speakerText?.text || null;
+      } else {
+        this.savedQueue = this.dialogueQueue.length > 0 ? [...this.dialogueQueue] : null;
+      }
+
+      this.scene.restart();
+    }, 300);
   }
 
   private gamepadAPressed = false;
@@ -537,6 +585,8 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
+    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
     this.input.keyboard?.removeAllListeners();
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();

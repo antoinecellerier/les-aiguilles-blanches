@@ -145,9 +145,9 @@ export default class HUDScene extends Phaser.Scene {
         color: '#EEEEEE',
       }).setScrollFactor(0);
     } else {
-      // Compact: tiny colored dot as bar identifier
-      const dotR = Math.round(3 * this.uiScale);
-      this.add.circle(padding + dotR, row2Y + Math.round(7 * this.uiScale), dotR, THEME.colors.dangerHex).setScrollFactor(0);
+      // Compact: tiny colored square as bar identifier (rectangles only per ART_STYLE.md)
+      const dotSize = Math.round(6 * this.uiScale);
+      this.add.rectangle(padding + Math.round(3 * this.uiScale), row2Y + Math.round(7 * this.uiScale), dotSize, dotSize, THEME.colors.dangerHex).setScrollFactor(0);
     }
     const fuelBarY = row2Y + Math.round(7 * this.uiScale);
     this.add.rectangle(barStartX - barBorder, fuelBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
@@ -169,8 +169,8 @@ export default class HUDScene extends Phaser.Scene {
         color: '#EEEEEE',
       }).setScrollFactor(0);
     } else {
-      const dotR = Math.round(3 * this.uiScale);
-      this.add.circle(padding + dotR, row3Y + Math.round(7 * this.uiScale), dotR, THEME.colors.successHex).setScrollFactor(0);
+      const dotSize = Math.round(6 * this.uiScale);
+      this.add.rectangle(padding + Math.round(3 * this.uiScale), row3Y + Math.round(7 * this.uiScale), dotSize, dotSize, THEME.colors.successHex).setScrollFactor(0);
     }
     const stamBarY = row3Y + Math.round(7 * this.uiScale);
     this.add.rectangle(barStartX - barBorder, stamBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
@@ -216,6 +216,10 @@ export default class HUDScene extends Phaser.Scene {
     const browserTouch = detectTouch();
     const hasTouch = phaserTouch || browserTouch;
     // isMobile already defined at top of create()
+
+    // Touch button sizing
+    const touchBtnPad = Math.round(6 * this.uiScale);
+    const minHitSize = 44; // Minimum touch target per ART_STYLE.md
     
     // Skip level button — inside visor
     // On narrow mobile, use abbreviated ">>" to save space
@@ -234,13 +238,45 @@ export default class HUDScene extends Phaser.Scene {
       fontFamily: THEME.fonts.family,
       fontSize: skipFontSize,
       color: THEME.colors.textMuted,
-    }).setOrigin(skipOriginX, 0).setScrollFactor(0)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerover', () => skipBtn.setStyle({ color: THEME.colors.textPrimary }))
-      .on('pointerout', () => skipBtn.setStyle({ color: THEME.colors.textMuted }))
-      .on('pointerdown', () => this.skipLevel());
+    }).setOrigin(skipOriginX, 0).setScrollFactor(0);
+
+    // Ensure skip button meets minimum touch target on mobile
+    let skipHitBottom = skipBtn.y + skipBtn.height; // Default: text bottom
+    if (hasTouch) {
+      const skipHitW = Math.max(minHitSize, skipBtn.width + touchBtnPad * 2);
+      const skipHitH = Math.max(minHitSize, skipBtn.height + touchBtnPad);
+      const skipCenterY = skipBtn.y + skipBtn.height / 2;
+      const skipHitX = skipOriginX === 0
+        ? skipBtn.x + skipBtn.width / 2
+        : skipBtn.x - skipBtn.width / 2;
+      const skipHitZone = this.add.rectangle(
+        skipHitX, skipCenterY,
+        skipHitW, skipHitH, 0x000000, 0
+      ).setScrollFactor(0).setDepth(DEPTHS.NIGHT_OVERLAY)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.skipLevel());
+      skipBtn.on('pointerover', () => skipBtn.setStyle({ color: THEME.colors.textPrimary }));
+      skipHitZone.on('pointerover', () => skipBtn.setStyle({ color: THEME.colors.textPrimary }));
+      skipBtn.on('pointerout', () => skipBtn.setStyle({ color: THEME.colors.textMuted }));
+      skipHitZone.on('pointerout', () => skipBtn.setStyle({ color: THEME.colors.textMuted }));
+      skipHitBottom = skipCenterY + skipHitH / 2;
+    } else {
+      skipBtn.setInteractive({ useHandCursor: true })
+        .on('pointerover', () => skipBtn.setStyle({ color: THEME.colors.textPrimary }))
+        .on('pointerout', () => skipBtn.setStyle({ color: THEME.colors.textMuted }))
+        .on('pointerdown', () => this.skipLevel());
+    }
     
-    nextButtonY = visorHeight + Math.round(4 * this.uiScale);
+    // Position pause/fullscreen buttons below skip hit zone on touch, below visor otherwise
+    if (hasTouch) {
+      // Ensure pause bg top edge doesn't overlap skip bg bottom edge
+      // Pause bg center is at nextButtonY + textHeight/2, so bg top = nextButtonY - (hitSize - textHeight)/2
+      // We need: nextButtonY - hitSize/2 + textHeight/2 >= skipHitBottom + gap
+      // Simplify: nextButtonY >= skipHitBottom + gap + hitSize/2 (conservative, works for any text height)
+      nextButtonY = Math.max(visorHeight + Math.round(4 * this.uiScale), Math.round(skipHitBottom + minHitSize / 2 + 4 * this.uiScale));
+    } else {
+      nextButtonY = visorHeight + Math.round(4 * this.uiScale);
+    }
 
     this.input.keyboard?.on('keydown-N', () => this.skipLevel());
     
@@ -278,7 +314,6 @@ export default class HUDScene extends Phaser.Scene {
     const touchBtnSize = isMobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
     
     // Pause/Menu button (touch devices)
-    const touchBtnPad = Math.round(6 * this.uiScale);
     if (hasTouch) {
       const pauseBtn = this.add.text(width - padding, nextButtonY, '||', {
         fontFamily: THEME.fonts.family,
@@ -286,16 +321,18 @@ export default class HUDScene extends Phaser.Scene {
         fontStyle: 'bold',
         color: '#FFFFFF',
       }).setOrigin(1, 0).setScrollFactor(0).setDepth(DEPTHS.PLAYER);
+      const pbW = Math.max(minHitSize, pauseBtn.width + touchBtnPad * 2);
+      const pbH = Math.max(minHitSize, pauseBtn.height + touchBtnPad);
       const pbBg = this.add.rectangle(
         pauseBtn.x - pauseBtn.width / 2, pauseBtn.y + pauseBtn.height / 2,
-        pauseBtn.width + touchBtnPad * 2, pauseBtn.height + touchBtnPad,
+        pbW, pbH,
         0x000000
       ).setScrollFactor(0).setDepth(DEPTHS.NIGHT_OVERLAY).setAlpha(0.55);
       pbBg.setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.openPauseMenu());
       pauseBtn.setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.openPauseMenu());
-      nextButtonY += pauseBtn.height + touchBtnPad + Math.round(5 * this.uiScale);
+      nextButtonY += pbH + Math.round(5 * this.uiScale);
     }
 
     // Fullscreen button (touch devices or when in fullscreen)
@@ -307,9 +344,11 @@ export default class HUDScene extends Phaser.Scene {
         fontStyle: 'bold',
         color: isFullscreen ? '#FF6666' : '#FFFFFF',
       }).setOrigin(1, 0).setScrollFactor(0).setDepth(DEPTHS.PLAYER);
+      const fsW = Math.max(minHitSize, fsBtn.width + touchBtnPad * 2);
+      const fsH = Math.max(minHitSize, fsBtn.height + touchBtnPad);
       const fsBg = this.add.rectangle(
         fsBtn.x - fsBtn.width / 2, fsBtn.y + fsBtn.height / 2,
-        fsBtn.width + touchBtnPad * 2, fsBtn.height + touchBtnPad,
+        fsW, fsH,
         0x000000
       ).setScrollFactor(0).setDepth(DEPTHS.NIGHT_OVERLAY).setAlpha(0.55);
       fsBg.setInteractive({ useHandCursor: true })

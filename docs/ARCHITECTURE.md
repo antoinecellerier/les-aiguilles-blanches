@@ -58,6 +58,7 @@ snow-groomer/
 │   │   ├── gameProgress.ts # Save/load game progress
 │   │   ├── keyboardLayout.ts # Keyboard layout detection, key name utilities
 │   │   ├── menuButtonNav.ts  # Reusable button selection/navigation controller
+│   │   ├── cameraCoords.ts  # World↔overlay coordinate conversions for scrollFactor(0) objects
 │   │   ├── sceneTransitions.ts # Centralized scene cleanup and transitions
 │   │   └── touchDetect.ts    # Touch detection with Firefox desktop fallback
 │   ├── scenes/
@@ -263,8 +264,12 @@ Frame Update:
 ```
 
 **Night Overlay System:**
-- Dark overlay (0x000022, 70% opacity) covers entire viewport
-- Directional flood lights rendered as layered circles
+- Dark overlay (0x000022, 70% opacity) covers entire viewport with `setScrollFactor(0)` (screen-space)
+- Uses `worldToOverlay()` / `overlayFullScreen()` from `src/utils/cameraCoords.ts`
+- World-to-overlay draw-space: `drawPos = worldPos - cam.scrollX/Y` (zoom handled by camera)
+- Full-screen fill inverts camera origin+zoom transform to cover all pixels
+- Overdraw by 10px margin to prevent edge gaps during resize transitions
+- Directional flood lights rendered as layered circles, radii scaled by zoom
 - Front lights: Wide 108° spread, 5 tile range (warm white)
 - Rear lights: 5 tile range (slightly warm tint)
 - Light direction tracks groomer velocity
@@ -513,6 +518,9 @@ shutdown() {
 | GameScene | Update camera zoom/bounds (no restart) |
 | HUDScene | Debounced restart (300ms, 10px threshold) |
 | LevelCompleteScene | Restart scene (preserves result data via `scene.settings.data`) |
+| DialogueScene | Debounced restart (300ms, 10px threshold) — saves/restores dialogue queue |
+| PauseScene | Debounced restart (300ms, 10px threshold) — preserves `levelIndex` |
+| CreditsScene | Debounced restart (300ms, 10px threshold) |
 
 **Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern.
 
@@ -542,9 +550,9 @@ shutdown(): void {
 | GameScene | Scale resize, gamepad listeners, game.events listeners, timers |
 | HUDScene | Scale resize, custom events, gameScene refs |
 | LevelCompleteScene | Scale resize listener, inputReady timer |
-| DialogueScene | Keyboard listeners, tweens, children |
-| PauseScene | Keyboard listeners, inputReady timer |
-| CreditsScene | Keyboard listeners, tweens, children |
+| DialogueScene | Scale resize listener, keyboard listeners, tweens, children |
+| PauseScene | Scale resize listener, keyboard listeners, inputReady timer |
+| CreditsScene | Scale resize listener, keyboard listeners, tweens, children |
 
 ### Input Ready Delay Pattern
 
@@ -863,6 +871,23 @@ Also call `this.tweens.killAll()` and `this.children.removeAll(true)` in shutdow
 - Use `generateTexture()` in `preload()` for procedural textures, destroy the temp Graphics immediately
 - Reuse Graphics objects with `.clear()` for things drawn every frame (e.g., night overlay, winch cable)
 - Use consistent depth values with gaps between layers for future insertions
+
+### ScrollFactor(0) Coordinate System
+
+`setScrollFactor(0)` prevents camera scroll but **does NOT prevent zoom**. The camera still applies its zoom+origin transform to drawn coordinates. For full-screen overlays or world-positioned effects on `scrollFactor(0)` Graphics:
+
+```typescript
+import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
+
+// Convert world position to overlay draw-space: drawPos = worldPos - cam.scrollXY
+const { x, y } = worldToOverlay(cam, worldX, worldY);
+
+// Fill entire screen (accounts for zoom + origin offset)
+const rect = overlayFullScreen(cam, 10); // 10px margin
+graphics.fillRect(rect.x, rect.y, rect.width, rect.height);
+```
+
+**Never** use `scale.width/height` or `cam.width/height` directly for `scrollFactor(0)` draw coordinates — both produce incorrect results when zoom ≠ 1.
 
 ### Timers
 

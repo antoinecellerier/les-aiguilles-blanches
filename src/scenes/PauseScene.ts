@@ -5,6 +5,7 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
+import { hasTouch as detectTouch } from '../utils/touchDetect';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -34,19 +35,38 @@ export default class PauseScene extends Phaser.Scene {
     this.scene.bringToTop();
     
     const { width, height } = this.cameras.main;
+    const isTouch = detectTouch();
+    const minTouchTarget = isTouch ? 44 : 28;
+
+    // Responsive scaling
+    const scaleX = width / 1024;
+    const scaleY = height / 768;
+    const scaleFactor = Math.max(0.55, Math.min(1.5, Math.min(scaleX, scaleY)));
+
+    const panelWidth = Math.min(Math.round(300 * scaleFactor), width - 20);
+    const fontSize = Math.max(14, Math.round(18 * scaleFactor));
+    const titleFontSize = Math.max(18, Math.round(28 * scaleFactor));
+    const buttonPadY = Math.max(Math.round(8 * scaleFactor), Math.ceil((minTouchTarget - fontSize) / 2));
+    const buttonSpacing = Math.max(6, Math.round(12 * scaleFactor));
+    const buttonH = fontSize + buttonPadY * 2;
+    const panelHeight = Math.min(Math.round(titleFontSize + 30 * scaleFactor + (buttonH + buttonSpacing) * 4 + 20 * scaleFactor), height - 20);
 
     // Dim overlay
     this.add.rectangle(width / 2, height / 2, width, height, THEME.colors.overlayDim, THEME.opacity.overlay);
 
     // Panel
-    this.add.rectangle(width / 2, height / 2, 300, 350, THEME.colors.panelBg, THEME.opacity.panelBg);
+    this.add.rectangle(width / 2, height / 2, panelWidth, panelHeight, THEME.colors.panelBg, THEME.opacity.panelBg);
 
     // Title
-    this.add.text(width / 2, height / 2 - 130, t('pauseTitle') || 'Paused', titleStyle())
+    const tStyle = titleStyle();
+    tStyle.fontSize = titleFontSize + 'px';
+    this.add.text(width / 2, height / 2 - panelHeight / 2 + Math.round(20 * scaleFactor), t('pauseTitle') || 'Paused', tStyle)
       .setOrigin(0.5);
 
     // Buttons
     const btnStyle = buttonStyle();
+    btnStyle.fontSize = fontSize + 'px';
+    btnStyle.padding = { x: Math.round(40 * scaleFactor), y: buttonPadY };
 
     const buttonDefs = [
       { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
@@ -59,10 +79,12 @@ export default class PauseScene extends Phaser.Scene {
     this.buttonCallbacks = [];
     this.buttonIsCTA = [];
 
+    const firstButtonY = height / 2 - panelHeight / 2 + titleFontSize + Math.round(40 * scaleFactor);
+
     buttonDefs.forEach((btn, i) => {
       const style = { ...btnStyle };
       if (btn.isCTA) style.backgroundColor = THEME.colors.buttonCTAHex;
-      const button = this.add.text(width / 2, height / 2 - 50 + i * 55, t(btn.text) || btn.text, style)
+      const button = this.add.text(width / 2, firstButtonY + i * (buttonH + buttonSpacing), t(btn.text) || btn.text, style)
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => this.buttonNav.select(i))
@@ -104,6 +126,10 @@ export default class PauseScene extends Phaser.Scene {
     // Delay accepting input to prevent held ESC from immediately resuming
     this.inputReady = false;
     this.inputReadyTimer = this.time.delayedCall(300, () => { this.inputReady = true; });
+
+    this.lastResizeWidth = width;
+    this.lastResizeHeight = height;
+    this.scale.on('resize', this.handleResize, this);
   }
 
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -112,9 +138,29 @@ export default class PauseScene extends Phaser.Scene {
   private buttonNav!: MenuButtonNav;
   private gamepadNav!: GamepadMenuNav;
   private gamepadStartPressed = false;
+  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastResizeWidth = 0;
+  private lastResizeHeight = 0;
 
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
+
+  private handleResize(): void {
+    if (!this.cameras?.main) return;
+    const { width, height } = this.cameras.main;
+    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
+      return;
+    }
+    if (this.resizeTimer) clearTimeout(this.resizeTimer);
+    this.resizeTimer = setTimeout(() => {
+      this.resizeTimer = null;
+      if (this.scene.isActive()) {
+        this.lastResizeWidth = width;
+        this.lastResizeHeight = height;
+        this.scene.restart({ levelIndex: this.levelIndex });
+      }
+    }, 300);
+  }
 
   update(_time: number, delta: number): void {
     this.gamepadNav.update(delta);
@@ -156,6 +202,8 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.scale.off('resize', this.handleResize, this);
+    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
     this.input.keyboard?.removeAllListeners();
     
     // Clean up inputReady timer if scene shutdown before it fires

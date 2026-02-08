@@ -89,12 +89,12 @@ export default class MenuScene extends Phaser.Scene {
     const aspect = width / height;
     const isPortrait = aspect < 0.9;
     
-    const titleSize = Math.round(40 * scaleFactor);
+    const titleSize = Math.max(20, Math.round(40 * scaleFactor));
     // Ensure subtitle is legible on mobile (boost on portrait)
     const subtitleSize = isPortrait
       ? Math.max(14, Math.round(20 * scaleFactor))
       : Math.max(12, Math.round(16 * scaleFactor));
-    const buttonSize = Math.round(18 * scaleFactor);
+    const buttonSize = Math.max(12, Math.round(18 * scaleFactor));
     // Ensure buttons meet 44px minimum touch target height
     const minTouchTarget = 44;
     // Tighter padding on portrait to save vertical space
