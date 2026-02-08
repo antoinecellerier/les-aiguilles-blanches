@@ -105,17 +105,41 @@ window.addEventListener('load', () => {
     attachCanvasTouchDetect(window.game.canvas);
   }
 
-  // Phaser Scale.RESIZE mode handles window resize automatically.
-  // We only expose resizeGame() for test automation (Playwright viewport changes
-  // don't trigger real browser resize events).
-  (window as unknown as { resizeGame: () => void }).resizeGame = () => {
+  // Phaser Scale.RESIZE mode handles most window resize events, but Firefox
+  // dev tools responsive mode and some mobile orientation changes can be missed.
+  // Use ResizeObserver on the container as the most reliable resize detection.
+  const resizeGame = () => {
     if (window.game && window.game.scale) {
       const container = document.getElementById('game-container');
       const w = container?.clientWidth || window.innerWidth;
       const h = container?.clientHeight || window.innerHeight;
-      window.game.scale.resize(w, h);
+      // Only resize if dimensions actually changed
+      if (w !== window.game.scale.width || h !== window.game.scale.height) {
+        window.game.scale.resize(w, h);
+      }
     }
   };
+  // ResizeObserver catches all container size changes (orientation, dev tools, address bar).
+  // Debounce to avoid interfering with scene transitions.
+  let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  const debouncedResize = () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resizeGame, 150);
+  };
+  const container = document.getElementById('game-container');
+  if (container && typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(debouncedResize).observe(container);
+  }
+  // Fallback for browsers without ResizeObserver
+  window.addEventListener('resize', debouncedResize);
+  window.addEventListener('orientationchange', () => {
+    // Orientation change fires before dimensions update; defer measurement
+    setTimeout(resizeGame, 200);
+    setTimeout(resizeGame, 500);
+  });
+
+  // Expose for test automation (Playwright viewport changes)
+  (window as unknown as { resizeGame: () => void }).resizeGame = resizeGame;
 });
 
 export { config };

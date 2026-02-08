@@ -499,7 +499,16 @@ const scaleFactor = Math.min(scaleByHeight, scaleByWidth) * dprBoost;
 
 ### Resize & Orientation Handling
 
-Phaser's `Scale.RESIZE` mode automatically resizes the canvas to fill its parent container on window resize and orientation change. **Do not manually call `scale.resize()`** — this conflicts with the built-in handler and causes double-resize bugs.
+Phaser's `Scale.RESIZE` mode handles most window resize events automatically. However, Firefox dev tools responsive mode and some mobile orientation changes don't reliably fire `window.resize` events.
+
+**Solution:** `main.ts` installs three redundant resize detectors:
+1. **`ResizeObserver`** on `#game-container` — most reliable, catches all container size changes
+2. **`window.addEventListener('resize')`** — fallback for older browsers
+3. **`orientationchange`** listener — deferred reads (200ms + 500ms) since viewport dimensions update after the event
+
+All three are **debounced at 150ms** to avoid interfering with scene transitions (which use `setTimeout(100ms)` internally). The debounced handler reads container dimensions and calls `game.scale.resize()` only when they actually changed.
+
+Canvas CSS `width: 100% !important; height: 100% !important` prevents visual gaps while Phaser's pixel resolution catches up.
 
 The game config uses percentage-based sizing:
 ```typescript
@@ -558,7 +567,7 @@ shutdown() {
 
 **Groomer depth on portrait:** On portrait devices with virtual touch controls, HUDScene emits `GAME_EVENTS.TOUCH_CONTROL_HEIGHT` with the control area height. GameScene sets `CAMERA_MIN_OFFSET_Y` so the groomer never hides behind touch buttons.
 
-**Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern.
+**Key lesson:** Always consult Phaser documentation before implementing framework-level features. Manual `scale.resize()` calls caused persistent bugs that were resolved by following the built-in `Scale.RESIZE` pattern. The only exception is the ResizeObserver/orientationchange handler in `main.ts`, which calls `game.scale.resize()` explicitly to compensate for events Phaser's built-in handler misses.
 
 ### Scene Lifecycle & Cleanup
 
@@ -714,6 +723,8 @@ The utility stops all registered game scenes, removes them, re-adds fresh instan
 - Always pass explicit data to prevent stale `sys.settings.data` reuse
 - Uses `setTimeout(100ms)` to allow render frame to complete
 - **Must stop() before remove()**: Phaser's `remove()` calls `sys.destroy()` which does NOT call `shutdown()`. Without an explicit `stop()`, `game.events` listeners registered in `create()` leak and fire on the next scene instance
+- **`transitionPending` guard** prevents double-fire. Reset is deferred via the target scene's `'update'` event after `game.scene.start()` so that at least one Phaser update frame passes — this ensures `captureGamepadButtons()` in new scenes' `create()` properly captures held buttons before new transitions are allowed
+- Callers should also guard locally (e.g., `isNavigating` flag in LevelCompleteScene, `isSkipping` in HUDScene, `isTransitioning` in GameScene) as defense-in-depth
 
 ### Stale Scene Data (Critical)
 
@@ -896,8 +907,9 @@ This section documents Phaser 3 patterns audited and verified in this codebase. 
 ### Scale & Resize
 
 - Use `Phaser.Scale.RESIZE` with `width: '100%', height: '100%'` in the game config
-- **Never call `scale.resize()` manually** — it conflicts with RESIZE mode and causes double-resize, one-frame-late rendering, or stuck states
-- The only exception is `window.resizeGame()` exposed for test automation (Playwright viewport changes don't trigger real browser resize events)
+- **Do not call `scale.resize()` from scenes** — use Phaser's built-in resize handler
+- `main.ts` installs a `ResizeObserver` + `orientationchange` listener that calls `game.scale.resize()` to compensate for events Phaser misses (Firefox dev tools, some mobile orientation changes). This is debounced at 150ms.
+- `window.resizeGame()` is also exposed for test automation (Playwright viewport changes don't trigger real browser resize events)
 - Scenes handle resize via `this.scale.on('resize')` with a `requestAnimationFrame` guard to prevent restart-during-create loops
 
 ### Shutdown & Event Cleanup

@@ -69,6 +69,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.buttonCallbacks = [];
     this.buttonIsCTA = [];
     this.inputReady = false;
+    this.isNavigating = false;
   }
 
   create(): void {
@@ -322,8 +323,12 @@ export default class LevelCompleteScene extends Phaser.Scene {
     return btn;
   }
 
+  private isNavigating = false;
+
   /** Clean up all game scenes and navigate to a target scene */
   private navigateTo(targetKey: string, data?: Record<string, unknown>): void {
+    if (this.isNavigating) return;
+    this.isNavigating = true;
     resetGameScenes(this.game, targetKey, data);
   }
 

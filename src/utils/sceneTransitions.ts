@@ -72,7 +72,17 @@ export function resetGameScenes(
     // Start target
     game.scene.start(target, data);
 
-    // Reset guard AFTER transition completes, preventing re-entry during create()
-    transitionPending = false;
+    // Delay guard reset until the target scene's first update() frame completes.
+    // game.scene.start() runs init()+create() synchronously, but update() hasn't
+    // run yet. captureGamepadButtons() in create() may miss held buttons if the
+    // gamepad input plugin hasn't refreshed for the new scene. Waiting for the
+    // first update event ensures edge detection processes held-button state
+    // before we allow new transitions.
+    const targetScene = game.scene.getScene(target);
+    if (targetScene) {
+      targetScene.events.once('update', () => { transitionPending = false; });
+    } else {
+      transitionPending = false;
+    }
   }, 100);
 }

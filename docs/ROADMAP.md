@@ -49,6 +49,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Resize & orientation fix** — Added `ResizeObserver` on `#game-container` + `orientationchange` listener in `main.ts` to catch resize events that Phaser's built-in `Scale.RESIZE` mode misses (Firefox dev tools responsive mode, some mobile orientation changes). All debounced at 150ms. Canvas CSS `width: 100% !important; height: 100% !important` prevents visual gaps during resize transitions.
+
+- ✅ **Gamepad level loop fix** — Fixed rare bug where skipping levels with gamepad caused the next level to initialize 2-3 times. Root cause: `transitionPending` guard in `resetGameScenes()` reset immediately after `game.scene.start()`, but new scenes' `update()` hadn't run yet — held gamepad buttons weren't captured by edge detection. Fix: defer guard reset via `requestAnimationFrame`. Added `isNavigating` guard in `LevelCompleteScene.navigateTo()` as defense-in-depth.
+
 - ✅ **HUD visor horizontal redesign** — Replaced 4-row vertical visor layout with compact 3-row horizontal design. Row 1: level name + timer. Row 2: fuel, stamina, and coverage progress bars side by side with colored dot identifiers. Row 3: bonus objectives in horizontal columns. Coverage bar shows gold target marker at target % position, fills white→green on target met. Accessibility: visor alpha 0.55→0.80, text stroke, brighter bar borders, text labels ("F"/"S") replacing colored dots in colorblind mode. Fixed timer init bug (was "00:00" causing false speed_run failure).
 
 - ✅ **HUD bonus objectives** — Bonus objectives (fuel efficiency, no tumbles, speed run, winch mastery, exploration) displayed inside visor during gameplay. Live evaluation with green ✓ on success, red ✗ on irreversible failure. Compact screens flash objectives for 4s then fade, with re-flash on status change. Added `tumbleCount`, `fuelUsed`, `winchUseCount`, `pathsVisited`, `totalPaths` to `GameStateEvent`. Extracted `buildGameStatePayload()` in GameScene to remove emit duplication.
