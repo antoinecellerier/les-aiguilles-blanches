@@ -168,7 +168,7 @@ export default class GameScene extends Phaser.Scene {
 
   create(): void {
     try {
-      this._createLevel();
+      this.createLevel();
     } catch (e) {
       console.error('GameScene create error:', e);
       console.error('Level:', this.levelIndex, this.level?.nameKey);
@@ -179,8 +179,8 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  private _createLevel(): void {
-    console.log('GameScene._createLevel starting for level', this.levelIndex);
+  private createLevel(): void {
+    console.log('GameScene.createLevel starting for level', this.levelIndex);
     const { width: screenWidth, height: screenHeight } = this.cameras.main;
 
     // Calculate tile size to fit level on screen with some margin
@@ -392,7 +392,7 @@ export default class GameScene extends Phaser.Scene {
     // Handle window resize - keep camera bounds updated and groomer visible
     this.scale.on('resize', this.handleResize, this);
 
-    console.log('GameScene._createLevel complete!');
+    console.log('GameScene.createLevel complete!');
     // Pause on ESC (but not while dialogue is showing — ESC dismisses dialogue first)
     this.input.keyboard?.on('keydown-ESC', () => {
       const dlg = this.scene.get('DialogueScene') as DialogueScene;
@@ -454,14 +454,15 @@ export default class GameScene extends Phaser.Scene {
     this.winchCableGraphics.setDepth(DEPTHS.WINCH_CABLE);
 
     if (anchorDefs.length === 0) {
+      const defaultYIndex = Math.min(4, this.geometry.pistePath.length - 1);
       const anchorY = tileSize * 4;
-      const path = this.geometry.pistePath[4] || { centerX: this.level.width / 2 };
+      const path = this.geometry.pistePath[defaultYIndex] || { centerX: this.level.width / 2 };
       this.createAnchorPost(path.centerX * tileSize, anchorY, 1);
       return;
     }
 
     anchorDefs.forEach((def, i) => {
-      const yIndex = Math.floor(def.y * this.level.height);
+      const yIndex = Math.min(Math.floor(def.y * this.level.height), this.geometry.pistePath.length - 1);
       const path = this.geometry.pistePath[yIndex] || { centerX: this.level.width / 2 };
       const x = path.centerX * tileSize;
       const y = yIndex * tileSize;
@@ -667,10 +668,7 @@ export default class GameScene extends Phaser.Scene {
     restaurant.setDepth(DEPTHS.GROUND_OBJECTS);
     // Add restaurant footprint for wildlife collision
     const rSize = this.tileSize * 2;
-    this.buildingRects.push({
-      x: restaurant.x - rSize / 2, y: restaurant.y - rSize / 2,
-      w: rSize, h: rSize,
-    });
+    this.addBuildingFootprint(restaurant.x, restaurant.y, rSize, rSize);
 
     // Fuel station at bottom of level (maintenance area in resort)
     const fuelStation = this.interactables.create(
@@ -682,16 +680,17 @@ export default class GameScene extends Phaser.Scene {
     fuelStation.setScale(this.tileSize / 16);
     fuelStation.setDepth(DEPTHS.GROUND_OBJECTS);
     // Add fuel station footprint for wildlife collision
-    const fSize = this.tileSize * 2;
-    this.buildingRects.push({
-      x: fuelStation.x - fSize / 2, y: fuelStation.y - fSize / 2,
-      w: fSize, h: fSize,
-    });
+    this.addBuildingFootprint(fuelStation.x, fuelStation.y, this.tileSize * 2, this.tileSize * 2);
 
     // Add resort buildings on easier pistes (near resort)
     if (['tutorial', 'green', 'blue'].includes(this.level.difficulty)) {
       this.createResortBuildings(worldWidth, worldHeight);
     }
+  }
+
+  /** Register a building footprint (center-based) for wildlife collision avoidance. */
+  private addBuildingFootprint(cx: number, cy: number, w: number, h: number): void {
+    this.buildingRects.push({ x: cx - w / 2, y: cy - h / 2, w, h });
   }
 
   private createResortBuildings(worldWidth: number, worldHeight: number): void {
@@ -754,10 +753,7 @@ export default class GameScene extends Phaser.Scene {
     const size = this.tileSize * 2;
 
     // Store footprint for wildlife collision
-    this.buildingRects.push({
-      x: x - size / 2, y: y - size * 0.4,
-      w: size, h: size * 0.65,
-    });
+    this.addBuildingFootprint(x, y - size * 0.4 + size * 0.325, size, size * 0.65);
 
     // Chalet body (wooden)
     g.fillStyle(0x8B4513, 1);
@@ -1023,19 +1019,17 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private checkSteepness(): void {
-    if (!this.geometry.steepZoneRects || this.geometry.steepZoneRects.length === 0) return;
+    if (this.geometry.steepZoneRects.length === 0) return;
     if (this.isGameOver || this.isTumbling) return;
 
     const groomerY = this.groomer.y;
     const groomerX = this.groomer.x;
 
-    if (this.geometry.accessPathRects) {
-      for (const path of this.geometry.accessPathRects) {
-        if (groomerY >= path.startY && groomerY <= path.endY &&
-          groomerX >= path.leftX && groomerX <= path.rightX) {
-          this.accessPathsVisited.add(path.pathIndex);
-          return;
-        }
+    for (const path of this.geometry.accessPathRects) {
+      if (groomerY >= path.startY && groomerY <= path.endY &&
+        groomerX >= path.leftX && groomerX <= path.rightX) {
+        this.accessPathsVisited.add(path.pathIndex);
+        return;
       }
     }
 
