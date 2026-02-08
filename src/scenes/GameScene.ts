@@ -2596,10 +2596,11 @@ export default class GameScene extends Phaser.Scene {
     const worldWidth = this.level.width * this.tileSize;
     const worldHeight = this.level.height * this.tileSize;
 
-    // Scale proportionally from the original viewport where zoom was 1
-    const scaleX = width / this.originalScreenWidth;
-    const scaleY = height / this.originalScreenHeight;
-    const zoom = Math.max(0.5, Math.min(scaleX, scaleY, 1.5));
+    // Scale so world appears similarly sized regardless of orientation.
+    // Use diagonal ratio — orientation-independent measure of viewport size.
+    const origDiag = Math.sqrt(this.originalScreenWidth ** 2 + this.originalScreenHeight ** 2);
+    const newDiag = Math.sqrt(width ** 2 + height ** 2);
+    const zoom = Math.max(0.5, Math.min(newDiag / origDiag, 1.5));
     
     // If world fits in viewport at this zoom, use static camera
     if (worldWidth * zoom <= width && worldHeight * zoom <= height) {

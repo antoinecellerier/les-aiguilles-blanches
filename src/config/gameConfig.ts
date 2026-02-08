@@ -110,6 +110,8 @@ export const BALANCE = {
 
   // Camera
   CAMERA_LERP: 0.1,
+  CAMERA_MIN_OFFSET_Y: 50,  // Min vertical padding around world in screen pixels
+  TOUCH_CONTROLS_WIDE_ASPECT_THRESHOLD: 1.2,  // Aspect ratio above which touch controls don't overlap play area
   SHAKE_WARNING_1: { duration: 200, intensity: 0.005 },
   SHAKE_WARNING_2: { duration: 300, intensity: 0.01 },
   SHAKE_AVALANCHE: { duration: 1000, intensity: 0.02 },
