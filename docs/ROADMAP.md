@@ -20,6 +20,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Polish (Medium Priority)
 
+- [ ] Directional slope traversal — Groomer should traverse intermediate-slope zones fine when facing up/down but tumble when moving sideways across the slope
 - [x] Level differentiation - Bonus objectives (fuel efficiency, no tumble, speed run, winch mastery, exploration) with per-level assignments and grade integration
 - [x] Character avatars - Visual representations for Jean-Pierre, Marie, Thierry, Émilie
 - [x] Service roads - Improved legibility and practical usability (packed snow texture, amber poles, tree clearing, boundary wall exemption, intro dialog)
