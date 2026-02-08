@@ -11,13 +11,15 @@ from conftest import wait_for_scene, skip_to_level, wait_for_game_ready
 EXPECTED_SPEAKERS = {
     0: 'Jean-Pierre',  # Tutorial
     1: 'Jean-Pierre',  # Green - jeanPierreIntro
-    2: 'Émilie',        # Blue - level2Intro
-    3: 'Émilie',        # Snowpark - level3Intro
-    4: 'Jean-Pierre',  # Red - level4Intro
-    5: 'Émilie',        # Half-pipe - level5Intro
-    6: 'Thierry',       # Black night - level6Intro
-    7: 'Thierry',       # Avalanche - thierryWarning
-    8: 'Marie',         # Storm - level8Intro
+    2: 'Émilie',        # Blue - level_chamoisIntro
+    3: 'Émilie',        # Snowpark - level_airZoneIntro
+    4: 'Jean-Pierre',  # Red L'Aigle - level_aigleIntro (fuel/roads)
+    5: 'Thierry',       # Red Le Glacier - level_glacierIntro (winch intro)
+    6: 'Émilie',        # Half-pipe - level_tubeIntro
+    7: 'Thierry',       # Black night - level_verticaleIntro
+    8: 'Thierry',       # Avalanche - level_colDangereuxIntro
+    9: 'Marie',         # Storm - level_tempeteIntro
+    10: 'Jean-Pierre',  # FIS Finale - level_coupeDesAiguillesIntro
 }
 
 
@@ -58,10 +60,12 @@ class TestDialogueSpeakers:
         (2, 'Émilie'),
         (3, 'Émilie'),
         (4, 'Jean-Pierre'),
-        (5, 'Émilie'),
-        (6, 'Thierry'),
+        (5, 'Thierry'),
+        (6, 'Émilie'),
         (7, 'Thierry'),
-        (8, 'Marie'),
+        (8, 'Thierry'),
+        (9, 'Marie'),
+        (10, 'Jean-Pierre'),
     ])
     def test_level_intro_speaker(self, game_page: Page, level_index: int, expected_speaker: str):
         """Verify correct speaker name appears in level intro dialogue."""
@@ -116,8 +120,8 @@ class TestDialogueSpeakers:
             f"System dialogue 'tumble' should default to Jean-Pierre, got '{speaker}'"
         )
 
-    def test_thierry_warning_shows_thierry_when_triggered_directly(self, game_page: Page):
-        """thierryWarning should show Thierry even when triggered outside level 7 intro."""
+    def test_avalanche_warning_shows_thierry_when_triggered_directly(self, game_page: Page):
+        """avalancheWarning should show Thierry even when triggered outside level intro."""
         start_game(game_page)
         
         # Dismiss any intro dialogue first
@@ -129,14 +133,14 @@ class TestDialogueSpeakers:
         }""")
         game_page.wait_for_timeout(200)
         
-        # Trigger thierryWarning directly (no explicit speaker)
+        # Trigger avalancheWarning directly (no explicit speaker)
         game_page.evaluate("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
-            if (ds && ds.showDialogue) ds.showDialogue('thierryWarning');
+            if (ds && ds.showDialogue) ds.showDialogue('avalancheWarning');
         }""")
         
         wait_for_dialogue(game_page, timeout=3000)
         speaker = get_dialogue_speaker(game_page)
         assert speaker == 'Thierry', (
-            f"thierryWarning should show Thierry via DIALOGUE_SPEAKERS map, got '{speaker}'"
+            f"avalancheWarning should show Thierry via DIALOGUE_SPEAKERS map, got '{speaker}'"
         )

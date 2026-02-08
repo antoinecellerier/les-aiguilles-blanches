@@ -192,12 +192,14 @@ export default class HUDScene extends Phaser.Scene {
     }).setScrollFactor(0);
 
     // === TOP-RIGHT: Timer + target ===
-    this.timerText = this.add.text(width - padding, row1Y, '00:00', {
+    const hasTimer = this.level.timeLimit > 0;
+    this.timerText = this.add.text(width - padding, row1Y, hasTimer ? '00:00' : '', {
       fontFamily: THEME.fonts.family,
       fontSize: fontLarge,
       fontStyle: 'bold',
       color: '#FFFFFF',
     }).setOrigin(1, 0).setScrollFactor(0);
+    if (!hasTimer) this.timerText.setVisible(false);
 
     // On compact screens, stack target below timer at row3Y to avoid overlap
     const targetY = isCompact ? row3Y : row1Y + Math.round(26 * this.uiScale);

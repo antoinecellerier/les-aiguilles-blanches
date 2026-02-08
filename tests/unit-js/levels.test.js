@@ -5,8 +5,8 @@ import { describe, it, expect } from 'vitest';
 import { LEVELS } from './config-wrappers/index.js';
 
 describe('Level Configuration', () => {
-    it('should have exactly 9 levels', () => {
-        expect(LEVELS).toHaveLength(9);
+    it('should have exactly 11 levels', () => {
+        expect(LEVELS).toHaveLength(11);
     });
 
     it('all levels should have required properties', () => {
@@ -67,10 +67,10 @@ describe('Level Configuration', () => {
         });
     });
 
-    it('level 6 should be a night level with winch', () => {
-        expect(LEVELS[6].isNight).toBe(true);
-        expect(LEVELS[6].hasWinch).toBe(true);
-        expect(LEVELS[6].winchAnchors?.length).toBeGreaterThan(0);
+    it('level 7 should be a night level with winch', () => {
+        expect(LEVELS[7].isNight).toBe(true);
+        expect(LEVELS[7].hasWinch).toBe(true);
+        expect(LEVELS[7].winchAnchors?.length).toBeGreaterThan(0);
     });
 
     it('levels with hasWinch should have winch anchors', () => {

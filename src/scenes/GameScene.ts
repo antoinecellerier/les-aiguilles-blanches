@@ -361,9 +361,6 @@ export default class GameScene extends Phaser.Scene {
     if (this.level.introDialogue) {
       this.time.delayedCall(500, () => {
         this.showDialogue(this.level.introDialogue!, this.level.introSpeaker);
-        if (this.level.id === 4) {
-          this.showDialogue('level4WinchIntro', this.level.introSpeaker);
-        }
       });
     }
 
@@ -2360,12 +2357,13 @@ export default class GameScene extends Phaser.Scene {
       this.time.delayedCall(BALANCE.FUEL_EMPTY_DELAY, () => {
         this.gameOver(false, 'fuel');
       });
-    } else if (this.timeRemaining <= 0) {
+    } else if (this.timeRemaining <= 0 && this.level.timeLimit > 0) {
       this.gameOver(false, 'time');
     }
   }
 
   private updateTimer(): void {
+    if (this.level.timeLimit <= 0) return;
     if (this.timeRemaining > 0) {
       this.timeRemaining--;
       this.game.events.emit(GAME_EVENTS.TIMER_UPDATE, this.timeRemaining);

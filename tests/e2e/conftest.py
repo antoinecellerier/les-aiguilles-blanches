@@ -87,13 +87,13 @@ def wait_for_level_or_credits(page, expected_level: int, timeout: int = 10000):
 
 
 def skip_to_credits(page, timeout_per_level: int = 10000):
-    """Skip through all 9 levels to reach CreditsScene.
+    """Skip through all levels to reach CreditsScene.
     
     Deterministic approach that waits for each level transition to complete.
     Uses longer timeout to handle asset loading between levels.
     """
     import time
-    for i in range(9):
+    for i in range(11):
         page.keyboard.press("n")
         time.sleep(0.1)
         result = wait_for_level_or_credits(page, i + 1, timeout=timeout_per_level)
@@ -104,16 +104,36 @@ def skip_to_credits(page, timeout_per_level: int = 10000):
     wait_for_scene(page, 'CreditsScene', timeout=timeout_per_level)
 
 
-def skip_to_level(page, level_index: int, timeout: int = 10000):
+# Level nameKey → array index mapping (must match src/config/levels.ts order)
+LEVEL_INDEX = {
+    'tutorialName': 0,
+    'level_marmottesName': 1,
+    'level_chamoisName': 2,
+    'level_airZoneName': 3,
+    'level_aigleName': 4,
+    'level_glacierName': 5,
+    'level_tubeName': 6,
+    'level_verticaleName': 7,
+    'level_colDangereuxName': 8,
+    'level_tempeteName': 9,
+    'level_coupeDesAiguillesName': 10,
+}
+
+
+def skip_to_level(page, level, timeout: int = 10000):
     """Skip directly to a specific level using game's internal transition.
-    
-    More reliable than pressing 'n' multiple times.
     
     Args:
         page: Playwright page object
-        level_index: Target level (0=tutorial, 1=green, ..., 6=black night, etc.)
+        level: Level nameKey (e.g. 'level_verticaleName') or integer index
         timeout: Max wait time in ms
     """
+    if isinstance(level, str):
+        assert level in LEVEL_INDEX, f"Unknown level nameKey '{level}'. Valid: {list(LEVEL_INDEX.keys())}"
+        level_index = LEVEL_INDEX[level]
+    else:
+        level_index = level
+    
     # Use the game's transitionToLevel method directly
     page.evaluate(f"""() => {{
         const gameScene = window.game?.scene?.getScene('GameScene');

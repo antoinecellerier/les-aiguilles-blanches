@@ -167,7 +167,7 @@ class TestCanvasRendering:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        for level in range(9):
+        for level in range(11):
             assert_canvas_renders_content(game_page)
             game_page.keyboard.press("n")
             result = wait_for_level_or_credits(game_page, level + 1)
@@ -511,29 +511,21 @@ class TestLevelNavigation:
         assert level == 1, f"After skip should be on level 1, got {level}"
         assert_scene_active(game_page, 'GameScene')
 
-    def test_full_level_progression_through_all_9_levels(self, game_page: Page):
-        """Skip through ALL 9 levels (0-8), verify each, then credits."""
+    def test_full_level_progression_through_all_11_levels(self, game_page: Page):
+        """Skip through ALL 11 levels (0-10), verify each, then credits."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
-        level_names = [
-            "Tutorial", "Les Marmottes", "Les Écureuils", "Air Zone",
-            "Les Chamois", "Le Tube", "Le Mur", "La Chouette", "La Pointe"
-        ]
-        
-        for expected_level in range(9):
+        for expected_level in range(11):
             current = get_current_level(game_page)
             assert current == expected_level, \
-                f"Expected level {expected_level} ({level_names[expected_level]}), got {current}"
+                f"Expected level {expected_level}, got {current}"
             assert_scene_active(game_page, 'GameScene')
             assert_scene_active(game_page, 'HUDScene')
             
-            # Take screenshot for visual verification
-            game_page.screenshot(path=f"tests/screenshots/level_{expected_level}_{level_names[expected_level].replace(' ', '_')}.png")
-            
             # Skip to next - wait for level to change or credits
             game_page.keyboard.press("n")
-            if expected_level < 8:
+            if expected_level < 10:
                 game_page.wait_for_function(
                     f"() => window.game?.scene?.getScene('GameScene')?.levelIndex === {expected_level + 1}",
                     timeout=5000
@@ -541,9 +533,8 @@ class TestLevelNavigation:
             else:
                 wait_for_scene(game_page, 'CreditsScene')
         
-        # After level 8, should be at credits
+        # After level 10, should be at credits
         assert_scene_active(game_page, 'CreditsScene', "Should be at credits after completing all levels")
-        game_page.screenshot(path="tests/screenshots/credits_screen.png")
 
     def test_credits_returns_to_menu(self, game_page: Page):
         """Test that exiting credits returns to menu."""
@@ -627,7 +618,7 @@ class TestTutorial:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 1 for cleaner grooming test
-        skip_to_level(game_page, 1)
+        skip_to_level(game_page, 'level_marmottesName')
         dismiss_dialogues(game_page)
         
         # Get initial groomed count
@@ -663,7 +654,7 @@ class TestGroomerMovement:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 1
-        skip_to_level(game_page, 1)
+        skip_to_level(game_page, 'level_marmottesName')
         
         # Dismiss any dialogues programmatically
         dismiss_dialogues(game_page)
@@ -698,7 +689,7 @@ class TestGroomerMovement:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 1 and dismiss dialogues
-        skip_to_level(game_page, 1)
+        skip_to_level(game_page, 'level_marmottesName')
         dismiss_dialogues(game_page)
         
         initial_pos = game_page.evaluate("""() => {
@@ -1100,7 +1091,7 @@ class TestLevelComplete:
         assert len(objectives['bonusObjectives']) == 0, "Tutorial should have no bonus objectives"
 
         # Skip to level 1 and check
-        skip_to_level(game_page, 1)
+        skip_to_level(game_page, 'level_marmottesName')
         obj_l1 = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
             return gs?.level?.bonusObjectives?.length ?? 0;
@@ -1686,7 +1677,7 @@ class TestDynamicKeyHints:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 6 (has winch anchors)
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Check winch hint text in HUD
         winch_hint_text = game_page.evaluate("""() => {
@@ -1712,7 +1703,7 @@ class TestNightLevel:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 6 (Black Piste - night level)
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Check nightOverlay exists
         has_night_overlay = game_page.evaluate("""() => {
@@ -1728,7 +1719,7 @@ class TestNightLevel:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 6 (night level)
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Get initial headlight direction
         initial_dir = game_page.evaluate("""() => {
@@ -1762,7 +1753,7 @@ class TestWinchMechanics:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 6 (has winch)
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Try to activate winch (should fail - not near anchor)
         game_page.keyboard.down("ShiftLeft")
@@ -1784,7 +1775,7 @@ class TestWinchMechanics:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip directly to level 6 (has winch)
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Check anchor structure
         anchor_info = game_page.evaluate("""() => {
@@ -1813,7 +1804,7 @@ class TestCliffMechanics:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip to level 7 (Avalanche Zone - has dangerous boundaries)
-        skip_to_level(game_page, 7)
+        skip_to_level(game_page, 'level_verticaleName')
         
         cliff_info = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
@@ -1838,7 +1829,7 @@ class TestCliffMechanics:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip to level 7 (has cliffs)
-        skip_to_level(game_page, 7)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Verify cliff segments have valid offset and extent values
         cliff_params = game_page.evaluate("""() => {
@@ -1888,7 +1879,7 @@ class TestCliffMechanics:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip to level 7 (has cliffs with winding piste shape)
-        skip_to_level(game_page, 7)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Test that getX returns valid interpolated values
         interpolation_test = game_page.evaluate("""() => {
@@ -1926,7 +1917,7 @@ class TestCliffMechanics:
         wait_for_scene(game_page, 'GameScene')
         
         # Skip to level 7 (has cliffs with winding piste shape)
-        skip_to_level(game_page, 7)
+        skip_to_level(game_page, 'level_verticaleName')
         
         # Check that isOnCliff function exists and markers respect it
         marker_check = game_page.evaluate("""() => {
@@ -1959,7 +1950,7 @@ class TestForestBoundaries:
         """Dangerous levels should have boundary walls beyond cliff zones to block forest."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
-        skip_to_level(game_page, 7)
+        skip_to_level(game_page, 'level_verticaleName')
 
         wall_count = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
@@ -2050,7 +2041,7 @@ class TestAccessPaths:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 4)
+        skip_to_level(game_page, 'level_aigleName')
         dismiss_dialogues(game_page)
 
         info = game_page.evaluate("""() => {
@@ -2075,7 +2066,7 @@ class TestAccessPaths:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 4)
+        skip_to_level(game_page, 'level_aigleName')
         dismiss_dialogues(game_page)
 
         overlaps = game_page.evaluate("""() => {
@@ -2102,7 +2093,7 @@ class TestAccessPaths:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 4)
+        skip_to_level(game_page, 'level_aigleName')
         dismiss_dialogues(game_page)
 
         result = game_page.evaluate("""() => {
@@ -2129,11 +2120,11 @@ class TestAccessPaths:
         assert pos['x'] < start_x - 20, f"Groomer should move left into road, started at {start_x}, ended at {pos['x']}"
 
     def test_road_traversable_dangerous(self, game_page: Page):
-        """Test that groomer can traverse service road on dangerous level (level 6)."""
+        """Test that groomer can traverse service road on dangerous level (La Verticale)."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         dismiss_dialogues(game_page)
 
         result = game_page.evaluate("""() => {
@@ -2163,7 +2154,7 @@ class TestAccessPaths:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 4)
+        skip_to_level(game_page, 'level_aigleName')
         dismiss_dialogues(game_page)
 
         overlaps = game_page.evaluate("""() => {
@@ -2188,7 +2179,7 @@ class TestAccessPaths:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 6)
+        skip_to_level(game_page, 'level_verticaleName')
         dismiss_dialogues(game_page)
 
         overlaps = game_page.evaluate("""() => {
@@ -2215,7 +2206,7 @@ class TestAccessPaths:
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
-        skip_to_level(game_page, 4)
+        skip_to_level(game_page, 'level_aigleName')
         dismiss_dialogues(game_page)
 
         info = game_page.evaluate("""() => {
@@ -2243,7 +2234,7 @@ class TestWildlife:
         wait_for_scene(game_page, 'GameScene')
 
         # Level 1 has wildlife (bunnies + birds)
-        skip_to_level(game_page, 1)
+        skip_to_level(game_page, 'level_marmottesName')
         dismiss_dialogues(game_page)
 
         counts = game_page.evaluate("""() => {
