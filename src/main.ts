@@ -11,6 +11,7 @@ import './setup';
 
 // Scene transition registry (must be before scene imports to avoid circular deps)
 import { registerGameScenes } from './utils/sceneTransitions';
+import { attachCanvasTouchDetect } from './utils/touchDetect';
 
 // TypeScript scenes
 import BootScene from './scenes/BootScene';
@@ -98,6 +99,11 @@ window.addEventListener('load', () => {
   }
 
   window.game = new Phaser.Game(config);
+
+  // Attach canvas touch detection for Firefox desktop touchscreens
+  if (window.game.canvas) {
+    attachCanvasTouchDetect(window.game.canvas);
+  }
 
   // Phaser Scale.RESIZE mode handles window resize automatically.
   // We only expose resizeGame() for test automation (Playwright viewport changes

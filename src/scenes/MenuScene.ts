@@ -7,7 +7,7 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { hasTouch as detectTouch, onTouchAvailable } from '../utils/touchDetect';
 
 /**
  * Les Aiguilles Blanches - Menu Scene
@@ -356,6 +356,11 @@ export default class MenuScene extends Phaser.Scene {
     this.gamepadConnectHandler = () => this.updateInputHints();
     window.addEventListener('gamepadconnected', this.gamepadConnectHandler);
     window.addEventListener('gamepaddisconnected', this.gamepadConnectHandler);
+
+    // Update hints when touch is first detected (Firefox desktop touchscreens)
+    onTouchAvailable(() => {
+      if (this.scene.isActive()) this.updateInputHints();
+    });
 
     // Keyboard navigation
     this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
