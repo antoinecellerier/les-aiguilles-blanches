@@ -150,9 +150,9 @@ export default class GameScene extends Phaser.Scene {
 
     // Load movement sensitivity from settings
     const savedSensitivity = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
-    this.movementSensitivity = savedSensitivity ? parseFloat(savedSensitivity) : 1.0;
-    if (isNaN(this.movementSensitivity) || this.movementSensitivity < 0.25 || this.movementSensitivity > 2.0) {
-      this.movementSensitivity = 1.0;
+    this.movementSensitivity = savedSensitivity ? parseFloat(savedSensitivity) : BALANCE.SENSITIVITY_DEFAULT;
+    if (isNaN(this.movementSensitivity) || this.movementSensitivity < BALANCE.SENSITIVITY_MIN || this.movementSensitivity > BALANCE.SENSITIVITY_MAX) {
+      this.movementSensitivity = BALANCE.SENSITIVITY_DEFAULT;
     }
   }
 
@@ -1114,8 +1114,8 @@ export default class GameScene extends Phaser.Scene {
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
     // Reload sensitivity in case it was changed in Settings
     const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
-    const val = saved ? parseFloat(saved) : 1.0;
-    this.movementSensitivity = (isNaN(val) || val < 0.25 || val > 2.0) ? 1.0 : val;
+    const val = saved ? parseFloat(saved) : BALANCE.SENSITIVITY_DEFAULT;
+    this.movementSensitivity = (isNaN(val) || val < BALANCE.SENSITIVITY_MIN || val > BALANCE.SENSITIVITY_MAX) ? BALANCE.SENSITIVITY_DEFAULT : val;
     this.scene.resume();
   }
 

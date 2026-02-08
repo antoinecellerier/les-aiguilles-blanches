@@ -365,7 +365,7 @@ export default class MenuScene extends Phaser.Scene {
             githubLink.setText(`GitHub  ·  v${data.version}`);
           }
         })
-        .catch(() => {});
+        .catch(() => { /* Dev-only version fetch — ignore network errors */ });
     }
 
     this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {

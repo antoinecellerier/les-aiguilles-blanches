@@ -3,6 +3,7 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed, isConfirmPressed, isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
+import { BALANCE } from '../config/gameConfig';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
@@ -654,7 +655,7 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private createSensitivitySlider(): any {
-    const MIN = 0.25, MAX = 2.0, DEFAULT = 1.0;
+    const MIN = BALANCE.SENSITIVITY_MIN, MAX = BALANCE.SENSITIVITY_MAX, DEFAULT = BALANCE.SENSITIVITY_DEFAULT;
     const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     let value = saved ? parseFloat(saved) : DEFAULT;
     if (isNaN(value) || value < MIN || value > MAX) value = DEFAULT;

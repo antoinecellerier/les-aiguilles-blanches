@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from '../setup';
 import { THEME } from '../config/theme';
+import { BALANCE } from '../config/gameConfig';
 import { getMappingFromGamepad } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
@@ -244,7 +245,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Delay accepting input to prevent held keys from prior scene from firing
     this.inputReady = false;
-    this.inputReadyTimer = this.time.delayedCall(300, () => { this.inputReady = true; });
+    this.inputReadyTimer = this.time.delayedCall(BALANCE.SCENE_INPUT_DELAY, () => { this.inputReady = true; });
   }
 
   private resizing = false;

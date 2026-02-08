@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility } from '../setup';
+import { BALANCE } from '../config/gameConfig';
 import { THEME, buttonStyle, titleStyle } from '../config/theme';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
@@ -124,7 +125,7 @@ export default class PauseScene extends Phaser.Scene {
     
     // Delay accepting input to prevent held ESC from immediately resuming
     this.inputReady = false;
-    this.inputReadyTimer = this.time.delayedCall(300, () => { this.inputReady = true; });
+    this.inputReadyTimer = this.time.delayedCall(BALANCE.SCENE_INPUT_DELAY, () => { this.inputReady = true; });
 
     this.resizeManager = new ResizeManager(this, {
       restartData: () => ({ levelIndex: this.levelIndex }),

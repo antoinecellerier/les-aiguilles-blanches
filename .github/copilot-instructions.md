@@ -50,7 +50,7 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 ## Critical Patterns
 
 ### localStorage Keys
-All keys are centralized in `src/config/storageKeys.ts`. Always use `STORAGE_KEYS.*` constants — never hardcode key strings.
+All keys are centralized in `src/config/storageKeys.ts`. Always use `STORAGE_KEYS.*` constants — never hardcode key strings. Use `getJSON`/`setJSON`/`getString`/`setString` from `src/utils/storage.ts` — never call `localStorage` directly.
 
 ### Dynamic Placeholders
 `{keys}`, `{groomKey}`, `{winchKey}` in localized strings - see `keyboardLayout.ts`

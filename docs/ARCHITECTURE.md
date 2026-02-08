@@ -63,7 +63,9 @@ snow-groomer/
 │   │   ├── keyboardLayout.ts # Keyboard layout detection, key name utilities
 │   │   ├── menuButtonNav.ts  # Reusable button selection/navigation controller
 │   │   ├── cameraCoords.ts  # World↔overlay coordinate conversions for scrollFactor(0) objects
+│   │   ├── resizeManager.ts # Debounced resize-restart handler for scenes
 │   │   ├── sceneTransitions.ts # Centralized scene cleanup and transitions
+│   │   ├── storage.ts       # Type-safe localStorage helpers (getJSON/setJSON/getString/setString)
 │   │   └── touchDetect.ts    # Touch detection with Firefox desktop fallback
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation

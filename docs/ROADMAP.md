@@ -48,6 +48,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Cross-cutting code health fixes** — Extracted `ResizeManager` utility (dedup resize-debounce in 4 scenes, -56 net lines). Extracted `storage.ts` with typed `getJSON`/`setJSON`/`getString`/`setString` (dedup localStorage patterns in 6 files, -23 net lines). Centralized `BINDINGS_VERSION` in `storageKeys.ts` (was fragile duplicate). Added `SENSITIVITY_MIN/MAX/DEFAULT` and `SCENE_INPUT_DELAY` to BALANCE. Extracted `getSavedKeyName()` to dedup `getGroomKeyName`/`getWinchKeyName`.
+
 - ✅ **GameScene LevelGeometry + PisteRenderer + WinchSystem + ObstacleBuilder extraction** — Extracted piste path/cliff/access path geometry into `LevelGeometry` (385 lines, zero Phaser dependency), boundary colliders/cliff visuals/markers/trees/access path rendering into `PisteRenderer` (651 lines), winch anchors/cable/state into `WinchSystem` (196 lines), and obstacle/building/chalet creation into `ObstacleBuilder` (218 lines). Decomposed 220-line `createLevel()` into 6 focused sub-methods. GameScene reduced from 2783→1296 lines (-53%). Fixed shutdown ordering.
 
 - ✅ **MenuScene god method refactoring** — Split `create()` (390→50 lines) and `update()` (467→7 lines) into focused sub-methods. Extracted createSkyAndGround, createTitle, createMenuButtons, createFooter, setupInput from create(); updateSnowflakes, updateWildlife, updateBird, updateClimber, updateGroundAnimal, animateGroundAnimal, wanderDecision, updateTracks from update(); createMenuClimbers, createMenuBirds from createMenuWildlife. 38 methods total, no behavioral changes.
