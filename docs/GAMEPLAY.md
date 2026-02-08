@@ -152,19 +152,29 @@ The game's difficulty naturally increases as you progress:
 - **Time**: 4:40
 - **Skills**: Gradient handling, fuel management
 
-**Tips**: Watch your fuel consumption on steep sections. Plan your route to pass the fuel station.
+**Tips**: Watch your fuel consumption on steep sections. Use service roads (yellow/black poles) to climb back up.
 
-### Level 5: Half-pipe - Le Tube
+### Level 5: Red Piste - Le Glacier
+*"Time to learn the winch."*
+
+- **Difficulty**: ◆ Red (Advanced)
+- **Objective**: Groom 80% using the winch
+- **Time**: 5 minutes
+- **Skills**: Winch operation, steep slope navigation
+
+**Tips**: Thierry's set up the anchors. Press the winch key near a numbered post to attach — it stops you sliding on the 35-40° slopes. Two service roads help you reach the anchors.
+
+### Level 6: Half-pipe - Le Tube
 *"Competition tomorrow!"*
 
 - **Difficulty**: Park (Precision)
-- **Objective**: Perfect 95% coverage
+- **Objective**: Groom 80% coverage
 - **Time**: 6 minutes
-- **Skills**: Special grooming patterns
+- **Skills**: Precision grooming patterns
 
 **Tips**: The half-pipe walls need careful attention. Work from top to bottom.
 
-### Level 6: Black Piste - La Verticale
+### Level 7: Black Piste - La Verticale
 *"Night shift on the steepest run."*
 
 - **Difficulty**: ★ Black (Expert)
@@ -174,7 +184,7 @@ The game's difficulty naturally increases as you progress:
 
 **Tips**: Your groomer has directional headlights that illuminate the area in front and behind you. The lights rotate as you move, so they always shine where you're headed. Deploy the winch on steep sections - it only provides pulling force when you're downhill from the anchor.
 
-### Level 7: Avalanche Zone - Col Dangereux
+### Level 8: Avalanche Zone - Col Dangereux
 *"High risk, high reward."*
 
 - **Difficulty**: ★ Black (Hazard)
@@ -184,7 +194,7 @@ The game's difficulty naturally increases as you progress:
 
 **Tips**: Avoid marked avalanche zones. Listen to Thierry's safety briefing.
 
-### Level 8: Storm Recovery
+### Level 9: Storm Recovery
 *"Nature's fury has passed. Time to clean up."*
 
 - **Difficulty**: ◆ Red (Endurance)
@@ -193,6 +203,16 @@ The game's difficulty naturally increases as you progress:
 - **Skills**: Heavy snow handling, time management
 
 **Tips**: Deep snow slows you down. Use the winch and eat hearty food for stamina.
+
+### Level 10: Coupe des Aiguilles - FIS Finale
+*"This is the big night. Show me what you've learned."*
+
+- **Difficulty**: ★ Black (Mastery)
+- **Objective**: Groom 85% — full mountain, night ops
+- **Time**: 6 minutes
+- **Skills**: Everything — winch, fuel, steep slopes, night visibility
+
+**Tips**: Jean-Pierre's final test. The FIS inspects tomorrow — every piste must be perfect. Use all the skills you've learned across the season.
 
 ## 🧀 Savoyard Cuisine
 

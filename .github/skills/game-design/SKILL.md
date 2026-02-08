@@ -5,7 +5,7 @@ description: Experienced game designer review of narrative arc, difficulty curve
 
 ## Game Design Review Process
 
-Review the game's overall design for narrative coherence, difficulty progression, character utilization, and mechanical balance. The game is a snow groomer simulation across 9 levels at a fictional Savoie ski resort — it should feel like a well-paced learning journey from rookie to expert.
+Review the game's overall design for narrative coherence, difficulty progression, character utilization, and mechanical balance. The game is a snow groomer simulation across 11 levels at a fictional Savoie ski resort — it should feel like a well-paced learning journey from rookie to expert.
 
 **This skill is advisory only.** It produces findings and recommendations but **always asks the user for confirmation before making any changes.** Game design decisions are inherently subjective.
 
@@ -15,7 +15,7 @@ Use explore agents to gather the complete game design picture from these sources
 
 1. **`src/config/levels.ts`** — All 9 level definitions: difficulty, dimensions, time limits, coverage targets, obstacles, steep zones, winch anchors, access paths, hazards, wildlife, bonus objectives, intro dialogue keys
 2. **`src/config/gameConfig.ts`** — BALANCE constants: stamina/fuel/food rates, movement physics, slope/tumble/winch thresholds, wildlife distances, avalanche risk values
-3. **`src/config/localization.ts`** (FR block only) — All dialogue keys: jeanPierreIntro, level*Intro, thierryWarning, marieWelcome, taunt* categories, tutorial steps
+3. **`src/config/localization.ts`** (FR block only) — All dialogue keys: jeanPierreIntro, level*Intro, marieWelcome, taunt* categories, tutorial steps
 4. **`docs/GAMEPLAY.md`** — Player-facing level guide, character descriptions, controls, food items
 5. **`docs/ROADMAP.md`** — Planned features that would affect design (special missions, advanced mechanics)
 

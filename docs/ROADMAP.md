@@ -40,6 +40,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Level progression redesign** - Split L4 (3 mechanics) into L4 L'Aigle (fuel/roads) + L5 Le Glacier (winch intro). Added L10 Coupe des Aiguilles (FIS finale, night, all mechanics, Jean-Pierre bookend). Removed tutorial time limit. Lowered halfpipe coverage 95%→80%. Renamed all level keys from numbered (level1Name) to descriptive (level_marmottesName). Game now has 11 levels with proper one-mechanic-per-level difficulty curve.
+
+- ✅ **Content review** - Fixed thierryWarning register break (vous→tu), subtitle wording, level 2/3 character voice, avalanche wordplay. Added Émilie to level 3 intro. Fixed DE/IT missing taunt sentences.
+
 - ✅ **Dialogue speaker fix** - Added `introSpeaker` field to Level config and `DIALOGUE_SPEAKERS` map in DialogueScene. Each level intro now shows the correct character name and portrait. 12 e2e tests + 1 unit test.
 
 - ✅ **Art review fixes** - Enabled pixelArt mode (crisp pixel edges), improved button contrast (WCAG AA), refactored marker colors to use centralized DIFFICULTY_MARKERS, replaced magic depth numbers in HUDScene with DEPTHS constants, improved touch button contrast. Updated ART_STYLE.md with accurate groomer dimensions, mechanical palette, tree variants, and undocumented colors.

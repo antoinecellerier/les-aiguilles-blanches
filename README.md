@@ -27,7 +27,7 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 
 ### Features
 
-- **9 Progressive Levels**: From guided tutorial through storm operations and night grooming
+- **11 Progressive Levels**: From guided tutorial through storm operations and night grooming
 - **Authentic Grooming Mechanics**: Tiller, blade, and winch systems
 - **Savoyard Culture**: Local food (tartiflette, fondue, génépi) that affects gameplay
 - **Full Accessibility**: High contrast, colorblind modes, screen reader support, rebindable controls
@@ -151,7 +151,7 @@ npm run dev &       # Start Vite in background
 ./run-tests.sh --browser chromium # Single browser only
 ```
 
-E2E tests cover: menu navigation, all 9 levels, tutorial flow, grooming, pause, credits, and restart cycle.
+E2E tests cover: menu navigation, all 11 levels, tutorial flow, grooming, pause, credits, and restart cycle.
 
 ## 🌐 Localization
 

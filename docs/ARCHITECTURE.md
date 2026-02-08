@@ -231,8 +231,8 @@ const gameState = {
 ```javascript
 {
     id: 1,
-    nameKey: 'level1Name',      // Localization key
-    taskKey: 'level1Task',
+    nameKey: 'level_marmottesName',  // Localization key (descriptive, not numbered)
+    taskKey: 'level_marmottesTask',
     difficulty: 'green',         // green/blue/red/black/park
     timeLimit: 300,              // seconds
     targetCoverage: 80,          // percentage
