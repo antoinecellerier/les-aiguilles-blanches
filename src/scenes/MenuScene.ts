@@ -90,70 +90,62 @@ export default class MenuScene extends Phaser.Scene {
     const isPortrait = aspect < 0.9;
     
     const titleSize = Math.max(20, Math.round(40 * scaleFactor));
-    // Ensure subtitle is legible on mobile (boost on portrait)
     const subtitleSize = isPortrait
       ? Math.max(14, Math.round(20 * scaleFactor))
       : Math.max(12, Math.round(16 * scaleFactor));
     const buttonSize = Math.max(12, Math.round(18 * scaleFactor));
-    // Ensure buttons meet 44px minimum touch target height
     const minTouchTarget = 44;
-    // Tighter padding on portrait to save vertical space
     const basePadding = isPortrait ? 8 : 12;
     const buttonPadding = Math.max(Math.round(basePadding * scaleFactor), Math.ceil((minTouchTarget - buttonSize) / 2));
 
-    // Snow line adapts to aspect ratio
     const snowLinePct = isPortrait ? 0.82 : 0.78;
     const snowLineY = height * snowLinePct;
     this.snowLineY = snowLineY;
     const footerHeight = Math.round(36 * scaleFactor);
-    // Safe area padding for modern phones with gesture bars
     const safeAreaBottom = isPortrait ? Math.round(20 * scaleFactor) : 0;
 
-    // Sky gradient — bands proportional to snow line
+    this.createSkyAndGround(width, height, snowLineY, footerHeight, scaleFactor, safeAreaBottom);
+    const subtitleBottom = this.createTitle(width, height, snowLineY, scaleFactor, isPortrait, titleSize, subtitleSize);
+    this.createMenuButtons(width, height, snowLineY, scaleFactor, isPortrait, buttonSize, buttonPadding, footerHeight, safeAreaBottom, subtitleBottom);
+    this.createFooter(width, height, scaleFactor, footerHeight, safeAreaBottom);
+    this.setupInput();
+
+    Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
+  }
+
+  private createSkyAndGround(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, safeAreaBottom: number): void {
     const skyBand1 = snowLineY * 0.4;
     const skyBand2 = snowLineY * 0.25;
     this.add.rectangle(width / 2, 0, width, skyBand1, 0x5bb8e8).setOrigin(0.5, 0);
     this.add.rectangle(width / 2, skyBand1, width, skyBand2, 0x87ceeb).setOrigin(0.5, 0);
     this.add.rectangle(width / 2, skyBand1 + skyBand2, width, snowLineY - skyBand1 - skyBand2, 0xa8ddf0).setOrigin(0.5, 0);
 
-    // Mountains — stepped pixel pyramids with rock colors
     this.createMountains(width, height, snowLineY, scaleFactor);
 
-    // Snow ground — white with grooming texture (depth 3: above mountains, below trees/animals)
     this.add.rectangle(width / 2, snowLineY, width, height - snowLineY, 0xffffff).setOrigin(0.5, 0).setDepth(3);
-    // Subtle grooming lines
     const g = this.add.graphics().setDepth(3);
     g.fillStyle(0xf0f6fa, 1);
     for (let ly = snowLineY + 8; ly < height - footerHeight; ly += 10) {
       g.fillRect(0, ly, width, 1);
     }
-    // Snow edge highlight
     this.add.rectangle(width / 2, snowLineY, width, 3, 0xd8e4e8).setOrigin(0.5, 0).setDepth(3);
 
-    // Trees on snow line
     this.createTrees(width, snowLineY, scaleFactor);
-
-    // Parked groomer on the snow
     this.createGroomer(width, snowLineY, scaleFactor);
-
-    // Wildlife decorations on the slopes
     this.createMenuWildlife(width, height, snowLineY, footerHeight + safeAreaBottom, scaleFactor);
-
-    // Animated snow particles
     this.createSnowParticles(width, snowLineY);
+  }
 
-    // Title — adapts to aspect ratio
+  /** Returns the Y coordinate of the subtitle ribbon bottom edge. */
+  private createTitle(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, titleSize: number, subtitleSize: number): number {
     const titleY = isPortrait ? height * 0.08 : height * 0.12;
     const titleBgWidth = Math.round(Math.min(520 * scaleFactor, width - 20));
     const titleBgHeight = Math.round(80 * scaleFactor);
-    // Title background — softer semi-transparent with pixel border
     this.add.rectangle(width / 2, titleY, titleBgWidth + 8, titleBgHeight + 8, 0x2d2822, 0.45).setOrigin(0.5).setDepth(10);
     this.add.rectangle(width / 2, titleY, titleBgWidth, titleBgHeight, 0x1a2a3e, 0.4).setOrigin(0.5).setDepth(10);
-    // Light pixel border for definition
     const tbg = this.add.graphics().setDepth(10);
     tbg.lineStyle(2, 0x87ceeb, 0.5);
     tbg.strokeRect(width / 2 - titleBgWidth / 2, titleY - titleBgHeight / 2, titleBgWidth, titleBgHeight);
-    // Shadow text
     this.add.text(width / 2 + 3, titleY + 3, 'Les Aiguilles Blanches', {
       fontFamily: THEME.fonts.family,
       fontSize: titleSize + 'px',
@@ -168,16 +160,13 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(10);
 
     const subtitleText = t('subtitle') || 'Snow Groomer Simulation';
-    // Ribbon hangs below the title box, slightly overlapping its bottom edge
     const subtitleY = titleY + titleBgHeight / 2 + Math.round(12 * scaleFactor);
-    // Measure subtitle text width for ribbon sizing
     const subtitleMeasure = this.add.text(0, -100, subtitleText, {
       fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
     });
     const stw = subtitleMeasure.width;
     subtitleMeasure.destroy();
-    // Ribbon banner behind subtitle
     const ribbonH = Math.round(subtitleSize * 1.8);
     const ribbonW = stw + Math.round(40 * scaleFactor);
     const ribbonTabW = Math.round(14 * scaleFactor);
@@ -189,35 +178,26 @@ export default class MenuScene extends Phaser.Scene {
     const rTop = subtitleY - ribbonH / 2;
     const rBot = subtitleY + ribbonH / 2;
     const tabInset = Math.round(ribbonH * 0.12);
-    // Back tabs (darker, slightly inset vertically)
     ribbonG.fillStyle(0x8b1a1a, 1);
     ribbonG.fillRect(cx - ribbonW / 2 - ribbonTabW, rTop + tabInset, ribbonTabW, ribbonH - tabInset * 2);
     ribbonG.fillRect(cx + ribbonW / 2, rTop + tabInset, ribbonTabW, ribbonH - tabInset * 2);
-    // V-notch cuts on tab ends (use sky color to punch out notch)
     ribbonG.fillStyle(0x87ceeb, 1);
     ribbonG.fillRect(cx - ribbonW / 2 - ribbonTabW, subtitleY - notchH / 2, foldW, notchH);
     ribbonG.fillRect(cx + ribbonW / 2 + ribbonTabW - foldW, subtitleY - notchH / 2, foldW, notchH);
-    // Fold shadows (small dark rects where ribbon folds behind — no fillTriangle for Firefox)
     ribbonG.fillStyle(0x550000, 1);
     ribbonG.fillRect(cx - ribbonW / 2 - foldW, rTop + tabInset, foldW, ribbonH - tabInset * 2);
     ribbonG.fillRect(cx + ribbonW / 2, rTop + tabInset, foldW, ribbonH - tabInset * 2);
-    // Drop shadow under ribbon for depth
     ribbonG.fillStyle(0x000000, 0.15);
     ribbonG.fillRect(cx - ribbonW / 2 + 3, rBot + 1, ribbonW, Math.round(3 * scaleFactor));
-    // Main ribbon body
     ribbonG.fillStyle(0xcc2200, 1);
     ribbonG.fillRect(cx - ribbonW / 2, rTop, ribbonW, ribbonH);
-    // Ribbon highlight stripe (top edge)
     ribbonG.fillStyle(0xe63e1a, 1);
     ribbonG.fillRect(cx - ribbonW / 2, rTop, ribbonW, stripe);
-    // Ribbon shadow stripe (bottom edge)
     ribbonG.fillStyle(0x991a00, 1);
     ribbonG.fillRect(cx - ribbonW / 2, rBot - stripe, ribbonW, stripe);
-    // Inner border (gold lines)
     ribbonG.fillStyle(0xFFD700, 0.35);
     ribbonG.fillRect(cx - ribbonW / 2 + stripe, rTop + stripe + 1, ribbonW - stripe * 2, 1);
     ribbonG.fillRect(cx - ribbonW / 2 + stripe, rBot - stripe - 2, ribbonW - stripe * 2, 1);
-    // Subtitle text with shadow
     this.add.text(cx + 2, subtitleY + 2, subtitleText, {
       fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
@@ -229,13 +209,14 @@ export default class MenuScene extends Phaser.Scene {
       color: '#FFD700',
     }).setOrigin(0.5).setDepth(10);
 
-    // Check for saved progress
+    return subtitleY + ribbonH / 2;
+  }
+
+  private createMenuButtons(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, buttonSize: number, buttonPadding: number, footerHeight: number, safeAreaBottom: number, subtitleBottom: number): void {
     const savedProgress = getSavedProgress();
     const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0;
 
-    // Build button list
     const buttonDefs: Array<{ text: string; callback: () => void; primary: boolean }> = [];
-    
     if (hasProgress) {
       buttonDefs.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel), primary: true });
       buttonDefs.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
@@ -245,7 +226,6 @@ export default class MenuScene extends Phaser.Scene {
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
     buttonDefs.push({ text: 'changelog', callback: () => this.showChangelog(), primary: false });
     buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
-    
     if (document.fullscreenEnabled) {
       const isFullscreen = !!document.fullscreenElement;
       buttonDefs.push({ 
@@ -255,13 +235,11 @@ export default class MenuScene extends Phaser.Scene {
       });
     }
 
-    // Menu buttons — positioned between title and footer/snow line
-    const menuStartY = subtitleY + ribbonH / 2 + 15 * scaleFactor;
+    const menuStartY = subtitleBottom + 15 * scaleFactor;
     const menuEndY = Math.min(snowLineY, height - footerHeight - safeAreaBottom) - 10 * scaleFactor;
     const menuAvailableH = menuEndY - menuStartY;
     const minButtonHeight = buttonSize + buttonPadding * 2;
-    const minSpacing = minButtonHeight + (isPortrait ? 4 : 10); // comfortable gap between buttons
-    // Drop fullscreen button if all buttons can't fit in available vertical space
+    const minSpacing = minButtonHeight + (isPortrait ? 4 : 10);
     if (buttonDefs.length * minSpacing > menuAvailableH) {
       const fsIdx = buttonDefs.findIndex(b => b.text === 'fullscreen' || b.text === 'exitFullscreen');
       if (fsIdx !== -1) buttonDefs.splice(fsIdx, 1);
@@ -269,12 +247,10 @@ export default class MenuScene extends Phaser.Scene {
     const buttonSpacing = Math.max(minSpacing, Math.min(Math.round(46 * scaleFactor), Math.round(menuAvailableH / (buttonDefs.length + 0.5))));
     const menuY = menuStartY + buttonSpacing * 0.5;
 
-    // Store buttons for gamepad navigation
     this.menuButtons = [];
     this.buttonShadows = [];
     this.buttonCallbacks = [];
 
-    // Selection arrow
     const arrowSize = Math.round(22 * scaleFactor);
     this.selectionArrow = this.add.text(0, 0, '▶', {
       fontFamily: THEME.fonts.family,
@@ -288,12 +264,9 @@ export default class MenuScene extends Phaser.Scene {
       const btnText = t(btn.text) || btn.text;
       const yPos = menuY + i * buttonSpacing;
       const shadowOffset = Math.round(4 * scaleFactor);
-      
-      // Uniform blue theme with slight emphasis on primary
       const bgColor = btn.primary ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
       const shadowColor = btn.primary ? '#115511' : '#1a3a5c';
 
-      // Shadow rectangle (darker offset)
       const shadow = this.add.text(width / 2 + shadowOffset, yPos + shadowOffset, btnText, {
         fontFamily: THEME.fonts.family,
         fontSize: buttonSize + 'px',
@@ -302,7 +275,6 @@ export default class MenuScene extends Phaser.Scene {
         padding: { x: Math.round(50 * scaleFactor), y: buttonPadding },
       }).setOrigin(0.5).setAlpha(0.6).setDepth(10);
 
-      // Main button
       const button = this.add.text(width / 2, yPos, btnText, {
         fontFamily: THEME.fonts.family,
         fontSize: buttonSize + 'px',
@@ -328,7 +300,6 @@ export default class MenuScene extends Phaser.Scene {
       this.buttonCallbacks.push(btn.callback);
     });
 
-    // Create button nav with custom styler for shadows + arrow
     const shadows = this.buttonShadows;
     const arrow = this.selectionArrow;
     this.buttonNav = createMenuButtonNav(
@@ -354,7 +325,6 @@ export default class MenuScene extends Phaser.Scene {
     );
     this.buttonNav.refreshStyles();
 
-    // Compute the menu button zone so wildlife avoids it
     if (this.menuButtons.length > 0) {
       const firstBtn = this.menuButtons[0];
       const lastBtn = this.menuButtons[this.menuButtons.length - 1];
@@ -366,8 +336,9 @@ export default class MenuScene extends Phaser.Scene {
         bottom: lastBtn.y + lastBtn.height / 2 + 20,
       };
     }
+  }
 
-    // Footer — dark panel strip (lifted by safe area on portrait mobile)
+  private createFooter(width: number, height: number, scaleFactor: number, footerHeight: number, safeAreaBottom: number): void {
     const footerTop = height - footerHeight - safeAreaBottom;
     this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, THEME.colors.dialogBg).setOrigin(0.5, 0).setDepth(10);
     this.add.rectangle(width / 2, footerTop, width, 2, THEME.colors.border).setOrigin(0.5, 0).setDepth(10);
@@ -386,7 +357,6 @@ export default class MenuScene extends Phaser.Scene {
         window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank', 'noopener,noreferrer');
       });
 
-    // In dev, fetch live version from server (updates on each commit without restart)
     if (import.meta.env.DEV) {
       fetch('/api/version')
         .then(r => r.json())
@@ -404,7 +374,6 @@ export default class MenuScene extends Phaser.Scene {
       color: THEME.colors.accent,
     }).setOrigin(0.5).setDepth(10);
 
-    // Input method hints — individual text objects for per-hint alpha
     this.footerGithubRight = githubLink.x + githubLink.width / 2;
     this.footerHintY = footerTop + footerHeight / 2;
     this.footerHintStyle = {
@@ -413,24 +382,22 @@ export default class MenuScene extends Phaser.Scene {
       color: THEME.colors.info,
     };
     this.updateInputHints();
+  }
 
-    // Update hints when gamepad connects/disconnects
+  private setupInput(): void {
     this.gamepadConnectHandler = () => this.updateInputHints();
     window.addEventListener('gamepadconnected', this.gamepadConnectHandler);
     window.addEventListener('gamepaddisconnected', this.gamepadConnectHandler);
 
-    // Update hints when touch is first detected (Firefox desktop touchscreens)
     onTouchAvailable(() => {
       if (this.scene.isActive()) this.updateInputHints();
     });
 
-    // Keyboard navigation
     this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
     this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
     this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
 
-    // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
       onNavigate: (dir) => this.buttonNav.navigate(dir),
       onConfirm: () => {
@@ -442,8 +409,6 @@ export default class MenuScene extends Phaser.Scene {
     this.gamepadNav.initState();
 
     this.scale.on('resize', this.handleResize, this);
-
-    Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
   }
 
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -521,7 +486,13 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    // Animate snow particles
+    this.updateSnowflakes(time, delta);
+    this.updateWildlife(time, delta);
+    this.updateTracks(delta);
+    this.gamepadNav.update(delta);
+  }
+
+  private updateSnowflakes(time: number, delta: number): void {
     for (const flake of this.snowflakes) {
       flake.rect.y += flake.speed * (delta / 16);
       flake.rect.x += Math.sin(time / 1000 + flake.wobbleOffset) * 0.3;
@@ -530,445 +501,433 @@ export default class MenuScene extends Phaser.Scene {
         flake.rect.x = Phaser.Math.Between(0, this.cameras.main.width);
       }
     }
+  }
 
-    // Animate wildlife
+  private updateWildlife(time: number, delta: number): void {
     const dt = delta / 1000;
     const width = this.cameras.main.width;
     const pointer = this.input.activePointer;
     for (const a of this.menuAnimals) {
-      // Check pointer proximity for all animal types
       const pdx = a.x - pointer.worldX;
       const pdy = a.y - pointer.worldY;
       const pointerDist = Math.sqrt(pdx * pdx + pdy * pdy);
       const fleeRadius = a.type === 'bird' ? 50 : 60;
 
       if (a.type === 'bird') {
-        // Pointer scares birds — set flee velocity, transition perched→flying
-        if (pointerDist < fleeRadius) {
-          const fleeAngle = Math.atan2(pdy, pdx);
-          if (a.state === 'perched' || a.state === 'landing') {
-            a.state = 'flying';
-            a.graphics.clear();
-            drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
-          }
-          a.vx = Math.cos(fleeAngle) * 60;
-          a.vy = Math.sin(fleeAngle) * 30 - 10;
-          // Face flee direction
-          if (a.vx > 0.5) a.graphics.setScale(1, 1);
-          else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-          a.wanderTimer = 2000 + Math.random() * 3000;
-        }
-
-        if (a.state === 'perched') {
-          // Perched: sit still with tiny bob, take off after timer
-          a.wanderTimer -= delta;
-          const bob = Math.sin(time / 400 + a.homeX) * 0.3;
-          a.graphics.setPosition(a.x, a.y + bob);
-          a.graphics.setRotation(0);
-          if (a.wanderTimer <= 0) {
-            a.state = 'flying';
-            // Swap to flying sprite
-            a.graphics.clear();
-            drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
-            // Take off in a random direction
-            const takeoffAngle = (Math.random() - 0.5) * Math.PI * 0.8;
-            const takeoffSpeed = 8 + Math.random() * 6;
-            a.vx = Math.cos(takeoffAngle) * takeoffSpeed;
-            a.vy = -2 - Math.random() * 3;
-            // Face takeoff direction
-            if (a.vx > 0.5) a.graphics.setScale(1, 1);
-            else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-            a.wanderTimer = 2000 + Math.random() * 3000;
-          }
-        } else if (a.state === 'landing' && a.perchTarget) {
-          // Glide toward perch target
-          const ldx = a.perchTarget.x - a.x;
-          const ldy = (a.perchTarget.y - 4) - a.y;
-          const ldist = Math.sqrt(ldx * ldx + ldy * ldy);
-          if (ldist < 4) {
-            a.x = a.perchTarget.x;
-            a.y = a.perchTarget.y - 4;
-            a.state = 'perched';
-            a.vx = 0; a.vy = 0;
-            a.graphics.setRotation(0);
-            a.graphics.setScale(1, 1);
-            // Swap to perched sprite
-            a.graphics.clear();
-            drawBirdPerched(a.graphics, 0, 0, a.spriteH || 2);
-            a.wanderTimer = 3000 + Math.random() * 5000;
-          } else {
-            a.vx += (ldx / ldist * 50 - a.vx) * dt * 2;
-            a.vy += (ldy / ldist * 50 - a.vy) * dt * 2;
-            // Face movement direction during glide
-            if (a.vx > 0.5) a.graphics.setScale(1, 1);
-            else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-            a.x += a.vx * dt;
-            a.y += a.vy * dt;
-            a.wanderTimer -= delta;
-            if (a.wanderTimer <= 0) {
-              a.state = 'flying';
-              a.vx = 8; a.vy = -2;
-              a.graphics.setScale(1, 1);
-              a.wanderTimer = 3000 + Math.random() * 3000;
-            }
-          }
-          a.graphics.setPosition(a.x, a.y);
-        } else {
-          // Flying: alpine chough soaring
-          a.wanderTimer -= delta;
-          if (a.wanderTimer <= 0) {
-            // Try to perch: find nearest perch spot within range
-            if (Math.random() < 0.4 && this.perchSpots.length > 0) {
-              let bestPerch: { x: number; y: number } | null = null;
-              let bestDist = 150;
-              for (const p of this.perchSpots) {
-                if (p.x > this.menuZone.left && p.x < this.menuZone.right &&
-                    p.y > this.menuZone.top && p.y < this.menuZone.bottom) continue;
-                const bdx = p.x - a.x;
-                const bdy = (p.y - 4) - a.y;
-                const bd = Math.sqrt(bdx * bdx + bdy * bdy);
-                if (bd < bestDist) { bestDist = bd; bestPerch = p; }
-              }
-              if (bestPerch) {
-                a.state = 'landing';
-                a.perchTarget = bestPerch;
-                const ldx2 = bestPerch.x - a.x;
-                const ldy2 = (bestPerch.y - 4) - a.y;
-                const ldist2 = Math.sqrt(ldx2 * ldx2 + ldy2 * ldy2);
-                a.vx = (ldx2 / ldist2) * 40;
-                a.vy = (ldy2 / ldist2) * 40;
-                a.wanderTimer = 5000;
-              }
-            }
-            if (a.state !== 'landing') {
-              // Soar in wide arcs — gentle turn from current heading
-              const prevAngle = Math.atan2(a.vy, a.vx || 1);
-              const turnRate = (Math.random() - 0.5) * 0.6;
-              const newAngle = prevAngle + turnRate;
-              const speed = 6 + Math.random() * 10;
-              a.vx = Math.cos(newAngle) * speed;
-              a.vy = Math.sin(newAngle) * speed * 0.6;
-              a.wanderTimer = 1500 + Math.random() * 2500;
-            }
-          }
-          if (a.state === 'flying') {
-            // Maintain a minimum forward speed (birds don't hover)
-            const speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
-            if (speed < 5) {
-              const boost = 8 / Math.max(speed, 0.1);
-              a.vx *= boost;
-              a.vy *= boost;
-            }
-            // Smooth continuous turn — birds arc, not zigzag
-            const turnRate = Math.sin(time / 3000 + a.homeX * 0.2) * 0.4;
-            const heading = Math.atan2(a.vy, a.vx);
-            const newHeading = heading + turnRate * dt;
-            const curSpeed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
-            a.vx = Math.cos(newHeading) * curSpeed;
-            a.vy = Math.sin(newHeading) * curSpeed;
-            a.x += a.vx * dt;
-            a.y += a.vy * dt;
-            // Flip sprite to face movement direction (side-view)
-            if (a.vx > 0.5) a.graphics.setScale(1, 1);
-            else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-            // Soft steering toward sky band
-            const skyMin = this.snowLineY * 0.08;
-            const skyMax = this.snowLineY * 0.55;
-            if (a.y < skyMin) a.vy += 20 * dt;
-            else if (a.y > skyMax) a.vy -= 30 * dt;
-            if (a.x > width + 30) { a.x = -30; }
-            else if (a.x < -30) { a.x = width + 30; }
-          }
-          a.graphics.setPosition(a.x, a.y);
-        }
+        this.updateBird(a, time, delta, dt, width, pointerDist, pdx, pdy, fleeRadius);
       } else if (a.type === 'climber') {
-        // Bouquetin climbing mountain: deliberate hop pattern
-        // Real ibex climb in short explosive leaps between ledges, then pause
-        if (pointerDist < fleeRadius && a.climbPath && a.climbIndex !== undefined) {
-          a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
-          a.wanderTimer = 0;
-        }
-        if (a.climbPath && a.climbIndex !== undefined) {
-          const target = a.climbPath[a.climbIndex];
-          const cdx = target.x - a.x;
-          const cdy = target.y - a.y;
-          const cdist = Math.sqrt(cdx * cdx + cdy * cdy);
-          const scared = pointerDist < 100;
-
-          if (cdist < 3) {
-            // At waypoint: stand still, slight head bob (grazing/looking around)
-            a.wanderTimer -= delta;
-            a.hopPhase = 0;
-            const graze = Math.sin(time / 400 + a.homeX) * 0.3;
-            a.graphics.setPosition(a.x, a.y + graze);
-            a.graphics.setDepth(1 + a.y * 0.001);
-            if (a.wanderTimer <= 0) {
-              a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
-              a.wanderTimer = scared ? 200 : (800 + Math.random() * 2000);
-              const next = a.climbPath[a.climbIndex];
-              if (next.x > a.x) a.graphics.setScale(1, 1);
-              else if (next.x < a.x) a.graphics.setScale(-1, 1);
-            }
-          } else {
-            // Hop toward waypoint: fast burst with vertical arc
-            const hopSpeed = scared ? 55 : 30;
-            a.hopPhase = (a.hopPhase || 0) + dt * 6;
-            const hopArc = -Math.abs(Math.sin(a.hopPhase)) * 4;
-            a.x += (cdx / cdist) * hopSpeed * dt;
-            a.y += (cdy / cdist) * hopSpeed * dt;
-            // Never sink below snow line
-            if (a.y > this.snowLineY - 2) a.y = this.snowLineY - 2;
-            a.graphics.setPosition(a.x, a.y + hopArc);
-            a.graphics.setDepth(1 + a.y * 0.001);
-          }
-        }
+        this.updateClimber(a, time, delta, dt, pointerDist, fleeRadius);
       } else {
-        // Marmots: dive into burrow when scared — slide down behind mask
-        if (a.species === 'marmot' && a.state === 'hiding') {
-          a.hideTimer = (a.hideTimer || 0) - delta;
-          const sH = a.spriteH || 16;
-          const dur = a.hideDuration || 3000;
-          const progress = Math.min(1, Math.max(0, 1 - (a.hideTimer || 0) / dur));
-          if (progress < 0.2) {
-            // Quick dive down
-            const t = progress / 0.2;
-            a.graphics.setPosition(a.x, a.homeY + t * sH);
-          } else if (progress > 0.8) {
-            // Emerge back up
-            const t = (progress - 0.8) / 0.2;
-            a.graphics.setPosition(a.x, a.homeY + (1 - t) * sH);
-          } else {
-            // Fully underground (clipped by mask)
-            a.graphics.setPosition(a.x, a.homeY + sH);
-          }
-          if ((a.hideTimer || 0) <= 0) {
-            a.state = undefined;
-            a.graphics.setPosition(a.x, a.y);
-            a.wanderTimer = 1000 + Math.random() * 2000;
-          }
-          continue; // skip normal position/animation updates while hiding
-        } else if (pointerDist < fleeRadius) {
-          const fleeAngle = Math.atan2(pdy, pdx);
-          if (a.species === 'bunny') {
-            // Bunny: fast zigzag escape hops
-            a.vx = Math.cos(fleeAngle) * 120;
-            a.vy = Math.sin(fleeAngle) * 50;
-            a.wanderTimer = 300;
-          } else if (a.species === 'chamois') {
-            // Chamois: explosive sprint in one direction
-            a.vx = Math.cos(fleeAngle) * 100;
-            a.vy = Math.sin(fleeAngle) * 20;
-            a.wanderTimer = 600;
-          } else if (a.species === 'marmot') {
-            // Marmot: dive into burrow at home position
-            a.vx = 0; a.vy = 0;
-            a.state = 'hiding';
-            a.hideDuration = 3000 + Math.random() * 2000;
-            a.hideTimer = a.hideDuration;
-          } else if (a.species === 'fox') {
-            // Fox: quick dart away
-            a.vx = Math.cos(fleeAngle) * 90;
-            a.vy = Math.sin(fleeAngle) * 25;
-            a.wanderTimer = 500;
-          }
-          if (a.vx > 0) a.graphics.setScale(1, 1);
-          else a.graphics.setScale(-1, 1);
-        } else {
-          a.wanderTimer -= delta;
-        }
+        this.updateGroundAnimal(a, time, delta, dt, width, pointerDist, pdx, pdy, fleeRadius);
+      }
+    }
+  }
 
-        if (a.wanderTimer <= 0) {
-          if (a.species === 'bunny') {
-            // Bunnies: energetic hop bursts with short pauses
-            if (Math.random() < 0.65) {
-              // Continue roughly same direction with some angular variation
-              const prevAngle = Math.atan2(a.vy || 0.1, a.vx || (Math.random() - 0.5));
-              const newAngle = prevAngle + (Math.random() - 0.5) * 1.2;
-              const speed = 40 + Math.random() * 70;
-              a.vx = Math.cos(newAngle) * speed;
-              a.vy = Math.sin(newAngle) * speed * 0.3;
-              a.wanderTimer = 400 + Math.random() * 600;
-            } else {
-              a.vx = 0; a.vy = 0;
-              a.wanderTimer = 200 + Math.random() * 500;
-            }
-          } else if (a.species === 'chamois') {
-            // Chamois: alert walk-stop pattern — walk a bit, freeze and look around, repeat
-            if (Math.random() < 0.1) {
-              // Herd relocation — pick a new area, all chamois follow
-              const newHomeX = 50 + Math.random() * (this.scale.width - 100);
-              const newHomeY = this.snowLineY + 10 + Math.random() * (this.snowBottomY - this.snowLineY - 20);
-              for (const c of this.menuAnimals) {
-                if (c.species !== 'chamois') continue;
-                c.homeX = newHomeX + (Math.random() - 0.5) * 40;
-                c.homeY = newHomeY + (Math.random() - 0.5) * 20;
-              }
-              const angle = Math.atan2(newHomeY - a.y, newHomeX - a.x);
-              a.vx = Math.cos(angle) * 45;
-              a.vy = Math.sin(angle) * 15;
-              a.wanderTimer = 1500 + Math.random() * 1500;
-            } else if (Math.random() < 0.45) {
-              a.vx = (Math.random() - 0.5) * 35;
-              a.vy = (Math.random() - 0.5) * 8;
-              a.wanderTimer = 1000 + Math.random() * 2000; // deliberate walk
-            } else {
-              a.vx = 0; a.vy = 0;
-              a.wanderTimer = 1500 + Math.random() * 3000; // alert freeze
-            }
-          } else if (a.species === 'fox') {
-            // Fox: hunt/stalk/rest/patrol using shared behavior
-            let nearestDist = Infinity;
-            let huntAngle = 0;
-            for (const prey of this.menuAnimals) {
-              if (prey === a || prey.type !== 'ground' || prey.species === 'fox') continue;
-              if (prey.state === 'hiding') continue;
-              const d = Math.sqrt((prey.x - a.x) ** 2 + (prey.y - a.y) ** 2);
-              if (d < nearestDist) {
-                nearestDist = d;
-                huntAngle = Math.atan2(prey.y - a.y, prey.x - a.x);
-              }
-            }
-            const decision = foxHuntDecision(nearestDist, huntAngle, a.vx, a.vy);
-            a.vx = decision.vx;
-            a.vy = decision.vy;
-            a.wanderTimer = decision.wanderTimer;
-          } else {
-            // Marmot: waddle around close to home, long freeze/sunbathing pauses
-            if (Math.random() < 0.35) {
-              a.vx = (Math.random() - 0.5) * 20;
-              a.vy = (Math.random() - 0.5) * 6;
-              a.wanderTimer = 400 + Math.random() * 800; // short waddle
-            } else {
-              a.vx = 0; a.vy = 0;
-              a.wanderTimer = 2000 + Math.random() * 4000; // sunbathing/sentinel
-            }
-          }
-        }
+  private updateBird(a: typeof this.menuAnimals[0], time: number, delta: number, dt: number, width: number, pointerDist: number, pdx: number, pdy: number, fleeRadius: number): void {
+    // Pointer scares birds — set flee velocity, transition perched→flying
+    if (pointerDist < fleeRadius) {
+      const fleeAngle = Math.atan2(pdy, pdx);
+      if (a.state === 'perched' || a.state === 'landing') {
+        a.state = 'flying';
+        a.graphics.clear();
+        drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
+      }
+      a.vx = Math.cos(fleeAngle) * 60;
+      a.vy = Math.sin(fleeAngle) * 30 - 10;
+      if (a.vx > 0.5) a.graphics.setScale(1, 1);
+      else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+      a.wanderTimer = 2000 + Math.random() * 3000;
+    }
 
-        a.x += a.vx * dt;
-        a.y += a.vy * dt;
-        const sw = this.scale.width;
-        if (a.species === 'marmot') {
-          // Marmots stay near burrow
-          if (a.x < a.boundLeft || a.x > a.boundRight) {
-            a.vx = -a.vx;
-            a.x = Phaser.Math.Clamp(a.x, a.boundLeft, a.boundRight);
-          }
-        } else {
-          // Others wrap to opposite edge
-          if (a.x < -20) { a.x = sw + 18; a.homeX = a.x; }
-          else if (a.x > sw + 20) { a.x = -18; a.homeX = a.x; }
-        }
-        // Keep on the snow foreground — clamp between snow line and footer
-        if (a.y < this.snowLineY + 5) { a.y = this.snowLineY + 5; a.vy = Math.abs(a.vy) * 0.5; }
-        if (a.y > this.snowBottomY) { a.y = this.snowBottomY; a.vy = -Math.abs(a.vy) * 0.5; }
-        const homePull = a.species === 'marmot' ? 0.5 : 0.08;
-        if (Math.abs(a.y - a.homeY) > 30) a.vy += (a.homeY - a.y) * homePull * dt;
-        // Always face movement direction
+    if (a.state === 'perched') {
+      // Perched: sit still with tiny bob, take off after timer
+      a.wanderTimer -= delta;
+      const bob = Math.sin(time / 400 + a.homeX) * 0.3;
+      a.graphics.setPosition(a.x, a.y + bob);
+      a.graphics.setRotation(0);
+      if (a.wanderTimer <= 0) {
+        a.state = 'flying';
+        a.graphics.clear();
+        drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
+        const takeoffAngle = (Math.random() - 0.5) * Math.PI * 0.8;
+        const takeoffSpeed = 8 + Math.random() * 6;
+        a.vx = Math.cos(takeoffAngle) * takeoffSpeed;
+        a.vy = -2 - Math.random() * 3;
         if (a.vx > 0.5) a.graphics.setScale(1, 1);
         else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-        // Y-based depth: use feet position (bottom of sprite) for correct tree interleaving
-        a.graphics.setDepth(5 + (a.y + (a.feetOffsetY || 0)) * 0.001);
-
-        // Update burrow mask to follow marmot position
-        if (a.burrowMaskShape) {
-          a.burrowMaskShape.clear();
-          a.burrowMaskShape.fillStyle(0xffffff);
-          // Bottom edge just below sprite feet; large rect above
-          a.burrowMaskShape.fillRect(a.x - 30, a.y - 100, 60, 100 + (a.spriteH || 16) / 2 + 1);
-          a.burrowY = a.y;
+        a.wanderTimer = 2000 + Math.random() * 3000;
+      }
+    } else if (a.state === 'landing' && a.perchTarget) {
+      // Glide toward perch target
+      const ldx = a.perchTarget.x - a.x;
+      const ldy = (a.perchTarget.y - 4) - a.y;
+      const ldist = Math.sqrt(ldx * ldx + ldy * ldy);
+      if (ldist < 4) {
+        a.x = a.perchTarget.x;
+        a.y = a.perchTarget.y - 4;
+        a.state = 'perched';
+        a.vx = 0; a.vy = 0;
+        a.graphics.setRotation(0);
+        a.graphics.setScale(1, 1);
+        a.graphics.clear();
+        drawBirdPerched(a.graphics, 0, 0, a.spriteH || 2);
+        a.wanderTimer = 3000 + Math.random() * 5000;
+      } else {
+        a.vx += (ldx / ldist * 50 - a.vx) * dt * 2;
+        a.vy += (ldy / ldist * 50 - a.vy) * dt * 2;
+        if (a.vx > 0.5) a.graphics.setScale(1, 1);
+        else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+        a.x += a.vx * dt;
+        a.y += a.vy * dt;
+        a.wanderTimer -= delta;
+        if (a.wanderTimer <= 0) {
+          a.state = 'flying';
+          a.vx = 8; a.vy = -2;
+          a.graphics.setScale(1, 1);
+          a.wanderTimer = 3000 + Math.random() * 3000;
         }
-
-        // Soft repulsion: nudge apart from nearby same-species animals
-        const minDist = 12;
-        for (const b of this.menuAnimals) {
-          if (b === a || b.type !== 'ground' || b.species !== a.species) continue;
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < minDist && dist > 0.1) {
-            const push = (minDist - dist) * 0.3;
-            a.x += (dx / dist) * push;
-            a.y += (dy / dist) * push * 0.3;
+      }
+      a.graphics.setPosition(a.x, a.y);
+    } else {
+      // Flying: alpine chough soaring
+      a.wanderTimer -= delta;
+      if (a.wanderTimer <= 0) {
+        if (Math.random() < 0.4 && this.perchSpots.length > 0) {
+          let bestPerch: { x: number; y: number } | null = null;
+          let bestDist = 150;
+          for (const p of this.perchSpots) {
+            if (p.x > this.menuZone.left && p.x < this.menuZone.right &&
+                p.y > this.menuZone.top && p.y < this.menuZone.bottom) continue;
+            const bdx = p.x - a.x;
+            const bdy = (p.y - 4) - a.y;
+            const bd = Math.sqrt(bdx * bdx + bdy * bdy);
+            if (bd < bestDist) { bestDist = bd; bestPerch = p; }
           }
-        }
-
-        // Species-specific idle animation
-        if (a.species === 'bunny') {
-          // Bunny: hop arc when moving, nose twitch when still
-          if (Math.abs(a.vx) > 5) {
-            a.hopPhase = (a.hopPhase || 0) + dt * 10;
-            const hop = -Math.abs(Math.sin(a.hopPhase)) * 3;
-            a.graphics.setPosition(a.x, a.y + hop);
-          } else {
-            const twitch = Math.sin(time / 200 + a.homeX) * 0.3;
-            a.graphics.setPosition(a.x, a.y + twitch);
-          }
-        } else if (a.species === 'chamois') {
-          // Chamois: smooth stride when walking, alert head turn when still
-          if (Math.abs(a.vx) > 3) {
-            const stride = Math.sin(time / 250 + a.homeX) * 0.8;
-            a.graphics.setPosition(a.x, a.y + stride);
-          } else {
-            const alert = Math.sin(time / 800 + a.homeX) * 0.4;
-            a.graphics.setPosition(a.x, a.y + alert);
-          }
-        } else if (a.species === 'fox') {
-          // Fox: trot, lunge bounce when sprinting, sniffing when still
-          if (Math.abs(a.vx) > FOX.LUNGE_ANIM_THRESHOLD) {
-            // Lunge — low bounding arc
-            const leap = -Math.abs(Math.sin(time / 100 + a.homeX)) * 3;
-            a.graphics.setPosition(a.x, a.y + leap);
-          } else if (Math.abs(a.vx) > 3) {
-            const trot = Math.sin(time / 200 + a.homeX) * 0.5;
-            a.graphics.setPosition(a.x, a.y + trot);
-          } else {
-            const sniff = Math.sin(time / 400 + a.homeX) * 0.6;
-            a.graphics.setPosition(a.x + sniff * 0.4, a.y);
-          }
-          // Fox scares nearby ground animals
-          for (const prey of this.menuAnimals) {
-            if (prey === a || prey.type !== 'ground' || prey.species === 'fox') continue;
-            if (prey.state === 'hiding') continue;
-            const fdx = prey.x - a.x;
-            const fdy = prey.y - a.y;
-            const fdist = Math.sqrt(fdx * fdx + fdy * fdy);
-            if (fdist < FOX.SCARE_RADIUS) {
-              if (prey.species === 'marmot') {
-                prey.vx = 0; prey.vy = 0;
-                prey.state = 'hiding';
-                prey.hideDuration = 4000 + Math.random() * 2000;
-                prey.hideTimer = prey.hideDuration;
-              } else {
-                const fleeAngle = Math.atan2(fdy, fdx);
-                prey.vx = Math.cos(fleeAngle) * 140;
-                prey.vy = Math.sin(fleeAngle) * 40;
-                prey.wanderTimer = 600;
-              }
-            }
-          }
-        } else {
-          if (Math.abs(a.vx) > 2) {
-            const waddle = Math.sin(time / 150 + a.homeX) * 0.6;
-            a.graphics.setPosition(a.x + waddle * 0.3, a.y);
-          } else {
-            const sentinel = Math.sin(time / 600 + a.homeX) * 0.5;
-            a.graphics.setPosition(a.x, a.y + sentinel);
+          if (bestPerch) {
+            a.state = 'landing';
+            a.perchTarget = bestPerch;
+            const ldx2 = bestPerch.x - a.x;
+            const ldy2 = (bestPerch.y - 4) - a.y;
+            const ldist2 = Math.sqrt(ldx2 * ldx2 + ldy2 * ldy2);
+            a.vx = (ldx2 / ldist2) * 40;
+            a.vy = (ldy2 / ldist2) * 40;
+            a.wanderTimer = 5000;
           }
         }
+        if (a.state !== 'landing') {
+          const prevAngle = Math.atan2(a.vy, a.vx || 1);
+          const turnRate = (Math.random() - 0.5) * 0.6;
+          const newAngle = prevAngle + turnRate;
+          const speed = 6 + Math.random() * 10;
+          a.vx = Math.cos(newAngle) * speed;
+          a.vy = Math.sin(newAngle) * speed * 0.6;
+          a.wanderTimer = 1500 + Math.random() * 2500;
+        }
+      }
+      if (a.state === 'flying') {
+        const speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
+        if (speed < 5) {
+          const boost = 8 / Math.max(speed, 0.1);
+          a.vx *= boost;
+          a.vy *= boost;
+        }
+        const turnRate = Math.sin(time / 3000 + a.homeX * 0.2) * 0.4;
+        const heading = Math.atan2(a.vy, a.vx);
+        const newHeading = heading + turnRate * dt;
+        const curSpeed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
+        a.vx = Math.cos(newHeading) * curSpeed;
+        a.vy = Math.sin(newHeading) * curSpeed;
+        a.x += a.vx * dt;
+        a.y += a.vy * dt;
+        if (a.vx > 0.5) a.graphics.setScale(1, 1);
+        else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+        const skyMin = this.snowLineY * 0.08;
+        const skyMax = this.snowLineY * 0.55;
+        if (a.y < skyMin) a.vy += 20 * dt;
+        else if (a.y > skyMax) a.vy -= 30 * dt;
+        if (a.x > width + 30) { a.x = -30; }
+        else if (a.x < -30) { a.x = width + 30; }
+      }
+      a.graphics.setPosition(a.x, a.y);
+    }
+  }
 
-        // Leave tracks on snow (ground animals, when moving)
-        if (Math.abs(a.vx) > 1 || Math.abs(a.vy) > 1) {
-          a.trackTimer = (a.trackTimer || 0) - delta;
-          if (a.trackTimer <= 0) {
-            this.placeMenuTrack(a.x, a.y, a.species || 'marmot', a.vx, a.vy);
-            a.trackTimer = 400;
+  private updateClimber(a: typeof this.menuAnimals[0], time: number, delta: number, dt: number, pointerDist: number, fleeRadius: number): void {
+    // Bouquetin climbing mountain: deliberate hop pattern
+    if (pointerDist < fleeRadius && a.climbPath && a.climbIndex !== undefined) {
+      a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
+      a.wanderTimer = 0;
+    }
+    if (a.climbPath && a.climbIndex !== undefined) {
+      const target = a.climbPath[a.climbIndex];
+      const cdx = target.x - a.x;
+      const cdy = target.y - a.y;
+      const cdist = Math.sqrt(cdx * cdx + cdy * cdy);
+      const scared = pointerDist < 100;
+
+      if (cdist < 3) {
+        // At waypoint: stand still, slight head bob
+        a.wanderTimer -= delta;
+        a.hopPhase = 0;
+        const graze = Math.sin(time / 400 + a.homeX) * 0.3;
+        a.graphics.setPosition(a.x, a.y + graze);
+        a.graphics.setDepth(1 + a.y * 0.001);
+        if (a.wanderTimer <= 0) {
+          a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
+          a.wanderTimer = scared ? 200 : (800 + Math.random() * 2000);
+          const next = a.climbPath[a.climbIndex];
+          if (next.x > a.x) a.graphics.setScale(1, 1);
+          else if (next.x < a.x) a.graphics.setScale(-1, 1);
+        }
+      } else {
+        // Hop toward waypoint: fast burst with vertical arc
+        const hopSpeed = scared ? 55 : 30;
+        a.hopPhase = (a.hopPhase || 0) + dt * 6;
+        const hopArc = -Math.abs(Math.sin(a.hopPhase)) * 4;
+        a.x += (cdx / cdist) * hopSpeed * dt;
+        a.y += (cdy / cdist) * hopSpeed * dt;
+        if (a.y > this.snowLineY - 2) a.y = this.snowLineY - 2;
+        a.graphics.setPosition(a.x, a.y + hopArc);
+        a.graphics.setDepth(1 + a.y * 0.001);
+      }
+    }
+  }
+
+  private updateGroundAnimal(a: typeof this.menuAnimals[0], time: number, delta: number, dt: number, width: number, pointerDist: number, pdx: number, pdy: number, fleeRadius: number): void {
+    // Marmots: dive into burrow when scared — slide down behind mask
+    if (a.species === 'marmot' && a.state === 'hiding') {
+      a.hideTimer = (a.hideTimer || 0) - delta;
+      const sH = a.spriteH || 16;
+      const dur = a.hideDuration || 3000;
+      const progress = Math.min(1, Math.max(0, 1 - (a.hideTimer || 0) / dur));
+      if (progress < 0.2) {
+        const t = progress / 0.2;
+        a.graphics.setPosition(a.x, a.homeY + t * sH);
+      } else if (progress > 0.8) {
+        const t = (progress - 0.8) / 0.2;
+        a.graphics.setPosition(a.x, a.homeY + (1 - t) * sH);
+      } else {
+        a.graphics.setPosition(a.x, a.homeY + sH);
+      }
+      if ((a.hideTimer || 0) <= 0) {
+        a.state = undefined;
+        a.graphics.setPosition(a.x, a.y);
+        a.wanderTimer = 1000 + Math.random() * 2000;
+      }
+      return; // skip normal updates while hiding
+    } else if (pointerDist < fleeRadius) {
+      const fleeAngle = Math.atan2(pdy, pdx);
+      if (a.species === 'bunny') {
+        a.vx = Math.cos(fleeAngle) * 120;
+        a.vy = Math.sin(fleeAngle) * 50;
+        a.wanderTimer = 300;
+      } else if (a.species === 'chamois') {
+        a.vx = Math.cos(fleeAngle) * 100;
+        a.vy = Math.sin(fleeAngle) * 20;
+        a.wanderTimer = 600;
+      } else if (a.species === 'marmot') {
+        a.vx = 0; a.vy = 0;
+        a.state = 'hiding';
+        a.hideDuration = 3000 + Math.random() * 2000;
+        a.hideTimer = a.hideDuration;
+      } else if (a.species === 'fox') {
+        a.vx = Math.cos(fleeAngle) * 90;
+        a.vy = Math.sin(fleeAngle) * 25;
+        a.wanderTimer = 500;
+      }
+      if (a.vx > 0) a.graphics.setScale(1, 1);
+      else a.graphics.setScale(-1, 1);
+    } else {
+      a.wanderTimer -= delta;
+    }
+
+    if (a.wanderTimer <= 0) {
+      this.wanderDecision(a);
+    }
+
+    // Physics: position, boundary, depth
+    a.x += a.vx * dt;
+    a.y += a.vy * dt;
+    const sw = this.scale.width;
+    if (a.species === 'marmot') {
+      if (a.x < a.boundLeft || a.x > a.boundRight) {
+        a.vx = -a.vx;
+        a.x = Phaser.Math.Clamp(a.x, a.boundLeft, a.boundRight);
+      }
+    } else {
+      if (a.x < -20) { a.x = sw + 18; a.homeX = a.x; }
+      else if (a.x > sw + 20) { a.x = -18; a.homeX = a.x; }
+    }
+    if (a.y < this.snowLineY + 5) { a.y = this.snowLineY + 5; a.vy = Math.abs(a.vy) * 0.5; }
+    if (a.y > this.snowBottomY) { a.y = this.snowBottomY; a.vy = -Math.abs(a.vy) * 0.5; }
+    const homePull = a.species === 'marmot' ? 0.5 : 0.08;
+    if (Math.abs(a.y - a.homeY) > 30) a.vy += (a.homeY - a.y) * homePull * dt;
+    if (a.vx > 0.5) a.graphics.setScale(1, 1);
+    else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+    a.graphics.setDepth(5 + (a.y + (a.feetOffsetY || 0)) * 0.001);
+
+    // Update burrow mask to follow marmot position
+    if (a.burrowMaskShape) {
+      a.burrowMaskShape.clear();
+      a.burrowMaskShape.fillStyle(0xffffff);
+      a.burrowMaskShape.fillRect(a.x - 30, a.y - 100, 60, 100 + (a.spriteH || 16) / 2 + 1);
+      a.burrowY = a.y;
+    }
+
+    // Soft repulsion: nudge apart from nearby same-species animals
+    const minDist = 12;
+    for (const b of this.menuAnimals) {
+      if (b === a || b.type !== 'ground' || b.species !== a.species) continue;
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist && dist > 0.1) {
+        const push = (minDist - dist) * 0.3;
+        a.x += (dx / dist) * push;
+        a.y += (dy / dist) * push * 0.3;
+      }
+    }
+
+    // Species-specific idle animation
+    this.animateGroundAnimal(a, time, dt);
+
+    // Fox scares nearby ground animals
+    if (a.species === 'fox') {
+      for (const prey of this.menuAnimals) {
+        if (prey === a || prey.type !== 'ground' || prey.species === 'fox') continue;
+        if (prey.state === 'hiding') continue;
+        const fdx = prey.x - a.x;
+        const fdy = prey.y - a.y;
+        const fdist = Math.sqrt(fdx * fdx + fdy * fdy);
+        if (fdist < FOX.SCARE_RADIUS) {
+          if (prey.species === 'marmot') {
+            prey.vx = 0; prey.vy = 0;
+            prey.state = 'hiding';
+            prey.hideDuration = 4000 + Math.random() * 2000;
+            prey.hideTimer = prey.hideDuration;
+          } else {
+            const fleeAngle = Math.atan2(fdy, fdx);
+            prey.vx = Math.cos(fleeAngle) * 140;
+            prey.vy = Math.sin(fleeAngle) * 40;
+            prey.wanderTimer = 600;
           }
         }
       }
     }
 
-    // Age and cleanup menu tracks
+    // Leave tracks on snow when moving
+    if (Math.abs(a.vx) > 1 || Math.abs(a.vy) > 1) {
+      a.trackTimer = (a.trackTimer || 0) - delta;
+      if (a.trackTimer <= 0) {
+        this.placeMenuTrack(a.x, a.y, a.species || 'marmot', a.vx, a.vy);
+        a.trackTimer = 400;
+      }
+    }
+  }
+
+  private animateGroundAnimal(a: typeof this.menuAnimals[0], time: number, dt: number): void {
+    if (a.species === 'bunny') {
+      if (Math.abs(a.vx) > 5) {
+        a.hopPhase = (a.hopPhase || 0) + dt * 10;
+        const hop = -Math.abs(Math.sin(a.hopPhase)) * 3;
+        a.graphics.setPosition(a.x, a.y + hop);
+      } else {
+        const twitch = Math.sin(time / 200 + a.homeX) * 0.3;
+        a.graphics.setPosition(a.x, a.y + twitch);
+      }
+    } else if (a.species === 'chamois') {
+      if (Math.abs(a.vx) > 3) {
+        const stride = Math.sin(time / 250 + a.homeX) * 0.8;
+        a.graphics.setPosition(a.x, a.y + stride);
+      } else {
+        const alert = Math.sin(time / 800 + a.homeX) * 0.4;
+        a.graphics.setPosition(a.x, a.y + alert);
+      }
+    } else if (a.species === 'fox') {
+      if (Math.abs(a.vx) > FOX.LUNGE_ANIM_THRESHOLD) {
+        const leap = -Math.abs(Math.sin(time / 100 + a.homeX)) * 3;
+        a.graphics.setPosition(a.x, a.y + leap);
+      } else if (Math.abs(a.vx) > 3) {
+        const trot = Math.sin(time / 200 + a.homeX) * 0.5;
+        a.graphics.setPosition(a.x, a.y + trot);
+      } else {
+        const sniff = Math.sin(time / 400 + a.homeX) * 0.6;
+        a.graphics.setPosition(a.x + sniff * 0.4, a.y);
+      }
+    } else {
+      if (Math.abs(a.vx) > 2) {
+        const waddle = Math.sin(time / 150 + a.homeX) * 0.6;
+        a.graphics.setPosition(a.x + waddle * 0.3, a.y);
+      } else {
+        const sentinel = Math.sin(time / 600 + a.homeX) * 0.5;
+        a.graphics.setPosition(a.x, a.y + sentinel);
+      }
+    }
+  }
+
+  private wanderDecision(a: typeof this.menuAnimals[0]): void {
+    if (a.species === 'bunny') {
+      if (Math.random() < 0.65) {
+        const prevAngle = Math.atan2(a.vy || 0.1, a.vx || (Math.random() - 0.5));
+        const newAngle = prevAngle + (Math.random() - 0.5) * 1.2;
+        const speed = 40 + Math.random() * 70;
+        a.vx = Math.cos(newAngle) * speed;
+        a.vy = Math.sin(newAngle) * speed * 0.3;
+        a.wanderTimer = 400 + Math.random() * 600;
+      } else {
+        a.vx = 0; a.vy = 0;
+        a.wanderTimer = 200 + Math.random() * 500;
+      }
+    } else if (a.species === 'chamois') {
+      if (Math.random() < 0.1) {
+        const newHomeX = 50 + Math.random() * (this.scale.width - 100);
+        const newHomeY = this.snowLineY + 10 + Math.random() * (this.snowBottomY - this.snowLineY - 20);
+        for (const c of this.menuAnimals) {
+          if (c.species !== 'chamois') continue;
+          c.homeX = newHomeX + (Math.random() - 0.5) * 40;
+          c.homeY = newHomeY + (Math.random() - 0.5) * 20;
+        }
+        const angle = Math.atan2(newHomeY - a.y, newHomeX - a.x);
+        a.vx = Math.cos(angle) * 45;
+        a.vy = Math.sin(angle) * 15;
+        a.wanderTimer = 1500 + Math.random() * 1500;
+      } else if (Math.random() < 0.45) {
+        a.vx = (Math.random() - 0.5) * 35;
+        a.vy = (Math.random() - 0.5) * 8;
+        a.wanderTimer = 1000 + Math.random() * 2000;
+      } else {
+        a.vx = 0; a.vy = 0;
+        a.wanderTimer = 1500 + Math.random() * 3000;
+      }
+    } else if (a.species === 'fox') {
+      let nearestDist = Infinity;
+      let huntAngle = 0;
+      for (const prey of this.menuAnimals) {
+        if (prey === a || prey.type !== 'ground' || prey.species === 'fox') continue;
+        if (prey.state === 'hiding') continue;
+        const d = Math.sqrt((prey.x - a.x) ** 2 + (prey.y - a.y) ** 2);
+        if (d < nearestDist) {
+          nearestDist = d;
+          huntAngle = Math.atan2(prey.y - a.y, prey.x - a.x);
+        }
+      }
+      const decision = foxHuntDecision(nearestDist, huntAngle, a.vx, a.vy);
+      a.vx = decision.vx;
+      a.vy = decision.vy;
+      a.wanderTimer = decision.wanderTimer;
+    } else {
+      if (Math.random() < 0.35) {
+        a.vx = (Math.random() - 0.5) * 20;
+        a.vy = (Math.random() - 0.5) * 6;
+        a.wanderTimer = 400 + Math.random() * 800;
+      } else {
+        a.vx = 0; a.vy = 0;
+        a.wanderTimer = 2000 + Math.random() * 4000;
+      }
+    }
+  }
+
+  private updateTracks(delta: number): void {
     for (let i = this.menuTracks.length - 1; i >= 0; i--) {
       const t = this.menuTracks[i];
       t.age += delta;
@@ -980,9 +939,6 @@ export default class MenuScene extends Phaser.Scene {
         t.graphics.setAlpha(fade * 0.5);
       }
     }
-
-    // Gamepad support for menu
-    this.gamepadNav.update(delta);
   }
 
   private resizing = false;
@@ -1275,18 +1231,22 @@ export default class MenuScene extends Phaser.Scene {
       addGroundAnimal(foxG, foxX, foxY, width * 0.4, 'fox');
     }
 
-    // Bouquetin: pair climbing together on the far-right mountain
+    // Bouquetin and birds
+    this.createMenuClimbers(width, snowLineY, sx, mtnScale, s);
+    this.createMenuBirds(width, snowLineY, scaleFactor, allPerches);
+  }
+
+  private createMenuClimbers(width: number, snowLineY: number, sx: number, mtnScale: number, s: number): void {
     const climbMtnX = 900 * sx;
     const climbMtnBaseW = 190 * mtnScale;
     const climbMtnPeakH = 260 * mtnScale;
-    const climbBase = snowLineY - 4; // stay above foreground snow
+    const climbBase = snowLineY - 4;
     const climbPeak = snowLineY - climbMtnPeakH * 0.85;
     for (let ib = 0; ib < 2; ib++) {
       const ibexG = this.add.graphics().setDepth(1.5);
       drawAnimal(ibexG, 'bouquetin', 0, 0, s);
       const climbPath: { x: number; y: number }[] = [];
       const climbSteps = 8;
-      // Each ibex on a slightly different line on the same flank
       const flankOffset = 0.12 + ib * 0.12;
       for (let i = 0; i <= climbSteps; i++) {
         const t = i / climbSteps;
@@ -1297,7 +1257,6 @@ export default class MenuScene extends Phaser.Scene {
           y: climbBase - t * (climbBase - climbPeak),
         });
       }
-      // Stagger start positions
       const startIdx = ib * 2;
       const startPt = climbPath[startIdx % climbPath.length];
       ibexG.setPosition(startPt.x, startPt.y);
@@ -1310,11 +1269,12 @@ export default class MenuScene extends Phaser.Scene {
         state: 'climbing', climbPath, climbIndex: startIdx % climbPath.length,
       });
     }
+  }
 
-    // Birds (alpine choughs): flock of 4-7, some perched, some flying
+  private createMenuBirds(width: number, snowLineY: number, scaleFactor: number, allPerches: { x: number; y: number }[]): void {
     const birdScale = Math.max(1.5, 2 * scaleFactor);
     const birdCount = 4 + Math.floor(Math.random() * 4);
-    const perchedCount = 1 + Math.floor(Math.random() * 2); // 1-2 start perched
+    const perchedCount = 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < birdCount; i++) {
       const birdG = this.add.graphics().setDepth(11);
 
@@ -1347,7 +1307,7 @@ export default class MenuScene extends Phaser.Scene {
         boundLeft: -20, boundRight: width + 20,
         state,
         perchTarget: allPerches[i % allPerches.length],
-        spriteH: birdScale, // store scale for sprite swaps
+        spriteH: birdScale,
       });
     }
   }
