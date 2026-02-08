@@ -55,7 +55,7 @@ class TestTutorial:
                 return gs?.groomer && gs.groomer.y !== {initial_pos['y']};
             }}""", timeout=3000)
             moved = True
-        except Exception:
+        except TimeoutError:
             moved = False
         game_page.keyboard.up("ArrowUp")
         
@@ -115,7 +115,7 @@ class TestGroomerMovement:
                 return gs?.groomer && gs.groomer.y !== {initial_pos['y']};
             }}""", timeout=3000)
             moved = True
-        except Exception:
+        except TimeoutError:
             moved = False
         
         game_page.keyboard.up("ArrowUp")

@@ -93,7 +93,9 @@ class TestDialogueSpeakers:
         }""")
         # This test verifies at the config level - checked via TypeScript compilation
         # and the parametrized tests above cover runtime behavior
-        assert result.get('success') or result.get('error') == 'GameScene not found'
+        assert result.get('success') or result.get('error') == 'GameScene not found', (
+            f"Expected success or GameScene not found, got: {result}"
+        )
 
     def test_system_dialogues_default_to_jean_pierre(self, game_page: Page):
         """System warnings (cliffFall, tumble, etc.) default to Jean-Pierre."""

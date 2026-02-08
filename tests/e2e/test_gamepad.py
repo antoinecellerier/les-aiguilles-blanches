@@ -31,6 +31,22 @@ def make_mock_gamepad_script(gamepad_id: str = 'Mock Gamepad (STANDARD GAMEPAD)'
 MOCK_GAMEPAD_SCRIPT = make_mock_gamepad_script()
 
 
+def _make_gamepad_fixture(mock_script: str):
+    """Factory for gamepad page fixtures with mock controller injection."""
+    @pytest.fixture
+    def fixture(page: Page):
+        page.add_init_script(mock_script)
+        page.goto(GAME_URL)
+        wait_for_scene(page, 'MenuScene')
+        page.wait_for_function(
+            "() => navigator.getGamepads()[0]?.connected === true",
+            timeout=3000
+        )
+        yield page
+        page.evaluate("window._mockGamepad = null; localStorage.clear()")
+    return fixture
+
+
 def press_gamepad_button(page: Page, button_index: int):
     """Press a gamepad button (0=A/B, 1=B/A, 9=Start)."""
     page.evaluate(f"""() => {{
@@ -73,23 +89,7 @@ def set_gamepad_stick(page: Page, stick: str, x: float, y: float):
         }}""")
 
 
-@pytest.fixture
-def gamepad_page(page: Page):
-    """Page fixture with mock gamepad injected BEFORE page load."""
-    # Inject mock BEFORE navigating so Phaser sees it during initialization
-    page.add_init_script(MOCK_GAMEPAD_SCRIPT)
-    
-    page.goto(GAME_URL)
-    wait_for_scene(page, 'MenuScene')
-    
-    # Wait for Phaser to detect the mock gamepad via polling
-    page.wait_for_function(
-        "() => navigator.getGamepads()[0]?.connected === true",
-        timeout=3000
-    )
-    
-    yield page
-    page.evaluate("window._mockGamepad = null; localStorage.clear()")
+gamepad_page = _make_gamepad_fixture(MOCK_GAMEPAD_SCRIPT)
 
 
 class TestGamepadMenuNavigation:
@@ -226,18 +226,7 @@ MOCK_NINTENDO_GAMEPAD_SCRIPT = make_mock_gamepad_script(
 )
 
 
-@pytest.fixture
-def nintendo_page(page: Page):
-    """Page fixture with Nintendo Switch Pro Controller mock."""
-    page.add_init_script(MOCK_NINTENDO_GAMEPAD_SCRIPT)
-    page.goto(GAME_URL)
-    wait_for_scene(page, 'MenuScene')
-    page.wait_for_function(
-        "() => navigator.getGamepads()[0]?.connected === true",
-        timeout=3000
-    )
-    yield page
-    page.evaluate("window._mockGamepad = null; localStorage.clear()")
+nintendo_page = _make_gamepad_fixture(MOCK_NINTENDO_GAMEPAD_SCRIPT)
 
 
 class TestNintendoControllerSwap:
@@ -292,18 +281,7 @@ MOCK_PLAYSTATION_GAMEPAD_SCRIPT = make_mock_gamepad_script(
 )
 
 
-@pytest.fixture
-def playstation_page(page: Page):
-    """Page fixture with PlayStation DualSense controller mock."""
-    page.add_init_script(MOCK_PLAYSTATION_GAMEPAD_SCRIPT)
-    page.goto(GAME_URL)
-    wait_for_scene(page, 'MenuScene')
-    page.wait_for_function(
-        "() => navigator.getGamepads()[0]?.connected === true",
-        timeout=3000
-    )
-    yield page
-    page.evaluate("window._mockGamepad = null; localStorage.clear()")
+playstation_page = _make_gamepad_fixture(MOCK_PLAYSTATION_GAMEPAD_SCRIPT)
 
 
 class TestPlayStationController:
