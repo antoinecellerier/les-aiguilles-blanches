@@ -8,7 +8,7 @@ import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav'
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, onTouchAvailable } from '../utils/touchDetect';
-import { drawAnimal, drawBirdPerched, drawBirdSideFlying } from '../utils/animalSprites';
+import { drawAnimal, drawBirdPerched, drawBirdSideFlying, ANIMAL_GRID } from '../utils/animalSprites';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
 import { drawTrackShape } from '../utils/animalTracks';
 
@@ -45,6 +45,7 @@ export default class MenuScene extends Phaser.Scene {
     climbIndex?: number;
     hopPhase?: number;
     trackTimer?: number;
+    feetOffsetY?: number;
   }[] = [];
   private inputHintTexts: Phaser.GameObjects.GameObject[] = [];
   private gamepadConnectHandler: (() => void) | null = null;
@@ -853,8 +854,8 @@ export default class MenuScene extends Phaser.Scene {
         // Always face movement direction
         if (a.vx > 0.5) a.graphics.setScale(1, 1);
         else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-        // Y-based depth: animals lower on screen render in front
-        a.graphics.setDepth(5 + a.y * 0.001);
+        // Y-based depth: use feet position (bottom of sprite) for correct tree interleaving
+        a.graphics.setDepth(5 + (a.y + (a.feetOffsetY || 0)) * 0.001);
 
         // Update burrow mask to follow marmot position
         if (a.burrowMaskShape) {
@@ -1153,13 +1154,22 @@ export default class MenuScene extends Phaser.Scene {
     const snowBottom = height - footerHeight - 20;
     this.snowBottomY = snowBottom;
 
+    // Feet offset: depth is based on bottom of sprite (feet), not center
+    const feetOffset = (species: string) => {
+      const grid = ANIMAL_GRID[species as keyof typeof ANIMAL_GRID];
+      return grid ? (grid.h / 2) * s : 0;
+    };
+
     const addGroundAnimal = (g: Phaser.GameObjects.Graphics, x: number, y: number, rangeX: number, species: string) => {
+      const fo = feetOffset(species);
+      g.setDepth(5 + (y + fo) * 0.001);
       this.menuAnimals.push({
         graphics: g, x, y, homeX: x, homeY: y,
         vx: 0, vy: 0, wanderTimer: Math.random() * 3000,
         type: 'ground', species,
         boundLeft: x - rangeX, boundRight: x + rangeX,
         hopPhase: 0,
+        feetOffsetY: fo,
       });
     };
 
@@ -1190,11 +1200,11 @@ export default class MenuScene extends Phaser.Scene {
     const marmotZone = Math.random() < 0.5 ? rightZone : leftZone;
     const marmotClusterX = randInZone(marmotZone);
     for (let i = 0; i < marmotCount; i++) {
-      const mg = this.add.graphics().setDepth(5);
+      const mg = this.add.graphics();
       drawAnimal(mg, 'marmot', 0, 0, s);
       const mx = marmotClusterX + (i - marmotCount / 2) * 18 * scaleFactor + (Math.random() - 0.5) * 10;
       const my = snowTop + Math.random() * (snowBottom - snowTop);
-      mg.setPosition(mx, my);
+      mg.setPosition(mx, my).setDepth(5 + (my + feetOffset('marmot')) * 0.001);
       // Burrow mask: clips marmot at ground level so it can slide down out of view
       const maskShape = this.make.graphics({ x: 0, y: 0 });
       const halfH = 2 * s;   // sprite is centered; extends halfH above and below origin
@@ -1214,6 +1224,7 @@ export default class MenuScene extends Phaser.Scene {
         burrowMask,
         burrowMaskShape: maskShape,
         spriteH: slideDistance,
+        feetOffsetY: feetOffset('marmot'),
       };
       this.menuAnimals.push(animal);
     }
@@ -1223,31 +1234,31 @@ export default class MenuScene extends Phaser.Scene {
     const chamoisZone = marmotZone === rightZone ? leftZone : rightZone;
     const chamoisClusterX = randInZone(chamoisZone);
     for (let i = 0; i < chamoisCount; i++) {
-      const cg = this.add.graphics().setDepth(5);
+      const cg = this.add.graphics();
       drawAnimal(cg, 'chamois', 0, 0, s);
       const cx = chamoisClusterX + (i - chamoisCount / 2) * 25 * scaleFactor + (Math.random() - 0.5) * 15;
       const cy = snowTop + Math.random() * (snowBottom - snowTop);
-      cg.setPosition(cx, cy);
+      cg.setPosition(cx, cy).setDepth(5 + cy * 0.001);
       addGroundAnimal(cg, cx, cy, width * 0.4, 'chamois');
     }
 
     // Bunny: solitary (mountain hares are loners), random side
     const bunnyZone = Math.random() < 0.5 ? leftZone : rightZone;
-    const bunnyG = this.add.graphics().setDepth(5);
+    const bunnyG = this.add.graphics();
     drawAnimal(bunnyG, 'bunny', 0, 0, s);
     const bunnyX = randInZone(bunnyZone);
     const bunnyY = snowTop + Math.random() * (snowBottom - snowTop);
-    bunnyG.setPosition(bunnyX, bunnyY);
+    bunnyG.setPosition(bunnyX, bunnyY).setDepth(5 + bunnyY * 0.001);
     addGroundAnimal(bunnyG, bunnyX, bunnyY, width * 0.45, 'bunny');
 
     // Fox: rare (~30% chance), solitary, roams wide
     if (Math.random() < 0.3) {
       const foxZone = Math.random() < 0.5 ? leftZone : rightZone;
-      const foxG = this.add.graphics().setDepth(5);
+      const foxG = this.add.graphics();
       drawAnimal(foxG, 'fox', 0, 0, s);
       const foxX = randInZone(foxZone);
       const foxY = snowTop + Math.random() * (snowBottom - snowTop);
-      foxG.setPosition(foxX, foxY);
+      foxG.setPosition(foxX, foxY).setDepth(5 + foxY * 0.001);
       addGroundAnimal(foxG, foxX, foxY, width * 0.4, 'fox');
     }
 
