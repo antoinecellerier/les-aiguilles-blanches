@@ -45,6 +45,27 @@
             position: absolute;
         }
 
+        #load-fallback {
+            display: none;
+            color: #E8F4F8;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #load-fallback a {
+            color: #87CEEB;
+        }
+
+        #load-fallback a:hover {
+            color: #FFD700;
+        }
+
         /* High contrast mode styles */
         .high-contrast #game-container {
             border-color: #FFD700;
@@ -97,7 +118,22 @@
         <div id="loading-indicator">
             ⛷️ Loading Les Aiguilles Blanches... ❄️
         </div>
+        <div id="load-fallback">
+            The game failed to load.<br><br>
+            <a href="https://github.com/antoinecellerier/les-aiguilles-blanches/issues" target="_blank" rel="noopener noreferrer">Report issue on GitHub</a>
+        </div>
     </div>
+
+    <script>
+        // Show fallback link if game hasn't loaded after 15 seconds
+        window._loadFallbackTimer = setTimeout(function() {
+            var indicator = document.getElementById('loading-indicator');
+            var fallback = document.getElementById('load-fallback');
+            if (indicator && indicator.offsetParent !== null) {
+                fallback.style.display = 'block';
+            }
+        }, 15000);
+    </script>
 
     <script type="module" src="/src/main.ts"></script>
 </body>

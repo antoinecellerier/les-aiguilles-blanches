@@ -383,7 +383,7 @@ export default class MenuScene extends Phaser.Scene {
       .on('pointerover', () => githubLink.setColor(THEME.colors.accent))
       .on('pointerout', () => githubLink.setColor(THEME.colors.info))
       .on('pointerdown', () => {
-        window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank');
+        window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank', 'noopener,noreferrer');
       });
 
     // In dev, fetch live version from server (updates on each commit without restart)

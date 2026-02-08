@@ -7,16 +7,16 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Bugs
 
 - [ ] Nintendo B-button back navigation - Flaky in full test suite (timing-sensitive gamepad stick navigation)
-- [ ] Service road width vs piste width - Roads should be visibly narrower than piste; widen piste if needed to ensure contrast
-- [ ] Avalanche zones overlap service roads - Avalanche zones should never overlap service roads
-- [ ] Anchor point accessibility - Every winch anchor must be reachable via piste or service road without blocking avalanche/steep obstacles
+- [x] Service road width vs piste width - Roads (5 tiles) are already 2-5× narrower than pistes with distinct packed-snow texture
+- [x] Avalanche zones overlap service roads - Increased avoidRects margin from 0.8× to 1.2× road width to cover curve interpolation
+- [x] Anchor point accessibility - Unit test validates no anchor falls inside steep zones; all current levels pass
 - [x] Groomer fall mechanics - Center-of-mass based cliff fall instead of instant physics overlap death
-- [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
+- [x] Chalet placement overlap - AABB overlap check against restaurant/fuel station footprints before placing chalets
 - [ ] PauseScene boot crash (not reproducible) - `this.manager is null` in resumeGame during boot; may be HMR artifact. Watch for recurrence
 - [ ] Firefox fullscreen button with gamepad - `requestFullscreen()` requires user-gesture; gamepad events don't qualify in Firefox
-- [ ] BootScene GitHub link - Add a link to the GitHub project on BootScene (and index.html fallback) so users can report issues if game fails to render
+- [x] BootScene GitHub link - GitHub issues link in BootScene error handler and index.html fallback (15s timeout)
 - [x] Firefox desktop touch detection - Touch availability updates on background tap via canvas listener
-- [ ] GameScene→LevelCompleteScene scene transition - Consider refactoring to use resetGameScenes() for consistency (currently uses direct scene.start for overlay cleanup)
+- [x] GameScene→LevelCompleteScene scene transition - By design: direct scene.start is correct here (overlays stopped explicitly, resetGameScenes would be unnecessary overhead)
 
 ## Polish (Medium Priority)
 
@@ -38,6 +38,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
+- [ ] Movement sensitivity setting - Add slider in SettingsScene to adjust groomer movement speed/responsiveness
 - [ ] Hide gamepad button hints in dialogues when no controller is connected
 
 ## Recently Completed

@@ -1413,8 +1413,8 @@ export default class GameScene extends Phaser.Scene {
       this.accessPathCurves.push({ leftEdge, rightEdge });
 
       // Build collision-exempt rects — one per curve point for full coverage
-      // Margin covers road half-width plus small buffer for curve interpolation
-      const margin = roadWidth * 0.8;
+      // Margin covers road half-width plus buffer for curve interpolation
+      const margin = roadWidth * 1.2;
       for (let p = 0; p < curvePoints.length - 1; p++) {
         const p1 = curvePoints[p];
         const p2 = curvePoints[p + 1];
@@ -1824,6 +1824,15 @@ export default class GameScene extends Phaser.Scene {
       const x = side === 'left' ?
         Math.max(tileSize * 3, pisteEdge - tileSize * 4) :
         Math.min(worldWidth - tileSize * 3, pisteEdge + tileSize * 4);
+
+      // Skip if chalet would overlap an existing building (restaurant, fuel station)
+      const cSize = tileSize * 2;
+      const cx = x - cSize / 2, cy = yPos - cSize * 0.4;
+      const cw = cSize, ch = cSize * 0.65;
+      const overlaps = this.buildingRects.some(b =>
+        cx < b.x + b.w && cx + cw > b.x && cy < b.y + b.h && cy + ch > b.y
+      );
+      if (overlaps) continue;
 
       this.createChalet(x, yPos);
     }

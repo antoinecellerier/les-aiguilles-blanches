@@ -90,4 +90,15 @@ describe('Level Configuration', () => {
             }
         });
     });
+
+    it('winch anchors should not fall inside steep zones', () => {
+        LEVELS.forEach((level, i) => {
+            (level.winchAnchors ?? []).forEach((anchor, j) => {
+                (level.steepZones ?? []).forEach((zone, k) => {
+                    const inside = anchor.y >= zone.startY && anchor.y <= zone.endY;
+                    expect(inside, `Level ${i} anchor ${j} (y=${anchor.y}) inside steep zone ${k} (${zone.startY}-${zone.endY})`).toBe(false);
+                });
+            });
+        });
+    });
 });

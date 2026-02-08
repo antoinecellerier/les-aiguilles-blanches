@@ -55,6 +55,7 @@ export default class BootScene extends Phaser.Scene {
       this.generateTextures();
 
       // Start menu
+      if ((window as any)._loadFallbackTimer) clearTimeout((window as any)._loadFallbackTimer);
       this.scene.start('MenuScene');
     } catch (error) {
       console.error('BootScene error:', error);
@@ -65,6 +66,18 @@ export default class BootScene extends Phaser.Scene {
         'Error: ' + message,
         { font: '16px Courier New', color: '#ff0000' }
       ).setOrigin(0.5);
+
+      const link = this.add.text(
+        this.cameras.main.width / 2,
+        this.cameras.main.height / 2 + 30,
+        'Report issue on GitHub',
+        { font: '14px Courier New', color: '#87CEEB' }
+      ).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      link.on('pointerover', () => link.setColor('#FFD700'));
+      link.on('pointerout', () => link.setColor('#87CEEB'));
+      link.on('pointerup', () => {
+        window.open('https://github.com/antoinecellerier/les-aiguilles-blanches/issues', '_blank', 'noopener,noreferrer');
+      });
     }
   }
 
