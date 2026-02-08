@@ -83,6 +83,8 @@ export default class GameScene extends Phaser.Scene {
   private tileSize = 16;
   private worldOffsetX = 0;
   private worldOffsetY = 0;
+  private originalScreenWidth = 0;
+  private originalScreenHeight = 0;
 
   // Game state
   private isGameOver = false;
@@ -223,6 +225,8 @@ export default class GameScene extends Phaser.Scene {
     const tilesByWidth = Math.floor(availableWidth / this.level.width);
     const tilesByHeight = Math.floor(availableHeight / this.level.height);
     this.tileSize = Math.max(12, Math.min(tilesByWidth, tilesByHeight, 28));
+    this.originalScreenWidth = screenWidth;
+    this.originalScreenHeight = screenHeight;
     console.log('Tile size:', this.tileSize, 'level size:', this.level.width, 'x', this.level.height);
 
     // Calculate world size and center offset
@@ -2584,44 +2588,45 @@ export default class GameScene extends Phaser.Scene {
     const width = gameSize.width;
     const height = gameSize.height;
     
-    // Calculate the world size based on original tile size
     const worldWidth = this.level.width * this.tileSize;
     const worldHeight = this.level.height * this.tileSize;
+
+    // Scale proportionally from the original viewport where zoom was 1
+    const scaleX = width / this.originalScreenWidth;
+    const scaleY = height / this.originalScreenHeight;
+    const zoom = Math.max(0.5, Math.min(scaleX, scaleY, 1.5));
     
-    // Calculate zoom to fit world in new viewport
-    // Use margins similar to original calculation
-    const marginX = 50;
-    const marginY = 100;
-    const availableWidth = width - marginX * 2;
-    const availableHeight = height - marginY;
+    // If world fits in viewport at this zoom, use static camera
+    if (worldWidth * zoom <= width && worldHeight * zoom <= height) {
+      this.cameras.main.setZoom(zoom);
+      this.cameras.main.stopFollow();
+      this.cameras.main.removeBounds();
+      const offsetX = Math.max(0, (width - worldWidth * zoom) / 2);
+      const offsetY = Math.max(50, (height - worldHeight * zoom) / 2);
+      // Convert screen-space offset to camera-local (divide by zoom)
+      this.cameras.main.setScroll(-offsetX / zoom, -offsetY / zoom);
+      return;
+    }
     
-    const zoomX = availableWidth / worldWidth;
-    const zoomY = availableHeight / worldHeight;
-    const zoom = Math.min(zoomX, zoomY, 1.5); // Cap zoom at 1.5x
-    
-    // Apply zoom
+    // World doesn't fit — follow groomer with bounds
     this.cameras.main.setZoom(zoom);
     
-    // Recalculate world offset for centering
     const scaledWorldWidth = worldWidth * zoom;
     const scaledWorldHeight = worldHeight * zoom;
-    const newOffsetX = Math.max(0, (width - scaledWorldWidth) / 2);
-    const newOffsetY = Math.max(marginY / 2, (height - scaledWorldHeight) / 2);
+    const offsetX = Math.max(0, (width - scaledWorldWidth) / 2);
+    const offsetY = Math.max(50, (height - scaledWorldHeight) / 2);
     
-    // Update camera bounds
     this.cameras.main.setBounds(
-      -newOffsetX / zoom,
-      -newOffsetY / zoom,
-      worldWidth + (newOffsetX * 2) / zoom,
-      worldHeight + (newOffsetY * 2) / zoom
+      -offsetX / zoom,
+      -offsetY / zoom,
+      worldWidth + (offsetX * 2) / zoom,
+      worldHeight + (offsetY * 2) / zoom
     );
     
-    // Ensure camera follows groomer
     if (this.groomer) {
       this.cameras.main.startFollow(this.groomer, true, BALANCE.CAMERA_LERP, BALANCE.CAMERA_LERP);
       this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
     }
-    // HUDScene handles its own restart via this.scale.on('resize')
   }
 
   gameOver(won: boolean, failReason: string | null = null): void {
