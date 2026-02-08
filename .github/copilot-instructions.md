@@ -42,6 +42,7 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 ## Custom Agents
 - `code-health` — Thorough code audit against engineering best practices. Auto-activates as a skill when you ask about code quality, duplication, or tech debt. Also available explicitly via `/agent` → `code-health`
 - `content-review` — Expert content writer review of in-game text: dialogue, localization, lore, tone, and translation quality across all 5 languages
+- `game-design` — Experienced game designer review of narrative arc, difficulty curve, character development, mechanics coherence, and pacing across all levels
 - `art-review` — Art director review of visual code and rendered output against `docs/ART_STYLE.md`. Checks color palettes, shape compliance (rectangles only), dimensions, depth layering, and accessibility
 
 ## Critical Patterns
