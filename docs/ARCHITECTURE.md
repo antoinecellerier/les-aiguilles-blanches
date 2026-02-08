@@ -46,6 +46,7 @@ snow-groomer/
 │   │   ├── WildlifeSystem.ts # Animal spawning, flee AI, update loop
 │   │   ├── LevelGeometry.ts # Piste path, cliff, access path geometry (pure data, no Phaser)
 │   │   ├── MenuTerrainRenderer.ts # Menu background: sky, mountains, snow, trees, groomer
+│   │   ├── MenuWildlifeController.ts # Menu wildlife AI, snowflakes, animal tracks
 │   │   ├── ObstacleBuilder.ts # Obstacle placement, buildings, chalets
 │   │   ├── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
 │   │   └── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state

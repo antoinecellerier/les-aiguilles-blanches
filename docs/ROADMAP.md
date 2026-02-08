@@ -151,7 +151,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - GameScene further decomposition: GroomingSystem, InputManager candidates. LevelGeometry, PisteRenderer, WinchSystem, ObstacleBuilder done. Remaining methods (movement, resources, game flow, camera) are tightly coupled to GameScene state — further extraction would increase complexity.
 - Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring ~7 lines, track aging ~10 lines, same-species repulsion ~9 lines). Both files use the same patterns but different coordinate systems (side-view vs top-down), making extraction non-trivial.
-- MenuScene god class (1326 lines, 31 methods): extract wildlife animation controller. Terrain renderer and overlay manager extracted.
+- MenuScene god class (607 lines, 20 methods): terrain renderer, overlay manager, and wildlife controller extracted. Remaining: UI layout, menu buttons, footer, input hints, game flow.
 - SettingsScene god class (1205 lines): extract reusable UI components (slider, toggle, button group), separate form state from layout.
 - HazardSystem callback coupling: GameScene passes 6 closures to `createAvalancheZones()`. Replace with event emitter pattern via `game.events`.
 - Timing magic numbers: various hardcoded delays (300/500/800/2000ms) in DialogueScene, SettingsScene, HazardSystem. Centralize incrementally into BALANCE.
