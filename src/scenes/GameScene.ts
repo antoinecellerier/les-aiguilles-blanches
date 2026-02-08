@@ -349,8 +349,19 @@ export default class GameScene extends Phaser.Scene {
     // Input
     console.log('Setting up input...');
     this.setupInput();
-    console.log('Input set up, launching HUD scene...');
+    console.log('Input set up, registering event listeners...');
 
+    // Cross-scene event listeners (use bound handlers for clean removal)
+    // IMPORTANT: Register BEFORE launching HUDScene to avoid race condition
+    // where HUDScene.create() emits events before we're listening
+    this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
+    this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
+    this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
+    this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
+    this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
+    
+    console.log('Launching HUD scene...');
+    
     // Launch overlay scenes directly (no delayedCall — avoids race with rapid level transitions)
     this.scene.launch('DialogueScene');
     console.log('Dialogue launched');
@@ -367,12 +378,6 @@ export default class GameScene extends Phaser.Scene {
         this.showDialogue(this.level.introDialogue!, this.level.introSpeaker);
       });
     }
-
-    // Cross-scene event listeners (use bound handlers for clean removal)
-    this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
-    this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
-    this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
-    this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
 
     // Timer
     this.time.addEvent({
@@ -2602,7 +2607,7 @@ export default class GameScene extends Phaser.Scene {
       this.cameras.main.stopFollow();
       this.cameras.main.removeBounds();
       const offsetX = Math.max(0, (width - worldWidth * zoom) / 2);
-      const offsetY = Math.max(50, (height - worldHeight * zoom) / 2);
+      const offsetY = Math.max(BALANCE.CAMERA_MIN_OFFSET_Y, (height - worldHeight * zoom) / 2);
       // Convert screen-space offset to camera-local (divide by zoom)
       this.cameras.main.setScroll(-offsetX / zoom, -offsetY / zoom);
       return;
@@ -2611,22 +2616,68 @@ export default class GameScene extends Phaser.Scene {
     // World doesn't fit — follow groomer with bounds
     this.cameras.main.setZoom(zoom);
     
-    const scaledWorldWidth = worldWidth * zoom;
-    const scaledWorldHeight = worldHeight * zoom;
-    const offsetX = Math.max(0, (width - scaledWorldWidth) / 2);
-    const offsetY = Math.max(50, (height - scaledWorldHeight) / 2);
-    
-    this.cameras.main.setBounds(
-      -offsetX / zoom,
-      -offsetY / zoom,
-      worldWidth + (offsetX * 2) / zoom,
-      worldHeight + (offsetY * 2) / zoom
-    );
-    
     if (this.groomer) {
       this.cameras.main.startFollow(this.groomer, true, BALANCE.CAMERA_LERP, BALANCE.CAMERA_LERP);
+      this.cameras.main.setFollowOffset(0, this.touchFollowOffsetY);
+    }
+    this.updateCameraBoundsForOffset();
+    if (this.groomer) {
       this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
     }
+  }
+
+  /** Camera follow offset to keep groomer above touch controls (world-space) */
+  private touchFollowOffsetY = 0;
+
+  /** Update camera bounds to include extra room for the touch follow offset */
+  private updateCameraBoundsForOffset(): void {
+    const cam = this.cameras.main;
+    if (!cam || !(cam as any)._follow) return;
+    const worldWidth = this.level.width * this.tileSize;
+    const worldHeight = this.level.height * this.tileSize;
+    const zoom = cam.zoom || 1;
+    const screenW = this.scale.width;
+    const screenH = this.scale.height;
+    const scaledWorldW = worldWidth * zoom;
+    const scaledWorldH = worldHeight * zoom;
+    const offsetX = Math.max(0, (screenW - scaledWorldW) / 2) / zoom;
+    const offsetY = Math.max(BALANCE.CAMERA_MIN_OFFSET_Y, (screenH - scaledWorldH) / 2) / zoom;
+    // Extend bounds downward by the follow offset so camera can scroll past world bottom
+    const extraBottom = Math.abs(this.touchFollowOffsetY);
+    cam.setBounds(
+      -offsetX,
+      -offsetY,
+      worldWidth + offsetX * 2,
+      worldHeight + offsetY * 2 + extraBottom
+    );
+  }
+
+  private onTouchControlsTop(topEdge: number): void {
+    const cam = this.cameras.main;
+    if (!cam) return;
+    
+    // Only apply offset if camera is following
+    if (!(cam as any)._follow) return;
+    
+    const screenW = this.scale.width;
+    const screenH = this.scale.height;
+    const aspect = screenW / screenH;
+
+    // On wide aspect ratios (tablets, landscape), the joystick and buttons
+    // sit in the bottom corners and don't overlap the centered play area.
+    if (aspect > BALANCE.TOUCH_CONTROLS_WIDE_ASPECT_THRESHOLD) {
+      this.touchFollowOffsetY = 0;
+      cam.setFollowOffset(0, 0);
+      this.updateCameraBoundsForOffset();
+      return;
+    }
+
+    // Narrow/portrait: shift camera so groomer clears the touch controls
+    const controlsHeight = screenH - topEdge;
+    const zoom = cam.zoom || 1;
+    this.touchFollowOffsetY = -(controlsHeight / 2) / zoom;
+    cam.setFollowOffset(0, this.touchFollowOffsetY);
+    this.updateCameraBoundsForOffset();
   }
 
   gameOver(won: boolean, failReason: string | null = null): void {
@@ -2688,6 +2739,7 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
+    this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
 
     this.scale.off('resize', this.handleResize, this);
     this.input.gamepad?.removeAllListeners();

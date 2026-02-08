@@ -780,8 +780,13 @@ GameScene and HUDScene communicate via Phaser's global event emitter (`game.even
 | `PAUSE_REQUEST` | HUD/Pause → GameScene | — | On button press |
 | `RESUME_REQUEST` | Pause → GameScene | — | On button press |
 | `SKIP_LEVEL` | HUD → GameScene | nextLevel | On button press |
+| `TOUCH_CONTROLS_TOP` | HUD → GameScene | topEdge (screen px) | On touch control layout |
 
 Always clean up listeners in `shutdown()` with `this.game.events.off(GAME_EVENTS.*)`.
+
+#### Touch Controls Camera Offset
+
+On narrow/portrait devices (aspect < 1.2), virtual touch controls overlap the play area. HUDScene emits `TOUCH_CONTROLS_TOP` with the top edge of the controls in screen pixels. GameScene uses this to apply a negative `followOffset.y` so the groomer renders above the controls. Camera bounds are extended downward by `|followOffset.y|` via `updateCameraBoundsForOffset()` to prevent clamping at the world bottom edge.
 
 ### GameScene System Extraction
 

@@ -407,6 +407,9 @@ export default class HUDScene extends Phaser.Scene {
     const margin = 15; // Extra margin between dialogue and controls
     this.touchControlsTopEdge = joystickTopEdge - margin;
 
+    // Notify GameScene so it can offset the camera to keep groomer above controls
+    this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.touchControlsTopEdge);
+
     // Joystick base (outer circle) — beveled retro style
     this.joystickBase = this.add.circle(joystickX, joystickY, joystickRadius, 0x222222, alpha * 0.7)
       .setScrollFactor(0)
