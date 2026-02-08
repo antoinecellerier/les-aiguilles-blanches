@@ -77,8 +77,10 @@ snow-groomer/
 │   ├── agents/
 │   │   └── code-health.agent.md  # Code audit custom agent
 │   ├── skills/
-│   │   ├── code-health/    # Auto-invoked code audit skill
-│   │   └── docs-update/    # Auto-invoked docs sync skill
+│   │   ├── art-review/    # Art director visual review skill
+│   │   ├── code-health/   # Auto-invoked code audit skill
+│   │   ├── content-review/# Content writer review skill
+│   │   └── docs-update/   # Auto-invoked docs sync skill
 │   └── copilot-instructions.md   # Copilot custom instructions
 └── docs/
     ├── ARCHITECTURE.md     # This file

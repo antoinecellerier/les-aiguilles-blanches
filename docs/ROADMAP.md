@@ -40,6 +40,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Art director review skill** - New `art-review` skill for visual code review against ART_STYLE.md (colors, shapes, dimensions, depth, accessibility) with Playwright screenshot inspection and cross-model consultation. Added to pre-commit checklist.
+
 - ✅ **Alpine wildlife** - Decorative bouquetin, chamois, marmots, bunnies, and birds on menu and in-game. Flee AI reacts to groomer proximity. Per-level species config via WildlifeSystem
 
 - ✅ **Wildlife polish** - Side-view flying bird sprite (Gemini-reviewed), perched/flying sprite swaps, proper flight orientation via setScale, smooth arc-turning soaring, fox hunting/lunge/rest extracted to foxBehavior.ts, track drawing extracted to animalTracks.ts, Y-based bouquetin depth, bird world-edge wrapping, dialog depth fix (renders above mountains), building/cliff collision, track erasure on grooming, track bootstrapping, overlay shutdown cleanup

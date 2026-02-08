@@ -22,9 +22,10 @@ npm run dev                       # Dev server
 Before every commit, verify:
 
 1. **Code review** - Run the `code-health` skill (`.github/skills/code-health/SKILL.md`) on all changed files. Fix any HIGH/MEDIUM findings before committing.
-2. **Tests** - Regression test exists and passes
-3. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
-4. **Commit message** - Summarizes functional change, lists all updates
+2. **Art review** - If any visual files changed (scenes, sprites, theme, weather), run the `art-review` skill (`.github/skills/art-review/SKILL.md`). Fix any HIGH/MEDIUM findings before committing.
+3. **Tests** - Regression test exists and passes
+4. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
+5. **Commit message** - Summarizes functional change, lists all updates
 
 Commit message structure:
 ```
@@ -41,6 +42,7 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 ## Custom Agents
 - `code-health` — Thorough code audit against engineering best practices. Auto-activates as a skill when you ask about code quality, duplication, or tech debt. Also available explicitly via `/agent` → `code-health`
 - `content-review` — Expert content writer review of in-game text: dialogue, localization, lore, tone, and translation quality across all 5 languages
+- `art-review` — Art director review of visual code and rendered output against `docs/ART_STYLE.md`. Checks color palettes, shape compliance (rectangles only), dimensions, depth layering, and accessibility
 
 ## Critical Patterns
 

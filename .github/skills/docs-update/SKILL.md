@@ -78,6 +78,7 @@ Update `.github/skills/` or `.github/agents/` if:
 
 - Workflow processes changed (audit steps, review criteria)
 - New tools or patterns should be codified for reuse
+- Visual style rules changed (update art-review skill alongside ART_STYLE.md)
 
 ### 9. README.md
 
