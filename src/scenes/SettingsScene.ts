@@ -702,69 +702,58 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private createBindingRow(actionId: string, label: string): any {
-    // Use fixWidthSizer for wrapping with width constraint
-    const row = this.rexUI.add.fixWidthSizer({ 
-      width: this.contentWidth,
-      space: { item: Math.round(this.fontSize * 0.5), line: 2 }
+    return this.createBindingRowImpl(actionId, label, {
+      labelPrefix: '',
+      getCurrentBinding: () => this.keys.bindings[actionId as keyof KeyBindings],
+      getDefaultBinding: () => getLayoutDefaults()[actionId as keyof KeyBindings],
+      getDisplayName: (binding: number) => this.keys.getKeyName(binding),
+      onRebind: (btn: Phaser.GameObjects.Text) => this.keys.startRebind(actionId, btn),
     });
-    
-    row.add(this.createText(label + ':', this.smallFont, THEME.colors.textSecondary));
-    
-    const currentBinding = this.keys.bindings[actionId as keyof KeyBindings];
-    const defaults = getLayoutDefaults();
-    const isCustom = currentBinding !== defaults[actionId as keyof KeyBindings];
-    const keyName = this.keys.getKeyName(currentBinding);
-    
-    const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
-    const btn = this.add.text(0, 0, keyName + (isCustom ? ' *' : ''), {
-      fontFamily: THEME.fonts.family,
-      fontSize: this.smallFont + 'px',
-      color: isCustom ? THEME.colors.accent : THEME.colors.info,
-      backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
-      padding: { x: Math.round(paddingY * 2), y: paddingY },
-    }).setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.keys.startRebind(actionId, btn));
-    
-    row.add(btn);
-
-    // Register focus item
-    this.focus.items.push({
-      element: row,
-      activate: () => this.keys.startRebind(actionId, btn),
-    });
-
-    return row;
   }
 
   private createGamepadBindingRow(actionId: string, label: string): any {
+    return this.createBindingRowImpl(actionId, label, {
+      labelPrefix: '🎮 ',
+      getCurrentBinding: () => this.keys.gamepadBindings[actionId as keyof GamepadBindings],
+      getDefaultBinding: () => getDefaultGamepadBindings()[actionId as keyof GamepadBindings],
+      getDisplayName: (binding: number) => getButtonName(binding, getConnectedControllerType()),
+      onRebind: (btn: Phaser.GameObjects.Text) => this.keys.startGamepadRebind(actionId, btn),
+    });
+  }
+
+  private createBindingRowImpl(_actionId: string, label: string, opts: {
+    labelPrefix: string;
+    getCurrentBinding: () => number;
+    getDefaultBinding: () => number;
+    getDisplayName: (binding: number) => string;
+    onRebind: (btn: Phaser.GameObjects.Text) => void;
+  }): any {
     const row = this.rexUI.add.fixWidthSizer({
       width: this.contentWidth,
       space: { item: Math.round(this.fontSize * 0.5), line: 2 }
     });
 
-    row.add(this.createText('🎮 ' + label + ':', this.smallFont, THEME.colors.textSecondary));
+    row.add(this.createText(opts.labelPrefix + label + ':', this.smallFont, THEME.colors.textSecondary));
 
-    const currentBtn = this.keys.gamepadBindings[actionId as keyof GamepadBindings];
-    const defaultBtn = getDefaultGamepadBindings()[actionId as keyof GamepadBindings];
-    const isCustom = currentBtn !== defaultBtn;
-    const btnName = getButtonName(currentBtn, getConnectedControllerType());
+    const current = opts.getCurrentBinding();
+    const isCustom = current !== opts.getDefaultBinding();
+    const displayName = opts.getDisplayName(current);
 
     const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
-    const btn = this.add.text(0, 0, btnName + (isCustom ? ' *' : ''), {
+    const btn = this.add.text(0, 0, displayName + (isCustom ? ' *' : ''), {
       fontFamily: THEME.fonts.family,
       fontSize: this.smallFont + 'px',
       color: isCustom ? THEME.colors.accent : THEME.colors.info,
       backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
       padding: { x: Math.round(paddingY * 2), y: paddingY },
     }).setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.keys.startGamepadRebind(actionId, btn));
+      .on('pointerdown', () => opts.onRebind(btn));
 
     row.add(btn);
 
-    // Register focus item
     this.focus.items.push({
       element: row,
-      activate: () => this.keys.startGamepadRebind(actionId, btn),
+      activate: () => opts.onRebind(btn),
     });
 
     return row;
