@@ -45,6 +45,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **GameScene LevelGeometry extraction** — Extracted piste path, cliff segments, access path geometry into `src/systems/LevelGeometry.ts` (385 lines, zero Phaser dependency). GameScene reduced from 2783→2386 lines (-397). Fixed shutdown ordering: system resets now run before `children.removeAll(true)`. Tests updated to use `geometry.*` property paths.
+
 - ✅ **MenuScene god method refactoring** — Split `create()` (390→50 lines) and `update()` (467→7 lines) into focused sub-methods. Extracted createSkyAndGround, createTitle, createMenuButtons, createFooter, setupInput from create(); updateSnowflakes, updateWildlife, updateBird, updateClimber, updateGroundAnimal, animateGroundAnimal, wanderDecision, updateTracks from update(); createMenuClimbers, createMenuBirds from createMenuWildlife. 38 methods total, no behavioral changes.
 
 - ✅ **Settings keyboard & gamepad navigation** - FocusItem system with 17 navigable elements (language group, toggles, bindings, layout group, sensitivity slider, gamepad bindings, reset, back). Arrow/D-pad up/down navigates, left/right cycles groups and adjusts slider. Focus indicator with auto-scroll and panel clipping. Gamepad left/right handled with separate cooldown from vertical nav.
@@ -142,4 +144,5 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Deferred Refactors
 
+- GameScene further decomposition: PisteRenderer (boundary/cliff/marker/tree rendering), WinchSystem, GroomingSystem, InputManager. LevelGeometry done; these are the next candidates.
 - Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring ~7 lines, track aging ~10 lines, same-species repulsion ~9 lines). Both files use the same patterns but different coordinate systems (side-view vs top-down), making extraction non-trivial.

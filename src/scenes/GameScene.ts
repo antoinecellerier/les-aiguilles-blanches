@@ -12,6 +12,7 @@ import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { HazardSystem } from '../systems/HazardSystem';
 import { WildlifeSystem, type ObstacleRect } from '../systems/WildlifeSystem';
+import { LevelGeometry, type PistePath } from '../systems/LevelGeometry';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -23,39 +24,10 @@ interface GameSceneData {
   level?: number;
 }
 
-interface PistePath {
-  centerX: number;
-  width: number;
-}
-
 interface SnowCell {
   tile: Phaser.GameObjects.Image;
   groomed: boolean;
   groomable: boolean;
-}
-
-interface SteepZoneRect {
-  startY: number;
-  endY: number;
-  leftX: number;
-  rightX: number;
-  slope: number;
-}
-
-interface AccessPathRect {
-  startY: number;
-  endY: number;
-  leftX: number;
-  rightX: number;
-  side: 'left' | 'right';
-  pathIndex: number;
-}
-
-interface AccessEntryZone {
-  y: number;
-  side: string;
-  startY: number;
-  endY: number;
 }
 
 interface WinchAnchor {
@@ -129,22 +101,8 @@ export default class GameScene extends Phaser.Scene {
   private groomableTiles = 0;
   private totalTiles = 0;
 
-  // Piste path
-  private pistePath: PistePath[] = [];
-  private steepZoneRects: SteepZoneRect[] = [];
-  private accessPathRects: AccessPathRect[] = [];
-  private accessEntryZones: AccessEntryZone[] = [];
-  private accessPathCurves: { leftEdge: {x:number,y:number}[]; rightEdge: {x:number,y:number}[] }[] = [];
-  
-  // Cliff data - shared between physics and visuals for consistency
-  private cliffSegments: {
-    side: 'left' | 'right';
-    startY: number;
-    endY: number;
-    offset: number;  // Distance from piste edge where cliff starts
-    extent: number;  // Width of cliff
-    getX: (y: number) => number;  // Piste edge position at Y
-  }[] = [];
+  // Piste path & geometry (extracted to LevelGeometry system)
+  private geometry = new LevelGeometry();
 
   // Winch
   private winchAnchors: WinchAnchor[] = [];
@@ -260,10 +218,7 @@ export default class GameScene extends Phaser.Scene {
     this.createSnowGrid();
     console.log('Snow grid created');
 
-    // Pre-calculate access path geometry so boundaries and background can avoid them
-    this.calculateAccessPathGeometry();
-
-    // Create boundary colliders after access path geometry is available
+    // Create boundary colliders after geometry is available (piste path, cliffs, access paths)
     this.createBoundaryColliders();
 
     // Create extended background to cover full visible window
@@ -348,7 +303,7 @@ export default class GameScene extends Phaser.Scene {
         () => this.isGrooming,
         (key: string) => this.showDialogue(key),
         (won: boolean, reason: string) => this.gameOver(won, reason),
-        this.accessPathRects,
+        this.geometry.accessPathRects,
         this.winchAnchors?.map(a => ({ x: a.x, y: a.baseY }))
       );
       console.log('Avalanche zones created');
@@ -414,12 +369,12 @@ export default class GameScene extends Phaser.Scene {
       const worldW = this.level.width * this.tileSize;
       const worldH = this.level.height * this.tileSize;
       // Use mid-level piste path to estimate left/right edges
-      const midPath = this.pistePath[Math.floor(this.level.height / 2)];
+      const midPath = this.geometry.pistePath[Math.floor(this.level.height / 2)];
       const pisteLeft = midPath ? (midPath.centerX - midPath.width / 2) * this.tileSize : worldW * 0.3;
       const pisteRight = midPath ? (midPath.centerX + midPath.width / 2) * this.tileSize : worldW * 0.7;
-      this.wildlifeSystem.spawn(this.level.wildlife, worldW, worldH, pisteLeft, pisteRight, this.accessPathRects);
+      this.wildlifeSystem.spawn(this.level.wildlife, worldW, worldH, pisteLeft, pisteRight, this.geometry.accessPathRects);
       this.wildlifeSystem.setObstacles(
-        (px, py) => this.isOnCliff(px, py),
+        (px, py) => this.geometry.isOnCliff(px, py),
         this.buildingRects,
       );
       this.wildlifeSystem.bootstrapTracks();
@@ -478,7 +433,7 @@ export default class GameScene extends Phaser.Scene {
           const offsetX = (Math.random() - 0.5) * treeSpacing * 0.8;
           const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
           const tx = x + offsetX, ty = y + offsetY;
-          if (this.isOnAccessPath(tx, ty)) continue;
+          if (this.geometry.isOnAccessPath(tx, ty)) continue;
           this.createTree(tx, ty);
         }
       }
@@ -492,7 +447,7 @@ export default class GameScene extends Phaser.Scene {
           const offsetX = (Math.random() - 0.5) * treeSpacing;
           const offsetY = (Math.random() - 0.5) * treeSpacing;
           const tx = x + offsetX, ty = y + offsetY;
-          if (this.isOnAccessPath(tx, ty)) continue;
+          if (this.geometry.isOnAccessPath(tx, ty)) continue;
           this.createRock(tx, ty);
         }
       }
@@ -514,96 +469,19 @@ export default class GameScene extends Phaser.Scene {
     g.fillRect(x, y + size * 0.1, size * 0.4, size * 0.15);
   }
 
-  private generatePistePath(): void {
-    const shape = this.level.pisteShape || 'straight';
-    const pisteWidth = this.level.pisteWidth || 0.5;
-    const worldWidth = this.level.width;
-    const worldHeight = this.level.height;
-    const halfWidth = Math.floor(worldWidth * pisteWidth / 2);
-
-    this.pistePath = [];
-
-    for (let y = 0; y < worldHeight; y++) {
-      const progress = y / worldHeight;
-      let centerX = worldWidth / 2;
-      let width = halfWidth * 2;
-
-      switch (shape) {
-        case 'straight':
-          break;
-        case 'gentle_curve':
-          centerX += Math.sin(progress * Math.PI * 2) * (worldWidth * 0.15);
-          break;
-        case 'winding':
-          centerX += Math.sin(progress * Math.PI * 3) * (worldWidth * 0.2);
-          width = halfWidth * 2 * (0.8 + 0.2 * Math.cos(progress * Math.PI * 3));
-          break;
-        case 'serpentine':
-          centerX += Math.sin(progress * Math.PI * 4) * (worldWidth * 0.25);
-          width = halfWidth * 2 * (0.7 + 0.3 * Math.abs(Math.cos(progress * Math.PI * 4)));
-          break;
-        case 'wide':
-          width = halfWidth * 2.5;
-          break;
-      }
-
-      this.pistePath.push({
-        centerX: Math.max(halfWidth + 3, Math.min(worldWidth - halfWidth - 3, centerX)),
-        width: Math.max(6, Math.floor(width))
-      });
-    }
-  }
-
-  private isInPiste(x: number, y: number): boolean {
-    if (y < 3 || y >= this.level.height - 2) return false;
-    if (!this.pistePath || !this.pistePath[y]) return true;
-
-    const path = this.pistePath[y];
-    const halfWidth = path.width / 2;
-    return x >= path.centerX - halfWidth && x < path.centerX + halfWidth;
-  }
-
-  /**
-   * Check if a position (in pixels) falls within a cliff area.
-   * Used to avoid placing markers on rocks.
-   */
-  private isOnCliff(x: number, y: number): boolean {
-    if (!this.cliffSegments || this.cliffSegments.length === 0) return false;
-    
-    for (const cliff of this.cliffSegments) {
-      // Check if y is within this cliff segment's vertical range
-      if (y < cliff.startY || y > cliff.endY) continue;
-      
-      const pisteEdge = cliff.getX(y);
-      
-      if (cliff.side === 'left') {
-        // Left cliff extends from (pisteEdge - offset - extent) to (pisteEdge - offset)
-        const cliffEnd = pisteEdge - cliff.offset;
-        const cliffStart = cliffEnd - cliff.extent;
-        if (x >= cliffStart && x <= cliffEnd) return true;
-      } else {
-        // Right cliff extends from (pisteEdge + offset) to (pisteEdge + offset + extent)
-        const cliffStart = pisteEdge + cliff.offset;
-        const cliffEnd = cliffStart + cliff.extent;
-        if (x >= cliffStart && x <= cliffEnd) return true;
-      }
-    }
-    
-    return false;
-  }
-
   private createSnowGrid(): void {
     this.snowTiles = this.add.group();
     const tileSize = this.tileSize;
 
-    this.generatePistePath();
+    // Generate all geometry (piste path, access zones, cliffs)
+    this.geometry.generate(this.level, tileSize);
 
     this.groomableTiles = 0;
 
     for (let y = 0; y < this.level.height; y++) {
       this.snowGrid[y] = [];
       for (let x = 0; x < this.level.width; x++) {
-        const isGroomable = this.isInPiste(x, y);
+        const isGroomable = this.geometry.isInPiste(x, y, this.level);
 
         const tile = this.add.image(
           x * tileSize + tileSize / 2,
@@ -628,153 +506,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.totalTiles = this.groomableTiles;
-
-    this.calculateAccessPathZones();
-    this.calculateCliffSegments();  // Calculate cliff data before physics/visuals
-  }
-
-  private calculateAccessPathZones(): void {
-    const accessPaths = this.level.accessPaths || [];
-    this.accessEntryZones = [];
-
-    if (accessPaths.length === 0) return;
-
-    const tileSize = this.tileSize;
-    const worldHeight = this.level.height * tileSize;
-    const gapWidth = tileSize * 8;
-
-    accessPaths.forEach(path => {
-      const entryY = path.endY * worldHeight;
-      const exitY = path.startY * worldHeight;
-
-      this.accessEntryZones.push({
-        y: entryY,
-        side: path.side,
-        startY: entryY - gapWidth,
-        endY: entryY + gapWidth
-      });
-
-      this.accessEntryZones.push({
-        y: exitY,
-        side: path.side,
-        startY: exitY - gapWidth,
-        endY: exitY + gapWidth
-      });
-    });
-  }
-
-  /**
-   * Calculate cliff segments with variable offset and extent.
-   * Called before createBoundaryColliders so both physics and visuals use same data.
-   */
-  private calculateCliffSegments(): void {
-    if (!this.level.hasDangerousBoundaries) return;
-    
-    this.cliffSegments = [];
-    const tileSize = this.tileSize;
-    const worldWidth = this.level.width * tileSize;
-    
-    // Seeded random for consistent cliff appearance
-    const rand = (seed: number) => {
-      const n = Math.sin(seed * 127.1) * 43758.5453;
-      return n - Math.floor(n);
-    };
-    
-    // Build continuous cliff segments for each side
-    type EdgeData = { y: number; x: number };
-    const leftEdges: EdgeData[] = [];
-    const rightEdges: EdgeData[] = [];
-    let leftStart: number | null = null;
-    let rightStart: number | null = null;
-    
-    for (let y = 3; y < this.level.height - 2; y++) {
-      const path = this.pistePath[y];
-      if (!path) continue;
-      
-      const leftEdge = (path.centerX - path.width / 2) * tileSize;
-      const rightEdge = (path.centerX + path.width / 2) * tileSize;
-      const yPos = y * tileSize;
-      
-      // Check access paths - cliffs should not overlap service roads
-      // Check both entry/exit zones AND full road geometry (switchback area)
-      const isLeftAccess = (this.accessEntryZones?.some(z => 
-        z.side === 'left' && yPos >= z.startY - tileSize * 2 && yPos <= z.endY + tileSize * 2
-      )) || (this.accessPathRects?.some(r =>
-        r.side === 'left' && yPos >= r.startY && yPos <= r.endY
-      ));
-      const isRightAccess = (this.accessEntryZones?.some(z => 
-        z.side === 'right' && yPos >= z.startY - tileSize * 2 && yPos <= z.endY + tileSize * 2
-      )) || (this.accessPathRects?.some(r =>
-        r.side === 'right' && yPos >= r.startY && yPos <= r.endY
-      ));
-      
-      // Left cliff segments - anywhere piste doesn't touch left edge
-      const hasLeftCliff = leftEdge > tileSize && !isLeftAccess;
-      if (hasLeftCliff) {
-        if (leftStart === null) leftStart = yPos;
-        leftEdges.push({ y: yPos, x: leftEdge });
-      } else if (leftStart !== null) {
-        this.finalizeCliffSegmentWithParams(leftStart, (y - 1) * tileSize, leftEdges, 'left', rand, tileSize, worldWidth);
-        leftStart = null;
-        leftEdges.length = 0;
-      }
-      
-      // Right cliff segments - anywhere piste doesn't touch right edge
-      const hasRightCliff = rightEdge < worldWidth - tileSize && !isRightAccess;
-      if (hasRightCliff) {
-        if (rightStart === null) rightStart = yPos;
-        rightEdges.push({ y: yPos, x: rightEdge });
-      } else if (rightStart !== null) {
-        this.finalizeCliffSegmentWithParams(rightStart, (y - 1) * tileSize, rightEdges, 'right', rand, tileSize, worldWidth);
-        rightStart = null;
-        rightEdges.length = 0;
-      }
-    }
-    
-    // Close remaining segments
-    if (leftStart !== null) {
-      this.finalizeCliffSegmentWithParams(leftStart, (this.level.height - 3) * tileSize, leftEdges, 'left', rand, tileSize, worldWidth);
-    }
-    if (rightStart !== null) {
-      this.finalizeCliffSegmentWithParams(rightStart, (this.level.height - 3) * tileSize, rightEdges, 'right', rand, tileSize, worldWidth);
-    }
-  }
-  
-  private finalizeCliffSegmentWithParams(
-    startY: number,
-    endY: number,
-    edges: { y: number; x: number }[],
-    side: 'left' | 'right',
-    rand: (seed: number) => number,
-    tileSize: number,
-    worldWidth: number
-  ): void {
-    if (edges.length < 2) return;
-    
-    // CRITICAL: Copy edges array since caller clears it after this call
-    // The closure needs its own copy to work correctly
-    const edgesCopy = edges.map(e => ({ y: e.y, x: e.x }));
-    
-    // Variable offset from piste edge: 1.5-3 tiles minimum
-    // Ensures cliffs never overlap with piste area
-    const offsetVariation = rand(startY * 0.5 + 77);
-    const offset = tileSize * (1.5 + offsetVariation * 1.5);
-    
-    // Finite extent: 3-5 tiles wide
-    const extent = tileSize * (3 + rand(startY * 0.3 + 99) * 2);
-    
-    // Interpolation function for edge position using copied edges
-    const getX = (y: number): number => {
-      const idx = edgesCopy.findIndex(e => e.y >= y);
-      if (idx <= 0) return edgesCopy[0].x;
-      if (idx >= edgesCopy.length) return edgesCopy[edgesCopy.length - 1].x;
-      const prev = edgesCopy[idx - 1];
-      const next = edgesCopy[idx];
-      const t = (y - prev.y) / (next.y - prev.y || 1);
-      return prev.x + (next.x - prev.x) * t;
-    };
-    
-    this.cliffSegments.push({ side, startY, endY, offset, extent, getX });
   }
 
   private createBoundaryColliders(): void {
@@ -788,11 +519,11 @@ export default class GameScene extends Phaser.Scene {
 
     const isAccessZone = (yPos: number, side: string): boolean => {
       // Check entry/exit zones
-      if (this.accessEntryZones) {
+      if (this.geometry.accessEntryZones) {
         const segmentTop = yPos;
         const segmentBottom = yPos + tileSize * 4;
 
-        for (const zone of this.accessEntryZones) {
+        for (const zone of this.geometry.accessEntryZones) {
           if (zone.side === side &&
             segmentTop < zone.endY && segmentBottom > zone.startY) {
             return true;
@@ -800,10 +531,10 @@ export default class GameScene extends Phaser.Scene {
         }
       }
       // Check full road path rects (switchback area)
-      if (this.accessPathRects) {
+      if (this.geometry.accessPathRects) {
         const segmentTop = yPos;
         const segmentBottom = yPos + tileSize * 4;
-        for (const rect of this.accessPathRects) {
+        for (const rect of this.geometry.accessPathRects) {
           if (segmentTop < rect.endY && segmentBottom > rect.startY) {
             if (rect.side === side) return true;
           }
@@ -816,10 +547,10 @@ export default class GameScene extends Phaser.Scene {
 
     // For dangerous levels, use cliff segments with offset for physics
     // For non-dangerous levels, use piste edge directly
-    if (isDangerous && this.cliffSegments.length > 0) {
+    if (isDangerous && this.geometry.cliffSegments.length > 0) {
       // Create danger zones based on cliff segments (with offset from piste)
       // Skip segments that overlap access paths (belt-and-suspenders with calculateCliffSegments)
-      for (const cliff of this.cliffSegments) {
+      for (const cliff of this.geometry.cliffSegments) {
         // Create physics bodies for each segment of the cliff
         for (let y = cliff.startY; y < cliff.endY; y += segmentHeight) {
           if (isAccessZone(y, cliff.side)) continue;
@@ -886,7 +617,7 @@ export default class GameScene extends Phaser.Scene {
         if (y >= this.level.height - 2) continue;
 
         const yPos = y * tileSize;
-        const path = this.pistePath[y] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
+        const path = this.geometry.pistePath[y] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
         const leftEdge = (path.centerX - path.width / 2) * tileSize;
         const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
@@ -945,7 +676,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createCliffEdgeVisuals(): void {
     // Use pre-calculated cliff segments (same data as physics)
-    for (const cliff of this.cliffSegments) {
+    for (const cliff of this.geometry.cliffSegments) {
       this.drawContinuousCliff(cliff);
     }
   }
@@ -1127,7 +858,7 @@ export default class GameScene extends Phaser.Scene {
     for (let yi = 0; yi < this.level.height; yi += markerSpacing) {
       if (yi < 4 || yi >= this.level.height - 3) continue;
 
-      const path = this.pistePath[yi];
+      const path = this.geometry.pistePath[yi];
       if (!path) continue;
 
       const leftX = (path.centerX - path.width / 2) * tileSize;
@@ -1138,10 +869,10 @@ export default class GameScene extends Phaser.Scene {
       const leftMarkerX = leftX - tileSize * 0.5;
       const rightMarkerX = rightX + tileSize * 0.5;
       
-      if (!this.isOnCliff(leftMarkerX, y)) {
+      if (!this.geometry.isOnCliff(leftMarkerX, y)) {
         this.createMarkerPole(leftMarkerX, y, markerColor, markerSymbol, 'left');
       }
-      if (!this.isOnCliff(rightMarkerX, y)) {
+      if (!this.geometry.isOnCliff(rightMarkerX, y)) {
         this.createMarkerPole(rightMarkerX, y, markerColor, markerSymbol, 'right');
       }
     }
@@ -1186,22 +917,11 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  private isOnAccessPath(x: number, y: number): boolean {
-    if (!this.accessPathRects) return false;
-    for (const rect of this.accessPathRects) {
-      if (y >= rect.startY && y <= rect.endY &&
-        x >= rect.leftX && x <= rect.rightX) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private createForestBoundaries(worldWidth: number, _worldHeight: number): void {
     const tileSize = this.tileSize;
 
     for (let yi = 3; yi < this.level.height - 2; yi += 2) {
-      const path = this.pistePath[yi];
+      const path = this.geometry.pistePath[yi];
       if (!path) continue;
 
       const leftEdge = (path.centerX - path.width / 2) * tileSize;
@@ -1211,8 +931,8 @@ export default class GameScene extends Phaser.Scene {
       for (let tx = tileSize; tx < leftEdge - tileSize; tx += tileSize * 1.5) {
         const treeX = tx + Math.random() * tileSize;
         const treeY = y + Math.random() * tileSize;
-        if (this.isOnAccessPath(treeX, treeY)) continue;
-        if (this.isOnCliff(treeX, treeY)) continue;
+        if (this.geometry.isOnAccessPath(treeX, treeY)) continue;
+        if (this.geometry.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
           this.createTree(treeX, treeY);
         }
@@ -1221,8 +941,8 @@ export default class GameScene extends Phaser.Scene {
       for (let tx = rightEdge + tileSize; tx < worldWidth - tileSize; tx += tileSize * 1.5) {
         const treeX = tx + Math.random() * tileSize;
         const treeY = y + Math.random() * tileSize;
-        if (this.isOnAccessPath(treeX, treeY)) continue;
-        if (this.isOnCliff(treeX, treeY)) continue;
+        if (this.geometry.isOnAccessPath(treeX, treeY)) continue;
+        if (this.geometry.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
           this.createTree(treeX, treeY);
         }
@@ -1248,14 +968,14 @@ export default class GameScene extends Phaser.Scene {
     const tileSize = this.tileSize;
     const worldHeight = this.level.height * tileSize;
 
-    this.steepZoneRects = [];
+    this.geometry.steepZoneRects = [];
 
     steepZones.forEach(zone => {
       const startY = zone.startY * worldHeight;
       const endY = zone.endY * worldHeight;
 
       const midYIndex = Math.floor((zone.startY + zone.endY) / 2 * this.level.height);
-      const path = this.pistePath[midYIndex] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
+      const path = this.geometry.pistePath[midYIndex] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
       const leftEdge = (path.centerX - path.width / 2) * tileSize;
       const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
@@ -1310,7 +1030,7 @@ export default class GameScene extends Phaser.Scene {
         padding: { x: 3, y: 1 }
       }).setOrigin(0, 0.5).setAlpha(0.8).setDepth(DEPTHS.SIGNAGE);
 
-      this.steepZoneRects.push({
+      this.geometry.steepZoneRects.push({
         startY: startY,
         endY: endY,
         leftX: leftEdge,
@@ -1321,134 +1041,16 @@ export default class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Pre-calculate access path geometry (curves, edges, rects).
-   * Called early so boundary colliders and background trees can avoid road areas.
-   */
-  private calculateAccessPathGeometry(): void {
-    const accessPaths = this.level.accessPaths || [];
-    this.accessPathRects = [];
-    this.accessPathCurves = [];
-    if (accessPaths.length === 0) return;
-
-    const tileSize = this.tileSize;
-    const worldHeight = this.level.height * tileSize;
-    const worldWidth = this.level.width * tileSize;
-    const roadWidth = tileSize * 5;
-
-    accessPaths.forEach((path, pathIdx) => {
-      const entryY = path.endY * worldHeight;
-      const exitY = path.startY * worldHeight;
-      const onLeft = path.side === 'left';
-
-      const entryYIndex = Math.floor(path.endY * this.level.height);
-      const exitYIndex = Math.floor(path.startY * this.level.height);
-      const entryPath = this.pistePath[entryYIndex] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
-      const exitPath = this.pistePath[exitYIndex] || { centerX: this.level.width / 2, width: this.level.width * 0.5 };
-
-      const entryPisteX = onLeft ?
-        (entryPath.centerX - entryPath.width / 2) * tileSize :
-        (entryPath.centerX + entryPath.width / 2) * tileSize;
-      const exitPisteX = onLeft ?
-        (exitPath.centerX - exitPath.width / 2) * tileSize :
-        (exitPath.centerX + exitPath.width / 2) * tileSize;
-
-      const roadExtent = tileSize * 12;
-      const outerX = onLeft ?
-        Math.max(tileSize * 3, Math.min(entryPisteX, exitPisteX) - roadExtent) :
-        Math.min(worldWidth - tileSize * 3, Math.max(entryPisteX, exitPisteX) + roadExtent);
-
-      const numTurns = 3;
-      const segmentHeight = (entryY - exitY) / (numTurns + 1);
-
-      const curvePoints: { x: number; y: number }[] = [];
-      const stepsPerSegment = 12;
-
-      curvePoints.push({ x: entryPisteX, y: entryY });
-
-      for (let t = 0; t <= numTurns; t++) {
-        const targetY = entryY - (t + 0.5) * segmentHeight;
-        const atOuter = (t % 2 === 0);
-        const innerX = onLeft ?
-          Math.min(entryPisteX, exitPisteX) - tileSize * 2 :
-          Math.max(entryPisteX, exitPisteX) + tileSize * 2;
-        const targetX = atOuter ? outerX : innerX;
-
-        const prevPoint = curvePoints[curvePoints.length - 1];
-
-        for (let s = 1; s <= stepsPerSegment; s++) {
-          const progress = s / stepsPerSegment;
-          const eased = progress < 0.5 ?
-            2 * progress * progress :
-            1 - Math.pow(-2 * progress + 2, 2) / 2;
-
-          const x = prevPoint.x + (targetX - prevPoint.x) * eased;
-          const y = prevPoint.y + (targetY - prevPoint.y) * progress;
-          curvePoints.push({ x, y });
-        }
-      }
-
-      const lastPoint = curvePoints[curvePoints.length - 1];
-      for (let s = 1; s <= stepsPerSegment; s++) {
-        const progress = s / stepsPerSegment;
-        const eased = progress < 0.5 ?
-          2 * progress * progress :
-          1 - Math.pow(-2 * progress + 2, 2) / 2;
-
-        const x = lastPoint.x + (exitPisteX - lastPoint.x) * eased;
-        const y = lastPoint.y + (exitY - lastPoint.y) * progress;
-        curvePoints.push({ x, y });
-      }
-
-      const leftEdge: { x: number; y: number }[] = [];
-      const rightEdge: { x: number; y: number }[] = [];
-
-      for (let p = 0; p < curvePoints.length; p++) {
-        const curr = curvePoints[p];
-        const next = curvePoints[Math.min(p + 1, curvePoints.length - 1)];
-        const prev = curvePoints[Math.max(p - 1, 0)];
-
-        const dx = (next.x - prev.x) / 2;
-        const dy = (next.y - prev.y) / 2;
-        const len = Math.sqrt(dx * dx + dy * dy) || 1;
-
-        const nx = -dy / len * (roadWidth / 2);
-        const ny = dx / len * (roadWidth / 2);
-
-        leftEdge.push({ x: curr.x + nx, y: curr.y + ny });
-        rightEdge.push({ x: curr.x - nx, y: curr.y - ny });
-      }
-
-      this.accessPathCurves.push({ leftEdge, rightEdge });
-
-      // Build collision-exempt rects — one per curve point for full coverage
-      // Margin covers road half-width plus buffer for curve interpolation
-      const margin = roadWidth * 1.2;
-      for (let p = 0; p < curvePoints.length - 1; p++) {
-        const p1 = curvePoints[p];
-        const p2 = curvePoints[p + 1];
-        this.accessPathRects.push({
-          startY: Math.min(p1.y, p2.y) - margin,
-          endY: Math.max(p1.y, p2.y) + margin,
-          leftX: Math.min(p1.x, p2.x) - margin,
-          rightX: Math.max(p1.x, p2.x) + margin,
-          side: onLeft ? 'left' : 'right',
-          pathIndex: pathIdx,
-        });
-      }
-    });
-  }
-
-  /**
    * Render access path visuals (road surface tiles + poles).
-   * Uses pre-computed geometry from calculateAccessPathGeometry().
+   * Uses pre-computed geometry from LevelGeometry.
    */
   private createAccessPaths(): void {
-    if (this.accessPathCurves.length === 0) return;
+    if (this.geometry.accessPathCurves.length === 0) return;
 
     const tileSize = this.tileSize;
     const poleSpacing = tileSize * 15;
 
-    this.accessPathCurves.forEach(({ leftEdge, rightEdge }) => {
+    this.geometry.accessPathCurves.forEach(({ leftEdge, rightEdge }) => {
       // Place road surface tiles along the curve
       const placedTiles = new Set<string>();
       for (let p = 0; p < leftEdge.length - 1; p++) {
@@ -1546,14 +1148,14 @@ export default class GameScene extends Phaser.Scene {
 
     if (anchorDefs.length === 0) {
       const anchorY = tileSize * 4;
-      const path = this.pistePath[4] || { centerX: this.level.width / 2 };
+      const path = this.geometry.pistePath[4] || { centerX: this.level.width / 2 };
       this.createAnchorPost(path.centerX * tileSize, anchorY, 1);
       return;
     }
 
     anchorDefs.forEach((def, i) => {
       const yIndex = Math.floor(def.y * this.level.height);
-      const path = this.pistePath[yIndex] || { centerX: this.level.width / 2 };
+      const path = this.geometry.pistePath[yIndex] || { centerX: this.level.width / 2 };
       const x = path.centerX * tileSize;
       const y = yIndex * tileSize;
 
@@ -1743,8 +1345,8 @@ export default class GameScene extends Phaser.Scene {
           y = Phaser.Math.Between(this.tileSize * 10, worldHeight - this.tileSize * 10);
         }
         attempts++;
-      } while ((this.isOnAccessPath(x, y) || this.isOnCliff(x, y)) && attempts < 10);
-      if (this.isOnAccessPath(x, y) || this.isOnCliff(x, y)) continue;
+      } while ((this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y)) && attempts < 10);
+      if (this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y)) continue;
 
       let texture = 'tree';
       if (type === 'rocks') texture = 'rock';
@@ -1822,7 +1424,7 @@ export default class GameScene extends Phaser.Scene {
       }
 
       const pathIndex = Math.floor(yPos / tileSize);
-      const path = this.pistePath[pathIndex] ||
+      const path = this.geometry.pistePath[pathIndex] ||
         { centerX: this.level.width / 2, width: this.level.width * 0.5 };
 
       const pisteEdge = side === 'left' ?
@@ -1909,7 +1511,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createGroomer(): void {
     const bottomYIndex = Math.min(this.level.height - 8, Math.floor(this.level.height * 0.9));
-    const bottomPath = this.pistePath[bottomYIndex] || { centerX: this.level.width / 2 };
+    const bottomPath = this.geometry.pistePath[bottomYIndex] || { centerX: this.level.width / 2 };
     const startX = bottomPath.centerX * this.tileSize;
     const startY = bottomYIndex * this.tileSize;
 
@@ -1955,7 +1557,7 @@ export default class GameScene extends Phaser.Scene {
    */
   private checkCliffFall(): void {
     if (this.isGameOver || this.isFallingOffCliff || this.isTumbling) return;
-    if (!this.cliffSegments || this.cliffSegments.length === 0) return;
+    if (!this.geometry.cliffSegments || this.geometry.cliffSegments.length === 0) return;
 
     const scale = this.tileSize / 16;
     const rot = this.groomer.rotation;
@@ -1972,15 +1574,15 @@ export default class GameScene extends Phaser.Scene {
     const halfWid = BALANCE.GROOMER_HALF_WIDTH * scale * 0.5;   // 50% — sides are more sensitive
 
     // Side points (left/right of tracks) — tip if either side is on cliff
-    const leftOnCliff = this.isOnCliff(cx - rightX * halfWid, cy - rightY * halfWid);
-    const rightOnCliff = this.isOnCliff(cx + rightX * halfWid, cy + rightY * halfWid);
+    const leftOnCliff = this.geometry.isOnCliff(cx - rightX * halfWid, cy - rightY * halfWid);
+    const rightOnCliff = this.geometry.isOnCliff(cx + rightX * halfWid, cy + rightY * halfWid);
     if (leftOnCliff || rightOnCliff) {
       this.triggerCliffFall();
       return;
     }
 
     // Center of mass — fall if center itself is on cliff
-    if (this.isOnCliff(cx, cy)) {
+    if (this.geometry.isOnCliff(cx, cy)) {
       this.triggerCliffFall();
       return;
     }
@@ -2121,14 +1723,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private checkSteepness(): void {
-    if (!this.steepZoneRects || this.steepZoneRects.length === 0) return;
+    if (!this.geometry.steepZoneRects || this.geometry.steepZoneRects.length === 0) return;
     if (this.isGameOver || this.isTumbling) return;
 
     const groomerY = this.groomer.y;
     const groomerX = this.groomer.x;
 
-    if (this.accessPathRects) {
-      for (const path of this.accessPathRects) {
+    if (this.geometry.accessPathRects) {
+      for (const path of this.geometry.accessPathRects) {
         if (groomerY >= path.startY && groomerY <= path.endY &&
           groomerX >= path.leftX && groomerX <= path.rightX) {
           this.accessPathsVisited.add(path.pathIndex);
@@ -2137,7 +1739,7 @@ export default class GameScene extends Phaser.Scene {
       }
     }
 
-    for (const zone of this.steepZoneRects) {
+    for (const zone of this.geometry.steepZoneRects) {
       if (groomerY >= zone.startY && groomerY <= zone.endY &&
         groomerX >= zone.leftX && groomerX <= zone.rightX) {
 
@@ -2166,7 +1768,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private getSlopeAtPosition(x: number, y: number): number {
-    for (const zone of this.steepZoneRects) {
+    for (const zone of this.geometry.steepZoneRects) {
       if (y >= zone.startY && y <= zone.endY &&
         x >= zone.leftX && x <= zone.rightX) {
         return zone.slope;
@@ -2772,12 +2374,13 @@ export default class GameScene extends Phaser.Scene {
     this.tweens.killAll();
     this.time.removeAllEvents();
 
-    this.children.removeAll(true);
-
     this.winchCableGraphics = null;
     this.weatherSystem.reset();
     this.hazardSystem.reset();
     this.wildlifeSystem.reset();
+    this.geometry.reset();
     this.buildingRects = [];
+
+    this.children.removeAll(true);
   }
 }

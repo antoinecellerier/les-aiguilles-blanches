@@ -109,12 +109,12 @@ class TestCliffMechanics:
         
         cliff_info = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.cliffSegments) return null;
+            if (!gameScene?.geometry?.cliffSegments) return null;
             return {
-                count: gameScene.cliffSegments.length,
-                hasOffset: gameScene.cliffSegments.length > 0 && 'offset' in gameScene.cliffSegments[0],
-                hasExtent: gameScene.cliffSegments.length > 0 && 'extent' in gameScene.cliffSegments[0],
-                hasSide: gameScene.cliffSegments.length > 0 && 'side' in gameScene.cliffSegments[0]
+                count: gameScene.geometry.cliffSegments.length,
+                hasOffset: gameScene.geometry.cliffSegments.length > 0 && 'offset' in gameScene.geometry.cliffSegments[0],
+                hasExtent: gameScene.geometry.cliffSegments.length > 0 && 'extent' in gameScene.geometry.cliffSegments[0],
+                hasSide: gameScene.geometry.cliffSegments.length > 0 && 'side' in gameScene.geometry.cliffSegments[0]
             };
         }""")
         
@@ -133,8 +133,8 @@ class TestCliffMechanics:
         
         cliff_params = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.cliffSegments?.length) return null;
-            const cliff = gameScene.cliffSegments[0];
+            if (!gameScene?.geometry?.cliffSegments?.length) return null;
+            const cliff = gameScene.geometry.cliffSegments[0];
             const tileSize = gameScene.tileSize || 16;
             return {
                 offset: cliff.offset,
@@ -158,7 +158,7 @@ class TestCliffMechanics:
         
         cliff_count = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
-            return gameScene?.cliffSegments?.length ?? 0;
+            return gameScene?.geometry?.cliffSegments?.length ?? 0;
         }""")
         
         assert cliff_count == 0, "Tutorial level should not have cliff segments"
@@ -172,9 +172,9 @@ class TestCliffMechanics:
         
         interpolation_test = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.cliffSegments?.length) return null;
+            if (!gameScene?.geometry?.cliffSegments?.length) return null;
             
-            const cliff = gameScene.cliffSegments[0];
+            const cliff = gameScene.geometry.cliffSegments[0];
             const { startY, endY, getX } = cliff;
             const midY = (startY + endY) / 2;
             
@@ -207,8 +207,8 @@ class TestCliffMechanics:
             const gameScene = window.game?.scene?.getScene('GameScene');
             if (!gameScene) return { error: 'no scene' };
             
-            const hasMethod = typeof gameScene.isOnCliff === 'function';
-            const cliffCount = gameScene.cliffSegments?.length || 0;
+            const hasMethod = typeof gameScene.geometry.isOnCliff === 'function';
+            const cliffCount = gameScene.geometry.cliffSegments?.length || 0;
             
             return {
                 hasIsOnCliffMethod: hasMethod,
@@ -263,12 +263,12 @@ class TestAccessPaths:
 
         info = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs?.accessPathRects?.length) return null;
-            const r = gs.accessPathRects[0];
+            if (!gs?.geometry?.accessPathRects?.length) return null;
+            const r = gs.geometry.accessPathRects[0];
             return {
-                count: gs.accessPathRects.length,
+                count: gs.geometry.accessPathRects.length,
                 hasSide: 'side' in r,
-                sides: [...new Set(gs.accessPathRects.map(r => r.side))],
+                sides: [...new Set(gs.geometry.accessPathRects.map(r => r.side))],
             };
         }""")
 
@@ -288,12 +288,12 @@ class TestAccessPaths:
 
         overlaps = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs?.accessPathRects || !gs?.boundaryWalls) return null;
+            if (!gs?.geometry?.accessPathRects || !gs?.boundaryWalls) return null;
             let count = 0;
             gs.boundaryWalls.getChildren().forEach(w => {
                 const wl = w.x - w.width / 2, wr = w.x + w.width / 2;
                 const wt = w.y - w.height / 2, wb = w.y + w.height / 2;
-                for (const r of gs.accessPathRects) {
+                for (const r of gs.geometry.accessPathRects) {
                     if (wl < r.rightX && wr > r.leftX && wt < r.endY && wb > r.startY) {
                         count++;
                         break;
@@ -317,7 +317,7 @@ class TestAccessPaths:
             const gs = window.game?.scene?.getScene('GameScene');
             const tileSize = gs.tileSize;
             const entryY = 0.4 * gs.level.height;
-            const path = gs.pistePath[Math.floor(entryY)];
+            const path = gs.geometry.pistePath[Math.floor(entryY)];
             const pisteLeftEdge = (path.centerX - path.width / 2) * tileSize;
             return { pisteLeftEdge: Math.round(pisteLeftEdge), tileSize };
         }""")
@@ -346,7 +346,7 @@ class TestAccessPaths:
             const gs = window.game?.scene?.getScene('GameScene');
             const tileSize = gs.tileSize;
             const entryY = Math.floor(0.35 * gs.level.height);
-            const path = gs.pistePath[entryY];
+            const path = gs.geometry.pistePath[entryY];
             const pisteLeftEdge = (path.centerX - path.width / 2) * tileSize;
             return { pisteLeftEdge: Math.round(pisteLeftEdge), entryPixelY: Math.round(entryY * tileSize), tileSize };
         }""")
@@ -373,10 +373,10 @@ class TestAccessPaths:
 
         overlaps = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs?.accessPathRects || !gs?.obstacles) return null;
+            if (!gs?.geometry?.accessPathRects || !gs?.obstacles) return null;
             let count = 0;
             gs.obstacles.getChildren().forEach(o => {
-                for (const r of gs.accessPathRects) {
+                for (const r of gs.geometry.accessPathRects) {
                     if (o.x >= r.leftX && o.x <= r.rightX && o.y >= r.startY && o.y <= r.endY) {
                         count++;
                         break;
@@ -398,12 +398,12 @@ class TestAccessPaths:
 
         overlaps = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs?.accessPathRects || !gs?.dangerZones) return null;
+            if (!gs?.geometry?.accessPathRects || !gs?.dangerZones) return null;
             let count = 0;
             gs.dangerZones.getChildren().forEach(w => {
                 const wl = w.x - w.width / 2, wr = w.x + w.width / 2;
                 const wt = w.y - w.height / 2, wb = w.y + w.height / 2;
-                for (const r of gs.accessPathRects) {
+                for (const r of gs.geometry.accessPathRects) {
                     if (wl < r.rightX && wr > r.leftX && wt < r.endY && wb > r.startY) {
                         count++;
                         break;
@@ -426,8 +426,8 @@ class TestAccessPaths:
         info = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
             return {
-                rectsCount: gs.accessPathRects?.length ?? 0,
-                curvesCount: gs.accessPathCurves?.length ?? 0,
+                rectsCount: gs.geometry.accessPathRects?.length ?? 0,
+                curvesCount: gs.geometry.accessPathCurves?.length ?? 0,
                 wallsCount: gs.boundaryWalls?.getLength() ?? 0,
                 accessPaths: gs.level.accessPaths?.length ?? 0,
             };

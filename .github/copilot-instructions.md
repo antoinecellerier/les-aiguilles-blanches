@@ -79,6 +79,7 @@ GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/
 - `src/systems/WeatherSystem.ts` - Night overlay, headlights, weather
 - `src/systems/HazardSystem.ts` - Avalanche zones, risk tracking
 - `src/systems/WildlifeSystem.ts` - Animal spawning, flee AI, building/cliff collision, track system
+- `src/systems/LevelGeometry.ts` - Piste path, cliff, access path geometry (pure data, no Phaser)
 - `src/types/GameSceneInterface.ts` - Cross-scene event types
 - `tests/e2e/conftest.py` - Test helpers
 
