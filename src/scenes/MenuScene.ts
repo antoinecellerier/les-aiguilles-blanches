@@ -563,45 +563,4 @@ export default class MenuScene extends Phaser.Scene {
     this.overlay.show('changelog', entries);
   }
 
-  private showControls(): void {
-    // Detect capabilities
-    const hasTouch = detectTouch();
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
-    
-    if (isMobile && hasTouch) {
-      // Mobile-only: show touch controls
-      this.overlay.show('controls', [
-        '🎮 ' + (t('touchSupported') || 'Touch controls'),
-        '',
-        '◀▲▼▶ D-pad - Move',
-        '❄️ Button - Groom',
-        '🔗 Button - Winch',
-        '',
-        '🎮 Gamepad also supported',
-      ]);
-    } else if (hasTouch) {
-      // PC with touchscreen: show both
-      this.overlay.show('controls', [
-        `⬆️ ${keys} / Arrows - Move`,
-        '⏺️ SPACE - Groom',
-        '🔗 SHIFT - Winch',
-        '⏸️ ESC - Pause',
-        '',
-        '🎮 Gamepad supported',
-        '📱 Touch D-pad available',
-      ]);
-    } else {
-      // Keyboard only
-      this.overlay.show('controls', [
-        `⬆️ ${keys} / Arrows - Move`,
-        '⏺️ SPACE - Groom',
-        '🔗 SHIFT - Winch',
-        '⏸️ ESC - Pause',
-        '',
-        '🎮 Gamepad supported',
-      ]);
-    }
-  }
-
 }

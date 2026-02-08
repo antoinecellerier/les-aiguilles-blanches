@@ -737,7 +737,6 @@ export default class SettingsScene extends Phaser.Scene {
     row.add(this.createText(label + ':', this.smallFont, THEME.colors.textSecondary));
     
     const currentBinding = this.keys.bindings[actionId as keyof KeyBindings];
-    const defaultBinding = this.keys.bindings[actionId as keyof KeyBindings]; // compare below
     const defaults = getLayoutDefaults();
     const isCustom = currentBinding !== defaults[actionId as keyof KeyBindings];
     const keyName = this.keys.getKeyName(currentBinding);
