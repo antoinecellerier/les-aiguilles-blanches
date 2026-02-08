@@ -47,7 +47,8 @@ def touch_page(page: Page):
     page.wait_for_selector("canvas", timeout=10000)
     wait_for_game_ready(page)
     
-    return page
+    yield page
+    page.evaluate("localStorage.clear()")
 
 
 def test_touch_controls_visible_on_touch_device(touch_page: Page):
@@ -184,8 +185,8 @@ def test_touch_groom_button(touch_page: Page):
             }""" % initial_coverage,
             timeout=3000
         )
-    except Exception:
-        pass  # Coverage may not change; assertion below handles it
+    except TimeoutError:
+        pass  # Coverage may not change if touch simulation doesn't trigger grooming
     
     # Release
     touch_page.evaluate("""

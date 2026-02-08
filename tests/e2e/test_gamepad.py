@@ -1,7 +1,7 @@
 """E2E tests for gamepad support using mocked Gamepad API."""
 import pytest
 from playwright.sync_api import Page
-from conftest import wait_for_scene, GAME_URL
+from conftest import wait_for_scene, dismiss_dialogues, GAME_URL
 
 
 def make_mock_gamepad_script(gamepad_id: str = 'Mock Gamepad (STANDARD GAMEPAD)') -> str:
@@ -89,7 +89,7 @@ def gamepad_page(page: Page):
     )
     
     yield page
-    page.evaluate("localStorage.clear()")
+    page.evaluate("window._mockGamepad = null; localStorage.clear()")
 
 
 class TestGamepadMenuNavigation:
@@ -185,24 +185,8 @@ class TestGamepadGameplay:
         
         wait_for_scene(gamepad_page, 'GameScene')
         
-        # Dismiss all dialogues — keep pressing A until dialogue is gone
-        for _ in range(15):
-            is_showing = gamepad_page.evaluate("""() => {
-                const ds = window.game?.scene?.getScene('DialogueScene');
-                return ds?.isDialogueShowing?.() ?? false;
-            }""")
-            if not is_showing:
-                break
-            press_gamepad_button(gamepad_page, 0)
-            gamepad_page.wait_for_timeout(100)
-            release_gamepad_button(gamepad_page, 0)
-            gamepad_page.wait_for_timeout(200)
-        
-        # Wait for dialogue to fully clear
-        gamepad_page.wait_for_function("""() => {
-            const ds = window.game?.scene?.getScene('DialogueScene');
-            return ds && ds.isDialogueShowing && !ds.isDialogueShowing();
-        }""", timeout=3000)
+        # Dismiss tutorial dialogues
+        dismiss_dialogues(gamepad_page)
         
         # Press Start to pause
         press_gamepad_button(gamepad_page, 9)
@@ -253,7 +237,7 @@ def nintendo_page(page: Page):
         timeout=3000
     )
     yield page
-    page.evaluate("localStorage.clear()")
+    page.evaluate("window._mockGamepad = null; localStorage.clear()")
 
 
 class TestNintendoControllerSwap:
@@ -319,7 +303,7 @@ def playstation_page(page: Page):
         timeout=3000
     )
     yield page
-    page.evaluate("localStorage.clear()")
+    page.evaluate("window._mockGamepad = null; localStorage.clear()")
 
 
 class TestPlayStationController:

@@ -1,63 +1,10 @@
 """E2E tests for Settings UI legibility and layout."""
 import pytest
 from playwright.sync_api import Page, expect
-from conftest import wait_for_scene, wait_for_game_ready, GAME_URL
-
-
-def navigate_to_settings_via_keyboard(page: Page):
-    """Navigate to Settings using keyboard (more reliable for small viewports)."""
-    # Use direct scene start via console
-    page.evaluate("""() => {
-        if (window.game && window.game.scene) {
-            window.game.scene.start('SettingsScene');
-        }
-    }""")
-    wait_for_scene(page, 'SettingsScene')
-
-
-def navigate_to_settings(page: Page):
-    """Navigate to Settings using click or fallback to keyboard."""
-    canvas = page.locator("canvas")
-    box = canvas.bounding_box()
-    
-    if not box:
-        navigate_to_settings_via_keyboard(page)
-        return
-    
-    # Settings is button index 3 (Start=0, How to Play=1, Changelog=2, Settings=3)
-    pos = page.evaluate("""() => {
-        const scene = window.game?.scene?.getScene('MenuScene');
-        if (!scene || !scene.menuButtons) return null;
-        const btn = scene.menuButtons[3];
-        if (!btn) return null;
-        return { x: btn.x, y: btn.y };
-    }""")
-    
-    if pos:
-        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
-        wait_for_scene(page, 'SettingsScene')
-    
-    # Check if it worked, fallback to direct scene start if not
-    scenes = get_active_scenes(page)
-    if 'SettingsScene' not in scenes:
-        navigate_to_settings_via_keyboard(page)
-
-
-def get_active_scenes(page: Page) -> list:
-    """Get list of active Phaser scene keys."""
-    return page.evaluate("""() => {
-        if (window.game && window.game.scene) {
-            return window.game.scene.getScenes(true).map(s => s.scene.key);
-        }
-        return [];
-    }""")
-
-
-def assert_scene_active(page: Page, scene_key: str, message: str = None):
-    """Assert a specific scene is currently active."""
-    scenes = get_active_scenes(page)
-    msg = message or f"Expected {scene_key} to be active, got: {scenes}"
-    assert scene_key in scenes, msg
+from conftest import (
+    wait_for_scene, wait_for_game_ready, GAME_URL,
+    navigate_to_settings, get_active_scenes, assert_scene_active,
+)
 
 
 def get_settings_text_elements(page: Page) -> list:

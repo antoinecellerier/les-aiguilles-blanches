@@ -299,6 +299,42 @@ def assert_not_on_menu(page):
     assert 'MenuScene' not in scenes, f"Still on MenuScene! Button click likely missed. Active: {scenes}"
 
 
+def navigate_to_settings(page):
+    """Navigate to Settings using click or fallback to direct scene start."""
+    canvas = page.locator("canvas")
+    box = canvas.bounding_box()
+
+    if not box:
+        page.evaluate("""() => {
+            if (window.game && window.game.scene) {
+                window.game.scene.start('SettingsScene');
+            }
+        }""")
+        wait_for_scene(page, 'SettingsScene')
+        return
+
+    pos = page.evaluate("""() => {
+        const scene = window.game?.scene?.getScene('MenuScene');
+        if (!scene || !scene.menuButtons) return null;
+        const btn = scene.menuButtons[3];
+        if (!btn) return null;
+        return { x: btn.x, y: btn.y };
+    }""")
+
+    if pos:
+        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
+        wait_for_scene(page, 'SettingsScene')
+
+    scenes = get_active_scenes(page)
+    if 'SettingsScene' not in scenes:
+        page.evaluate("""() => {
+            if (window.game && window.game.scene) {
+                window.game.scene.start('SettingsScene');
+            }
+        }""")
+        wait_for_scene(page, 'SettingsScene')
+
+
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
     """Configure browser context for game testing."""
