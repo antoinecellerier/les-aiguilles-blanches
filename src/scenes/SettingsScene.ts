@@ -3,7 +3,7 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
 import { isBackPressed, isConfirmPressed, isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
-import { STORAGE_KEYS } from '../config/storageKeys';
+import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
@@ -28,7 +28,6 @@ interface KeyBindings {
   winch: number;
 }
 
-const BINDINGS_VERSION = 2;
 
 interface FocusItem {
   element: Phaser.GameObjects.GameObject; // for scrolling into view

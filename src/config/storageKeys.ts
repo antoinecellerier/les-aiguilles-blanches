@@ -15,3 +15,6 @@ export const STORAGE_KEYS = {
   GAMEPAD_BINDINGS: 'snowGroomer_gamepadBindings',
   MOVEMENT_SENSITIVITY: 'snowGroomer_movementSensitivity',
 } as const;
+
+/** Increment when key binding schema changes to invalidate saved bindings. */
+export const BINDINGS_VERSION = 2;

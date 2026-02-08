@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
-import { STORAGE_KEYS } from '../config/storageKeys';
+import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
@@ -561,7 +561,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private loadKeyBindings(): { up: number; down: number; left: number; right: number; groom: number; winch: number } {
-    const BINDINGS_VERSION = 2; // Must match SettingsScene
     const savedVersion = localStorage.getItem(STORAGE_KEYS.BINDINGS_VERSION);
     const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
     
