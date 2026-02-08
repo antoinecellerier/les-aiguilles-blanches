@@ -13,6 +13,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Groomer fall mechanics - Center-of-mass based cliff fall instead of instant physics overlap death
 - [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
 - [x] Firefox desktop touch detection - Touch availability updates on background tap via canvas listener
+- [ ] GameScene→LevelCompleteScene scene transition - Consider refactoring to use resetGameScenes() for consistency (currently uses direct scene.start for overlay cleanup)
 
 ## Polish (Medium Priority)
 
@@ -38,6 +39,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Alpine wildlife (bouquetin, chamois, lapins, birds) as decorative features on menu screen and in-game — flee when groomer approaches
 
 ## Recently Completed
+
+- ✅ **Code health audit - Level loop bug fix** - Added regression test for held SPACE across scene transitions. Applied inputReady pattern to PauseScene (prevents held ESC from immediately resuming). Added timer cleanup to LevelCompleteScene and PauseScene shutdown(). Documented inputReady pattern in ARCHITECTURE.md. Confirmed PauseScene↔SettingsScene direct scene transitions are correct (preserve game state).
 
 - ✅ **Level loop fix** - Game looped between levels when pressing SPACE. Two causes: (1) `game.scene.remove()` doesn't call `shutdown()`, leaking `game.events` listeners — fixed by stopping scenes before removing in `resetGameScenes()`. (2) Held SPACE from prior scene immediately activated LevelCompleteScene buttons — fixed with 300ms input delay
 

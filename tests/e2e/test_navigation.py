@@ -884,6 +884,9 @@ class TestPauseMenu:
         wait_for_scene(game_page, 'PauseScene')
         assert_scene_active(game_page, 'PauseScene')
         
+        # Wait for inputReady delay (300ms) to prevent held ESC from immediately resuming
+        game_page.wait_for_timeout(350)
+        
         # Unpause
         game_page.keyboard.press("Escape")
         wait_for_scene_inactive(game_page, 'PauseScene')
@@ -929,6 +932,7 @@ class TestPauseMenu:
         # Pause
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
+        game_page.wait_for_timeout(350)  # Wait for inputReady
 
         # Open Settings from Pause (button index 2 = Settings)
         game_page.evaluate("""() => {
@@ -950,6 +954,7 @@ class TestPauseMenu:
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
         assert_scene_active(game_page, 'PauseScene', "Should return to Pause after Settings")
+        game_page.wait_for_timeout(350)  # Wait for inputReady after returning to Pause
 
         # Resume (ESC)
         game_page.keyboard.press("Escape")
@@ -970,6 +975,7 @@ class TestPauseMenu:
         # First: Pause → Settings → Back → Resume (sets returnTo='PauseScene' on SettingsScene)
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
+        game_page.wait_for_timeout(350)  # Wait for inputReady
         game_page.evaluate("""() => {
             const ps = window.game?.scene?.getScene('PauseScene');
             for (const child of ps.children.list) {
@@ -983,12 +989,14 @@ class TestPauseMenu:
         wait_for_scene(game_page, 'SettingsScene')
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
+        game_page.wait_for_timeout(350)  # Wait for inputReady after returning to Pause
         game_page.keyboard.press("Escape")
         wait_for_scene_inactive(game_page, 'PauseScene')
 
         # Now: Pause → Quit to menu
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
+        game_page.wait_for_timeout(350)  # Wait for inputReady
         game_page.evaluate("""() => {
             const ps = window.game?.scene?.getScene('PauseScene');
             for (const child of ps.children.list) {
@@ -1127,6 +1135,62 @@ class TestFailScreen:
         assert scene_data is not None, "LevelCompleteScene should exist"
         assert scene_data['won'] == False, "Should be a fail screen"
 
+    def test_held_space_does_not_activate_button(self, game_page: Page):
+        """Regression test: Held SPACE from prior scene should not immediately activate buttons.
+        
+        This tests the fix for the level loop bug where holding SPACE during gameplay
+        would immediately activate the first button when LevelCompleteScene appeared,
+        causing the game to loop between levels.
+        """
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        
+        # Hold SPACE key down (simulates user holding it during gameplay)
+        game_page.keyboard.down("Space")
+        
+        # Trigger level complete while SPACE is held
+        game_page.evaluate("""() => {
+            const gameScene = window.game.scene.getScene('GameScene');
+            if (gameScene && gameScene.gameOver) {
+                gameScene.gameOver(false, 'fuel');
+            }
+        }""")
+        
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        
+        # Brief wait - button should NOT activate during inputReady delay (300ms)
+        game_page.wait_for_timeout(150)
+        
+        # Verify we're still on LevelCompleteScene (not transitioned away)
+        scenes_after_delay = get_active_scenes(game_page)
+        assert 'LevelCompleteScene' in scenes_after_delay, \
+            "Should still be on LevelCompleteScene during inputReady delay"
+        
+        # Release SPACE
+        game_page.keyboard.up("Space")
+        
+        # Wait for inputReady delay to expire (300ms total, plus scene transition overhead)
+        game_page.wait_for_timeout(250)
+        
+        # Verify inputReady is now true
+        input_ready = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('LevelCompleteScene');
+            return scene?.inputReady ?? false;
+        }""")
+        assert input_ready, "inputReady should be true after 300ms delay"
+        
+        # Now SPACE should work - press it to activate button
+        game_page.keyboard.press("Space")
+        game_page.wait_for_timeout(250)  # Wait for resetGameScenes setTimeout (100ms) plus buffer
+        
+        # Should transition away now (either GameScene for retry or MenuScene)
+        # resetGameScenes will start adding scenes, so check for scene restart
+        final_scenes = get_active_scenes(game_page)
+        # After resetGameScenes, LevelCompleteScene should be removed and restarted cleanly
+        # We should see either only GameScene+HUD+Dialogue, or only MenuScene
+        assert 'GameScene' in final_scenes or 'MenuScene' in final_scenes, \
+            f"Should transition to GameScene or MenuScene. Active scenes: {final_scenes}"
+    
     def test_level_complete_keyboard_navigation(self, game_page: Page):
         """Test that LevelCompleteScene supports keyboard navigation between buttons."""
         click_button(game_page, BUTTON_START, "Start Game")

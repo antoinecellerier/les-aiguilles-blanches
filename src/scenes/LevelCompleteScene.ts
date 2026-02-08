@@ -42,6 +42,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private buttonIsCTA: boolean[] = [];
   private buttonNav!: MenuButtonNav;
   private inputReady = false;
+  private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
 
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
@@ -243,7 +244,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Delay accepting input to prevent held keys from prior scene from firing
     this.inputReady = false;
-    this.time.delayedCall(300, () => { this.inputReady = true; });
+    this.inputReadyTimer = this.time.delayedCall(300, () => { this.inputReady = true; });
   }
 
   private resizing = false;
@@ -260,6 +261,12 @@ export default class LevelCompleteScene extends Phaser.Scene {
   shutdown(): void {
     this.input.keyboard?.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
+    
+    // Clean up inputReady timer if scene shutdown before it fires
+    if (this.inputReadyTimer) {
+      this.inputReadyTimer.destroy();
+      this.inputReadyTimer = null;
+    }
   }
 
   private gamepadNav!: GamepadMenuNav;

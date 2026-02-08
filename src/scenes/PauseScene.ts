@@ -17,6 +17,8 @@ interface PauseSceneData {
 
 export default class PauseScene extends Phaser.Scene {
   private levelIndex = 0;
+  private inputReady = false;
+  private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
     super({ key: 'PauseScene' });
@@ -24,6 +26,7 @@ export default class PauseScene extends Phaser.Scene {
 
   init(data: PauseSceneData): void {
     this.levelIndex = data.levelIndex;
+    this.inputReady = false;
   }
 
   create(): void {
@@ -79,14 +82,14 @@ export default class PauseScene extends Phaser.Scene {
     // Keyboard navigation
     this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
-    this.input.keyboard?.on('keydown-ESC', () => this.resumeGame());
+    this.input.keyboard?.on('keydown-ENTER', () => { if (this.inputReady) this.buttonNav.activate(); });
+    this.input.keyboard?.on('keydown-ESC', () => { if (this.inputReady) this.resumeGame(); });
 
     // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
       onNavigate: (dir) => this.buttonNav.navigate(dir),
-      onConfirm: () => this.buttonNav.activate(),
-      onBack: () => this.resumeGame(),
+      onConfirm: () => { if (this.inputReady) this.buttonNav.activate(); },
+      onBack: () => { if (this.inputReady) this.resumeGame(); },
     });
     this.gamepadNav.initState();
     // Track Start button separately (also resumes)
@@ -97,6 +100,10 @@ export default class PauseScene extends Phaser.Scene {
     }
 
     Accessibility.announce(t('pauseTitle'));
+    
+    // Delay accepting input to prevent held ESC from immediately resuming
+    this.inputReady = false;
+    this.inputReadyTimer = this.time.delayedCall(300, () => { this.inputReady = true; });
   }
 
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -112,7 +119,7 @@ export default class PauseScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     this.gamepadNav.update(delta);
     // Start button also resumes (in addition to Back handled by gamepadNav)
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
+    if (this.inputReady && this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
         const startPressed = pad.buttons[9]?.pressed ?? false;
@@ -150,5 +157,11 @@ export default class PauseScene extends Phaser.Scene {
 
   shutdown(): void {
     this.input.keyboard?.removeAllListeners();
+    
+    // Clean up inputReady timer if scene shutdown before it fires
+    if (this.inputReadyTimer) {
+      this.inputReadyTimer.destroy();
+      this.inputReadyTimer = null;
+    }
   }
 }

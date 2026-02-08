@@ -17,6 +17,7 @@ Launch parallel explore agents to investigate these dimensions simultaneously:
 4. **Error handling** — Find empty catch blocks, swallowed errors, missing error boundaries, unhandled promise rejections.
 5. **Architecture** — Find circular dependencies, god classes (files with 50+ methods or 2000+ lines), tight coupling between modules.
 6. **Magic values** — Find hardcoded strings, numbers, or config values that should be constants or in config files.
+7. **Regression test coverage** — Cross-reference recent bug fixes (git log, ROADMAP.md recently completed) with test files. Flag fixes that lack a corresponding regression test reproducing the original failure condition.
 
 ### Phase 2: Cross-model consultation
 
@@ -62,9 +63,10 @@ For each fix:
 1. Run TypeScript compilation (`npx tsc --noEmit`)
 2. Run full test suite (`./run-tests.sh --browser chromium`)
 3. Distinguish test flakes (pass when isolated) from real regressions
-4. Update `docs/ARCHITECTURE.md` with new patterns/utilities
-5. Update `docs/ROADMAP.md` — move completed items, add deferred items
-6. Commit with comprehensive message
+4. **Check for missing regression tests** — For each bug fix or behavioral change, verify a regression test exists. If not, flag it as a finding. A regression test should reproduce the specific failure condition (e.g., key held across scene transition, stale listener firing) so it catches regressions in the future.
+5. Update `docs/ARCHITECTURE.md` with new patterns/utilities
+6. Update `docs/ROADMAP.md` — move completed items, add deferred items
+7. Commit with comprehensive message
 
 ## Principles
 

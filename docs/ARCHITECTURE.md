@@ -529,12 +529,57 @@ shutdown(): void {
 |-------|-----------|
 | MenuScene | Scale resize listener |
 | SettingsScene | Scale resize listener |
-| GameScene | Scale resize, gamepad listeners |
+| GameScene | Scale resize, gamepad listeners, game.events listeners, timers |
 | HUDScene | Scale resize, custom events, gameScene refs |
-| LevelCompleteScene | Scale resize listener |
+| LevelCompleteScene | Scale resize listener, inputReady timer |
 | DialogueScene | Keyboard listeners, tweens, children |
-| PauseScene | Keyboard listeners |
+| PauseScene | Keyboard listeners, inputReady timer |
 | CreditsScene | Keyboard listeners, tweens, children |
+
+### Input Ready Delay Pattern
+
+**Problem**: Held keys from the previous scene can trigger immediate actions in the new scene. For example, holding SPACE to groom in GameScene would immediately activate the first button when LevelCompleteScene appears, causing unintended navigation.
+
+**Solution**: Use an `inputReady` flag with a 300ms delay before accepting input:
+
+```typescript
+export default class YourScene extends Phaser.Scene {
+  private inputReady = false;
+  private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
+
+  init(data: any): void {
+    // Reset flag on scene init
+    this.inputReady = false;
+  }
+
+  create(): void {
+    // Guard all input handlers with inputReady check
+    this.input.keyboard?.on('keydown-SPACE', () => { 
+      if (this.inputReady) this.activate(); 
+    });
+    
+    // Delay accepting input
+    this.inputReadyTimer = this.time.delayedCall(300, () => { 
+      this.inputReady = true; 
+    });
+  }
+
+  shutdown(): void {
+    // Clean up timer
+    if (this.inputReadyTimer) {
+      this.inputReadyTimer.destroy();
+      this.inputReadyTimer = null;
+    }
+  }
+}
+```
+
+**When to use**: Apply this pattern to scenes that:
+- Accept immediate action input (ENTER, SPACE, ESC)
+- Can be entered while a user is holding keys (e.g., end-of-level transitions)
+- Have toggle/resume behavior that could loop (e.g., ESC to pause → ESC to resume)
+
+**Currently implemented in**: LevelCompleteScene, PauseScene
 
 ## Browser Compatibility Notes
 
