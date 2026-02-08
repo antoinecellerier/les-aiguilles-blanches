@@ -8,6 +8,7 @@ import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
+import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -30,16 +31,6 @@ interface KeyBindings {
 }
 
 
-interface FocusItem {
-  element: Phaser.GameObjects.GameObject; // for scrolling into view
-  activate: () => void;
-  left?: () => void;
-  right?: () => void;
-  // Group items: array of button texts for visual highlight
-  buttons?: Phaser.GameObjects.Text[];
-  groupIndex?: number;
-  fixed?: boolean; // true for elements outside the scrollable panel
-}
 
 export default class SettingsScene extends Phaser.Scene {
   private returnTo: string | null = null;
@@ -66,10 +57,11 @@ export default class SettingsScene extends Phaser.Scene {
   private contentWidth = 300; // Available width for content
 
   // Focus navigation
-  private focusItems: FocusItem[] = [];
-  private focusIndex = -1;
+  private focus = new FocusNavigator();
+  /** Exposed for E2E test access — delegates to FocusNavigator. */
+  get focusIndex(): number { return this.focus.index; }
+  get focusItems(): FocusItem[] { return this.focus.items; }
   private pendingFocusIndex = -1;
-  private focusIndicator: Phaser.GameObjects.Graphics | null = null;
   private gamepadNav: ReturnType<typeof createGamepadMenuNav> | null = null;
   private gpHorizCooldown = 0;
 
@@ -87,8 +79,7 @@ export default class SettingsScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     this.cameras.main.setBackgroundColor(THEME.colors.dialogBg);
     this.loadBindings();
-    this.focusItems = [];
-    this.focusIndex = -1;
+    this.focus.init(this);
     this.lastGamepadName = '';
 
     // DPI-aware sizing (matches SettingsScene logic)
@@ -137,32 +128,27 @@ export default class SettingsScene extends Phaser.Scene {
       if (this.rebindingGamepadAction) return;
       switch (event.code) {
         case 'Escape': this.goBack(); break;
-        case 'ArrowUp': event.preventDefault(); this.navigateFocus(-1); break;
-        case 'ArrowDown': event.preventDefault(); this.navigateFocus(1); break;
-        case 'ArrowLeft': event.preventDefault(); this.focusLeft(); break;
-        case 'ArrowRight': event.preventDefault(); this.focusRight(); break;
-        case 'Enter': case 'Space': event.preventDefault(); this.activateFocus(); break;
+        case 'ArrowUp': event.preventDefault(); this.focus.navigate(-1); break;
+        case 'ArrowDown': event.preventDefault(); this.focus.navigate(1); break;
+        case 'ArrowLeft': event.preventDefault(); this.focus.left(); break;
+        case 'ArrowRight': event.preventDefault(); this.focus.right(); break;
+        case 'Enter': case 'Space': event.preventDefault(); this.focus.activate(); break;
       }
     });
 
     // Gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
-      onNavigate: (dir: number) => this.navigateFocus(dir),
-      onConfirm: () => this.activateFocus(),
+      onNavigate: (dir: number) => this.focus.navigate(dir),
+      onConfirm: () => this.focus.activate(),
       onBack: () => this.goBack(),
       isBlocked: () => !!this.rebindingAction || !!this.rebindingGamepadAction,
     });
     this.gamepadNav.initState();
 
-    // Focus indicator (drawn above everything)
-    this.focusIndicator = this.add.graphics();
-    this.focusIndicator.setDepth(1000);
-
     // Restore focus position after restart (e.g., language/colorblind change)
-    if (this.pendingFocusIndex >= 0 && this.pendingFocusIndex < this.focusItems.length) {
-      this.focusIndex = this.pendingFocusIndex;
-      this.updateFocusIndicator();
-      this.scrollToFocused();
+    if (this.pendingFocusIndex >= 0 && this.pendingFocusIndex < this.focus.items.length) {
+      this.focus.index = this.pendingFocusIndex;
+      this.focus.updateIndicator();
     }
 
     // Handle resize
@@ -174,7 +160,7 @@ export default class SettingsScene extends Phaser.Scene {
   private resizing = false;
 
   private restartScene(): void {
-    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex, focusIndex: this.focusIndex });
+    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex, focusIndex: this.focus.index });
   }
 
   private handleResize(): void {
@@ -184,82 +170,6 @@ export default class SettingsScene extends Phaser.Scene {
       this.restartScene();
       this.resizing = false;
     });
-  }
-
-  // ── Focus Navigation ──────────────────────────────────────────────
-
-  private navigateFocus(dir: number): void {
-    if (this.focusItems.length === 0) return;
-    if (this.focusIndex < 0) {
-      this.focusIndex = 0;
-    } else {
-      this.focusIndex = (this.focusIndex + dir + this.focusItems.length) % this.focusItems.length;
-    }
-    this.updateFocusIndicator();
-    this.scrollToFocused();
-  }
-
-  private focusLeft(): void {
-    const item = this.focusItems[this.focusIndex];
-    if (item?.left) item.left();
-  }
-
-  private focusRight(): void {
-    const item = this.focusItems[this.focusIndex];
-    if (item?.right) item.right();
-  }
-
-  private activateFocus(): void {
-    const item = this.focusItems[this.focusIndex];
-    if (item) item.activate();
-  }
-
-  private updateFocusIndicator(): void {
-    if (!this.focusIndicator) return;
-    this.focusIndicator.clear();
-    if (this.focusIndex < 0 || this.focusIndex >= this.focusItems.length) return;
-
-    const item = this.focusItems[this.focusIndex];
-    const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
-    if (!el?.getBounds) return;
-
-    const bounds = el.getBounds();
-
-    // Clip panel children that scrolled out of view, but not fixed elements
-    if (!item.fixed && this.mainSizer?.getBounds) {
-      const panel = this.mainSizer.getBounds();
-      if (bounds.y + bounds.height < panel.y || bounds.y > panel.y + panel.height) return;
-    }
-
-    this.focusIndicator.lineStyle(2, 0x87CEEB, 1);
-    this.focusIndicator.strokeRect(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
-  }
-
-  private scrollToFocused(): void {
-    if (!this.mainSizer || this.focusIndex < 0) return;
-    const item = this.focusItems[this.focusIndex];
-    const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
-    if (!el?.getBounds) return;
-
-    const bounds = el.getBounds();
-    const panelBounds = this.mainSizer.getBounds();
-    if (!panelBounds) return;
-
-    // Scroll if element is outside visible panel area
-    const panelTop = panelBounds.y;
-    const panelBottom = panelBounds.y + panelBounds.height;
-
-    if (bounds.y < panelTop || bounds.y + bounds.height > panelBottom) {
-      // Estimate scroll position: fraction of content
-      const contentHeight = this.mainSizer.childOY !== undefined
-        ? Math.abs(this.mainSizer.minChildOY || 1)
-        : 1;
-      if (contentHeight > 0) {
-        const targetOY = -(bounds.y - panelTop - panelBounds.height / 3);
-        const clampedOY = Phaser.Math.Clamp(targetOY, this.mainSizer.minChildOY || -contentHeight, 0);
-        this.mainSizer.setChildOY(clampedOY);
-      }
-    }
   }
 
   update(_time: number, delta: number): void {
@@ -273,10 +183,10 @@ export default class SettingsScene extends Phaser.Scene {
       if (pad) {
         const stickX = pad.leftStick?.x ?? 0;
         if (pad.left || stickX < -0.5) {
-          this.focusLeft();
+          this.focus.left();
           this.gpHorizCooldown = 200;
         } else if (pad.right || stickX > 0.5) {
-          this.focusRight();
+          this.focus.right();
           this.gpHorizCooldown = 200;
         }
       }
@@ -288,7 +198,7 @@ export default class SettingsScene extends Phaser.Scene {
     }
 
     // Update focus indicator position (follows elements during scroll)
-    this.updateFocusIndicator();
+    this.focus.updateIndicator();
   }
 
   private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
@@ -350,6 +260,7 @@ export default class SettingsScene extends Phaser.Scene {
     if (needsScroll) {
       this.mainSizer.setChildrenInteractive();
     }
+    this.focus.setScrollPanel(this.mainSizer);
   }
 
   private createTwoColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
@@ -423,6 +334,7 @@ export default class SettingsScene extends Phaser.Scene {
     if (needsScroll) {
       this.mainSizer.setChildrenInteractive();
     }
+    this.focus.setScrollPanel(this.mainSizer);
   }
 
   private addLanguageSection(sizer: any): void {
@@ -497,7 +409,7 @@ export default class SettingsScene extends Phaser.Scene {
     sizer.add(resetBtn, { align: 'left' });
 
     // Register reset button focus item
-    this.focusItems.push({
+    this.focus.items.push({
       element: resetBtn,
       activate: () => this.resetBindings(),
     });
@@ -527,7 +439,7 @@ export default class SettingsScene extends Phaser.Scene {
     backBtn.on('pointerdown', () => this.goBack());
 
     // Register back button focus item (always last)
-    this.focusItems.push({
+    this.focus.items.push({
       element: backBtn,
       activate: () => this.goBack(),
       fixed: true,
@@ -595,7 +507,7 @@ export default class SettingsScene extends Phaser.Scene {
     // Register as a group focus item
     const currentIndex = languages.findIndex(l => l.code === currentLang);
     const groupIndex = { value: Math.max(0, currentIndex) };
-    this.focusItems.push({
+    this.focus.items.push({
       element: row,
       buttons: langButtons,
       groupIndex: groupIndex.value,
@@ -645,7 +557,7 @@ export default class SettingsScene extends Phaser.Scene {
     btn.on('pointerdown', toggle);
     
     // Register focus item
-    this.focusItems.push({
+    this.focus.items.push({
       element: row,
       activate: toggle,
     });
@@ -741,7 +653,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Register focus item with left/right adjustment
     const STEP = 0.05;
-    this.focusItems.push({
+    this.focus.items.push({
       element: wrapper,
       activate: () => {},
       left: () => {
@@ -780,7 +692,7 @@ export default class SettingsScene extends Phaser.Scene {
     const currentMode = Accessibility.settings.colorblindMode;
     const currentIdx = cbModes.indexOf(currentMode);
     const groupIndex = { value: Math.max(0, currentIdx) };
-    this.focusItems.push({
+    this.focus.items.push({
       element: container,
       buttons: cbButtons,
       groupIndex: groupIndex.value,
@@ -853,7 +765,7 @@ export default class SettingsScene extends Phaser.Scene {
     row.add(btn);
 
     // Register focus item
-    this.focusItems.push({
+    this.focus.items.push({
       element: row,
       activate: () => this.startRebind(actionId, btn),
     });
@@ -888,7 +800,7 @@ export default class SettingsScene extends Phaser.Scene {
     row.add(btn);
 
     // Register focus item
-    this.focusItems.push({
+    this.focus.items.push({
       element: row,
       activate: () => this.startGamepadRebind(actionId, btn),
     });
@@ -912,7 +824,7 @@ export default class SettingsScene extends Phaser.Scene {
     if (hasCustomBindings) {
       row.add(this.createText(t('customBindings') || 'Custom', this.smallFont, THEME.colors.accent));
       // No navigation for custom mode
-      this.focusItems.push({ element: row, activate: () => {} });
+      this.focus.items.push({ element: row, activate: () => {} });
     } else {
       const currentLayout = getKeyboardLayout();
       const layoutButtons: Phaser.GameObjects.Text[] = [];
@@ -934,7 +846,7 @@ export default class SettingsScene extends Phaser.Scene {
       // Register as group focus item
       const currentIdx = AVAILABLE_LAYOUTS.findIndex(l => l.id === currentLayout);
       const groupIndex = { value: Math.max(0, currentIdx) };
-      this.focusItems.push({
+      this.focus.items.push({
         element: row,
         buttons: layoutButtons,
         groupIndex: groupIndex.value,
@@ -1197,9 +1109,5 @@ export default class SettingsScene extends Phaser.Scene {
     this.input.keyboard?.removeAllListeners();
     this.input.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
-    this.focusIndicator?.destroy();
-    this.focusIndicator = null;
-    this.focusItems = [];
-    this.focusIndex = -1;
   }
 }

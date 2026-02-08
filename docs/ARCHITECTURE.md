@@ -64,6 +64,7 @@ snow-groomer/
 │   │   ├── gameProgress.ts # Save/load game progress
 │   │   ├── keyboardLayout.ts # Keyboard layout detection, key name utilities
 │   │   ├── menuButtonNav.ts  # Reusable button selection/navigation controller
+│   │   ├── focusNavigator.ts # Reusable keyboard/gamepad focus navigation with scroll
 │   │   ├── overlayManager.ts # Modal overlay dialogs (simple + scrollable) with keyboard dismiss
 │   │   ├── cameraCoords.ts  # World↔overlay coordinate conversions for scrollFactor(0) objects
 │   │   ├── resizeManager.ts # Debounced resize-restart handler for scenes

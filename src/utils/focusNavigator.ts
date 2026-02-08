@@ -1,0 +1,115 @@
+import Phaser from 'phaser';
+
+/**
+ * A navigable item in a focus list (button, toggle, slider, etc.).
+ */
+export interface FocusItem {
+  element: Phaser.GameObjects.GameObject;
+  activate: () => void;
+  left?: () => void;
+  right?: () => void;
+  buttons?: Phaser.GameObjects.Text[];
+  groupIndex?: number;
+  /** True for elements outside the scrollable panel (e.g., back button). */
+  fixed?: boolean;
+}
+
+/**
+ * Manages keyboard/gamepad focus navigation over a list of FocusItems.
+ * Draws a focus indicator, supports wrapping navigation, and auto-scrolls
+ * scrollable panels to keep the focused item visible.
+ */
+export class FocusNavigator {
+  items: FocusItem[] = [];
+  index = -1;
+  private indicator: Phaser.GameObjects.Graphics | null = null;
+  private scrollPanel: any = null;
+
+  /** Create the focus indicator graphic. Call in scene.create(). */
+  init(scene: Phaser.Scene): void {
+    this.items = [];
+    this.index = -1;
+    this.indicator = scene.add.graphics();
+    this.indicator.setDepth(1000);
+  }
+
+  /** Set the scrollable panel used for auto-scroll and clipping. */
+  setScrollPanel(panel: any): void {
+    this.scrollPanel = panel;
+  }
+
+  /** Navigate focus by direction (+1 = down, -1 = up). Wraps around. */
+  navigate(dir: number): void {
+    if (this.items.length === 0) return;
+    if (this.index < 0) {
+      this.index = 0;
+    } else {
+      this.index = (this.index + dir + this.items.length) % this.items.length;
+    }
+    this.updateIndicator();
+    this.scrollToFocused();
+  }
+
+  left(): void {
+    const item = this.items[this.index];
+    if (item?.left) item.left();
+  }
+
+  right(): void {
+    const item = this.items[this.index];
+    if (item?.right) item.right();
+  }
+
+  activate(): void {
+    const item = this.items[this.index];
+    if (item) item.activate();
+  }
+
+  /** Redraw the focus indicator at the current item's position. */
+  updateIndicator(): void {
+    if (!this.indicator) return;
+    this.indicator.clear();
+    if (this.index < 0 || this.index >= this.items.length) return;
+
+    const item = this.items[this.index];
+    const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
+    if (!el?.getBounds) return;
+
+    const bounds = el.getBounds();
+
+    // Clip panel children that scrolled out of view, but not fixed elements
+    if (!item.fixed && this.scrollPanel?.getBounds) {
+      const panel = this.scrollPanel.getBounds();
+      if (bounds.y + bounds.height < panel.y || bounds.y > panel.y + panel.height) return;
+    }
+
+    this.indicator.lineStyle(2, 0x87CEEB, 1);
+    this.indicator.strokeRect(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
+  }
+
+  /** Auto-scroll the panel so the focused item is visible. */
+  private scrollToFocused(): void {
+    if (!this.scrollPanel || this.index < 0) return;
+    const item = this.items[this.index];
+    const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
+    if (!el?.getBounds) return;
+
+    const bounds = el.getBounds();
+    const panelBounds = this.scrollPanel.getBounds();
+    if (!panelBounds) return;
+
+    const panelTop = panelBounds.y;
+    const panelBottom = panelBounds.y + panelBounds.height;
+
+    if (bounds.y < panelTop || bounds.y + bounds.height > panelBottom) {
+      const contentHeight = this.scrollPanel.childOY !== undefined
+        ? Math.abs(this.scrollPanel.minChildOY || 1)
+        : 1;
+      if (contentHeight > 0) {
+        const targetOY = -(bounds.y - panelTop - panelBounds.height / 3);
+        const clampedOY = Phaser.Math.Clamp(targetOY, this.scrollPanel.minChildOY || -contentHeight, 0);
+        this.scrollPanel.setChildOY(clampedOY);
+      }
+    }
+  }
+}
