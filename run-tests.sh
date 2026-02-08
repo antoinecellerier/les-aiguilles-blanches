@@ -202,6 +202,12 @@ if [ "$SKIP_E2E" = false ]; then
 
     echo ""
     echo "=== Running E2E tests (Playwright) ==="
+
+    # Auto-setup venv if missing
+    if [ ! -f .venv/bin/activate ]; then
+        echo "Python venv not found — running setup.sh..."
+        ./setup.sh
+    fi
     source .venv/bin/activate
 
     # Check if --browser was explicitly provided
