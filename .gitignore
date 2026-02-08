@@ -21,3 +21,6 @@ dist/
 # Test artifacts
 tests/screenshots/
 stats.html
+
+# Public publishing script
+publish-remote.sh
