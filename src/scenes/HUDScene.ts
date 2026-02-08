@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level } from '../setup';
 import { THEME } from '../config/theme';
+import { DEPTHS } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
@@ -282,12 +283,12 @@ export default class HUDScene extends Phaser.Scene {
         fontSize: touchBtnSize,
         fontStyle: 'bold',
         color: '#FFFFFF',
-      }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(DEPTHS.PLAYER);
       const pbBg = this.add.rectangle(
         pauseBtn.x - pauseBtn.width / 2, pauseBtn.y + pauseBtn.height / 2,
         pauseBtn.width + touchBtnPad * 2, pauseBtn.height + touchBtnPad,
         0x000000
-      ).setScrollFactor(0).setDepth(100).setAlpha(0.55);
+      ).setScrollFactor(0).setDepth(DEPTHS.NIGHT_OVERLAY).setAlpha(0.55);
       pbBg.setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.openPauseMenu());
       pauseBtn.setInteractive({ useHandCursor: true })
@@ -303,12 +304,12 @@ export default class HUDScene extends Phaser.Scene {
         fontSize: touchBtnSize,
         fontStyle: 'bold',
         color: isFullscreen ? '#FF6666' : '#FFFFFF',
-      }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+      }).setOrigin(1, 0).setScrollFactor(0).setDepth(DEPTHS.PLAYER);
       const fsBg = this.add.rectangle(
         fsBtn.x - fsBtn.width / 2, fsBtn.y + fsBtn.height / 2,
         fsBtn.width + touchBtnPad * 2, fsBtn.height + touchBtnPad,
         0x000000
-      ).setScrollFactor(0).setDepth(100).setAlpha(0.55);
+      ).setScrollFactor(0).setDepth(DEPTHS.NIGHT_OVERLAY).setAlpha(0.55);
       fsBg.setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.toggleFullscreen());
       fsBtn.setInteractive({ useHandCursor: true })
@@ -415,7 +416,7 @@ export default class HUDScene extends Phaser.Scene {
     this.createTouchButton(Math.round(actionX - btnSize - padding / 2), actionY, Math.round(btnSize * 1.2), 'GRM', alpha,
       () => { this.touchGroom = true; },
       () => { this.touchGroom = false; },
-      0x2266aa, true
+      0x1a4a7a, true
     );
 
     // Winch button (SHIFT equivalent) - only if level has winch
@@ -423,7 +424,7 @@ export default class HUDScene extends Phaser.Scene {
       this.createTouchButton(actionX, Math.round(actionY - btnSize - padding / 2), Math.round(btnSize * 1.2), 'WCH', alpha,
         () => { this.touchWinch = true; },
         () => { this.touchWinch = false; },
-        0xaa6622, true
+        0x7a4a1a, true
       );
     }
   }
@@ -446,7 +447,7 @@ export default class HUDScene extends Phaser.Scene {
     this.joystickThumb.setPosition(thumbX, thumbY);
     
     // Update visual feedback - highlight thumb when active
-    this.joystickThumb.setFillStyle(0x88aaff, 0.9);
+    this.joystickThumb.setFillStyle(0x6688cc, 0.9);
     
     // Determine direction based on angle and distance
     // Dead zone: 20% of radius

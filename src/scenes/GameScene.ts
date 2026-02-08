@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
-import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { BALANCE, DEPTHS, DIFFICULTY_MARKERS } from '../config/gameConfig';
 import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS } from '../config/storageKeys';
@@ -1684,15 +1684,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private getDifficultyColor(): number {
-    switch (this.level.difficulty) {
-      case 'tutorial':
-      case 'green': return 0x22AA22;
-      case 'blue': return 0x2266CC;
-      case 'red': return 0xCC2222;
-      case 'black': return 0x111111;
-      case 'park': return 0xFF8800;
-      default: return 0x888888;
-    }
+    // Tutorial uses green markers for visibility against white snow
+    const key = this.level.difficulty === 'tutorial' ? 'green' : this.level.difficulty;
+    const marker = DIFFICULTY_MARKERS[key as keyof typeof DIFFICULTY_MARKERS];
+    return marker?.color ?? 0x888888;
   }
 
   private createObstacles(): void {

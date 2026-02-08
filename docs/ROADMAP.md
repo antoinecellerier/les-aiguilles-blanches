@@ -40,6 +40,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Art review fixes** - Enabled pixelArt mode (crisp pixel edges), improved button contrast (WCAG AA), refactored marker colors to use centralized DIFFICULTY_MARKERS, replaced magic depth numbers in HUDScene with DEPTHS constants, improved touch button contrast. Updated ART_STYLE.md with accurate groomer dimensions, mechanical palette, tree variants, and undocumented colors.
+
 - ✅ **Art director review skill** - New `art-review` skill for visual code review against ART_STYLE.md (colors, shapes, dimensions, depth, accessibility) with Playwright screenshot inspection and cross-model consultation. Added to pre-commit checklist.
 
 - ✅ **Alpine wildlife** - Decorative bouquetin, chamois, marmots, bunnies, and birds on menu and in-game. Flee AI reacts to groomer proximity. Per-level species config via WildlifeSystem

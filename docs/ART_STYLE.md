@@ -16,7 +16,7 @@ The game uses a **retro pixel-art style** inspired by the 1991 Windows game SkiF
 | Element | Size (px) | Notes |
 |---------|-----------|-------|
 | Tile | 16×16 | Base unit for terrain |
-| Groomer | 32×48 | 2 tiles wide, 3 tiles tall |
+| Groomer | 36×58 | ~2.25 tiles wide, ~3.6 tiles tall (includes rear tiller) |
 | Tree | 30×40 | ~2 tiles wide, 2.5 tiles tall |
 | Rock | 24×16 | 1.5 tiles wide, 1 tile tall |
 | Restaurant | 60×50 | ~4 tiles wide, 3 tiles tall |
@@ -65,10 +65,15 @@ Alpine rock with warm brown tones (NOT gray):
 - Tracks: `0x333333` (dark gray)
 - Blade: `0x888888` (gray)
 - Base: `0x666666` (medium gray)
+- Tiller drum: `0x555555` (dark mechanical gray)
+- Tiller arm: `0x777777` (mid mechanical gray)
+- Comb teeth: `0x999999` (light mechanical gray)
 
 **Trees:**
-- Foliage: `0x228b22` (forest green)
-- Trunk: `0x8b4513` (saddle brown)
+- Foliage: `0x228b22` (forest green) — menu/texture
+- Foliage (in-game): `0x1a4a2a` (dark forest green) — darker for top-down contrast
+- Trunk: `0x8b4513` (saddle brown) — menu/texture
+- Trunk (in-game): `0x4a3728` (dark brown) — darker for top-down contrast
 
 **Rock obstacles:**
 - Base: `0x696969` (dim gray)
@@ -90,8 +95,8 @@ Alpine rock with warm brown tones (NOT gray):
 
 | Element | Color | Hex |
 |---------|-------|-----|
-| Button | Slate blue | `0x2d5a7b` |
-| Button hover | Lighter blue | `0x3d7a9b` |
+| Button | Slate blue | `0x3a6d8e` |
+| Button hover | Lighter blue | `0x4a8aab` |
 | Button shadow | Dark slate | `#1a3a5c` (hardcoded in MenuScene) |
 | Selection arrow | Gold | `0xffd700` |
 | Panel background | Dark gray | `0x222222` |
@@ -109,7 +114,8 @@ The menu uses a **side-view alpine scene** with pixel-art elements:
 - White snow ground (`0xffffff`) with subtle grooming lines (`0xf0f6fa`)
 - Animated falling snow particles (2-4px white rects, 40 particles)
 - Pixel-art pine trees clustered along snow line
-- Side-view groomer: tracks, red body, blue cabin, front blade, exhaust
+- Side-view groomer: tracks, red body (`0xcc2200`), blue cabin, front blade, exhaust (`0x555555`), dark red roof (`0xaa1a00`), blade accent (`0xaaaaaa`)
+- Menu ribbon decorations: dark red shades (`0x8b1a1a`, `0x550000`, `0xe63e1a`, `0x991a00`)
 - Retro 3D buttons with shadow offset
 - Dark footer panel with gold "Made with ❄️" text
 - Layout adapts to aspect ratio (portrait vs landscape)
@@ -120,7 +126,7 @@ Signage follows NF S52-102 (French ski slope marking standard). Reference: [spor
 
 | Difficulty | Color | Shape | Symbol |
 |------------|-------|-------|--------|
-| Tutorial | White `0xffffff` | Circle | ○ |
+| Tutorial | White `0xffffff` | Circle | ○ | Uses green markers in-game for snow visibility |
 | Green | Green `0x22c55e` | Circle | ● |
 | Blue | Blue `0x3b82f6` | Square | ■ |
 | Red | Red `0xef4444` | Diamond | ◆ |
@@ -138,6 +144,8 @@ Character faces appear in dialogue boxes using a 12×12 pixel grid system.
 | **Thierry** | Patrol | Green `0x5a7b2d` | Helmet, red badge, sunglasses |
 | **Émilie** | Apprentice | Orange `0x7b5a2d` | Beanie, blonde hair |
 
+Shared portrait colors: skin `0xffccaa`, eyes `0x000000`, mouth `0x553333`, hair grays `0x4a3b2a`/`0xd4a055`.
+
 **Jalon rules (NF S52-102):**
 - Right-side markers (going downhill) have orange top cap — since camera faces uphill, this is screen-left
 - Danger poles: yellow/black stripes (`0xffcc00`/`0x111111`)
@@ -146,7 +154,7 @@ Character faces appear in dialogue boxes using a 12×12 pixel grid system.
 
 ## Wildlife
 
-Procedural pixel art animals generated in `animalSprites.ts`. All rectangle-only, no curves. Fox uses shared hunting logic from `foxBehavior.ts`. Track marks drawn via `animalTracks.ts`.
+Procedural pixel art animals generated in `animalSprites.ts`. All rectangle-only, no curves. Fox uses shared hunting logic from `foxBehavior.ts`. Track marks drawn via `animalTracks.ts` in blue-gray (`0xb8c4d0`).
 
 | Species | Grid Size | Key Colors |
 |---------|-----------|------------|
@@ -271,8 +279,8 @@ The HUD uses a "visor" pattern: full-width semi-transparent dark bar across the 
 | Target | Accent yellow (`THEME.colors.accent`) |
 
 Touch button icons are pixel art drawn with `fillRect` calls:
-- **Groom**: 3-prong rake/tiller in light blue (`0xddddff`)
-- **Winch**: Simplified anchor shape in warm gold (`0xffddaa`)
+- **Groom**: 3-prong rake/tiller in light blue (`0xddddff`) on dark blue bg (`0x1a4a7a`)
+- **Winch**: Simplified anchor shape in warm gold (`0xffddaa`) on dark brown bg (`0x7a4a1a`)
 - Both on circular dark backgrounds with beveled edge highlight
 
 Pause/fullscreen buttons use pill-shaped backgrounds (black, alpha 0.55) for contrast against any terrain.
@@ -281,8 +289,8 @@ Pause/fullscreen buttons use pill-shaped backgrounds (black, alpha 0.55) for con
 
 - Dark overlay: `0x000022` at 70% opacity
 - Headlights: Layered circles with decreasing opacity
-- Front lights: 108° spread, 5 tile range, warm white
-- Rear lights: 5 tile range, slightly warm tint
+- Front lights: 108° spread, 5 tile range, warm white (`0xffffee`)
+- Rear lights: 5 tile range, slightly warm tint (`0xffddcc`)
 
 ## Adding New Visual Elements
 
@@ -291,7 +299,7 @@ When adding new sprites or visual elements:
 1. **Use existing palettes** - Pick colors from the tables above
 2. **Match tile scale** - New elements should relate to 16px tile size
 3. **Simple shapes** - Rectangles only, no curves or complex polygons
-4. **Limited details** - 2-4 colors per element maximum
+4. **Limited details** - 2-4 colors per simple element (rocks, markers), up to 9 for complex sprites (groomer, fuel station)
 5. **Generate in BootScene** - All textures created via Phaser Graphics
 6. **Test in context** - Verify against snow backgrounds and other elements
 
@@ -302,5 +310,5 @@ When adding new sprites or visual elements:
 - ❌ External image files (generate all textures)
 - ❌ Gray cliffs (use warm brown alpine palette)
 - ❌ Pure black shadows (use dark brown `0x1a1612` or `0x2d2822`)
-- ❌ Too many colors per element (max 4-5)
+- ❌ Too many colors per element (max 4-5 for simple elements, max 9 for complex sprites)
 - ❌ Anti-aliasing or smoothing effects

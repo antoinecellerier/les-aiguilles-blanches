@@ -7,10 +7,10 @@ export const THEME = {
   // Color palette
   colors: {
     // Primary button colors (navigation/secondary actions)
-    buttonPrimary: 0x2d5a7b,
-    buttonPrimaryHex: '#2d5a7b',
-    buttonHover: 0x3d7a9b,
-    buttonHoverHex: '#3d7a9b',
+    buttonPrimary: 0x3a6d8e,
+    buttonPrimaryHex: '#3a6d8e',
+    buttonHover: 0x4a8aab,
+    buttonHoverHex: '#4a8aab',
 
     // CTA button colors (Start Game, Next Level, Retry — "green = go")
     buttonCTA: 0x228b22,
