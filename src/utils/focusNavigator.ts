@@ -91,6 +91,7 @@ export class FocusNavigator {
   private scrollToFocused(): void {
     if (!this.scrollPanel || this.index < 0) return;
     const item = this.items[this.index];
+    if (item.fixed) return;
     const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
     if (!el?.getBounds) return;
 
@@ -102,14 +103,11 @@ export class FocusNavigator {
     const panelBottom = panelBounds.y + panelBounds.height;
 
     if (bounds.y < panelTop || bounds.y + bounds.height > panelBottom) {
-      const contentHeight = this.scrollPanel.childOY !== undefined
-        ? Math.abs(this.scrollPanel.minChildOY || 1)
-        : 1;
-      if (contentHeight > 0) {
-        const targetOY = -(bounds.y - panelTop - panelBounds.height / 3);
-        const clampedOY = Phaser.Math.Clamp(targetOY, this.scrollPanel.minChildOY || -contentHeight, 0);
-        this.scrollPanel.setChildOY(clampedOY);
-      }
+      // rexUI scrollablePanel uses bottomChildOY (negative) as scroll range
+      const minOY = this.scrollPanel.bottomChildOY ?? this.scrollPanel.minChildOY ?? -1;
+      const targetOY = this.scrollPanel.childOY - (bounds.y - panelTop - panelBounds.height / 3);
+      const clampedOY = Phaser.Math.Clamp(targetOY, minOY, 0);
+      this.scrollPanel.setChildOY(clampedOY);
     }
   }
 }
