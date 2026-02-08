@@ -267,22 +267,36 @@ For natural-looking boundaries (cliffs, terrain transitions):
 
 ### HUD / Visor Strip
 
-The HUD uses a "visor" pattern: full-width semi-transparent dark bar across the top.
+The HUD uses a "visor" pattern: full-width semi-transparent dark bar across the top with a 3-row horizontal layout.
+
+**Layout:**
+```
+Row 1: Level name (left) + winch status (center) + timer (right)
+Row 2: Fuel bar + stamina bar + coverage bar (all horizontal)
+Row 3: Bonus objectives (horizontal columns)
+```
 
 | Property | Value |
 |----------|-------|
-| Background | Black `0x000000`, alpha 0.55 |
-| Bottom accent | Cyan (`THEME.colors.infoHex`), alpha 0.40, 1px |
+| Background | Black `0x000000`, alpha 0.55 (0.80 in accessibility modes) |
+| Bottom accent | Cyan (`THEME.colors.infoHex`), alpha 0.40, 1px (2px in high-contrast) |
 | Text | White `#FFFFFF` (main), muted `#EEEEEE` (skip) |
-| Coverage | White, green `#00FF00` when target met |
+| Text stroke | Black `#000000` (accessibility modes only) |
+| Bar border | Gray `0x555555` (normal) / `0x999999` (high-contrast) |
+| Bar background | Dark `0x222222` |
+| Fuel bar | Red (`THEME.colors.dangerHex`), brighter red `0xff0000` when ≤30% |
+| Stamina bar | Green (`THEME.colors.successHex`), orange `0xffaa00` when ≤30% |
+| Coverage bar | White `0xffffff` (below target), green (`THEME.colors.successHex`) when ≥ target |
+| Coverage target marker | Gold (`THEME.colors.accentHex`), 2px wide, extends 4px above/below bar |
 | Timer | White, red when ≤60s remaining |
-| Target | Accent yellow (`THEME.colors.accent`) |
+| Bar identifiers | Colored dots (normal) or text labels "F"/"S" (colorblind mode) |
+
+**Compact mode** (narrow/short screens): Shorter bars (60px vs 80px). Bonus objectives flash for 4s then fade, re-flash on status change.
 
 Touch button icons are pixel art drawn with `fillRect` calls:
 - **Groom**: 3-prong rake/tiller in light blue (`0xddddff`) on dark blue bg (`0x1a4a7a`)
 - **Winch**: Simplified anchor shape in warm gold (`0xffddaa`) on dark brown bg (`0x7a4a1a`)
 - Both on circular dark backgrounds with beveled edge highlight
-- **Compact mode** (narrow/short screens): Colored squares replace text labels next to bars (red for fuel, green for stamina)
 
 Pause/fullscreen buttons use pill-shaped backgrounds (black, alpha 0.55) for contrast against any terrain.
 

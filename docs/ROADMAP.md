@@ -49,6 +49,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **HUD visor horizontal redesign** — Replaced 4-row vertical visor layout with compact 3-row horizontal design. Row 1: level name + timer. Row 2: fuel, stamina, and coverage progress bars side by side with colored dot identifiers. Row 3: bonus objectives in horizontal columns. Coverage bar shows gold target marker at target % position, fills white→green on target met. Accessibility: visor alpha 0.55→0.80, text stroke, brighter bar borders, text labels ("F"/"S") replacing colored dots in colorblind mode. Fixed timer init bug (was "00:00" causing false speed_run failure).
+
 - ✅ **HUD bonus objectives** — Bonus objectives (fuel efficiency, no tumbles, speed run, winch mastery, exploration) displayed inside visor during gameplay. Live evaluation with green ✓ on success, red ✗ on irreversible failure. Compact screens flash objectives for 4s then fade, with re-flash on status change. Added `tumbleCount`, `fuelUsed`, `winchUseCount`, `pathsVisited`, `totalPaths` to `GameStateEvent`. Extracted `buildGameStatePayload()` in GameScene to remove emit duplication.
 
 - ✅ **Cross-cutting code health fixes** — Extracted `ResizeManager` utility (dedup resize-debounce in 4 scenes, -56 net lines). Extracted `storage.ts` with typed `getJSON`/`setJSON`/`getString`/`setString` (dedup localStorage patterns in 6 files, -23 net lines). Centralized `BINDINGS_VERSION` in `storageKeys.ts` (was fragile duplicate). Added `SENSITIVITY_MIN/MAX/DEFAULT` and `SCENE_INPUT_DELAY` to BALANCE. Extracted `getSavedKeyName()` to dedup `getGroomKeyName`/`getWinchKeyName`.

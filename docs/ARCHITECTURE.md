@@ -369,13 +369,34 @@ A thin accent stripe (1px, THEME color) runs inside the top bevel for visual pol
 
 ## HUD: Visor Style
 
-The HUD uses a "visor" pattern: a full-width semi-transparent dark strip across the top of the screen (alpha 0.55). All HUD text sits inside this strip without stroke — the dark background provides contrast against snow/terrain. A thin cyan accent line marks the bottom edge.
+The HUD uses a "visor" pattern: a full-width semi-transparent dark strip across the top of the screen. All HUD text sits inside this strip — the dark background provides contrast against snow/terrain. A thin cyan accent line marks the bottom edge.
 
-- **Left side**: Level name, FUEL/STAM bars with labels, coverage percentage
-- **Right side**: Timer (large), target percentage, skip button
-- **Winch status**: Small green "🔗 WINCH" text appears inside visor only when winch is active
+### Three-Row Horizontal Layout
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Blue Piste – Le Chamois     🔗 WINCH          03:58        │  Row 1
+│ 🔴██████ 100%  🟢██████ 100%  ██████|████ 52%             │  Row 2
+│ ★ No tumbles ✓   ★ Fuel ≤60% 52%                          │  Row 3
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **Row 1**: Level name (left), winch status (center), timer (right, large font)
+- **Row 2**: Fuel bar + stamina bar + coverage progress bar (all horizontal, with colored dot identifiers and percentage labels)
+- **Row 3**: Bonus objectives (horizontal, fixed-width columns) — empty/hidden if no bonuses
+- **Coverage bar**: Gray border, dark bg, white fill (turns green when ≥ target). Gold vertical target marker at target % position. Fills remaining width after fuel+stamina, capped at 200×uiScale for ultrawide
+- **Winch status**: Green "🔗 WINCH" text in row 1, visible only when winch is active
 - **Touch buttons**: Pixel art icons on circular buttons (rake = groom, anchor = winch)
-- **No permanent winch hint**: Winch instructions are delivered via Jean-Pierre dialogue on the first winch level (level 4)
+- **No permanent winch hint**: Winch instructions are delivered via Jean-Pierre dialogue on the first winch level
+
+### Accessibility Adaptation
+
+When high-contrast or colorblind modes are active:
+- Visor background alpha increases from 0.55 to 0.80
+- All visor text gains a black stroke outline for readability
+- Bar borders brighten from `0x555555` to `0x999999`
+- Colorblind mode replaces colored dots with text labels ("F"/"S") so users don't rely on red/green color differentiation
+- Bottom accent line doubles in thickness
 
 ### Responsive Layout
 
@@ -383,8 +404,8 @@ Scaling: `baseScale = max(0.6, min(2.0, min(width/1024, height/768)))`. On high-
 
 | Mode | Condition | Behaviour |
 |------|-----------|-----------|
-| Compact | `isNarrow` (width < 600) or `isShort` (height < 500) | Drops FUEL/STAM labels (replaced by colored dots: red=fuel, green=stamina), uses smaller coverage font, tighter row gaps |
-| Very narrow | width ≤ 360 + touch | Skip button repositioned left of coverage text to avoid crowding pause/fullscreen |
+| Compact | `isNarrow` (width < 600) or `isShort` (height < 500) | Shorter bars (60px vs 80px), tighter spacing, bonus objectives flash 4s then fade |
+| Very narrow | width ≤ 360 + touch | Skip button repositioned left to avoid crowding pause/fullscreen |
 | Joystick cap | width < 600 | Joystick radius capped to `(width - actionBtnSpace - padding*2 - 10) / 2` to prevent overlap with action buttons |
 
 ### Pause/Fullscreen Pill Buttons

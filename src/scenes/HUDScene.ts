@@ -7,6 +7,7 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
+import { Accessibility } from '../utils/accessibility';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -32,8 +33,10 @@ export default class HUDScene extends Phaser.Scene {
   private staminaBarBg: Phaser.GameObjects.Rectangle | null = null;
   private staminaText: Phaser.GameObjects.Text | null = null;
   private coverageText: Phaser.GameObjects.Text | null = null;
+  private coverageBar: Phaser.GameObjects.Rectangle | null = null;
+  private coverageBarBg: Phaser.GameObjects.Rectangle | null = null;
+  private covBarWidth = 0;
   private timerText: Phaser.GameObjects.Text | null = null;
-  private targetText: Phaser.GameObjects.Text | null = null;
   private winchStatus: Phaser.GameObjects.Text | null = null;
   private touchControlsContainer: Phaser.GameObjects.Container | null = null;
   
@@ -110,8 +113,8 @@ export default class HUDScene extends Phaser.Scene {
     const isNarrow = width < 600; // Portrait phone or small screen
     const isShort = height < 500; // Landscape phone
     const isCompact = isNarrow || isShort; // Drop labels, tighten spacing
-    const barWidth = Math.round((isCompact ? 90 : 110) * this.uiScale);
-    const barHeight = Math.round(14 * this.uiScale);
+    const barWidth = Math.round((isCompact ? 60 : 80) * this.uiScale);
+    const barHeight = Math.round(12 * this.uiScale);
     const barBorder = Math.max(1, Math.round(1.5 * this.uiScale));
 
     // Minimum readable font sizes (CSS pixels)
@@ -120,111 +123,135 @@ export default class HUDScene extends Phaser.Scene {
     const fontMed = Math.max(14, Math.round(16 * this.uiScale)) + 'px';
     const fontLarge = Math.max(18, Math.round(24 * this.uiScale)) + 'px';
 
+    // Accessibility: boost contrast when high-contrast or colorblind modes are active
+    const a11y = Accessibility.settings;
+    const hc = a11y.highContrast;
+    const cb = a11y.colorblindMode !== 'none';
+    // Text stroke for readability in high-contrast/colorblind modes
+    const a11yStroke = (hc || cb) ? '#000000' : undefined;
+    const a11yStrokeThickness = (hc || cb) ? Math.max(2, Math.round(3 * this.uiScale)) : 0;
+    // Helper: create text with visor styling (white, bold, accessibility stroke)
+    const visorText = (x: number, y: number, content: string, fontSize: string, color = '#FFFFFF') =>
+      this.add.text(x, y, content, {
+        fontFamily: THEME.fonts.family, fontSize, fontStyle: 'bold', color,
+        stroke: a11yStroke, strokeThickness: a11yStrokeThickness,
+      }).setScrollFactor(0);
+
     // === VISOR: semi-transparent dark strip across top ===
-    // Generous row spacing for clear visual separation
-    const rowGap = isShort ? Math.round(19 * this.uiScale) : Math.round(22 * this.uiScale);
+    // Row 1: level name + timer
+    // Row 2: fuel bar | stamina bar | coverage bar (all horizontal)
+    // Row 3: bonus objectives (horizontal, if any)
     const row1Y = padding;
-    // Extra gap after piste name for clear visual separation from bars
-    const nameGap = isShort ? Math.round(24 * this.uiScale) : Math.round(28 * this.uiScale);
+    const nameGap = isShort ? Math.round(22 * this.uiScale) : Math.round(26 * this.uiScale);
     const row2Y = row1Y + nameGap;
-    const row3Y = row2Y + rowGap;
-    const row4Y = row3Y + Math.round((isShort ? 21 : 24) * this.uiScale);
     const bonusCount = (this.level.bonusObjectives || []).length;
     const bonusLineHeight = Math.round(20 * this.uiScale);
-    const bonusExtraHeight = bonusCount > 0 ? bonusCount * bonusLineHeight + Math.round(8 * this.uiScale) : 0;
-    const visorHeight = row4Y + Math.round((isShort ? 26 : 26) * this.uiScale) + bonusExtraHeight;
+    const row2BottomPad = Math.round(10 * this.uiScale);
+    const row3Y = row2Y + barHeight + barBorder * 2 + row2BottomPad;
+    const bonusExtraHeight = bonusCount > 0 ? bonusLineHeight + Math.round(6 * this.uiScale) : 0;
+    const visorHeight = row3Y + bonusExtraHeight + (bonusCount > 0 ? 0 : Math.round(-4 * this.uiScale));
 
+    // Higher alpha in accessibility modes for stronger background contrast
+    const visorAlpha = (hc || cb) ? 0.8 : 0.55;
     this.add.rectangle(0, 0, width, visorHeight, 0x000000)
-      .setOrigin(0).setScrollFactor(0).setAlpha(0.55);
-    // Thin bottom edge accent
-    this.add.rectangle(0, visorHeight - 1, width, 1, THEME.colors.infoHex)
-      .setOrigin(0).setScrollFactor(0).setAlpha(0.4);
-
-    // On compact screens, drop labels and start bars at padding
-    const barStartX = isCompact ? padding : padding + Math.round(44 * this.uiScale);
+      .setOrigin(0).setScrollFactor(0).setAlpha(visorAlpha);
+    // Thin bottom edge accent — thicker in high-contrast
+    const accentHeight = hc ? 2 : 1;
+    this.add.rectangle(0, visorHeight - accentHeight, width, accentHeight, THEME.colors.infoHex)
+      .setOrigin(0).setScrollFactor(0).setAlpha(hc ? 0.8 : 0.4);
 
     // Level name
-    this.add.text(padding, row1Y, t(this.level.nameKey) || 'Level', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontSmall,
-      fontStyle: 'bold',
-      color: '#FFFFFF',
-    }).setScrollFactor(0);
+    const levelNameText = visorText(padding, row1Y, t(this.level.nameKey) || 'Level', fontSmall);
 
-    // Fuel bar
-    if (!isCompact) {
-      this.add.text(padding, row2Y, 'FUEL', {
-        fontFamily: THEME.fonts.family,
-        fontSize: fontTiny,
-        fontStyle: 'bold',
-        color: '#EEEEEE',
-      }).setScrollFactor(0);
+    // === ROW 2: All three bars side by side ===
+    const dotSize = Math.round(6 * this.uiScale);
+    const dotGap = Math.round(4 * this.uiScale);
+    const barTextGap = Math.round(4 * this.uiScale);
+    const sectionGap = Math.round(10 * this.uiScale);
+    const barCenterY = row2Y + barHeight / 2 + barBorder;
+    // Reserve space for "100%" text (4 chars in monospace fontTiny)
+    const pctTextWidth = Math.round(30 * this.uiScale);
+    // Coverage bar fills remaining space up to timer area, capped for readability
+    const timerReserve = Math.round(80 * this.uiScale);
+    // In colorblind mode, use text labels ("F"/"S") instead of colored dots
+    const labelWidth = cb ? Math.round(12 * this.uiScale) : 0;
+    const indicatorWidth = cb ? labelWidth : dotSize;
+    const resourceSectionWidth = indicatorWidth + dotGap + barWidth + barBorder * 2 + barTextGap + pctTextWidth;
+    const covBarStartX = padding + resourceSectionWidth * 2 + sectionGap * 2 + indicatorWidth + dotGap;
+    const covBarRight = width - padding - timerReserve;
+    const covBarWidthRaw = covBarRight - covBarStartX - barBorder * 2 - barTextGap - pctTextWidth;
+    // Cap coverage bar: min 60, max 200 (scaled) to avoid giant bars on ultrawide
+    const covBarWidth = Math.max(Math.round(60 * this.uiScale), Math.min(Math.round(200 * this.uiScale), covBarWidthRaw));
+    // Bar border color — brighter in high-contrast mode
+    const barBorderColor = hc ? 0x999999 : 0x555555;
+
+    // --- Fuel bar ---
+    let curX = padding;
+    if (cb) {
+      // Text label instead of colored dot for colorblind accessibility
+      visorText(curX, barCenterY, 'F', fontTiny, '#FF6666').setOrigin(0, 0.5);
+      curX += labelWidth + dotGap;
     } else {
-      // Compact: tiny colored square as bar identifier (rectangles only per ART_STYLE.md)
-      const dotSize = Math.round(6 * this.uiScale);
-      this.add.rectangle(padding + Math.round(3 * this.uiScale), row2Y + Math.round(7 * this.uiScale), dotSize, dotSize, THEME.colors.dangerHex).setScrollFactor(0);
+      this.add.rectangle(curX + dotSize / 2, barCenterY, dotSize, dotSize, THEME.colors.dangerHex)
+        .setScrollFactor(0);
+      curX += dotSize + dotGap;
     }
-    const fuelBarY = row2Y + Math.round(7 * this.uiScale);
-    this.add.rectangle(barStartX - barBorder, fuelBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelBarBg = this.add.rectangle(barStartX, fuelBarY, barWidth, barHeight, 0x222222).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelBar = this.add.rectangle(barStartX, fuelBarY, barWidth, barHeight, THEME.colors.dangerHex).setOrigin(0, 0.5).setScrollFactor(0);
-    this.fuelText = this.add.text(barStartX + barWidth + Math.round(6 * this.uiScale), row2Y, '100%', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontTiny,
-      fontStyle: 'bold',
-      color: '#FFFFFF',
-    }).setScrollFactor(0);
+    this.add.rectangle(curX, barCenterY, barWidth + barBorder * 2, barHeight + barBorder * 2, barBorderColor)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelBarBg = this.add.rectangle(curX + barBorder, barCenterY, barWidth, barHeight, 0x222222)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    this.fuelBar = this.add.rectangle(curX + barBorder, barCenterY, barWidth, barHeight, THEME.colors.dangerHex)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    curX += barWidth + barBorder * 2 + barTextGap;
+    this.fuelText = visorText(curX, row2Y, '100%', fontTiny);
 
-    // Stamina bar
-    if (!isCompact) {
-      this.add.text(padding, row3Y, 'STAM', {
-        fontFamily: THEME.fonts.family,
-        fontSize: fontTiny,
-        fontStyle: 'bold',
-        color: '#EEEEEE',
-      }).setScrollFactor(0);
+    // --- Stamina bar ---
+    curX += pctTextWidth + sectionGap;
+    if (cb) {
+      visorText(curX, barCenterY, 'S', fontTiny, '#66FF66').setOrigin(0, 0.5);
+      curX += labelWidth + dotGap;
     } else {
-      const dotSize = Math.round(6 * this.uiScale);
-      this.add.rectangle(padding + Math.round(3 * this.uiScale), row3Y + Math.round(7 * this.uiScale), dotSize, dotSize, THEME.colors.successHex).setScrollFactor(0);
+      this.add.rectangle(curX + dotSize / 2, barCenterY, dotSize, dotSize, THEME.colors.successHex)
+        .setScrollFactor(0);
+      curX += dotSize + dotGap;
     }
-    const stamBarY = row3Y + Math.round(7 * this.uiScale);
-    this.add.rectangle(barStartX - barBorder, stamBarY, barWidth + barBorder * 2, barHeight + barBorder * 2, 0x555555).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaBarBg = this.add.rectangle(barStartX, stamBarY, barWidth, barHeight, 0x222222).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaBar = this.add.rectangle(barStartX, stamBarY, barWidth, barHeight, THEME.colors.successHex).setOrigin(0, 0.5).setScrollFactor(0);
-    this.staminaText = this.add.text(barStartX + barWidth + Math.round(6 * this.uiScale), row3Y, '100%', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontTiny,
-      fontStyle: 'bold',
-      color: '#FFFFFF',
-    }).setScrollFactor(0);
+    this.add.rectangle(curX, barCenterY, barWidth + barBorder * 2, barHeight + barBorder * 2, barBorderColor)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaBarBg = this.add.rectangle(curX + barBorder, barCenterY, barWidth, barHeight, 0x222222)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    this.staminaBar = this.add.rectangle(curX + barBorder, barCenterY, barWidth, barHeight, THEME.colors.successHex)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    curX += barWidth + barBorder * 2 + barTextGap;
+    this.staminaText = visorText(curX, row2Y, '100%', fontTiny);
 
-    // Coverage — white for contrast, smaller on compact screens
-    this.coverageText = this.add.text(padding, row4Y, (t('coverage') || 'Coverage') + ': 0%', {
-      fontFamily: THEME.fonts.family,
-      fontSize: isCompact ? fontSmall : fontMed,
-      fontStyle: 'bold',
-      color: '#FFFFFF',
-    }).setScrollFactor(0);
+    // --- Coverage bar with target marker ---
+    curX += pctTextWidth + sectionGap;
+    const covBarX = curX;
+    this.add.rectangle(covBarX, barCenterY, covBarWidth + barBorder * 2, barHeight + barBorder * 2, barBorderColor)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    this.coverageBarBg = this.add.rectangle(covBarX + barBorder, barCenterY, covBarWidth, barHeight, 0x222222)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    this.coverageBar = this.add.rectangle(covBarX + barBorder, barCenterY, 0, barHeight, 0xffffff)
+      .setOrigin(0, 0.5).setScrollFactor(0);
+    // Target marker — gold vertical line at target % position
+    const targetX = covBarX + barBorder + Math.round(covBarWidth * this.level.targetCoverage / 100);
+    const markerHeight = barHeight + barBorder * 2 + Math.round(4 * this.uiScale);
+    this.add.rectangle(targetX, barCenterY, Math.max(2, Math.round(2 * this.uiScale)), markerHeight, THEME.colors.accentHex)
+      .setScrollFactor(0).setAlpha(0.9);
+    curX = covBarX + covBarWidth + barBorder * 2 + barTextGap;
+    this.coverageText = visorText(curX, row2Y, '0%', fontTiny);
+    this.covBarWidth = covBarWidth;
 
-    // === TOP-RIGHT: Timer + target ===
+    // === TOP-RIGHT: Timer ===
     const hasTimer = this.level.timeLimit > 0;
-    this.timerText = this.add.text(width - padding, row1Y, hasTimer ? '00:00' : '', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontLarge,
-      fontStyle: 'bold',
-      color: '#FFFFFF',
-    }).setOrigin(1, 0).setScrollFactor(0);
+    const initMins = Math.floor(this.level.timeLimit / 60);
+    const initSecs = this.level.timeLimit % 60;
+    const initTimerStr = hasTimer
+      ? initMins.toString().padStart(2, '0') + ':' + initSecs.toString().padStart(2, '0')
+      : '';
+    this.timerText = visorText(width - padding, row1Y, initTimerStr, fontLarge)
+      .setOrigin(1, 0);
     if (!hasTimer) this.timerText.setVisible(false);
-
-    // On compact screens, stack target below timer at row3Y to avoid overlap
-    const targetY = isCompact ? row3Y : row1Y + Math.round(26 * this.uiScale);
-    this.targetText = this.add.text(width - padding, targetY,
-      (t('target') || 'Target') + ': ' + this.level.targetCoverage + '%', {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontSmall,
-      fontStyle: 'bold',
-      color: THEME.colors.accent,
-    }).setOrigin(1, 0).setScrollFactor(0);
 
     // Touch detection for button sizing
     const phaserTouch = this.sys.game.device.input.touch;
@@ -236,18 +263,19 @@ export default class HUDScene extends Phaser.Scene {
     const touchBtnPad = Math.round(6 * this.uiScale);
     const minHitSize = 44; // Minimum touch target per ART_STYLE.md
     
-    // Skip level button — inside visor
+    // Skip level button — below visor, right-aligned
     // On narrow mobile, use abbreviated ">>" to save space
     // On very narrow (<=360px), position skip on left to avoid crowding pause/fullscreen
     const skipFontSize = (hasTouch && isMobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
     const isVeryNarrow = width <= 360;
     const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
     const skipLabel = isNarrow ? '>>' : (hasTouch && isMobile) ? '>> Skip' : hasGamepad ? '>> Skip [Select]' : '>> Skip [N]';
-    let nextButtonY = row4Y;
+    const skipY = visorHeight + Math.round(4 * this.uiScale);
+    let nextButtonY = skipY;
     
     const skipOriginX = (isVeryNarrow && hasTouch) ? 0 : 1;
     const skipX = (isVeryNarrow && hasTouch)
-      ? padding + (this.coverageText?.width ?? 0) + Math.round(8 * this.uiScale)
+      ? padding + Math.round(8 * this.uiScale)
       : width - padding;
     const skipBtn = this.add.text(skipX, nextButtonY, skipLabel, {
       fontFamily: THEME.fonts.family,
@@ -297,30 +325,24 @@ export default class HUDScene extends Phaser.Scene {
     
     // Show keyboard hint on desktop (even with touchscreen), touch hint on mobile
 
-    // Winch status indicator (hidden by default, shown when winch is active)
+    // Winch status indicator — row 1, right of level name (mode indicator)
     if (this.level.hasWinch) {
-      this.winchStatus = this.add.text(padding, row4Y + Math.round(20 * this.uiScale), '', {
-        fontFamily: THEME.fonts.family,
-        fontSize: fontSmall,
-        fontStyle: 'bold',
-        color: '#00FF00',
-      }).setScrollFactor(0).setVisible(false);
+      const winchX = padding + levelNameText.width + Math.round(10 * this.uiScale);
+      this.winchStatus = visorText(winchX, row1Y, '', fontSmall, '#00FF00')
+        .setVisible(false);
     }
 
-    // Bonus objectives inside visor (bottom of visor area)
+    // Bonus objectives in row 3 — horizontal layout with fixed-width columns
     this.bonusObjectives = this.level.bonusObjectives || [];
     this.bonusFailed = this.bonusObjectives.map(() => false);
     this.bonusTexts = [];
     if (this.bonusObjectives.length > 0) {
-      const bonusStartY = visorHeight - bonusExtraHeight + Math.round(2 * this.uiScale);
+      // Divide available width evenly among objectives
+      const availWidth = width - padding * 2;
+      const colWidth = Math.floor(availWidth / this.bonusObjectives.length);
       this.bonusObjectives.forEach((obj, i) => {
         const label = this.getBonusLabel(obj);
-        const txt = this.add.text(padding, bonusStartY + i * bonusLineHeight, '★ ' + label, {
-          fontFamily: THEME.fonts.family,
-          fontSize: fontMed,
-          fontStyle: 'bold',
-          color: '#FFFFFF',
-        }).setScrollFactor(0);
+        const txt = visorText(padding + i * colWidth, row3Y, '★ ' + label, fontSmall);
         this.bonusTexts.push(txt);
       });
 
@@ -744,9 +766,13 @@ export default class HUDScene extends Phaser.Scene {
     if (this.staminaBar?.active) this.staminaBar.setFillStyle(staminaPercent > 0.3 ? THEME.colors.successHex : 0xffaa00);
 
     if (this.coverageText?.active) {
-      this.coverageText.setText((t('coverage') || 'Coverage') + ': ' + coverage + '%');
-      if (coverage >= this.level.targetCoverage) {
-        this.coverageText.setColor('#00FF00');
+      this.coverageText.setText(coverage + '%');
+      const targetMet = coverage >= this.level.targetCoverage;
+      this.coverageText.setColor(targetMet ? '#00FF00' : '#FFFFFF');
+      // Update coverage bar fill
+      if (this.coverageBar?.active) {
+        this.coverageBar.width = this.covBarWidth * (coverage / 100);
+        this.coverageBar.setFillStyle(targetMet ? THEME.colors.successHex : 0xffffff);
       }
     }
 
@@ -954,6 +980,8 @@ export default class HUDScene extends Phaser.Scene {
     this.staminaBar = null;
     this.staminaText = null;
     this.coverageText = null;
+    this.coverageBar = null;
+    this.coverageBarBg = null;
     this.winchStatus = null;
     this.bonusTexts = [];
     this.bonusObjectives = [];
