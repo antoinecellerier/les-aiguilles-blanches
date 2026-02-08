@@ -2232,3 +2232,41 @@ class TestAccessPaths:
         assert info['rectsCount'] > 0, "accessPathRects should be populated"
         assert info['curvesCount'] == 2, "Should have 2 curve sets"
         assert info['wallsCount'] > 0, "Should have boundary walls"
+
+
+class TestWildlife:
+    """Tests for alpine wildlife system."""
+
+    def test_wildlife_spawns_in_game(self, game_page: Page):
+        """Wildlife should spawn on levels that have wildlife config."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        # Level 1 has wildlife (bunnies + birds)
+        skip_to_level(game_page, 1)
+        dismiss_dialogues(game_page)
+
+        counts = game_page.evaluate("""() => {
+            const gs = window.game.scene.getScene('GameScene');
+            if (!gs || !gs.wildlifeSystem) return null;
+            return { total: gs.wildlifeSystem.totalCount, active: gs.wildlifeSystem.activeCount };
+        }""")
+
+        assert counts is not None, "WildlifeSystem should exist"
+        assert counts['total'] > 0, "Wildlife should spawn on level 1"
+        assert counts['active'] > 0, "Wildlife should be active initially"
+
+    def test_wildlife_on_menu_screen(self, game_page: Page):
+        """Menu screen should have wildlife decorations."""
+        wait_for_scene(game_page, 'MenuScene')
+
+        # Check that Graphics objects exist (wildlife drawn via Graphics)
+        has_graphics = game_page.evaluate("""() => {
+            const menu = window.game.scene.getScene('MenuScene');
+            if (!menu) return false;
+            const graphics = menu.children.list.filter(c => c.type === 'Graphics');
+            // Menu has mountains, trees, groomer + wildlife = many graphics
+            return graphics.length > 10;
+        }""")
+
+        assert has_graphics, "Menu should have wildlife graphics objects"

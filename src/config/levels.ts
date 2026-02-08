@@ -4,12 +4,18 @@
  */
 
 import type { DifficultyType } from './gameConfig';
+import type { AnimalType } from '../utils/animalSprites';
 
 export type WeatherType = 'clear' | 'light_snow' | 'storm';
 export type PisteShape = 'straight' | 'gentle_curve' | 'winding' | 'serpentine' | 'wide';
 export type ObstacleType = 'trees' | 'rocks' | 'pylons' | 'jumps' | 'rails' | 'cliffs' | 'avalanche_zones' | 'snow_drifts';
 export type HazardType = 'avalanche';
 export type SpecialFeature = 'kickers' | 'rails' | 'halfpipe';
+
+export interface WildlifeSpawn {
+  type: AnimalType;
+  count: number;
+}
 
 export interface SteepZone {
   startY: number;
@@ -65,6 +71,7 @@ export interface Level {
   hazards?: HazardType[];
   accessPaths?: AccessPath[];
   bonusObjectives?: BonusObjective[];
+  wildlife?: WildlifeSpawn[];
 }
 
 export const LEVELS: Level[] = [
@@ -98,6 +105,10 @@ export const LEVELS: Level[] = [
       { trigger: 'hudDone', dialogue: 'tutorialGoal', delay: 4000 },
       { trigger: 'coverage40', dialogue: 'tutorialComplete' },
     ],
+    wildlife: [
+      { type: 'bunny', count: 3 },
+      { type: 'bird', count: 4 },
+    ],
   },
   {
     id: 1,
@@ -119,6 +130,11 @@ export const LEVELS: Level[] = [
     introDialogue: 'jeanPierreIntro',
     bonusObjectives: [
       { type: 'speed_run', target: 180 },
+    ],
+    wildlife: [
+      { type: 'bunny', count: 3 },
+      { type: 'marmot', count: 2 },
+      { type: 'bird', count: 5 },
     ],
   },
   {
@@ -143,6 +159,13 @@ export const LEVELS: Level[] = [
       { type: 'no_tumble', target: 0 },
       { type: 'fuel_efficiency', target: 60 },
     ],
+    wildlife: [
+      { type: 'bunny', count: 3 },
+      { type: 'marmot', count: 3 },
+      { type: 'chamois', count: 2 },
+      { type: 'bird', count: 6 },
+      { type: 'fox', count: 1 },
+    ],
   },
   {
     id: 3,
@@ -165,6 +188,10 @@ export const LEVELS: Level[] = [
     introDialogue: 'level3Intro',
     bonusObjectives: [
       { type: 'fuel_efficiency', target: 50 },
+    ],
+    wildlife: [
+      { type: 'bird', count: 6 },
+      { type: 'bunny', count: 2 },
     ],
   },
   {
@@ -196,6 +223,13 @@ export const LEVELS: Level[] = [
       { type: 'winch_mastery', target: 3 },
       { type: 'exploration', target: 2 },
     ],
+    wildlife: [
+      { type: 'chamois', count: 3 },
+      { type: 'marmot', count: 2 },
+      { type: 'bunny', count: 3 },
+      { type: 'bird', count: 5 },
+      { type: 'fox', count: 1 },
+    ],
   },
   {
     id: 5,
@@ -218,6 +252,10 @@ export const LEVELS: Level[] = [
     introDialogue: 'level5Intro',
     bonusObjectives: [
       { type: 'speed_run', target: 240 },
+    ],
+    wildlife: [
+      { type: 'bird', count: 5 },
+      { type: 'bunny', count: 1 },
     ],
   },
   {
@@ -252,6 +290,12 @@ export const LEVELS: Level[] = [
       { type: 'exploration', target: 3 },
       { type: 'no_tumble', target: 0 },
     ],
+    wildlife: [
+      { type: 'chamois', count: 4 },
+      { type: 'bouquetin', count: 2 },
+      { type: 'bird', count: 6 },
+      { type: 'fox', count: 1 },
+    ],
   },
   {
     id: 7,
@@ -284,6 +328,12 @@ export const LEVELS: Level[] = [
       { type: 'no_tumble', target: 0 },
       { type: 'winch_mastery', target: 4 },
     ],
+    wildlife: [
+      { type: 'bouquetin', count: 3 },
+      { type: 'chamois', count: 4 },
+      { type: 'marmot', count: 2 },
+      { type: 'bird', count: 7 },
+    ],
   },
   {
     id: 8,
@@ -307,6 +357,11 @@ export const LEVELS: Level[] = [
     bonusObjectives: [
       { type: 'fuel_efficiency', target: 70 },
       { type: 'speed_run', target: 300 },
+    ],
+    wildlife: [
+      { type: 'chamois', count: 2 },
+      { type: 'bunny', count: 3 },
+      { type: 'bird', count: 4 },
     ],
   },
 ];

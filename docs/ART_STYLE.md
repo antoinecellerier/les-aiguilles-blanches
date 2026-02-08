@@ -144,6 +144,25 @@ Character faces appear in dialogue boxes using a 12×12 pixel grid system.
 - Warning signs: yellow triangle with exclamation mark
 - Avalanche barrier flags: yellow (`0xffcc00`)
 
+## Wildlife
+
+Procedural pixel art animals generated in `animalSprites.ts`. All rectangle-only, no curves. Fox uses shared hunting logic from `foxBehavior.ts`. Track marks drawn via `animalTracks.ts`.
+
+| Species | Grid Size | Key Colors |
+|---------|-----------|------------|
+| Bouquetin (ibex) | 10×8 | Gray-brown `0x6E6259`, belly tan `0xC4A35A`, dark horns `0x444444` |
+| Chamois | 7×6 | Dark brown `0x5C3D1E`, cream belly `0xD4B87A`, face mask stripe |
+| Marmot | 5×4 | Tawny `0x8B7355`, light belly `0xC4A87A` |
+| Bunny | 6×5 | Near-white `0xF0F0F0`, pink inner ear `0xFFC0CB`, black ear tips |
+| Bird (Alpine chough) | 4×3 top-down, 6×3 side-flying, 2×3 perched | Black `0x111111`, yellow beak `0xFFCC00`, red legs `0xFF3333` |
+| Fox | 8×5 | Orange `0xCC6600`, cream belly `0xF0E0C0`, white tail tip |
+
+### Bird Sprite Variants
+
+- **Top-down flying** (4×3): V-shape wings spread, used in game scene
+- **Side-view flying** (6×3): Soaring profile with raised wing, used in menu scene. Flips horizontally via `setScale(-1, 1)` for leftward flight
+- **Perched** (2×3): Compact upright sitting pose with folded wings and visible red legs
+
 ## Texture Patterns
 
 ### Snow Textures

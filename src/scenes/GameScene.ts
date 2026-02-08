@@ -11,6 +11,7 @@ import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { HazardSystem } from '../systems/HazardSystem';
+import { WildlifeSystem, type ObstacleRect } from '../systems/WildlifeSystem';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -152,6 +153,8 @@ export default class GameScene extends Phaser.Scene {
 
   // Weather & environment
   private weatherSystem!: WeatherSystem;
+  private wildlifeSystem!: WildlifeSystem;
+  private buildingRects: ObstacleRect[] = [];
 
   // Input
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -307,6 +310,9 @@ export default class GameScene extends Phaser.Scene {
     // Avalanche state
     this.hazardSystem = new HazardSystem(this);
 
+    // Wildlife
+    this.wildlifeSystem = new WildlifeSystem(this, this.tileSize);
+
     // Tutorial state
     this.tutorialStep = 0;
     this.tutorialTriggered = {};
@@ -388,6 +394,22 @@ export default class GameScene extends Phaser.Scene {
 
     // Apply accessibility settings
     this.weatherSystem.applyAccessibilitySettings();
+
+    // Spawn wildlife
+    if (this.level.wildlife && this.level.wildlife.length > 0) {
+      const worldW = this.level.width * this.tileSize;
+      const worldH = this.level.height * this.tileSize;
+      // Use mid-level piste path to estimate left/right edges
+      const midPath = this.pistePath[Math.floor(this.level.height / 2)];
+      const pisteLeft = midPath ? (midPath.centerX - midPath.width / 2) * this.tileSize : worldW * 0.3;
+      const pisteRight = midPath ? (midPath.centerX + midPath.width / 2) * this.tileSize : worldW * 0.7;
+      this.wildlifeSystem.spawn(this.level.wildlife, worldW, worldH, pisteLeft, pisteRight, this.accessPathRects);
+      this.wildlifeSystem.setObstacles(
+        (px, py) => this.isOnCliff(px, py),
+        this.buildingRects,
+      );
+      this.wildlifeSystem.bootstrapTracks();
+    }
 
     // Handle window resize - keep camera bounds updated and groomer visible
     this.scale.on('resize', this.handleResize, this);
@@ -1732,6 +1754,12 @@ export default class GameScene extends Phaser.Scene {
     restaurant.interactionType = 'food';
     restaurant.setScale(this.tileSize / 16);
     restaurant.setDepth(DEPTHS.GROUND_OBJECTS);
+    // Add restaurant footprint for wildlife collision
+    const rSize = this.tileSize * 2;
+    this.buildingRects.push({
+      x: restaurant.x - rSize / 2, y: restaurant.y - rSize / 2,
+      w: rSize, h: rSize,
+    });
 
     // Fuel station at bottom of level (maintenance area in resort)
     const fuelStation = this.interactables.create(
@@ -1742,6 +1770,12 @@ export default class GameScene extends Phaser.Scene {
     fuelStation.interactionType = 'fuel';
     fuelStation.setScale(this.tileSize / 16);
     fuelStation.setDepth(DEPTHS.GROUND_OBJECTS);
+    // Add fuel station footprint for wildlife collision
+    const fSize = this.tileSize * 2;
+    this.buildingRects.push({
+      x: fuelStation.x - fSize / 2, y: fuelStation.y - fSize / 2,
+      w: fSize, h: fSize,
+    });
 
     // Add resort buildings on easier pistes (near resort)
     if (['tutorial', 'green', 'blue'].includes(this.level.difficulty)) {
@@ -1798,6 +1832,12 @@ export default class GameScene extends Phaser.Scene {
     const g = this.add.graphics();
     g.setDepth(DEPTHS.GROUND_OBJECTS);
     const size = this.tileSize * 2;
+
+    // Store footprint for wildlife collision
+    this.buildingRects.push({
+      x: x - size / 2, y: y - size * 0.4,
+      w: size, h: size * 0.65,
+    });
 
     // Chalet body (wooden)
     g.fillStyle(0x8B4513, 1);
@@ -2043,6 +2083,9 @@ export default class GameScene extends Phaser.Scene {
       this.weatherSystem.updateNightOverlay(this.groomer);
     }
 
+    // Update wildlife (flee from groomer)
+    this.wildlifeSystem.update(this.groomer.x, this.groomer.y, delta);
+
     // Emit game state for HUD
     this.game.events.emit(GAME_EVENTS.GAME_STATE, {
       fuel: this.fuel,
@@ -2260,6 +2303,8 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     }
+    // Erase animal tracks in the groomed area
+    this.wildlifeSystem.eraseTracksAt(x, y, radius * this.tileSize);
   }
 
   private updateResources(delta: number): void {
@@ -2653,5 +2698,7 @@ export default class GameScene extends Phaser.Scene {
     this.winchCableGraphics = null;
     this.weatherSystem.reset();
     this.hazardSystem.reset();
+    this.wildlifeSystem.reset();
+    this.buildingRects = [];
   }
 }

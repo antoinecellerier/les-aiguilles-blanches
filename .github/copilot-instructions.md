@@ -63,9 +63,13 @@ GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/
 - `src/config/gameConfig.ts` - Game constants, BALANCE tuning values
 - `src/config/levels.ts` - Level definitions
 - `src/config/localization.ts` - All UI strings
+- `src/utils/animalSprites.ts` - Procedural pixel art for alpine wildlife (6 species + bird variants)
+- `src/utils/foxBehavior.ts` - Shared fox hunting/lunge constants and decision logic
+- `src/utils/animalTracks.ts` - Shared track/footprint drawing
 - `src/utils/characterPortraits.ts` - Procedural pixel art generation
 - `src/systems/WeatherSystem.ts` - Night overlay, headlights, weather
 - `src/systems/HazardSystem.ts` - Avalanche zones, risk tracking
+- `src/systems/WildlifeSystem.ts` - Animal spawning, flee AI, building/cliff collision, track system
 - `src/types/GameSceneInterface.ts` - Cross-scene event types
 - `tests/e2e/conftest.py` - Test helpers
 

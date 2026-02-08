@@ -42,13 +42,17 @@ snow-groomer/
 │   │   └── theme.ts        # UI colors, fonts, button styles
 │   ├── systems/
 │   │   ├── WeatherSystem.ts  # Night overlay, headlights, weather particles
-│   │   └── HazardSystem.ts   # Avalanche zones, risk handling
+│   │   ├── HazardSystem.ts   # Avalanche zones, risk handling
+│   │   └── WildlifeSystem.ts # Animal spawning, flee AI, update loop
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
+│   │   ├── animalSprites.ts  # Procedural pixel art for alpine wildlife (6 species + perched/flying variants)
+│   │   ├── animalTracks.ts   # Shared track/footprint drawing for menu & game scenes
 │   │   ├── characterPortraits.ts # Procedural 12×12 pixel art portraits
+│   │   ├── foxBehavior.ts    # Shared fox hunting/lunge decision logic + constants
 │   │   ├── gamepad.ts      # Controller detection, button mapping
 │   │   ├── gamepadMenu.ts  # Reusable gamepad menu navigation controller
 │   │   ├── gameProgress.ts # Save/load game progress
@@ -771,6 +775,7 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 
 - **WeatherSystem** — Night overlay rendering, headlight cones, weather particle emitters, accessibility filters
 - **HazardSystem** — Avalanche zone creation, risk tracking, avalanche trigger sequence
+- **WildlifeSystem** — Decorative animal spawning, flee-from-groomer AI, per-level species config. Uses shared utilities: `foxBehavior.ts` for fox hunting decisions, `animalTracks.ts` for track drawing, `animalSprites.ts` for procedural sprites (including side-view flying and perched bird variants). Animals avoid buildings/cliffs (non-climbing species), grooming erases tracks, and tracks are bootstrapped at level start.
 
 Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `_createLevel()` and `update()`.
 

@@ -112,6 +112,7 @@ The game's difficulty naturally increases as you progress:
 - **Resort buildings**: Near-resort pistes feature Savoyard chalets with snow-covered roofs and smoking chimneys. Higher altitude pistes show only natural terrain.
 - **Time pressure**: Later levels have tighter time limits relative to area size.
 - **Steepness**: Advanced levels require winch operation on steep sections.
+- **Wildlife**: Decorative alpine animals (bouquetin, chamois, marmots, bunnies, birds) roam the slopes and flee when the groomer approaches.
 
 ### Level 1: Green Piste - Les Marmottes
 *"Welcome aboard, rookie!"*

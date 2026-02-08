@@ -134,6 +134,12 @@ export const BALANCE = {
   HEADLIGHT_STEPS: 6,
   HEADLIGHT_DIST_STEPS: 8,
   HEADLIGHT_ARC_STEPS: 12,
+
+  // Wildlife
+  WILDLIFE_FLEE_DISTANCE: 120,    // px — distance at which animals start fleeing
+  WILDLIFE_CALM_DISTANCE: 200,    // px — distance at which fleeing animals return to idle
+  WILDLIFE_FLEE_SPEED_BASE: 60,   // px/s — base flee speed (multiplied per species)
+  WILDLIFE_SPAWN_MARGIN: 40,      // px — min distance from world edges for spawning
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

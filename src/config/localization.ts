@@ -216,7 +216,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260209_date: '9 février 2026',
-        changelog_20260209: '🎨 Portraits des personnages dans les dialogues',
+        changelog_20260209: '🎨 Portraits des personnages dans les dialogues\n🦅 Faune alpine : chocards, bouquetins, chamois, marmottes, lièvres et renards\n🐾 Traces d\'animaux dans la neige, effacées par le damage',
     changelog_20260208_date: "8 février 2026",
         changelog_20260208: "🪧 Signalétique conforme NF S52-102 : triangles danger, jalons orange, poteaux jaune/noir\n🏔️ Profondeur visuelle corrigée : arbres, falaises, bâtiments\n📱 Support tactile Firefox corrigé",
         changelog_20260207_date: "7 février 2026",
@@ -432,7 +432,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260209_date: 'February 9, 2026',
-        changelog_20260209: '🎨 Character portraits in dialogues',
+        changelog_20260209: '🎨 Character portraits in dialogues\n🦅 Alpine wildlife: choughs, ibex, chamois, marmots, hares and foxes\n🐾 Animal tracks in snow, erased by grooming',
     changelog_20260208_date: "February 8, 2026",
         changelog_20260208: "🪧 Signage per NF S52-102: warning triangles, orange-capped markers, yellow/black danger poles\n🏔️ Visual depth fixed: trees, cliffs, buildings render correctly\n📱 Firefox touchscreen support fixed",
         changelog_20260207_date: "February 7, 2026",
@@ -614,7 +614,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260209_date: '9. Februar 2026',
-        changelog_20260209: '🎨 Charakterporträts in Dialogen',
+        changelog_20260209: '🎨 Charakterporträts in Dialogen\n🦅 Alpine Tierwelt: Alpendohlen, Steinböcke, Gämsen, Murmeltiere, Hasen und Füchse\n🐾 Tierspuren im Schnee, durch Pistenpflege gelöscht',
     changelog_20260208_date: "8. Februar 2026",
         changelog_20260208: "🪧 Beschilderung nach NF S52-102: Warndreiecke, orange Markierungen, gelb/schwarze Gefahrenpfosten\n🏔️ Visuelle Tiefe korrigiert: Bäume, Klippen, Gebäude\n📱 Firefox-Touchscreen-Unterstützung behoben",
         changelog_20260207_date: "7. Februar 2026",
@@ -827,7 +827,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260209_date: '9 febbraio 2026',
-        changelog_20260209: '🎨 Ritratti dei personaggi nei dialoghi',
+        changelog_20260209: '🎨 Ritratti dei personaggi nei dialoghi\n🦅 Fauna alpina: gracchi, stambecchi, camosci, marmotte, lepri e volpi\n🐾 Tracce animali nella neve, cancellate dalla preparazione piste',
     changelog_20260208_date: "8 febbraio 2026",
         changelog_20260208: "🪧 Segnaletica conforme NF S52-102: triangoli pericolo, paletti arancioni, pali giallo/nero\n🏔️ Profondità visiva corretta: alberi, scogliere, edifici\n📱 Supporto touchscreen Firefox corretto",
         changelog_20260207_date: "7 febbraio 2026",
@@ -1040,7 +1040,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260209_date: '9 de febrero de 2026',
-        changelog_20260209: '🎨 Retratos de personajes en diálogos',
+        changelog_20260209: '🎨 Retratos de personajes en diálogos\n🦅 Fauna alpina: chovas, cabras monteses, rebecos, marmotas, liebres y zorros\n🐾 Huellas de animales en la nieve, borradas por el pisado',
     changelog_20260208_date: "8 de febrero de 2026",
         changelog_20260208: "🪧 Señalización según NF S52-102: triángulos de peligro, balizas naranjas, postes amarillo/negro\n🏔️ Profundidad visual corregida: árboles, acantilados, edificios\n📱 Soporte táctil Firefox corregido",
         changelog_20260207_date: "7 de febrero de 2026",

@@ -12,6 +12,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Anchor point accessibility - Every winch anchor must be reachable via piste or service road without blocking avalanche/steep obstacles
 - [x] Groomer fall mechanics - Center-of-mass based cliff fall instead of instant physics overlap death
 - [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
+- [ ] PauseScene boot crash (not reproducible) - `this.manager is null` in resumeGame during boot; may be HMR artifact. Watch for recurrence
 - [x] Firefox desktop touch detection - Touch availability updates on background tap via canvas listener
 - [ ] GameScene→LevelCompleteScene scene transition - Consider refactoring to use resetGameScenes() for consistency (currently uses direct scene.start for overlay cleanup)
 
@@ -34,11 +35,14 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
 - [ ] Leaderboards
-- [ ] Easter eggs (5G towers, wildlife, Candide Thovex cameo)
+- [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Hide gamepad button hints in dialogues when no controller is connected
-- [ ] Alpine wildlife (bouquetin, chamois, lapins, birds) as decorative features on menu screen and in-game — flee when groomer approaches
 
 ## Recently Completed
+
+- ✅ **Alpine wildlife** - Decorative bouquetin, chamois, marmots, bunnies, and birds on menu and in-game. Flee AI reacts to groomer proximity. Per-level species config via WildlifeSystem
+
+- ✅ **Wildlife polish** - Side-view flying bird sprite (Gemini-reviewed), perched/flying sprite swaps, proper flight orientation via setScale, smooth arc-turning soaring, fox hunting/lunge/rest extracted to foxBehavior.ts, track drawing extracted to animalTracks.ts, Y-based bouquetin depth, bird world-edge wrapping, dialog depth fix (renders above mountains), building/cliff collision, track erasure on grooming, track bootstrapping, overlay shutdown cleanup
 
 - ✅ **Code health audit - Level loop bug fix** - Added regression test for held SPACE across scene transitions. Applied inputReady pattern to PauseScene (prevents held ESC from immediately resuming). Added timer cleanup to LevelCompleteScene and PauseScene shutdown(). Documented inputReady pattern in ARCHITECTURE.md. Confirmed PauseScene↔SettingsScene direct scene transitions are correct (preserve game state).
 
@@ -102,3 +106,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ### Test Coverage Gaps
 
 - Nintendo B-button back navigation flaky under parallel test execution
+
+### Deferred Refactors
+
+- Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring ~7 lines, track aging ~10 lines, same-species repulsion ~9 lines). Both files use the same patterns but different coordinate systems (side-view vs top-down), making extraction non-trivial.
