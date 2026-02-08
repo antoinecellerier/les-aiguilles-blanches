@@ -361,6 +361,7 @@ export default class HUDScene extends Phaser.Scene {
     this.barWidth = barWidth;
     this.game.events.on(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.on(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
+    this.game.events.on(GAME_EVENTS.ACCESSIBILITY_CHANGED, this.handleAccessibilityChanged, this);
     this.resizeManager = new ResizeManager(this, {
       restartData: () => ({ level: this.level }),
     });
@@ -865,6 +866,11 @@ export default class HUDScene extends Phaser.Scene {
     this.gameState = state;
   }
 
+  private handleAccessibilityChanged(): void {
+    if (!this.scene.isActive()) return;
+    this.scene.restart({ level: this.level });
+  }
+
   private getBonusLabel(obj: BonusObjective): string {
     switch (obj.type) {
       case 'fuel_efficiency': return (t('bonusFuel') || 'Fuel') + ' ≤' + obj.target + '%';
@@ -969,6 +975,7 @@ export default class HUDScene extends Phaser.Scene {
     // Remove global event listeners FIRST to prevent callbacks on destroyed objects
     this.game.events.off(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
+    this.game.events.off(GAME_EVENTS.ACCESSIBILITY_CHANGED, this.handleAccessibilityChanged, this);
 
     this.resizeManager.destroy();
     this.input.keyboard?.removeAllListeners();

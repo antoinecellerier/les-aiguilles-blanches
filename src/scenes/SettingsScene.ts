@@ -8,6 +8,7 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
+import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
 import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager';
 
@@ -153,6 +154,12 @@ export default class SettingsScene extends Phaser.Scene {
 
   private restartScene(): void {
     this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex, focusIndex: this.focus.index });
+  }
+
+  /** Apply accessibility changes to DOM and notify running game scenes. */
+  private broadcastAccessibility(): void {
+    Accessibility.applyDOMSettings();
+    this.game.events.emit(GAME_EVENTS.ACCESSIBILITY_CHANGED);
   }
 
   private handleResize(): void {
@@ -315,12 +322,14 @@ export default class SettingsScene extends Phaser.Scene {
       Accessibility.settings.highContrast, (val) => {
         Accessibility.settings.highContrast = val;
         Accessibility.saveSettings();
+        this.broadcastAccessibility();
       }), { align: 'left' });
     
     sizer.add(this.createToggleRow(t('reducedMotion') || 'Reduced Motion',
       Accessibility.settings.reducedMotion, (val) => {
         Accessibility.settings.reducedMotion = val;
         Accessibility.saveSettings();
+        this.broadcastAccessibility();
       }), { align: 'left' });
 
     // Colorblind modes
@@ -663,18 +672,21 @@ export default class SettingsScene extends Phaser.Scene {
       activate: () => {
         Accessibility.settings.colorblindMode = cbModes[groupIndex.value];
         Accessibility.saveSettings();
+        this.broadcastAccessibility();
         this.restartScene();
       },
       left: () => {
         groupIndex.value = (groupIndex.value - 1 + cbModes.length) % cbModes.length;
         Accessibility.settings.colorblindMode = cbModes[groupIndex.value];
         Accessibility.saveSettings();
+        this.broadcastAccessibility();
         this.restartScene();
       },
       right: () => {
         groupIndex.value = (groupIndex.value + 1) % cbModes.length;
         Accessibility.settings.colorblindMode = cbModes[groupIndex.value];
         Accessibility.saveSettings();
+        this.broadcastAccessibility();
         this.restartScene();
       },
     });
@@ -697,6 +709,7 @@ export default class SettingsScene extends Phaser.Scene {
       .on('pointerdown', () => {
         Accessibility.settings.colorblindMode = mode;
         Accessibility.saveSettings();
+        this.broadcastAccessibility();
         this.restartScene();
       });
   }

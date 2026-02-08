@@ -22,6 +22,8 @@ export interface AccessibilityModule {
   announce(message: string): void;
   loadSettings(): AccessibilitySettings;
   saveSettings(): void;
+  applyDOMSettings(): void;
+  ensureColorblindFilters(): void;
   getColorblindMatrix(mode: ColorblindMode): number[] | null;
 }
 
@@ -76,6 +78,62 @@ export const Accessibility: AccessibilityModule = {
 
   saveSettings() {
     setJSON(STORAGE_KEYS.ACCESSIBILITY, this.settings);
+  },
+
+  /** Apply high-contrast class and colorblind CSS filter to the DOM. */
+  applyDOMSettings() {
+    if (this.settings.highContrast) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+
+    const canvas = document.querySelector('#game-container canvas') as HTMLCanvasElement | null;
+    if (canvas) {
+      if (this.settings.colorblindMode && this.settings.colorblindMode !== 'none') {
+        this.ensureColorblindFilters();
+        canvas.style.filter = `url(#${this.settings.colorblindMode}-filter)`;
+      } else {
+        canvas.style.filter = '';
+      }
+    }
+  },
+
+  /** Inject SVG colorblind filter definitions into the DOM (idempotent). */
+  ensureColorblindFilters() {
+    if (document.getElementById('colorblind-filters')) return;
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'colorblind-filters';
+    svg.style.position = 'absolute';
+    svg.style.width = '0';
+    svg.style.height = '0';
+    svg.innerHTML = `
+      <defs>
+        <filter id="deuteranopia-filter">
+          <feColorMatrix type="matrix" values="
+            0.625 0.375 0 0 0
+            0.7 0.3 0 0 0
+            0 0.3 0.7 0 0
+            0 0 0 1 0"/>
+        </filter>
+        <filter id="protanopia-filter">
+          <feColorMatrix type="matrix" values="
+            0.567 0.433 0 0 0
+            0.558 0.442 0 0 0
+            0 0.242 0.758 0 0
+            0 0 0 1 0"/>
+        </filter>
+        <filter id="tritanopia-filter">
+          <feColorMatrix type="matrix" values="
+            0.95 0.05 0 0 0
+            0 0.433 0.567 0 0
+            0 0.475 0.525 0 0
+            0 0 0 1 0"/>
+        </filter>
+      </defs>
+    `;
+    document.body.appendChild(svg);
   },
 
   // Color transforms for colorblind modes

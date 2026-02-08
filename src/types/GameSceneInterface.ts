@@ -38,4 +38,6 @@ export const GAME_EVENTS = {
   SKIP_LEVEL: 'skipLevel',
   /** HUDScene → GameScene: top edge of touch controls in screen pixels */
   TOUCH_CONTROLS_TOP: 'touchControlsTop',
+  /** SettingsScene → HUDScene: accessibility settings changed, redraw needed */
+  ACCESSIBILITY_CHANGED: 'accessibilityChanged',
 } as const;
