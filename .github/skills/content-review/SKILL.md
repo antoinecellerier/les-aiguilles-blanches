@@ -1,11 +1,13 @@
 ---
 name: content-review
-description: Expert content writer review of in-game text. Use this when asked to review dialogue, localization, lore consistency, tone, or translation quality.
+description: Expert content writer review of in-game text. Use this when asked to review dialogue, localization, lore consistency, tone, translation quality, or when changelog entries are added or modified.
 ---
 
 ## Content Review Process
 
-Review all player-facing text in the game for quality, consistency, and authenticity. The game is set in a fictional Savoie ski resort — tone should blend professional ski operations with warm Savoyard hospitality and humor.
+Review all player-facing text **in the game** for quality, consistency, and authenticity. The game is set in a fictional Savoie ski resort — tone should blend professional ski operations with warm Savoyard hospitality and humor.
+
+**Scope:** Only in-game content that players see (localization strings, dialogue, changelog overlay, level names). Do NOT review repository markdown files (ROADMAP.md, ARCHITECTURE.md, TESTING.md, etc.) — those are developer-facing documentation.
 
 ### Phase 1: Content extraction
 
@@ -13,7 +15,6 @@ Use explore agents to gather all content from these sources:
 
 1. **`src/config/localization.ts`** — All UI strings, dialogues, taunts, tutorials, changelog across 5 languages (fr, en, de, it, es)
 2. **`src/config/levels.ts`** — Level names, narrative context, difficulty descriptions
-3. **`docs/GAMEPLAY.md`** — Player-facing level guide, character descriptions
 
 ### Phase 2: Review dimensions
 
@@ -49,6 +50,26 @@ Evaluate content across these dimensions, launching parallel explore agents:
    - Error/warning messages should tell the player what happened AND what to do
    - Tutorial hints should be concise — players should understand in <3 seconds
    - Accessibility labels should be descriptive and screen-reader friendly
+
+6. **Changelog conciseness**
+   - Each date entry should have 3–5 items max — highlight what players will notice
+   - Lead with new content (levels, wildlife, characters), not technical fixes
+   - Consolidate all bug fixes into a single catch-all line (e.g. "🔧 Corrections tactiles et accessibilité")
+   - Drop items players won't notice (internal refactors, signage standards, sensitivity ranges, touch target sizes)
+   - Keep entries short: one emoji + 2–3 words per line. No sub-clauses, no parenthetical details, no enumerations
+   - Reference style (Feb 3–8 entries):
+     ```
+     🏔️ Le Glacier et Coupe des Aiguilles
+     🦅 Faune alpine
+     🎨 Portraits des personnages
+     🎮 Navigation clavier/manette dans les paramètres
+     🔧 Corrections tactiles, affichage et accessibilité
+     ```
+   - Bad patterns to avoid:
+     - ❌ "11 niveaux : Le Glacier (treuil) et Coupe des Aiguilles (finale FIS)" — too many details
+     - ❌ "Faune alpine : bouquetins, chamois, marmottes, lièvres et renards" — enumeration belongs in gameplay, not changelog
+     - ❌ "Cibles tactiles agrandies (pause, plein écran, passer)" — players don't care which targets
+     - ❌ "Signalétique conforme NF S52-102" — regulatory references mean nothing to players
 
 ### Phase 3: Cross-model consultation
 

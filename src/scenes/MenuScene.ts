@@ -1455,19 +1455,122 @@ export default class MenuScene extends Phaser.Scene {
     this.overlayOpen = true;
     const { width, height } = this.cameras.main;
 
-    // Count actual rendered lines (entries may contain \n)
-    const fullText = lines.join('\n');
-    const renderedLines = fullText.split('\n').filter(l => l.trim()).length + 3;
-    const availableHeight = height * 0.85;
-    const optimalLineHeight = availableHeight / renderedLines;
-    const optimalFontSize = optimalLineHeight / 2.2;
-    const fontSize = Math.round(Math.max(10, Math.min(28, optimalFontSize)));
+    const fontSize = Math.round(Math.max(12, Math.min(22, height / 30)));
     const titleSize = Math.round(fontSize * 1.4);
     const scaleFactor = fontSize / 18;
-
     const panelWidth = Math.min(700 * scaleFactor, width - 40);
+    const padding = 20;
+    const titleSpacing = Math.round(fontSize * 1.5);
+    const buttonHeight = Math.round(fontSize * 2.5);
 
-    // Create dialog using rexUI
+    const contentText = this.add.text(0, 0, lines.join('\n'), {
+      fontFamily: THEME.fonts.family,
+      fontSize: fontSize + 'px',
+      color: '#cccccc',
+      align: 'center',
+      lineSpacing: Math.round(fontSize * 0.6),
+      wordWrap: { width: panelWidth - 60 },
+    });
+
+    // Measure content vs available space to decide if scrolling is needed
+    const maxPanelHeight = height * 0.85;
+    const headerFooterHeight = titleSize + titleSpacing * 2 + buttonHeight + padding * 2;
+    const availableContentHeight = maxPanelHeight - headerFooterHeight;
+    const needsScroll = contentText.height > availableContentHeight;
+
+    // For short content, use simple dialog. For long content, use scrollable panel.
+    if (!needsScroll) {
+      this.showSimpleOverlay(titleKey, contentText, panelWidth, fontSize, titleSize, titleSpacing, padding, scaleFactor);
+    } else {
+      // Destroy the measurement text — scrollable panel creates its own
+      const textContent = lines.join('\n');
+      contentText.destroy();
+
+      const scrollContent = this.add.text(0, 0, textContent, {
+        fontFamily: THEME.fonts.family,
+        fontSize: fontSize + 'px',
+        color: '#cccccc',
+        align: 'center',
+        lineSpacing: Math.round(fontSize * 0.6),
+        wordWrap: { width: panelWidth - 60 },
+      });
+
+      const contentSizer = this.rexUI.add.sizer({ orientation: 'vertical' })
+        .add(scrollContent, { align: 'center' });
+
+      const scrollPanel = this.rexUI.add.scrollablePanel({
+        x: width / 2,
+        y: height / 2 - buttonHeight / 2,
+        width: panelWidth - padding * 2,
+        height: availableContentHeight,
+        scrollMode: 'y',
+        background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 0, 0x1a2a3e, 0),
+        panel: { child: contentSizer },
+        slider: {
+          track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
+          thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
+        },
+        mouseWheelScroller: { speed: 0.3 },
+        space: { panel: 5 },
+      }).layout();
+      scrollPanel.setChildrenInteractive({});
+
+      // Title text
+      const titleText = this.add.text(width / 2, height * 0.075 + padding, t(titleKey) || titleKey, {
+        fontFamily: THEME.fonts.family,
+        fontSize: titleSize + 'px',
+        fontStyle: 'bold',
+        color: '#87CEEB',
+      }).setOrigin(0.5, 0);
+
+      // Back button
+      const backBtn = this.createDialogButton('← ' + (t('back') || 'Back'), fontSize, scaleFactor);
+      backBtn.setPosition(width / 2 - backBtn.width / 2, height * 0.925 - buttonHeight);
+
+      // Background panel
+      const bgPanel = this.rexUI.add.roundRectangle(
+        width / 2, height / 2, panelWidth, maxPanelHeight, 8, 0x1a2a3e
+      ).setStrokeStyle(4, 0x3d7a9b);
+
+      // Set depths
+      const baseDepth = 100;
+      bgPanel.setDepth(baseDepth);
+      titleText.setDepth(baseDepth + 1);
+      scrollPanel.setDepth(baseDepth + 1);
+      backBtn.setDepth(baseDepth + 1);
+
+      // Dark overlay
+      const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
+      overlay.setInteractive();
+      overlay.setDepth(baseDepth - 1);
+
+      const closeOverlay = () => {
+        this.overlayOpen = false;
+        this.overlayCloseCallback = null;
+        this.input.keyboard?.off('keydown-ESC', closeOverlay);
+        this.input.keyboard?.off('keydown-ENTER', closeOverlay);
+        this.input.keyboard?.off('keydown-SPACE', closeOverlay);
+        overlay.destroy();
+        bgPanel.destroy();
+        titleText.destroy();
+        scrollPanel.destroy();
+        backBtn.destroy();
+      };
+      this.overlayCloseCallback = closeOverlay;
+      this.input.keyboard?.on('keydown-ESC', closeOverlay);
+      this.input.keyboard?.on('keydown-ENTER', closeOverlay);
+      this.input.keyboard?.on('keydown-SPACE', closeOverlay);
+      backBtn.on('pointerup', closeOverlay);
+    }
+  }
+
+  private showSimpleOverlay(
+    titleKey: string, contentText: Phaser.GameObjects.Text,
+    panelWidth: number, fontSize: number, titleSize: number,
+    titleSpacing: number, padding: number, scaleFactor: number
+  ): void {
+    const { width, height } = this.cameras.main;
+
     const dialog = this.rexUI.add.dialog({
       x: width / 2,
       y: height / 2,
@@ -1479,39 +1582,29 @@ export default class MenuScene extends Phaser.Scene {
         fontStyle: 'bold',
         color: '#87CEEB',
       }),
-      content: this.add.text(0, 0, lines.join('\n'), {
-        fontFamily: THEME.fonts.family,
-        fontSize: fontSize + 'px',
-        color: '#cccccc',
-        align: 'center',
-        lineSpacing: Math.round(fontSize * 0.6),
-        wordWrap: { width: panelWidth - 60 },
-      }),
+      content: contentText,
       actions: [
         this.createDialogButton('← ' + (t('back') || 'Back'), fontSize, scaleFactor)
       ],
       space: {
-        title: Math.round(fontSize * 1.5),
-        content: Math.round(fontSize * 1.5),
+        title: titleSpacing,
+        content: titleSpacing,
         action: Math.round(fontSize * 0.8),
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: 20,
+        left: padding,
+        right: padding,
+        top: padding,
+        bottom: padding,
       },
       align: { actions: 'center' },
       expand: { content: false },
     }).layout();
 
-    // Ensure dialog renders above ALL scene content (birds at 11, UI at 10)
     dialog.setDepth(100);
 
-    // Dark overlay behind dialog — setInteractive() to block pointer events on buttons underneath
     const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
     overlay.setInteractive();
     overlay.setDepth(dialog.depth - 1);
 
-    // ESC, ENTER, or SPACE to close
     const closeOverlay = () => {
       this.overlayOpen = false;
       this.overlayCloseCallback = null;
@@ -1526,7 +1619,6 @@ export default class MenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', closeOverlay);
     this.input.keyboard?.on('keydown-SPACE', closeOverlay);
 
-    // Handle button click
     dialog.on('button.click', closeOverlay);
   }
 

@@ -2,10 +2,11 @@
 import os
 import pytest
 
-# Base URL for the game - can be overridden via environment variable
+# Base URL for the game - can be overridden via GAME_URL or PORT env var
+_port = os.environ.get("PORT", "3000")
 GAME_URL = os.environ.get(
     "GAME_URL",
-    "http://localhost:3000/index.html"
+    f"http://localhost:{_port}/index.html"
 )
 
 

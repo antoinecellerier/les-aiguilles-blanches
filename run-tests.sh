@@ -11,6 +11,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Load local overrides (e.g. PORT=3001)
+[ -f .env.local ] && export $(grep -v '^#' .env.local | xargs)
+
 # Check for --smart flag and strip it from args
 SMART_MODE=false
 ARGS=()
@@ -152,26 +155,27 @@ fi
 # --- Run E2E tests ---
 if [ "$SKIP_E2E" = false ]; then
     # Start dev server if not already running
+    DEV_PORT="${PORT:-3000}"
     DEV_SERVER_PID=""
-    if curl -s http://localhost:3000 > /dev/null 2>&1; then
-        echo "Dev server already running on port 3000"
+    if curl -s http://localhost:$DEV_PORT > /dev/null 2>&1; then
+        echo "Dev server already running on port $DEV_PORT"
     else
-        # Kill any stale (non-functional) process on port 3000
-        if lsof -ti:3000 > /dev/null 2>&1; then
-            echo "Killing stale process on port 3000..."
-            kill $(lsof -ti:3000) 2>/dev/null || true
+        # Kill any stale (non-functional) process on the port
+        if lsof -ti:$DEV_PORT > /dev/null 2>&1; then
+            echo "Killing stale process on port $DEV_PORT..."
+            kill $(lsof -ti:$DEV_PORT) 2>/dev/null || true
             sleep 1
         fi
 
         echo ""
         echo "=== Starting dev server ==="
-        npm run dev &
+        PORT=$DEV_PORT npm run dev &
         DEV_SERVER_PID=$!
 
         # Wait for server to be ready (with timeout)
         SERVER_READY=false
         for i in {1..30}; do
-            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+            if curl -s http://localhost:$DEV_PORT > /dev/null 2>&1; then
                 echo "Dev server ready (PID: $DEV_SERVER_PID)"
                 SERVER_READY=true
                 break

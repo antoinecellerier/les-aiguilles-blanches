@@ -119,4 +119,13 @@ describe('Localization', () => {
         });
         expect(duplicates, `Duplicate changelog dates:\n${duplicates.join('\n')}`).toHaveLength(0);
     });
+
+    it('changelog keys should not reference future dates', () => {
+        const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const futureKeys = Object.keys(TRANSLATIONS.fr)
+            .filter(key => key.match(/^changelog_\d{8}_date$/))
+            .map(key => key.match(/^changelog_(\d{8})_date$/)[1])
+            .filter(dateStr => dateStr > today);
+        expect(futureKeys, `Changelog keys with future dates: ${futureKeys.join(', ')}`).toHaveLength(0);
+    });
 });

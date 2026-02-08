@@ -24,9 +24,10 @@ Before every commit, verify:
 
 1. **Code review** - Run the `code-health` skill (`.github/skills/code-health/SKILL.md`) on all changed files. Fix any HIGH/MEDIUM findings before committing.
 2. **Art review** - If any visual files changed (scenes, sprites, theme, weather), run the `art-review` skill (`.github/skills/art-review/SKILL.md`). Fix any HIGH/MEDIUM findings before committing.
-3. **Tests** - Regression test exists and passes
-4. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
-5. **Commit message** - Summarizes functional change, lists all updates
+3. **Content review** - If any changelog or localization strings changed, run the `content-review` skill (`.github/skills/content-review/SKILL.md`). Changelog entries must follow the crisp style (3–5 items, no enumerations, no parenthetical details).
+4. **Tests** - Regression test exists and passes
+5. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
+6. **Commit message** - Summarizes functional change, lists all updates
 
 Commit message structure:
 ```

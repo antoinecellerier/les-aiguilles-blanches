@@ -24,3 +24,6 @@ stats.html
 
 # Public publishing script
 publish-remote.sh
+
+# Local environment overrides
+.env.local
