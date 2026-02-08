@@ -4,7 +4,7 @@ import { THEME } from '../config/theme';
 import { DEPTHS } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
 import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
 import { Accessibility } from '../utils/accessibility';
@@ -101,9 +101,9 @@ export default class HUDScene extends Phaser.Scene {
     let baseScale = Math.max(0.6, Math.min(2.0, Math.min(scaleX, scaleY)));
     
     // On high-DPI mobile devices, boost UI scale for better readability
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const mobile = isMobile();
     const dpr = window.devicePixelRatio || 1;
-    if (isMobile && dpr > 1.5) {
+    if (mobile && dpr > 1.5) {
       // Boost scale by ~20% on high-DPI mobile for larger, more readable UI
       baseScale = Math.min(2.0, baseScale * 1.2);
     }
@@ -257,7 +257,7 @@ export default class HUDScene extends Phaser.Scene {
     const phaserTouch = this.sys.game.device.input.touch;
     const browserTouch = detectTouch();
     const hasTouch = phaserTouch || browserTouch;
-    // isMobile already defined at top of create()
+    // isMobile() already called at top of create() as `mobile`
 
     // Touch button sizing
     const touchBtnPad = Math.round(6 * this.uiScale);
@@ -266,10 +266,10 @@ export default class HUDScene extends Phaser.Scene {
     // Skip level button — below visor, right-aligned
     // On narrow mobile, use abbreviated ">>" to save space
     // On very narrow (<=360px), position skip on left to avoid crowding pause/fullscreen
-    const skipFontSize = (hasTouch && isMobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
+    const skipFontSize = (hasTouch && mobile) ? Math.max(14, Math.round(12 * this.uiScale)) + 'px' : fontTiny;
     const isVeryNarrow = width <= 360;
     const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
-    const skipLabel = isNarrow ? '>>' : (hasTouch && isMobile) ? '>> Skip' : hasGamepad ? '>> Skip [Select]' : '>> Skip [N]';
+    const skipLabel = isNarrow ? '>>' : (hasTouch && mobile) ? '>> Skip' : hasGamepad ? '>> Skip [Select]' : '>> Skip [N]';
     const skipY = visorHeight + Math.round(4 * this.uiScale);
     let nextButtonY = skipY;
     
@@ -367,7 +367,7 @@ export default class HUDScene extends Phaser.Scene {
     this.resizeManager.register();
 
     // Create touch controls - show on mobile, or on first touch for PC with touchscreen
-    if (isMobile && hasTouch) {
+    if (mobile && hasTouch) {
       this.createTouchControls();
     } else if (hasTouch) {
       // PC with touchscreen: create controls but hidden, show on first touch
@@ -378,7 +378,7 @@ export default class HUDScene extends Phaser.Scene {
     const isFullscreen = !!document.fullscreenElement;
     
     // Larger font for touch buttons on mobile (minimum 24px for easy tapping)
-    const touchBtnSize = isMobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
+    const touchBtnSize = mobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
     
     // Pause/Menu button (touch devices)
     if (hasTouch) {
@@ -430,10 +430,10 @@ export default class HUDScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     
     // Scale touch controls for high-DPI screens
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const mobile = isMobile();
     
     // Base size: larger on mobile
-    const baseSize = isMobile ? Math.max(60, 50 * Math.max(1, this.uiScale)) : 50 * this.uiScale;
+    const baseSize = mobile ? Math.max(60, 50 * Math.max(1, this.uiScale)) : 50 * this.uiScale;
     const btnSize = Math.round(baseSize);
     const padding = Math.round(25 * this.uiScale);
     const alpha = 0.7;

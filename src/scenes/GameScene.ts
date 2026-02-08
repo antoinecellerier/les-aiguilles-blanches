@@ -6,7 +6,7 @@ import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
 import { GAME_EVENTS, type GameStateEvent, type TouchInputEvent } from '../types/GameSceneInterface';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { HazardSystem } from '../systems/HazardSystem';
@@ -1070,9 +1070,8 @@ export default class GameScene extends Phaser.Scene {
   private showDialogue(key: string, speaker?: string): void {
     // Check for gamepad first, then touch, then default
     const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     const hasTouch = detectTouch();
-    const isTouchOnly = isMobile && hasTouch && !hasGamepad;
+    const isTouchOnly = isMobile() && hasTouch && !hasGamepad;
     
     let dialogueKey = key;
     

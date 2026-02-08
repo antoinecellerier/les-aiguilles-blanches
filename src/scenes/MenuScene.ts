@@ -7,7 +7,7 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch, onTouchAvailable } from '../utils/touchDetect';
+import { hasTouch as detectTouch, onTouchAvailable, isMobile } from '../utils/touchDetect';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { OverlayManager } from '../utils/overlayManager';
@@ -379,13 +379,13 @@ export default class MenuScene extends Phaser.Scene {
     this.inputHintTexts.forEach(t => { if (t.active) t.destroy(); });
     this.inputHintTexts = [];
 
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const mobile = isMobile();
     const hasTouch = detectTouch();
     const hasGamepad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(g => g !== null);
 
     // Define all hints: [icon, label, isAvailable] — always show all three
     const allHints: [string, string, boolean][] = [
-      ['💻', 'Keyboard', !isMobile],
+      ['💻', 'Keyboard', !mobile],
       ['✋', 'Touch', hasTouch],
       ['🎮', 'Gamepad', hasGamepad],
     ];
@@ -500,8 +500,8 @@ export default class MenuScene extends Phaser.Scene {
     // On devices with both touch and keyboard, show keyboard (primary on desktop)
     // Only show touch-specific hints on touch-only devices (no physical keyboard)
     const hasTouch = detectTouch();
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    const showTouchHints = hasTouch && isMobile && !hasGamepad;
+    const mobile = isMobile();
+    const showTouchHints = hasTouch && mobile && !hasGamepad;
     const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
     const groomKey = getGroomKeyName(); // e.g., "SPACE" or rebound key
     

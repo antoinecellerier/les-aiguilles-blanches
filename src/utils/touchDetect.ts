@@ -50,3 +50,8 @@ export function attachCanvasTouchDetect(canvas: HTMLCanvasElement): void {
   listenerAttached = true;
   canvas.addEventListener('touchstart', onTouchDetected, { once: true });
 }
+
+/** Returns true if the device is a mobile phone or tablet (UA-based heuristic). */
+export function isMobile(): boolean {
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
