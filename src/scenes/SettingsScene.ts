@@ -1,14 +1,15 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode, LEVELS } from '../setup';
-import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
-import { isBackPressed, isConfirmPressed, isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from '../utils/gamepad';
+import { getKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, type KeyboardLayout } from '../utils/keyboardLayout';
+import { loadGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 import { BALANCE } from '../config/gameConfig';
-import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
+import { STORAGE_KEYS } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
 import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
+import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -21,28 +22,11 @@ interface SettingsSceneData {
   focusIndex?: number;
 }
 
-interface KeyBindings {
-  up: number;
-  down: number;
-  left: number;
-  right: number;
-  groom: number;
-  winch: number;
-}
-
-
 
 export default class SettingsScene extends Phaser.Scene {
   private returnTo: string | null = null;
   private levelIndex = 0;
-  private bindings: KeyBindings = this.getDefaultBindings();
-  private displayNames: Record<number, string> = {};
-  private rebindingAction: string | null = null;
-  private rebindButtons: Record<string, Phaser.GameObjects.Text> = {};
-  private gamepadBindings: GamepadBindings = loadGamepadBindings();
-  private rebindingGamepadAction: string | null = null;
-  private gamepadRebindSnapshot: Record<number, boolean> = {};
-  private gamepadRebindButtons: Record<string, Phaser.GameObjects.Text> = {};
+  private keys: KeybindingManager = null!;
   private statusText: Phaser.GameObjects.Text | null = null;
   private mainSizer: any = null;
   private gamepadNameText: Phaser.GameObjects.Text | null = null;
@@ -78,7 +62,13 @@ export default class SettingsScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.cameras.main;
     this.cameras.main.setBackgroundColor(THEME.colors.dialogBg);
-    this.loadBindings();
+    this.keys = new KeybindingManager(this);
+    this.keys.accentColor = THEME.colors.accent;
+    this.keys.buttonBgColor = THEME.colors.buttonPrimaryHex;
+    this.keys.onStatus = (msg: string) => this.statusText?.setText(msg);
+    this.keys.onLayout = () => this.mainSizer?.layout();
+    this.keys.onRestart = () => this.restartScene();
+    this.keys.load();
     this.focus.init(this);
     this.lastGamepadName = '';
 
@@ -121,11 +111,11 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Keyboard input for rebinding and navigation
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-      if (this.rebindingAction) {
-        this.finishRebind(event.keyCode, event.key, event.code);
+      if (this.keys.rebindingAction) {
+        this.keys.finishRebind(event.keyCode, event.key, event.code);
         return;
       }
-      if (this.rebindingGamepadAction) return;
+      if (this.keys.rebindingGamepadAction) return;
       switch (event.code) {
         case 'Escape': this.goBack(); break;
         case 'ArrowUp': event.preventDefault(); this.focus.navigate(-1); break;
@@ -141,7 +131,7 @@ export default class SettingsScene extends Phaser.Scene {
       onNavigate: (dir: number) => this.focus.navigate(dir),
       onConfirm: () => this.focus.activate(),
       onBack: () => this.goBack(),
-      isBlocked: () => !!this.rebindingAction || !!this.rebindingGamepadAction,
+      isBlocked: () => !!this.keys.rebindingAction || !!this.keys.rebindingGamepadAction,
     });
     this.gamepadNav.initState();
 
@@ -174,11 +164,11 @@ export default class SettingsScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     this.gamepadNav?.update(delta);
-    this.checkGamepadRebind();
+    this.keys.checkGamepadRebind();
 
     // Gamepad left/right for group cycling & slider (separate from vertical nav)
     this.gpHorizCooldown = Math.max(0, this.gpHorizCooldown - delta);
-    if (this.gpHorizCooldown <= 0 && !this.rebindingAction && !this.rebindingGamepadAction) {
+    if (this.gpHorizCooldown <= 0 && !this.keys.rebindingAction && !this.keys.rebindingGamepadAction) {
       const pad = this.input.gamepad?.getPad(0);
       if (pad) {
         const stickX = pad.leftStick?.x ?? 0;
@@ -405,13 +395,13 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Reset button
     const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset'), this.smallFont, '#ffaaaa', '#5a2d2d');
-    resetBtn.on('pointerdown', () => this.resetBindings());
+    resetBtn.on('pointerdown', () => this.keys.reset());
     sizer.add(resetBtn, { align: 'left' });
 
     // Register reset button focus item
     this.focus.items.push({
       element: resetBtn,
-      activate: () => this.resetBindings(),
+      activate: () => this.keys.reset(),
     });
 
     // Input hints
@@ -746,10 +736,11 @@ export default class SettingsScene extends Phaser.Scene {
     
     row.add(this.createText(label + ':', this.smallFont, THEME.colors.textSecondary));
     
-    const currentBinding = this.bindings[actionId as keyof KeyBindings];
-    const defaultBinding = this.getDefaultBindings()[actionId as keyof KeyBindings];
-    const isCustom = currentBinding !== defaultBinding;
-    const keyName = this.getKeyName(currentBinding);
+    const currentBinding = this.keys.bindings[actionId as keyof KeyBindings];
+    const defaultBinding = this.keys.bindings[actionId as keyof KeyBindings]; // compare below
+    const defaults = getLayoutDefaults();
+    const isCustom = currentBinding !== defaults[actionId as keyof KeyBindings];
+    const keyName = this.keys.getKeyName(currentBinding);
     
     const paddingY = Math.max(3, (this.minTouchTarget - this.smallFont) / 3);
     const btn = this.add.text(0, 0, keyName + (isCustom ? ' *' : ''), {
@@ -759,15 +750,14 @@ export default class SettingsScene extends Phaser.Scene {
       backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
       padding: { x: Math.round(paddingY * 2), y: paddingY },
     }).setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.startRebind(actionId, btn));
+      .on('pointerdown', () => this.keys.startRebind(actionId, btn));
     
-    this.rebindButtons[actionId] = btn;
     row.add(btn);
 
     // Register focus item
     this.focus.items.push({
       element: row,
-      activate: () => this.startRebind(actionId, btn),
+      activate: () => this.keys.startRebind(actionId, btn),
     });
 
     return row;
@@ -781,7 +771,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     row.add(this.createText('🎮 ' + label + ':', this.smallFont, THEME.colors.textSecondary));
 
-    const currentBtn = this.gamepadBindings[actionId as keyof GamepadBindings];
+    const currentBtn = this.keys.gamepadBindings[actionId as keyof GamepadBindings];
     const defaultBtn = getDefaultGamepadBindings()[actionId as keyof GamepadBindings];
     const isCustom = currentBtn !== defaultBtn;
     const btnName = getButtonName(currentBtn, getConnectedControllerType());
@@ -794,15 +784,14 @@ export default class SettingsScene extends Phaser.Scene {
       backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
       padding: { x: Math.round(paddingY * 2), y: paddingY },
     }).setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.startGamepadRebind(actionId, btn));
+      .on('pointerdown', () => this.keys.startGamepadRebind(actionId, btn));
 
-    this.gamepadRebindButtons[actionId] = btn;
     row.add(btn);
 
     // Register focus item
     this.focus.items.push({
       element: row,
-      activate: () => this.startGamepadRebind(actionId, btn),
+      activate: () => this.keys.startGamepadRebind(actionId, btn),
     });
 
     return row;
@@ -817,8 +806,8 @@ export default class SettingsScene extends Phaser.Scene {
     row.add(this.createText('⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', this.smallFont, THEME.colors.textSecondary));
     
     // Check for custom bindings
-    const hasCustomBindings = Object.keys(this.bindings).some(key => 
-      this.bindings[key as keyof KeyBindings] !== this.getDefaultBindings()[key as keyof KeyBindings]
+    const hasCustomBindings = Object.keys(this.keys.bindings).some(key => 
+      this.keys.bindings[key as keyof KeyBindings] !== getLayoutDefaults()[key as keyof KeyBindings]
     );
 
     if (hasCustomBindings) {
@@ -838,7 +827,7 @@ export default class SettingsScene extends Phaser.Scene {
           backgroundColor: isActive ? THEME.colors.info : '#555555',
           padding: { x: Math.round(paddingY * 2), y: paddingY },
         }).setInteractive({ useHandCursor: true })
-          .on('pointerdown', () => this.setLayout(layout.id));
+          .on('pointerdown', () => this.keys.setLayout(layout.id));
         layoutButtons.push(btn);
         row.add(btn);
       });
@@ -850,202 +839,18 @@ export default class SettingsScene extends Phaser.Scene {
         element: row,
         buttons: layoutButtons,
         groupIndex: groupIndex.value,
-        activate: () => this.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id),
+        activate: () => this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id),
         left: () => {
           groupIndex.value = (groupIndex.value - 1 + AVAILABLE_LAYOUTS.length) % AVAILABLE_LAYOUTS.length;
-          this.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
+          this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
         },
         right: () => {
           groupIndex.value = (groupIndex.value + 1) % AVAILABLE_LAYOUTS.length;
-          this.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
+          this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
         },
       });
     }
     return row;
-  }
-
-  // === Logic Methods ===
-
-  private loadBindings(): void {
-    const savedVersion = localStorage.getItem(STORAGE_KEYS.BINDINGS_VERSION);
-    const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
-    const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
-    const defaults = this.getDefaultBindings();
-
-    if (savedVersion !== String(BINDINGS_VERSION)) {
-      this.bindings = defaults;
-      this.displayNames = {};
-      return;
-    }
-
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        this.bindings = { ...defaults };
-        for (const key of Object.keys(defaults) as Array<keyof KeyBindings>) {
-          if (typeof parsed[key] === 'number' && parsed[key] > 0) {
-            this.bindings[key] = parsed[key];
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to parse key bindings:', e);
-        this.bindings = defaults;
-      }
-    } else {
-      this.bindings = defaults;
-    }
-
-    if (savedNames) {
-      try {
-        this.displayNames = JSON.parse(savedNames);
-      } catch (e) {
-        console.warn('Failed to parse display names:', e);
-        this.displayNames = {};
-      }
-    }
-  }
-
-  private getDefaultBindings(): KeyBindings {
-    return getLayoutDefaults();
-  }
-
-  private saveBindings(): void {
-    try {
-      localStorage.setItem(STORAGE_KEYS.BINDINGS_VERSION, String(BINDINGS_VERSION));
-      localStorage.setItem(STORAGE_KEYS.BINDINGS, JSON.stringify(this.bindings));
-      localStorage.setItem(STORAGE_KEYS.DISPLAY_NAMES, JSON.stringify(this.displayNames));
-    } catch { /* Private browsing or quota exceeded */ }
-  }
-
-  private getKeyName(keyCode: number): string {
-    if (!keyCode) return '?';
-    if (this.displayNames[keyCode]) return this.displayNames[keyCode];
-    
-    const specialKeys: Record<number, string> = {
-      38: '↑', 40: '↓', 37: '←', 39: '→',
-      32: 'SPACE', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT',
-      13: 'ENTER', 9: 'TAB', 27: 'ESC', 8: '⌫', 46: 'DEL',
-    };
-    if (specialKeys[keyCode]) return specialKeys[keyCode];
-    if (keyCode >= 65 && keyCode <= 90) return String.fromCharCode(keyCode);
-    if (keyCode >= 48 && keyCode <= 57) return String.fromCharCode(keyCode);
-    return keyCode.toString();
-  }
-
-  private startRebind(actionId: string, btn: Phaser.GameObjects.Text): void {
-    if (this.rebindingAction) return;
-    this.rebindingAction = actionId;
-    btn.setText('...');
-    btn.setStyle({ backgroundColor: '#5a5a2d' });
-    this.statusText?.setText(t('pressKey') || 'Press a key...');
-    this.mainSizer?.layout();
-  }
-
-  private finishRebind(keyCode: number, keyChar: string, eventCode: string): void {
-    if (!this.rebindingAction) return;
-    if (eventCode === 'Escape') {
-      this.cancelRebind();
-      return;
-    }
-
-    const actionId = this.rebindingAction as keyof KeyBindings;
-    this.bindings[actionId] = keyCode;
-    if (keyChar.length === 1) {
-      this.displayNames[keyCode] = keyChar.toUpperCase();
-    } else {
-      this.displayNames[keyCode] = keyChar;
-    }
-    this.saveBindings();
-
-    const btn = this.rebindButtons[actionId];
-    btn.setText(this.getKeyName(keyCode) + ' *');
-    btn.setStyle({ backgroundColor: '#5a5a2d', color: THEME.colors.accent });
-
-    this.rebindingAction = null;
-    this.statusText?.setText(t('saved') || 'Saved!');
-    this.mainSizer?.layout();
-    this.time.delayedCall(800, () => this.restartScene());
-  }
-
-  private cancelRebind(): void {
-    if (!this.rebindingAction) return;
-    const btn = this.rebindButtons[this.rebindingAction];
-    btn.setText(this.getKeyName(this.bindings[this.rebindingAction as keyof KeyBindings]));
-    btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex });
-    this.rebindingAction = null;
-    this.statusText?.setText('');
-    this.mainSizer?.layout();
-  }
-
-  private startGamepadRebind(actionId: string, btn: Phaser.GameObjects.Text): void {
-    if (this.rebindingGamepadAction || this.rebindingAction) return;
-    if (!this.input.gamepad || this.input.gamepad.total === 0) {
-      this.statusText?.setText(t('noGamepadConnected') || 'No gamepad connected');
-      return;
-    }
-    this.rebindingGamepadAction = actionId;
-    // Snapshot current button state so the confirm press isn't immediately captured
-    this.gamepadRebindSnapshot = captureGamepadButtons(this, Array.from({ length: 16 }, (_, i) => i));
-    btn.setText('...');
-    btn.setStyle({ backgroundColor: '#5a5a2d' });
-    this.statusText?.setText(t('pressGamepadButton') || 'Press a gamepad button...');
-    this.mainSizer?.layout();
-  }
-
-  private checkGamepadRebind(): void {
-    if (!this.rebindingGamepadAction) return;
-    if (!this.input.gamepad || this.input.gamepad.total === 0) return;
-
-    const pad = this.input.gamepad.getPad(0);
-    if (!pad) return;
-
-    const maxBtn = Math.min(Math.max(pad.buttons.length, 8), 16);
-    for (let i = 0; i < maxBtn; i++) {
-      const now = isGamepadButtonPressed(pad, i);
-      const was = this.gamepadRebindSnapshot[i] ?? false;
-      // Only accept a fresh press (not-pressed → pressed)
-      if (now && !was) {
-        this.acceptGamepadRebind(i);
-        return;
-      }
-      this.gamepadRebindSnapshot[i] = now;
-    }
-  }
-
-  private acceptGamepadRebind(buttonIndex: number): void {
-    const actionId = this.rebindingGamepadAction as keyof GamepadBindings;
-    this.gamepadBindings[actionId] = buttonIndex;
-    saveGamepadBindings(this.gamepadBindings);
-
-    const btn = this.gamepadRebindButtons[actionId];
-    const isCustom = buttonIndex !== getDefaultGamepadBindings()[actionId];
-    btn.setText(getButtonName(buttonIndex, getConnectedControllerType()) + (isCustom ? ' *' : ''));
-    btn.setStyle({ backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
-                    color: isCustom ? THEME.colors.accent : THEME.colors.info });
-
-    this.rebindingGamepadAction = null;
-    this.statusText?.setText(t('saved') || 'Saved!');
-    this.mainSizer?.layout();
-    this.time.delayedCall(800, () => this.restartScene());
-  }
-
-  private resetBindings(): void {
-    setKeyboardLayout('qwerty');
-    this.bindings = this.getDefaultBindings();
-    this.displayNames = {};
-    this.saveBindings();
-    this.gamepadBindings = getDefaultGamepadBindings();
-    saveGamepadBindings(this.gamepadBindings);
-    this.statusText?.setText(t('controlsReset') || 'Controls reset!');
-    this.time.delayedCall(800, () => this.restartScene());
-  }
-
-  private setLayout(layout: KeyboardLayout): void {
-    setKeyboardLayout(layout);
-    this.bindings = this.getDefaultBindings();
-    this.displayNames = {};
-    this.saveBindings();
-    this.restartScene();
   }
 
   private setLang(code: SupportedLanguage): void {
@@ -1054,8 +859,8 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private goBack(): void {
-    if (this.rebindingAction) {
-      this.cancelRebind();
+    if (this.keys.rebindingAction) {
+      this.keys.cancelRebind();
       return;
     }
 
