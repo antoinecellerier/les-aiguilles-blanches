@@ -4,6 +4,7 @@ import { drawPortrait } from '../utils/characterPortraits';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
+import { ResizeManager } from '../utils/resizeManager';
 
 /**
  * Les Aiguilles Blanches - Dialogue Scene
@@ -124,9 +125,7 @@ export default class DialogueScene extends Phaser.Scene {
   private savedCurrentText: string | null = null;
   private savedCurrentSpeaker: string | null = null;
 
-  private lastResizeWidth = 0;
-  private lastResizeHeight = 0;
-  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  private resizeManager!: ResizeManager;
   private excludeSize = 200;
 
   create(): void {
@@ -135,8 +134,19 @@ export default class DialogueScene extends Phaser.Scene {
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
-    this.lastResizeWidth = width;
-    this.lastResizeHeight = height;
+    this.resizeManager = new ResizeManager(this, {
+      onBeforeRestart: () => {
+        if (this.isShowing) {
+          const currentItem: DialogueItem = { key: '', text: this.fullText, speaker: this.speakerText?.text };
+          this.savedQueue = [currentItem, ...this.dialogueQueue];
+          this.savedCurrentText = this.fullText;
+          this.savedCurrentSpeaker = this.speakerText?.text || null;
+        } else {
+          this.savedQueue = this.dialogueQueue.length > 0 ? [...this.dialogueQueue] : null;
+        }
+      },
+    });
+    this.resizeManager.register();
 
     // Fullscreen hit zone for clicking anywhere to dismiss (initially disabled)
     // Exclude top-right corner (200x200) where HUD buttons are located
@@ -252,41 +262,12 @@ export default class DialogueScene extends Phaser.Scene {
       this.gamepadBPressed = false;
     }
 
-    this.scale.on('resize', this.handleResize, this);
-
     // Restore dialogue state after resize restart
     if (this.savedQueue && this.savedQueue.length > 0) {
       this.dialogueQueue = this.savedQueue;
       this.savedQueue = null;
       this.displayNextDialogue();
     }
-  }
-
-  private handleResize(): void {
-    if (!this.cameras?.main) return;
-    const { width, height } = this.cameras.main;
-    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
-      return;
-    }
-    if (this.resizeTimer) clearTimeout(this.resizeTimer);
-    this.resizeTimer = setTimeout(() => {
-      this.resizeTimer = null;
-      if (!this.scene.isActive()) return;
-      this.lastResizeWidth = this.cameras.main.width;
-      this.lastResizeHeight = this.cameras.main.height;
-
-      // Save dialogue state before restart
-      if (this.isShowing) {
-        const currentItem: DialogueItem = { key: '', text: this.fullText, speaker: this.speakerText?.text };
-        this.savedQueue = [currentItem, ...this.dialogueQueue];
-        this.savedCurrentText = this.fullText;
-        this.savedCurrentSpeaker = this.speakerText?.text || null;
-      } else {
-        this.savedQueue = this.dialogueQueue.length > 0 ? [...this.dialogueQueue] : null;
-      }
-
-      this.scene.restart();
-    }, 300);
   }
 
   private gamepadAPressed = false;
@@ -585,8 +566,7 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   shutdown(): void {
-    this.scale.off('resize', this.handleResize, this);
-    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
+    this.resizeManager.destroy();
     this.input.keyboard?.removeAllListeners();
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();

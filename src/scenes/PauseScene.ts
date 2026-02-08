@@ -7,6 +7,7 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad';
+import { ResizeManager } from '../utils/resizeManager';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -125,9 +126,10 @@ export default class PauseScene extends Phaser.Scene {
     this.inputReady = false;
     this.inputReadyTimer = this.time.delayedCall(300, () => { this.inputReady = true; });
 
-    this.lastResizeWidth = width;
-    this.lastResizeHeight = height;
-    this.scale.on('resize', this.handleResize, this);
+    this.resizeManager = new ResizeManager(this, {
+      restartData: () => ({ levelIndex: this.levelIndex }),
+    });
+    this.resizeManager.register();
   }
 
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -136,29 +138,10 @@ export default class PauseScene extends Phaser.Scene {
   private buttonNav!: MenuButtonNav;
   private gamepadNav!: GamepadMenuNav;
   private gamepadStartPressed = false;
-  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
-  private lastResizeWidth = 0;
-  private lastResizeHeight = 0;
+  private resizeManager!: ResizeManager;
 
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
-
-  private handleResize(): void {
-    if (!this.cameras?.main) return;
-    const { width, height } = this.cameras.main;
-    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
-      return;
-    }
-    if (this.resizeTimer) clearTimeout(this.resizeTimer);
-    this.resizeTimer = setTimeout(() => {
-      this.resizeTimer = null;
-      if (this.scene.isActive()) {
-        this.lastResizeWidth = width;
-        this.lastResizeHeight = height;
-        this.scene.restart({ levelIndex: this.levelIndex });
-      }
-    }, 300);
-  }
 
   update(_time: number, delta: number): void {
     this.gamepadNav.update(delta);
@@ -200,8 +183,7 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   shutdown(): void {
-    this.scale.off('resize', this.handleResize, this);
-    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
+    this.resizeManager.destroy();
     this.input.keyboard?.removeAllListeners();
     
     // Clean up inputReady timer if scene shutdown before it fires

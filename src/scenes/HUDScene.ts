@@ -6,6 +6,7 @@ import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
+import { ResizeManager } from '../utils/resizeManager';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -300,9 +301,10 @@ export default class HUDScene extends Phaser.Scene {
     this.barWidth = barWidth;
     this.game.events.on(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.on(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
-    this.lastResizeWidth = width;
-    this.lastResizeHeight = height;
-    this.scale.on('resize', this.handleResize, this);
+    this.resizeManager = new ResizeManager(this, {
+      restartData: () => ({ level: this.level }),
+    });
+    this.resizeManager.register();
 
     // Create touch controls - show on mobile, or on first touch for PC with touchscreen
     if (isMobile && hasTouch) {
@@ -808,36 +810,14 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   private resizing = false;
-  private lastResizeWidth = 0;
-  private lastResizeHeight = 0;
-  private resizeTimer: ReturnType<typeof setTimeout> | null = null;
-
-  private handleResize(): void {
-    if (!this.cameras?.main) return;
-    const { width, height } = this.cameras.main;
-    // Ignore tiny resize changes (mobile URL bar, soft keyboard)
-    if (Math.abs(width - this.lastResizeWidth) < 10 && Math.abs(height - this.lastResizeHeight) < 10) {
-      return;
-    }
-    // Debounce: wait for resize events to settle
-    if (this.resizeTimer) clearTimeout(this.resizeTimer);
-    this.resizeTimer = setTimeout(() => {
-      this.resizeTimer = null;
-      if (this.scene.isActive()) {
-        this.lastResizeWidth = width;
-        this.lastResizeHeight = height;
-        this.scene.restart({ level: this.level });
-      }
-    }, 300);
-  }
+  private resizeManager!: ResizeManager;
 
   shutdown(): void {
     // Remove global event listeners FIRST to prevent callbacks on destroyed objects
     this.game.events.off(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
 
-    this.scale.off('resize', this.handleResize, this);
-    if (this.resizeTimer) { clearTimeout(this.resizeTimer); this.resizeTimer = null; }
+    this.resizeManager.destroy();
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);
