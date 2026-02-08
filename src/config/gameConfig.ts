@@ -95,6 +95,12 @@ export const BALANCE = {
   SLIDE_GRAVITY_OFFSET: 25,
   SLIDE_GRAVITY_MULTIPLIER: 2,
   TUMBLE_SLIDE_SPEED: 300,
+  CLIFF_FALL_DELAY: 1500,  // ms after center-of-mass crosses cliff edge before game over
+
+  // Groomer dimensions (in sprite pixels, before scale) for cliff stability checks
+  // Sprite is 36×58px, origin at center
+  GROOMER_HALF_LENGTH: 29,  // Front/rear (along track axis)
+  GROOMER_HALF_WIDTH: 18,   // Left/right (perpendicular to tracks)
 
   // Avalanche
   AVALANCHE_RISK_PER_FRAME: 0.015,

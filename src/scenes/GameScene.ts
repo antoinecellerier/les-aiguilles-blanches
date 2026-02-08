@@ -1870,15 +1870,10 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.groomer, this.obstacles);
     this.physics.add.collider(this.groomer, this.boundaryWalls);
 
-    if (this.dangerZones && this.dangerZones.getLength() > 0) {
-      this.physics.add.overlap(
-        this.groomer,
-        this.dangerZones,
-        this.handleCliffFall as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
-        undefined,
-        this
-      );
-    }
+    // Cliff fall is checked per-frame via center-of-mass in checkCliffFall().
+    // Danger zones exist as visual markers but have no physics interaction —
+    // the groomer can extend its tracks/tiller over the edge safely until
+    // its center of mass crosses onto cliff terrain.
 
     this.physics.add.overlap(
       this.groomer,
@@ -1889,11 +1884,53 @@ export default class GameScene extends Phaser.Scene {
     );
   }
 
-  private handleCliffFall(): void {
-    if (this.isGameOver || this.isFallingOffCliff) return;
+  /**
+   * Directional cliff stability check. Called every frame.
+   *
+   * Checks 4 points around the groomer (front, rear, left, right) based on
+   * its facing direction. Tracked vehicles are stable along their length axis
+   * (front/rear can overhang) but tip easily sideways:
+   *
+   * - Side point on cliff → immediate tip-over (no lateral grip)
+   * - Only front or rear on cliff → safe (weight supported by tracks)
+   * - Center of mass on cliff → fall (fully past the edge)
+   */
+  private checkCliffFall(): void {
+    if (this.isGameOver || this.isFallingOffCliff || this.isTumbling) return;
+    if (!this.cliffSegments || this.cliffSegments.length === 0) return;
+
+    const scale = this.tileSize / 16;
+    const rot = this.groomer.rotation;
+    // Forward direction (along tracks): sprite local -Y rotated into world space
+    const fwdX = -Math.sin(rot);
+    const fwdY = Math.cos(rot);
+    // Right direction (perpendicular to tracks)
+    const rightX = Math.cos(rot);
+    const rightY = Math.sin(rot);
+
+    const cx = this.groomer.x;
+    const cy = this.groomer.y;
+    const halfLen = BALANCE.GROOMER_HALF_LENGTH * scale * 0.7;  // 70% — don't need full tip
+    const halfWid = BALANCE.GROOMER_HALF_WIDTH * scale * 0.5;   // 50% — sides are more sensitive
+
+    // Side points (left/right of tracks) — tip if either side is on cliff
+    const leftOnCliff = this.isOnCliff(cx - rightX * halfWid, cy - rightY * halfWid);
+    const rightOnCliff = this.isOnCliff(cx + rightX * halfWid, cy + rightY * halfWid);
+    if (leftOnCliff || rightOnCliff) {
+      this.triggerCliffFall();
+      return;
+    }
+
+    // Center of mass — fall if center itself is on cliff
+    if (this.isOnCliff(cx, cy)) {
+      this.triggerCliffFall();
+      return;
+    }
+  }
+
+  private triggerCliffFall(): void {
     this.isFallingOffCliff = true;
-    
-    // Clear winch state
+
     this.winchActive = false;
     this.winchAnchor = null;
     if (this.winchCableGraphics) {
@@ -1901,7 +1938,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.showDialogue('cliffFall');
-    this.time.delayedCall(1500, () => {
+    this.time.delayedCall(BALANCE.CLIFF_FALL_DELAY, () => {
       this.gameOver(false, 'cliff');
     });
   }
@@ -1996,6 +2033,7 @@ export default class GameScene extends Phaser.Scene {
     this.handleGrooming();
     this.updateWinch();
     this.checkSteepness();
+    this.checkCliffFall();
     this.updateResources(delta);
     this.checkTutorialProgress();
     this.checkWinCondition();

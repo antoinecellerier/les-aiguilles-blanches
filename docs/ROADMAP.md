@@ -10,9 +10,9 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Service road width vs piste width - Roads should be visibly narrower than piste; widen piste if needed to ensure contrast
 - [ ] Avalanche zones overlap service roads - Avalanche zones should never overlap service roads
 - [ ] Anchor point accessibility - Every winch anchor must be reachable via piste or service road without blocking avalanche/steep obstacles
-- [ ] Groomer fall mechanics - Only fall when tracks (front) are over cliff/steep edge, not tiller (rear); add probability-based tip-over instead of instant fall
+- [x] Groomer fall mechanics - Center-of-mass based cliff fall instead of instant physics overlap death
 - [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
-- [ ] Firefox desktop touch detection - Touch availability should update on background tap, not just button presses
+- [x] Firefox desktop touch detection - Touch availability updates on background tap via canvas listener
 
 ## Polish (Medium Priority)
 
