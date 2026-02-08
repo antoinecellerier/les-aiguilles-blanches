@@ -92,10 +92,9 @@ def skip_to_credits(page, timeout_per_level: int = 10000):
     Deterministic approach that waits for each level transition to complete.
     Uses longer timeout to handle asset loading between levels.
     """
-    import time
     for i in range(11):
         page.keyboard.press("n")
-        time.sleep(0.1)
+        page.wait_for_timeout(100)
         result = wait_for_level_or_credits(page, i + 1, timeout=timeout_per_level)
         if result == 'credits':
             return  # Done - credits are showing
