@@ -173,68 +173,8 @@ export default class GameScene extends Phaser.Scene {
     console.log('GameScene.createLevel starting for level', this.levelIndex);
     const { width: screenWidth, height: screenHeight } = this.cameras.main;
 
-    // Calculate tile size to fit level on screen with some margin
-    const marginX = 50;
-    const marginY = 100;
-    const availableWidth = screenWidth - marginX * 2;
-    const availableHeight = screenHeight - marginY;
-
-    const tilesByWidth = Math.floor(availableWidth / this.level.width);
-    const tilesByHeight = Math.floor(availableHeight / this.level.height);
-    this.tileSize = Math.max(12, Math.min(tilesByWidth, tilesByHeight, 28));
-    this.originalScreenWidth = screenWidth;
-    this.originalScreenHeight = screenHeight;
-    console.log('Tile size:', this.tileSize, 'level size:', this.level.width, 'x', this.level.height);
-
-    // Calculate world size and center offset
-    const worldWidth = this.level.width * this.tileSize;
-    const worldHeight = this.level.height * this.tileSize;
-
-    // Center the world on screen
-    this.worldOffsetX = Math.max(0, (screenWidth - worldWidth) / 2);
-    this.worldOffsetY = Math.max(marginY / 2, (screenHeight - worldHeight) / 2);
-
-    this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
-    console.log('World bounds set');
-
-    // Sky background
-    this.cameras.main.setBackgroundColor(
-      this.level.isNight ? GAME_CONFIG.COLORS.SKY_NIGHT : GAME_CONFIG.COLORS.SKY_DAY
-    );
-
-    // Create snow grid (sets totalTiles based on groomable area, builds pistePath)
-    this.snowGrid = [];
-    this.groomedCount = 0;
-    console.log('Creating snow grid...');
-    this.createSnowGrid();
-    console.log('Snow grid created');
-
-    // Initialize PisteRenderer with geometry data
-    this.pisteRenderer = new PisteRenderer(this, this.geometry);
-
-    // Create boundary colliders after geometry is available (piste path, cliffs, access paths)
-    const { boundaryWalls, dangerZones } = this.pisteRenderer.createBoundaryColliders(this.level, this.tileSize);
-    this.boundaryWalls = boundaryWalls;
-    this.dangerZones = dangerZones;
-
-    // Create extended background to cover full visible window
-    // Must be after snow grid + access path geometry so trees avoid roads
-    this.pisteRenderer.createExtendedBackground(
-      screenWidth, screenHeight, worldWidth, worldHeight,
-      this.worldOffsetX, this.worldOffsetY, this.level, this.tileSize
-    );
-
-    // Create piste boundaries (for visual definition)
-    this.pisteRenderer.createPisteBoundaries(this.level, this.tileSize, worldWidth);
-    console.log('Piste boundaries created, creating obstacles...');
-
-    // Create obstacles
-    this.obstacles = this.physics.add.staticGroup();
-    this.interactables = this.physics.add.staticGroup();
-    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
-    this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables);
-    this.buildingRects = this.obstacleBuilder.buildingRects;
-    console.log('Obstacles created, creating groomer...');
+    const { worldWidth, worldHeight } = this.initWorldDimensions(screenWidth, screenHeight);
+    this.createTerrain(screenWidth, screenHeight, worldWidth, worldHeight);
 
     // Create groomer
     this.createGroomer();
@@ -254,42 +194,115 @@ export default class GameScene extends Phaser.Scene {
     }
     console.log('Camera set up, initializing game state...');
 
-    // Game state
+    this.initGameState();
+    this.setupLevelSystems();
+    this.setupInputAndScenes();
+    this.setupEffectsAndWildlife(worldWidth, worldHeight);
+
+    // Handle window resize - keep camera bounds updated and groomer visible
+    this.scale.on('resize', this.handleResize, this);
+
+    console.log('GameScene.createLevel complete!');
+    // Pause on ESC (but not while dialogue is showing — ESC dismisses dialogue first)
+    this.input.keyboard?.on('keydown-ESC', () => {
+      const dlg = this.scene.get('DialogueScene') as DialogueScene;
+      if (dlg?.isDialogueShowing()) return;
+      this.pauseGame();
+    });
+
+    Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
+  }
+
+  private initWorldDimensions(screenWidth: number, screenHeight: number): { worldWidth: number; worldHeight: number } {
+    const marginX = 50;
+    const marginY = 100;
+    const availableWidth = screenWidth - marginX * 2;
+    const availableHeight = screenHeight - marginY;
+
+    const tilesByWidth = Math.floor(availableWidth / this.level.width);
+    const tilesByHeight = Math.floor(availableHeight / this.level.height);
+    this.tileSize = Math.max(12, Math.min(tilesByWidth, tilesByHeight, 28));
+    this.originalScreenWidth = screenWidth;
+    this.originalScreenHeight = screenHeight;
+    console.log('Tile size:', this.tileSize, 'level size:', this.level.width, 'x', this.level.height);
+
+    const worldWidth = this.level.width * this.tileSize;
+    const worldHeight = this.level.height * this.tileSize;
+
+    this.worldOffsetX = Math.max(0, (screenWidth - worldWidth) / 2);
+    this.worldOffsetY = Math.max(marginY / 2, (screenHeight - worldHeight) / 2);
+
+    this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+    console.log('World bounds set');
+
+    this.cameras.main.setBackgroundColor(
+      this.level.isNight ? GAME_CONFIG.COLORS.SKY_NIGHT : GAME_CONFIG.COLORS.SKY_DAY
+    );
+
+    return { worldWidth, worldHeight };
+  }
+
+  private createTerrain(
+    screenWidth: number, screenHeight: number,
+    worldWidth: number, worldHeight: number
+  ): void {
+    this.snowGrid = [];
+    this.groomedCount = 0;
+    console.log('Creating snow grid...');
+    this.createSnowGrid();
+    console.log('Snow grid created');
+
+    this.pisteRenderer = new PisteRenderer(this, this.geometry);
+
+    const { boundaryWalls, dangerZones } = this.pisteRenderer.createBoundaryColliders(this.level, this.tileSize);
+    this.boundaryWalls = boundaryWalls;
+    this.dangerZones = dangerZones;
+
+    this.pisteRenderer.createExtendedBackground(
+      screenWidth, screenHeight, worldWidth, worldHeight,
+      this.worldOffsetX, this.worldOffsetY, this.level, this.tileSize
+    );
+
+    this.pisteRenderer.createPisteBoundaries(this.level, this.tileSize, worldWidth);
+    console.log('Piste boundaries created, creating obstacles...');
+
+    this.obstacles = this.physics.add.staticGroup();
+    this.interactables = this.physics.add.staticGroup();
+    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
+    this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables);
+    this.buildingRects = this.obstacleBuilder.buildingRects;
+    console.log('Obstacles created, creating groomer...');
+  }
+
+  private initGameState(): void {
     this.fuel = 100;
     this.stamina = 100;
     this.timeRemaining = this.level.timeLimit;
     this.isGrooming = false;
     this.buffs = {};
 
-    // Stats tracking
     this.fuelUsed = 0;
     this.tumbleCount = 0;
     this.accessPathsVisited = new Set<number>();
 
-    // Systems
     this.winchSystem = new WinchSystem(this, this.geometry);
     this.weatherSystem = new WeatherSystem(this, this.tileSize);
-
-    // Avalanche state
     this.hazardSystem = new HazardSystem(this);
-
-    // Wildlife
     this.wildlifeSystem = new WildlifeSystem(this, this.tileSize);
 
-    // Tutorial state
     this.tutorialStep = 0;
     this.tutorialTriggered = {};
     this.hasMoved = false;
     this.hasGroomed = false;
     console.log('State initialized, creating winch/avalanche if needed...');
+  }
 
-    // Create winch anchor points for levels that have winch
+  private setupLevelSystems(): void {
     if (this.level.hasWinch) {
       this.winchSystem.createAnchors(this.level, this.tileSize);
       console.log('Winch anchors created');
     }
 
-    // Create avalanche zones for levels with avalanche hazard
     if (this.level.hazards && this.level.hazards.includes('avalanche')) {
       this.hazardSystem.createAvalancheZones(
         this.level,
@@ -304,8 +317,9 @@ export default class GameScene extends Phaser.Scene {
       );
       console.log('Avalanche zones created');
     }
+  }
 
-    // Input
+  private setupInputAndScenes(): void {
     console.log('Setting up input...');
     this.setupInput();
     console.log('Input set up, registering event listeners...');
@@ -321,7 +335,6 @@ export default class GameScene extends Phaser.Scene {
     
     console.log('Launching HUD scene...');
     
-    // Launch overlay scenes directly (no delayedCall — avoids race with rapid level transitions)
     this.scene.launch('DialogueScene');
     console.log('Dialogue launched');
 
@@ -331,14 +344,14 @@ export default class GameScene extends Phaser.Scene {
     this.scene.bringToTop('HUDScene');
     console.log('HUD launched on top');
 
-    // Show intro dialogue after a short delay to let scenes initialize
     if (this.level.introDialogue) {
       this.time.delayedCall(500, () => {
         this.showDialogue(this.level.introDialogue!, this.level.introSpeaker);
       });
     }
+  }
 
-    // Timer
+  private setupEffectsAndWildlife(worldWidth: number, worldHeight: number): void {
     this.time.addEvent({
       delay: 1000,
       callback: this.updateTimer,
@@ -346,48 +359,28 @@ export default class GameScene extends Phaser.Scene {
       loop: true
     });
 
-    // Night overlay
     if (this.level.isNight) {
       this.weatherSystem.createNightOverlay();
       this.weatherSystem.updateNightOverlay(this.groomer);
     }
 
-    // Weather effects
     if (this.level.weather !== 'clear') {
       this.weatherSystem.createWeatherEffects(this.level);
     }
 
-    // Apply accessibility settings
     this.weatherSystem.applyAccessibilitySettings();
 
-    // Spawn wildlife
     if (this.level.wildlife && this.level.wildlife.length > 0) {
-      const worldW = this.level.width * this.tileSize;
-      const worldH = this.level.height * this.tileSize;
-      // Use mid-level piste path to estimate left/right edges
       const midPath = this.geometry.pistePath[Math.floor(this.level.height / 2)];
-      const pisteLeft = midPath ? (midPath.centerX - midPath.width / 2) * this.tileSize : worldW * 0.3;
-      const pisteRight = midPath ? (midPath.centerX + midPath.width / 2) * this.tileSize : worldW * 0.7;
-      this.wildlifeSystem.spawn(this.level.wildlife, worldW, worldH, pisteLeft, pisteRight, this.geometry.accessPathRects);
+      const pisteLeft = midPath ? (midPath.centerX - midPath.width / 2) * this.tileSize : worldWidth * 0.3;
+      const pisteRight = midPath ? (midPath.centerX + midPath.width / 2) * this.tileSize : worldWidth * 0.7;
+      this.wildlifeSystem.spawn(this.level.wildlife, worldWidth, worldHeight, pisteLeft, pisteRight, this.geometry.accessPathRects);
       this.wildlifeSystem.setObstacles(
         (px, py) => this.geometry.isOnCliff(px, py),
         this.buildingRects,
       );
       this.wildlifeSystem.bootstrapTracks();
     }
-
-    // Handle window resize - keep camera bounds updated and groomer visible
-    this.scale.on('resize', this.handleResize, this);
-
-    console.log('GameScene.createLevel complete!');
-    // Pause on ESC (but not while dialogue is showing — ESC dismisses dialogue first)
-    this.input.keyboard?.on('keydown-ESC', () => {
-      const dlg = this.scene.get('DialogueScene') as DialogueScene;
-      if (dlg?.isDialogueShowing()) return;
-      this.pauseGame();
-    });
-
-    Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
   }
 
 

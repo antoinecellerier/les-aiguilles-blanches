@@ -45,6 +45,7 @@ snow-groomer/
 │   │   ├── HazardSystem.ts   # Avalanche zones, risk handling
 │   │   ├── WildlifeSystem.ts # Animal spawning, flee AI, update loop
 │   │   ├── LevelGeometry.ts # Piste path, cliff, access path geometry (pure data, no Phaser)
+│   │   ├── ObstacleBuilder.ts # Obstacle placement, buildings, chalets
 │   │   ├── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
 │   │   └── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
 │   ├── types/
@@ -821,10 +822,11 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 - **HazardSystem** — Avalanche zone creation, risk tracking, avalanche trigger sequence
 - **WildlifeSystem** — Decorative animal spawning, flee-from-groomer AI, per-level species config. Uses shared utilities: `foxBehavior.ts` for fox hunting decisions, `animalTracks.ts` for track drawing, `animalSprites.ts` for procedural sprites (including side-view flying and perched bird variants). Animals avoid buildings/cliffs (non-climbing species), grooming erases tracks, and tracks are bootstrapped at level start.
 - **LevelGeometry** — Pure data system (no Phaser dependency). Generates piste path, access path zones/curves, and cliff segments from level config. Provides query methods `isInPiste()`, `isOnCliff()`, `isOnAccessPath()` used by rendering and physics.
+- **ObstacleBuilder** — Creates obstacles (rocks, trees), interactable buildings (restaurant, fuel station), and decorative chalets. Tracks building footprints for wildlife collision avoidance.
 - **PisteRenderer** — All piste visual rendering: boundary colliders, cliff edge visuals, piste markers, forest trees, access path roads/poles, steep zone indicators, and extended background. Returns physics groups for GameScene collision setup.
 - **WinchSystem** — Winch anchor creation, cable rendering (taut/slack), attach/detach state. Exposes `isTaut()` query used by movement and resource systems.
 
-Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `_createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
+Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
 
 ### Balance Constants
 
