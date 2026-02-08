@@ -34,7 +34,7 @@ SKIP_E2E=false
 
 if [ "$SMART_MODE" = true ]; then
     echo "=== Smart mode: selecting tests from uncommitted changes ==="
-    CHANGED_FILES=$(git diff --name-only HEAD 2>/dev/null || true)
+    CHANGED_FILES=$( { git diff --name-only HEAD; git ls-files --others --exclude-standard; } 2>/dev/null | sort -u || true)
 
     if [ -z "$CHANGED_FILES" ]; then
         echo "No uncommitted changes detected — nothing to test."
@@ -82,6 +82,26 @@ if [ "$SMART_MODE" = true ]; then
     # Deduplicate E2E file list
     if [ ${#SMART_E2E_FILES[@]} -gt 0 ]; then
         readarray -t SMART_E2E_FILES < <(printf '%s\n' "${SMART_E2E_FILES[@]}" | sort -u)
+    fi
+
+    # Validate: every E2E test file on disk must be known to the selection logic.
+    # This catches new test files that haven't been added to the mapping above.
+    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py"
+    UNKNOWN_E2E=()
+    for f in tests/e2e/test_*.py; do
+        [ -f "$f" ] || continue
+        basename=$(basename "$f")
+        if ! echo "$KNOWN_E2E_FILES" | grep -qw "$basename"; then
+            UNKNOWN_E2E+=("$basename")
+        fi
+    done
+    if [ ${#UNKNOWN_E2E[@]} -gt 0 ]; then
+        echo ""
+        echo "ERROR: Unknown E2E test file(s) not in --smart mapping:"
+        printf '  %s\n' "${UNKNOWN_E2E[@]}"
+        echo "Add source→test mapping in run-tests.sh (search for KNOWN_E2E_FILES)"
+        echo "and update the specialized case statement above."
+        exit 1
     fi
 
     # Determine what to skip

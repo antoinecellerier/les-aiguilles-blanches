@@ -35,7 +35,7 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
   - `tests/e2e/conftest.py` changed → runs all E2E tests
   - No `src/` or test changes → skips E2E entirely
 
-This is maintenance-free: new source files are covered by the `test_navigation.py` catch-all, and unit test selection uses Vitest's built-in module graph.
+This is maintenance-free for source files: new source files are covered by the `test_navigation.py` catch-all, and unit test selection uses Vitest's built-in module graph. If a new E2E test file is added to `tests/e2e/`, `--smart` will fail with an error until its source→test mapping is added to `run-tests.sh`.
 
 ## Test Helpers
 
