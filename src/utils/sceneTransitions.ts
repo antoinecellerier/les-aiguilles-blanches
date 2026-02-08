@@ -47,8 +47,6 @@ export function resetGameScenes(
   // This prevents destroying scenes while their update() is still on the call stack
   // (e.g. HUDScene.update → skipLevel → emit SKIP_LEVEL → transitionToLevel → stop).
   setTimeout(() => {
-    transitionPending = false;
-
     // Remove all game scenes (order doesn't matter for removal)
     for (const { key } of gameSceneEntries) {
       try {
@@ -67,5 +65,8 @@ export function resetGameScenes(
 
     // Start target
     game.scene.start(target, data);
+
+    // Reset guard AFTER transition completes, preventing re-entry during create()
+    transitionPending = false;
   }, 100);
 }

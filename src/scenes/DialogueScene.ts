@@ -18,6 +18,7 @@ interface DialogueItem {
 export default class DialogueScene extends Phaser.Scene {
   private dialogueQueue: DialogueItem[] = [];
   private isShowing = false;
+  private lastDismissedAt = 0;
   private container: Phaser.GameObjects.Container | null = null;
   private bg: Phaser.GameObjects.Rectangle | null = null;
   private hitZone: Phaser.GameObjects.Rectangle | null = null;
@@ -465,6 +466,7 @@ export default class DialogueScene extends Phaser.Scene {
 
   private hideDialogue(): void {
     this.isShowing = false;
+    this.lastDismissedAt = Date.now();
     this.isTyping = false;
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();
@@ -510,6 +512,9 @@ export default class DialogueScene extends Phaser.Scene {
 
   /** Check if dialogue is currently being displayed */
   isDialogueShowing(): boolean {
+    // Brief cooldown after dismiss prevents ESC from both dismissing dialogue
+    // and triggering pause in the same keypress (both scenes handle keydown-ESC)
+    if (!this.isShowing && Date.now() - this.lastDismissedAt < 200) return true;
     return this.isShowing;
   }
 

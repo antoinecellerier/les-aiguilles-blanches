@@ -160,6 +160,15 @@ export default class GameScene extends Phaser.Scene {
   private winchKey!: Phaser.Input.Keyboard.Key;
   private gamepad: Phaser.Input.Gamepad.Gamepad | null = null;
 
+  // Bound event handlers for clean game.events.off() removal
+  private boundTouchHandler = (data: TouchInputEvent) => { this.touchInput = data; };
+  private boundPauseHandler = () => {
+    const dlg = this.scene.get('DialogueScene') as DialogueScene;
+    if (!dlg?.isDialogueShowing()) this.pauseGame();
+  };
+  private boundResumeHandler = () => { this.resumeGame(); };
+  private boundSkipHandler = (nextLevel: number) => { this.transitionToLevel(nextLevel); };
+
 
   constructor() {
     super({ key: 'GameScene' });
@@ -352,22 +361,11 @@ export default class GameScene extends Phaser.Scene {
       });
     }
 
-    // Cross-scene event listeners
-    this.game.events.on(GAME_EVENTS.TOUCH_INPUT, (data: TouchInputEvent) => {
-      this.touchInput = data;
-    });
-    this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, () => {
-      const dlg = this.scene.get('DialogueScene') as DialogueScene;
-      if (!dlg?.isDialogueShowing()) {
-        this.pauseGame();
-      }
-    });
-    this.game.events.on(GAME_EVENTS.RESUME_REQUEST, () => {
-      this.resumeGame();
-    });
-    this.game.events.on(GAME_EVENTS.SKIP_LEVEL, (nextLevel: number) => {
-      this.transitionToLevel(nextLevel);
-    });
+    // Cross-scene event listeners (use bound handlers for clean removal)
+    this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
+    this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
+    this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
+    this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
 
     // Timer
     this.time.addEvent({
@@ -2599,10 +2597,10 @@ export default class GameScene extends Phaser.Scene {
   shutdown(): void {
     console.log('GameScene.shutdown');
 
-    this.game.events.off(GAME_EVENTS.TOUCH_INPUT);
-    this.game.events.off(GAME_EVENTS.PAUSE_REQUEST);
-    this.game.events.off(GAME_EVENTS.RESUME_REQUEST);
-    this.game.events.off(GAME_EVENTS.SKIP_LEVEL);
+    this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
+    this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
+    this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
+    this.game.events.off(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
 
     this.scale.off('resize', this.handleResize, this);
     this.input.gamepad?.removeAllListeners();

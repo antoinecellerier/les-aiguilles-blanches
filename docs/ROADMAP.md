@@ -12,6 +12,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Anchor point accessibility - Every winch anchor must be reachable via piste or service road without blocking avalanche/steep obstacles
 - [ ] Groomer fall mechanics - Only fall when tracks (front) are over cliff/steep edge, not tiller (rear); add probability-based tip-over instead of instant fall
 - [ ] Chalet placement overlap - Chalets should not overlap Marie's restaurant or the refuel point
+- [ ] Firefox desktop touch detection - Touch availability should update on background tap, not just button presses
 
 ## Polish (Medium Priority)
 
