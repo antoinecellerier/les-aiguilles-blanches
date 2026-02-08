@@ -14,6 +14,7 @@ import { WildlifeSystem, type ObstacleRect } from '../systems/WildlifeSystem';
 import { LevelGeometry, type PistePath } from '../systems/LevelGeometry';
 import { PisteRenderer } from '../systems/PisteRenderer';
 import { WinchSystem } from '../systems/WinchSystem';
+import { ObstacleBuilder } from '../systems/ObstacleBuilder';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -105,6 +106,7 @@ export default class GameScene extends Phaser.Scene {
   // Weather & environment
   private weatherSystem!: WeatherSystem;
   private wildlifeSystem!: WildlifeSystem;
+  private obstacleBuilder!: ObstacleBuilder;
   private buildingRects: ObstacleRect[] = [];
 
   // Input
@@ -229,7 +231,9 @@ export default class GameScene extends Phaser.Scene {
     // Create obstacles
     this.obstacles = this.physics.add.staticGroup();
     this.interactables = this.physics.add.staticGroup();
-    this.createObstacles();
+    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
+    this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables);
+    this.buildingRects = this.obstacleBuilder.buildingRects;
     console.log('Obstacles created, creating groomer...');
 
     // Create groomer
@@ -427,203 +431,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
 
-  private createObstacles(): void {
-    const obstacleTypes = this.level.obstacles || [];
-    const worldWidth = this.level.width * this.tileSize;
-    const worldHeight = this.level.height * this.tileSize;
 
-    // Adjust obstacle count based on difficulty
-    // Easier pistes have fewer obstacles on the groomed area
-    const baseCount = Math.floor(this.level.width * this.level.height / 100);
-    let difficultyMultiplier: number;
-    switch (this.level.difficulty) {
-      case 'tutorial': difficultyMultiplier = 0.2; break;
-      case 'green': difficultyMultiplier = 0.4; break;
-      case 'blue': difficultyMultiplier = 0.6; break;
-      case 'red': difficultyMultiplier = 0.8; break;
-      case 'black': difficultyMultiplier = 1.0; break;
-      case 'park': difficultyMultiplier = 0.5; break;
-      default: difficultyMultiplier = 0.6;
-    }
-    const obstacleCount = Math.floor(baseCount * difficultyMultiplier);
-
-    for (let i = 0; i < obstacleCount; i++) {
-      const type = Phaser.Utils.Array.GetRandom(obstacleTypes);
-      if (!type) continue;
-
-      let x: number, y: number;
-      let attempts = 0;
-      do {
-        if (Math.random() < 0.7) {
-          if (Math.random() < 0.5) {
-            x = Phaser.Math.Between(this.tileSize * 3, this.tileSize * 6);
-          } else {
-            x = Phaser.Math.Between(worldWidth - this.tileSize * 6, worldWidth - this.tileSize * 3);
-          }
-          y = Phaser.Math.Between(this.tileSize * 5, worldHeight - this.tileSize * 5);
-        } else {
-          x = Phaser.Math.Between(this.tileSize * 8, worldWidth - this.tileSize * 8);
-          y = Phaser.Math.Between(this.tileSize * 10, worldHeight - this.tileSize * 10);
-        }
-        attempts++;
-      } while ((this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y)) && attempts < 10);
-      if (this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y)) continue;
-
-      let texture = 'tree';
-      if (type === 'rocks') texture = 'rock';
-
-      const obstacle = this.obstacles.create(x, y, texture);
-      obstacle.setImmovable(true);
-      obstacle.setScale(this.tileSize / 16);
-      obstacle.setDepth(DEPTHS.TREES);
-    }
-
-    const restaurant = this.interactables.create(
-      worldWidth / 2 - this.tileSize * 4,
-      this.tileSize * 2,
-      'restaurant'
-    );
-    restaurant.interactionType = 'food';
-    restaurant.setScale(this.tileSize / 16);
-    restaurant.setDepth(DEPTHS.GROUND_OBJECTS);
-    // Add restaurant footprint for wildlife collision
-    const rSize = this.tileSize * 2;
-    this.addBuildingFootprint(restaurant.x, restaurant.y, rSize, rSize);
-
-    // Fuel station at bottom of level (maintenance area in resort)
-    const fuelStation = this.interactables.create(
-      worldWidth / 2 + this.tileSize * 4,
-      worldHeight - this.tileSize * 3,
-      'fuel'
-    );
-    fuelStation.interactionType = 'fuel';
-    fuelStation.setScale(this.tileSize / 16);
-    fuelStation.setDepth(DEPTHS.GROUND_OBJECTS);
-    // Add fuel station footprint for wildlife collision
-    this.addBuildingFootprint(fuelStation.x, fuelStation.y, this.tileSize * 2, this.tileSize * 2);
-
-    // Add resort buildings on easier pistes (near resort)
-    if (['tutorial', 'green', 'blue'].includes(this.level.difficulty)) {
-      this.createResortBuildings(worldWidth, worldHeight);
-    }
-  }
-
-  /** Register a building footprint (center-based) for wildlife collision avoidance. */
-  private addBuildingFootprint(cx: number, cy: number, w: number, h: number): void {
-    this.buildingRects.push({ x: cx - w / 2, y: cy - h / 2, w, h });
-  }
-
-  private createResortBuildings(worldWidth: number, worldHeight: number): void {
-    const tileSize = this.tileSize;
-
-    // Place more chalets on easier pistes (closer to resort)
-    let chaletCount: number;
-    switch (this.level.difficulty) {
-      case 'tutorial': chaletCount = 3; break;
-      case 'green': chaletCount = 4; break;
-      case 'blue': chaletCount = 2; break;
-      default: chaletCount = 1;
-    }
-
-    // Tutorial is inside the resort village - chalets throughout
-    // Other pistes - chalets near bottom where skiers arrive
-    const isTutorial = this.level.difficulty === 'tutorial';
-
-    for (let i = 0; i < chaletCount; i++) {
-      const side = i % 2 === 0 ? 'left' : 'right';
-
-      let yPos: number;
-      if (isTutorial) {
-        // Spread chalets throughout the village area
-        yPos = tileSize * (4 + i * 2.5);
-      } else {
-        // Position chalets near bottom of piste (arrival area)
-        const bottomY = this.level.height * tileSize;
-        yPos = bottomY - tileSize * (8 + i * 3);
-      }
-
-      const pathIndex = Math.floor(yPos / tileSize);
-      const path = this.geometry.pistePath[pathIndex] ||
-        { centerX: this.level.width / 2, width: this.level.width * 0.5 };
-
-      const pisteEdge = side === 'left' ?
-        (path.centerX - path.width / 2) * tileSize :
-        (path.centerX + path.width / 2) * tileSize;
-
-      const x = side === 'left' ?
-        Math.max(tileSize * 3, pisteEdge - tileSize * 4) :
-        Math.min(worldWidth - tileSize * 3, pisteEdge + tileSize * 4);
-
-      // Skip if chalet would overlap an existing building (restaurant, fuel station)
-      const cSize = tileSize * 2;
-      const cx = x - cSize / 2, cy = yPos - cSize * 0.4;
-      const cw = cSize, ch = cSize * 0.65;
-      const overlaps = this.buildingRects.some(b =>
-        cx < b.x + b.w && cx + cw > b.x && cy < b.y + b.h && cy + ch > b.y
-      );
-      if (overlaps) continue;
-
-      this.createChalet(x, yPos);
-    }
-  }
-
-  private createChalet(x: number, y: number): void {
-    const g = this.add.graphics();
-    g.setDepth(DEPTHS.GROUND_OBJECTS);
-    const size = this.tileSize * 2;
-
-    // Store footprint for wildlife collision
-    this.addBuildingFootprint(x, y - size * 0.4 + size * 0.325, size, size * 0.65);
-
-    // Chalet body (wooden)
-    g.fillStyle(0x8B4513, 1);
-    g.fillRect(x - size / 2, y - size * 0.4, size, size * 0.6);
-
-    // Stone foundation
-    g.fillStyle(0x666666, 1);
-    g.fillRect(x - size / 2 - 2, y + size * 0.15, size + 4, size * 0.1);
-
-    // Roof (dark wood with snow)
-    g.fillStyle(0x4a3728, 1);
-    g.beginPath();
-    g.moveTo(x - size * 0.7, y - size * 0.35);
-    g.lineTo(x, y - size * 0.8);
-    g.lineTo(x + size * 0.7, y - size * 0.35);
-    g.closePath();
-    g.fillPath();
-
-    // Snow on roof
-    g.fillStyle(0xFFFFFF, 0.9);
-    g.beginPath();
-    g.moveTo(x - size * 0.65, y - size * 0.4);
-    g.lineTo(x, y - size * 0.75);
-    g.lineTo(x + size * 0.65, y - size * 0.4);
-    g.lineTo(x + size * 0.5, y - size * 0.35);
-    g.lineTo(x, y - size * 0.6);
-    g.lineTo(x - size * 0.5, y - size * 0.35);
-    g.closePath();
-    g.fillPath();
-
-    // Windows
-    g.fillStyle(0x87CEEB, 1);
-    g.fillRect(x - size * 0.3, y - size * 0.25, size * 0.2, size * 0.2);
-    g.fillRect(x + size * 0.1, y - size * 0.25, size * 0.2, size * 0.2);
-
-    // Door
-    g.fillStyle(0x4a3728, 1);
-    g.fillRect(x - size * 0.1, y - size * 0.05, size * 0.2, size * 0.25);
-
-    // Chimney with smoke
-    g.fillStyle(0x555555, 1);
-    g.fillRect(x + size * 0.25, y - size * 0.7, size * 0.12, size * 0.2);
-
-    // Smoke puffs (if not reduced motion)
-    if (!Accessibility.settings.reducedMotion) {
-      g.fillStyle(0xCCCCCC, 0.6);
-      g.fillCircle(x + size * 0.31, y - size * 0.8, 3);
-      g.fillCircle(x + size * 0.28, y - size * 0.9, 2);
-    }
-  }
 
   private createGroomer(): void {
     const bottomYIndex = Math.min(this.level.height - 8, Math.floor(this.level.height * 0.9));
@@ -1486,6 +1294,7 @@ export default class GameScene extends Phaser.Scene {
     this.hazardSystem.reset();
     this.wildlifeSystem.reset();
     this.winchSystem.reset();
+    this.obstacleBuilder.reset();
     this.geometry.reset();
     this.buildingRects = [];
 
