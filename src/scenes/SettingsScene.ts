@@ -16,6 +16,11 @@ import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager'
  * Replaces manual layout with Sizer-based automatic positioning
  */
 
+/** Layout constants for SettingsScene scroll panels and spacing. */
+const SCROLLBAR_TRACK_COLOR = 0x555555;
+const SCROLLBAR_THUMB_COLOR = 0x888888;
+const GP_HORIZ_COOLDOWN_MS = 200;
+
 interface SettingsSceneData {
   returnTo?: string;
   levelIndex?: number;
@@ -171,10 +176,10 @@ export default class SettingsScene extends Phaser.Scene {
         const stickX = pad.leftStick?.x ?? 0;
         if (pad.left || stickX < -0.5) {
           this.focus.left();
-          this.gpHorizCooldown = 200;
+          this.gpHorizCooldown = GP_HORIZ_COOLDOWN_MS;
         } else if (pad.right || stickX > 0.5) {
           this.focus.right();
-          this.gpHorizCooldown = 200;
+          this.gpHorizCooldown = GP_HORIZ_COOLDOWN_MS;
         }
       }
     }
@@ -199,8 +204,8 @@ export default class SettingsScene extends Phaser.Scene {
       scrollMode: 'y',
       panel: { child: contentSizer },
       slider: needsScroll ? {
-        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
-        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
+        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, SCROLLBAR_TRACK_COLOR),
+        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, SCROLLBAR_THUMB_COLOR),
       } : false,
       mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
       space: { panel: needsScroll ? 5 : 0 },
@@ -557,7 +562,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     const container = this.add.container(0, 0);
     const track = this.add.graphics();
-    track.fillStyle(0x555555, 1);
+    track.fillStyle(SCROLLBAR_TRACK_COLOR, 1);
     track.fillRect(0, -trackHeight / 2, trackWidth, trackHeight);
     container.add(track);
 
