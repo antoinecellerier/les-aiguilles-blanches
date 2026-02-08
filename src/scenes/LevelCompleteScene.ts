@@ -41,6 +41,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private buttonCallbacks: (() => void)[] = [];
   private buttonIsCTA: boolean[] = [];
   private buttonNav!: MenuButtonNav;
+  private inputReady = false;
 
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
@@ -65,6 +66,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.menuButtons = [];
     this.buttonCallbacks = [];
     this.buttonIsCTA = [];
+    this.inputReady = false;
   }
 
   create(): void {
@@ -216,9 +218,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
     );
     this.input.keyboard?.on('keydown-LEFT', () => this.buttonNav.navigate(-1));
     this.input.keyboard?.on('keydown-RIGHT', () => this.buttonNav.navigate(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
-    this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
-    this.input.keyboard?.on('keydown-ESC', () => this.navigateTo('MenuScene'));
+    this.input.keyboard?.on('keydown-ENTER', () => { if (this.inputReady) this.buttonNav.activate(); });
+    this.input.keyboard?.on('keydown-SPACE', () => { if (this.inputReady) this.buttonNav.activate(); });
+    this.input.keyboard?.on('keydown-ESC', () => { if (this.inputReady) this.navigateTo('MenuScene'); });
     
     // Initialize selection
     this.buttonNav.refreshStyles();
@@ -229,8 +231,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
       onNavigate: (dir) => this.buttonNav.navigate(dir),
-      onConfirm: () => this.buttonNav.activate(),
-      onBack: () => this.navigateTo('MenuScene'),
+      onConfirm: () => { if (this.inputReady) this.buttonNav.activate(); },
+      onBack: () => { if (this.inputReady) this.navigateTo('MenuScene'); },
     });
     this.gamepadNav.initState();
 
@@ -238,6 +240,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.scale.on('resize', this.handleResize, this);
 
     Accessibility.announce(t(titleKey) + '. ' + t('coverage') + ' ' + this.coverage + '%');
+
+    // Delay accepting input to prevent held keys from prior scene from firing
+    this.inputReady = false;
+    this.time.delayedCall(300, () => { this.inputReady = true; });
   }
 
   private resizing = false;

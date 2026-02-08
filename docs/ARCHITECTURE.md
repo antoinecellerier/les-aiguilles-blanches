@@ -610,6 +610,7 @@ The utility stops all registered game scenes, removes them, re-adds fresh instan
 - Registration pattern in `main.ts` avoids circular imports between scenes and utility
 - Always pass explicit data to prevent stale `sys.settings.data` reuse
 - Uses `setTimeout(100ms)` to allow render frame to complete
+- **Must stop() before remove()**: Phaser's `remove()` calls `sys.destroy()` which does NOT call `shutdown()`. Without an explicit `stop()`, `game.events` listeners registered in `create()` leak and fire on the next scene instance
 
 ### Stale Scene Data (Critical)
 

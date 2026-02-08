@@ -47,10 +47,16 @@ export function resetGameScenes(
   // This prevents destroying scenes while their update() is still on the call stack
   // (e.g. HUDScene.update → skipLevel → emit SKIP_LEVEL → transitionToLevel → stop).
   setTimeout(() => {
-    // Remove all game scenes (order doesn't matter for removal)
+    // Stop then remove all game scenes.
+    // Stopping first ensures shutdown() runs, which cleans up game.events listeners.
+    // Phaser's remove() only calls destroy() — it does NOT call shutdown().
     for (const { key } of gameSceneEntries) {
       try {
-        if (game.scene.getScene(key)) {
+        const scene = game.scene.getScene(key);
+        if (scene) {
+          if (game.scene.isActive(key) || game.scene.isSleeping(key) || game.scene.isPaused(key)) {
+            game.scene.stop(key);
+          }
           game.scene.remove(key);
         }
       } catch {

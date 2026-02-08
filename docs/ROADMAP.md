@@ -39,6 +39,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Level loop fix** - Game looped between levels when pressing SPACE. Two causes: (1) `game.scene.remove()` doesn't call `shutdown()`, leaking `game.events` listeners — fixed by stopping scenes before removing in `resetGameScenes()`. (2) Held SPACE from prior scene immediately activated LevelCompleteScene buttons — fixed with 300ms input delay
+
 - ✅ **Game freeze fix** - Added `.active` guards on all HUD game objects, null-safe DialogueScene access, `isActive` guards on pauseGame/resumeGame, fixed skipLevel scene stop order. Removed unreliable `delayedCall(1)` wrapper for overlay scene launches. Winch slack cable no longer prevents steep slope slide. Removed useless below-zone anchors (levels 7-9). Dialogue tween race prevention
 
 - ✅ **Dialogue typewriter freeze fix** - ESC during dialogue typing simultaneously dismissed dialogue and paused game, causing stuck state. ESC/Start/pause button now dismiss dialogue first; pause only fires on next press. Added safety timeout and closure-captured text to prevent timer desync
