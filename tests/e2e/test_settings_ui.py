@@ -311,3 +311,37 @@ class TestSettingsContentBounds:
         small_fonts = [e for e in elements if e['fontSize'] > 0 and e['fontSize'] < 14]
         assert len(small_fonts) == 0, \
             f"Small fonts on narrow screen: {[e['text'] for e in small_fonts]}"
+
+
+class TestSettingsKeyboardNav:
+    """Test keyboard navigation through Settings."""
+
+    def test_arrow_keys_move_focus(self, settings_page: Page):
+        """Arrow keys should highlight settings items."""
+        settings_page.keyboard.press("ArrowDown")
+        settings_page.wait_for_timeout(100)
+
+        has_focus = settings_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('SettingsScene');
+            if (!scene) return false;
+            return scene.focusIndex >= 0 && scene.focusItems.length > 0;
+        }""")
+        assert has_focus, "Focus system should activate on ArrowDown"
+
+    def test_arrow_down_increments_focus(self, settings_page: Page):
+        """ArrowDown should advance to the next focus item."""
+        settings_page.keyboard.press("ArrowDown")
+        settings_page.wait_for_timeout(50)
+        settings_page.keyboard.press("ArrowDown")
+        settings_page.wait_for_timeout(50)
+
+        index = settings_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('SettingsScene');
+            return scene ? scene.focusIndex : -1;
+        }""")
+        assert index == 1, f"Expected focusIndex 1 after two ArrowDown, got {index}"
+
+    def test_escape_goes_back(self, settings_page: Page):
+        """Escape key should navigate back from Settings."""
+        settings_page.keyboard.press("Escape")
+        wait_for_scene(settings_page, 'MenuScene')

@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode, LEVELS } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
-import { isBackPressed, isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
+import { isBackPressed, isConfirmPressed, isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { createGamepadMenuNav } from '../utils/gamepadMenu';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -15,6 +16,7 @@ import { hasTouch as detectTouch } from '../utils/touchDetect';
 interface SettingsSceneData {
   returnTo?: string;
   levelIndex?: number;
+  focusIndex?: number;
 }
 
 interface KeyBindings {
@@ -28,6 +30,17 @@ interface KeyBindings {
 
 const BINDINGS_VERSION = 2;
 
+interface FocusItem {
+  element: Phaser.GameObjects.GameObject; // for scrolling into view
+  activate: () => void;
+  left?: () => void;
+  right?: () => void;
+  // Group items: array of button texts for visual highlight
+  buttons?: Phaser.GameObjects.Text[];
+  groupIndex?: number;
+  fixed?: boolean; // true for elements outside the scrollable panel
+}
+
 export default class SettingsScene extends Phaser.Scene {
   private returnTo: string | null = null;
   private levelIndex = 0;
@@ -37,6 +50,7 @@ export default class SettingsScene extends Phaser.Scene {
   private rebindButtons: Record<string, Phaser.GameObjects.Text> = {};
   private gamepadBindings: GamepadBindings = loadGamepadBindings();
   private rebindingGamepadAction: string | null = null;
+  private gamepadRebindSnapshot: Record<number, boolean> = {};
   private gamepadRebindButtons: Record<string, Phaser.GameObjects.Text> = {};
   private statusText: Phaser.GameObjects.Text | null = null;
   private mainSizer: any = null;
@@ -51,6 +65,14 @@ export default class SettingsScene extends Phaser.Scene {
   private useSingleColumn = false;
   private contentWidth = 300; // Available width for content
 
+  // Focus navigation
+  private focusItems: FocusItem[] = [];
+  private focusIndex = -1;
+  private pendingFocusIndex = -1;
+  private focusIndicator: Phaser.GameObjects.Graphics | null = null;
+  private gamepadNav: ReturnType<typeof createGamepadMenuNav> | null = null;
+  private gpHorizCooldown = 0;
+
   constructor() {
     super({ key: 'SettingsScene' });
   }
@@ -58,12 +80,16 @@ export default class SettingsScene extends Phaser.Scene {
   init(data: SettingsSceneData): void {
     this.returnTo = data?.returnTo || null;
     this.levelIndex = data?.levelIndex || 0;
+    this.pendingFocusIndex = data?.focusIndex ?? -1;
   }
 
   create(): void {
     const { width, height } = this.cameras.main;
     this.cameras.main.setBackgroundColor(THEME.colors.dialogBg);
     this.loadBindings();
+    this.focusItems = [];
+    this.focusIndex = -1;
+    this.lastGamepadName = '';
 
     // DPI-aware sizing (matches SettingsScene logic)
     this.dpr = window.devicePixelRatio || 1;
@@ -102,14 +128,42 @@ export default class SettingsScene extends Phaser.Scene {
     // Back button (fixed at bottom)
     this.createBackButton(width, height, padding);
 
-    // Keyboard input for rebinding
+    // Keyboard input for rebinding and navigation
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       if (this.rebindingAction) {
         this.finishRebind(event.keyCode, event.key, event.code);
-      } else if (event.code === 'Escape') {
-        this.goBack();
+        return;
+      }
+      if (this.rebindingGamepadAction) return;
+      switch (event.code) {
+        case 'Escape': this.goBack(); break;
+        case 'ArrowUp': event.preventDefault(); this.navigateFocus(-1); break;
+        case 'ArrowDown': event.preventDefault(); this.navigateFocus(1); break;
+        case 'ArrowLeft': event.preventDefault(); this.focusLeft(); break;
+        case 'ArrowRight': event.preventDefault(); this.focusRight(); break;
+        case 'Enter': case 'Space': event.preventDefault(); this.activateFocus(); break;
       }
     });
+
+    // Gamepad navigation
+    this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
+      onNavigate: (dir: number) => this.navigateFocus(dir),
+      onConfirm: () => this.activateFocus(),
+      onBack: () => this.goBack(),
+      isBlocked: () => !!this.rebindingAction || !!this.rebindingGamepadAction,
+    });
+    this.gamepadNav.initState();
+
+    // Focus indicator (drawn above everything)
+    this.focusIndicator = this.add.graphics();
+    this.focusIndicator.setDepth(1000);
+
+    // Restore focus position after restart (e.g., language/colorblind change)
+    if (this.pendingFocusIndex >= 0 && this.pendingFocusIndex < this.focusItems.length) {
+      this.focusIndex = this.pendingFocusIndex;
+      this.updateFocusIndicator();
+      this.scrollToFocused();
+    }
 
     // Handle resize
     this.scale.on('resize', this.handleResize, this);
@@ -119,13 +173,122 @@ export default class SettingsScene extends Phaser.Scene {
 
   private resizing = false;
 
+  private restartScene(): void {
+    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex, focusIndex: this.focusIndex });
+  }
+
   private handleResize(): void {
     if (this.resizing || !this.scene.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
-      this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+      this.restartScene();
       this.resizing = false;
     });
+  }
+
+  // ── Focus Navigation ──────────────────────────────────────────────
+
+  private navigateFocus(dir: number): void {
+    if (this.focusItems.length === 0) return;
+    if (this.focusIndex < 0) {
+      this.focusIndex = 0;
+    } else {
+      this.focusIndex = (this.focusIndex + dir + this.focusItems.length) % this.focusItems.length;
+    }
+    this.updateFocusIndicator();
+    this.scrollToFocused();
+  }
+
+  private focusLeft(): void {
+    const item = this.focusItems[this.focusIndex];
+    if (item?.left) item.left();
+  }
+
+  private focusRight(): void {
+    const item = this.focusItems[this.focusIndex];
+    if (item?.right) item.right();
+  }
+
+  private activateFocus(): void {
+    const item = this.focusItems[this.focusIndex];
+    if (item) item.activate();
+  }
+
+  private updateFocusIndicator(): void {
+    if (!this.focusIndicator) return;
+    this.focusIndicator.clear();
+    if (this.focusIndex < 0 || this.focusIndex >= this.focusItems.length) return;
+
+    const item = this.focusItems[this.focusIndex];
+    const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
+    if (!el?.getBounds) return;
+
+    const bounds = el.getBounds();
+
+    // Clip panel children that scrolled out of view, but not fixed elements
+    if (!item.fixed && this.mainSizer?.getBounds) {
+      const panel = this.mainSizer.getBounds();
+      if (bounds.y + bounds.height < panel.y || bounds.y > panel.y + panel.height) return;
+    }
+
+    this.focusIndicator.lineStyle(2, 0x87CEEB, 1);
+    this.focusIndicator.strokeRect(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
+  }
+
+  private scrollToFocused(): void {
+    if (!this.mainSizer || this.focusIndex < 0) return;
+    const item = this.focusItems[this.focusIndex];
+    const el = item.element as Phaser.GameObjects.Components.GetBounds & Phaser.GameObjects.GameObject;
+    if (!el?.getBounds) return;
+
+    const bounds = el.getBounds();
+    const panelBounds = this.mainSizer.getBounds();
+    if (!panelBounds) return;
+
+    // Scroll if element is outside visible panel area
+    const panelTop = panelBounds.y;
+    const panelBottom = panelBounds.y + panelBounds.height;
+
+    if (bounds.y < panelTop || bounds.y + bounds.height > panelBottom) {
+      // Estimate scroll position: fraction of content
+      const contentHeight = this.mainSizer.childOY !== undefined
+        ? Math.abs(this.mainSizer.minChildOY || 1)
+        : 1;
+      if (contentHeight > 0) {
+        const targetOY = -(bounds.y - panelTop - panelBounds.height / 3);
+        const clampedOY = Phaser.Math.Clamp(targetOY, this.mainSizer.minChildOY || -contentHeight, 0);
+        this.mainSizer.setChildOY(clampedOY);
+      }
+    }
+  }
+
+  update(_time: number, delta: number): void {
+    this.gamepadNav?.update(delta);
+    this.checkGamepadRebind();
+
+    // Gamepad left/right for group cycling & slider (separate from vertical nav)
+    this.gpHorizCooldown = Math.max(0, this.gpHorizCooldown - delta);
+    if (this.gpHorizCooldown <= 0 && !this.rebindingAction && !this.rebindingGamepadAction) {
+      const pad = this.input.gamepad?.getPad(0);
+      if (pad) {
+        const stickX = pad.leftStick?.x ?? 0;
+        if (pad.left || stickX < -0.5) {
+          this.focusLeft();
+          this.gpHorizCooldown = 200;
+        } else if (pad.right || stickX > 0.5) {
+          this.focusRight();
+          this.gpHorizCooldown = 200;
+        }
+      }
+    }
+
+    // Update gamepad name dynamically
+    if (this.gamepadNameText) {
+      this.updateGamepadName();
+    }
+
+    // Update focus indicator position (follows elements during scroll)
+    this.updateFocusIndicator();
   }
 
   private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
@@ -333,6 +496,12 @@ export default class SettingsScene extends Phaser.Scene {
     resetBtn.on('pointerdown', () => this.resetBindings());
     sizer.add(resetBtn, { align: 'left' });
 
+    // Register reset button focus item
+    this.focusItems.push({
+      element: resetBtn,
+      activate: () => this.resetBindings(),
+    });
+
     // Input hints
     const hasTouchSetting = detectTouch();
     const inputHints: string[] = [];
@@ -356,6 +525,13 @@ export default class SettingsScene extends Phaser.Scene {
     backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHoverHex }));
     backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHex }));
     backBtn.on('pointerdown', () => this.goBack());
+
+    // Register back button focus item (always last)
+    this.focusItems.push({
+      element: backBtn,
+      activate: () => this.goBack(),
+      fixed: true,
+    });
   }
 
   // === UI Element Factory Methods ===
@@ -398,6 +574,7 @@ export default class SettingsScene extends Phaser.Scene {
       { code: 'es', name: '🇪🇸' },
     ];
     const currentLang = getLanguage();
+    const langButtons: Phaser.GameObjects.Text[] = [];
     
     languages.forEach(lang => {
       const isActive = currentLang === lang.code;
@@ -411,8 +588,28 @@ export default class SettingsScene extends Phaser.Scene {
         padding: { x: paddingX, y: paddingY },
       }).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.setLang(lang.code));
+      langButtons.push(btn);
       row.add(btn);
     });
+
+    // Register as a group focus item
+    const currentIndex = languages.findIndex(l => l.code === currentLang);
+    const groupIndex = { value: Math.max(0, currentIndex) };
+    this.focusItems.push({
+      element: row,
+      buttons: langButtons,
+      groupIndex: groupIndex.value,
+      activate: () => this.setLang(languages[groupIndex.value].code),
+      left: () => {
+        groupIndex.value = (groupIndex.value - 1 + languages.length) % languages.length;
+        this.setLang(languages[groupIndex.value].code);
+      },
+      right: () => {
+        groupIndex.value = (groupIndex.value + 1) % languages.length;
+        this.setLang(languages[groupIndex.value].code);
+      },
+    });
+
     return row;
   }
 
@@ -435,7 +632,7 @@ export default class SettingsScene extends Phaser.Scene {
     }).setInteractive({ useHandCursor: true });
 
     let value = initialValue;
-    btn.on('pointerdown', () => {
+    const toggle = () => {
       value = !value;
       btn.setText(value ? t('on') : t('off'));
       btn.setStyle({
@@ -444,8 +641,15 @@ export default class SettingsScene extends Phaser.Scene {
       });
       onChange(value);
       this.mainSizer?.layout();
-    });
+    };
+    btn.on('pointerdown', toggle);
     
+    // Register focus item
+    this.focusItems.push({
+      element: row,
+      activate: toggle,
+    });
+
     row.add(btn);
     return row;
   }
@@ -535,6 +739,25 @@ export default class SettingsScene extends Phaser.Scene {
     container.setSize(trackWidth, thumbSize);
     wrapper.add(container, { align: 'left' });
 
+    // Register focus item with left/right adjustment
+    const STEP = 0.05;
+    this.focusItems.push({
+      element: wrapper,
+      activate: () => {},
+      left: () => {
+        value = Math.max(MIN, Math.round((value - STEP) * 20) / 20);
+        drawThumb(valToT(value));
+        valueText.setText(Math.round(value * 100) + '%');
+        localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+      },
+      right: () => {
+        value = Math.min(MAX, Math.round((value + STEP) * 20) / 20);
+        drawThumb(valToT(value));
+        valueText.setText(Math.round(value * 100) + '%');
+        localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+      },
+    });
+
     return wrapper;
   }
 
@@ -546,7 +769,40 @@ export default class SettingsScene extends Phaser.Scene {
       width: this.contentWidth,
       space: { item: 4, line: 4 }
     });
-    cbModes.forEach(mode => container.add(this.createColorblindBtn(mode)));
+    const cbButtons: Phaser.GameObjects.Text[] = [];
+    cbModes.forEach(mode => {
+      const btn = this.createColorblindBtn(mode);
+      cbButtons.push(btn);
+      container.add(btn);
+    });
+
+    // Register as group focus item
+    const currentMode = Accessibility.settings.colorblindMode;
+    const currentIdx = cbModes.indexOf(currentMode);
+    const groupIndex = { value: Math.max(0, currentIdx) };
+    this.focusItems.push({
+      element: container,
+      buttons: cbButtons,
+      groupIndex: groupIndex.value,
+      activate: () => {
+        Accessibility.settings.colorblindMode = cbModes[groupIndex.value];
+        Accessibility.saveSettings();
+        this.restartScene();
+      },
+      left: () => {
+        groupIndex.value = (groupIndex.value - 1 + cbModes.length) % cbModes.length;
+        Accessibility.settings.colorblindMode = cbModes[groupIndex.value];
+        Accessibility.saveSettings();
+        this.restartScene();
+      },
+      right: () => {
+        groupIndex.value = (groupIndex.value + 1) % cbModes.length;
+        Accessibility.settings.colorblindMode = cbModes[groupIndex.value];
+        Accessibility.saveSettings();
+        this.restartScene();
+      },
+    });
+
     return container;
   }
 
@@ -565,7 +821,7 @@ export default class SettingsScene extends Phaser.Scene {
       .on('pointerdown', () => {
         Accessibility.settings.colorblindMode = mode;
         Accessibility.saveSettings();
-        this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+        this.restartScene();
       });
   }
 
@@ -595,6 +851,13 @@ export default class SettingsScene extends Phaser.Scene {
     
     this.rebindButtons[actionId] = btn;
     row.add(btn);
+
+    // Register focus item
+    this.focusItems.push({
+      element: row,
+      activate: () => this.startRebind(actionId, btn),
+    });
+
     return row;
   }
 
@@ -623,6 +886,13 @@ export default class SettingsScene extends Phaser.Scene {
 
     this.gamepadRebindButtons[actionId] = btn;
     row.add(btn);
+
+    // Register focus item
+    this.focusItems.push({
+      element: row,
+      activate: () => this.startGamepadRebind(actionId, btn),
+    });
+
     return row;
   }
 
@@ -641,8 +911,11 @@ export default class SettingsScene extends Phaser.Scene {
 
     if (hasCustomBindings) {
       row.add(this.createText(t('customBindings') || 'Custom', this.smallFont, THEME.colors.accent));
+      // No navigation for custom mode
+      this.focusItems.push({ element: row, activate: () => {} });
     } else {
       const currentLayout = getKeyboardLayout();
+      const layoutButtons: Phaser.GameObjects.Text[] = [];
       AVAILABLE_LAYOUTS.forEach(layout => {
         const isActive = currentLayout === layout.id;
         const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
@@ -654,7 +927,26 @@ export default class SettingsScene extends Phaser.Scene {
           padding: { x: Math.round(paddingY * 2), y: paddingY },
         }).setInteractive({ useHandCursor: true })
           .on('pointerdown', () => this.setLayout(layout.id));
+        layoutButtons.push(btn);
         row.add(btn);
+      });
+
+      // Register as group focus item
+      const currentIdx = AVAILABLE_LAYOUTS.findIndex(l => l.id === currentLayout);
+      const groupIndex = { value: Math.max(0, currentIdx) };
+      this.focusItems.push({
+        element: row,
+        buttons: layoutButtons,
+        groupIndex: groupIndex.value,
+        activate: () => this.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id),
+        left: () => {
+          groupIndex.value = (groupIndex.value - 1 + AVAILABLE_LAYOUTS.length) % AVAILABLE_LAYOUTS.length;
+          this.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
+        },
+        right: () => {
+          groupIndex.value = (groupIndex.value + 1) % AVAILABLE_LAYOUTS.length;
+          this.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
+        },
       });
     }
     return row;
@@ -760,7 +1052,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.rebindingAction = null;
     this.statusText?.setText(t('saved') || 'Saved!');
     this.mainSizer?.layout();
-    this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
+    this.time.delayedCall(800, () => this.restartScene());
   }
 
   private cancelRebind(): void {
@@ -780,6 +1072,8 @@ export default class SettingsScene extends Phaser.Scene {
       return;
     }
     this.rebindingGamepadAction = actionId;
+    // Snapshot current button state so the confirm press isn't immediately captured
+    this.gamepadRebindSnapshot = captureGamepadButtons(this, Array.from({ length: 16 }, (_, i) => i));
     btn.setText('...');
     btn.setStyle({ backgroundColor: '#5a5a2d' });
     this.statusText?.setText(t('pressGamepadButton') || 'Press a gamepad button...');
@@ -793,15 +1087,16 @@ export default class SettingsScene extends Phaser.Scene {
     const pad = this.input.gamepad.getPad(0);
     if (!pad) return;
 
-    // Check all standard buttons for a press (including trigger-axis fallback).
-    // Use Math.max to ensure trigger indices 6,7 are checked even if
-    // the browser reports fewer buttons (Firefox axes-only triggers).
     const maxBtn = Math.min(Math.max(pad.buttons.length, 8), 16);
     for (let i = 0; i < maxBtn; i++) {
-      if (isGamepadButtonPressed(pad, i)) {
+      const now = isGamepadButtonPressed(pad, i);
+      const was = this.gamepadRebindSnapshot[i] ?? false;
+      // Only accept a fresh press (not-pressed → pressed)
+      if (now && !was) {
         this.acceptGamepadRebind(i);
         return;
       }
+      this.gamepadRebindSnapshot[i] = now;
     }
   }
 
@@ -819,7 +1114,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.rebindingGamepadAction = null;
     this.statusText?.setText(t('saved') || 'Saved!');
     this.mainSizer?.layout();
-    this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
+    this.time.delayedCall(800, () => this.restartScene());
   }
 
   private resetBindings(): void {
@@ -830,7 +1125,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.gamepadBindings = getDefaultGamepadBindings();
     saveGamepadBindings(this.gamepadBindings);
     this.statusText?.setText(t('controlsReset') || 'Controls reset!');
-    this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
+    this.time.delayedCall(800, () => this.restartScene());
   }
 
   private setLayout(layout: KeyboardLayout): void {
@@ -838,12 +1133,12 @@ export default class SettingsScene extends Phaser.Scene {
     this.bindings = this.getDefaultBindings();
     this.displayNames = {};
     this.saveBindings();
-    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+    this.restartScene();
   }
 
   private setLang(code: SupportedLanguage): void {
     setLanguage(code);
-    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex });
+    this.restartScene();
   }
 
   private goBack(): void {
@@ -868,8 +1163,6 @@ export default class SettingsScene extends Phaser.Scene {
       this.scene.start('MenuScene');
     }
   }
-
-  private gamepadBPressed = false;
 
   private updateGamepadName(): void {
     if (!this.gamepadNameText) return;
@@ -900,28 +1193,13 @@ export default class SettingsScene extends Phaser.Scene {
     }
   }
 
-  update(): void {
-    // Check for gamepad rebinding input
-    this.checkGamepadRebind();
-
-    // Gamepad B button to go back (handles Nintendo swap)
-    if (!this.rebindingGamepadAction && this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) {
-        const backPressed = isBackPressed(pad);
-        if (backPressed && !this.gamepadBPressed) {
-          this.goBack();
-        }
-        this.gamepadBPressed = backPressed;
-      }
-    }
-    
-    // Update gamepad name display
-    this.updateGamepadName();
-  }
-
   shutdown(): void {
     this.input.keyboard?.removeAllListeners();
+    this.input.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
+    this.focusIndicator?.destroy();
+    this.focusIndicator = null;
+    this.focusItems = [];
+    this.focusIndex = -1;
   }
 }

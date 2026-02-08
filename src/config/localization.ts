@@ -221,6 +221,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
         
         // Changelog
+        changelog_20260211_date: '11 février 2026',
+        changelog_20260211: '🎮 Navigation clavier/manette dans les paramètres\n🎚️ Réglage de sensibilité du mouvement (25%–200%)',
         changelog_20260210_date: '10 février 2026',
         changelog_20260210: '📱 Cibles tactiles agrandies (pause, plein écran, passer)\n🌙 Correction de la surcouche nuit lors du basculement plein écran\n🔄 Redimensionnement correct des dialogues, pause et crédits\n📐 Menu pause responsive sur tous les formats',
         changelog_20260209_date: '9 février 2026',
@@ -445,6 +447,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
         
         // Changelog
+        changelog_20260211_date: 'February 11, 2026',
+        changelog_20260211: '🎮 Keyboard & gamepad navigation in Settings\n🎚️ Movement sensitivity setting (25%–200%)',
         changelog_20260210_date: 'February 10, 2026',
         changelog_20260210: '📱 Larger touch targets (pause, fullscreen, skip)\n🌙 Night overlay fix on fullscreen toggle\n🔄 Dialogue, pause and credits resize correctly\n📐 Responsive pause menu on all form factors',
         changelog_20260209_date: 'February 9, 2026',
@@ -635,6 +639,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
         
         // Changelog
+        changelog_20260211_date: '11. Februar 2026',
+        changelog_20260211: '🎮 Tastatur- & Gamepad-Navigation in den Einstellungen\n🎚️ Bewegungsempfindlichkeit (25%–200%)',
         changelog_20260210_date: '10. Februar 2026',
         changelog_20260210: '📱 Größere Touch-Ziele (Pause, Vollbild, Überspringen)\n🌙 Nacht-Overlay bei Vollbildwechsel korrigiert\n🔄 Dialog, Pause und Credits passen sich bei Größenänderung an\n📐 Responsives Pause-Menü für alle Bildschirmformate',
         changelog_20260209_date: '9. Februar 2026',
@@ -856,6 +862,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
         
         // Changelog
+        changelog_20260211_date: '11 febbraio 2026',
+        changelog_20260211: '🎮 Navigazione tastiera e gamepad nelle impostazioni\n🎚️ Sensibilità del movimento (25%–200%)',
         changelog_20260210_date: '10 febbraio 2026',
         changelog_20260210: '📱 Aree touch più grandi (pausa, schermo intero, salta)\n🌙 Correzione overlay notturno al cambio schermo intero\n🔄 Dialoghi, pausa e crediti si ridimensionano correttamente\n📐 Menu pausa responsive su tutti i formati',
         changelog_20260209_date: '9 febbraio 2026',
@@ -1077,6 +1085,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
         
         // Changelog
+        changelog_20260211_date: '11 de febrero de 2026',
+        changelog_20260211: '🎮 Navegación por teclado y mando en los ajustes\n🎚️ Sensibilidad del movimiento (25%–200%)',
         changelog_20260210_date: '10 de febrero de 2026',
         changelog_20260210: '📱 Áreas táctiles más grandes (pausa, pantalla completa, saltar)\n🌙 Corrección de la capa nocturna al cambiar a pantalla completa\n🔄 Diálogos, pausa y créditos se redimensionan correctamente\n📐 Menú de pausa responsive en todos los formatos',
         changelog_20260209_date: '9 de febrero de 2026',

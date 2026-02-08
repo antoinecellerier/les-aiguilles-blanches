@@ -38,10 +38,14 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
+- [ ] Menu wildlife flees on multitouch inputs (currently only single pointer triggers flee)
 - [x] Movement sensitivity setting - Continuous slider (25%–200%) in SettingsScene, saved to localStorage, applied as speed multiplier
 - [x] Hide gamepad button hints in dialogues when no controller is connected
+- [x] Settings keyboard/gamepad navigation - Full focus system for all 17 interactive elements, arrow keys + D-pad, Enter/A to activate, left/right for groups/slider
 
 ## Recently Completed
+
+- ✅ **Settings keyboard & gamepad navigation** - FocusItem system with 17 navigable elements (language group, toggles, bindings, layout group, sensitivity slider, gamepad bindings, reset, back). Arrow/D-pad up/down navigates, left/right cycles groups and adjusts slider. Focus indicator with auto-scroll and panel clipping. Gamepad left/right handled with separate cooldown from vertical nav.
 
 - ✅ **Smart test runner** - `run-tests.sh --smart` runs only tests affected by uncommitted changes. Unit tests use `vitest --changed HEAD`; E2E uses file-level selection with `test_navigation.py` as catch-all.
 
