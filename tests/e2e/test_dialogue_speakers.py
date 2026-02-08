@@ -4,7 +4,7 @@ Validates that each level intro shows the correct character name and portrait.
 """
 import pytest
 from playwright.sync_api import Page
-from conftest import wait_for_scene, skip_to_level, wait_for_game_ready
+from conftest import wait_for_scene, skip_to_level
 
 
 # Expected speaker for each level's intro dialogue
@@ -38,6 +38,16 @@ def wait_for_dialogue(page: Page, timeout: int = 5000):
         const ds = window.game?.scene?.getScene('DialogueScene');
         return ds && ds.isDialogueShowing && ds.isDialogueShowing();
     }""", timeout=timeout)
+
+
+def clear_dialogue_queue(page: Page):
+    """Force-clear dialogue queue and hide, even if no dialogue is currently showing."""
+    page.evaluate("""() => {
+        const ds = window.game?.scene?.getScene('DialogueScene');
+        if (ds && ds.dialogueQueue) ds.dialogueQueue = [];
+        if (ds && ds.hideDialogue) ds.hideDialogue();
+    }""")
+    page.wait_for_timeout(200)
 
 
 def start_game(page: Page):
@@ -103,12 +113,7 @@ class TestDialogueSpeakers:
         
         # Dismiss any intro dialogue first
         game_page.wait_for_timeout(1000)
-        game_page.evaluate("""() => {
-            const ds = window.game?.scene?.getScene('DialogueScene');
-            if (ds && ds.dialogueQueue) ds.dialogueQueue = [];
-            if (ds && ds.hideDialogue) ds.hideDialogue();
-        }""")
-        game_page.wait_for_timeout(200)
+        clear_dialogue_queue(game_page)
         
         # Trigger a system dialogue directly
         game_page.evaluate("""() => {
@@ -128,12 +133,7 @@ class TestDialogueSpeakers:
         
         # Dismiss any intro dialogue first
         game_page.wait_for_timeout(1000)
-        game_page.evaluate("""() => {
-            const ds = window.game?.scene?.getScene('DialogueScene');
-            if (ds && ds.dialogueQueue) ds.dialogueQueue = [];
-            if (ds && ds.hideDialogue) ds.hideDialogue();
-        }""")
-        game_page.wait_for_timeout(200)
+        clear_dialogue_queue(game_page)
         
         # Trigger avalancheWarning directly (no explicit speaker)
         game_page.evaluate("""() => {

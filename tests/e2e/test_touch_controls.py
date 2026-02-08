@@ -9,6 +9,9 @@ from playwright.sync_api import Page, expect
 # Import the base URL from conftest
 from conftest import GAME_URL, skip_to_level, dismiss_dialogues, wait_for_scene, wait_for_game_ready
 
+# Standard mobile viewport sizes
+IPHONE_PORTRAIT = {"width": 390, "height": 844}
+IPHONE_LANDSCAPE = {"width": 844, "height": 390}
 
 def click_start_button(page: Page):
     """Click the Start Game button by querying its position from the game scene."""
@@ -33,7 +36,7 @@ def click_start_button(page: Page):
 def touch_page(page: Page):
     """Configure page to emulate a touch device."""
     # Emulate iPhone 12 touch device with touch capability
-    page.set_viewport_size({"width": 390, "height": 844})
+    page.set_viewport_size(IPHONE_PORTRAIT)
     
     # Inject touch capability detection
     page.add_init_script("""
@@ -186,7 +189,7 @@ def test_touch_groom_button(touch_page: Page):
             timeout=3000
         )
     except TimeoutError:
-        pass  # Coverage may not change if touch simulation doesn't trigger grooming
+        pass  # OK — coverage assertion below handles both paths
     
     # Release
     touch_page.evaluate("""
@@ -283,13 +286,13 @@ class TestOrientationChanges:
 
     def test_portrait_to_landscape_resize(self, page: Page):
         """Game should resize when switching from portrait to landscape."""
-        page.set_viewport_size({"width": 390, "height": 844})
+        page.set_viewport_size(IPHONE_PORTRAIT)
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
         wait_for_game_ready(page)
         
         # Switch to landscape and wait for resize to propagate
-        page.set_viewport_size({"width": 844, "height": 390})
+        page.set_viewport_size(IPHONE_LANDSCAPE)
         page.wait_for_timeout(100)
         page.evaluate("() => window.resizeGame?.()")
         page.wait_for_function(
@@ -299,13 +302,13 @@ class TestOrientationChanges:
 
     def test_landscape_to_portrait_resize(self, page: Page):
         """Game should resize when switching from landscape to portrait."""
-        page.set_viewport_size({"width": 844, "height": 390})
+        page.set_viewport_size(IPHONE_LANDSCAPE)
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
         wait_for_game_ready(page)
         
         # Switch to portrait and wait for resize to propagate
-        page.set_viewport_size({"width": 390, "height": 844})
+        page.set_viewport_size(IPHONE_PORTRAIT)
         page.wait_for_timeout(100)
         page.evaluate("() => window.resizeGame?.()")
         page.wait_for_function(
@@ -316,7 +319,7 @@ class TestOrientationChanges:
     def test_game_playable_after_orientation_change(self, page: Page):
         """Game should remain playable after orientation change."""
         # Start in portrait
-        page.set_viewport_size({"width": 390, "height": 844})
+        page.set_viewport_size(IPHONE_PORTRAIT)
         page.goto(GAME_URL)
         page.wait_for_selector("canvas", timeout=10000)
         wait_for_game_ready(page)
@@ -337,7 +340,7 @@ class TestOrientationChanges:
         assert 'GameScene' in scenes_before, "GameScene should be active before orientation change"
         
         # Change orientation
-        page.set_viewport_size({"width": 844, "height": 390})
+        page.set_viewport_size(IPHONE_LANDSCAPE)
         page.wait_for_timeout(100)
         
         # Verify game is still running
@@ -410,7 +413,7 @@ class TestOrientationChanges:
     def test_hud_relayout_on_orientation_change(self, game_page: Page):
         """HUD should relayout correctly when simulating orientation change."""
         # Start in portrait phone dimensions
-        game_page.set_viewport_size({"width": 390, "height": 844})
+        game_page.set_viewport_size(IPHONE_PORTRAIT)
         game_page.evaluate("() => window.resizeGame?.()")
         game_page.wait_for_timeout(100)
 
@@ -419,7 +422,7 @@ class TestOrientationChanges:
         dismiss_dialogues(game_page)
 
         # Rotate to landscape
-        game_page.set_viewport_size({"width": 844, "height": 390})
+        game_page.set_viewport_size(IPHONE_LANDSCAPE)
         game_page.evaluate("() => window.resizeGame?.()")
 
         # Wait for HUD to relayout within landscape viewport bounds

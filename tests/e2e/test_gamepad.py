@@ -69,6 +69,22 @@ def release_gamepad_button(page: Page, button_index: int):
     }}""")
 
 
+def tap_gamepad_button(page: Page, button_index: int, delay: int = 100):
+    """Press and release a gamepad button with a short delay."""
+    press_gamepad_button(page, button_index)
+    page.wait_for_timeout(delay)
+    release_gamepad_button(page, button_index)
+
+
+def navigate_stick_down(page: Page, steps: int = 3):
+    """Navigate down N steps using left stick pulses (for menu navigation)."""
+    for _ in range(steps):
+        set_gamepad_stick(page, 'left', 0, 0.8)
+        page.wait_for_timeout(50)
+        set_gamepad_stick(page, 'left', 0, 0)
+        page.wait_for_timeout(250)
+
+
 def set_gamepad_stick(page: Page, stick: str, x: float, y: float):
     """Set left or right stick position (-1 to 1)."""
     if stick == 'left':
@@ -134,10 +150,7 @@ class TestGamepadMenuNavigation:
 
     def test_a_button_starts_game(self, gamepad_page: Page):
         """Test A button (index 0) starts game from menu."""
-        # Press and release A button
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
         
         # Should transition to GameScene
         wait_for_scene(gamepad_page, 'GameScene', timeout=3000)
@@ -145,12 +158,7 @@ class TestGamepadMenuNavigation:
     def test_b_button_in_settings_goes_back(self, gamepad_page: Page):
         """Test B button goes back from settings."""
         # Navigate to settings: Start(0) -> HowToPlay(1) -> Changelog(2) -> Settings(3)
-        # Use quick pulses to avoid multiple navigations per pulse
-        for _ in range(3):
-            set_gamepad_stick(gamepad_page, 'left', 0, 0.8)
-            gamepad_page.wait_for_timeout(50)  # Very short pulse
-            set_gamepad_stick(gamepad_page, 'left', 0, 0)
-            gamepad_page.wait_for_timeout(250)  # Wait for cooldown to reset
+        navigate_stick_down(gamepad_page, 3)
         
         # Verify we're on Settings (index 3)
         selected = gamepad_page.evaluate(
@@ -159,16 +167,12 @@ class TestGamepadMenuNavigation:
         assert selected == 3, f"Should be on Settings (index 3), got {selected}"
         
         # Press A to enter settings
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(150)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0, delay=150)
         
         wait_for_scene(gamepad_page, 'SettingsScene', timeout=3000)
         
         # Press B to go back
-        press_gamepad_button(gamepad_page, 1)
-        gamepad_page.wait_for_timeout(150)
-        release_gamepad_button(gamepad_page, 1)
+        tap_gamepad_button(gamepad_page, 1, delay=150)
         
         wait_for_scene(gamepad_page, 'MenuScene', timeout=3000)
 
@@ -179,9 +183,7 @@ class TestGamepadGameplay:
     def test_start_button_pauses_game(self, gamepad_page: Page):
         """Test Start button (index 9) pauses the game."""
         # Start game first
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
         
@@ -189,18 +191,14 @@ class TestGamepadGameplay:
         dismiss_dialogues(gamepad_page)
         
         # Press Start to pause
-        press_gamepad_button(gamepad_page, 9)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 9)
+        tap_gamepad_button(gamepad_page, 9)
         
         wait_for_scene(gamepad_page, 'PauseScene', timeout=2000)
 
     def test_a_button_dismisses_dialogue(self, gamepad_page: Page):
         """Test A button advances dialogue."""
         # Start game
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
         
@@ -211,9 +209,7 @@ class TestGamepadGameplay:
         }""", timeout=3000)
         
         # Press A to dismiss
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(150)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0, delay=150)
         gamepad_page.wait_for_timeout(300)
         
         # Verify game is still active (didn't crash or go back to menu)
@@ -243,10 +239,7 @@ class TestNintendoControllerSwap:
     def test_nintendo_a_button_confirms(self, nintendo_page: Page):
         """On Nintendo, physical A button (index 1) should confirm."""
         # On Nintendo, A is at button index 1 (east position)
-        # The game should now use button 1 for confirm on Nintendo
-        press_gamepad_button(nintendo_page, 1)  # Nintendo A = index 1
-        nintendo_page.wait_for_timeout(100)
-        release_gamepad_button(nintendo_page, 1)
+        tap_gamepad_button(nintendo_page, 1)  # Nintendo A = index 1
         
         # Should start game (confirm action)
         wait_for_scene(nintendo_page, 'GameScene', timeout=3000)
@@ -254,23 +247,15 @@ class TestNintendoControllerSwap:
     def test_nintendo_b_button_goes_back(self, nintendo_page: Page):
         """On Nintendo, physical B button (index 0) should go back."""
         # First enter settings (index 3)
-        for _ in range(3):
-            set_gamepad_stick(nintendo_page, 'left', 0, 0.8)
-            nintendo_page.wait_for_timeout(50)
-            set_gamepad_stick(nintendo_page, 'left', 0, 0)
-            nintendo_page.wait_for_timeout(250)
+        navigate_stick_down(nintendo_page, 3)
         
         # Confirm with Nintendo A (index 1)
-        press_gamepad_button(nintendo_page, 1)
-        nintendo_page.wait_for_timeout(150)
-        release_gamepad_button(nintendo_page, 1)
+        tap_gamepad_button(nintendo_page, 1, delay=150)
         
         wait_for_scene(nintendo_page, 'SettingsScene', timeout=3000)
         
         # Go back with Nintendo B (index 0)
-        press_gamepad_button(nintendo_page, 0)  # Nintendo B = index 0
-        nintendo_page.wait_for_timeout(150)
-        release_gamepad_button(nintendo_page, 0)
+        tap_gamepad_button(nintendo_page, 0, delay=150)  # Nintendo B = index 0
         
         wait_for_scene(nintendo_page, 'MenuScene', timeout=3000)
 
@@ -297,10 +282,7 @@ class TestPlayStationController:
 
     def test_playstation_cross_button_confirms(self, playstation_page: Page):
         """On PlayStation, Cross button (index 0) should confirm."""
-        # PlayStation Cross = button index 0 (same as Xbox A)
-        press_gamepad_button(playstation_page, 0)
-        playstation_page.wait_for_timeout(100)
-        release_gamepad_button(playstation_page, 0)
+        tap_gamepad_button(playstation_page, 0)
         
         # Should start game (confirm action)
         wait_for_scene(playstation_page, 'GameScene', timeout=3000)
@@ -308,23 +290,15 @@ class TestPlayStationController:
     def test_playstation_circle_button_goes_back(self, playstation_page: Page):
         """On PlayStation, Circle button (index 1) should go back."""
         # First enter settings (index 3)
-        for _ in range(3):
-            set_gamepad_stick(playstation_page, 'left', 0, 0.8)
-            playstation_page.wait_for_timeout(50)
-            set_gamepad_stick(playstation_page, 'left', 0, 0)
-            playstation_page.wait_for_timeout(250)
+        navigate_stick_down(playstation_page, 3)
         
         # Confirm with Cross (index 0)
-        press_gamepad_button(playstation_page, 0)
-        playstation_page.wait_for_timeout(150)
-        release_gamepad_button(playstation_page, 0)
+        tap_gamepad_button(playstation_page, 0, delay=150)
         
         wait_for_scene(playstation_page, 'SettingsScene', timeout=3000)
         
         # Go back with Circle (index 1)
-        press_gamepad_button(playstation_page, 1)
-        playstation_page.wait_for_timeout(150)
-        release_gamepad_button(playstation_page, 1)
+        tap_gamepad_button(playstation_page, 1, delay=150)
         
         wait_for_scene(playstation_page, 'MenuScene', timeout=3000)
 
@@ -335,9 +309,7 @@ class TestGamepadDialogueDismiss:
     def test_b_button_dismisses_dialogue(self, gamepad_page: Page):
         """B button should dismiss all dialogue (like ESC)."""
         # Start game
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
         
@@ -348,9 +320,7 @@ class TestGamepadDialogueDismiss:
         }""", timeout=5000)
         
         # Press B (button 1) to dismiss
-        press_gamepad_button(gamepad_page, 1)
-        gamepad_page.wait_for_timeout(150)
-        release_gamepad_button(gamepad_page, 1)
+        tap_gamepad_button(gamepad_page, 1, delay=150)
         gamepad_page.wait_for_timeout(300)
         
         # Dialogue should be dismissed
@@ -368,9 +338,7 @@ class TestGamepadSelectSkip:
     def test_select_button_skips_level(self, gamepad_page: Page):
         """Select button (button 8) should skip to next level."""
         # Start game
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
         gamepad_page.wait_for_timeout(1000)
@@ -382,9 +350,7 @@ class TestGamepadSelectSkip:
         }""")
         
         # Press Select (button 8)
-        press_gamepad_button(gamepad_page, 8)
-        gamepad_page.wait_for_timeout(150)
-        release_gamepad_button(gamepad_page, 8)
+        tap_gamepad_button(gamepad_page, 8, delay=150)
         gamepad_page.wait_for_timeout(1000)
         
         # Level should have advanced
@@ -400,9 +366,7 @@ class TestGamepadSelectSkip:
     def test_held_select_does_not_double_skip(self, gamepad_page: Page):
         """Holding Select across a level skip should not skip the next level too."""
         # Start game
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
 
         wait_for_scene(gamepad_page, 'GameScene')
         gamepad_page.wait_for_timeout(1000)
@@ -437,18 +401,14 @@ class TestDialoguePlaceholders:
     def test_groom_key_placeholder_resolves(self, gamepad_page: Page):
         """Dialogue text should show actual key names, not raw {groomKey}."""
         # Start game
-        press_gamepad_button(gamepad_page, 0)
-        gamepad_page.wait_for_timeout(100)
-        release_gamepad_button(gamepad_page, 0)
+        tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
         gamepad_page.wait_for_timeout(2000)
         
         # Advance to groom tutorial dialogue
         for _ in range(10):
-            press_gamepad_button(gamepad_page, 0)
-            gamepad_page.wait_for_timeout(100)
-            release_gamepad_button(gamepad_page, 0)
+            tap_gamepad_button(gamepad_page, 0)
             gamepad_page.wait_for_timeout(400)
             
             # Check if current dialogue contains groom key info
