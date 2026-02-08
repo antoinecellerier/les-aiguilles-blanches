@@ -97,9 +97,6 @@ export default class SettingsScene extends Phaser.Scene {
     // Available width for content (used by fixWidthSizers to know when to wrap)
     this.contentWidth = width - padding * 2;
 
-    // Create scrollable panel for content
-    const contentHeight = height * 0.85; // Reserve space for back button
-    
     if (this.useSingleColumn) {
       this.createSingleColumnLayout(width, height, padding, itemSpacing);
     } else {
@@ -191,6 +188,30 @@ export default class SettingsScene extends Phaser.Scene {
     this.focus.updateIndicator();
   }
 
+  /** Wrap a content sizer in a scrollable panel with conditional scrollbar. */
+  private wrapInScrollPanel(contentSizer: any, x: number, y: number, panelWidth: number, availableHeight: number): void {
+    contentSizer.layout();
+    const contentHeight = contentSizer.height;
+    const needsScroll = contentHeight > availableHeight;
+
+    this.mainSizer = this.rexUI.add.scrollablePanel({
+      x, y, width: panelWidth, height: availableHeight, origin: 0,
+      scrollMode: 'y',
+      panel: { child: contentSizer },
+      slider: needsScroll ? {
+        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
+        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
+      } : false,
+      mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
+      space: { panel: needsScroll ? 5 : 0 },
+    }).layout();
+
+    if (needsScroll) {
+      this.mainSizer.setChildrenInteractive();
+    }
+    this.focus.setScrollPanel(this.mainSizer);
+  }
+
   private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
     // Single scrollable column for narrow/portrait screens
     // Reserve space for back button at bottom
@@ -224,33 +245,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
     contentSizer.add(this.statusText, { align: 'center' });
 
-    // Layout content to measure height
-    contentSizer.layout();
-    const contentHeight = contentSizer.height;
-    const needsScroll = contentHeight > availableHeight;
-
-    // Wrap in scrollable panel
-    this.mainSizer = this.rexUI.add.scrollablePanel({
-      x: padding,
-      y: padding,
-      width: sizerWidth,
-      height: availableHeight,
-      origin: 0,
-      scrollMode: 'y',
-      panel: { child: contentSizer },
-      slider: needsScroll ? {
-        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
-        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
-      } : false,
-      mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
-      space: { panel: needsScroll ? 5 : 0 },
-    }).layout();
-
-    // Enable touch/mouse scrolling only if needed
-    if (needsScroll) {
-      this.mainSizer.setChildrenInteractive();
-    }
-    this.focus.setScrollPanel(this.mainSizer);
+    this.wrapInScrollPanel(contentSizer, padding, padding, sizerWidth, availableHeight);
   }
 
   private createTwoColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
@@ -297,34 +292,8 @@ export default class SettingsScene extends Phaser.Scene {
 
     rootSizer.add(leftCol, { align: 'top' });
     rootSizer.add(rightCol, { align: 'top' });
-    
-    // Layout to measure content height
-    rootSizer.layout();
-    const contentHeight = rootSizer.height;
-    const needsScroll = contentHeight > availableHeight;
-    
-    // Wrap in scrollable panel
-    this.mainSizer = this.rexUI.add.scrollablePanel({
-      x: padding,
-      y: padding,
-      width: width - padding * 2,
-      height: availableHeight,
-      origin: 0,
-      scrollMode: 'y',
-      panel: { child: rootSizer },
-      slider: needsScroll ? {
-        track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, 0x555555),
-        thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, 0x888888),
-      } : false,
-      mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
-      space: { panel: needsScroll ? 5 : 0 },
-    }).layout();
 
-    // Enable touch/mouse scrolling only if needed
-    if (needsScroll) {
-      this.mainSizer.setChildrenInteractive();
-    }
-    this.focus.setScrollPanel(this.mainSizer);
+    this.wrapInScrollPanel(rootSizer, padding, padding, width - padding * 2, availableHeight);
   }
 
   private addLanguageSection(sizer: any): void {
