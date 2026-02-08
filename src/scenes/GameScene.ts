@@ -13,6 +13,7 @@ import { HazardSystem } from '../systems/HazardSystem';
 import { WildlifeSystem, type ObstacleRect } from '../systems/WildlifeSystem';
 import { LevelGeometry, type PistePath } from '../systems/LevelGeometry';
 import { PisteRenderer } from '../systems/PisteRenderer';
+import { WinchSystem } from '../systems/WinchSystem';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -28,13 +29,6 @@ interface SnowCell {
   tile: Phaser.GameObjects.Image;
   groomed: boolean;
   groomable: boolean;
-}
-
-interface WinchAnchor {
-  x: number;
-  y: number;      // Hook position (top) - for cable attachment
-  baseY: number;  // Base position - for proximity detection
-  number: number;
 }
 
 interface Buffs {
@@ -64,8 +58,6 @@ export default class GameScene extends Phaser.Scene {
   private isTumbling = false;
   private isFallingOffCliff = false;
   private steepWarningShown = false;
-  private winchActive = false;
-  private winchAnchor: WinchAnchor | null = null;
   private gamepadBindings: GamepadBindings = loadGamepadBindings();
   private touchInput: TouchInputEvent = { left: false, right: false, up: false, down: false, groom: false, winch: false };
 
@@ -80,7 +72,6 @@ export default class GameScene extends Phaser.Scene {
   // Stats tracking for bonus objectives
   private fuelUsed = 0;
   private tumbleCount = 0;
-  private winchUseCount = 0;
   private accessPathsVisited = new Set<number>();
 
   // Tutorial
@@ -106,8 +97,7 @@ export default class GameScene extends Phaser.Scene {
   private pisteRenderer!: PisteRenderer;
 
   // Winch
-  private winchAnchors: WinchAnchor[] = [];
-  private winchCableGraphics: Phaser.GameObjects.Graphics | null = null;
+  private winchSystem!: WinchSystem;
 
   // Avalanche
   private hazardSystem!: HazardSystem;
@@ -155,8 +145,6 @@ export default class GameScene extends Phaser.Scene {
     this.isTumbling = false;
     this.isFallingOffCliff = false;
     this.steepWarningShown = false;
-    this.winchActive = false;
-    this.winchAnchor = null;
 
     // Load movement sensitivity from settings
     const savedSensitivity = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
@@ -272,15 +260,10 @@ export default class GameScene extends Phaser.Scene {
     // Stats tracking
     this.fuelUsed = 0;
     this.tumbleCount = 0;
-    this.winchUseCount = 0;
     this.accessPathsVisited = new Set<number>();
 
-    // Winch state
-    this.winchActive = false;
-    this.winchCableGraphics = null;
-    this.winchAnchor = null;
-
-    // Night state
+    // Systems
+    this.winchSystem = new WinchSystem(this, this.geometry);
     this.weatherSystem = new WeatherSystem(this, this.tileSize);
 
     // Avalanche state
@@ -298,7 +281,7 @@ export default class GameScene extends Phaser.Scene {
 
     // Create winch anchor points for levels that have winch
     if (this.level.hasWinch) {
-      this.createWinchAnchors();
+      this.winchSystem.createAnchors(this.level, this.tileSize);
       console.log('Winch anchors created');
     }
 
@@ -313,7 +296,7 @@ export default class GameScene extends Phaser.Scene {
         (key: string) => this.showDialogue(key),
         (won: boolean, reason: string) => this.gameOver(won, reason),
         this.geometry.accessPathRects,
-        this.winchAnchors?.map(a => ({ x: a.x, y: a.baseY }))
+        this.winchSystem.anchors?.map(a => ({ x: a.x, y: a.baseY }))
       );
       console.log('Avalanche zones created');
     }
@@ -443,169 +426,6 @@ export default class GameScene extends Phaser.Scene {
     this.totalTiles = this.groomableTiles;
   }
 
-
-  private createWinchAnchors(): void {
-    const tileSize = this.tileSize;
-    const anchorDefs = this.level.winchAnchors || [];
-
-    this.winchAnchors = [];
-
-    this.winchCableGraphics = this.add.graphics();
-    this.winchCableGraphics.setDepth(DEPTHS.WINCH_CABLE);
-
-    if (anchorDefs.length === 0) {
-      const defaultYIndex = Math.min(4, this.geometry.pistePath.length - 1);
-      const anchorY = tileSize * 4;
-      const path = this.geometry.pistePath[defaultYIndex] || { centerX: this.level.width / 2 };
-      this.createAnchorPost(path.centerX * tileSize, anchorY, 1);
-      return;
-    }
-
-    anchorDefs.forEach((def, i) => {
-      const yIndex = Math.min(Math.floor(def.y * this.level.height), this.geometry.pistePath.length - 1);
-      const path = this.geometry.pistePath[yIndex] || { centerX: this.level.width / 2 };
-      const x = path.centerX * tileSize;
-      const y = yIndex * tileSize;
-
-      this.createAnchorPost(x, y, i + 1);
-    });
-  }
-
-  private createAnchorPost(x: number, y: number, number: number): void {
-    const g = this.add.graphics();
-    g.setDepth(DEPTHS.GROUND_OBJECTS);
-
-    // Base plate
-    g.fillStyle(0x888888, 1);
-    g.fillRect(x - 10, y + 5, 20, 8);
-
-    // Vertical pole
-    g.fillStyle(0xFFAA00, 1);
-    g.fillRect(x - 4, y - 20, 8, 28);
-
-    // Cable hook ring (rectangle, no circles)
-    g.fillStyle(0xCCCCCC, 1);
-    g.fillRect(x - 6, y - 28, 12, 3);
-    g.fillRect(x - 6, y - 22, 12, 3);
-    g.fillRect(x - 6, y - 28, 3, 9);
-    g.fillRect(x + 3, y - 28, 3, 9);
-
-    // Yellow number plate with black text
-    g.fillStyle(0xffff00, 1);
-    g.fillRect(x - 8, y + 14, 16, 10);
-    g.fillStyle(0x000000, 1);
-    this.add.text(x, y + 19, '' + number, {
-      fontFamily: 'Courier New, monospace',
-      fontSize: '8px',
-      color: '#000000',
-    }).setOrigin(0.5).setDepth(DEPTHS.GROUND_LABELS);
-
-    // Store hook position (y - 22) for cable, base position (y + 8) for proximity
-    this.winchAnchors.push({ x, y: y - 22, baseY: y + 8, number });
-  }
-
-  private getNearestAnchor(): WinchAnchor | null {
-    if (!this.winchAnchors || this.winchAnchors.length === 0) return null;
-
-    let nearest: WinchAnchor | null = null;
-    let nearestDist = Infinity;
-    
-    // Max distance to attach winch (about 3 tiles from the base)
-    const maxAttachDistance = this.tileSize * 3;
-
-    this.winchAnchors.forEach(anchor => {
-      // Use baseY for proximity check (where groomer would physically attach)
-      const dist = Phaser.Math.Distance.Between(
-        this.groomer.x, this.groomer.y,
-        anchor.x, anchor.baseY
-      );
-      if (dist < nearestDist && dist <= maxAttachDistance) {
-        nearestDist = dist;
-        nearest = anchor;
-      }
-    });
-
-    return nearest;
-  }
-
-  private updateWinch(): void {
-    if (!this.level.hasWinch) return;
-
-    // Check touch input (via event system)
-    const touchWinch = this.touchInput.winch;
-
-    // Gamepad winch button (configurable, default L1)
-    const gamepadWinch = isGamepadButtonPressed(this.gamepad, this.gamepadBindings.winch);
-
-    const isWinchPressed = this.winchKey.isDown || touchWinch || gamepadWinch;
-
-    if (isWinchPressed && !this.winchActive) {
-      this.winchAnchor = this.getNearestAnchor();
-      if (this.winchAnchor) {
-        this.winchActive = true;
-        this.winchUseCount++;
-        Accessibility.announce(t('winchAttached') || 'Winch attached');
-      }
-    } else if (!isWinchPressed && this.winchActive) {
-      this.winchActive = false;
-      this.winchAnchor = null;
-      if (this.winchCableGraphics) {
-        this.winchCableGraphics.clear();
-      }
-    }
-
-    if (this.winchActive && this.winchAnchor && this.winchCableGraphics) {
-      this.winchCableGraphics.clear();
-      
-      const anchorX = this.winchAnchor.x;
-      const anchorY = this.winchAnchor.y;
-      const groomerX = this.groomer.x;
-      const groomerY = this.groomer.y - 10;
-      
-      // Check if cable has slack (groomer is above or at same level as anchor)
-      // In screen coords, lower Y = higher altitude
-      const hasSlack = groomerY <= anchorY;
-      
-      if (hasSlack) {
-        // Draw sagging cable - quadratic curve drooping down
-        const midX = (anchorX + groomerX) / 2;
-        const dist = Math.abs(groomerX - anchorX);
-        const sag = Math.max(30, dist * 0.3); // Sag amount based on horizontal distance
-        const midY = Math.max(anchorY, groomerY) + sag;
-        
-        this.winchCableGraphics.lineStyle(2, 0x666666, 0.7); // Thinner, grayer for slack
-        this.winchCableGraphics.beginPath();
-        this.winchCableGraphics.moveTo(anchorX, anchorY);
-        // Draw curved line using segments
-        const segments = 12;
-        for (let i = 1; i <= segments; i++) {
-          const t = i / segments;
-          // Quadratic bezier: P = (1-t)²P0 + 2(1-t)tP1 + t²P2
-          const px = (1 - t) * (1 - t) * anchorX + 2 * (1 - t) * t * midX + t * t * groomerX;
-          const py = (1 - t) * (1 - t) * anchorY + 2 * (1 - t) * t * midY + t * t * groomerY;
-          this.winchCableGraphics.lineTo(px, py);
-        }
-        this.winchCableGraphics.strokePath();
-      } else {
-        // Taut cable - straight line with tension coloring
-        const dist = Phaser.Math.Distance.Between(groomerX, groomerY, anchorX, anchorY);
-        const maxDist = this.level.height * this.tileSize * 0.8;
-        const tension = Math.min(1, dist / maxDist);
-        const cableColor = Phaser.Display.Color.Interpolate.ColorWithColor(
-          new Phaser.Display.Color(136, 136, 136),
-          new Phaser.Display.Color(255, 100, 100),
-          100,
-          tension * 100
-        );
-        this.winchCableGraphics.lineStyle(3,
-          Phaser.Display.Color.GetColor(cableColor.r, cableColor.g, cableColor.b), 1);
-        this.winchCableGraphics.beginPath();
-        this.winchCableGraphics.moveTo(anchorX, anchorY);
-        this.winchCableGraphics.lineTo(groomerX, groomerY);
-        this.winchCableGraphics.strokePath();
-      }
-    }
-  }
 
   private createObstacles(): void {
     const obstacleTypes = this.level.obstacles || [];
@@ -887,11 +707,7 @@ export default class GameScene extends Phaser.Scene {
   private triggerCliffFall(): void {
     this.isFallingOffCliff = true;
 
-    this.winchActive = false;
-    this.winchAnchor = null;
-    if (this.winchCableGraphics) {
-      this.winchCableGraphics.clear();
-    }
+    this.winchSystem.detach();
 
     this.showDialogue('cliffFall');
     this.time.delayedCall(BALANCE.CLIFF_FALL_DELAY, () => {
@@ -993,7 +809,11 @@ export default class GameScene extends Phaser.Scene {
 
     this.handleMovement();
     this.handleGrooming();
-    this.updateWinch();
+    if (this.level.hasWinch) {
+      const isWinchPressed = this.winchKey.isDown || this.touchInput.winch ||
+        isGamepadButtonPressed(this.gamepad, this.gamepadBindings.winch);
+      this.winchSystem.update(isWinchPressed, this.groomer.x, this.groomer.y, this.tileSize, this.level.height);
+    }
     this.checkSteepness();
     this.checkCliffFall();
     this.updateResources(delta);
@@ -1013,7 +833,7 @@ export default class GameScene extends Phaser.Scene {
       fuel: this.fuel,
       stamina: this.stamina,
       coverage: this.getCoverage(),
-      winchActive: this.winchActive,
+      winchActive: this.winchSystem.active,
       levelIndex: this.levelIndex,
     });
   }
@@ -1038,10 +858,7 @@ export default class GameScene extends Phaser.Scene {
         groomerX >= zone.leftX && groomerX <= zone.rightX) {
 
         // Winch only prevents slide/tumble when cable is taut (groomer below anchor)
-        const winchTaut = this.winchActive && this.winchAnchor && 
-          (groomerY - 10) > this.winchAnchor.y;
-
-        if (!winchTaut) {
+        if (!this.winchSystem.isTaut(groomerY)) {
           if (zone.slope >= BALANCE.TUMBLE_SLOPE_THRESHOLD) {
             this.triggerTumble(zone.slope);
             return;
@@ -1137,15 +954,15 @@ export default class GameScene extends Phaser.Scene {
       if (isGamepadButtonPressed(this.gamepad, this.gamepadBindings.groom)) this.isGrooming = true;
     }
 
-    if (this.winchActive && this.winchAnchor) {
-      const dx = this.winchAnchor.x - this.groomer.x;
-      const dy = this.winchAnchor.y - this.groomer.y;
+    if (this.winchSystem.active && this.winchSystem.anchor) {
+      const dx = this.winchSystem.anchor.x - this.groomer.x;
+      const dy = this.winchSystem.anchor.y - this.groomer.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       
       // Only apply winch force when cable is taut (groomer below anchor)
       // In screen coords, groomer.y > anchor.y means groomer is lower/below
       const groomerY = this.groomer.y - 10;
-      const isTaut = groomerY > this.winchAnchor.y;
+      const isTaut = groomerY > this.winchSystem.anchor.y;
 
       if (dist > BALANCE.WINCH_MIN_DISTANCE && isTaut) {
         const winchForce = BALANCE.WINCH_FORCE;
@@ -1244,10 +1061,7 @@ export default class GameScene extends Phaser.Scene {
       const isOnSteep = currentSlope >= BALANCE.STEEP_STAMINA_THRESHOLD;
       
       // Check if winch is actually helping (taut, not slack)
-      const winchHelping = this.winchActive && this.winchAnchor && 
-        (this.groomer.y - 10) > this.winchAnchor.y;
-      
-      if (winchHelping) {
+      if (this.winchSystem.isTaut(this.groomer.y)) {
         // Winch does the work - minimal operator effort
         staminaDrain *= BALANCE.STAMINA_WINCH_MULTIPLIER;
       } else if (isOnSteep) {
@@ -1608,7 +1422,7 @@ export default class GameScene extends Phaser.Scene {
       fuel: this.fuel,
       stamina: this.stamina,
       coverage: this.getCoverage(),
-      winchActive: this.winchActive,
+      winchActive: this.winchSystem.active,
       levelIndex: this.levelIndex,
     });
 
@@ -1625,7 +1439,7 @@ export default class GameScene extends Phaser.Scene {
       failReason: failReason,
       fuelUsed: Math.round(this.fuelUsed),
       tumbleCount: this.tumbleCount,
-      winchUseCount: this.winchUseCount,
+      winchUseCount: this.winchSystem.useCount,
       pathsVisited: this.accessPathsVisited.size,
       totalPaths: totalPaths,
     });
@@ -1668,10 +1482,10 @@ export default class GameScene extends Phaser.Scene {
     this.tweens.killAll();
     this.time.removeAllEvents();
 
-    this.winchCableGraphics = null;
     this.weatherSystem.reset();
     this.hazardSystem.reset();
     this.wildlifeSystem.reset();
+    this.winchSystem.reset();
     this.geometry.reset();
     this.buildingRects = [];
 

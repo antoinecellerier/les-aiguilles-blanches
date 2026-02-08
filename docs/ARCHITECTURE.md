@@ -45,7 +45,8 @@ snow-groomer/
 │   │   ├── HazardSystem.ts   # Avalanche zones, risk handling
 │   │   ├── WildlifeSystem.ts # Animal spawning, flee AI, update loop
 │   │   ├── LevelGeometry.ts # Piste path, cliff, access path geometry (pure data, no Phaser)
-│   │   └── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
+│   │   ├── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
+│   │   └── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
@@ -821,6 +822,7 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 - **WildlifeSystem** — Decorative animal spawning, flee-from-groomer AI, per-level species config. Uses shared utilities: `foxBehavior.ts` for fox hunting decisions, `animalTracks.ts` for track drawing, `animalSprites.ts` for procedural sprites (including side-view flying and perched bird variants). Animals avoid buildings/cliffs (non-climbing species), grooming erases tracks, and tracks are bootstrapped at level start.
 - **LevelGeometry** — Pure data system (no Phaser dependency). Generates piste path, access path zones/curves, and cliff segments from level config. Provides query methods `isInPiste()`, `isOnCliff()`, `isOnAccessPath()` used by rendering and physics.
 - **PisteRenderer** — All piste visual rendering: boundary colliders, cliff edge visuals, piste markers, forest trees, access path roads/poles, steep zone indicators, and extended background. Returns physics groups for GameScene collision setup.
+- **WinchSystem** — Winch anchor creation, cable rendering (taut/slack), attach/detach state. Exposes `isTaut()` query used by movement and resource systems.
 
 Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `_createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
 

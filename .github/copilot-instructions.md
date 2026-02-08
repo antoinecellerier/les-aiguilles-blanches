@@ -81,6 +81,7 @@ GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/
 - `src/systems/WildlifeSystem.ts` - Animal spawning, flee AI, building/cliff collision, track system
 - `src/systems/LevelGeometry.ts` - Piste path, cliff, access path geometry (pure data, no Phaser)
 - `src/systems/PisteRenderer.ts` - Boundary colliders, cliff visuals, markers, trees, access paths
+- `src/systems/WinchSystem.ts` - Winch anchors, cable rendering, attach/detach state
 - `src/types/GameSceneInterface.ts` - Cross-scene event types
 - `tests/e2e/conftest.py` - Test helpers
 

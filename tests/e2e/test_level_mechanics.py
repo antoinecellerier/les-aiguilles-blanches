@@ -66,7 +66,7 @@ class TestWinchMechanics:
         
         winch_active = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
-            return gameScene?.winchActive ?? false;
+            return gameScene?.winchSystem?.active ?? false;
         }""")
         
         game_page.keyboard.up("ShiftLeft")
@@ -82,8 +82,8 @@ class TestWinchMechanics:
         
         anchor_info = game_page.evaluate("""() => {
             const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.winchAnchors?.length) return null;
-            const anchor = gameScene.winchAnchors[0];
+            if (!gameScene?.winchSystem?.anchors?.length) return null;
+            const anchor = gameScene.winchSystem.anchors[0];
             return {
                 hasX: 'x' in anchor,
                 hasY: 'y' in anchor,

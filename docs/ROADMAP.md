@@ -45,7 +45,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
-- ✅ **GameScene LevelGeometry + PisteRenderer extraction** — Extracted piste path/cliff/access path geometry into `LevelGeometry` (385 lines, zero Phaser dependency) and boundary colliders, cliff visuals, markers, trees, access path rendering into `PisteRenderer` (651 lines). GameScene reduced from 2783→1686 lines (-1097). Fixed shutdown ordering.
+- ✅ **GameScene LevelGeometry + PisteRenderer + WinchSystem extraction** — Extracted piste path/cliff/access path geometry into `LevelGeometry` (385 lines, zero Phaser dependency), boundary colliders/cliff visuals/markers/trees/access path rendering into `PisteRenderer` (651 lines), and winch anchors/cable/state into `WinchSystem` (196 lines). GameScene reduced from 2783→1494 lines (-1289). Fixed shutdown ordering.
 
 - ✅ **MenuScene god method refactoring** — Split `create()` (390→50 lines) and `update()` (467→7 lines) into focused sub-methods. Extracted createSkyAndGround, createTitle, createMenuButtons, createFooter, setupInput from create(); updateSnowflakes, updateWildlife, updateBird, updateClimber, updateGroundAnimal, animateGroundAnimal, wanderDecision, updateTracks from update(); createMenuClimbers, createMenuBirds from createMenuWildlife. 38 methods total, no behavioral changes.
 
@@ -144,5 +144,5 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Deferred Refactors
 
-- GameScene further decomposition: PisteRenderer (boundary/cliff/marker/tree rendering), WinchSystem, GroomingSystem, InputManager. LevelGeometry done; these are the next candidates.
+- GameScene further decomposition: ObstacleBuilder, GroomingSystem, InputManager. LevelGeometry, PisteRenderer, WinchSystem done; these are the next candidates.
 - Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring ~7 lines, track aging ~10 lines, same-species repulsion ~9 lines). Both files use the same patterns but different coordinate systems (side-view vs top-down), making extraction non-trivial.
