@@ -6,6 +6,7 @@ import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/men
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -115,11 +116,8 @@ export default class PauseScene extends Phaser.Scene {
     });
     this.gamepadNav.initState();
     // Track Start button separately (also resumes)
-    this.gamepadStartPressed = false;
-    if (this.input.gamepad && this.input.gamepad.total > 0) {
-      const pad = this.input.gamepad.getPad(0);
-      if (pad) this.gamepadStartPressed = pad.buttons[9]?.pressed || false;
-    }
+    const padState = captureGamepadButtons(this, [9]); // 9 = Start/Menu
+    this.gamepadStartPressed = padState[9];
 
     Accessibility.announce(t('pauseTitle'));
     
@@ -168,7 +166,7 @@ export default class PauseScene extends Phaser.Scene {
     if (this.inputReady && this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        const startPressed = pad.buttons[9]?.pressed ?? false;
+        const startPressed = isGamepadButtonPressed(pad, 9);
         if (startPressed && !this.gamepadStartPressed) {
           this.resumeGame();
         }

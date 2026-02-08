@@ -481,6 +481,40 @@ class TestGamepadSelectSkip:
             f"Select should skip level: was {level_before}, now {level_after}"
 
 
+    def test_held_select_does_not_double_skip(self, gamepad_page: Page):
+        """Holding Select across a level skip should not skip the next level too."""
+        # Start game
+        press_gamepad_button(gamepad_page, 0)
+        gamepad_page.wait_for_timeout(100)
+        release_gamepad_button(gamepad_page, 0)
+
+        wait_for_scene(gamepad_page, 'GameScene')
+        gamepad_page.wait_for_timeout(1000)
+
+        # Press Select and HOLD it across the transition
+        press_gamepad_button(gamepad_page, 8)
+        gamepad_page.wait_for_timeout(150)
+        # Don't release — keep held
+
+        # Wait for level to advance
+        gamepad_page.wait_for_function("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.levelIndex >= 1;
+        }""", timeout=5000)
+        gamepad_page.wait_for_timeout(1500)
+
+        # Should be on level 1, NOT level 2+ (no double-skip)
+        level = gamepad_page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.levelIndex ?? -1;
+        }""")
+
+        release_gamepad_button(gamepad_page, 8)
+
+        assert level == 1, \
+            f"Held Select should skip exactly one level (expected 1, got {level})"
+
+
 class TestDialoguePlaceholders:
     """Test dialogue placeholders resolve correctly."""
 

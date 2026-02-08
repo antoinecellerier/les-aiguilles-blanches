@@ -227,3 +227,28 @@ export function isBackPressed(gamepad: Phaser.Input.Gamepad.Gamepad | null): boo
   const mapping = getMappingFromGamepad(gamepad);
   return isGamepadButtonPressed(gamepad, mapping.back);
 }
+
+/**
+ * Capture the current pressed state of specific gamepad buttons.
+ * Call in create()/init() to prevent phantom presses when a button
+ * is already held during a scene transition.
+ *
+ * @returns Map from button index to pressed state, or all-false if no pad.
+ */
+export function captureGamepadButtons(
+  scene: Phaser.Scene,
+  buttonIndices: number[],
+): Record<number, boolean> {
+  const state: Record<number, boolean> = {};
+  for (const idx of buttonIndices) state[idx] = false;
+
+  if (scene.input.gamepad && scene.input.gamepad.total > 0) {
+    const pad = scene.input.gamepad.getPad(0);
+    if (pad) {
+      for (const idx of buttonIndices) {
+        state[idx] = isGamepadButtonPressed(pad, idx);
+      }
+    }
+  }
+  return state;
+}

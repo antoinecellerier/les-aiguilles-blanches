@@ -5,7 +5,7 @@ import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { saveProgress } from '../utils/gameProgress';
-import { isConfirmPressed, isGamepadButtonPressed, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
+import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
@@ -2004,6 +2004,12 @@ export default class GameScene extends Phaser.Scene {
           Accessibility.announce('Gamepad connected');
         }
       });
+
+      // Capture current button state to prevent phantom presses on scene transition
+      if (this.gamepad) {
+        const padState = captureGamepadButtons(this, [this.gamepadBindings.pause]);
+        this.gamepadStartPressed = padState[this.gamepadBindings.pause];
+      }
     }
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {

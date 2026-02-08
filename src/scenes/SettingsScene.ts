@@ -702,24 +702,14 @@ export default class SettingsScene extends Phaser.Scene {
     const pad = this.input.gamepad.getPad(0);
     if (!pad) return;
 
-    // Check all buttons for a press (including trigger-axis fallback)
-    for (let i = 0; i < pad.buttons.length && i < 16; i++) {
+    // Check all standard buttons for a press (including trigger-axis fallback).
+    // Use Math.max to ensure trigger indices 6,7 are checked even if
+    // the browser reports fewer buttons (Firefox axes-only triggers).
+    const maxBtn = Math.min(Math.max(pad.buttons.length, 8), 16);
+    for (let i = 0; i < maxBtn; i++) {
       if (isGamepadButtonPressed(pad, i)) {
         this.acceptGamepadRebind(i);
         return;
-      }
-    }
-
-    // Also detect triggers reported as axes only (Firefox Xbox LT/RT)
-    // Axes 4,5 map to button indices 6,7 (LT/RT)
-    const triggerAxes: [number, number][] = [[4, 6], [5, 7]];
-    for (const [axisIdx, btnIdx] of triggerAxes) {
-      if (pad.axes[axisIdx] && pad.axes[axisIdx].getValue() > 0.5) {
-        // Only accept if not already caught by the button loop above
-        if (!pad.buttons[btnIdx]?.pressed) {
-          this.acceptGamepadRebind(btnIdx);
-          return;
-        }
       }
     }
   }

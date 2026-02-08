@@ -5,6 +5,7 @@ import { DEPTHS } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -76,6 +77,10 @@ export default class HUDScene extends Phaser.Scene {
   create(): void {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
+
+    // Capture current gamepad state to prevent phantom presses on scene transition
+    const padState = captureGamepadButtons(this, [8]); // 8 = Select/Back
+    this.gamepadSelectPressed = padState[8];
 
     // For very tall screens (21:9 phones), scale based on width to ensure UI fits
     const refWidth = 1024;
@@ -775,7 +780,7 @@ export default class HUDScene extends Phaser.Scene {
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
       if (pad) {
-        const selectPressed = pad.buttons[8]?.pressed ?? false;
+        const selectPressed = isGamepadButtonPressed(pad, 8);
         if (selectPressed && !this.gamepadSelectPressed) {
           this.skipLevel();
         }

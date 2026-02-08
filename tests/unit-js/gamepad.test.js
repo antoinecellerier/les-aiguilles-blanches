@@ -2,7 +2,7 @@
  * Unit tests for gamepad utilities
  */
 import { describe, it, expect } from 'vitest';
-import { getButtonName, getDefaultGamepadBindings, detectControllerType, isGamepadButtonPressed } from './config-wrappers/index.js';
+import { getButtonName, getDefaultGamepadBindings, detectControllerType, isGamepadButtonPressed, captureGamepadButtons } from './config-wrappers/index.js';
 
 describe('getButtonName', () => {
     it('should return circled letters for generic controller', () => {
@@ -137,5 +137,56 @@ describe('isGamepadButtonPressed', () => {
             axes: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         });
         expect(isGamepadButtonPressed(pad, 0)).toBe(false);
+    });
+});
+
+describe('captureGamepadButtons', () => {
+    function mockScene(buttons = [], axes = []) {
+        const pad = {
+            buttons: buttons.map(p => ({ pressed: p, value: p ? 1 : 0 })),
+            axes: axes.map(v => ({ getValue: () => v, value: v })),
+        };
+        return {
+            input: {
+                gamepad: {
+                    total: 1,
+                    getPad: () => pad,
+                },
+            },
+        };
+    }
+
+    it('should capture pressed state for requested buttons', () => {
+        const scene = mockScene([false, true, false, false, false, false, false, false, true]);
+        const state = captureGamepadButtons(scene, [1, 8]);
+        expect(state[1]).toBe(true);
+        expect(state[8]).toBe(true);
+    });
+
+    it('should return false for unpressed buttons', () => {
+        const scene = mockScene([false, false, false]);
+        const state = captureGamepadButtons(scene, [0, 1, 2]);
+        expect(state[0]).toBe(false);
+        expect(state[1]).toBe(false);
+        expect(state[2]).toBe(false);
+    });
+
+    it('should return all false when no gamepad connected', () => {
+        const scene = { input: { gamepad: { total: 0, getPad: () => null } } };
+        const state = captureGamepadButtons(scene, [0, 8, 9]);
+        expect(state[0]).toBe(false);
+        expect(state[8]).toBe(false);
+        expect(state[9]).toBe(false);
+    });
+
+    it('should detect triggers via axis fallback', () => {
+        // Firefox: button 6 not pressed, but axis 4 has value
+        const scene = mockScene(
+            [false, false, false, false, false, false, false],
+            [0, 0, 0, 0, 0.9, 0]
+        );
+        const state = captureGamepadButtons(scene, [6, 7]);
+        expect(state[6]).toBe(true);
+        expect(state[7]).toBe(false);
     });
 });
