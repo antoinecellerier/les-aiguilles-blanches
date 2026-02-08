@@ -45,7 +45,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
-- ✅ **GameScene LevelGeometry extraction** — Extracted piste path, cliff segments, access path geometry into `src/systems/LevelGeometry.ts` (385 lines, zero Phaser dependency). GameScene reduced from 2783→2386 lines (-397). Fixed shutdown ordering: system resets now run before `children.removeAll(true)`. Tests updated to use `geometry.*` property paths.
+- ✅ **GameScene LevelGeometry + PisteRenderer extraction** — Extracted piste path/cliff/access path geometry into `LevelGeometry` (385 lines, zero Phaser dependency) and boundary colliders, cliff visuals, markers, trees, access path rendering into `PisteRenderer` (651 lines). GameScene reduced from 2783→1686 lines (-1097). Fixed shutdown ordering.
 
 - ✅ **MenuScene god method refactoring** — Split `create()` (390→50 lines) and `update()` (467→7 lines) into focused sub-methods. Extracted createSkyAndGround, createTitle, createMenuButtons, createFooter, setupInput from create(); updateSnowflakes, updateWildlife, updateBird, updateClimber, updateGroundAnimal, animateGroundAnimal, wanderDecision, updateTracks from update(); createMenuClimbers, createMenuBirds from createMenuWildlife. 38 methods total, no behavioral changes.
 
