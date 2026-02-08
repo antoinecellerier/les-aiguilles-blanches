@@ -176,6 +176,129 @@ def dismiss_dialogues(page, timeout: int = 5000):
     }""", timeout=timeout)
 
 
+def click_menu_button(page, button_index: int, button_name: str = "button"):
+    """Click a menu button by index (0=Start, 1=How to Play, 2=Changelog, 3=Settings).
+
+    Queries actual button positions from the game scene for reliability across layouts.
+    """
+    canvas = page.locator("canvas")
+    box = canvas.bounding_box()
+    assert box, "Canvas not found"
+
+    pos = page.evaluate(f"""() => {{
+        const scene = window.game?.scene?.getScene('MenuScene');
+        if (!scene || !scene.menuButtons) return null;
+        const btn = scene.menuButtons[{button_index}];
+        if (!btn) return null;
+        return {{ x: btn.x, y: btn.y }};
+    }}""")
+
+    if pos:
+        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
+    else:
+        for _ in range(button_index):
+            page.keyboard.press("ArrowDown")
+            page.wait_for_timeout(50)
+        page.keyboard.press("Enter")
+
+
+# Menu button index constants
+BUTTON_START = 0
+BUTTON_HOW_TO_PLAY = 1
+BUTTON_CHANGELOG = 2
+BUTTON_SETTINGS = 3
+
+
+def click_button(page, button_index: int, description: str):
+    """Click a menu button by index and wait briefly for it to register."""
+    click_menu_button(page, button_index, description)
+    page.wait_for_timeout(100)
+
+
+def get_active_scenes(page) -> list:
+    """Get list of active Phaser scene keys."""
+    return page.evaluate("""() => {
+        if (window.game && window.game.scene) {
+            return window.game.scene.getScenes(true).map(s => s.scene.key);
+        }
+        return [];
+    }""")
+
+
+def get_current_level(page) -> int:
+    """Get current level index from GameScene."""
+    return page.evaluate("""() => {
+        if (window.game && window.game.scene) {
+            const gameScene = window.game.scene.getScene('GameScene');
+            if (gameScene && gameScene.levelIndex !== undefined) {
+                return gameScene.levelIndex;
+            }
+        }
+        return -1;
+    }""")
+
+
+def assert_no_error_message(page):
+    """Assert there's no error message displayed on screen."""
+    error_visible = page.evaluate("""() => {
+        const container = document.getElementById('game-container');
+        if (container) {
+            const errorDiv = container.querySelector('.error-message');
+            if (errorDiv) return errorDiv.textContent;
+        }
+        return null;
+    }""")
+    assert error_visible is None, f"Error message displayed: {error_visible}"
+    scenes = get_active_scenes(page)
+    assert len(scenes) > 0, "No active scenes - game may have crashed"
+
+
+def assert_canvas_renders_content(page):
+    """Assert canvas has non-black content (catches Firefox rendering issues)."""
+    from PIL import Image
+    import io
+
+    screenshot = page.screenshot()
+    img = Image.open(io.BytesIO(screenshot))
+    pixels = img.load()
+    w, h = img.size
+
+    samples = [
+        pixels[w//2, h//2],
+        pixels[w//2, h//4],
+        pixels[w//4, h//2],
+        pixels[3*w//4, h//2],
+        pixels[w//2, 3*h//4],
+    ]
+
+    has_content = any(
+        (p[0] > 20 or p[1] > 20 or p[2] > 20) for p in samples
+    )
+
+    assert has_content, \
+        f"Screen appears all black - possible rendering issue. Samples (RGBA): {samples}"
+
+
+def assert_scene_active(page, scene_key: str, msg: str = ""):
+    """Assert that a specific scene is active."""
+    assert_no_error_message(page)
+    scenes = get_active_scenes(page)
+    assert scene_key in scenes, f"Expected '{scene_key}' to be active. Active scenes: {scenes}. {msg}"
+
+
+def assert_scene_not_active(page, scene_key: str, msg: str = ""):
+    """Assert that a specific scene is NOT active."""
+    scenes = get_active_scenes(page)
+    assert scene_key not in scenes, f"Expected '{scene_key}' to NOT be active. Active scenes: {scenes}. {msg}"
+
+
+def assert_not_on_menu(page):
+    """Assert we're no longer on the menu."""
+    assert_no_error_message(page)
+    scenes = get_active_scenes(page)
+    assert 'MenuScene' not in scenes, f"Still on MenuScene! Button click likely missed. Active: {scenes}"
+
+
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
     """Configure browser context for game testing."""

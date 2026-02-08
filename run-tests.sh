@@ -73,8 +73,20 @@ if [ "$SMART_MODE" = true ]; then
                 src/scenes/SettingsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_settings_ui.py") ;;
                 src/utils/touchDetect.ts)     SMART_E2E_FILES+=("tests/e2e/test_touch_controls.py") ;;
                 src/scenes/HUDScene.ts)       SMART_E2E_FILES+=("tests/e2e/test_touch_controls.py") ;;
-                src/scenes/DialogueScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_dialogue_speakers.py") ;;
+                src/scenes/DialogueScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_dialogue_speakers.py")
+                                             SMART_E2E_FILES+=("tests/e2e/test_dialogue.py") ;;
                 src/utils/characterPortraits.ts) SMART_E2E_FILES+=("tests/e2e/test_dialogue_speakers.py") ;;
+                src/scenes/GameScene.ts)     SMART_E2E_FILES+=("tests/e2e/test_gameplay.py")
+                                             SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
+                src/scenes/PauseScene.ts)    SMART_E2E_FILES+=("tests/e2e/test_pause_menu.py") ;;
+                src/scenes/LevelCompleteScene.ts) SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
+                src/scenes/CreditsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
+                src/scenes/MenuScene.ts)     SMART_E2E_FILES+=("tests/e2e/test_scene_layering.py") ;;
+                src/config/gameConfig.ts)    SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
+                src/config/levels.ts)        SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
+                src/utils/keyboardLayout.ts) SMART_E2E_FILES+=("tests/e2e/test_key_hints.py") ;;
+                src/systems/WeatherSystem.ts) SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
+                src/systems/WildlifeSystem.ts) SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
             esac
         done <<< "$CHANGED_FILES"
     fi
@@ -86,7 +98,7 @@ if [ "$SMART_MODE" = true ]; then
 
     # Validate: every E2E test file on disk must be known to the selection logic.
     # This catches new test files that haven't been added to the mapping above.
-    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py"
+    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_key_hints.py test_level_mechanics.py"
     UNKNOWN_E2E=()
     for f in tests/e2e/test_*.py; do
         [ -f "$f" ] || continue

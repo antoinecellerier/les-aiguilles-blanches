@@ -28,10 +28,16 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
 - **Unit tests**: Uses Vitest's `--changed` flag which traces the import graph automatically — zero maintenance.
 - **E2E tests**: File-level selection based on which source files changed:
   - Any `src/` change → always runs `test_navigation.py` (catch-all integration suite)
+  - `src/scenes/GameScene.ts` → also runs `test_gameplay.py`, `test_level_mechanics.py`
+  - `src/scenes/DialogueScene.ts` → also runs `test_dialogue_speakers.py`, `test_dialogue.py`
+  - `src/scenes/PauseScene.ts` → also runs `test_pause_menu.py`
+  - `src/scenes/LevelCompleteScene.ts` or `CreditsScene.ts` → also runs `test_level_complete.py`
+  - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`
   - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
   - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
   - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`
-  - `src/scenes/DialogueScene.ts` or `src/utils/characterPortraits.ts` → also runs `test_dialogue_speakers.py`
+  - `src/utils/keyboardLayout.ts` → also runs `test_key_hints.py`
+  - `src/config/levels.ts`, `src/systems/*` → also runs `test_level_mechanics.py`
   - `tests/e2e/conftest.py` changed → runs all E2E tests
   - No `src/` or test changes → skips E2E entirely
 
@@ -39,7 +45,7 @@ This is maintenance-free for source files: new source files are covered by the `
 
 ## Test Helpers
 
-Core helpers are in `tests/e2e/conftest.py`. Navigation-specific helpers (`click_button`, `BUTTON_*` constants) are in `tests/e2e/test_navigation.py`.
+Core helpers are in `tests/e2e/conftest.py`, including `click_menu_button`, `click_button`, `BUTTON_*` constants, `assert_scene_active`, `get_active_scenes`, and other shared utilities.
 
 ### Fixtures
 
@@ -130,12 +136,19 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 
 | File | Tests |
 |------|-------|
-| `test_navigation.py` | Menu, scenes, levels, progression, changelog |
+| `test_navigation.py` | Menu navigation, canvas rendering, game progress, level transitions |
+| `test_gameplay.py` | Tutorial, groomer movement, grooming input guard, snow contrast |
+| `test_dialogue.py` | Dialogue display, dismissal, positioning |
+| `test_pause_menu.py` | Pause menu open/close, settings roundtrip |
+| `test_level_complete.py` | Level complete, fail screen, credits, keyboard nav |
+| `test_scene_layering.py` | Scene depth ordering, menu depth, resize behavior |
+| `test_accessibility.py` | Colorblind filters, high contrast, HUD, background rendering |
+| `test_key_hints.py` | Dynamic key hints, rebound keys, AZERTY layout |
+| `test_level_mechanics.py` | Night, winch, cliffs, forests, access paths, wildlife |
 | `test_dialogue_speakers.py` | Speaker assignment, character portraits per level |
-| `test_gamepad.py` | Controller detection, button mapping |
+| `test_gamepad.py` | Controller detection, button mapping, Nintendo/PlayStation |
 | `test_touch_controls.py` | Touch input, orientation changes, resize |
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
-| Classes: `TestNightLevel`, `TestWinchMechanics` | Night overlay, headlights, winch |
 
 ### Viewport / Resize Testing
 

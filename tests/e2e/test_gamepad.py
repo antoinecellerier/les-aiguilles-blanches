@@ -4,37 +4,31 @@ from playwright.sync_api import Page
 from conftest import wait_for_scene, GAME_URL
 
 
-# Helper to inject a mock gamepad into the browser
-MOCK_GAMEPAD_SCRIPT = """
-(function() {
-    // Create a mock gamepad object
-    const mockGamepad = {
-        id: 'Mock Gamepad (STANDARD GAMEPAD)',
+def make_mock_gamepad_script(gamepad_id: str = 'Mock Gamepad (STANDARD GAMEPAD)') -> str:
+    """Generate a mock gamepad init script with the given controller ID."""
+    return f"""
+(function() {{
+    const mockGamepad = {{
+        id: '{gamepad_id}',
         index: 0,
         connected: true,
         timestamp: performance.now(),
         mapping: 'standard',
-        axes: [0, 0, 0, 0],  // Left stick X, Y, Right stick X, Y
+        axes: [0, 0, 0, 0],
         buttons: []
-    };
-    
-    // Initialize 17 buttons (standard gamepad layout)
-    for (let i = 0; i < 17; i++) {
-        mockGamepad.buttons.push({ pressed: false, touched: false, value: 0 });
-    }
-    
-    // Store the mock gamepad
+    }};
+    for (let i = 0; i < 17; i++) {{
+        mockGamepad.buttons.push({{ pressed: false, touched: false, value: 0 }});
+    }}
     window._mockGamepad = mockGamepad;
-    
-    // Override navigator.getGamepads to return our mock
-    navigator.getGamepads = function() {
+    navigator.getGamepads = function() {{
         return [window._mockGamepad, null, null, null];
-    };
-    
-    // Phaser polls getGamepads, no need to dispatch events
-    // Just ensure getGamepads returns our mock
-})();
+    }};
+}})();
 """
+
+
+MOCK_GAMEPAD_SCRIPT = make_mock_gamepad_script()
 
 
 def press_gamepad_button(page: Page, button_index: int):
@@ -243,29 +237,9 @@ class TestGamepadGameplay:
 
 
 # Nintendo controller mock - uses different ID for button swap detection
-MOCK_NINTENDO_GAMEPAD_SCRIPT = """
-(function() {
-    const mockGamepad = {
-        id: 'Nintendo Switch Pro Controller (STANDARD GAMEPAD Vendor: 057e Product: 2009)',
-        index: 0,
-        connected: true,
-        timestamp: performance.now(),
-        mapping: 'standard',
-        axes: [0, 0, 0, 0],
-        buttons: []
-    };
-    
-    for (let i = 0; i < 17; i++) {
-        mockGamepad.buttons.push({ pressed: false, touched: false, value: 0 });
-    }
-    
-    window._mockGamepad = mockGamepad;
-    
-    navigator.getGamepads = function() {
-        return [window._mockGamepad, null, null, null];
-    };
-})();
-"""
+MOCK_NINTENDO_GAMEPAD_SCRIPT = make_mock_gamepad_script(
+    'Nintendo Switch Pro Controller (STANDARD GAMEPAD Vendor: 057e Product: 2009)'
+)
 
 
 @pytest.fixture
@@ -329,29 +303,9 @@ class TestNintendoControllerSwap:
 
 
 # PlayStation controller mock
-MOCK_PLAYSTATION_GAMEPAD_SCRIPT = """
-(function() {
-    const mockGamepad = {
-        id: 'Sony DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)',
-        index: 0,
-        connected: true,
-        timestamp: performance.now(),
-        mapping: 'standard',
-        axes: [0, 0, 0, 0],
-        buttons: []
-    };
-    
-    for (let i = 0; i < 17; i++) {
-        mockGamepad.buttons.push({ pressed: false, touched: false, value: 0 });
-    }
-    
-    window._mockGamepad = mockGamepad;
-    
-    navigator.getGamepads = function() {
-        return [window._mockGamepad, null, null, null];
-    };
-})();
-"""
+MOCK_PLAYSTATION_GAMEPAD_SCRIPT = make_mock_gamepad_script(
+    'Sony DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)'
+)
 
 
 @pytest.fixture
