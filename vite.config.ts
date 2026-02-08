@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { resolve } from 'path';
 import { execSync } from 'child_process';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -27,6 +27,20 @@ function getVersion() {
   } catch {
     return 'dev';
   }
+}
+
+// Dev-only plugin: serves /api/version with live git hash on every request
+function liveVersionPlugin(): Plugin {
+  return {
+    name: 'live-version',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/api/version', (_req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ version: getVersion() }));
+      });
+    },
+  };
 }
 
 export default defineConfig({
@@ -59,6 +73,7 @@ export default defineConfig({
     pure: process.env.NODE_ENV === 'production' ? ['console.log', 'console.debug'] : [],
   },
   plugins: [
+    liveVersionPlugin(),
     // Generate bundle analysis (run: npm run build && open stats.html)
     visualizer({
       filename: 'stats.html',

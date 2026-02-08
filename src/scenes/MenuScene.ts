@@ -386,6 +386,18 @@ export default class MenuScene extends Phaser.Scene {
         window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank');
       });
 
+    // In dev, fetch live version from server (updates on each commit without restart)
+    if (import.meta.env.DEV) {
+      fetch('/api/version')
+        .then(r => r.json())
+        .then(data => {
+          if (data.version && githubLink.active) {
+            githubLink.setText(`GitHub  ·  v${data.version}`);
+          }
+        })
+        .catch(() => {});
+    }
+
     this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(Math.max(10, 12 * scaleFactor)) + 'px',
