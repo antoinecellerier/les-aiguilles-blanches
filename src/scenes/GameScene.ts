@@ -360,9 +360,9 @@ export default class GameScene extends Phaser.Scene {
     // Show intro dialogue after a short delay to let scenes initialize
     if (this.level.introDialogue) {
       this.time.delayedCall(500, () => {
-        this.showDialogue(this.level.introDialogue!);
+        this.showDialogue(this.level.introDialogue!, this.level.introSpeaker);
         if (this.level.id === 4) {
-          this.showDialogue('level4WinchIntro');
+          this.showDialogue('level4WinchIntro', this.level.introSpeaker);
         }
       });
     }
@@ -2477,7 +2477,7 @@ export default class GameScene extends Phaser.Scene {
       this.tutorialStep++;
       const delay = step.delay || 300;
       this.time.delayedCall(delay, () => {
-        this.showDialogue(step.dialogue);
+        this.showDialogue(step.dialogue, this.level.introSpeaker);
       });
     }
   }
@@ -2533,7 +2533,7 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
-  private showDialogue(key: string): void {
+  private showDialogue(key: string, speaker?: string): void {
     // Check for gamepad first, then touch, then default
     const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
@@ -2558,7 +2558,7 @@ export default class GameScene extends Phaser.Scene {
     
     const dlg = this.scene.get('DialogueScene') as DialogueScene | null;
     if (dlg?.showDialogue) {
-      dlg.showDialogue(dialogueKey);
+      dlg.showDialogue(dialogueKey, speaker);
     }
   }
 

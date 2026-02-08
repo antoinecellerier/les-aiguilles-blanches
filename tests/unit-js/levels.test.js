@@ -80,4 +80,14 @@ describe('Level Configuration', () => {
             }
         });
     });
+
+    it('levels with introDialogue should have explicit introSpeaker', () => {
+        const validSpeakers = ['Jean-Pierre', 'Émilie', 'Thierry', 'Marie'];
+        LEVELS.forEach((level, i) => {
+            if (level.introDialogue) {
+                expect(level.introSpeaker, `Level ${i} has introDialogue but no introSpeaker`).toBeDefined();
+                expect(validSpeakers, `Level ${i} introSpeaker '${level.introSpeaker}' not valid`).toContain(level.introSpeaker);
+            }
+        });
+    });
 });

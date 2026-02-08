@@ -113,6 +113,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | File | Tests |
 |------|-------|
 | `test_navigation.py` | Menu, scenes, levels, progression, changelog |
+| `test_dialogue_speakers.py` | Speaker assignment, character portraits per level |
 | `test_gamepad.py` | Controller detection, button mapping |
 | `test_touch_controls.py` | Touch input, orientation changes, resize |
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |

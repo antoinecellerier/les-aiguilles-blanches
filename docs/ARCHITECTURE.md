@@ -242,7 +242,8 @@ const gameState = {
     isNight: false,
     weather: 'clear',            // clear/light_snow/storm
     obstacles: ['trees'],
-    introDialogue: 'jeanPierreIntro'
+    introDialogue: 'jeanPierreIntro',
+    introSpeaker: 'Jean-Pierre'    // Character who delivers the intro
 }
 ```
 
@@ -388,6 +389,9 @@ Each speaker gets a colored portrait box with their initial letter:
 - Marie: `0x7b2d5a` (purple)
 - Thierry: `0x5a7b2d` (green)
 - Émilie: `0x7b5a2d` (brown)
+
+### Speaker Assignment
+Each level specifies its intro speaker via `introSpeaker` in the Level config. `DialogueScene.showDialogue(key, speaker?)` accepts an optional speaker parameter. Resolution order: explicit parameter → `DIALOGUE_SPEAKERS` map → default (Jean-Pierre). Valid speakers: `'Jean-Pierre'`, `'Émilie'`, `'Thierry'`, `'Marie'`.
 
 ### Typewriter Text Effect
 Dialogue text reveals character-by-character at 25ms intervals:

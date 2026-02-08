@@ -10,9 +10,29 @@ import { THEME } from '../config/theme';
  * Shows character dialogues and tutorial messages
  */
 
+// Canonical speaker for each dialogue key (fallback when no explicit speaker passed)
+export const DIALOGUE_SPEAKERS: Record<string, string> = {
+  tutorialIntro: 'Jean-Pierre',
+  jeanPierreIntro: 'Jean-Pierre',
+  level2Intro: 'Émilie',
+  level3Intro: 'Émilie',
+  level4Intro: 'Jean-Pierre',
+  level4WinchIntro: 'Jean-Pierre',
+  level4WinchIntroTouch: 'Jean-Pierre',
+  level4WinchIntroGamepad: 'Jean-Pierre',
+  level5Intro: 'Émilie',
+  level6Intro: 'Thierry',
+  thierryWarning: 'Thierry',
+  avalancheWarning: 'Thierry',
+  avalancheTrigger: 'Thierry',
+  level8Intro: 'Marie',
+  marieWelcome: 'Marie',
+};
+
 interface DialogueItem {
   key: string;
   text: string;
+  speaker?: string;
 }
 
 export default class DialogueScene extends Phaser.Scene {
@@ -244,7 +264,7 @@ export default class DialogueScene extends Phaser.Scene {
     }
   }
 
-  showDialogue(key: string): void {
+  showDialogue(key: string, speaker?: string): void {
     let text = t(key);
     if (!text || text === key) return;
 
@@ -256,7 +276,7 @@ export default class DialogueScene extends Phaser.Scene {
     // Split into pages if text would overflow max box height
     const pages = this.splitTextToPages(text);
     for (const page of pages) {
-      this.dialogueQueue.push({ key, text: page });
+      this.dialogueQueue.push({ key, text: page, speaker });
     }
 
     if (!this.isShowing) {
@@ -335,10 +355,8 @@ export default class DialogueScene extends Phaser.Scene {
       this.bg.setInteractive({ useHandCursor: true });
     }
 
-    let speaker = 'Jean-Pierre';
-    if (dialogue.key.includes('marie')) { speaker = 'Marie'; }
-    else if (dialogue.key.includes('thierry')) { speaker = 'Thierry'; }
-    else if (dialogue.key.includes('emilie')) { speaker = 'Émilie'; }
+    // Use explicit speaker, then DIALOGUE_SPEAKERS map, then default
+    const speaker = dialogue.speaker || DIALOGUE_SPEAKERS[dialogue.key] || 'Jean-Pierre';
 
     this.speakerText.setText(speaker);
     

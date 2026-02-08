@@ -64,6 +64,7 @@ export interface Level {
   steepZones: SteepZone[];
   winchAnchors: WinchAnchor[];
   introDialogue?: string;
+  introSpeaker?: string;
   isTutorial?: boolean;
   tutorialSteps?: TutorialStep[];
   specialFeatures?: SpecialFeature[];
@@ -94,6 +95,7 @@ export const LEVELS: Level[] = [
     steepZones: [],
     winchAnchors: [],
     introDialogue: 'tutorialIntro',
+    introSpeaker: 'Jean-Pierre',
     tutorialSteps: [
       { trigger: 'start', dialogue: 'tutorialWelcome', delay: 1000 },
       { trigger: 'welcomeDone', dialogue: 'tutorialControls', delay: 3000 },
@@ -128,6 +130,7 @@ export const LEVELS: Level[] = [
     steepZones: [],
     winchAnchors: [],
     introDialogue: 'jeanPierreIntro',
+    introSpeaker: 'Jean-Pierre',
     bonusObjectives: [
       { type: 'speed_run', target: 180 },
     ],
@@ -155,6 +158,7 @@ export const LEVELS: Level[] = [
     steepZones: [{ startY: 0.4, endY: 0.6, slope: 25 }],
     winchAnchors: [],
     introDialogue: 'level2Intro',
+    introSpeaker: 'Émilie',
     bonusObjectives: [
       { type: 'no_tumble', target: 0 },
       { type: 'fuel_efficiency', target: 60 },
@@ -186,6 +190,7 @@ export const LEVELS: Level[] = [
     steepZones: [],
     winchAnchors: [],
     introDialogue: 'level3Intro',
+    introSpeaker: 'Émilie',
     bonusObjectives: [
       { type: 'fuel_efficiency', target: 50 },
     ],
@@ -219,6 +224,7 @@ export const LEVELS: Level[] = [
     ],
     winchAnchors: [{ y: 0.15 }, { y: 0.5 }],
     introDialogue: 'level4Intro',
+    introSpeaker: 'Jean-Pierre',
     bonusObjectives: [
       { type: 'winch_mastery', target: 3 },
       { type: 'exploration', target: 2 },
@@ -250,6 +256,7 @@ export const LEVELS: Level[] = [
     steepZones: [],
     winchAnchors: [],
     introDialogue: 'level5Intro',
+    introSpeaker: 'Émilie',
     bonusObjectives: [
       { type: 'speed_run', target: 240 },
     ],
@@ -286,6 +293,7 @@ export const LEVELS: Level[] = [
     ],
     winchAnchors: [{ y: 0.05 }, { y: 0.3 }, { y: 0.55 }],
     introDialogue: 'level6Intro',
+    introSpeaker: 'Thierry',
     bonusObjectives: [
       { type: 'exploration', target: 3 },
       { type: 'no_tumble', target: 0 },
@@ -324,6 +332,7 @@ export const LEVELS: Level[] = [
     ],
     winchAnchors: [{ y: 0.1 }, { y: 0.4 }],
     introDialogue: 'thierryWarning',
+    introSpeaker: 'Thierry',
     bonusObjectives: [
       { type: 'no_tumble', target: 0 },
       { type: 'winch_mastery', target: 4 },
@@ -354,6 +363,7 @@ export const LEVELS: Level[] = [
     steepZones: [{ startY: 0.3, endY: 0.45, slope: 35 }],
     winchAnchors: [{ y: 0.2 }],
     introDialogue: 'level8Intro',
+    introSpeaker: 'Marie',
     bonusObjectives: [
       { type: 'fuel_efficiency', target: 70 },
       { type: 'speed_run', target: 300 },
