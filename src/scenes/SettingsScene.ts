@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, ColorblindMode, LEVELS } from '../setup';
 import { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, KeyboardLayout } from '../utils/keyboardLayout';
-import { isBackPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
+import { isBackPressed, isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { resetGameScenes } from '../utils/sceneTransitions';
@@ -702,26 +702,43 @@ export default class SettingsScene extends Phaser.Scene {
     const pad = this.input.gamepad.getPad(0);
     if (!pad) return;
 
-    // Check all buttons for a press
+    // Check all buttons for a press (including trigger-axis fallback)
     for (let i = 0; i < pad.buttons.length && i < 16; i++) {
-      if (pad.buttons[i]?.pressed) {
-        const actionId = this.rebindingGamepadAction as keyof GamepadBindings;
-        this.gamepadBindings[actionId] = i;
-        saveGamepadBindings(this.gamepadBindings);
-
-        const btn = this.gamepadRebindButtons[actionId];
-        const isCustom = i !== getDefaultGamepadBindings()[actionId];
-        btn.setText(getButtonName(i, getConnectedControllerType()) + (isCustom ? ' *' : ''));
-        btn.setStyle({ backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
-                        color: isCustom ? THEME.colors.accent : THEME.colors.info });
-
-        this.rebindingGamepadAction = null;
-        this.statusText?.setText(t('saved') || 'Saved!');
-        this.mainSizer?.layout();
-        this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
+      if (isGamepadButtonPressed(pad, i)) {
+        this.acceptGamepadRebind(i);
         return;
       }
     }
+
+    // Also detect triggers reported as axes only (Firefox Xbox LT/RT)
+    // Axes 4,5 map to button indices 6,7 (LT/RT)
+    const triggerAxes: [number, number][] = [[4, 6], [5, 7]];
+    for (const [axisIdx, btnIdx] of triggerAxes) {
+      if (pad.axes[axisIdx] && pad.axes[axisIdx].getValue() > 0.5) {
+        // Only accept if not already caught by the button loop above
+        if (!pad.buttons[btnIdx]?.pressed) {
+          this.acceptGamepadRebind(btnIdx);
+          return;
+        }
+      }
+    }
+  }
+
+  private acceptGamepadRebind(buttonIndex: number): void {
+    const actionId = this.rebindingGamepadAction as keyof GamepadBindings;
+    this.gamepadBindings[actionId] = buttonIndex;
+    saveGamepadBindings(this.gamepadBindings);
+
+    const btn = this.gamepadRebindButtons[actionId];
+    const isCustom = buttonIndex !== getDefaultGamepadBindings()[actionId];
+    btn.setText(getButtonName(buttonIndex, getConnectedControllerType()) + (isCustom ? ' *' : ''));
+    btn.setStyle({ backgroundColor: isCustom ? '#5a5a2d' : THEME.colors.buttonPrimaryHex,
+                    color: isCustom ? THEME.colors.accent : THEME.colors.info });
+
+    this.rebindingGamepadAction = null;
+    this.statusText?.setText(t('saved') || 'Saved!');
+    this.mainSizer?.layout();
+    this.time.delayedCall(800, () => this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex }));
   }
 
   private resetBindings(): void {

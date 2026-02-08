@@ -23,4 +23,4 @@ if (typeof globalThis.navigator === 'undefined') {
 export { LEVELS } from '../../../src/config/levels.ts';
 export { TRANSLATIONS, t, setLanguage, getLanguage, detectLanguage } from '../../../src/config/localization.ts';
 export { GAME_CONFIG, DIFFICULTY_MARKERS, FOOD_ITEMS } from '../../../src/config/gameConfig.ts';
-export { getButtonName, getDefaultGamepadBindings, detectControllerType } from '../../../src/utils/gamepad.ts';
+export { getButtonName, getDefaultGamepadBindings, detectControllerType, isGamepadButtonPressed } from '../../../src/utils/gamepad.ts';

@@ -5,7 +5,7 @@ import { THEME } from '../config/theme';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { saveProgress } from '../utils/gameProgress';
-import { isConfirmPressed, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
+import { isConfirmPressed, isGamepadButtonPressed, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
@@ -1608,7 +1608,7 @@ export default class GameScene extends Phaser.Scene {
     const touchWinch = this.touchInput.winch;
 
     // Gamepad winch button (configurable, default L1)
-    const gamepadWinch = this.gamepad?.buttons[this.gamepadBindings.winch]?.pressed ?? false;
+    const gamepadWinch = isGamepadButtonPressed(this.gamepad, this.gamepadBindings.winch);
 
     const isWinchPressed = this.winchKey.isDown || touchWinch || gamepadWinch;
 
@@ -2049,7 +2049,7 @@ export default class GameScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     // Check gamepad Start button for pause (with debounce)
     if (this.gamepad) {
-      const startPressed = this.gamepad.buttons[this.gamepadBindings.pause]?.pressed ?? false;
+      const startPressed = isGamepadButtonPressed(this.gamepad, this.gamepadBindings.pause);
       if (startPressed && !this.gamepadStartPressed && !this.isGameOver) {
         const dlg = this.scene.get('DialogueScene') as DialogueScene;
         if (!dlg?.isDialogueShowing()) {
@@ -2206,7 +2206,7 @@ export default class GameScene extends Phaser.Scene {
       if (this.gamepad.up) vy = -speed;
       if (this.gamepad.down) vy = speed;
       // Use configurable groom button (default: south/A)
-      if (this.gamepad.buttons[this.gamepadBindings.groom]?.pressed) this.isGrooming = true;
+      if (isGamepadButtonPressed(this.gamepad, this.gamepadBindings.groom)) this.isGrooming = true;
     }
 
     if (this.winchActive && this.winchAnchor) {
@@ -2244,7 +2244,7 @@ export default class GameScene extends Phaser.Scene {
     }
     // After dialogue closes, suppress grooming until groom key is released
     if (this.dialogueWasShowing) {
-      const gamepadGroom = this.gamepad !== null && (this.gamepadBindings ? this.gamepad.buttons[this.gamepadBindings.groom]?.pressed ?? false : false);
+      const gamepadGroom = this.gamepad !== null && (this.gamepadBindings ? isGamepadButtonPressed(this.gamepad, this.gamepadBindings.groom) : false);
       if (this.groomKey.isDown || gamepadGroom) {
         this.isGrooming = false;
         return;
@@ -2256,7 +2256,7 @@ export default class GameScene extends Phaser.Scene {
     const touchGroom = this.touchInput.groom;
 
     // Use configurable groom button (default: south/A)
-    const gamepadGroom = this.gamepad !== null && (this.gamepad.buttons[this.gamepadBindings.groom]?.pressed ?? false);
+    const gamepadGroom = this.gamepad !== null && isGamepadButtonPressed(this.gamepad, this.gamepadBindings.groom);
     this.isGrooming = this.groomKey.isDown || gamepadGroom || touchGroom;
 
     if (this.isGrooming && this.fuel > 0) {

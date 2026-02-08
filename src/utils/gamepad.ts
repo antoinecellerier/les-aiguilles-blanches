@@ -188,6 +188,26 @@ export function getMappingFromGamepad(gamepad: Phaser.Input.Gamepad.Gamepad | nu
   return getButtonMapping(type);
 }
 
+// Firefox reports Xbox LT/RT (indices 6,7) as axes instead of buttons.
+// Map trigger button indices to the axis index used as fallback.
+const TRIGGER_AXIS_FALLBACK: Record<number, number> = { 6: 4, 7: 5 };
+const TRIGGER_AXIS_THRESHOLD = 0.5;
+
+/**
+ * Check if a gamepad button is pressed, with Firefox trigger-as-axis fallback.
+ * For buttons 6 (LT) and 7 (RT), also checks the corresponding axis value
+ * in case the browser reports triggers as axes instead of buttons.
+ */
+export function isGamepadButtonPressed(pad: Phaser.Input.Gamepad.Gamepad | null, index: number): boolean {
+  if (!pad) return false;
+  if (pad.buttons[index]?.pressed) return true;
+  const axisIdx = TRIGGER_AXIS_FALLBACK[index];
+  if (axisIdx !== undefined && pad.axes[axisIdx]) {
+    return pad.axes[axisIdx].getValue() > TRIGGER_AXIS_THRESHOLD;
+  }
+  return false;
+}
+
 /**
  * Check if confirm button is pressed on any connected gamepad.
  * Handles Nintendo button swap automatically.
@@ -195,7 +215,7 @@ export function getMappingFromGamepad(gamepad: Phaser.Input.Gamepad.Gamepad | nu
 export function isConfirmPressed(gamepad: Phaser.Input.Gamepad.Gamepad | null): boolean {
   if (!gamepad) return false;
   const mapping = getMappingFromGamepad(gamepad);
-  return gamepad.buttons[mapping.confirm]?.pressed || false;
+  return isGamepadButtonPressed(gamepad, mapping.confirm);
 }
 
 /**
@@ -205,5 +225,5 @@ export function isConfirmPressed(gamepad: Phaser.Input.Gamepad.Gamepad | null): 
 export function isBackPressed(gamepad: Phaser.Input.Gamepad.Gamepad | null): boolean {
   if (!gamepad) return false;
   const mapping = getMappingFromGamepad(gamepad);
-  return gamepad.buttons[mapping.back]?.pressed || false;
+  return isGamepadButtonPressed(gamepad, mapping.back);
 }
