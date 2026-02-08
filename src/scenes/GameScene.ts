@@ -164,6 +164,7 @@ export default class GameScene extends Phaser.Scene {
   private groomKey!: Phaser.Input.Keyboard.Key;
   private winchKey!: Phaser.Input.Keyboard.Key;
   private gamepad: Phaser.Input.Gamepad.Gamepad | null = null;
+  private movementSensitivity = 1.0;
 
   // Bound event handlers for clean game.events.off() removal
   private boundTouchHandler = (data: TouchInputEvent) => { this.touchInput = data; };
@@ -197,6 +198,13 @@ export default class GameScene extends Phaser.Scene {
     this.steepWarningShown = false;
     this.winchActive = false;
     this.winchAnchor = null;
+
+    // Load movement sensitivity from settings
+    const savedSensitivity = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
+    this.movementSensitivity = savedSensitivity ? parseFloat(savedSensitivity) : 1.0;
+    if (isNaN(this.movementSensitivity) || this.movementSensitivity < 0.25 || this.movementSensitivity > 2.0) {
+      this.movementSensitivity = 1.0;
+    }
   }
 
   create(): void {
@@ -2198,7 +2206,7 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
-    const speed = GAME_CONFIG.GROOMER_SPEED * (this.buffs.speed ? BALANCE.SPEED_BUFF_MULTIPLIER : 1);
+    const speed = GAME_CONFIG.GROOMER_SPEED * this.movementSensitivity * (this.buffs.speed ? BALANCE.SPEED_BUFF_MULTIPLIER : 1);
 
     let vx = 0;
     let vy = 0;
@@ -2585,14 +2593,19 @@ export default class GameScene extends Phaser.Scene {
   }
 
   pauseGame(): void {
-    if (!this.scene.isActive()) return;
+    if (!this.scene.manager || !this.scene.isActive()) return;
     this.scene.pause();
     this.scene.launch('PauseScene', { levelIndex: this.levelIndex });
     this.scene.bringToTop('PauseScene');
   }
 
   resumeGame(): void {
+    if (!this.scene.manager) return;
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
+    // Reload sensitivity in case it was changed in Settings
+    const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
+    const val = saved ? parseFloat(saved) : 1.0;
+    this.movementSensitivity = (isNaN(val) || val < 0.25 || val > 2.0) ? 1.0 : val;
     this.scene.resume();
   }
 

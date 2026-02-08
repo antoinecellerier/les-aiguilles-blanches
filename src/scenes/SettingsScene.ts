@@ -312,6 +312,9 @@ export default class SettingsScene extends Phaser.Scene {
     // Layout selector
     sizer.add(this.createLayoutSelector(), { align: 'left' });
 
+    // Movement sensitivity slider
+    sizer.add(this.createSensitivitySlider(), { align: 'left' });
+
     // Gamepad bindings section
     sizer.add(this.createText('🎮 ' + (t('gamepadButtons') || 'Gamepad Buttons'), this.smallFont, THEME.colors.textSecondary),
       { align: 'left', padding: { top: 10 } });
@@ -445,6 +448,94 @@ export default class SettingsScene extends Phaser.Scene {
     
     row.add(btn);
     return row;
+  }
+
+  private createSensitivitySlider(): any {
+    const MIN = 0.25, MAX = 2.0, DEFAULT = 1.0;
+    const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
+    let value = saved ? parseFloat(saved) : DEFAULT;
+    if (isNaN(value) || value < MIN || value > MAX) value = DEFAULT;
+
+    const wrapper = this.rexUI.add.sizer({ orientation: 'vertical', space: { item: 4 } });
+
+    // Label row: "Sensibilité: 95%"
+    const labelRow = this.rexUI.add.fixWidthSizer({
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.3) },
+    });
+    const label = this.createText(
+      (t('movementSensitivity') || 'Sensitivity') + ':',
+      this.smallFont, THEME.colors.textSecondary
+    );
+    const valueText = this.createText(
+      Math.round(value * 100) + '%',
+      this.smallFont, THEME.colors.textPrimary
+    );
+    labelRow.add(label);
+    labelRow.add(valueText);
+    wrapper.add(labelRow, { align: 'left' });
+
+    // Slider track
+    const trackWidth = Math.min(this.contentWidth - 40, 200);
+    const trackHeight = 8;
+    const thumbSize = Math.max(this.minTouchTarget, 20);
+
+    const container = this.add.container(0, 0);
+    const track = this.add.graphics();
+    track.fillStyle(0x555555, 1);
+    track.fillRect(0, -trackHeight / 2, trackWidth, trackHeight);
+    container.add(track);
+
+    const fill = this.add.graphics();
+    container.add(fill);
+
+    const thumb = this.add.graphics();
+    container.add(thumb);
+
+    const drawThumb = (t: number) => {
+      const x = t * trackWidth;
+      thumb.clear();
+      thumb.fillStyle(0x87CEEB, 1);
+      thumb.fillRect(x - 6, -thumbSize / 2, 12, thumbSize);
+      fill.clear();
+      fill.fillStyle(0x3a6d8e, 1);
+      fill.fillRect(0, -trackHeight / 2, x, trackHeight);
+    };
+
+    const valToT = (v: number) => (v - MIN) / (MAX - MIN);
+    const tToVal = (t: number) => Math.round((MIN + t * (MAX - MIN)) * 20) / 20;
+
+    drawThumb(valToT(value));
+
+    const hitZone = this.add.rectangle(
+      trackWidth / 2, 0, trackWidth + thumbSize, thumbSize, 0x000000, 0
+    ).setInteractive({ useHandCursor: true, draggable: true });
+    container.add(hitZone);
+
+    const updateFromPointer = (pointerX: number) => {
+      const bounds = hitZone.getBounds();
+      const relX = pointerX - bounds.left;
+      const t = Phaser.Math.Clamp(relX / trackWidth, 0, 1);
+      value = tToVal(t);
+      drawThumb(valToT(value));
+      valueText.setText(Math.round(value * 100) + '%');
+      localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+    };
+
+    let dragging = false;
+    hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      dragging = true;
+      updateFromPointer(pointer.x);
+    });
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (dragging && pointer.isDown) updateFromPointer(pointer.x);
+    });
+    this.input.on('pointerup', () => { dragging = false; });
+
+    container.setSize(trackWidth, thumbSize);
+    wrapper.add(container, { align: 'left' });
+
+    return wrapper;
   }
 
   private createColorblindButtons(): any {

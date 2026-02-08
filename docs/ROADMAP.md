@@ -12,7 +12,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Anchor point accessibility - Unit test validates no anchor falls inside steep zones; all current levels pass
 - [x] Groomer fall mechanics - Center-of-mass based cliff fall instead of instant physics overlap death
 - [x] Chalet placement overlap - AABB overlap check against restaurant/fuel station footprints before placing chalets
-- [ ] PauseScene boot crash (not reproducible) - `this.manager is null` in resumeGame during boot; may be HMR artifact. Watch for recurrence
+- [x] PauseScene boot crash (not reproducible) - Added `this.scene.manager` null guard in pauseGame/resumeGame to handle deferred scene teardown timing
 - [ ] Firefox fullscreen button with gamepad - `requestFullscreen()` requires user-gesture; gamepad events don't qualify in Firefox
 - [x] BootScene GitHub link - GitHub issues link in BootScene error handler and index.html fallback (15s timeout)
 - [x] Firefox desktop touch detection - Touch availability updates on background tap via canvas listener
@@ -38,8 +38,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
-- [ ] Movement sensitivity setting - Add slider in SettingsScene to adjust groomer movement speed/responsiveness
-- [ ] Hide gamepad button hints in dialogues when no controller is connected
+- [x] Movement sensitivity setting - Continuous slider (25%–200%) in SettingsScene, saved to localStorage, applied as speed multiplier
+- [x] Hide gamepad button hints in dialogues when no controller is connected
 
 ## Recently Completed
 

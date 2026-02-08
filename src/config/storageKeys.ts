@@ -13,4 +13,5 @@ export const STORAGE_KEYS = {
   BINDINGS_VERSION: 'snowGroomer_bindingsVersion',
   DISPLAY_NAMES: 'snowGroomer_displayNames',
   GAMEPAD_BINDINGS: 'snowGroomer_gamepadBindings',
+  MOVEMENT_SENSITIVITY: 'snowGroomer_movementSensitivity',
 } as const;
