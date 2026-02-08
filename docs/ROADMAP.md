@@ -30,6 +30,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Advanced tiller mechanics - Tiller raise/lower, speed-dependent grooming quality for harder levels
 - [ ] Make test script robust to stale sessions
 - [x] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
+- [ ] Adapt the menu scene to render weather from the current level (night, storm, etc.)
+- [ ] Make the settings menu look nicer
 
 ## Future (Backlog)
 
@@ -42,6 +44,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Movement sensitivity setting - Continuous slider (25%–200%) in SettingsScene, saved to localStorage, applied as speed multiplier
 - [x] Hide gamepad button hints in dialogues when no controller is connected
 - [x] Settings keyboard/gamepad navigation - Full focus system for all 17 interactive elements, arrow keys + D-pad, Enter/A to activate, left/right for groups/slider
+- [ ] Publish as standalone game package
 
 ## Recently Completed
 
