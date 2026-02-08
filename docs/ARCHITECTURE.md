@@ -805,7 +805,7 @@ GameScene and HUDScene communicate via Phaser's global event emitter (`game.even
 
 | Event | Direction | Payload | Frequency |
 |-------|-----------|---------|-----------|
-| `GAME_STATE` | GameScene → HUD | fuel, stamina, coverage, winchActive, levelIndex | Every frame |
+| `GAME_STATE` | GameScene → HUD | fuel, stamina, coverage, winchActive, levelIndex, tumbleCount, fuelUsed, winchUseCount, pathsVisited, totalPaths | Every frame |
 | `TIMER_UPDATE` | GameScene → HUD | seconds remaining | Every second |
 | `TOUCH_INPUT` | HUD → GameScene | left, right, up, down, groom, winch | Every frame |
 | `PAUSE_REQUEST` | HUD/Pause → GameScene | — | On button press |
@@ -815,6 +815,7 @@ GameScene and HUDScene communicate via Phaser's global event emitter (`game.even
 
 Always clean up listeners in `shutdown()` with `this.game.events.off(GAME_EVENTS.*)`.
 
+GameScene constructs the `GAME_STATE` payload via `buildGameStatePayload()` — a single method used by both the per-frame emit in `update()` and the final emit in `gameOver()`. HUDScene uses the bonus stats to evaluate bonus objectives in real-time inside the visor, with irreversible failure tracking for `no_tumble` and `speed_run`.
 #### Touch Controls Camera Offset
 
 On narrow/portrait devices (aspect < 1.2), virtual touch controls overlap the play area. HUDScene emits `TOUCH_CONTROLS_TOP` with the top edge of the controls in screen pixels. GameScene uses this to apply a negative `followOffset.y` so the groomer renders above the controls. Camera bounds are extended downward by `|followOffset.y|` via `updateCameraBoundsForOffset()` to prevent clamping at the world bottom edge.

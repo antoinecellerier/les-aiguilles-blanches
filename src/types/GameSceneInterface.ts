@@ -5,6 +5,12 @@ export interface GameStateEvent {
   coverage: number;
   winchActive: boolean;
   levelIndex: number;
+  // Bonus objective tracking
+  tumbleCount: number;
+  fuelUsed: number;
+  winchUseCount: number;
+  pathsVisited: number;
+  totalPaths: number;
 }
 
 export interface TouchInputEvent {

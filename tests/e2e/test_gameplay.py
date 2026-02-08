@@ -238,3 +238,42 @@ class TestSnowContrast:
         }""")
         
         assert new_count > initial_count, f"Grooming should increase count: {initial_count} -> {new_count}"
+
+
+class TestBonusObjectives:
+    """Test bonus objectives display in HUD."""
+
+    def test_bonus_objectives_visible_on_level_with_bonuses(self, game_page: Page):
+        """HUD should show bonus objective text on levels that have them."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        dismiss_dialogues(game_page)
+        # Level 1 (Les Marmottes) has a speed_run bonus
+        skip_to_level(game_page, 1)
+        dismiss_dialogues(game_page)
+        game_page.wait_for_timeout(500)
+
+        bonus_count = game_page.evaluate("""() => {
+            const hud = window.game.scene.getScene('HUDScene');
+            if (!hud) return 0;
+            return hud.children.list.filter(c =>
+                c.type === 'Text' && c.text && (c.text.includes('✓') || c.text.includes('✗') || c.text.includes('≤'))
+            ).length;
+        }""")
+        assert bonus_count > 0, "Expected bonus objective text in HUD"
+
+    def test_no_bonus_objectives_on_tutorial(self, game_page: Page):
+        """Tutorial (level 0) has no bonus objectives — HUD should not show any."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        dismiss_dialogues(game_page)
+        game_page.wait_for_timeout(500)
+
+        bonus_count = game_page.evaluate("""() => {
+            const hud = window.game.scene.getScene('HUDScene');
+            if (!hud) return 0;
+            return hud.children.list.filter(c =>
+                c.type === 'Text' && c.text && c.text.includes('≤')
+            ).length;
+        }""")
+        assert bonus_count == 0, "Tutorial should not show bonus objectives"

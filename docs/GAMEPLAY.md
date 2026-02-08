@@ -243,7 +243,7 @@ Each level awards 1-3 stars based on:
 
 ### Bonus Objectives
 
-Most levels have optional bonus challenges shown on the results screen:
+Most levels have optional bonus challenges displayed in the HUD below the visor during gameplay:
 
 | Objective | Description |
 |-----------|-------------|
@@ -252,6 +252,8 @@ Most levels have optional bonus challenges shown on the results screen:
 | **Speed run** | Complete within a time target |
 | **Winch mastery** | Successfully use the winch N times |
 | **Exploration** | Visit all service roads on the level |
+
+Objectives turn green (✓) when met and red (✗) on irreversible failure (e.g., first tumble). On compact screens, objectives flash for 4 seconds at level start then fade, re-appearing briefly on status change.
 
 ## 🎭 Characters
 

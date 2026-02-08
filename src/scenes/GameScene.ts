@@ -7,7 +7,7 @@ import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
-import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
+import { GAME_EVENTS, type GameStateEvent, type TouchInputEvent } from '../types/GameSceneInterface';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { HazardSystem } from '../systems/HazardSystem';
 import { WildlifeSystem, type ObstacleRect } from '../systems/WildlifeSystem';
@@ -629,13 +629,7 @@ export default class GameScene extends Phaser.Scene {
     this.wildlifeSystem.update(this.groomer.x, this.groomer.y, delta);
 
     // Emit game state for HUD
-    this.game.events.emit(GAME_EVENTS.GAME_STATE, {
-      fuel: this.fuel,
-      stamina: this.stamina,
-      coverage: this.getCoverage(),
-      winchActive: this.winchSystem.active,
-      levelIndex: this.levelIndex,
-    });
+    this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
   }
 
   private checkSteepness(): void {
@@ -1213,23 +1207,30 @@ export default class GameScene extends Phaser.Scene {
     this.updateCameraBoundsForOffset();
   }
 
+  private buildGameStatePayload(): GameStateEvent {
+    return {
+      fuel: this.fuel,
+      stamina: this.stamina,
+      coverage: this.getCoverage(),
+      winchActive: this.winchSystem?.active ?? false,
+      levelIndex: this.levelIndex,
+      tumbleCount: this.tumbleCount,
+      fuelUsed: Math.round(this.fuelUsed),
+      winchUseCount: this.winchSystem?.useCount ?? 0,
+      pathsVisited: this.accessPathsVisited.size,
+      totalPaths: (this.level.accessPaths || []).length,
+    };
+  }
+
   gameOver(won: boolean, failReason: string | null = null): void {
     if (this.isGameOver) return;
     this.isGameOver = true;
 
     // Emit final game state so HUD has correct values before stopping
-    this.game.events.emit(GAME_EVENTS.GAME_STATE, {
-      fuel: this.fuel,
-      stamina: this.stamina,
-      coverage: this.getCoverage(),
-      winchActive: this.winchSystem.active,
-      levelIndex: this.levelIndex,
-    });
+    this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
 
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
-
-    const totalPaths = (this.level.accessPaths || []).length;
 
     this.scene.start('LevelCompleteScene', {
       won: won,
@@ -1241,7 +1242,7 @@ export default class GameScene extends Phaser.Scene {
       tumbleCount: this.tumbleCount,
       winchUseCount: this.winchSystem.useCount,
       pathsVisited: this.accessPathsVisited.size,
-      totalPaths: totalPaths,
+      totalPaths: (this.level.accessPaths || []).length,
     });
   }
 

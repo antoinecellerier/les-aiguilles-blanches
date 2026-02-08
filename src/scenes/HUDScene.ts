@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { t, LEVELS, type Level } from '../setup';
+import { t, LEVELS, type Level, type BonusObjective } from '../setup';
 import { THEME } from '../config/theme';
 import { DEPTHS } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
@@ -19,7 +19,7 @@ interface HUDSceneData {
 
 export default class HUDScene extends Phaser.Scene {
   private level!: Level;
-  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0 };
+  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0 };
   private isSkipping = false;
   private gamepadSelectPressed = false;
   private uiScale = 1;
@@ -44,6 +44,12 @@ export default class HUDScene extends Phaser.Scene {
   
   // Touch controls bounds (for dialogue positioning)
   private touchControlsTopEdge = 0;
+
+  // Bonus objectives panel
+  private bonusTexts: Phaser.GameObjects.Text[] = [];
+  private bonusObjectives: BonusObjective[] = [];
+  private bonusFailed: boolean[] = []; // irreversible failure tracking
+  private bonusFadeTimer?: Phaser.Time.TimerEvent;
 
   // Touch controls state (emitted via GAME_EVENTS.TOUCH_INPUT)
   private touchUp = false;
@@ -123,7 +129,10 @@ export default class HUDScene extends Phaser.Scene {
     const row2Y = row1Y + nameGap;
     const row3Y = row2Y + rowGap;
     const row4Y = row3Y + Math.round((isShort ? 21 : 24) * this.uiScale);
-    const visorHeight = row4Y + Math.round((isShort ? 26 : 26) * this.uiScale);
+    const bonusCount = (this.level.bonusObjectives || []).length;
+    const bonusLineHeight = Math.round(20 * this.uiScale);
+    const bonusExtraHeight = bonusCount > 0 ? bonusCount * bonusLineHeight + Math.round(8 * this.uiScale) : 0;
+    const visorHeight = row4Y + Math.round((isShort ? 26 : 26) * this.uiScale) + bonusExtraHeight;
 
     this.add.rectangle(0, 0, width, visorHeight, 0x000000)
       .setOrigin(0).setScrollFactor(0).setAlpha(0.55);
@@ -296,6 +305,35 @@ export default class HUDScene extends Phaser.Scene {
         fontStyle: 'bold',
         color: '#00FF00',
       }).setScrollFactor(0).setVisible(false);
+    }
+
+    // Bonus objectives inside visor (bottom of visor area)
+    this.bonusObjectives = this.level.bonusObjectives || [];
+    this.bonusFailed = this.bonusObjectives.map(() => false);
+    this.bonusTexts = [];
+    if (this.bonusObjectives.length > 0) {
+      const bonusStartY = visorHeight - bonusExtraHeight + Math.round(2 * this.uiScale);
+      this.bonusObjectives.forEach((obj, i) => {
+        const label = this.getBonusLabel(obj);
+        const txt = this.add.text(padding, bonusStartY + i * bonusLineHeight, '★ ' + label, {
+          fontFamily: THEME.fonts.family,
+          fontSize: fontMed,
+          fontStyle: 'bold',
+          color: '#FFFFFF',
+        }).setScrollFactor(0);
+        this.bonusTexts.push(txt);
+      });
+
+      // On compact screens, flash objectives then fade out after 4 seconds
+      if (isCompact) {
+        this.bonusFadeTimer = this.time.delayedCall(4000, () => {
+          this.bonusTexts.forEach(txt => {
+            if (txt?.active) {
+              this.tweens.add({ targets: txt, alpha: 0, duration: 800, ease: 'Power2' });
+            }
+          });
+        });
+      }
     }
 
     this.barWidth = barWidth;
@@ -722,6 +760,9 @@ export default class HUDScene extends Phaser.Scene {
       }
     }
 
+    // Update bonus objectives display
+    this.updateBonusObjectives();
+
     // Action button overlap detection: check all active pointers against all
     // action buttons so a thumb overlapping both groom and winch activates both
     if (this.actionButtons.length > 0) {
@@ -798,6 +839,92 @@ export default class HUDScene extends Phaser.Scene {
     this.gameState = state;
   }
 
+  private getBonusLabel(obj: BonusObjective): string {
+    switch (obj.type) {
+      case 'fuel_efficiency': return (t('bonusFuel') || 'Fuel') + ' ≤' + obj.target + '%';
+      case 'no_tumble': return t('bonusNoTumble') || 'No tumbles';
+      case 'speed_run': {
+        const m = Math.floor(obj.target / 60);
+        const s = obj.target % 60;
+        return (t('bonusSpeed') || 'Time') + ' ≤' + m + ':' + s.toString().padStart(2, '0');
+      }
+      case 'winch_mastery': return (t('bonusWinch') || 'Winch') + ' ×' + obj.target;
+      case 'exploration': return (t('bonusExplore') || 'Roads') + ' ×' + obj.target;
+      default: return '';
+    }
+  }
+
+  private updateBonusObjectives(): void {
+    if (this.bonusTexts.length === 0) return;
+    const s = this.gameState;
+    const timeLimit = this.level.timeLimit ?? 0;
+    const timeUsed = timeLimit > 0
+      ? timeLimit - (this.timerText?.active ? this.parseTimer() : 0)
+      : 0;
+
+    this.bonusObjectives.forEach((obj, i) => {
+      const txt = this.bonusTexts[i];
+      if (!txt?.active) return;
+
+      let met = false;
+      let suffix = '';
+
+      switch (obj.type) {
+        case 'fuel_efficiency':
+          met = s.fuelUsed <= obj.target;
+          suffix = ' ' + s.fuelUsed + '%';
+          // Fuel can still go down — not irreversibly failed
+          break;
+        case 'no_tumble':
+          met = s.tumbleCount === 0;
+          if (s.tumbleCount > 0) this.bonusFailed[i] = true;
+          break;
+        case 'speed_run':
+          met = timeUsed <= obj.target;
+          if (timeUsed > obj.target) this.bonusFailed[i] = true;
+          break;
+        case 'winch_mastery':
+          met = s.winchUseCount >= obj.target;
+          suffix = ' ' + s.winchUseCount + '/' + obj.target;
+          break;
+        case 'exploration':
+          met = s.pathsVisited >= obj.target;
+          suffix = ' ' + s.pathsVisited + '/' + obj.target;
+          break;
+      }
+
+      const label = '★ ' + this.getBonusLabel(obj);
+      const prevText = txt.text;
+      if (met) {
+        txt.setText(label + ' ✓');
+        txt.setColor(THEME.colors.success);
+      } else if (this.bonusFailed[i]) {
+        txt.setText(label + ' ✗');
+        txt.setColor(THEME.colors.danger);
+      } else {
+        txt.setText(label + suffix);
+        txt.setColor('#FFFFFF');
+      }
+
+      // On compact screens, flash objective back when status changes
+      if (txt.alpha < 0.1 && txt.text !== prevText) {
+        txt.setAlpha(0.85);
+        this.tweens.add({ targets: txt, alpha: 0, duration: 800, delay: 2000, ease: 'Power2' });
+      }
+    });
+  }
+
+  private parseTimer(): number {
+    if (!this.timerText?.active) return 0;
+    const text = this.timerText.text;
+    const parts = text.split(':');
+    if (parts.length !== 2) return 0;
+    const mins = parseInt(parts[0], 10);
+    const secs = parseInt(parts[1], 10);
+    if (isNaN(mins) || isNaN(secs)) return 0;
+    return mins * 60 + secs;
+  }
+
   private updateTimer(seconds: number): void {
     if (!this.timerText || !this.timerText.active) return;
     const mins = Math.floor(seconds / 60);
@@ -828,6 +955,11 @@ export default class HUDScene extends Phaser.Scene {
     this.staminaText = null;
     this.coverageText = null;
     this.winchStatus = null;
+    this.bonusTexts = [];
+    this.bonusObjectives = [];
+    this.bonusFailed = [];
+    this.bonusFadeTimer?.remove();
+    this.bonusFadeTimer = undefined;
     this.timerText = null;
     this.actionButtons = [];
   }

@@ -44,9 +44,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Movement sensitivity setting - Continuous slider (25%–200%) in SettingsScene, saved to localStorage, applied as speed multiplier
 - [x] Hide gamepad button hints in dialogues when no controller is connected
 - [x] Settings keyboard/gamepad navigation - Full focus system for all 17 interactive elements, arrow keys + D-pad, Enter/A to activate, left/right for groups/slider
+- [x] HUD bonus objectives panel - Live display of bonus objectives inside visor during gameplay with ✓/✗ status, compact mode fade
 - [ ] Publish as standalone game package
 
 ## Recently Completed
+
+- ✅ **HUD bonus objectives** — Bonus objectives (fuel efficiency, no tumbles, speed run, winch mastery, exploration) displayed inside visor during gameplay. Live evaluation with green ✓ on success, red ✗ on irreversible failure. Compact screens flash objectives for 4s then fade, with re-flash on status change. Added `tumbleCount`, `fuelUsed`, `winchUseCount`, `pathsVisited`, `totalPaths` to `GameStateEvent`. Extracted `buildGameStatePayload()` in GameScene to remove emit duplication.
 
 - ✅ **Cross-cutting code health fixes** — Extracted `ResizeManager` utility (dedup resize-debounce in 4 scenes, -56 net lines). Extracted `storage.ts` with typed `getJSON`/`setJSON`/`getString`/`setString` (dedup localStorage patterns in 6 files, -23 net lines). Centralized `BINDINGS_VERSION` in `storageKeys.ts` (was fragile duplicate). Added `SENSITIVITY_MIN/MAX/DEFAULT` and `SCENE_INPUT_DELAY` to BALANCE. Extracted `getSavedKeyName()` to dedup `getGroomKeyName`/`getWinchKeyName`.
 
@@ -158,3 +161,4 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - Color magic numbers: inline `0x...` colors in ObstacleBuilder, WinchSystem, WeatherSystem, HazardSystem. Centralize into THEME incrementally.
 - Silent storage errors: `storage.ts` catch blocks have no user notification. Consider toast/banner for critical save failures (progress, bindings).
 - Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
+- Bonus evaluation duplication: HUDScene.updateBonusObjectives() and LevelCompleteScene.evaluateBonusObjectives() both evaluate 5 bonus types with similar switch logic. Extract shared `evaluateBonusObjective()` and `getBonusLabel()` to `src/utils/bonusObjectives.ts`.
