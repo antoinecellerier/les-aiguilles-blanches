@@ -4,6 +4,7 @@
  */
 
 import { STORAGE_KEYS } from './storageKeys';
+import { getString, setString } from '../utils/storage';
 
 export type SupportedLanguage = 'fr' | 'en' | 'de' | 'it' | 'es';
 
@@ -1110,7 +1111,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
 export function setLanguage(lang: SupportedLanguage): void {
     if (TRANSLATIONS[lang]) {
         currentLang = lang;
-        localStorage.setItem(STORAGE_KEYS.LANG, lang);
+        setString(STORAGE_KEYS.LANG, lang);
     }
 }
 
@@ -1123,7 +1124,7 @@ export function t(key: string): string {
 }
 
 export function detectLanguage(): SupportedLanguage {
-    const saved = localStorage.getItem(STORAGE_KEYS.LANG);
+    const saved = getString(STORAGE_KEYS.LANG);
     if (saved && saved in TRANSLATIONS) {
         return saved as SupportedLanguage;
     }

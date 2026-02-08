@@ -25,6 +25,7 @@
  */
 
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { getJSON, setJSON } from './storage';
 
 export type ControllerType = 'xbox' | 'nintendo' | 'playstation' | 'generic';
 
@@ -76,25 +77,17 @@ export function getDefaultGamepadBindings(): GamepadBindings {
 }
 
 export function loadGamepadBindings(): GamepadBindings {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.GAMEPAD_BINDINGS);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const defaults = getDefaultGamepadBindings();
-      return {
-        groom: typeof parsed.groom === 'number' ? parsed.groom : defaults.groom,
-        winch: typeof parsed.winch === 'number' ? parsed.winch : defaults.winch,
-        pause: typeof parsed.pause === 'number' ? parsed.pause : defaults.pause,
-      };
-    }
-  } catch (e) { console.warn('Failed to load gamepad bindings:', e); }
-  return getDefaultGamepadBindings();
+  const defaults = getDefaultGamepadBindings();
+  const parsed = getJSON<Partial<GamepadBindings>>(STORAGE_KEYS.GAMEPAD_BINDINGS, {});
+  return {
+    groom: typeof parsed.groom === 'number' ? parsed.groom : defaults.groom,
+    winch: typeof parsed.winch === 'number' ? parsed.winch : defaults.winch,
+    pause: typeof parsed.pause === 'number' ? parsed.pause : defaults.pause,
+  };
 }
 
 export function saveGamepadBindings(bindings: GamepadBindings): void {
-  try {
-    localStorage.setItem(STORAGE_KEYS.GAMEPAD_BINDINGS, JSON.stringify(bindings));
-  } catch { /* Private browsing or quota exceeded */ }
+  setJSON(STORAGE_KEYS.GAMEPAD_BINDINGS, bindings);
 }
 
 /** Get display name for a button index, adapted to the connected controller type. */

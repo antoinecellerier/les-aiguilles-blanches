@@ -4,6 +4,7 @@
  */
 
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { getJSON, setJSON } from './storage';
 
 interface GameProgress {
   currentLevel: number;
@@ -11,13 +12,7 @@ interface GameProgress {
 }
 
 export function getSavedProgress(): GameProgress | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROGRESS);
-    if (!saved) return null;
-    return JSON.parse(saved) as GameProgress;
-  } catch {
-    return null;
-  }
+  return getJSON<GameProgress | null>(STORAGE_KEYS.PROGRESS, null);
 }
 
 export function saveProgress(level: number): void {
@@ -25,9 +20,7 @@ export function saveProgress(level: number): void {
     currentLevel: level,
     savedAt: new Date().toISOString(),
   };
-  try {
-    localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
-  } catch { /* Private browsing or quota exceeded */ }
+  setJSON(STORAGE_KEYS.PROGRESS, progress);
 }
 
 export function clearProgress(): void {

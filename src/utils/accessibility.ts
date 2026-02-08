@@ -4,6 +4,7 @@
  */
 
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { getJSON, setJSON } from './storage';
 
 export type ColorblindMode = 'none' | 'deuteranopia' | 'protanopia' | 'tritanopia';
 
@@ -62,14 +63,8 @@ export const Accessibility: AccessibilityModule = {
   },
 
   loadSettings(): AccessibilitySettings {
-    const saved = localStorage.getItem(STORAGE_KEYS.ACCESSIBILITY);
-    if (saved) {
-      try {
-        Object.assign(this.settings, JSON.parse(saved));
-      } catch (e) {
-        console.warn('Failed to parse accessibility settings:', e);
-      }
-    }
+    const saved = getJSON<Partial<AccessibilitySettings>>(STORAGE_KEYS.ACCESSIBILITY, {});
+    Object.assign(this.settings, saved);
 
     // Check system preferences
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -80,9 +75,7 @@ export const Accessibility: AccessibilityModule = {
   },
 
   saveSettings() {
-    try {
-      localStorage.setItem(STORAGE_KEYS.ACCESSIBILITY, JSON.stringify(this.settings));
-    } catch { /* Private browsing or quota exceeded */ }
+    setJSON(STORAGE_KEYS.ACCESSIBILITY, this.settings);
   },
 
   // Color transforms for colorblind modes

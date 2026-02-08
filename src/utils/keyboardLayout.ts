@@ -4,13 +4,9 @@
 
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from './gamepad';
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { getString, setString, getJSON } from './storage';
 
 export type KeyboardLayout = 'qwerty' | 'azerty' | 'qwertz';
-
-function safeSetItem(key: string, value: string): void {
-  try { localStorage.setItem(key, value); }
-  catch { /* Private browsing or quota exceeded */ }
-}
 
 // Movement key defaults per layout
 const LAYOUT_DEFAULTS: Record<KeyboardLayout, { up: number; down: number; left: number; right: number }> = {
@@ -31,7 +27,7 @@ const LAYOUT_NAMES: Record<KeyboardLayout, { up: string; down: string; left: str
  */
 export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
   // Check if already detected and stored
-  const stored = localStorage.getItem(STORAGE_KEYS.KEYBOARD_LAYOUT);
+  const stored = getString(STORAGE_KEYS.KEYBOARD_LAYOUT);
   if (stored && isValidLayout(stored)) {
     return stored as KeyboardLayout;
   }
@@ -55,8 +51,8 @@ export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
         detected = 'qwertz';
       }
       
-      safeSetItem(STORAGE_KEYS.KEYBOARD_LAYOUT, detected);
-      safeSetItem(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
+      setString(STORAGE_KEYS.KEYBOARD_LAYOUT, detected);
+      setString(STORAGE_KEYS.LAYOUT_DETECTED, 'true');
       return detected;
     } catch (e) {
       console.warn('Keyboard Layout API unavailable:', e);
@@ -74,7 +70,7 @@ export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
  * Returns cached value or default
  */
 export function getKeyboardLayout(): KeyboardLayout {
-  const stored = localStorage.getItem(STORAGE_KEYS.KEYBOARD_LAYOUT);
+  const stored = getString(STORAGE_KEYS.KEYBOARD_LAYOUT);
   if (stored && isValidLayout(stored)) {
     return stored as KeyboardLayout;
   }
@@ -85,14 +81,14 @@ export function getKeyboardLayout(): KeyboardLayout {
  * Set the keyboard layout manually
  */
 export function setKeyboardLayout(layout: KeyboardLayout): void {
-  safeSetItem(STORAGE_KEYS.KEYBOARD_LAYOUT, layout);
+  setString(STORAGE_KEYS.KEYBOARD_LAYOUT, layout);
 }
 
 /**
  * Check if layout has been auto-detected
  */
 export function isLayoutDetected(): boolean {
-  return localStorage.getItem(STORAGE_KEYS.LAYOUT_DETECTED) === 'true';
+  return getString(STORAGE_KEYS.LAYOUT_DETECTED) === 'true';
 }
 
 /**
@@ -119,27 +115,16 @@ export function getLayoutDefaults(): { up: number; down: number; left: number; r
  * Get display names for movement keys based on saved bindings or layout
  */
 export function getMovementKeyNames(): { up: string; down: string; left: string; right: string } {
-  // First try to get from saved display names
-  const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
-  const savedBindings = localStorage.getItem(STORAGE_KEYS.BINDINGS);
-  
-  if (savedNames && savedBindings) {
-    try {
-      const names = JSON.parse(savedNames);
-      const bindings = JSON.parse(savedBindings);
-      
-      // Check if we have display names for all movement keys
-      if (names[bindings.up] && names[bindings.down] && names[bindings.left] && names[bindings.right]) {
-        return {
-          up: names[bindings.up],
-          down: names[bindings.down],
-          left: names[bindings.left],
-          right: names[bindings.right],
-        };
-      }
-    } catch {
-      // Fall through to layout defaults
-    }
+  const names = getJSON<Record<string, string>>(STORAGE_KEYS.DISPLAY_NAMES, {});
+  const bindings = getJSON<Record<string, number>>(STORAGE_KEYS.BINDINGS, {});
+
+  if (names[bindings.up] && names[bindings.down] && names[bindings.left] && names[bindings.right]) {
+    return {
+      up: names[bindings.up],
+      down: names[bindings.down],
+      left: names[bindings.left],
+      right: names[bindings.right],
+    };
   }
   
   // Fall back to layout defaults
@@ -156,26 +141,19 @@ export function getMovementKeysString(): string {
   return `${names.up}${names.left}${names.down}${names.right}`.toUpperCase();
 }
 
+/** Look up a single key's display name from saved bindings. */
+function getSavedKeyName(bindingKey: string, fallback: string): string {
+  const names = getJSON<Record<string, string>>(STORAGE_KEYS.DISPLAY_NAMES, {});
+  const bindings = getJSON<Record<string, number>>(STORAGE_KEYS.BINDINGS, {});
+  const code = bindings[bindingKey];
+  return (code != null && names[code]) ? names[code].toUpperCase() : fallback;
+}
+
 /**
  * Get the display name for the groom key (default: SPACE)
  */
 export function getGroomKeyName(): string {
-  const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
-  const savedBindings = localStorage.getItem(STORAGE_KEYS.BINDINGS);
-  
-  let keyName = 'SPACE';
-  if (savedNames && savedBindings) {
-    try {
-      const names = JSON.parse(savedNames);
-      const bindings = JSON.parse(savedBindings);
-      if (names[bindings.groom]) {
-        keyName = names[bindings.groom].toUpperCase();
-      }
-    } catch {
-      // Fall through to default
-    }
-  }
-
+  const keyName = getSavedKeyName('groom', 'SPACE');
   const gpBindings = loadGamepadBindings();
   const gpBtn = getButtonName(gpBindings.groom, getConnectedControllerType());
   return keyName + ' / ' + gpBtn;
@@ -185,22 +163,7 @@ export function getGroomKeyName(): string {
  * Get the display name for the winch key (default: SHIFT)
  */
 export function getWinchKeyName(): string {
-  const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
-  const savedBindings = localStorage.getItem(STORAGE_KEYS.BINDINGS);
-  
-  let keyName = 'SHIFT';
-  if (savedNames && savedBindings) {
-    try {
-      const names = JSON.parse(savedNames);
-      const bindings = JSON.parse(savedBindings);
-      if (names[bindings.winch]) {
-        keyName = names[bindings.winch].toUpperCase();
-      }
-    } catch {
-      // Fall through to default
-    }
-  }
-
+  const keyName = getSavedKeyName('winch', 'SHIFT');
   const gpBindings = loadGamepadBindings();
   const gpBtn = getButtonName(gpBindings.winch, getConnectedControllerType());
   return keyName + ' / ' + gpBtn;
