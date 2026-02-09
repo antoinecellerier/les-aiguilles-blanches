@@ -7,7 +7,6 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Bugs
 
 - [ ] Firefox fullscreen button with gamepad - `requestFullscreen()` requires user-gesture; gamepad events don't qualify in Firefox
-- [ ] Nintendo B-button back navigation - Flaky in full test suite (timing-sensitive gamepad stick navigation); passes in isolation
 
 ## Polish (Medium Priority)
 

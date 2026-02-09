@@ -80,9 +80,9 @@ def navigate_stick_down(page: Page, steps: int = 3):
     """Navigate down N steps using left stick pulses (for menu navigation)."""
     for _ in range(steps):
         set_gamepad_stick(page, 'left', 0, 0.8)
-        page.wait_for_timeout(50)
+        page.wait_for_timeout(80)
         set_gamepad_stick(page, 'left', 0, 0)
-        page.wait_for_timeout(250)
+        page.wait_for_timeout(350)
 
 
 def set_gamepad_stick(page: Page, stick: str, x: float, y: float):
@@ -246,18 +246,19 @@ class TestNintendoControllerSwap:
 
     def test_nintendo_b_button_goes_back(self, nintendo_page: Page):
         """On Nintendo, physical B button (index 0) should go back."""
-        # First enter settings (index 3)
+        # First enter settings (index 3) — longer delays for parallel stability
         navigate_stick_down(nintendo_page, 3)
+        nintendo_page.wait_for_timeout(300)  # Let menu settle before confirm
         
         # Confirm with Nintendo A (index 1)
-        tap_gamepad_button(nintendo_page, 1, delay=150)
+        tap_gamepad_button(nintendo_page, 1, delay=200)
         
-        wait_for_scene(nintendo_page, 'SettingsScene', timeout=3000)
+        wait_for_scene(nintendo_page, 'SettingsScene', timeout=5000)
         
         # Go back with Nintendo B (index 0)
-        tap_gamepad_button(nintendo_page, 0, delay=150)  # Nintendo B = index 0
+        tap_gamepad_button(nintendo_page, 0, delay=200)  # Nintendo B = index 0
         
-        wait_for_scene(nintendo_page, 'MenuScene', timeout=3000)
+        wait_for_scene(nintendo_page, 'MenuScene', timeout=5000)
 
 
 # PlayStation controller mock
