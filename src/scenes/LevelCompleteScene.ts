@@ -23,6 +23,7 @@ interface LevelCompleteData {
   winchUseCount?: number;
   pathsVisited?: number;
   totalPaths?: number;
+  restartCount?: number;
 }
 
 export default class LevelCompleteScene extends Phaser.Scene {
@@ -33,6 +34,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private failReason?: string;
   private fuelUsed = 0;
   private tumbleCount = 0;
+  private restartCount = 0;
   private winchUseCount = 0;
   private pathsVisited = 0;
   private totalPaths = 0;
@@ -60,6 +62,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.failReason = data.failReason;
     this.fuelUsed = data.fuelUsed ?? 0;
     this.tumbleCount = data.tumbleCount ?? 0;
+    this.restartCount = data.restartCount ?? 0;
     this.winchUseCount = data.winchUseCount ?? 0;
     this.pathsVisited = data.pathsVisited ?? 0;
     this.totalPaths = data.totalPaths ?? 0;
@@ -210,7 +213,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     } else {
       // Failed: Retry + Menu
       this.addButton(buttonSizer, t('retry') || 'Retry', buttonFontSize, buttonPadding,
-        () => this.navigateTo('GameScene', { level: this.levelIndex }), true);
+        () => this.navigateTo('GameScene', { level: this.levelIndex, restartCount: this.restartCount + 1 }), true);
       this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
         () => this.navigateTo('MenuScene'));
     }
@@ -401,9 +404,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
           met = this.fuelUsed <= obj.target;
           label = t('bonusFuel') + ' ≤' + obj.target + '%';
           break;
-        case 'no_tumble':
-          met = this.tumbleCount === 0;
-          label = t('bonusNoTumble');
+        case 'flawless':
+          met = this.restartCount === 0;
+          label = t('bonusFlawless');
           break;
         case 'speed_run':
           met = this.timeUsed <= obj.target;

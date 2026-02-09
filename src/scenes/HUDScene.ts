@@ -20,7 +20,7 @@ interface HUDSceneData {
 
 export default class HUDScene extends Phaser.Scene {
   private level!: Level;
-  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0 };
+  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0, restartCount: 0 };
   private isSkipping = false;
   private gamepadSelectPressed = false;
   private uiScale = 1;
@@ -874,7 +874,7 @@ export default class HUDScene extends Phaser.Scene {
   private getBonusLabel(obj: BonusObjective): string {
     switch (obj.type) {
       case 'fuel_efficiency': return (t('bonusFuel') || 'Fuel') + ' ≤' + obj.target + '%';
-      case 'no_tumble': return t('bonusNoTumble') || 'No tumbles';
+      case 'flawless': return t('bonusFlawless') || 'First try';
       case 'speed_run': {
         const m = Math.floor(obj.target / 60);
         const s = obj.target % 60;
@@ -907,9 +907,10 @@ export default class HUDScene extends Phaser.Scene {
           suffix = ' ' + s.fuelUsed + '%';
           // Fuel can still go down — not irreversibly failed
           break;
-        case 'no_tumble':
-          met = s.tumbleCount === 0;
-          if (s.tumbleCount > 0) this.bonusFailed[i] = true;
+        case 'flawless':
+          met = s.restartCount === 0;
+          // Already determined at level start — can't change mid-level
+          if (s.restartCount > 0) this.bonusFailed[i] = true;
           break;
         case 'speed_run':
           met = timeUsed <= obj.target;

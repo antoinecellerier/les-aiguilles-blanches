@@ -24,6 +24,7 @@ import DialogueScene from './DialogueScene';
 
 interface GameSceneData {
   level?: number;
+  restartCount?: number;
 }
 
 interface SnowCell {
@@ -73,6 +74,7 @@ export default class GameScene extends Phaser.Scene {
   // Stats tracking for bonus objectives
   private fuelUsed = 0;
   private tumbleCount = 0;
+  private restartCount = 0;
   private accessPathsVisited = new Set<number>();
 
   // Tutorial
@@ -134,6 +136,7 @@ export default class GameScene extends Phaser.Scene {
   init(data: GameSceneData): void {
     console.log('GameScene.init:', data);
     this.levelIndex = data.level || 0;
+    this.restartCount = data.restartCount || 0;
     this.level = LEVELS[this.levelIndex];
     console.log('GameScene.init: loaded level', this.levelIndex, this.level?.nameKey);
 
@@ -1218,6 +1221,7 @@ export default class GameScene extends Phaser.Scene {
       winchUseCount: this.winchSystem?.useCount ?? 0,
       pathsVisited: this.accessPathsVisited.size,
       totalPaths: (this.level.accessPaths || []).length,
+      restartCount: this.restartCount,
     };
   }
 
@@ -1242,6 +1246,7 @@ export default class GameScene extends Phaser.Scene {
       winchUseCount: this.winchSystem.useCount,
       pathsVisited: this.accessPathsVisited.size,
       totalPaths: (this.level.accessPaths || []).length,
+      restartCount: this.restartCount,
     });
   }
 

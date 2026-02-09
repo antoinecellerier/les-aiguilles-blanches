@@ -39,7 +39,7 @@ export interface TutorialStep {
   delay?: number;
 }
 
-export type BonusObjectiveType = 'fuel_efficiency' | 'no_tumble' | 'speed_run' | 'winch_mastery' | 'exploration';
+export type BonusObjectiveType = 'fuel_efficiency' | 'flawless' | 'speed_run' | 'winch_mastery' | 'exploration';
 
 export interface BonusObjective {
   type: BonusObjectiveType;
@@ -160,7 +160,7 @@ export const LEVELS: Level[] = [
     introDialogue: 'level_chamoisIntro',
     introSpeaker: 'Émilie',
     bonusObjectives: [
-      { type: 'no_tumble', target: 0 },
+      { type: 'flawless', target: 0 },
       { type: 'fuel_efficiency', target: 60 },
     ],
     wildlife: [
@@ -265,7 +265,7 @@ export const LEVELS: Level[] = [
     introSpeaker: 'Thierry',
     bonusObjectives: [
       { type: 'winch_mastery', target: 3 },
-      { type: 'no_tumble', target: 0 },
+      { type: 'flawless', target: 0 },
     ],
     wildlife: [
       { type: 'chamois', count: 2 },
@@ -332,7 +332,7 @@ export const LEVELS: Level[] = [
     introSpeaker: 'Thierry',
     bonusObjectives: [
       { type: 'exploration', target: 3 },
-      { type: 'no_tumble', target: 0 },
+      { type: 'flawless', target: 0 },
     ],
     wildlife: [
       { type: 'chamois', count: 4 },
@@ -370,7 +370,7 @@ export const LEVELS: Level[] = [
     introDialogue: 'level_colDangereuxIntro',
     introSpeaker: 'Thierry',
     bonusObjectives: [
-      { type: 'no_tumble', target: 0 },
+      { type: 'flawless', target: 0 },
       { type: 'winch_mastery', target: 4 },
     ],
     wildlife: [
@@ -442,7 +442,7 @@ export const LEVELS: Level[] = [
     bonusObjectives: [
       { type: 'winch_mastery', target: 5 },
       { type: 'speed_run', target: 280 },
-      { type: 'no_tumble', target: 0 },
+      { type: 'flawless', target: 0 },
     ],
     wildlife: [
       { type: 'bouquetin', count: 2 },

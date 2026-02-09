@@ -11,6 +11,7 @@ export interface GameStateEvent {
   winchUseCount: number;
   pathsVisited: number;
   totalPaths: number;
+  restartCount: number;
 }
 
 export interface TouchInputEvent {
