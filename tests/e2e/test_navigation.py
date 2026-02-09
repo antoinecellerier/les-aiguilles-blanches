@@ -84,6 +84,41 @@ class TestMenuNavigation:
         }""")
         assert overlay_open, "Overlay should be open after clicking How to Play"
 
+    def test_how_to_play_content_visible(self, game_page: Page):
+        """Regression: How to Play content text must render above dialog background."""
+        assert_scene_active(game_page, 'MenuScene')
+        
+        click_button(game_page, BUTTON_HOW_TO_PLAY, "How to Play")
+        game_page.wait_for_timeout(500)
+        
+        # The content text should exist at depth >= 100 and have non-zero height
+        content = game_page.evaluate("""() => {
+            const ms = window.game.scene.getScene('MenuScene');
+            const texts = ms.children.list.filter(
+                c => c.type === 'Text' && c.depth >= 100 && c.text && c.text.length > 20
+                    && !c.text.startsWith('How') && !c.text.startsWith('←')
+                    && !c.text.startsWith('Comment')
+            );
+            if (texts.length === 0) return null;
+            const t = texts[0];
+            // Check display list: content must be AFTER the background rectangle
+            const bgIdx = ms.children.list.findIndex(
+                c => c.type === 'rexRoundRectangleShape' && c.depth >= 100
+            );
+            const contentIdx = ms.children.list.indexOf(t);
+            return {
+                text: t.text.substring(0, 60),
+                visible: t.visible, alpha: t.alpha,
+                height: Math.round(t.height),
+                renderOrder: contentIdx > bgIdx ? 'above' : 'below',
+            };
+        }""")
+        assert content is not None, "Content text should exist in How to Play dialog"
+        assert content['visible'], "Content text should be visible"
+        assert content['alpha'] > 0, "Content text should not be transparent"
+        assert content['height'] > 30, f"Content text should have height, got {content['height']}"
+        assert content['renderOrder'] == 'above', "Content must render above background"
+
     def test_how_to_play_dismiss_with_enter(self, game_page: Page):
         """Test How to Play overlay dismissed with Enter without triggering menu action."""
         assert_scene_active(game_page, 'MenuScene')

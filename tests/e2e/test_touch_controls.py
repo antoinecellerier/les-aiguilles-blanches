@@ -467,3 +467,65 @@ class TestOrientationChanges:
             return true;
         }""")
         assert bounds_ok, "HUD elements should be within landscape viewport bounds"
+
+
+def test_groomer_above_touch_controls_portrait(touch_page: Page):
+    """Regression: groomer must render above virtual touch controls on portrait devices."""
+    # Skip to La Verticale (level 7) — tall level where groomer spawns near bottom
+    skip_to_level(touch_page, 7)
+    dismiss_dialogues(touch_page)
+    touch_page.wait_for_timeout(500)
+
+    result = touch_page.evaluate("""() => {
+        const gs = window.game.scene.getScene('GameScene');
+        const hud = window.game.scene.getScene('HUDScene');
+        const cam = gs.cameras.main;
+        const g = gs.groomer;
+        if (!g || !cam) return null;
+        const groomerScreenY = (g.y - cam.worldView.y) * cam.zoom;
+        return {
+            groomerScreenY: Math.round(groomerScreenY),
+            touchControlsTop: hud?.touchControlsTopEdge ?? null,
+            followOffsetY: Math.round(cam.followOffset?.y ?? 0),
+        };
+    }""")
+    assert result is not None, "Should get groomer and touch control positions"
+    if result['touchControlsTop'] is not None:
+        assert result['groomerScreenY'] < result['touchControlsTop'], \
+            f"Groomer (screen Y={result['groomerScreenY']}) must be above touch controls (top={result['touchControlsTop']})"
+        assert result['followOffsetY'] < 0, "Camera should have negative follow offset on portrait"
+
+
+def test_zoom_stable_across_rotation(touch_page: Page):
+    """Regression: zoom must stay consistent when rotating portrait↔landscape and back."""
+    click_start_button(touch_page)
+    wait_for_scene(touch_page, 'GameScene')
+    dismiss_dialogues(touch_page)
+    touch_page.wait_for_timeout(500)
+
+    # Record initial zoom in portrait
+    initial = touch_page.evaluate("""() => {
+        const gs = window.game.scene.getScene('GameScene');
+        return { zoom: gs.cameras.main.zoom, w: gs.game.scale.width, h: gs.game.scale.height };
+    }""")
+
+    # Rotate to landscape
+    touch_page.set_viewport_size(IPHONE_LANDSCAPE)
+    touch_page.evaluate(f"() => window.game.scale.resize({IPHONE_LANDSCAPE['width']}, {IPHONE_LANDSCAPE['height']})")
+    touch_page.wait_for_timeout(500)
+
+    landscape = touch_page.evaluate("() => ({ zoom: window.game.scene.getScene('GameScene').cameras.main.zoom })")
+
+    # Rotate back to portrait
+    touch_page.set_viewport_size(IPHONE_PORTRAIT)
+    touch_page.evaluate(f"() => window.game.scale.resize({IPHONE_PORTRAIT['width']}, {IPHONE_PORTRAIT['height']})")
+    touch_page.wait_for_timeout(500)
+
+    back = touch_page.evaluate("() => ({ zoom: window.game.scene.getScene('GameScene').cameras.main.zoom })")
+
+    # Zoom should return to the same value after round-trip
+    assert abs(back['zoom'] - initial['zoom']) < 0.01, \
+        f"Zoom should round-trip: initial={initial['zoom']}, after rotation={back['zoom']}"
+    # Landscape zoom should not be dramatically different (diagonal is same)
+    assert abs(landscape['zoom'] - initial['zoom']) < 0.15, \
+        f"Landscape zoom should be similar: portrait={initial['zoom']}, landscape={landscape['zoom']}"
