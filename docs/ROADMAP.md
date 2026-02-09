@@ -12,7 +12,6 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Polish (Medium Priority)
 
 - [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
-- [ ] Adapt the menu scene to render weather from the current level (night, storm, etc.)
 - [ ] Make the settings menu look nicer — visual polish pass
 
 
@@ -20,6 +19,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
 - [ ] All characters have dialogue lines — Verify all 4 characters appear across levels where appropriate
+- [ ] Storm snow accumulation — Trees, mountains, cliffs accumulate visible snow during storm weather
 - [ ] Sound effects and music
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
@@ -35,6 +35,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ **Tutorial dialogue polish** — Rewrote tutorial strings from robotic checklist format to natural Jean-Pierre dialogue. HUD description now matches actual colored bars. Fixed DE/IT grammar. Content reviewed via cross-model consultation.
 
 - ✅ **Dialogue UI on large screens** — Capped dialogue box width at 800px (centered). Increased text font on desktop (14→16px). Prevents thin banner stretching across ultrawide monitors.
+
+- ✅ **Menu weather from level progress** — Menu scene shows night overlay and snow particles matching the player's current level weather (night, storm, light snow).
 
 - ✅ **Resize & zoom fixes** — Diagonal-ratio zoom scaling for orientation-independent viewport sizing. Proportional zoom on resize preserves world scale. Groomer kept above virtual touch controls on portrait devices via `GAME_EVENTS.TOUCH_CONTROLS_TOP` event with extended camera bounds.
 

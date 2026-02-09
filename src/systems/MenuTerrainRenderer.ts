@@ -4,20 +4,28 @@ import Phaser from 'phaser';
  * Renders the static menu background: sky gradient, mountains, snow ground, trees, and groomer.
  * Pure rendering — no state, no updates. Created once per scene lifecycle.
  */
-export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number): void {
-  createSky(scene, width, snowLineY);
+export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }): void {
+  createSky(scene, width, snowLineY, weather);
   createMountains(scene, width, snowLineY, scaleFactor);
   createSnowGround(scene, width, height, snowLineY, footerHeight);
   createTrees(scene, width, snowLineY, scaleFactor);
   createGroomer(scene, width, snowLineY, scaleFactor);
 }
 
-function createSky(scene: Phaser.Scene, width: number, snowLineY: number): void {
+function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weather?: { isNight: boolean; weather: string }): void {
   const skyBand1 = snowLineY * 0.4;
   const skyBand2 = snowLineY * 0.25;
-  scene.add.rectangle(width / 2, 0, width, skyBand1, 0x5bb8e8).setOrigin(0.5, 0);
-  scene.add.rectangle(width / 2, skyBand1, width, skyBand2, 0x87ceeb).setOrigin(0.5, 0);
-  scene.add.rectangle(width / 2, skyBand1 + skyBand2, width, snowLineY - skyBand1 - skyBand2, 0xa8ddf0).setOrigin(0.5, 0);
+  const isStorm = weather?.weather === 'storm';
+  const isNight = weather?.isNight;
+  // Storm: grey-white overcast; Night: deep blue; Default: sunny blue gradient
+  const colors = isStorm
+    ? [0x707478, 0x808488, 0x909498]
+    : isNight
+      ? [0x0a1628, 0x142240, 0x1e3050]
+      : [0x5bb8e8, 0x87ceeb, 0xa8ddf0];
+  scene.add.rectangle(width / 2, 0, width, skyBand1, colors[0]).setOrigin(0.5, 0);
+  scene.add.rectangle(width / 2, skyBand1, width, skyBand2, colors[1]).setOrigin(0.5, 0);
+  scene.add.rectangle(width / 2, skyBand1 + skyBand2, width, snowLineY - skyBand1 - skyBand2, colors[2]).setOrigin(0.5, 0);
 }
 
 function createSnowGround(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number): void {

@@ -12,7 +12,7 @@ interface MenuAnimal {
   type: 'ground' | 'bird' | 'climber';
   species?: string;
   boundLeft: number; boundRight: number;
-  state?: 'flying' | 'perched' | 'climbing' | 'landing' | 'hiding';
+  state?: 'flying' | 'perched' | 'climbing' | 'landing' | 'hiding' | 'sleeping';
   hideTimer?: number;
   hideDuration?: number;
   burrowY?: number;
@@ -25,6 +25,7 @@ interface MenuAnimal {
   hopPhase?: number;
   trackTimer?: number;
   feetOffsetY?: number;
+  sleepZzz?: Phaser.GameObjects.Text[];
 }
 
 export class MenuWildlifeController {
@@ -39,12 +40,14 @@ export class MenuWildlifeController {
   snowLineY = 0;
   snowBottomY = 0;
   menuZone = { left: 0, right: 0, top: 0, bottom: 0 };
+  private weatherConfig = { isNight: false, weather: 'clear' };
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
   }
 
-  create(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number): void {
+  create(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }): void {
+    this.weatherConfig = weather || { isNight: false, weather: 'clear' };
     this.createMenuWildlife(width, height, snowLineY, footerHeight, scaleFactor);
     this.createSnowParticles(width, snowLineY);
   }
@@ -53,12 +56,14 @@ export class MenuWildlifeController {
     this.updateSnowflakes(time, delta);
     this.updateWildlife(time, delta);
     this.updateTracks(delta);
+    this.updateSleepZzz(time);
   }
 
   destroy(): void {
     for (const a of this.menuAnimals) {
       if (a.burrowMask) a.graphics.clearMask(true);
       if (a.burrowMaskShape) a.burrowMaskShape.destroy();
+      if (a.sleepZzz) a.sleepZzz.forEach(z => z.destroy());
       a.graphics.destroy();
     }
     this.menuAnimals.length = 0;
@@ -82,6 +87,12 @@ export class MenuWildlifeController {
     const width = this.scene.cameras.main.width;
     const pointer = this.scene.input.activePointer;
     for (const a of this.menuAnimals) {
+      // Sleeping animals: gentle breathing bob, no wandering
+      if (a.state === 'sleeping') {
+        const bob = Math.sin(time / 800 + a.homeX) * 0.5;
+        a.graphics.setPosition(a.x, a.y + bob);
+        continue;
+      }
       const pdx = a.x - pointer.worldX;
       const pdy = a.y - pointer.worldY;
       const pointerDist = Math.sqrt(pdx * pdx + pdy * pdy);
@@ -535,6 +546,8 @@ export class MenuWildlifeController {
     const s = Math.max(2, 3 * scaleFactor);
     const mtnScale = snowLineY / 600;
     this.menuAnimals = [];
+    const { isNight, weather } = this.weatherConfig;
+    const isStorm = weather === 'storm';
 
     // Foreground snow area: from snowLineY to bottom minus footer
     const snowTop = snowLineY + 5;
@@ -582,8 +595,13 @@ export class MenuWildlifeController {
     const randInZone = (zone: { min: number; max: number }) =>
       zone.min + Math.random() * (zone.max - zone.min);
 
+    // Storm shelter: animals huddle under a tree near the snowline
+    const shelterTreeX = Math.random() < 0.5 ? 130 * sx : (width - 170 * sx);
+    const shelterY = snowTop + 8;
+
     // Marmots: colony of 2-3, clustered together (family group near burrow)
-    const marmotCount = 2 + Math.floor(Math.random() * 2);
+    // At night or during storms, marmots hide in burrows (diurnal)
+    const marmotCount = (isNight || isStorm) ? 0 : 2 + Math.floor(Math.random() * 2);
     const marmotZone = Math.random() < 0.5 ? rightZone : leftZone;
     const marmotClusterX = randInZone(marmotZone);
     for (let i = 0; i < marmotCount; i++) {
@@ -616,30 +634,45 @@ export class MenuWildlifeController {
       this.menuAnimals.push(animal);
     }
 
-    // Chamois: small herd of 2-3
-    const chamoisCount = 2 + Math.floor(Math.random() * 2);
+    // Chamois: small herd of 2-3 (1 sheltering during storms, fewer at night)
+    const chamoisCount = isStorm ? 1 : isNight ? 1 : 2 + Math.floor(Math.random() * 2);
     const chamoisZone = marmotZone === rightZone ? leftZone : rightZone;
-    const chamoisClusterX = randInZone(chamoisZone);
+    const chamoisClusterX = isStorm ? shelterTreeX : randInZone(chamoisZone);
+    let chamoisClusterY = isStorm ? shelterY : snowTop + Math.random() * (snowBottom - snowTop);
     for (let i = 0; i < chamoisCount; i++) {
       const cg = this.scene.add.graphics();
       drawAnimal(cg, 'chamois', 0, 0, s);
       const cx = chamoisClusterX + (i - chamoisCount / 2) * 25 * scaleFactor + (Math.random() - 0.5) * 15;
-      const cy = snowTop + Math.random() * (snowBottom - snowTop);
+      const cy = i === 0 ? chamoisClusterY : snowTop + Math.random() * (snowBottom - snowTop);
+      if (i === 0) chamoisClusterY = cy;
       cg.setPosition(cx, cy).setDepth(5 + cy * 0.001);
       addGroundAnimal(cg, cx, cy, width * 0.4, 'chamois');
+      if (isNight) {
+        const sleeper = this.menuAnimals[this.menuAnimals.length - 1];
+        sleeper.state = 'sleeping';
+        sleeper.sleepZzz = this.createSleepZzz(cx, cy);
+      }
     }
 
-    // Bunny: solitary (mountain hares are loners), random side
-    const bunnyZone = Math.random() < 0.5 ? leftZone : rightZone;
-    const bunnyG = this.scene.add.graphics();
-    drawAnimal(bunnyG, 'bunny', 0, 0, s);
-    const bunnyX = randInZone(bunnyZone);
-    const bunnyY = snowTop + Math.random() * (snowBottom - snowTop);
-    bunnyG.setPosition(bunnyX, bunnyY).setDepth(5 + bunnyY * 0.001);
-    addGroundAnimal(bunnyG, bunnyX, bunnyY, width * 0.45, 'bunny');
+    // Bunny: solitary (mountain hares are loners)
+    // During storms, huddles next to chamois under tree shelter
+    {
+      const bunnyZone = isStorm ? chamoisZone : (Math.random() < 0.5 ? leftZone : rightZone);
+      const bunnyG = this.scene.add.graphics();
+      drawAnimal(bunnyG, 'bunny', 0, 0, s);
+      const bunnyX = isStorm
+        ? shelterTreeX + 12 * scaleFactor
+        : randInZone(bunnyZone);
+      const bunnyY = isStorm
+        ? shelterY + 3
+        : snowTop + Math.random() * (snowBottom - snowTop);
+      bunnyG.setPosition(bunnyX, bunnyY).setDepth(5 + bunnyY * 0.001);
+      addGroundAnimal(bunnyG, bunnyX, bunnyY, isStorm ? 15 : width * 0.45, 'bunny');
+    }
 
-    // Fox: rare (~30% chance), solitary, roams wide
-    if (Math.random() < 0.3) {
+    // Fox: nocturnal — more common at night (~60%), rare by day (~30%), absent in storms
+    const foxChance = isStorm ? 0 : isNight ? 0.6 : 0.3;
+    if (Math.random() < foxChance) {
       const foxZone = Math.random() < 0.5 ? leftZone : rightZone;
       const foxG = this.scene.add.graphics();
       drawAnimal(foxG, 'fox', 0, 0, s);
@@ -655,6 +688,8 @@ export class MenuWildlifeController {
   }
 
   private createMenuClimbers(width: number, snowLineY: number, sx: number, mtnScale: number, s: number): void {
+    // Bouquetin shelter during storms
+    if (this.weatherConfig.weather === 'storm') return;
     const climbMtnX = 900 * sx;
     const climbMtnBaseW = 190 * mtnScale;
     const climbMtnPeakH = 260 * mtnScale;
@@ -690,21 +725,25 @@ export class MenuWildlifeController {
   }
 
   private createMenuBirds(width: number, snowLineY: number, scaleFactor: number, allPerches: { x: number; y: number }[]): void {
+    const { isNight, weather } = this.weatherConfig;
+    const isStorm = weather === 'storm';
     const birdScale = Math.max(1.5, 2 * scaleFactor);
-    const birdCount = 4 + Math.floor(Math.random() * 4);
-    const perchedCount = 1 + Math.floor(Math.random() * 2);
+    // Fewer birds in bad weather; at night most are roosting
+    const birdCount = isStorm ? 0 : isNight ? 2 : 4 + Math.floor(Math.random() * 4);
+    // At night, all birds start perched (roosting)
+    const perchedCount = isNight ? birdCount : 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < birdCount; i++) {
       const birdG = this.scene.add.graphics().setDepth(11);
 
       const startPerched = i < perchedCount;
       let bx: number, by: number;
-      let state: 'flying' | 'perched';
+      let state: 'flying' | 'perched' | 'sleeping';
 
       if (startPerched) {
         const perch = allPerches[i % allPerches.length];
         bx = perch.x;
         by = perch.y - 4;
-        state = 'perched';
+        state = isNight ? 'sleeping' : 'perched';
         drawBirdPerched(birdG, 0, 0, birdScale);
       } else {
         bx = Math.random() * width;
@@ -720,12 +759,13 @@ export class MenuWildlifeController {
         graphics: birdG, x: bx, y: by, homeX: bx, homeY: by,
         vx: state === 'flying' ? Math.cos(initAngle) * initSpeed : 0,
         vy: state === 'flying' ? Math.sin(initAngle) * initSpeed * 0.5 : 0,
-        wanderTimer: state === 'perched' ? 3000 + Math.random() * 5000 : 1500 + Math.random() * 2000,
+        wanderTimer: state === 'flying' ? 1500 + Math.random() * 2000 : 3000 + Math.random() * 5000,
         type: 'bird',
         boundLeft: -20, boundRight: width + 20,
         state,
         perchTarget: allPerches[i % allPerches.length],
         spriteH: birdScale,
+        sleepZzz: state === 'sleeping' ? this.createSleepZzz(bx, by) : undefined,
       });
     }
   }
@@ -743,6 +783,41 @@ export class MenuWildlifeController {
         speed: Phaser.Math.FloatBetween(0.3, 1.2),
         wobbleOffset: Phaser.Math.FloatBetween(0, Math.PI * 2),
       });
+    }
+  }
+
+  /** Create floating "zzz" text trail above a sleeping animal */
+  private createSleepZzz(x: number, y: number): Phaser.GameObjects.Text[] {
+    const zTexts: Phaser.GameObjects.Text[] = [];
+    const sizes = [8, 10, 13];
+    for (let i = 0; i < 3; i++) {
+      const z = this.scene.add.text(x + 6, y - 8, 'z', {
+        fontFamily: 'monospace',
+        fontSize: sizes[i] + 'px',
+        fontStyle: 'italic',
+        color: '#aaccff',
+      }).setOrigin(0.5).setAlpha(0).setDepth(12);
+      // Stagger via custom data
+      z.setData('phase', i * 0.33); // 0, 0.33, 0.66 — staggered start
+      zTexts.push(z);
+    }
+    return zTexts;
+  }
+
+  /** Animate floating zzz: each "z" rises, grows, fades, then loops */
+  private updateSleepZzz(time: number): void {
+    const cycleMs = 3000;
+    for (const a of this.menuAnimals) {
+      if (a.state !== 'sleeping' || !a.sleepZzz) continue;
+      for (const z of a.sleepZzz) {
+        const phase = z.getData('phase') as number;
+        const t = ((time / cycleMs + phase) % 1); // 0→1 per cycle
+        // Rise from 0→-20px, fade in then out
+        z.setPosition(a.x + 6 + t * 4, a.y - 8 - t * 20);
+        const alpha = t < 0.15 ? t / 0.15 : t > 0.8 ? (1 - t) / 0.2 : 1;
+        z.setAlpha(alpha * 0.7);
+        z.setScale(0.7 + t * 0.5);
+      }
     }
   }
 }

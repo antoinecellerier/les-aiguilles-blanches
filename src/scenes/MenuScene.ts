@@ -11,6 +11,7 @@ import { hasTouch as detectTouch, onTouchAvailable, isMobile } from '../utils/to
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { OverlayManager } from '../utils/overlayManager';
+import { LEVELS } from '../config/levels';
 
 /**
  * Les Aiguilles Blanches - Menu Scene
@@ -75,19 +76,62 @@ export default class MenuScene extends Phaser.Scene {
     const footerHeight = Math.round(36 * scaleFactor);
     const safeAreaBottom = isPortrait ? Math.round(20 * scaleFactor) : 0;
 
-    this.createSkyAndGround(width, height, snowLineY, footerHeight, scaleFactor, safeAreaBottom);
+    // Determine weather from player's current level progress
+    const progress = getSavedProgress();
+    const currentLevel = progress ? LEVELS[progress.currentLevel] : null;
+    const levelWeather = currentLevel
+      ? { isNight: currentLevel.isNight, weather: currentLevel.weather }
+      : undefined;
+
+    this.createSkyAndGround(width, height, snowLineY, footerHeight, scaleFactor, safeAreaBottom, levelWeather);
     const subtitleBottom = this.createTitle(width, height, snowLineY, scaleFactor, isPortrait, titleSize, subtitleSize);
     this.createMenuButtons(width, height, snowLineY, scaleFactor, isPortrait, buttonSize, buttonPadding, footerHeight, safeAreaBottom, subtitleBottom);
     this.createFooter(width, height, scaleFactor, footerHeight, safeAreaBottom);
+    this.createMenuWeather(width, height, levelWeather);
     this.setupInput();
 
     Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
   }
 
-  private createSkyAndGround(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, safeAreaBottom: number): void {
-    createMenuTerrain(this, width, height, snowLineY, footerHeight, scaleFactor);
+  private createSkyAndGround(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, safeAreaBottom: number, weather?: { isNight: boolean; weather: string }): void {
+    createMenuTerrain(this, width, height, snowLineY, footerHeight, scaleFactor, weather);
     this.wildlife.snowLineY = snowLineY;
-    this.wildlife.create(width, height, snowLineY, footerHeight + safeAreaBottom, scaleFactor);
+    this.wildlife.create(width, height, snowLineY, footerHeight + safeAreaBottom, scaleFactor, weather);
+  }
+
+  /** Add night overlay and snow particles if the player's current level has weather. */
+  private createMenuWeather(width: number, height: number, weather?: { isNight: boolean; weather: string }): void {
+    if (!weather) return;
+
+    // Night overlay — subtle tint so menu stays readable
+    if (weather.isNight) {
+      this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
+        .setAlpha(0.45).setDepth(5);
+    }
+
+    // Storm overlay — grey-blue haze for low visibility
+    if (weather.weather === 'storm') {
+      this.add.rectangle(width / 2, height / 2, width, height, 0x667788)
+        .setAlpha(0.25).setDepth(5);
+    }
+
+    // Snow particles for storm or light_snow
+    if (weather.weather !== 'clear' && this.textures.exists('snow_ungroomed')) {
+      const isStorm = weather.weather === 'storm';
+      this.add.particles(0, 0, 'snow_ungroomed', {
+        x: { min: 0, max: width },
+        y: -10,
+        quantity: isStorm ? 6 : 2,
+        frequency: isStorm ? 50 : 200,
+        speedY: isStorm ? { min: 120, max: 280 } : { min: 20, max: 60 },
+        speedX: isStorm ? { min: -100, max: -30 } : { min: -10, max: 10 },
+        scale: isStorm ? { start: 0.4, end: 0.1 } : { start: 0.3, end: 0.08 },
+        alpha: { start: 0.8, end: 0.3 },
+        lifespan: isStorm ? 2500 : 5000,
+        blendMode: Phaser.BlendModes.ADD,
+        tint: isStorm ? 0xCCDDFF : 0xFFFFFF,
+      }).setDepth(200);
+    }
   }
 
   /** Returns the Y coordinate of the subtitle ribbon bottom edge. */
