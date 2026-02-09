@@ -17,7 +17,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make the settings menu look nicer — visual polish pass
 - [ ] Review in-game dialogue UI — better use of space on larger screens
 - [ ] Review in-game dialogue content — check for excessive or inaccurate emoji use
-- [ ] Chalet/tree depth layering on steep levels — investigate Y-based sorting for buildings vs trees
+
 
 ## Future (Backlog)
 
@@ -33,7 +33,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
-- ✅ **How to Play dialog fix** — Content text was invisible (rexUI background rendered on top). Fixed display list ordering with `bringToTop()`.
+- ✅ **Depth layering fix** — Y-based depth sorting for trees, chalets, anchors, wildlife via `yDepth()`. AIRBORNE depth for birds above winch cable. Background forest at fixed depth.
 
 - ✅ **Resize & zoom fixes** — Diagonal-ratio zoom scaling for orientation-independent viewport sizing. Proportional zoom on resize preserves world scale. Groomer kept above virtual touch controls on portrait devices via `GAME_EVENTS.TOUCH_CONTROLS_TOP` event with extended camera bounds.
 

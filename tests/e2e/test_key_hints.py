@@ -102,7 +102,7 @@ class TestDynamicKeyHints:
             const ds = window.game?.scene?.getScene('DialogueScene');
             if (!ds || !ds.dialogueText) return '';
             const text = ds.fullText || ds.dialogueText.text || '';
-            if (text.includes('CONTRÔLES') || text.includes('CONTROLS')) {
+            if (text.includes('bouger') || text.includes('move') || text.includes('CONTRÔLES') || text.includes('CONTROLS')) {
                 return text;
             }
             return '';
