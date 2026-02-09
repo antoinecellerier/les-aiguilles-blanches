@@ -41,4 +41,8 @@ export const GAME_EVENTS = {
   TOUCH_CONTROLS_TOP: 'touchControlsTop',
   /** SettingsScene → HUDScene: accessibility settings changed, redraw needed */
   ACCESSIBILITY_CHANGED: 'accessibilityChanged',
+  /** SettingsScene → AudioSystem: volume channel changed */
+  VOLUME_CHANGED: 'volumeChanged',
+  /** SettingsScene/PauseScene → AudioSystem: mute toggled */
+  MUTE_CHANGED: 'muteChanged',
 } as const;

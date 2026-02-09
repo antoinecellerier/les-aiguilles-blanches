@@ -14,6 +14,12 @@ export const STORAGE_KEYS = {
   DISPLAY_NAMES: 'snowGroomer_displayNames',
   GAMEPAD_BINDINGS: 'snowGroomer_gamepadBindings',
   MOVEMENT_SENSITIVITY: 'snowGroomer_movementSensitivity',
+  MASTER_VOLUME: 'snowGroomer_masterVolume',
+  MUSIC_VOLUME: 'snowGroomer_musicVolume',
+  SFX_VOLUME: 'snowGroomer_sfxVolume',
+  VOICE_VOLUME: 'snowGroomer_voiceVolume',
+  AMBIENCE_VOLUME: 'snowGroomer_ambienceVolume',
+  AUDIO_MUTED: 'snowGroomer_audioMuted',
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

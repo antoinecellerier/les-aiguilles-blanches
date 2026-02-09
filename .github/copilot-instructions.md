@@ -24,10 +24,11 @@ Before every commit, verify:
 
 1. **Code review** - Run the `code-health` skill (`.github/skills/code-health/SKILL.md`) on all changed files. Fix any HIGH/MEDIUM findings before committing.
 2. **Art review** - If any visual files changed (scenes, sprites, theme, weather), run the `art-review` skill (`.github/skills/art-review/SKILL.md`). Fix any HIGH/MEDIUM findings before committing.
-3. **Content review** - If any changelog or localization strings changed, run the `content-review` skill (`.github/skills/content-review/SKILL.md`). Changelog entries must follow the crisp style (3–5 items, no enumerations, no parenthetical details).
-4. **Tests** - Regression test exists and passes
-5. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
-6. **Commit message** - Summarizes functional change, lists all updates
+3. **Audio review** - If any audio files changed (audio system, SFX triggers, volume settings), run the `audio-review` skill (`.github/skills/audio-review/SKILL.md`). Fix any HIGH/MEDIUM findings before committing.
+4. **Content review** - If any changelog or localization strings changed, run the `content-review` skill (`.github/skills/content-review/SKILL.md`). Changelog entries must follow the crisp style (3–5 items, no enumerations, no parenthetical details).
+5. **Tests** - Regression test exists and passes
+6. **Docs sync** - Run the `docs-update` skill (`.github/skills/docs-update/SKILL.md`) to verify all documentation is current with the changes.
+7. **Commit message** - Summarizes functional change, lists all updates
 
 Commit message structure:
 ```
@@ -46,6 +47,7 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 - `content-review` — Expert content writer review of in-game text: dialogue, localization, lore, tone, and translation quality across all 5 languages
 - `game-design` — Experienced game designer review of narrative arc, difficulty curve, character development, mechanics coherence, and pacing across all levels
 - `art-review` — Art director review of visual code and rendered output against `docs/ART_STYLE.md`. Checks color palettes, shape compliance (rectangles only), dimensions, depth layering, and accessibility
+- `audio-review` — Audio director / sound designer review of game audio code. Checks sound palette coherence, Chopin nocturne-style music, Celeste-style voice gibberish, mixing balance, Web Audio API usage, and accessibility
 
 ## Critical Patterns
 

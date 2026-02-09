@@ -12,6 +12,7 @@ import './setup';
 // Scene transition registry (must be before scene imports to avoid circular deps)
 import { registerGameScenes } from './utils/sceneTransitions';
 import { attachCanvasTouchDetect } from './utils/touchDetect';
+import { AudioSystem } from './systems/AudioSystem';
 
 // TypeScript scenes
 import BootScene from './scenes/BootScene';
@@ -99,6 +100,9 @@ window.addEventListener('load', () => {
   }
 
   window.game = new Phaser.Game(config);
+
+  // Initialize audio system
+  AudioSystem.getInstance().init(window.game);
 
   // Attach canvas touch detection for Firefox desktop touchscreens
   if (window.game.canvas) {
