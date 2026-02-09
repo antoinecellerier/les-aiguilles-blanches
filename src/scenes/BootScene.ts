@@ -125,6 +125,11 @@ export default class BootScene extends Phaser.Scene {
     groomerGraphics.fillStyle(0x666666);
     groomerGraphics.fillRect(xo, yo + 44, 32, 4);
     groomerGraphics.generateTexture('groomer', 36, 58);
+    // Storm variant: same groomer with snow on roof and body
+    groomerGraphics.fillStyle(0xf0f5f8);
+    groomerGraphics.fillRect(xo + 4, yo + 5, 24, 2);   // body top
+    groomerGraphics.fillRect(xo + 8, yo + 10, 16, 2);   // cabin top
+    groomerGraphics.generateTexture('groomer_storm', 36, 58);
     groomerGraphics.destroy();
 
     // Tree sprite

@@ -338,7 +338,7 @@ export default class GameScene extends Phaser.Scene {
     
     console.log('Launching HUD scene...');
     
-    this.scene.launch('DialogueScene');
+    this.scene.launch('DialogueScene', { weather: this.level.weather });
     console.log('Dialogue launched');
 
     this.scene.launch('HUDScene', {
@@ -441,7 +441,8 @@ export default class GameScene extends Phaser.Scene {
       levelWidth: this.level.width, tileSize: this.tileSize
     });
 
-    this.groomer = this.physics.add.sprite(startX, startY, 'groomer');
+    const groomerTexture = this.level.weather === 'storm' ? 'groomer_storm' : 'groomer';
+    this.groomer = this.physics.add.sprite(startX, startY, groomerTexture);
     this.groomer.setCollideWorldBounds(true);
     this.groomer.setDrag(BALANCE.GROOMER_DRAG);
     this.groomer.setScale(this.tileSize / 16);

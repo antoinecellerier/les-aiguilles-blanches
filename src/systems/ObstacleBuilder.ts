@@ -33,6 +33,7 @@ export class ObstacleBuilder {
     const obstacleTypes = level.obstacles || [];
     const worldWidth = level.width * tileSize;
     const worldHeight = level.height * tileSize;
+    const isStorm = level.weather === 'storm';
 
     // Difficulty-scaled obstacle count
     const baseCount = Math.floor(level.width * level.height / 100);
@@ -77,6 +78,19 @@ export class ObstacleBuilder {
       obstacle.setImmovable(true);
       obstacle.setScale(tileSize / 16);
       obstacle.setDepth(yDepth(y));
+
+      if (isStorm) {
+        const s = tileSize / 16;
+        const sg = this.scene.add.graphics().setDepth(yDepth(y) + 0.0001);
+        sg.fillStyle(0xf0f5f8, 1);
+        if (type === 'rocks') {
+          sg.fillRect(x - 10 * s, y - 6 * s, 20 * s, 3 * s);
+        } else {
+          // Tree: snow on top two foliage tiers
+          sg.fillRect(x - 5 * s, y - 20 * s, 10 * s, 2 * s);
+          sg.fillRect(x - 9 * s, y - 12 * s, 18 * s, 2 * s);
+        }
+      }
     }
 
     // Restaurant at top of level
@@ -89,6 +103,14 @@ export class ObstacleBuilder {
     const rSize = tileSize * 2;
     this.addFootprint(restaurant.x, restaurant.y, rSize, rSize);
 
+    if (isStorm) {
+      const s = tileSize / 16;
+      const rg = this.scene.add.graphics().setDepth(yDepth(restaurant.y) + 0.0001);
+      rg.fillStyle(0xf0f5f8, 1);
+      // Snow on restaurant roof
+      rg.fillRect(restaurant.x - 28 * s, restaurant.y - 25 * s, 56 * s, 3 * s);
+    }
+
     // Fuel station at bottom of level
     const fuelStation = interactables.create(
       worldWidth / 2 + tileSize * 4, worldHeight - tileSize * 3, 'fuel'
@@ -97,6 +119,14 @@ export class ObstacleBuilder {
     fuelStation.setScale(tileSize / 16);
     fuelStation.setDepth(yDepth(fuelStation.y));
     this.addFootprint(fuelStation.x, fuelStation.y, tileSize * 2, tileSize * 2);
+
+    if (isStorm) {
+      const s = tileSize / 16;
+      const fg = this.scene.add.graphics().setDepth(yDepth(fuelStation.y) + 0.0001);
+      fg.fillStyle(0xf0f5f8, 1);
+      // Snow on fuel pump top
+      fg.fillRect(fuelStation.x - 16 * s, fuelStation.y - 20 * s, 28 * s, 3 * s);
+    }
 
     // Chalets on easier pistes
     if (['tutorial', 'green', 'blue'].includes(level.difficulty)) {
@@ -152,11 +182,11 @@ export class ObstacleBuilder {
       );
       if (overlaps) continue;
 
-      this.createChalet(x, yPos, tileSize);
+      this.createChalet(x, yPos, tileSize, level.weather === 'storm');
     }
   }
 
-  private createChalet(x: number, y: number, tileSize: number): void {
+  private createChalet(x: number, y: number, tileSize: number, isStorm?: boolean): void {
     const g = this.scene.add.graphics();
     g.setDepth(yDepth(y));
     const size = tileSize * 2;
@@ -191,6 +221,13 @@ export class ObstacleBuilder {
     g.lineTo(x - size * 0.5, y - size * 0.35);
     g.closePath();
     g.fillPath();
+
+    // Storm: extra snow buildup on roof and chimney
+    if (isStorm) {
+      g.fillStyle(0xf0f5f8, 1);
+      g.fillRect(x - size * 0.55, y - size * 0.42, size * 1.1, size * 0.06);
+      g.fillRect(x + size * 0.24, y - size * 0.75, size * 0.14, size * 0.04);
+    }
 
     // Windows
     g.fillStyle(0x87CEEB, 1);

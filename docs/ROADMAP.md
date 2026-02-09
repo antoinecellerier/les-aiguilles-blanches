@@ -17,7 +17,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
-- [ ] Storm snow accumulation — Trees, mountains, cliffs accumulate visible snow during storm weather
+- [x] Storm snow accumulation — Trees, mountains, groomer accumulate visible snow during storm weather
 - [ ] Sound effects and music
 - [ ] More character dialogues per level
 - [ ] Procedural level generation

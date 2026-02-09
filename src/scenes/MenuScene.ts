@@ -84,8 +84,9 @@ export default class MenuScene extends Phaser.Scene {
       : undefined;
 
     this.createSkyAndGround(width, height, snowLineY, footerHeight, scaleFactor, safeAreaBottom, levelWeather);
-    const subtitleBottom = this.createTitle(width, height, snowLineY, scaleFactor, isPortrait, titleSize, subtitleSize);
-    this.createMenuButtons(width, height, snowLineY, scaleFactor, isPortrait, buttonSize, buttonPadding, footerHeight, safeAreaBottom, subtitleBottom);
+    const isStorm = levelWeather?.weather === 'storm';
+    const subtitleBottom = this.createTitle(width, height, snowLineY, scaleFactor, isPortrait, titleSize, subtitleSize, isStorm);
+    this.createMenuButtons(width, height, snowLineY, scaleFactor, isPortrait, buttonSize, buttonPadding, footerHeight, safeAreaBottom, subtitleBottom, isStorm);
     this.createFooter(width, height, scaleFactor, footerHeight, safeAreaBottom);
     this.createMenuWeather(width, height, levelWeather);
     this.setupInput();
@@ -135,7 +136,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   /** Returns the Y coordinate of the subtitle ribbon bottom edge. */
-  private createTitle(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, titleSize: number, subtitleSize: number): number {
+  private createTitle(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, titleSize: number, subtitleSize: number, isStorm?: boolean): number {
     const titleY = isPortrait ? height * 0.08 : height * 0.12;
     const titleBgWidth = Math.round(Math.min(520 * scaleFactor, width - 20));
     const titleBgHeight = Math.round(80 * scaleFactor);
@@ -207,10 +208,25 @@ export default class MenuScene extends Phaser.Scene {
       color: '#FFD700',
     }).setOrigin(0.5).setDepth(10);
 
+    // Storm: snow on title box and subtitle ribbon
+    if (isStorm) {
+      const snowG = this.add.graphics().setDepth(10);
+      snowG.fillStyle(0xf0f5f8, 0.85);
+      const titleTop = titleY - titleBgHeight / 2;
+      for (let sx = -titleBgWidth / 2; sx < titleBgWidth / 2; sx += 5) {
+        const h = 2 + Math.abs(Math.sin(sx * 0.2)) * 2;
+        snowG.fillRect(width / 2 + sx, titleTop - h + 1, 5, h);
+      }
+      for (let sx = -ribbonW / 2; sx < ribbonW / 2; sx += 5) {
+        const h = 1 + Math.abs(Math.sin(sx * 0.25 + 1)) * 2;
+        snowG.fillRect(cx + sx, rTop - h + 1, 5, h);
+      }
+    }
+
     return subtitleY + ribbonH / 2;
   }
 
-  private createMenuButtons(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, buttonSize: number, buttonPadding: number, footerHeight: number, safeAreaBottom: number, subtitleBottom: number): void {
+  private createMenuButtons(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, buttonSize: number, buttonPadding: number, footerHeight: number, safeAreaBottom: number, subtitleBottom: number, isStorm?: boolean): void {
     const savedProgress = getSavedProgress();
     const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0;
 
@@ -297,6 +313,21 @@ export default class MenuScene extends Phaser.Scene {
       this.buttonShadows.push(shadow);
       this.buttonCallbacks.push(btn.callback);
     });
+
+    // Storm: snow accumulation on top of each button
+    if (isStorm) {
+      this.menuButtons.forEach(btn => {
+        const bw = btn.width;
+        const bx = btn.x - bw / 2;
+        const by = btn.y - btn.height / 2;
+        const sg = this.add.graphics().setDepth(11);
+        sg.fillStyle(0xf0f5f8, 0.8);
+        for (let sx = 0; sx < bw; sx += 5) {
+          const h = 1 + Math.abs(Math.sin(sx * 0.3 + btn.y * 0.1)) * 2;
+          sg.fillRect(bx + sx, by - h + 1, 5, h);
+        }
+      });
+    }
 
     const shadows = this.buttonShadows;
     const arrow = this.selectionArrow;

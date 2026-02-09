@@ -5,11 +5,12 @@ import Phaser from 'phaser';
  * Pure rendering — no state, no updates. Created once per scene lifecycle.
  */
 export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }): void {
+  const isStorm = weather?.weather === 'storm';
   createSky(scene, width, snowLineY, weather);
-  createMountains(scene, width, snowLineY, scaleFactor);
+  createMountains(scene, width, snowLineY, scaleFactor, isStorm);
   createSnowGround(scene, width, height, snowLineY, footerHeight);
-  createTrees(scene, width, snowLineY, scaleFactor);
-  createGroomer(scene, width, snowLineY, scaleFactor);
+  createTrees(scene, width, snowLineY, scaleFactor, isStorm);
+  createGroomer(scene, width, snowLineY, scaleFactor, isStorm);
 }
 
 function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weather?: { isNight: boolean; weather: string }): void {
@@ -38,22 +39,22 @@ function createSnowGround(scene: Phaser.Scene, width: number, height: number, sn
   scene.add.rectangle(width / 2, snowLineY, width, 3, 0xd8e4e8).setOrigin(0.5, 0).setDepth(3);
 }
 
-function createMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number): void {
+function createMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
   const mtnScale = snowLineY / 600;
   // Far mountains — dark rock, tall (depth 1)
-  drawSteppedMountain(scene, 80 * sx, snowLineY, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true, 1);
-  drawSteppedMountain(scene, 350 * sx, snowLineY, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true, 1);
-  drawSteppedMountain(scene, 512 * sx, snowLineY, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true, 1);
-  drawSteppedMountain(scene, 600 * sx, snowLineY, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true, 1);
-  drawSteppedMountain(scene, 900 * sx, snowLineY, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true, 1);
+  drawSteppedMountain(scene, 80 * sx, snowLineY, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
+  drawSteppedMountain(scene, 350 * sx, snowLineY, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
+  drawSteppedMountain(scene, 512 * sx, snowLineY, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
+  drawSteppedMountain(scene, 600 * sx, snowLineY, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
+  drawSteppedMountain(scene, 900 * sx, snowLineY, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
 
   // Near mountains — lighter, shorter, partial overlap (depth 2)
-  drawSteppedMountain(scene, 200 * sx, snowLineY, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2);
-  drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2);
+  drawSteppedMountain(scene, 200 * sx, snowLineY, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
+  drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
 }
 
-function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number): void {
+function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean): void {
   const stepH = 16;
   const steps = Math.ceil(peakHeight / stepH);
   // Start 2 steps below baseY to overlap with snow ground (no gap)
@@ -64,8 +65,11 @@ function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, bas
     const color = i % 3 === 0 ? highlightColor : bodyColor;
     scene.add.rectangle(cx, y, w, stepH, color).setOrigin(0.5, 1).setDepth(depth);
   }
-  if (snowCap && peakHeight > 150) {
-    const capSteps = Math.max(2, Math.min(4, Math.floor(steps * 0.12)));
+  // Snow caps: storms double the cap depth and add caps to all mountains
+  const hasSnowCap = snowCap || isStorm;
+  if (hasSnowCap && peakHeight > 100) {
+    const baseCap = Math.max(2, Math.min(4, Math.floor(steps * 0.12)));
+    const capSteps = isStorm ? Math.min(steps - 1, baseCap * 2) : baseCap;
     for (let i = 0; i < capSteps; i++) {
       const t = (steps - capSteps + i) / steps;
       const w = baseWidth * (1 - t * 0.85);
@@ -75,7 +79,7 @@ function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, bas
   }
 }
 
-function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number): void {
+function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
   // Clustered, varied positions — not evenly spaced
   const treePositions = [
@@ -91,12 +95,19 @@ function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scal
     g.fillRect(tx - 5 * s, snowLineY - 24 * s, 10 * s, 8 * s);
     g.fillRect(tx - 9 * s, snowLineY - 16 * s, 18 * s, 8 * s);
     g.fillRect(tx - 13 * s, snowLineY - 8 * s, 26 * s, 10 * s);
+    // Storm: snow on each foliage tier
+    if (isStorm) {
+      g.fillStyle(0xf0f5f8);
+      g.fillRect(tx - 5 * s, snowLineY - 24 * s, 10 * s, 3 * s);
+      g.fillRect(tx - 9 * s, snowLineY - 16 * s, 18 * s, 3 * s);
+      g.fillRect(tx - 13 * s, snowLineY - 8 * s, 26 * s, 3 * s);
+    }
     g.fillStyle(0x8b4513);
     g.fillRect(tx - 3 * s, snowLineY, 6 * s, 10 * s);
   }
 }
 
-function createGroomer(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number): void {
+function createGroomer(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
   const gx = width / 2 + 140 * sx;
   const s = 2.0 * scaleFactor;
@@ -149,5 +160,12 @@ function createGroomer(scene: Phaser.Scene, width: number, snowLineY: number, sc
   g.fillStyle(0x999999);
   for (let ty = -5; ty < 0; ty += 2) {
     g.fillRect(gx + 34 * s, groundY + ty * s, 3 * s, 1 * s);
+  }
+  // Storm: snow accumulation on roof, body, and blade
+  if (isStorm) {
+    g.fillStyle(0xf0f5f8);
+    g.fillRect(gx - 10 * s, groundY - 37 * s, 24 * s, 3 * s);  // roof top
+    g.fillRect(gx - 18 * s, groundY - 23 * s, 36 * s, 2 * s);  // body top
+    g.fillRect(gx - 27 * s, groundY - 17 * s, 10 * s, 2 * s);  // blade top
   }
 }

@@ -62,6 +62,8 @@ export class PisteRenderer {
     const treeSpacing = tileSize * 2;
     const margin = tileSize;
 
+    const isStorm = level.weather === 'storm';
+
     for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing) {
       for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing) {
         const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
@@ -70,7 +72,7 @@ export class PisteRenderer {
           const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
           const tx = x + offsetX, ty = y + offsetY;
           if (this.geometry.isOnAccessPath(tx, ty)) continue;
-          this.createTree(tx, ty, DEPTHS.BG_FOREST_ROCKS);
+          this.createTree(tx, ty, DEPTHS.BG_FOREST_ROCKS, isStorm);
         }
       }
     }
@@ -242,12 +244,13 @@ export class PisteRenderer {
 
   private createCliffEdgeVisuals(level: Level, tileSize: number): void {
     const worldWidth = level.width * tileSize;
+    const isStorm = level.weather === 'storm';
     for (const cliff of this.geometry.cliffSegments) {
-      this.drawContinuousCliff(cliff, tileSize, worldWidth);
+      this.drawContinuousCliff(cliff, tileSize, worldWidth, isStorm);
     }
   }
 
-  private drawContinuousCliff(cliff: CliffSegment, tileSize: number, worldWidth: number): void {
+  private drawContinuousCliff(cliff: CliffSegment, tileSize: number, worldWidth: number, isStorm: boolean): void {
     const g = this.scene.add.graphics();
     g.setDepth(DEPTHS.CLIFFS);
     
@@ -321,22 +324,23 @@ export class PisteRenderer {
       const treeX = side === 'left' 
         ? Math.max(tileSize, pisteEdge - treeDist)
         : Math.min(worldWidth - tileSize, pisteEdge + treeDist);
-      this.createTree(treeX, y + offsetY);
+      this.createTree(treeX, y + offsetY, undefined, isStorm);
       
       if (rand(y + 303) > 0.6) {
         const clusterCount = rand(y + 304) > 0.5 ? 2 : 1;
         for (let c = 0; c < clusterCount; c++) {
           const cx = treeX + (rand(y + 305 + c) - 0.5) * tileSize * 1.5;
           const cy = y + offsetY + (rand(y + 306 + c) - 0.5) * tileSize * 1.5;
-          this.createTree(cx, cy);
+          this.createTree(cx, cy, undefined, isStorm);
         }
       }
     }
   
-    // Sparse snow patches
-    const snowSpacing = tileSize * 2;
+    // Snow patches on cliff — denser during storms
+    const snowSpacing = isStorm ? tileSize : tileSize * 2;
+    const snowThreshold = isStorm ? 0.35 : 0.65;
     for (let y = startY + snowSpacing; y < endY - snowSpacing; y += snowSpacing) {
-      if (rand(y + 200) < 0.65) continue;
+      if (rand(y + 200) < snowThreshold) continue;
       
       const pisteEdge = getX(y);
       const snowDist = offset + rand(y + 201) * extent * 0.6;
@@ -345,7 +349,8 @@ export class PisteRenderer {
         : Math.min(worldWidth - tileSize, pisteEdge + snowDist);
       
       g.fillStyle(this.CLIFF_COLORS.snow, 1);
-      g.fillRect(snowX, y, detailLarge * 2, detailSize);
+      const patchW = isStorm ? detailLarge * 3 : detailLarge * 2;
+      g.fillRect(snowX, y, patchW, detailSize);
       if (rand(y + 202) > 0.5) {
         g.fillRect(snowX + detailSize, y + detailSize, detailLarge, detailSize);
       }
@@ -447,6 +452,7 @@ export class PisteRenderer {
   }
 
   private createForestBoundaries(level: Level, tileSize: number, worldWidth: number): void {
+    const isStorm = level.weather === 'storm';
     for (let yi = 3; yi < level.height - 2; yi += 2) {
       const path = this.geometry.pistePath[yi];
       if (!path) continue;
@@ -461,7 +467,7 @@ export class PisteRenderer {
         if (this.geometry.isOnAccessPath(treeX, treeY)) continue;
         if (this.geometry.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
-          this.createTree(treeX, treeY);
+          this.createTree(treeX, treeY, undefined, isStorm);
         }
       }
 
@@ -471,13 +477,13 @@ export class PisteRenderer {
         if (this.geometry.isOnAccessPath(treeX, treeY)) continue;
         if (this.geometry.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
-          this.createTree(treeX, treeY);
+          this.createTree(treeX, treeY, undefined, isStorm);
         }
       }
     }
   }
 
-  private createTree(x: number, y: number, depth?: number): void {
+  private createTree(x: number, y: number, depth?: number, isStorm?: boolean): void {
     const g = this.scene.add.graphics();
     g.setDepth(depth ?? yDepth(y));
     const size = 8 + Math.random() * 6;
@@ -488,6 +494,12 @@ export class PisteRenderer {
     g.fillStyle(0x1a4a2a, 1);
     g.fillRect(x - size / 2, y - size * 0.6, size, size * 0.5);
     g.fillRect(x - size / 3, y - size, size * 0.66, size * 0.5);
+
+    if (isStorm) {
+      g.fillStyle(0xf0f5f8, 1);
+      g.fillRect(x - size / 3, y - size, size * 0.66, 2);
+      g.fillRect(x - size / 2, y - size * 0.6, size, 2);
+    }
   }
 
   private createSteepZoneIndicators(level: Level, tileSize: number): void {

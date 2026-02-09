@@ -127,6 +127,11 @@ export default class DialogueScene extends Phaser.Scene {
 
   private resizeManager!: ResizeManager;
   private excludeSize = 200;
+  private isStorm = false;
+
+  init(data?: { weather?: string }): void {
+    this.isStorm = data?.weather === 'storm';
+  }
 
   create(): void {
     this.dialogueQueue = [];
@@ -238,6 +243,19 @@ export default class DialogueScene extends Phaser.Scene {
       this.portraitGraphics, this.speakerText, separator,
       this.dialogueText, this.continueText,
     ]);
+
+    // Storm: snow accumulation on top of dialogue box
+    if (this.isStorm) {
+      const snowG = this.add.graphics();
+      snowG.fillStyle(0xf0f5f8, 0.9);
+      const snowY = -boxHeight / 2 - 2;
+      // Irregular snow line along the top edge
+      for (let sx = -boxWidth / 2; sx < boxWidth / 2; sx += 6) {
+        const h = 2 + Math.abs(Math.sin(sx * 0.15)) * 3;
+        snowG.fillRect(bgX + sx, snowY - h + 2, 6, h);
+      }
+      this.container.add(snowG);
+    }
 
     this.bg.setInteractive({ useHandCursor: true });
     this.bg.on('pointerdown', () => {
