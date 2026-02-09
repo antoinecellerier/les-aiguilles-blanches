@@ -8,7 +8,7 @@ import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/men
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
-import { playClick } from '../systems/UISounds';
+import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -118,6 +118,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
     }
 
     // --- Responsive font sizes ---
+    // Play result sound
+    if (this.won) playLevelWin();
+    else playLevelFail();
     const baseFontSize = Math.min(20, width / 40, height / 30);
     const titleFontSize = Math.min(32, baseFontSize * 2);
     const statsFontSize = Math.min(22, baseFontSize * 1.25);

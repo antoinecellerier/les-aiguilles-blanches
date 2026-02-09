@@ -79,6 +79,12 @@ export default class GameScene extends Phaser.Scene {
   private restartCount = 0;
   private accessPathsVisited = new Set<number>();
 
+  // Warning sound throttling
+  private lastFuelWarnTime = 0;
+  private lastStaminaWarnTime = 0;
+  private lastTimeWarnTime = 0;
+  private staminaDepletedPlayed = false;
+
   // Tutorial
   private tutorialStep = 0;
   private tutorialTriggered: TutorialTriggered = {};
@@ -317,6 +323,11 @@ export default class GameScene extends Phaser.Scene {
     }
 
     if (this.level.hazards && this.level.hazards.includes('avalanche')) {
+      this.hazardSystem.onAvalancheSound = (level: number) => {
+        if (level === 1) this.engineSounds.playAvalancheWarning1();
+        else if (level === 2) this.engineSounds.playAvalancheWarning2();
+        else if (level === 3) this.engineSounds.playAvalancheTrigger();
+      };
       this.hazardSystem.createAvalancheZones(
         this.level,
         this.tileSize,
@@ -903,6 +914,24 @@ export default class GameScene extends Phaser.Scene {
     this.fuel = Phaser.Math.Clamp(this.fuel, 0, 100);
     this.stamina = Phaser.Math.Clamp(this.stamina, 0, 100);
 
+    // Resource warning sounds (throttled)
+    const now = Date.now();
+    if (this.fuel > 0 && this.fuel < 20 && now - this.lastFuelWarnTime > 2000) {
+      this.lastFuelWarnTime = now;
+      this.engineSounds.playFuelWarning();
+    }
+    if (this.stamina > 0 && this.stamina < BALANCE.LOW_STAMINA_THRESHOLD && now - this.lastStaminaWarnTime > 3000) {
+      this.lastStaminaWarnTime = now;
+      this.engineSounds.playStaminaWarning();
+    }
+    if (this.stamina <= 0 && !this.staminaDepletedPlayed) {
+      this.staminaDepletedPlayed = true;
+      this.engineSounds.playStaminaDepleted();
+    }
+    if (this.stamina > 10) {
+      this.staminaDepletedPlayed = false;
+    }
+
     for (const buff in this.buffs) {
       this.buffs[buff] -= dt * 1000;
       if (this.buffs[buff] <= 0) {
@@ -931,6 +960,17 @@ export default class GameScene extends Phaser.Scene {
     if (this.level.timeLimit <= 0) return;
     if (this.timeRemaining > 0) {
       this.timeRemaining--;
+      // Urgent ticks when time is running low
+      if (this.timeRemaining <= 30 && this.timeRemaining > 0) {
+        const now = Date.now();
+        // Speed up: 2s interval at 30s, 0.5s interval at 5s
+        const interval = this.timeRemaining <= 5 ? 500 :
+                         this.timeRemaining <= 10 ? 1000 : 2000;
+        if (now - this.lastTimeWarnTime > interval) {
+          this.lastTimeWarnTime = now;
+          this.engineSounds.playTimeWarning();
+        }
+      }
       this.game.events.emit(GAME_EVENTS.TIMER_UPDATE, this.timeRemaining);
     }
   }
@@ -944,7 +984,11 @@ export default class GameScene extends Phaser.Scene {
     if (interactable.interactionType === 'fuel') {
       if (this.fuel < 100) {
         this.fuel = Math.min(100, this.fuel + BALANCE.FUEL_REFILL_RATE);
-        this.engineSounds.playFuelRefill();
+        const now = Date.now();
+        if (now - this.lastRefuelSoundTime > 2000) {
+          this.lastRefuelSoundTime = now;
+          this.engineSounds.playFuelRefill();
+        }
         this.showInteractionFeedback(feedbackX, feedbackY, '🛢️', 0x44aaff, 28);
       }
     } else if (interactable.interactionType === 'food') {
@@ -952,13 +996,21 @@ export default class GameScene extends Phaser.Scene {
       if (!this.buffs.staminaRegen) {
         this.stamina = 100;
         this.buffs.staminaRegen = BALANCE.FOOD_BUFF_DURATION; // 60 second regen buff
-        this.engineSounds.playRestaurant();
+        const now = Date.now();
+        if (now - this.lastRestaurantSoundTime > 2000) {
+          this.lastRestaurantSoundTime = now;
+          this.engineSounds.playRestaurant();
+        }
         Accessibility.announce(t('marieWelcome'));
         this.showInteractionFeedback(feedbackX, feedbackY, '🧀 Reblochon!', 0xffdd44, 32, true);
       } else if (this.stamina < 100) {
         // If already have buff, just top up stamina
         this.stamina = Math.min(100, this.stamina + BALANCE.FOOD_STAMINA_REFILL_RATE);
-        this.engineSounds.playFuelRefill();
+        const now = Date.now();
+        if (now - this.lastRefuelSoundTime > 2000) {
+          this.lastRefuelSoundTime = now;
+          this.engineSounds.playFuelRefill();
+        }
         this.showInteractionFeedback(feedbackX, feedbackY, '🧀', 0xffdd44, 24);
       }
     }
@@ -966,6 +1018,8 @@ export default class GameScene extends Phaser.Scene {
 
   private lastFeedbackTime = 0;
   private lastBumpTime = 0;
+  private lastRefuelSoundTime = 0;
+  private lastRestaurantSoundTime = 0;
 
   private onObstacleHit(): void {
     const now = Date.now();

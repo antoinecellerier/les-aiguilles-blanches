@@ -186,3 +186,58 @@ export function playDeviceChime(connected: boolean): void {
   osc2.start(ctx.currentTime + 0.09);
   osc2.stop(ctx.currentTime + 0.18);
 }
+
+/** Victory fanfare — ascending arpeggio for level completion. */
+export function playLevelWin(): void {
+  const audio = AudioSystem.getInstance();
+  if (!audio.isReady()) return;
+
+  const ctx = audio.getContext();
+  const sfx = audio.getChannelNode('sfx')!;
+
+  // Ascending major arpeggio: C5 → E5 → G5 → C6
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    const start = ctx.currentTime + i * 0.12;
+    osc.frequency.setValueAtTime(vary(freq), start);
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(0.12, start + 0.03);
+    gain.gain.setValueAtTime(0.12, start + 0.08);
+    gain.gain.linearRampToValueAtTime(0, start + 0.18);
+    osc.connect(gain);
+    gain.connect(sfx);
+    osc.start(start);
+    osc.stop(start + 0.18);
+  });
+}
+
+/** Defeat sound — descending minor notes for level failure. */
+export function playLevelFail(): void {
+  const audio = AudioSystem.getInstance();
+  if (!audio.isReady()) return;
+
+  const ctx = audio.getContext();
+  const sfx = audio.getChannelNode('sfx')!;
+
+  // Descending minor: Eb4 → C4 → Ab3
+  const notes = [311, 262, 208];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    const start = ctx.currentTime + i * 0.2;
+    osc.frequency.setValueAtTime(vary(freq), start);
+    osc.frequency.linearRampToValueAtTime(freq * 0.92, start + 0.25);
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(0.12, start + 0.03);
+    gain.gain.setValueAtTime(0.12, start + 0.12);
+    gain.gain.linearRampToValueAtTime(0, start + 0.25);
+    osc.connect(gain);
+    gain.connect(sfx);
+    osc.start(start);
+    osc.stop(start + 0.25);
+  });
+}

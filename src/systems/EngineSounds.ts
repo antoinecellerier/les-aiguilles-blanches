@@ -679,4 +679,254 @@ export class EngineSounds {
       osc.stop(t + 0.2);
     });
   }
+
+  // --- Hazard & warning sounds ---
+
+  /** Deep sub-bass rumble for avalanche warning level 1. Ominous, felt more than heard. */
+  playAvalancheWarning1(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+
+    // Low detuned pair — menacing rumble
+    for (const freq of [55, 58]) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.15);
+      gain.gain.linearRampToValueAtTime(0, now + 1.2);
+      osc.connect(gain);
+      gain.connect(this.sfxNode);
+      osc.start(now);
+      osc.stop(now + 1.2);
+    }
+
+    // Filtered noise layer for texture
+    const bufLen = Math.floor(this.ctx.sampleRate * 1.2);
+    const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buf;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 150;
+    filter.Q.value = 1;
+    const nGain = this.ctx.createGain();
+    nGain.gain.setValueAtTime(0, now);
+    nGain.gain.linearRampToValueAtTime(0.10, now + 0.15);
+    nGain.gain.linearRampToValueAtTime(0, now + 1.2);
+    noise.connect(filter);
+    filter.connect(nGain);
+    nGain.connect(this.sfxNode);
+    noise.start(now);
+  }
+
+  /** Intense low rumble for avalanche warning level 2. The mountain is angry. */
+  playAvalancheWarning2(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+
+    // Layered low drones — deeper, louder, more voices
+    for (const freq of [48, 55, 63, 75]) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.2);
+      gain.gain.linearRampToValueAtTime(0, now + 1.6);
+      osc.connect(gain);
+      gain.connect(this.sfxNode);
+      osc.start(now);
+      osc.stop(now + 1.6);
+    }
+
+    // Throbbing LFO pulse for menace
+    const pulse = this.ctx.createOscillator();
+    const pulseGain = this.ctx.createGain();
+    const lfo = this.ctx.createOscillator();
+    const lfoGain = this.ctx.createGain();
+    pulse.type = 'sine';
+    pulse.frequency.value = 60;
+    lfo.frequency.value = 4; // Throbbing at 4Hz
+    lfoGain.gain.value = 0.06;
+    lfo.connect(lfoGain);
+    lfoGain.connect(pulseGain.gain);
+    pulseGain.gain.setValueAtTime(0.12, now);
+    pulseGain.gain.linearRampToValueAtTime(0, now + 1.6);
+    pulse.connect(pulseGain);
+    pulseGain.connect(this.sfxNode);
+    pulse.start(now);
+    pulse.stop(now + 1.6);
+    lfo.start(now);
+    lfo.stop(now + 1.6);
+
+    // Rumbling noise
+    const bufLen = Math.floor(this.ctx.sampleRate * 1.6);
+    const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buf;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 200;
+    filter.Q.value = 0.8;
+    const nGain = this.ctx.createGain();
+    nGain.gain.setValueAtTime(0, now);
+    nGain.gain.linearRampToValueAtTime(0.12, now + 0.2);
+    nGain.gain.linearRampToValueAtTime(0, now + 1.6);
+    noise.connect(filter);
+    filter.connect(nGain);
+    nGain.connect(this.sfxNode);
+    noise.start(now);
+  }
+
+  /** Massive avalanche — building low-frequency roar with crumbling rock texture. */
+  playAvalancheTrigger(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+
+    // Multiple detuned low layers building over 2s
+    const freqs = [45, 55, 65, 80, 100];
+    freqs.forEach((freq, i) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      // Staggered entry — each voice joins slightly later
+      const entry = i * 0.12;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.12, now + entry + 0.4);
+      gain.gain.setValueAtTime(0.12, now + 1.2);
+      gain.gain.linearRampToValueAtTime(0, now + 2.0);
+      osc.connect(gain);
+      gain.connect(this.sfxNode!);
+      osc.start(now + entry);
+      osc.stop(now + 2.0);
+    });
+
+    // Crumbling rumble noise layer
+    const bufLen = Math.floor(this.ctx.sampleRate * 2.0);
+    const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) {
+      const env = Math.sin(Math.PI * i / bufLen);
+      data[i] = (Math.random() * 2 - 1) * env;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buf;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(300, now);
+    filter.frequency.linearRampToValueAtTime(100, now + 2.0);
+    filter.Q.value = 0.8;
+    const nGain = this.ctx.createGain();
+    nGain.gain.setValueAtTime(0, now);
+    nGain.gain.linearRampToValueAtTime(0.12, now + 0.4);
+    nGain.gain.linearRampToValueAtTime(0, now + 2.0);
+    noise.connect(filter);
+    filter.connect(nGain);
+    nGain.connect(this.sfxNode);
+    noise.start(now);
+  }
+
+  /** Short warning beep for low fuel. */
+  playFuelWarning(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+
+    // Double beep — urgent but not harsh
+    for (const offset of [0, 0.15]) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(520, now + offset);
+      gain.gain.setValueAtTime(0, now + offset);
+      gain.gain.linearRampToValueAtTime(0.14, now + offset + 0.02);
+      gain.gain.setValueAtTime(0.14, now + offset + 0.08);
+      gain.gain.linearRampToValueAtTime(0, now + offset + 0.12);
+      osc.connect(gain);
+      gain.connect(this.sfxNode);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.12);
+    }
+  }
+
+  /** Descending tone for low stamina — tired/winding down feel. */
+  playStaminaWarning(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+    // Two-note descending — sounds like running out of energy
+    for (const [offset, freq] of [[0, 380], [0.15, 300]] as [number, number][]) {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + offset);
+      osc.frequency.linearRampToValueAtTime(freq * 0.85, now + offset + 0.12);
+      gain.gain.setValueAtTime(0, now + offset);
+      gain.gain.linearRampToValueAtTime(0.12, now + offset + 0.02);
+      gain.gain.setValueAtTime(0.12, now + offset + 0.08);
+      gain.gain.linearRampToValueAtTime(0, now + offset + 0.14);
+      osc.connect(gain);
+      gain.connect(this.sfxNode);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.14);
+    }
+  }
+
+  /** Exhaustion — long descending "powering down" tone when stamina hits zero. */
+  playStaminaDepleted(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+
+    // Three-note descending slide — winding down
+    const notes = [400, 280, 180];
+    notes.forEach((freq, i) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'sine';
+      const start = now + i * 0.2;
+      osc.frequency.setValueAtTime(freq, start);
+      osc.frequency.linearRampToValueAtTime(freq * 0.7, start + 0.25);
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.14, start + 0.03);
+      gain.gain.setValueAtTime(0.14, start + 0.12);
+      gain.gain.linearRampToValueAtTime(0, start + 0.25);
+      osc.connect(gain);
+      gain.connect(this.sfxNode!);
+      osc.start(start);
+      osc.stop(start + 0.25);
+    });
+  }
+
+  /** Urgent tick for time running low. */
+  playTimeWarning(): void {
+    if (!this.ctx || !this.sfxNode) return;
+
+    const now = this.ctx.currentTime;
+    // Two quick ticks
+    for (let i = 0; i < 2; i++) {
+      const t = now + i * 0.1;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800, t);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.setValueAtTime(0.06, t);
+      gain.gain.linearRampToValueAtTime(0, t + 0.04);
+      osc.connect(gain);
+      gain.connect(this.sfxNode);
+      osc.start(t);
+      osc.stop(t + 0.04);
+    }
+  }
 }

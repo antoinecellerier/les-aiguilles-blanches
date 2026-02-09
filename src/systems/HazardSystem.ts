@@ -6,12 +6,17 @@ import { THEME } from '../config/theme';
 export interface AvalancheZone extends Phaser.GameObjects.Rectangle {
   avalancheRisk: number;
   zoneVisual: Phaser.GameObjects.Rectangle;
+  warning1Fired?: boolean;
+  warning2Fired?: boolean;
 }
 
 export class HazardSystem {
   private scene: Phaser.Scene;
   private avalancheZones: AvalancheZone[] = [];
   private avalancheTriggered = false;
+
+  /** Optional sound callback: 1 = warning1, 2 = warning2, 3 = trigger */
+  onAvalancheSound: ((level: number) => void) | null = null;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -166,11 +171,15 @@ export class HazardSystem {
       zone.avalancheRisk += BALANCE.AVALANCHE_RISK_GROOMING;
     }
 
-    if (zone.avalancheRisk > BALANCE.AVALANCHE_WARNING_1 && zone.avalancheRisk < BALANCE.AVALANCHE_WARNING_1 + 0.05) {
+    if (zone.avalancheRisk > BALANCE.AVALANCHE_WARNING_1 && !zone.warning1Fired) {
+      zone.warning1Fired = true;
       this.scene.cameras.main.shake(BALANCE.SHAKE_WARNING_1.duration, BALANCE.SHAKE_WARNING_1.intensity);
+      this.onAvalancheSound?.(1);
     }
-    if (zone.avalancheRisk > BALANCE.AVALANCHE_WARNING_2 && zone.avalancheRisk < BALANCE.AVALANCHE_WARNING_2 + 0.05) {
+    if (zone.avalancheRisk > BALANCE.AVALANCHE_WARNING_2 && !zone.warning2Fired) {
+      zone.warning2Fired = true;
       this.scene.cameras.main.shake(BALANCE.SHAKE_WARNING_2.duration, BALANCE.SHAKE_WARNING_2.intensity);
+      this.onAvalancheSound?.(2);
       showDialogue('avalancheWarning');
     }
 
@@ -188,6 +197,7 @@ export class HazardSystem {
     if (this.avalancheTriggered) return;
     this.avalancheTriggered = true;
 
+    this.onAvalancheSound?.(3);
     this.scene.cameras.main.shake(BALANCE.SHAKE_AVALANCHE.duration, BALANCE.SHAKE_AVALANCHE.intensity);
 
     const avalancheParticles = this.scene.add.particles(0, 0, 'snow_ungroomed', {

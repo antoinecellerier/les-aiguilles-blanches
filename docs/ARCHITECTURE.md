@@ -52,8 +52,8 @@ snow-groomer/
 │   │   ├── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
 │   │   ├── AudioSystem.ts  # Web Audio API singleton, volume channels, gain chain
 │   │   ├── AmbienceSounds.ts # Storm wind/gusts, night owl & wolf calls
-│   │   ├── EngineSounds.ts # Engine rumble, snow crunch, grooming, winch, tumble SFX
-│   │   └── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle)
+│   │   ├── EngineSounds.ts # Engine rumble, snow crunch, grooming, winch, hazard, warning SFX
+│   │   └── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle, level win/fail)
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
@@ -870,7 +870,7 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 - **PisteRenderer** — All piste visual rendering: boundary colliders, cliff edge visuals, piste markers, forest trees, access path roads/poles, steep zone indicators, and extended background. Returns physics groups for GameScene collision setup.
 - **WinchSystem** — Winch anchor creation, cable rendering (taut/slack), attach/detach state. Exposes `isTaut()` query used by movement and resource systems.
 - **AudioSystem** — Singleton managing all game audio via Web Audio API. Handles AudioContext lifecycle (autoplay resume, visibility suspend/resume), five volume channels (master, music, sfx, voice, ambience) routed through a gain node chain, and localStorage persistence for volume settings.
-- **EngineSounds** — Procedural engine/movement sounds: diesel idle rumble (dual detuned sawtooth), speed-dependent pitch rise, surface-dependent snow crunch (crunchy on ungroomed, soft thumps on groomed), grooming blade buzz with LFO vibration, winch attach/detach clunks, winch tension hum, obstacle/boundary bump clang, fuel refill gurgle, restaurant welcome chime, rolling tumble impacts, and cliff fall with cascading rock hits. Created/destroyed per GameScene lifecycle; paused/resumed on game pause.
+- **EngineSounds** — Procedural engine/movement sounds and hazard warnings. Continuous: diesel idle rumble, speed-dependent pitch, surface-dependent snow crunch, grooming blade buzz, winch tension hum. One-shot: winch attach/detach, obstacle bump, fuel refill, restaurant chime, tumble impacts, cliff fall, stamina depleted. Hazard warnings: avalanche rumbles (2 escalation levels + trigger roar), low fuel double-beep (every 2s below 20%), low stamina descending tone (every 3s below threshold), time-running-out ticks (accelerating: 2s→1s→0.5s under 30s). Created/destroyed per GameScene lifecycle.
 - **AmbienceSounds** — Environmental soundscapes routed through the ambience channel. Storm levels get continuous bandpass-filtered wind noise + LFO-modulated howling gusts. Night levels get occasional procedural wildlife calls (owl two-tone hoot, wolf howl with vibrato) spaced 8–20s apart. Paused/resumed with game state.
 
 Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
