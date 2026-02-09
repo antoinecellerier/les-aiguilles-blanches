@@ -6,6 +6,8 @@ import { getMappingFromGamepad } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { resetGameScenes } from '../utils/sceneTransitions';
+import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
+import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -46,6 +48,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private buttonNav!: MenuButtonNav;
   private inputReady = false;
   private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
+  private wildlife!: MenuWildlifeController;
 
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
@@ -80,144 +83,198 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const level = LEVELS[this.levelIndex] as Level;
     const padding = Math.min(20, width * 0.03, height * 0.03);
 
-    this.cameras.main.setBackgroundColor(this.won ? THEME.colors.winBg : THEME.colors.failBg);
+    // --- Alpine background (reuse menu terrain) ---
+    const dpr = window.devicePixelRatio || 1;
+    const scaleByHeight = height / 720;
+    const scaleByWidth = width / 1280;
+    const dprBoost = Math.sqrt(dpr);
+    const scaleFactor = Math.min(scaleByHeight, scaleByWidth) * dprBoost;
+    const isPortrait = width / height < 1;
+    const snowLinePct = isPortrait ? 0.82 : 0.78;
+    const snowLineY = height * snowLinePct;
+    const footerHeight = Math.round(36 * scaleFactor);
 
-    // Calculate responsive font sizes
+    const levelWeather = { isNight: level.isNight ?? false, weather: level.weather ?? 'clear' };
+    const skipGroomer = !this.won && !!this.failReason;
+    createMenuTerrain(this, width, height, snowLineY, footerHeight, scaleFactor, levelWeather, skipGroomer);
+
+    // Weather effects (night overlay, snow particles)
+    this.createWeather(width, height, levelWeather);
+
+    // Wildlife
+    this.wildlife = new MenuWildlifeController(this);
+    this.wildlife.snowLineY = snowLineY;
+    this.wildlife.create(width, height, snowLineY, footerHeight, scaleFactor, levelWeather);
+
+    // Failure-specific groomer effects (replace the stock groomer)
+    if (skipGroomer) {
+      this.drawGroomerFailEffect(width, snowLineY, scaleFactor, levelWeather);
+    }
+
+    // Fail: somber red-brown tint overlay above terrain (above groomer effects)
+    if (!this.won) {
+      this.add.rectangle(width / 2, height / 2, width, height, 0x3a1a1a, 0.55).setDepth(6);
+    }
+
+    // --- Responsive font sizes ---
     const baseFontSize = Math.min(20, width / 40, height / 30);
-    const titleFontSize = Math.min(36, baseFontSize * 2.2);
-    const iconFontSize = Math.min(80, baseFontSize * 4.5);
+    const titleFontSize = Math.min(32, baseFontSize * 2);
+    const statsFontSize = Math.min(22, baseFontSize * 1.25);
     const buttonFontSize = Math.min(20, baseFontSize * 1.1);
+    const cx = width / 2;
+
+    // --- Build content top-down using a Y cursor ---
+    let cursorY = isPortrait ? height * 0.08 : height * 0.10;
+    const sectionGap = 14;
 
     const icon = this.won ? '🏆' : this.getFailIcon();
     const titleKey = this.won ? 'levelComplete' : 'levelFailed';
+    const gradeText = this.won ? this.getGrade() : '';
+    const statusStr = this.won ? gradeText : t(titleKey);
+    const statusColor = this.won ? THEME.colors.accent : '#ff6666';
+    const iconFontSize = Math.min(36, baseFontSize * 2);
+    const statusFontSize = Math.min(24, baseFontSize * 1.4);
 
-    // Build main content sizer
-    const mainSizer = this.rexUI.add.sizer({
-      x: width / 2,
-      y: height / 2,
-      width: width - padding * 2,
-      orientation: 'vertical',
-      space: { item: 10 },
-    });
+    // Title panel: calculate height from font sizes, width set after measuring text
+    const titlePanelH = iconFontSize + titleFontSize * 1.3 + statusFontSize * 1.3 + 40;
+    const titlePanelCY = cursorY + titlePanelH / 2;
+
+    // Create panel (width placeholder, resized after text is measured)
+    const titlePanel = this.add.rectangle(cx, titlePanelCY, 400, titlePanelH, 0x1a1a2e, 0.85)
+      .setStrokeStyle(2, this.won ? 0x228b22 : 0xcc2200).setDepth(10);
 
     // Icon
-    mainSizer.add(this.add.text(0, 0, icon, { font: `${iconFontSize}px Arial` }), { align: 'center' });
-
-    // Title
-    mainSizer.add(this.add.text(0, 0, t(titleKey), {
-      font: `bold ${titleFontSize}px ${THEME.fonts.family}`,
-      color: THEME.colors.textPrimary,
-    }), { align: 'center' });
-
-    // Fail taunt if applicable - prominent styling with background
-    if (!this.won && this.failReason) {
-      const taunt = this.getFailTaunt();
-      const tauntFontSize = Math.round(baseFontSize * 1.3); // 30% larger than base
-      const tauntText = this.add.text(0, 0, `« ${taunt} »`, {
-        font: `bold ${tauntFontSize}px ${THEME.fonts.family}`,
-        color: '#ffdddd',
-        align: 'center',
-        wordWrap: { width: width * 0.75 },
-      });
-      tauntText.setOrigin(0.5, 0.5);
-      
-      // Size background to fit text with padding
-      const bgWidth = Math.min(width * 0.9, tauntText.width + 40);
-      const bgHeight = tauntText.height + 20;
-      const tauntBg = this.add.rectangle(0, 0, bgWidth, bgHeight, 0x442222, 0.95);
-      tauntBg.setStrokeStyle(3, 0xff4444);
-      
-      // Container to hold both bg and text - set size for sizer layout
-      const tauntContainer = this.add.container(0, 0, [tauntBg, tauntText]);
-      tauntContainer.setSize(bgWidth, bgHeight);
-      mainSizer.add(tauntContainer, { align: 'center', padding: { top: 10, bottom: 15 } });
-    }
+    cursorY += 14;
+    this.add.text(cx, cursorY, icon, {
+      font: `${iconFontSize}px ${THEME.fonts.familyEmoji}`,
+    }).setOrigin(0.5, 0).setDepth(11);
+    cursorY += iconFontSize + 4;
 
     // Level name
-    mainSizer.add(this.add.text(0, 0, t(level.nameKey), {
-      font: `${baseFontSize}px ${THEME.fonts.family}`,
-      color: THEME.colors.textSecondary,
-    }), { align: 'center', padding: { top: 10 } });
-
-    // Stats
-    const statsText = [
-      t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
-      '',
-      t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
-      '',
-      this.won ? this.getGrade() : '',
-    ].join('\n');
-
-    mainSizer.add(this.add.text(0, 0, statsText, {
-      font: `${baseFontSize}px ${THEME.fonts.family}`,
+    const nameText = this.add.text(cx, cursorY, t(level.nameKey), {
+      fontFamily: THEME.fonts.family,
+      fontSize: `${titleFontSize}px`,
+      fontStyle: 'bold',
       color: THEME.colors.textPrimary,
-      align: 'center',
-      lineSpacing: 8,
-    }), { align: 'center', padding: { top: 20 } });
+    }).setOrigin(0.5, 0).setDepth(11);
+    cursorY += titleFontSize * 1.3 + 2;
 
-    // Bonus objectives
+    // Grade or "Level Failed"
+    const statusTextObj = this.add.text(cx, cursorY, statusStr, {
+      fontFamily: THEME.fonts.family,
+      fontSize: `${statusFontSize}px`,
+      fontStyle: 'bold',
+      color: statusColor,
+    }).setOrigin(0.5, 0).setDepth(11);
+
+    // Resize panel to fit widest content + padding
+    const contentW = Math.max(nameText.width, statusTextObj.width, 200);
+    const panelW = contentW + 50;
+    titlePanel.setSize(panelW, titlePanelH);
+
+    cursorY = titlePanelCY + titlePanelH / 2 + sectionGap;
+
+    // --- Taunt panel (fail only, capped width) ---
+    if (!this.won && this.failReason) {
+      const taunt = this.getFailTaunt();
+      const tauntFontSize = Math.round(baseFontSize * 1.15);
+      const maxTauntW = Math.min(600, width * 0.65);
+      const tauntText = this.add.text(cx, cursorY + 10, `« ${taunt} »`, {
+        fontFamily: THEME.fonts.family,
+        fontSize: `${tauntFontSize}px`,
+        fontStyle: 'bold italic',
+        color: '#ffdddd',
+        align: 'center',
+        wordWrap: { width: maxTauntW - 30 },
+      }).setOrigin(0.5, 0).setDepth(11);
+
+      const tauntH = tauntText.height + 20;
+      const tauntW = Math.min(maxTauntW, tauntText.width + 30);
+      this.add.rectangle(cx, cursorY + tauntH / 2, tauntW, tauntH, 0x442222, 0.8)
+        .setStrokeStyle(2, 0xff4444).setDepth(10);
+      cursorY += tauntH + sectionGap;
+    }
+
+    // --- Stats panel ---
+    const statsLines: string[] = [
+      t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
+      t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
+    ];
+
+    let bonusResults: { objective: BonusObjective; met: boolean; label: string }[] = [];
     if (this.won) {
-      const bonusResults = this.evaluateBonusObjectives();
+      bonusResults = this.evaluateBonusObjectives();
       if (bonusResults.length > 0) {
-        const bonusLines = bonusResults.map(r =>
-          (r.met ? '✓ ' : '✗ ') + r.label
-        ).join('\n');
-
-        const allMet = bonusResults.every(r => r.met);
-        const bonusColor = allMet ? THEME.colors.success : THEME.colors.textSecondary;
-
-        mainSizer.add(this.add.text(0, 0, bonusLines, {
-          font: `${baseFontSize}px ${THEME.fonts.family}`,
-          color: bonusColor,
-          align: 'left',
-          lineSpacing: 6,
-        }), { align: 'center', padding: { top: 12 } });
+        statsLines.push('');
+        bonusResults.forEach(r => statsLines.push((r.met ? '✓ ' : '✗ ') + r.label));
       }
     }
 
+    const statsText = this.add.text(cx, cursorY, statsLines.join('\n'), {
+      fontFamily: THEME.fonts.family,
+      fontSize: `${statsFontSize}px`,
+      color: THEME.colors.textPrimary,
+      align: 'center',
+      lineSpacing: 6,
+    }).setOrigin(0.5, 0).setDepth(11);
+
+    const statsPanelH = statsText.height + 24;
+    const statsPanelW = Math.max(panelW * 0.8, statsText.width + 40);
+    const statsPanelCY = cursorY + statsPanelH / 2;
+    this.add.rectangle(cx, statsPanelCY, statsPanelW, statsPanelH, 0x1a1a2e, 0.85)
+      .setStrokeStyle(1, this.won ? 0x3d7a9b : 0x664444).setDepth(10);
+    // Re-center text vertically in the panel
+    statsText.setY(statsPanelCY - statsText.height / 2);
+
+    if (this.won && bonusResults.length > 0 && bonusResults.every(r => r.met)) {
+      statsText.setColor(THEME.colors.success);
+    }
+
+    cursorY += statsPanelH + sectionGap;
+
     // Game complete message for final level win
     if (this.won && this.levelIndex === LEVELS.length - 1) {
-      mainSizer.add(this.add.text(0, 0, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
-        font: `bold ${baseFontSize * 1.25}px ${THEME.fonts.family}`,
+      const gcMsg = this.add.text(cx, cursorY, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
+        fontFamily: THEME.fonts.family,
+        fontSize: `${Math.round(baseFontSize * 1.25)}px`,
+        fontStyle: 'bold',
         color: THEME.colors.accent,
-      }), { align: 'center', padding: { top: 20 } });
+      }).setOrigin(0.5, 0).setDepth(11);
+      cursorY += gcMsg.height + sectionGap;
     }
 
-    // Button row
-    const buttonSizer = this.rexUI.add.sizer({
-      orientation: 'horizontal',
-      space: { item: 20 },
-    });
-
-    const buttonPadding = { x: Math.max(15, padding), y: Math.max(8, padding * 0.6) };
-
-    // Check if gamepad is connected for button hints
-    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
-    const confirmHint = hasGamepad ? 'Ⓐ' : '↵';
-    const backHint = hasGamepad ? 'Ⓑ' : 'ESC';
+    // --- Buttons ---
+    const buttonY = Math.min(cursorY + 4, height - 50);
+    const buttonPadding2 = { x: Math.max(15, padding), y: Math.max(8, padding * 0.6) };
+    const buttonContainer = this.add.container(0, 0).setDepth(11);
 
     if (this.won && this.levelIndex < LEVELS.length - 1) {
-      // Won, more levels: Next Level + Menu
-      this.addButton(buttonSizer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding, 
+      this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true);
-      this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
+      this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
-
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
-      // Won final level: View Credits + Menu
-      this.addButton(buttonSizer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding,
+      this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
         () => this.navigateTo('CreditsScene'), true);
-      this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
+      this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
-
     } else {
-      // Failed: Retry + Menu
-      this.addButton(buttonSizer, t('retry') || 'Retry', buttonFontSize, buttonPadding,
+      this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex, restartCount: this.restartCount + 1 }), true);
-      this.addButton(buttonSizer, t('menu') || 'Menu', buttonFontSize, buttonPadding,
+      this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     }
-    
+
+    // Position buttons horizontally centered
+    const gap = 20;
+    let totalBtnW = 0;
+    this.menuButtons.forEach((btn, i) => { totalBtnW += btn.width; if (i > 0) totalBtnW += gap; });
+    let btnX = cx - totalBtnW / 2;
+    this.menuButtons.forEach((btn) => {
+      btn.setPosition(btnX, buttonY);
+      btnX += btn.width + gap;
+    });
+
     // Keyboard navigation (horizontal layout)
     this.buttonNav = createMenuButtonNav(
       this.menuButtons, this.buttonCallbacks, ctaStyler(this.buttonIsCTA),
@@ -230,9 +287,6 @@ export default class LevelCompleteScene extends Phaser.Scene {
     
     // Initialize selection
     this.buttonNav.refreshStyles();
-
-    mainSizer.add(buttonSizer, { align: 'center', padding: { top: 30 } });
-    mainSizer.layout();
 
     // Initialize gamepad navigation
     this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
@@ -266,6 +320,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   shutdown(): void {
     this.input.keyboard?.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
+    this.wildlife?.destroy();
     
     // Clean up inputReady timer if scene shutdown before it fires
     if (this.inputReadyTimer) {
@@ -276,12 +331,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
   private gamepadNav!: GamepadMenuNav;
 
-  update(_time: number, delta: number): void {
+  update(time: number, delta: number): void {
     this.gamepadNav.update(delta);
+    this.wildlife.update(time, delta);
   }
   
   private addButton(
-    sizer: any,
+    container: Phaser.GameObjects.Container,
     text: string,
     fontSize: number,
     padding: { x: number; y: number },
@@ -304,26 +360,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);
     this.buttonIsCTA.push(isCTA);
-    sizer.add(btn);
-  }
-
-  private createButton(
-    text: string,
-    fontSize: number,
-    padding: { x: number; y: number },
-    callback: () => void
-  ): Phaser.GameObjects.Text {
-    const btn = this.add.text(0, 0, text, {
-      fontFamily: THEME.fonts.family,
-      fontSize: `${fontSize}px`,
-      color: THEME.colors.textPrimary,
-      backgroundColor: THEME.colors.buttonPrimaryHex,
-      padding,
-    }).setInteractive({ useHandCursor: true })
-      .on('pointerover', () => btn.setStyle({ backgroundColor: THEME.colors.buttonHoverHex }))
-      .on('pointerout', () => btn.setStyle({ backgroundColor: THEME.colors.buttonPrimaryHex }))
-      .on('pointerdown', callback);
-    return btn;
+    container.add(btn);
   }
 
   private isNavigating = false;
@@ -343,11 +380,11 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
   private getFailIcon(): string {
     switch (this.failReason) {
-      case 'cliff': return '🏔️💀';
-      case 'fuel': return '⛽💨';
-      case 'time': return '⏰❌';
-      case 'avalanche': return '🏔️❄️💨';
-      case 'tumble': return '🔄💥';
+      case 'cliff': return '🏔️';
+      case 'fuel': return '⛽';
+      case 'time': return '⏰';
+      case 'avalanche': return '❄️';
+      case 'tumble': return '💥';
       default: return '❌';
     }
   }
@@ -424,5 +461,187 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
       return { objective: obj, met, label };
     });
+  }
+
+  /** Weather effects: night overlay, storm haze, snow particles. */
+  private createWeather(width: number, height: number, weather?: { isNight: boolean; weather: string }): void {
+    if (!weather) return;
+    if (weather.isNight) {
+      this.add.rectangle(width / 2, height / 2, width, height, 0x000022).setAlpha(0.45).setDepth(5);
+    }
+    if (weather.weather === 'storm') {
+      this.add.rectangle(width / 2, height / 2, width, height, 0x667788).setAlpha(0.25).setDepth(5);
+    }
+    if (weather.weather !== 'clear' && this.textures.exists('snow_ungroomed')) {
+      const isStorm = weather.weather === 'storm';
+      this.add.particles(0, 0, 'snow_ungroomed', {
+        x: { min: 0, max: width },
+        y: -10,
+        quantity: isStorm ? 6 : 2,
+        frequency: isStorm ? 50 : 200,
+        speedY: isStorm ? { min: 120, max: 280 } : { min: 20, max: 60 },
+        speedX: isStorm ? { min: -100, max: -30 } : { min: -10, max: 10 },
+        scale: isStorm ? { start: 0.4, end: 0.1 } : { start: 0.3, end: 0.08 },
+        alpha: { start: 0.8, end: 0.3 },
+        lifespan: isStorm ? 2500 : 5000,
+        blendMode: Phaser.BlendModes.ADD,
+        tint: isStorm ? 0xCCDDFF : 0xFFFFFF,
+      }).setDepth(200);
+    }
+  }
+
+  /** Draw failure-specific visual effects on the terrain groomer. */
+  private drawGroomerFailEffect(width: number, snowLineY: number, scaleFactor: number, weather: { isNight: boolean; weather: string }): void {
+    const sx = width / 1024;
+    const gx = width / 2 + 140 * sx;
+    const s = 2.0 * scaleFactor;
+    const groundY = snowLineY;
+    const isStorm = weather.weather === 'storm';
+    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.001);
+
+    switch (this.failReason) {
+      case 'tumble': {
+        // Upside-down groomer: cabin at bottom, tracks on top, full detail
+        // Cabin roof (now at bottom)
+        g.fillStyle(0xaa1a00);
+        g.fillRect(gx - 10 * s, groundY - 4 * s, 24 * s, 3 * s);
+        // Window glass (inverted)
+        g.fillStyle(0x87ceeb);
+        g.fillRect(gx - 5 * s, groundY - 8 * s, 14 * s, 5 * s);
+        // Cabin frame
+        g.fillStyle(0x1e90ff);
+        g.fillRect(gx - 8 * s, groundY - 10 * s, 20 * s, 9 * s);
+        // Body — red, sits above cabin (inverted)
+        g.fillStyle(0xcc2200);
+        g.fillRect(gx - 18 * s, groundY - 24 * s, 36 * s, 14 * s);
+        // Front blade (inverted)
+        g.fillStyle(0x888888);
+        g.fillRect(gx - 26 * s, groundY - 22 * s, 10 * s, 10 * s);
+        g.fillStyle(0xaaaaaa);
+        g.fillRect(gx - 27 * s, groundY - 22 * s, 4 * s, 12 * s);
+        // Exhaust pipe (now points down from body)
+        g.fillStyle(0x555555);
+        g.fillRect(gx + 10 * s, groundY - 8 * s, 3 * s, 8 * s);
+        // Tiller arm (inverted)
+        g.fillStyle(0x777777);
+        g.fillRect(gx + 22 * s, groundY - 18 * s, 8 * s, 3 * s);
+        // Tiller drum
+        g.fillStyle(0x555555);
+        g.fillRect(gx + 28 * s, groundY - 22 * s, 6 * s, 8 * s);
+        // Tracks on top (inverted)
+        g.fillStyle(0x333333);
+        g.fillRect(gx - 24 * s, groundY - 32 * s, 48 * s, 8 * s);
+        g.fillStyle(0x444444);
+        for (let tx = -22; tx < 24; tx += 6) {
+          g.fillRect(gx + tx * s, groundY - 31 * s, 3 * s, 6 * s);
+        }
+        // Smoke/dust clouds around wreck
+        g.fillStyle(0x888888, 0.5);
+        g.fillRect(gx - 32 * s, groundY - 8 * s, 8 * s, 5 * s);
+        g.fillRect(gx + 26 * s, groundY - 6 * s, 10 * s, 4 * s);
+        // Storm snow on exposed tracks (top)
+        if (isStorm) {
+          g.fillStyle(0xf0f5f8);
+          g.fillRect(gx - 24 * s, groundY - 35 * s, 48 * s, 3 * s);
+        }
+        break;
+      }
+      case 'avalanche': {
+        // Buried under snow: pile of snow over the groomer
+        g.fillStyle(0xf0f5f8);
+        g.fillRect(gx - 28 * s, groundY - 20 * s, 56 * s, 20 * s);
+        g.fillRect(gx - 22 * s, groundY - 28 * s, 44 * s, 10 * s);
+        g.fillRect(gx - 16 * s, groundY - 34 * s, 32 * s, 8 * s);
+        g.fillRect(gx - 10 * s, groundY - 38 * s, 20 * s, 6 * s);
+        // Snow texture detail
+        g.fillStyle(0xe0e8ef);
+        g.fillRect(gx - 18 * s, groundY - 22 * s, 6 * s, 3 * s);
+        g.fillRect(gx + 8 * s, groundY - 26 * s, 8 * s, 3 * s);
+        g.fillRect(gx - 4 * s, groundY - 32 * s, 10 * s, 2 * s);
+        // Tip of cabin roof poking out
+        g.fillStyle(0xaa1a00);
+        g.fillRect(gx - 6 * s, groundY - 40 * s, 12 * s, 3 * s);
+        break;
+      }
+      case 'cliff': {
+        // Groomer tilted forward, front end dropped off cliff edge
+        // Tracks — tilted (rear higher, front lower)
+        g.fillStyle(0x333333);
+        g.fillRect(gx - 24 * s, groundY - 6 * s, 24 * s, 6 * s); // rear half level
+        g.fillRect(gx, groundY - 2 * s, 24 * s, 6 * s); // front half dropped
+        g.fillStyle(0x444444);
+        for (let tx = -22; tx < 0; tx += 6) {
+          g.fillRect(gx + tx * s, groundY - 5 * s, 3 * s, 4 * s);
+        }
+        for (let tx = 2; tx < 24; tx += 6) {
+          g.fillRect(gx + tx * s, groundY - 1 * s, 3 * s, 4 * s);
+        }
+        // Body — tilted
+        g.fillStyle(0xcc2200);
+        g.fillRect(gx - 18 * s, groundY - 20 * s, 18 * s, 14 * s); // rear half
+        g.fillRect(gx, groundY - 16 * s, 18 * s, 14 * s); // front half lower
+        // Cabin — on rear half
+        g.fillStyle(0x1e90ff);
+        g.fillRect(gx - 8 * s, groundY - 30 * s, 20 * s, 11 * s);
+        g.fillStyle(0x87ceeb);
+        g.fillRect(gx - 5 * s, groundY - 28 * s, 14 * s, 7 * s);
+        // Cabin roof
+        g.fillStyle(0xaa1a00);
+        g.fillRect(gx - 10 * s, groundY - 32 * s, 24 * s, 3 * s);
+        // Front blade — dangling lower
+        g.fillStyle(0x888888);
+        g.fillRect(gx - 26 * s, groundY - 10 * s, 10 * s, 10 * s);
+        g.fillStyle(0xaaaaaa);
+        g.fillRect(gx - 27 * s, groundY - 12 * s, 4 * s, 12 * s);
+        // Exhaust pipe
+        g.fillStyle(0x555555);
+        g.fillRect(gx + 10 * s, groundY - 36 * s, 3 * s, 8 * s);
+        // Falling rocks/debris below edge
+        g.fillStyle(0x6a5e52);
+        g.fillRect(gx + 16 * s, groundY + 6 * s, 5 * s, 4 * s);
+        g.fillRect(gx + 22 * s, groundY + 10 * s, 3 * s, 3 * s);
+        g.fillRect(gx + 10 * s, groundY + 8 * s, 4 * s, 3 * s);
+        // Warning stripes at cliff edge
+        g.fillStyle(0xff4444);
+        g.fillRect(gx - 2 * s, groundY - 1 * s, 4 * s, 2 * s);
+        g.fillRect(gx + 4 * s, groundY - 1 * s, 4 * s, 2 * s);
+        // Storm snow
+        if (isStorm) {
+          g.fillStyle(0xf0f5f8);
+          g.fillRect(gx - 10 * s, groundY - 35 * s, 24 * s, 3 * s);
+          g.fillRect(gx - 18 * s, groundY - 21 * s, 18 * s, 2 * s);
+        }
+        break;
+      }
+      case 'fuel': {
+        // Empty fuel — groomer with open hood and fuel warning
+        // Smoke from engine
+        g.fillStyle(0x666666, 0.6);
+        g.fillRect(gx + 8 * s, groundY - 42 * s, 6 * s, 4 * s);
+        g.fillRect(gx + 6 * s, groundY - 48 * s, 8 * s, 5 * s);
+        g.fillRect(gx + 4 * s, groundY - 54 * s, 10 * s, 5 * s);
+        // Open hood (popped up)
+        g.fillStyle(0xcc2200);
+        g.fillRect(gx - 18 * s, groundY - 28 * s, 36 * s, 3 * s);
+        // Empty fuel gauge (red indicator)
+        g.fillStyle(0xff0000);
+        g.fillRect(gx + 16 * s, groundY - 20 * s, 4 * s, 4 * s);
+        g.fillStyle(0x440000);
+        g.fillRect(gx + 17 * s, groundY - 19 * s, 2 * s, 2 * s);
+        break;
+      }
+      case 'time': {
+        // Clock ran out — groomer with zzz sleep marks
+        g.fillStyle(0xaaaaaa, 0.7);
+        // Zzz floating above cabin
+        const zzz = this.add.text(gx + 14 * s, groundY - 46 * s, 'zzZ', {
+          fontFamily: THEME.fonts.family,
+          fontSize: `${Math.round(14 * s)}px`,
+          fontStyle: 'bold',
+          color: '#aaaacc',
+        }).setDepth(5 + snowLineY * 0.001 + 0.002).setAngle(-10);
+        break;
+      }
+    }
   }
 }

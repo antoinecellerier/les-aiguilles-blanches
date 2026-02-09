@@ -232,6 +232,18 @@ Switchback paths through off-piste forest, allowing groomer to travel between pi
 - Cable hook: `0xCCCCCC` (light gray), rectangular ring (no circles)
 - Number plate: `0xffff00` (yellow) with black number text
 
+## Failure Groomer Effects (LevelCompleteScene)
+
+On fail screens, the standard groomer is replaced by a failure-specific visual drawn via `drawGroomerFailEffect()`. The fail overlay uses `0x3a1a1a` at 55% alpha.
+
+| Failure Type | Visual | Colors |
+|-------------|--------|--------|
+| Tumble | Upside-down groomer with smoke | Standard groomer colors + smoke `0x888888` |
+| Avalanche | Snow pile with cabin roof tip poking out | Snow `0xf0f5f8`, `0xe0e8ef`; roof tip `0xaa1a00` |
+| Cliff | Tilted groomer with debris, warning stripes | Debris `0x6a5e52`; stripes `0xff4444` |
+| Fuel | Smoke plumes rising, red fuel gauge | Smoke `0x666666`; gauge `0xff0000` |
+| Time | Gray "zzZ" sleep marks above groomer | Text `0xaaaacc` |
+
 ## Rendering Guidelines
 
 ### Depth/Layering (Phaser depth values)

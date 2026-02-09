@@ -868,6 +868,12 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 
 Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
 
+### MenuTerrainRenderer Reuse
+
+`createMenuTerrain()` accepts a `skipGroomer` parameter (default `false`). LevelCompleteScene passes `skipGroomer: true` to draw custom failure-specific groomer effects via `drawGroomerFailEffect()` instead of the standard side-view groomer. LevelCompleteScene also uses `MenuWildlifeController` for wildlife and applies weather effects (night overlay, storm particles) matching the completed level's weather config.
+
+Five failure groomer effects: **tumble** (upside-down groomer), **avalanche** (snow pile with cabin tip), **cliff** (tilted with debris), **fuel** (smoke plumes + gauge), **time** (zzZ sleep marks).
+
 ### Balance Constants
 
 All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights. Never hardcode magic numbers in GameScene — add them to `BALANCE`.

@@ -41,6 +41,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Win/fail screen visual redesign** — Alpine backgrounds via `createMenuTerrain()`, weather effects (night overlay, storm particles), wildlife via `MenuWildlifeController`, failure-specific groomer effects (tumble, avalanche, cliff, fuel, time).
+
 - ✅ **Depth layering fix** — Y-based depth sorting for trees, chalets, anchors, wildlife via `yDepth()`. AIRBORNE depth for birds above winch cable. Background forest at fixed depth.
 
 - ✅ **Tutorial dialogue polish** — Rewrote tutorial strings from robotic checklist format to natural Jean-Pierre dialogue. HUD description now matches actual colored bars. Fixed DE/IT grammar. Content reviewed via cross-model consultation.

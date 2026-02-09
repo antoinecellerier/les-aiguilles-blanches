@@ -4,13 +4,13 @@ import Phaser from 'phaser';
  * Renders the static menu background: sky gradient, mountains, snow ground, trees, and groomer.
  * Pure rendering — no state, no updates. Created once per scene lifecycle.
  */
-export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }): void {
+export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }, skipGroomer = false): void {
   const isStorm = weather?.weather === 'storm';
   createSky(scene, width, snowLineY, weather);
   createMountains(scene, width, snowLineY, scaleFactor, isStorm);
   createSnowGround(scene, width, height, snowLineY, footerHeight);
   createTrees(scene, width, snowLineY, scaleFactor, isStorm);
-  createGroomer(scene, width, snowLineY, scaleFactor, isStorm);
+  if (!skipGroomer) createGroomer(scene, width, snowLineY, scaleFactor, isStorm);
 }
 
 function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weather?: { isNight: boolean; weather: string }): void {
