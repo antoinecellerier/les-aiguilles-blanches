@@ -10,6 +10,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Polish (Medium Priority)
 
+- [ ] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
 - [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
 - [ ] Make the settings menu look nicer — visual polish pass
 
