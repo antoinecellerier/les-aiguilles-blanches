@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTHS } from '../config/gameConfig';
+import { DEPTHS, yDepth } from '../config/gameConfig';
 import { Accessibility } from '../setup';
 import type { Level } from '../config/levels';
 import type { LevelGeometry } from './LevelGeometry';
@@ -76,7 +76,7 @@ export class ObstacleBuilder {
       const obstacle = obstacles.create(x, y, texture);
       obstacle.setImmovable(true);
       obstacle.setScale(tileSize / 16);
-      obstacle.setDepth(DEPTHS.TREES);
+      obstacle.setDepth(yDepth(y));
     }
 
     // Restaurant at top of level
@@ -85,7 +85,7 @@ export class ObstacleBuilder {
     );
     restaurant.interactionType = 'food';
     restaurant.setScale(tileSize / 16);
-    restaurant.setDepth(DEPTHS.GROUND_OBJECTS);
+    restaurant.setDepth(yDepth(restaurant.y));
     const rSize = tileSize * 2;
     this.addFootprint(restaurant.x, restaurant.y, rSize, rSize);
 
@@ -95,7 +95,7 @@ export class ObstacleBuilder {
     );
     fuelStation.interactionType = 'fuel';
     fuelStation.setScale(tileSize / 16);
-    fuelStation.setDepth(DEPTHS.GROUND_OBJECTS);
+    fuelStation.setDepth(yDepth(fuelStation.y));
     this.addFootprint(fuelStation.x, fuelStation.y, tileSize * 2, tileSize * 2);
 
     // Chalets on easier pistes
@@ -158,7 +158,7 @@ export class ObstacleBuilder {
 
   private createChalet(x: number, y: number, tileSize: number): void {
     const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.GROUND_OBJECTS);
+    g.setDepth(yDepth(y));
     const size = tileSize * 2;
 
     this.addFootprint(x, y - size * 0.4 + size * 0.325, size, size * 0.65);

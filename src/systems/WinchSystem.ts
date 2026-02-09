@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTHS } from '../config/gameConfig';
+import { DEPTHS, yDepth } from '../config/gameConfig';
 import { Accessibility } from '../setup';
 import { t } from '../setup';
 import type { Level } from '../config/levels';
@@ -63,7 +63,7 @@ export class WinchSystem {
 
   private createAnchorPost(x: number, y: number, number: number): void {
     const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.GROUND_OBJECTS);
+    g.setDepth(yDepth(y));
 
     // Base plate
     g.fillStyle(0x888888, 1);

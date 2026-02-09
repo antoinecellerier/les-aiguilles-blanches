@@ -1,4 +1,4 @@
-import { DEPTHS, DIFFICULTY_MARKERS } from '../config/gameConfig';
+import { DEPTHS, DIFFICULTY_MARKERS, yDepth } from '../config/gameConfig';
 import { THEME } from '../config/theme';
 import type { Level } from '../config/levels';
 import type { LevelGeometry, CliffSegment } from './LevelGeometry';
@@ -70,7 +70,7 @@ export class PisteRenderer {
           const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
           const tx = x + offsetX, ty = y + offsetY;
           if (this.geometry.isOnAccessPath(tx, ty)) continue;
-          this.createTree(tx, ty);
+          this.createTree(tx, ty, DEPTHS.BG_FOREST_ROCKS);
         }
       }
     }
@@ -477,9 +477,9 @@ export class PisteRenderer {
     }
   }
 
-  private createTree(x: number, y: number): void {
+  private createTree(x: number, y: number, depth?: number): void {
     const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.TREES);
+    g.setDepth(depth ?? yDepth(y));
     const size = 8 + Math.random() * 6;
 
     g.fillStyle(0x4a3728, 1);

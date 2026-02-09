@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { BALANCE, DEPTHS, yDepth } from '../config/gameConfig';
 import type { WildlifeSpawn } from '../config/levels';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
 import { drawAnimal, ANIMAL_GRID, type AnimalType } from '../utils/animalSprites';
@@ -210,9 +210,9 @@ export class WildlifeSystem {
 
     // Birds render above trees; ground animals use Y-based depth among trees
     if (type === 'bird') {
-      g.setDepth(DEPTHS.SIGNAGE + 0.5);
+      g.setDepth(DEPTHS.AIRBORNE);
     } else {
-      g.setDepth(DEPTHS.TREES + y * 0.0001);
+      g.setDepth(yDepth(y));
     }
 
     drawAnimal(g, type, 0, 0, scale);
@@ -392,7 +392,7 @@ export class WildlifeSystem {
 
       // Y-based depth (ground animals only; birds stay above)
       if (animal.type !== 'bird') {
-        animal.graphics.setDepth(DEPTHS.TREES + animal.y * 0.0001);
+        animal.graphics.setDepth(yDepth(animal.y));
       }
 
       // Update burrow mask position

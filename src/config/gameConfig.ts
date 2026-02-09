@@ -52,19 +52,30 @@ export const DEPTHS = {
   TERRAIN: 0,         // Off-piste snow tiles (base layer)
   ACCESS_ROAD: 1,     // Packed snow on service roads (above off-piste, below piste)
   PISTE: 2,           // Piste snow tiles (above access roads so grooming is visible)
-  GROUND_OBJECTS: 2,  // Chalets, anchor posts
-  CLIFFS: 3,          // Cliff rock textures
-  TREES: 4,           // Trees (render above cliffs — in front in top-down view)
-  GROUND_LABELS: 5,   // Anchor numbers, text on ground objects
-  SIGNAGE: 6,         // Steep zone indicators, warning markers
-  MARKERS: 8,         // Piste marker poles, service road poles
+  CLIFFS: 3,          // Cliff rock textures (always below trees/buildings)
+  GROUND_OBJECTS: 4,  // Base for yDepth() Y-sorted objects (trees, chalets, anchors)
+  TREES: 4,           // Alias for GROUND_OBJECTS (both use yDepth())
+  GROUND_LABELS: 7,   // Anchor numbers, text on ground objects
+  SIGNAGE: 8,         // Steep zone indicators, warning markers
+  MARKERS: 9,         // Piste marker poles, service road poles
   WINCH_CABLE: 50,    // Winch cable graphics
+  AIRBORNE: 55,       // Flying birds, airborne objects (above cable, below overlay)
   NIGHT_OVERLAY: 100, // Night/weather darkening
   PLAYER: 101,        // Groomer (above night overlay so headlights work)
   FEEDBACK: 200,      // Floating text (+fuel, stamina, etc.)
   WEATHER: 200,       // Snow particles (same layer as feedback)
   VICTORY: 500,       // Victory text (topmost)
 } as const;
+
+/**
+ * Compute Y-sorted depth for ground objects (trees, chalets, buildings).
+ * Objects lower on screen (higher Y) render in front, creating correct
+ * top-down perspective. Uses GROUND_OBJECTS as base so all Y-sorted
+ * objects interleave correctly above cliffs and below signage.
+ */
+export function yDepth(y: number): number {
+  return DEPTHS.GROUND_OBJECTS + y * 0.001;
+}
 
 /** Gameplay balance constants — centralized for easy tuning */
 export const BALANCE = {
