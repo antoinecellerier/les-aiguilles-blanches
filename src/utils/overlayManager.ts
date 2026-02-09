@@ -181,6 +181,8 @@ export class OverlayManager {
     }).layout();
 
     dialog.setDepth(100);
+    // Ensure content text renders above the dialog background
+    scene.children.bringToTop(contentText);
 
     const overlay = scene.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
     overlay.setInteractive();
