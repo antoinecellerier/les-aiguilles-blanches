@@ -223,7 +223,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260208_date: "8 février 2026",
-        changelog_20260208: "📊 Tableau de bord redessiné — barres horizontales\n🎯 Barre de couverture avec marqueur de cible\n♿ Lisibilité améliorée en modes d'accessibilité\n🏔️ Le Glacier et Coupe des Aiguilles\n🦅 Faune alpine\n🎨 Portraits des personnages\n🎮 Navigation clavier/manette dans les paramètres",
+        changelog_20260208: "📊 Nouveau tableau de bord\n🏔️ Le Glacier et Coupe des Aiguilles\n🦅 Faune alpine\n🎨 Portraits des personnages\n🎮 Navigation clavier/manette",
         changelog_20260207_date: "7 février 2026",
         changelog_20260207: "🎨 Interface rétro\n🎯 Objectifs bonus\n🕹️ Remappage boutons manette\n🎮 Navigation manette",
         changelog_20260206_date: "6 février 2026",
@@ -443,7 +443,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260208_date: "February 8, 2026",
-        changelog_20260208: "📊 Redesigned HUD visor — horizontal bars\n🎯 Coverage progress bar with target marker\n♿ Improved readability in accessibility modes\n🏔️ Le Glacier and Coupe des Aiguilles\n🦅 Alpine wildlife\n🎨 Character portraits\n🎮 Keyboard & gamepad navigation in Settings",
+        changelog_20260208: "📊 Redesigned dashboard\n🏔️ Le Glacier and Coupe des Aiguilles\n🦅 Alpine wildlife\n🎨 Character portraits\n🎮 Keyboard & gamepad navigation",
         changelog_20260207_date: "February 7, 2026",
         changelog_20260207: "🎨 Retro UI\n🎯 Bonus objectives\n🕹️ Gamepad button rebinding\n🎮 Gamepad menu navigation",
         changelog_20260206_date: "February 6, 2026",
@@ -629,7 +629,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260208_date: "8. Februar 2026",
-        changelog_20260208: "📊 Neugestaltetes HUD — horizontale Balken\n🎯 Abdeckungsbalken mit Zielmarkierung\n♿ Verbesserte Lesbarkeit in Barrierefreiheitsmodi\n🏔️ Le Glacier und Coupe des Aiguilles\n🦅 Alpine Tierwelt\n🎨 Charakterporträts\n🎮 Tastatur- & Gamepad-Navigation in den Einstellungen",
+        changelog_20260208: "📊 Neues Dashboard\n🏔️ Le Glacier und Coupe des Aiguilles\n🦅 Alpine Tierwelt\n🎨 Charakterporträts\n🎮 Tastatur- & Gamepad-Navigation",
         changelog_20260207_date: "7. Februar 2026",
         changelog_20260207: "🎨 Retro-UI\n🎯 Bonusziele\n🕹️ Gamepad-Tastenbelegung\n🎮 Gamepad-Navigation",
         changelog_20260206_date: "6. Februar 2026",
@@ -846,7 +846,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260208_date: "8 febbraio 2026",
-        changelog_20260208: "📊 HUD ridisegnato — barre orizzontali\n🎯 Barra di copertura con indicatore obiettivo\n♿ Leggibilità migliorata nelle modalità di accessibilità\n🏔️ Le Glacier e Coupe des Aiguilles\n🦅 Fauna alpina\n🎨 Ritratti dei personaggi\n🎮 Navigazione tastiera e gamepad nelle impostazioni",
+        changelog_20260208: "📊 Nuovo cruscotto\n🏔️ Le Glacier e Coupe des Aiguilles\n🦅 Fauna alpina\n🎨 Ritratti dei personaggi\n🎮 Navigazione tastiera e gamepad",
         changelog_20260207_date: "7 febbraio 2026",
         changelog_20260207: "🎨 UI retro\n🎯 Obiettivi bonus\n🕹️ Rimappatura tasti gamepad\n🎮 Navigazione gamepad",
         changelog_20260206_date: "6 febbraio 2026",
@@ -1063,9 +1063,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260208_date: "8 de febrero de 2026",
-        changelog_20260208: "📊 HUD rediseñado — barras horizontales\n🎯 Barra de cobertura con marcador de objetivo\n♿ Legibilidad mejorada en modos de accesibilidad\n🏔️ Le Glacier y Coupe des Aiguilles\n🦅 Fauna alpina\n🎨 Retratos de personajes\n🎮 Navegación por teclado y mando en los ajustes",
+        changelog_20260208: "📊 Nuevo panel de control\n🏔️ Le Glacier y Coupe des Aiguilles\n🦅 Fauna alpina\n🎨 Retratos de personajes\n🎮 Navegación con teclado y mando",
         changelog_20260207_date: "7 de febrero de 2026",
-        changelog_20260207: "🎨 UI retro\n🎯 Objetivos bonus\n🕹️ Reasignación botones mando\n🎮 Navegación mando",
+        changelog_20260207: "🎨 UI retro\n🎯 Objetivos bonus\n🕹️ Reasignación de botones\n🎮 Navegación con mando",
         changelog_20260206_date: "6 de febrero de 2026",
         changelog_20260206: "🛤️ Caminos de pisapistas transitables\n🕹️ Joystick virtual\n🌍 5 idiomas completos",
         changelog_20260205_date: "5 de febrero de 2026",
