@@ -16,6 +16,7 @@ import { PisteRenderer } from '../systems/PisteRenderer';
 import { WinchSystem } from '../systems/WinchSystem';
 import { ObstacleBuilder } from '../systems/ObstacleBuilder';
 import { EngineSounds } from '../systems/EngineSounds';
+import { AmbienceSounds } from '../systems/AmbienceSounds';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -112,6 +113,7 @@ export default class GameScene extends Phaser.Scene {
   private obstacleBuilder!: ObstacleBuilder;
   private buildingRects: ObstacleRect[] = [];
   private engineSounds = new EngineSounds();
+  private ambienceSounds = new AmbienceSounds();
 
   // Input
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -221,6 +223,7 @@ export default class GameScene extends Phaser.Scene {
     Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
 
     this.engineSounds.start();
+    this.ambienceSounds.start(this.level.weather || 'clear', !!this.level.isNight);
   }
 
   private initWorldDimensions(screenWidth: number, screenHeight: number): { worldWidth: number; worldHeight: number } {
@@ -651,6 +654,7 @@ export default class GameScene extends Phaser.Scene {
     const tileY = Math.floor(this.groomer.y / this.tileSize);
     const onGroomed = this.snowGrid[tileY]?.[tileX]?.groomed ?? false;
     this.engineSounds.update(speed, this.isGrooming, winchTaut, onGroomed, delta);
+    this.ambienceSounds.update(delta);
 
     // Emit game state for HUD
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
@@ -1135,6 +1139,7 @@ export default class GameScene extends Phaser.Scene {
   pauseGame(): void {
     if (!this.scene.manager || !this.scene.isActive()) return;
     this.engineSounds.pause();
+    this.ambienceSounds.pause();
     this.scene.pause();
     this.scene.launch('PauseScene', { levelIndex: this.levelIndex });
     this.scene.bringToTop('PauseScene');
@@ -1148,6 +1153,7 @@ export default class GameScene extends Phaser.Scene {
     const val = saved ? parseFloat(saved) : BALANCE.SENSITIVITY_DEFAULT;
     this.movementSensitivity = (isNaN(val) || val < BALANCE.SENSITIVITY_MIN || val > BALANCE.SENSITIVITY_MAX) ? BALANCE.SENSITIVITY_DEFAULT : val;
     this.engineSounds.resume();
+    this.ambienceSounds.resume(this.level.weather || 'clear', !!this.level.isNight);
     this.scene.resume();
   }
 
@@ -1265,8 +1271,9 @@ export default class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
     this.isGameOver = true;
 
-    // Stop engine sounds immediately — scene may linger without shutdown()
+    // Stop gameplay sounds immediately — scene may linger without shutdown()
     this.engineSounds.stop();
+    this.ambienceSounds.stop();
 
     // Emit final game state so HUD has correct values before stopping
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
@@ -1333,6 +1340,7 @@ export default class GameScene extends Phaser.Scene {
     this.obstacleBuilder.reset();
     this.geometry.reset();
     this.engineSounds.stop();
+    this.ambienceSounds.stop();
     this.buildingRects = [];
 
     this.children.removeAll(true);
