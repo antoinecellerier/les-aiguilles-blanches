@@ -18,14 +18,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
-- [ ] All characters have dialogue lines — Verify all 4 characters appear across levels where appropriate
 - [ ] Storm snow accumulation — Trees, mountains, cliffs accumulate visible snow during storm weather
 - [ ] Sound effects and music
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
-- [ ] Menu wildlife flees on multitouch inputs (currently only single pointer triggers flee)
 - [ ] Publish as standalone game package
 
 ## Recently Completed

@@ -85,7 +85,12 @@ export class MenuWildlifeController {
   private updateWildlife(time: number, delta: number): void {
     const dt = delta / 1000;
     const width = this.scene.cameras.main.width;
-    const pointer = this.scene.input.activePointer;
+    // Collect all active pointers (supports multitouch flee)
+    const pointers = this.scene.input.manager?.pointers || [];
+    const activePointers = pointers.filter((p: Phaser.Input.Pointer) => p.isDown || p.wasTouch);
+    // Fallback to active pointer if no pressed pointers (mouse hover)
+    if (activePointers.length === 0) activePointers.push(this.scene.input.activePointer);
+
     for (const a of this.menuAnimals) {
       // Sleeping animals: gentle breathing bob, no wandering
       if (a.state === 'sleeping') {
@@ -93,9 +98,14 @@ export class MenuWildlifeController {
         a.graphics.setPosition(a.x, a.y + bob);
         continue;
       }
-      const pdx = a.x - pointer.worldX;
-      const pdy = a.y - pointer.worldY;
-      const pointerDist = Math.sqrt(pdx * pdx + pdy * pdy);
+      // Find closest pointer to this animal
+      let pdx = 0, pdy = 0, pointerDist = Infinity;
+      for (const p of activePointers) {
+        const dx = a.x - p.worldX;
+        const dy = a.y - p.worldY;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < pointerDist) { pdx = dx; pdy = dy; pointerDist = d; }
+      }
       const fleeRadius = a.type === 'bird' ? 50 : 60;
 
       if (a.type === 'bird') {
