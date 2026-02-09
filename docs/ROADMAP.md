@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Bugs
 
-- [ ] Firefox fullscreen button with gamepad - `requestFullscreen()` requires user-gesture; gamepad events don't qualify in Firefox
+- [x] Firefox fullscreen button with gamepad - Added F keyboard shortcut + hint toast when gamepad fullscreen is rejected
 
 ## Polish (Medium Priority)
 

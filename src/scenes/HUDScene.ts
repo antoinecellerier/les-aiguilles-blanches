@@ -729,8 +729,28 @@ export default class HUDScene extends Phaser.Scene {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.warn('Fullscreen request denied:', e);
+      document.documentElement.requestFullscreen().catch(() => {
+        // Firefox rejects gamepad-triggered fullscreen — show keyboard hint
+        const hint = this.add.text(
+          this.cameras.main.width / 2, this.cameras.main.height * 0.4,
+          '⌨️ ' + (t('fullscreenHint') || 'Press F for fullscreen'),
+          {
+            fontFamily: THEME.fonts.family,
+            fontSize: '14px',
+            color: '#FFD700',
+            backgroundColor: '#1a1a1a',
+            padding: { x: 12, y: 6 },
+          }
+        ).setOrigin(0.5).setDepth(DEPTHS.FEEDBACK).setScrollFactor(0).setAlpha(0);
+
+        this.tweens.add({
+          targets: hint,
+          alpha: 1,
+          duration: 300,
+          yoyo: true,
+          hold: 2500,
+          onComplete: () => hint.destroy(),
+        });
       });
     }
     // Resize handler will restart HUD to update button appearance

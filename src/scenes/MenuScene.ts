@@ -548,11 +548,36 @@ export default class MenuScene extends Phaser.Scene {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      document.documentElement.requestFullscreen().catch((e) => {
-        console.warn('Fullscreen request denied:', e);
+      document.documentElement.requestFullscreen().catch(() => {
+        // Firefox rejects gamepad-triggered fullscreen (not a user gesture).
+        // Show hint to use keyboard shortcut instead.
+        this.showFullscreenHint();
       });
     }
     // Resize handler will restart scene to update button layout
+  }
+
+  private showFullscreenHint(): void {
+    const hint = this.add.text(
+      this.cameras.main.width / 2, this.cameras.main.height * 0.45,
+      '⌨️ ' + (t('fullscreenHint') || 'Press F for fullscreen'),
+      {
+        fontFamily: THEME.fonts.family,
+        fontSize: '16px',
+        color: '#FFD700',
+        backgroundColor: '#1a1a1a',
+        padding: { x: 16, y: 8 },
+      }
+    ).setOrigin(0.5).setDepth(20).setAlpha(0);
+
+    this.tweens.add({
+      targets: hint,
+      alpha: 1,
+      duration: 300,
+      yoyo: true,
+      hold: 2500,
+      onComplete: () => hint.destroy(),
+    });
   }
 
 

@@ -140,6 +140,26 @@ window.addEventListener('load', () => {
 
   // Expose for test automation (Playwright viewport changes)
   (window as unknown as { resizeGame: () => void }).resizeGame = resizeGame;
+
+  // Global F key shortcut for fullscreen toggle (works in all browsers including Firefox with gamepad)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'f' || e.key === 'F') {
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+      // During gameplay, only toggle if F isn't bound to a game control
+      if (window.game?.scene?.isActive('GameScene')) {
+        try {
+          const saved = localStorage.getItem('snowGroomer_bindings');
+          const codes = saved ? Object.values(JSON.parse(saved)) as number[] : [];
+          if (codes.includes(e.keyCode)) return;
+        } catch { /* use default bindings — F is not bound */ }
+      }
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (document.fullscreenEnabled) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    }
+  });
 });
 
 export { config };
