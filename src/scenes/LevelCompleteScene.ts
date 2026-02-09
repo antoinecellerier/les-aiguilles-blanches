@@ -8,6 +8,7 @@ import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/men
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
+import { playClick } from '../systems/UISounds';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -355,7 +356,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     }).setInteractive({ useHandCursor: true })
       .on('pointerover', () => this.buttonNav.select(index))
       .on('pointerout', () => this.buttonNav.refreshStyles())
-      .on('pointerdown', callback);
+      .on('pointerdown', () => { playClick(); callback(); });
     
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);

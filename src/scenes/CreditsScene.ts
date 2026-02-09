@@ -4,6 +4,7 @@ import { THEME, buttonStyle } from '../config/theme';
 import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, simpleStyler, type MenuButtonNav } from '../utils/menuButtonNav';
+import { playClick } from '../systems/UISounds';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { ResizeManager } from '../utils/resizeManager';
 
@@ -238,7 +239,7 @@ export default class CreditsScene extends Phaser.Scene {
   private setupButton(btn: Phaser.GameObjects.Text, index: number, callback: () => void): void {
     btn.on('pointerover', () => this.buttonNav?.select(index));
     btn.on('pointerout', () => this.buttonNav?.refreshStyles());
-    btn.on('pointerdown', callback);
+    btn.on('pointerdown', () => { playClick(); callback(); });
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);
   }

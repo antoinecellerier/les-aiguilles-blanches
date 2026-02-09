@@ -12,6 +12,7 @@ import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
 import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager';
 import { AudioSystem, type VolumeChannel } from '../systems/AudioSystem';
+import { playClick, playCancel, playToggle, playPreview, playSensitivityBlip } from '../systems/UISounds';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -404,11 +405,21 @@ export default class SettingsScene extends Phaser.Scene {
 
     drawThumb(value);
 
+    // Throttle preview blips to avoid buzzing during drag
+    let lastPreview = 0;
+    const PREVIEW_COOLDOWN = 150;
+
     const apply = (newVal: number) => {
       value = Math.max(0, Math.min(1, Math.round(newVal * 100) / 100));
       drawThumb(value);
       valueText.setText(Math.round(value * 100) + '%');
       audio.setVolume(channel, value);
+
+      const now = Date.now();
+      if (now - lastPreview > PREVIEW_COOLDOWN) {
+        lastPreview = now;
+        playPreview(channel);
+      }
     };
 
     const hitZone = this.add.rectangle(
@@ -441,6 +452,7 @@ export default class SettingsScene extends Phaser.Scene {
       activate: () => {},
       left: () => apply(value - STEP),
       right: () => apply(value + STEP),
+      hasOwnSound: true,
     });
 
     return wrapper;
@@ -486,7 +498,7 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Reset button
     const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset'), this.smallFont, '#ffaaaa', '#5a2d2d');
-    resetBtn.on('pointerdown', () => this.keys.reset());
+    resetBtn.on('pointerdown', () => { playClick(); this.keys.reset(); });
     sizer.add(resetBtn, { align: 'left' });
 
     // Register reset button focus item
@@ -517,7 +529,7 @@ export default class SettingsScene extends Phaser.Scene {
     backBtn.setOrigin(0.5);
     backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHoverHex }));
     backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHex }));
-    backBtn.on('pointerdown', () => this.goBack());
+    backBtn.on('pointerdown', () => { playCancel(); this.goBack(); });
 
     // Register back button focus item (always last)
     this.focus.items.push({
@@ -627,6 +639,7 @@ export default class SettingsScene extends Phaser.Scene {
     let value = initialValue;
     const toggle = () => {
       value = !value;
+      playToggle(value);
       btn.setText(value ? t('on') : t('off'));
       btn.setStyle({
         color: value ? THEME.colors.toggleActiveText : THEME.colors.textMuted,
@@ -704,6 +717,9 @@ export default class SettingsScene extends Phaser.Scene {
 
     drawThumb(valToT(value));
 
+    let lastSensPreview = 0;
+    const SENS_COOLDOWN = 100;
+
     const hitZone = this.add.rectangle(
       trackWidth / 2, 0, trackWidth + thumbSize, thumbSize, 0x000000, 0
     ).setInteractive({ useHandCursor: true, draggable: true });
@@ -717,6 +733,11 @@ export default class SettingsScene extends Phaser.Scene {
       drawThumb(valToT(value));
       valueText.setText(Math.round(value * 100) + '%');
       localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+      const now = Date.now();
+      if (now - lastSensPreview > SENS_COOLDOWN) {
+        lastSensPreview = now;
+        playSensitivityBlip(valToT(value));
+      }
     };
 
     let dragging = false;
@@ -742,13 +763,16 @@ export default class SettingsScene extends Phaser.Scene {
         drawThumb(valToT(value));
         valueText.setText(Math.round(value * 100) + '%');
         localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+        playSensitivityBlip(valToT(value));
       },
       right: () => {
         value = Math.min(MAX, Math.round((value + STEP) * 20) / 20);
         drawThumb(valToT(value));
         valueText.setText(Math.round(value * 100) + '%');
         localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+        playSensitivityBlip(valToT(value));
       },
+      hasOwnSound: true,
     });
 
     return wrapper;
@@ -815,6 +839,7 @@ export default class SettingsScene extends Phaser.Scene {
       padding: { x: Math.round(paddingY * 1.5), y: paddingY },
     }).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
+        playClick();
         Accessibility.settings.colorblindMode = mode;
         Accessibility.saveSettings();
         this.broadcastAccessibility();
@@ -910,7 +935,7 @@ export default class SettingsScene extends Phaser.Scene {
           backgroundColor: isActive ? THEME.colors.info : '#555555',
           padding: { x: Math.round(paddingY * 2), y: paddingY },
         }).setInteractive({ useHandCursor: true })
-          .on('pointerdown', () => this.keys.setLayout(layout.id));
+          .on('pointerdown', () => { playClick(); this.keys.setLayout(layout.id); });
         layoutButtons.push(btn);
         row.add(btn);
       });

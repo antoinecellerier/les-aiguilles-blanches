@@ -4,6 +4,7 @@ import { BALANCE } from '../config/gameConfig';
 import { THEME, buttonStyle, titleStyle } from '../config/theme';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
+import { playClick } from '../systems/UISounds';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
@@ -92,7 +93,7 @@ export default class PauseScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => this.buttonNav.select(i))
         .on('pointerout', () => this.buttonNav.refreshStyles())
-        .on('pointerdown', btn.callback);
+        .on('pointerdown', () => { playClick(); btn.callback(); });
       
       this.menuButtons.push(button);
       this.buttonCallbacks.push(btn.callback);

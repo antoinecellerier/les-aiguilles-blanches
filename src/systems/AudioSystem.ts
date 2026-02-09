@@ -72,6 +72,10 @@ export class AudioSystem {
       this.ctx = new AudioContext();
       this.buildGainChain();
     }
+    // Nudge context out of suspended state if a user gesture has occurred
+    if (this.resumed && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
     return this.ctx;
   }
 
@@ -196,9 +200,9 @@ export class AudioSystem {
     return this.ensureContext();
   }
 
-  /** True if the AudioContext has been resumed by a user gesture */
+  /** True if a user gesture has been detected to enable audio */
   isReady(): boolean {
-    return this.resumed && this.ctx?.state === 'running';
+    return this.resumed;
   }
 
   // --- Cleanup ---

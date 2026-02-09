@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { t } from '../setup';
 import { THEME } from '../config/theme';
+import { playCancel } from '../systems/UISounds';
 
 /**
  * Manages modal overlay dialogs (simple and scrollable) for menu scenes.
@@ -125,6 +126,7 @@ export class OverlayManager {
     overlay.setDepth(baseDepth - 1);
 
     const closeOverlay = () => {
+      playCancel();
       this._open = false;
       this.closeCallback = null;
       scene.input.keyboard?.off('keydown-ESC', closeOverlay);
@@ -189,6 +191,7 @@ export class OverlayManager {
     overlay.setDepth(dialog.depth - 1);
 
     const closeOverlay = () => {
+      playCancel();
       this._open = false;
       this.closeCallback = null;
       scene.input.keyboard?.off('keydown-ESC', closeOverlay);

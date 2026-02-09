@@ -6,6 +6,7 @@
  * Works alongside gamepadMenu.ts (which handles gamepad-specific input).
  */
 import { THEME } from '../config/theme';
+import { playClick, playHover } from '../systems/UISounds';
 
 export interface ButtonStyler {
   /** Apply selected/deselected styles to all buttons. */
@@ -45,19 +46,24 @@ export function createMenuButtonNav(
     get selectedIndex() { return selected; },
 
     select(index: number): void {
+      const prev = selected;
       selected = Math.max(0, Math.min(index, buttons.length - 1));
       styler(buttons, selected);
+      if (selected !== prev) playHover();
     },
 
     navigate(direction: number): void {
       if (buttons.length === 0) return;
       if (opts?.canNavigate && !opts.canNavigate()) return;
+      const prev = selected;
       selected = (selected + direction + buttons.length) % buttons.length;
       styler(buttons, selected);
+      if (selected !== prev) playHover();
     },
 
     activate(): void {
       if (opts?.canNavigate && !opts.canNavigate()) return;
+      playClick();
       callbacks[selected]?.();
     },
 

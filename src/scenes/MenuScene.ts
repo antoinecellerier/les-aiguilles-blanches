@@ -6,6 +6,7 @@ import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
+import { playClick, playDeviceChime } from '../systems/UISounds';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, onTouchAvailable, isMobile } from '../utils/touchDetect';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
@@ -26,6 +27,7 @@ export default class MenuScene extends Phaser.Scene {
   private selectionArrow: Phaser.GameObjects.Text | null = null;
   private snowLineY = 0;
   private inputHintTexts: Phaser.GameObjects.GameObject[] = [];
+  private lastInputKey: string | null = null;
   private gamepadConnectHandler: (() => void) | null = null;
   private footerGithubRight = 0;
   private footerHintStyle: Phaser.Types.GameObjects.Text.TextStyle = {};
@@ -306,6 +308,7 @@ export default class MenuScene extends Phaser.Scene {
           this.buttonNav.refreshStyles();
         })
         .on('pointerup', () => {
+          playClick();
           btn.callback();
         });
       
@@ -414,7 +417,16 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private setupInput(): void {
-    this.gamepadConnectHandler = () => this.updateInputHints();
+    this.gamepadConnectHandler = (e?: Event) => {
+      // Use the event type when available for immediate correct state (Firefox compat)
+      if (e?.type === 'gamepadconnected' || e?.type === 'gamepaddisconnected') {
+        const connected = e.type === 'gamepadconnected';
+        playDeviceChime(connected);
+        this.updateInputHints(connected);
+      } else {
+        this.updateInputHints();
+      }
+    };
     window.addEventListener('gamepadconnected', this.gamepadConnectHandler);
     window.addEventListener('gamepaddisconnected', this.gamepadConnectHandler);
 
@@ -449,14 +461,23 @@ export default class MenuScene extends Phaser.Scene {
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
 
-  private updateInputHints(): void {
+  private updateInputHints(gamepadOverride?: boolean): void {
     // Destroy previous hint objects
     this.inputHintTexts.forEach(t => { if (t.active) t.destroy(); });
     this.inputHintTexts = [];
 
     const mobile = isMobile();
     const hasTouch = detectTouch();
-    const hasGamepad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(g => g !== null);
+    const hasGamepad = gamepadOverride ?? (navigator.getGamepads && Array.from(navigator.getGamepads()).some(g => g !== null));
+
+    // Track input state for touch detection chime
+    const key = `${!mobile}|${hasTouch}|${hasGamepad}`;
+    if (this.lastInputKey && key !== this.lastInputKey) {
+      // Only chime for touch changes (gamepad is handled by event listener)
+      const prevTouch = this.lastInputKey.split('|')[1] === 'true';
+      if (hasTouch !== prevTouch) playDeviceChime(hasTouch);
+    }
+    this.lastInputKey = key;
 
     // Define all hints: [icon, label, isAvailable] — always show all three
     const allHints: [string, string, boolean][] = [

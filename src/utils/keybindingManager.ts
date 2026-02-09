@@ -1,6 +1,7 @@
 import { getLayoutDefaults, setKeyboardLayout, type KeyboardLayout } from './keyboardLayout';
 import { isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from './gamepad';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
+import { playClick, playCancel } from '../systems/UISounds';
 
 export interface KeyBindings {
   up: number;
@@ -135,6 +136,7 @@ export class KeybindingManager {
     btn.setStyle({ backgroundColor: '#5a5a2d', color: this.accentColor });
 
     this.rebindingAction = null;
+    playClick();
     this.onStatus('Saved!');
     this.onLayout();
     this.scene.time.delayedCall(800, () => this.onRestart());
@@ -146,6 +148,7 @@ export class KeybindingManager {
     btn.setText(this.getKeyName(this.bindings[this.rebindingAction as keyof KeyBindings]));
     btn.setStyle({ backgroundColor: this.buttonBgColor });
     this.rebindingAction = null;
+    playCancel();
     this.onStatus('');
     this.onLayout();
   }
@@ -198,6 +201,7 @@ export class KeybindingManager {
                     color: isCustom ? this.accentColor : '#87CEEB' });
 
     this.rebindingGamepadAction = null;
+    playClick();
     this.onStatus('Saved!');
     this.onLayout();
     this.scene.time.delayedCall(800, () => this.onRestart());

@@ -50,7 +50,8 @@ snow-groomer/
 │   │   ├── ObstacleBuilder.ts # Obstacle placement, buildings, chalets
 │   │   ├── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
 │   │   ├── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
-│   │   └── AudioSystem.ts  # Web Audio API singleton, volume channels, gain chain
+│   │   ├── AudioSystem.ts  # Web Audio API singleton, volume channels, gain chain
+│   │   └── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle)
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)

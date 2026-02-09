@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { playHover, playClick } from '../systems/UISounds';
 
 /**
  * A navigable item in a focus list (button, toggle, slider, etc.).
@@ -12,6 +13,8 @@ export interface FocusItem {
   groupIndex?: number;
   /** True for elements outside the scrollable panel (e.g., back button). */
   fixed?: boolean;
+  /** True if left/right callbacks produce their own audio feedback (skips default hover sound). */
+  hasOwnSound?: boolean;
 }
 
 /**
@@ -41,28 +44,33 @@ export class FocusNavigator {
   /** Navigate focus by direction (+1 = down, -1 = up). Wraps around. */
   navigate(dir: number): void {
     if (this.items.length === 0) return;
+    const prev = this.index;
     if (this.index < 0) {
       this.index = 0;
     } else {
       this.index = (this.index + dir + this.items.length) % this.items.length;
     }
+    if (this.index !== prev) playHover();
     this.updateIndicator();
     this.scrollToFocused();
   }
 
   left(): void {
     const item = this.items[this.index];
-    if (item?.left) item.left();
+    if (item?.left) { if (!item.hasOwnSound) playHover(); item.left(); }
   }
 
   right(): void {
     const item = this.items[this.index];
-    if (item?.right) item.right();
+    if (item?.right) { if (!item.hasOwnSound) playHover(); item.right(); }
   }
 
   activate(): void {
     const item = this.items[this.index];
-    if (item) item.activate();
+    if (item) {
+      playClick();
+      item.activate();
+    }
   }
 
   /** Redraw the focus indicator at the current item's position. */
