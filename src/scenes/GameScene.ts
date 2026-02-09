@@ -16,6 +16,7 @@ import { PisteRenderer } from '../systems/PisteRenderer';
 import { WinchSystem } from '../systems/WinchSystem';
 import { ObstacleBuilder } from '../systems/ObstacleBuilder';
 import { EngineSounds } from '../systems/EngineSounds';
+import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import DialogueScene from './DialogueScene';
 
@@ -404,6 +405,9 @@ export default class GameScene extends Phaser.Scene {
         this.buildingRects,
       );
       this.wildlifeSystem.bootstrapTracks();
+      this.wildlifeSystem.onAnimalFlee = (type) => {
+        playAnimalCall(type);
+      };
     }
   }
 

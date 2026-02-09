@@ -63,6 +63,9 @@ export interface ObstacleRect {
 export class WildlifeSystem {
   private scene: Phaser.Scene;
   private animals: Animal[] = [];
+
+  /** Optional sound callback when an animal flees. */
+  onAnimalFlee: ((type: AnimalType) => void) | null = null;
   private tracks: Track[] = [];
   private tileSize: number;
   private worldW = 0;
@@ -647,6 +650,8 @@ export class WildlifeSystem {
   }
 
   private startFlee(animal: Animal, dx: number, dy: number): void {
+    this.onAnimalFlee?.(animal.type);
+
     if (animal.type === 'marmot') {
       // Marmot: dive into burrow
       animal.vx = 0; animal.vy = 0;

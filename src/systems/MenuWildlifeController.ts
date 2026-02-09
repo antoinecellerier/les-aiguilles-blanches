@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { drawAnimal, drawBirdPerched, drawBirdSideFlying, ANIMAL_GRID } from '../utils/animalSprites';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
 import { drawTrackShape } from '../utils/animalTracks';
+import { playAnimalCall } from './WildlifeSounds';
+import type { AnimalType } from '../utils/animalSprites';
 
 interface MenuAnimal {
   graphics: Phaser.GameObjects.Graphics;
@@ -13,6 +15,7 @@ interface MenuAnimal {
   species?: string;
   boundLeft: number; boundRight: number;
   state?: 'flying' | 'perched' | 'climbing' | 'landing' | 'hiding' | 'sleeping';
+  lastFleeSound?: number;
   hideTimer?: number;
   hideDuration?: number;
   burrowY?: number;
@@ -126,6 +129,11 @@ export class MenuWildlifeController {
         a.state = 'flying';
         a.graphics.clear();
         drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
+        const now = Date.now();
+        if (!a.lastFleeSound || now - a.lastFleeSound > 1000) {
+          a.lastFleeSound = now;
+          playAnimalCall('bird');
+        }
       }
       a.vx = Math.cos(fleeAngle) * 60;
       a.vy = Math.sin(fleeAngle) * 30 - 10;
@@ -252,6 +260,11 @@ export class MenuWildlifeController {
     if (pointerDist < fleeRadius && a.climbPath && a.climbIndex !== undefined) {
       a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
       a.wanderTimer = 0;
+      const now = Date.now();
+      if (!a.lastFleeSound || now - a.lastFleeSound > 1000) {
+        a.lastFleeSound = now;
+        playAnimalCall('bouquetin');
+      }
     }
     if (a.climbPath && a.climbIndex !== undefined) {
       const target = a.climbPath[a.climbIndex];
@@ -312,6 +325,12 @@ export class MenuWildlifeController {
       return; // skip normal updates while hiding
     } else if (pointerDist < fleeRadius) {
       const fleeAngle = Math.atan2(pdy, pdx);
+      // Play flee sound (throttled per animal)
+      const now = Date.now();
+      if (a.species && (!a.lastFleeSound || now - a.lastFleeSound > 1000)) {
+        a.lastFleeSound = now;
+        playAnimalCall(a.species as AnimalType);
+      }
       if (a.species === 'bunny') {
         a.vx = Math.cos(fleeAngle) * 120;
         a.vy = Math.sin(fleeAngle) * 50;

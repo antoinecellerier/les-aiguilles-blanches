@@ -53,7 +53,8 @@ snow-groomer/
 │   │   ├── AudioSystem.ts  # Web Audio API singleton, volume channels, gain chain
 │   │   ├── AmbienceSounds.ts # Storm wind/gusts, night owl & wolf calls
 │   │   ├── EngineSounds.ts # Engine rumble, snow crunch, grooming, winch, hazard, warning SFX
-│   │   └── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle, level win/fail)
+│   │   ├── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle, level win/fail)
+│   │   └── WildlifeSounds.ts # Animal flee/alarm sounds (marmot, chamois, bird, bunny, bouquetin, fox)
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
