@@ -33,6 +33,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Review Phaser patterns - Audit implementation against Phaser recommended patterns (Scale, Scene lifecycle, cameras)
 - [ ] Adapt the menu scene to render weather from the current level (night, storm, etc.)
 - [ ] Make the settings menu look nicer
+- [ ] Review in game dialogue UI styling. Could maybe better utilize available space on bigger screens
+- [ ] Review in game dialogue content styling for excessive or inaccurate use of emojis
 
 ## Future (Backlog)
 
