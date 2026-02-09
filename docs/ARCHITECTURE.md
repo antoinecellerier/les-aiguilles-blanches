@@ -49,7 +49,8 @@ snow-groomer/
 │   │   ├── MenuWildlifeController.ts # Menu wildlife AI, snowflakes, animal tracks
 │   │   ├── ObstacleBuilder.ts # Obstacle placement, buildings, chalets
 │   │   ├── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
-│   │   └── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
+│   │   ├── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
+│   │   └── AudioSystem.ts  # Web Audio API singleton, volume channels, gain chain
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
@@ -865,6 +866,7 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 - **ObstacleBuilder** — Creates obstacles (rocks, trees), interactable buildings (restaurant, fuel station), and decorative chalets. Tracks building footprints for wildlife collision avoidance.
 - **PisteRenderer** — All piste visual rendering: boundary colliders, cliff edge visuals, piste markers, forest trees, access path roads/poles, steep zone indicators, and extended background. Returns physics groups for GameScene collision setup.
 - **WinchSystem** — Winch anchor creation, cable rendering (taut/slack), attach/detach state. Exposes `isTaut()` query used by movement and resource systems.
+- **AudioSystem** — Singleton managing all game audio via Web Audio API. Handles AudioContext lifecycle (autoplay resume, visibility suspend/resume), five volume channels (master, music, sfx, voice, ambience) routed through a gain node chain, and localStorage persistence for volume settings.
 
 Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
 

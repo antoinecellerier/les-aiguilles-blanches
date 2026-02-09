@@ -107,6 +107,7 @@ class TestSettingsLayout:
             ('settings', 'paramètres'),
             ('language', 'langue'),
             ('accessibility', 'accessibilité'),
+            ('audio',),
         ]
         for expected_options in expected_content:
             found = any(any(opt in t for opt in expected_options) for t in texts)

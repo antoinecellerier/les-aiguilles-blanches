@@ -66,6 +66,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         keyboardLayout: "Disposition clavier",
         customBindings: "Personnalisé",
         noGamepadConnected: "Aucune manette connectée",
+
+        // Audio
+        audio: "Audio",
+        masterVolume: "Volume principal",
+        musicVolume: "Musique",
+        sfxVolume: "Effets sonores",
+        mute: "Muet",
         
         // How to Play hints
         howToPlayMove: "{keys} ou Flèches pour se déplacer",
@@ -290,6 +297,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
         noGamepadConnected: "No gamepad connected",
+
+        // Audio
+        audio: "Audio",
+        masterVolume: "Master Volume",
+        musicVolume: "Music",
+        sfxVolume: "Sound Effects",
+        mute: "Mute",
         
         // How to Play hints
         howToPlayMove: "{keys} or Arrows to move",
@@ -514,6 +528,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
         noGamepadConnected: "Kein Gamepad verbunden",
+
+        // Audio
+        audio: "Audio",
+        masterVolume: "Gesamtlautstärke",
+        musicVolume: "Musik",
+        sfxVolume: "Soundeffekte",
+        mute: "Stumm",
         
         // How to Play hints
         howToPlayMoveTouch: "Verwende das virtuelle D-Pad",
@@ -732,6 +753,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         gamepadSupported: "Gamepad OK",
         touchSupported: "Touch OK",
         noGamepadConnected: "Nessun gamepad connesso",
+
+        // Audio
+        audio: "Audio",
+        masterVolume: "Volume principale",
+        musicVolume: "Musica",
+        sfxVolume: "Effetti sonori",
+        mute: "Muto",
         
         // How to Play hints
         howToPlayMoveTouch: "Usa il D-pad virtuale",
@@ -950,6 +978,13 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         gamepadSupported: "Gamepad OK",
         touchSupported: "Táctil OK",
         noGamepadConnected: "Ningún gamepad conectado",
+
+        // Audio
+        audio: "Audio",
+        masterVolume: "Volumen general",
+        musicVolume: "Música",
+        sfxVolume: "Efectos de sonido",
+        mute: "Silenciar",
         
         // How to Play hints
         howToPlayMoveTouch: "Usa el D-pad virtual",

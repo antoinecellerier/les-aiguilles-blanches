@@ -32,7 +32,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
 - [x] Storm snow accumulation — Trees, mountains, groomer accumulate visible snow during storm weather
-- [ ] Sound effects and music
+- [ ] Sound effects and music (AudioSystem foundation + settings UI done; SFX, ambience, voice, music pending)
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
 - [ ] Leaderboards

@@ -11,6 +11,7 @@ import { createGamepadMenuNav } from '../utils/gamepadMenu';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
 import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager';
+import { AudioSystem, type VolumeChannel } from '../systems/AudioSystem';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -249,6 +250,7 @@ export default class SettingsScene extends Phaser.Scene {
     // All sections in single column
     this.addLanguageSection(contentSizer);
     this.addAccessibilitySection(contentSizer);
+    this.addAudioSection(contentSizer);
     
     // Always add controls section (scrollable now handles overflow)
     this.addControlsSection(contentSizer);
@@ -288,6 +290,7 @@ export default class SettingsScene extends Phaser.Scene {
       { align: 'center' });
     this.addLanguageSection(leftCol);
     this.addAccessibilitySection(leftCol);
+    this.addAudioSection(leftCol);
     
     // Right column: Controls
     const rightCol = this.rexUI.add.sizer({
@@ -336,6 +339,111 @@ export default class SettingsScene extends Phaser.Scene {
     sizer.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, THEME.colors.textSecondary), 
       { align: 'left' });
     sizer.add(this.createColorblindButtons(), { align: 'left' });
+  }
+
+  private addAudioSection(sizer: any): void {
+    sizer.add(this.createText('🔊 ' + (t('audio') || 'Audio'), this.fontSize, THEME.colors.textPrimary, true),
+      { align: 'left' });
+
+    // Mute toggle
+    const audio = AudioSystem.getInstance();
+    sizer.add(this.createToggleRow(t('mute') || 'Mute',
+      audio.isMuted(), (val) => {
+        audio.setMuted(val);
+      }), { align: 'left' });
+
+    // Volume sliders
+    sizer.add(this.createVolumeSlider('master', t('masterVolume') || 'Master Volume'), { align: 'left' });
+    sizer.add(this.createVolumeSlider('music', t('musicVolume') || 'Music'), { align: 'left' });
+    sizer.add(this.createVolumeSlider('sfx', t('sfxVolume') || 'Sound Effects'), { align: 'left' });
+  }
+
+  private createVolumeSlider(channel: VolumeChannel, label: string): any {
+    const audio = AudioSystem.getInstance();
+    let value = audio.getVolume(channel);
+
+    const wrapper = this.rexUI.add.sizer({ orientation: 'vertical', space: { item: 4 } });
+
+    const labelRow = this.rexUI.add.fixWidthSizer({
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.3) },
+    });
+    const labelText = this.createText(label + ':', this.smallFont, THEME.colors.textSecondary);
+    const valueText = this.createText(
+      Math.round(value * 100) + '%', this.smallFont, THEME.colors.textPrimary
+    );
+    labelRow.add(labelText);
+    labelRow.add(valueText);
+    wrapper.add(labelRow, { align: 'left' });
+
+    const trackWidth = Math.min(this.contentWidth - 40, 200);
+    const trackHeight = 8;
+    const thumbSize = Math.max(this.minTouchTarget, 20);
+
+    const container = this.add.container(0, 0);
+    const track = this.add.graphics();
+    track.fillStyle(SCROLLBAR_TRACK_COLOR, 1);
+    track.fillRect(0, -trackHeight / 2, trackWidth, trackHeight);
+    container.add(track);
+
+    const fill = this.add.graphics();
+    container.add(fill);
+
+    const thumb = this.add.graphics();
+    container.add(thumb);
+
+    const drawThumb = (t: number) => {
+      const x = t * trackWidth;
+      thumb.clear();
+      thumb.fillStyle(0x87CEEB, 1);
+      thumb.fillRect(x - 6, -thumbSize / 2, 12, thumbSize);
+      fill.clear();
+      fill.fillStyle(0x3a6d8e, 1);
+      fill.fillRect(0, -trackHeight / 2, x, trackHeight);
+    };
+
+    drawThumb(value);
+
+    const apply = (newVal: number) => {
+      value = Math.max(0, Math.min(1, Math.round(newVal * 100) / 100));
+      drawThumb(value);
+      valueText.setText(Math.round(value * 100) + '%');
+      audio.setVolume(channel, value);
+    };
+
+    const hitZone = this.add.rectangle(
+      trackWidth / 2, 0, trackWidth + thumbSize, thumbSize, 0x000000, 0
+    ).setInteractive({ useHandCursor: true, draggable: true });
+    container.add(hitZone);
+
+    const updateFromPointer = (pointerX: number) => {
+      const bounds = hitZone.getBounds();
+      const relX = pointerX - bounds.left;
+      apply(Phaser.Math.Clamp(relX / trackWidth, 0, 1));
+    };
+
+    let dragging = false;
+    hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      dragging = true;
+      updateFromPointer(pointer.x);
+    });
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (dragging && pointer.isDown) updateFromPointer(pointer.x);
+    });
+    this.input.on('pointerup', () => { dragging = false; });
+
+    container.setSize(trackWidth, thumbSize);
+    wrapper.add(container, { align: 'left' });
+
+    const STEP = 0.05;
+    this.focus.items.push({
+      element: wrapper,
+      activate: () => {},
+      left: () => apply(value - STEP),
+      right: () => apply(value + STEP),
+    });
+
+    return wrapper;
   }
 
   private addControlsSection(sizer: any): void {
