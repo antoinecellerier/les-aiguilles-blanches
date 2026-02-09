@@ -11,12 +11,9 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Polish (Medium Priority)
 
-- [ ] Directional slope traversal — Groomer should traverse intermediate-slope zones fine when facing up/down but tumble when moving sideways across the slope
 - [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
 - [ ] Adapt the menu scene to render weather from the current level (night, storm, etc.)
 - [ ] Make the settings menu look nicer — visual polish pass
-- [ ] Review in-game dialogue UI — better use of space on larger screens
-- [ ] Review in-game dialogue content — check for excessive or inaccurate emoji use
 
 
 ## Future (Backlog)
@@ -34,6 +31,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Recently Completed
 
 - ✅ **Depth layering fix** — Y-based depth sorting for trees, chalets, anchors, wildlife via `yDepth()`. AIRBORNE depth for birds above winch cable. Background forest at fixed depth.
+
+- ✅ **Tutorial dialogue polish** — Rewrote tutorial strings from robotic checklist format to natural Jean-Pierre dialogue. HUD description now matches actual colored bars. Fixed DE/IT grammar. Content reviewed via cross-model consultation.
+
+- ✅ **Dialogue UI on large screens** — Capped dialogue box width at 800px (centered). Increased text font on desktop (14→16px). Prevents thin banner stretching across ultrawide monitors.
 
 - ✅ **Resize & zoom fixes** — Diagonal-ratio zoom scaling for orientation-independent viewport sizing. Proportional zoom on resize preserves world scale. Groomer kept above virtual touch controls on portrait devices via `GAME_EVENTS.TOUCH_CONTROLS_TOP` event with extended camera bounds.
 

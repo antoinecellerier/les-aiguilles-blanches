@@ -170,7 +170,7 @@ export default class DialogueScene extends Phaser.Scene {
     this.container.setVisible(false);
     this.container.setDepth(100); // Above hit zone
 
-    const boxWidth = width - 40;
+    const boxWidth = Math.min(width - 40, 800);
     const boxHeight = this.dialogueBoxHeight;
     const bevelWidth = 3;
     const bevelLight = 0x555555;
@@ -178,14 +178,18 @@ export default class DialogueScene extends Phaser.Scene {
     const panelFill = 0x1a1a1a;
     const portraitSize = Math.round(boxHeight * 0.6);
     const portraitMargin = Math.round((boxHeight - portraitSize) / 2);
-    const textStartX = 20 + portraitSize + portraitMargin + 10;
+    // bgX is the horizontal center of the box
+    const bgX = width / 2;
+    const boxLeft = bgX - boxWidth / 2;
+    const textStartX = boxLeft + 20 + portraitSize + portraitMargin + 10;
     this.textStartX = textStartX;
-    this.textAreaWidth = boxWidth - textStartX - 50;
+    this.textAreaWidth = boxWidth - (textStartX - boxLeft) - 50;
+    // Use medium font on wider screens where the box isn't cramped
+    const dialogueFontSize = width >= 600 ? THEME.fonts.sizes.medium : THEME.fonts.sizes.small;
     // Cap box height to ~30% of screen so gameplay stays visible
     this.maxBoxHeight = Math.max(this.dialogueBoxHeight, Math.round(height * 0.3));
 
     // Main background
-    const bgX = width / 2;
     this.bg = this.add.rectangle(bgX, 0, boxWidth, boxHeight, panelFill);
     // Bevel edges (top=light, left=light, bottom=dark, right=dark)
     const bevelTop = this.add.rectangle(bgX, -boxHeight / 2, boxWidth, bevelWidth, bevelLight).setOrigin(0.5, 0);
@@ -210,13 +214,13 @@ export default class DialogueScene extends Phaser.Scene {
     });
 
     // Separator line under speaker name
-    const separator = this.add.rectangle(textStartX, -boxHeight / 2 + 32, boxWidth - textStartX - 40, 1, THEME.colors.infoHex, 0.4).setOrigin(0, 0.5);
+    const separator = this.add.rectangle(textStartX, -boxHeight / 2 + 32, (bgX + boxWidth / 2 - 40) - textStartX, 1, THEME.colors.infoHex, 0.4).setOrigin(0, 0.5);
 
     this.dialogueText = this.add.text(textStartX, -boxHeight / 2 + 40, '', {
       fontFamily: THEME.fonts.family,
-      fontSize: THEME.fonts.sizes.small + 'px',
+      fontSize: dialogueFontSize + 'px',
       color: THEME.colors.textPrimary,
-      wordWrap: { width: boxWidth - textStartX - 50 },
+      wordWrap: { width: this.textAreaWidth },
     });
 
     // Continue indicator
