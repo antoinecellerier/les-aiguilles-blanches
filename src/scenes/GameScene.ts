@@ -15,6 +15,7 @@ import { LevelGeometry, type PistePath } from '../systems/LevelGeometry';
 import { PisteRenderer } from '../systems/PisteRenderer';
 import { WinchSystem } from '../systems/WinchSystem';
 import { ObstacleBuilder } from '../systems/ObstacleBuilder';
+import { EngineSounds } from '../systems/EngineSounds';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -110,6 +111,7 @@ export default class GameScene extends Phaser.Scene {
   private wildlifeSystem!: WildlifeSystem;
   private obstacleBuilder!: ObstacleBuilder;
   private buildingRects: ObstacleRect[] = [];
+  private engineSounds = new EngineSounds();
 
   // Input
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -170,6 +172,9 @@ export default class GameScene extends Phaser.Scene {
       }
       throw e;
     }
+
+    // Phaser emits 'shutdown' but doesn't auto-call the method
+    this.events.once('shutdown', this.shutdown, this);
   }
 
   private createLevel(): void {
@@ -214,6 +219,8 @@ export default class GameScene extends Phaser.Scene {
     });
 
     Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
+
+    this.engineSounds.start();
   }
 
   private initWorldDimensions(screenWidth: number, screenHeight: number): { worldWidth: number; worldHeight: number } {
@@ -448,8 +455,8 @@ export default class GameScene extends Phaser.Scene {
     this.groomer.setScale(this.tileSize / 16);
     this.groomer.setDepth(DEPTHS.PLAYER); // Above night overlay
 
-    this.physics.add.collider(this.groomer, this.obstacles);
-    this.physics.add.collider(this.groomer, this.boundaryWalls);
+    this.physics.add.collider(this.groomer, this.obstacles, () => this.onObstacleHit());
+    this.physics.add.collider(this.groomer, this.boundaryWalls, () => this.onObstacleHit());
 
     // Cliff fall is checked per-frame via center-of-mass in checkCliffFall().
     // Danger zones exist as visual markers but have no physics interaction —
@@ -512,6 +519,7 @@ export default class GameScene extends Phaser.Scene {
   private triggerCliffFall(): void {
     this.isFallingOffCliff = true;
 
+    this.engineSounds.playCliffFall();
     this.winchSystem.detach();
 
     this.showDialogue('cliffFall');
@@ -616,7 +624,11 @@ export default class GameScene extends Phaser.Scene {
     if (this.level.hasWinch) {
       const isWinchPressed = this.winchKey.isDown || this.touchInput.winch ||
         isGamepadButtonPressed(this.gamepad, this.gamepadBindings.winch);
+      const wasActive = this.winchSystem.active;
       this.winchSystem.update(isWinchPressed, this.groomer.x, this.groomer.y, this.tileSize, this.level.height);
+      // Winch attach/detach one-shot sounds
+      if (this.winchSystem.active && !wasActive) this.engineSounds.playWinchAttach();
+      else if (!this.winchSystem.active && wasActive) this.engineSounds.playWinchDetach();
     }
     this.checkSteepness();
     this.checkCliffFall();
@@ -631,6 +643,14 @@ export default class GameScene extends Phaser.Scene {
 
     // Update wildlife (flee from groomer)
     this.wildlifeSystem.update(this.groomer.x, this.groomer.y, delta);
+
+    // Update engine/movement sounds
+    const speed = (this.groomer.body as Phaser.Physics.Arcade.Body).velocity.length();
+    const winchTaut = this.winchSystem.active && this.winchSystem.isTaut(this.groomer.y);
+    const tileX = Math.floor(this.groomer.x / this.tileSize);
+    const tileY = Math.floor(this.groomer.y / this.tileSize);
+    const onGroomed = this.snowGrid[tileY]?.[tileX]?.groomed ?? false;
+    this.engineSounds.update(speed, this.isGrooming, winchTaut, onGroomed, delta);
 
     // Emit game state for HUD
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
@@ -691,6 +711,7 @@ export default class GameScene extends Phaser.Scene {
     this.isTumbling = true;
     this.tumbleCount++;
 
+    this.engineSounds.playTumble();
     this.cameras.main.shake(BALANCE.SHAKE_TUMBLE.duration, BALANCE.SHAKE_TUMBLE.intensity);
 
     this.tweens.add({
@@ -919,6 +940,7 @@ export default class GameScene extends Phaser.Scene {
     if (interactable.interactionType === 'fuel') {
       if (this.fuel < 100) {
         this.fuel = Math.min(100, this.fuel + BALANCE.FUEL_REFILL_RATE);
+        this.engineSounds.playFuelRefill();
         this.showInteractionFeedback(feedbackX, feedbackY, '🛢️', 0x44aaff, 28);
       }
     } else if (interactable.interactionType === 'food') {
@@ -926,17 +948,28 @@ export default class GameScene extends Phaser.Scene {
       if (!this.buffs.staminaRegen) {
         this.stamina = 100;
         this.buffs.staminaRegen = BALANCE.FOOD_BUFF_DURATION; // 60 second regen buff
+        this.engineSounds.playRestaurant();
         Accessibility.announce(t('marieWelcome'));
         this.showInteractionFeedback(feedbackX, feedbackY, '🧀 Reblochon!', 0xffdd44, 32, true);
       } else if (this.stamina < 100) {
         // If already have buff, just top up stamina
         this.stamina = Math.min(100, this.stamina + BALANCE.FOOD_STAMINA_REFILL_RATE);
+        this.engineSounds.playFuelRefill();
         this.showInteractionFeedback(feedbackX, feedbackY, '🧀', 0xffdd44, 24);
       }
     }
   }
 
   private lastFeedbackTime = 0;
+  private lastBumpTime = 0;
+
+  private onObstacleHit(): void {
+    const now = Date.now();
+    if (now - this.lastBumpTime < 300) return; // Throttle
+    this.lastBumpTime = now;
+    this.engineSounds.playObstacleBump();
+  }
+
   private showInteractionFeedback(x: number, y: number, text: string, color: number, fontSize = 24, forceShow = false): void {
     const now = Date.now();
     // Throttle feedback to avoid spam (except for forceShow)
@@ -1101,6 +1134,7 @@ export default class GameScene extends Phaser.Scene {
 
   pauseGame(): void {
     if (!this.scene.manager || !this.scene.isActive()) return;
+    this.engineSounds.pause();
     this.scene.pause();
     this.scene.launch('PauseScene', { levelIndex: this.levelIndex });
     this.scene.bringToTop('PauseScene');
@@ -1113,6 +1147,7 @@ export default class GameScene extends Phaser.Scene {
     const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     const val = saved ? parseFloat(saved) : BALANCE.SENSITIVITY_DEFAULT;
     this.movementSensitivity = (isNaN(val) || val < BALANCE.SENSITIVITY_MIN || val > BALANCE.SENSITIVITY_MAX) ? BALANCE.SENSITIVITY_DEFAULT : val;
+    this.engineSounds.resume();
     this.scene.resume();
   }
 
@@ -1230,6 +1265,9 @@ export default class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
     this.isGameOver = true;
 
+    // Stop engine sounds immediately — scene may linger without shutdown()
+    this.engineSounds.stop();
+
     // Emit final game state so HUD has correct values before stopping
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
 
@@ -1294,6 +1332,7 @@ export default class GameScene extends Phaser.Scene {
     this.winchSystem.reset();
     this.obstacleBuilder.reset();
     this.geometry.reset();
+    this.engineSounds.stop();
     this.buildingRects = [];
 
     this.children.removeAll(true);

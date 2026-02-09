@@ -51,6 +51,7 @@ snow-groomer/
 │   │   ├── PisteRenderer.ts # Boundary colliders, cliff visuals, markers, trees, access paths
 │   │   ├── WinchSystem.ts  # Winch anchors, cable rendering, attach/detach state
 │   │   ├── AudioSystem.ts  # Web Audio API singleton, volume channels, gain chain
+│   │   ├── EngineSounds.ts # Engine rumble, snow crunch, grooming, winch, tumble SFX
 │   │   └── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle)
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
@@ -868,6 +869,7 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 - **PisteRenderer** — All piste visual rendering: boundary colliders, cliff edge visuals, piste markers, forest trees, access path roads/poles, steep zone indicators, and extended background. Returns physics groups for GameScene collision setup.
 - **WinchSystem** — Winch anchor creation, cable rendering (taut/slack), attach/detach state. Exposes `isTaut()` query used by movement and resource systems.
 - **AudioSystem** — Singleton managing all game audio via Web Audio API. Handles AudioContext lifecycle (autoplay resume, visibility suspend/resume), five volume channels (master, music, sfx, voice, ambience) routed through a gain node chain, and localStorage persistence for volume settings.
+- **EngineSounds** — Procedural engine/movement sounds: diesel idle rumble (dual detuned sawtooth), speed-dependent pitch rise, surface-dependent snow crunch (crunchy on ungroomed, soft thumps on groomed), grooming blade buzz with LFO vibration, winch attach/detach clunks, winch tension hum, obstacle/boundary bump clang, fuel refill gurgle, restaurant welcome chime, rolling tumble impacts, and cliff fall with cascading rock hits. Created/destroyed per GameScene lifecycle; paused/resumed on game pause.
 
 Each system takes the Phaser scene in its constructor and exposes methods called from GameScene's `createLevel()` and `update()`. LevelGeometry is the exception — it takes `level` and `tileSize` as params since it has no Phaser dependency.
 
