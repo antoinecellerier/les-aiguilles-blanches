@@ -7,6 +7,7 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
 import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
+import { STORAGE_KEYS } from '../config/storageKeys';
 import { Accessibility } from '../utils/accessibility';
 
 /**
@@ -321,7 +322,12 @@ export default class HUDScene extends Phaser.Scene {
       nextButtonY = visorHeight + Math.round(4 * this.uiScale);
     }
 
-    this.input.keyboard?.on('keydown-N', () => this.skipLevel());
+    this.input.keyboard?.on('keydown-N', (e: KeyboardEvent) => {
+      if (!this.isKeyBoundToGameControl(e.keyCode)) this.skipLevel();
+    });
+    this.input.keyboard?.on('keydown-P', (e: KeyboardEvent) => {
+      if (!this.isKeyBoundToGameControl(e.keyCode)) this.prevLevel();
+    });
     
     // Show keyboard hint on desktop (even with touchscreen), touch hint on mobile
 
@@ -754,6 +760,21 @@ export default class HUDScene extends Phaser.Scene {
       });
     }
     // Resize handler will restart HUD to update button appearance
+  }
+
+  private isKeyBoundToGameControl(keyCode: number): boolean {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
+      const codes = saved ? Object.values(JSON.parse(saved)) as number[] : [];
+      return codes.includes(keyCode);
+    } catch { return false; }
+  }
+
+  private prevLevel(): void {
+    const prevLevel = this.level.id - 1;
+    if (prevLevel < 0 || this.isSkipping) return;
+    this.isSkipping = true;
+    this.game.events.emit(GAME_EVENTS.SKIP_LEVEL, prevLevel);
   }
 
   private skipLevel(): void {
