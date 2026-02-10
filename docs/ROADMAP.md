@@ -29,6 +29,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
 - [ ] Make the settings menu look nicer — visual polish pass
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
+- [ ] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
 
 
 ## Future (Backlog)
