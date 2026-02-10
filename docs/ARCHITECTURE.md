@@ -926,7 +926,7 @@ All gameplay tuning values are centralized in `BALANCE` (exported from `src/conf
 
 ### Depth Constants
 
-All Phaser depth (z-order) values are centralized in `DEPTHS` (exported from `src/config/gameConfig.ts`). Never use magic depth numbers — always use `DEPTHS.*` constants. See `docs/ART_STYLE.md` for the full layer table.
+All Phaser depth (z-order) values are centralized in `DEPTHS` (exported from `src/config/gameConfig.ts`). Never use magic depth numbers — always use `DEPTHS.*` constants. See `docs/ART_STYLE.md` for the full layer table. Menu/settings scenes use `DEPTHS.MENU_OVERLAY` (13) and `DEPTHS.MENU_UI` (15) to layer UI above terrain backdrops with animated wildlife.
 
 ### Overlay Scene Input Handling
 

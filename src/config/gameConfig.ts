@@ -65,6 +65,9 @@ export const DEPTHS = {
   FEEDBACK: 200,      // Floating text (+fuel, stamina, etc.)
   WEATHER: 200,       // Snow particles (same layer as feedback)
   VICTORY: 500,       // Victory text (topmost)
+  // Menu/settings scene depths (separate from game world)
+  MENU_OVERLAY: 13,   // Darken overlay for settings/pause backdrops
+  MENU_UI: 15,        // UI panels, buttons, text above overlay
 } as const;
 
 /**

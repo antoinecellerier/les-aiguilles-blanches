@@ -28,7 +28,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [ ] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
 - [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
-- [ ] Make the settings menu look nicer — visual polish pass
+- [x] Make the settings menu look nicer — visual polish pass
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 - [x] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
 - [x] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
@@ -54,6 +54,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 
 ## Recently Completed
+
+- ✅ **Settings menu visual polish** — Alpine terrain backdrop with animated wildlife (via `MenuWildlifeController`), section panels with borders and gold accent dividers, responsive two-column/single-column layout with conditional scrollbar. Panel width properly accounts for padding to prevent overflow. Centralized `DEPTHS.MENU_OVERLAY`/`MENU_UI` constants in gameConfig.ts.
 
 - ✅ **Controller tooltips** — Hover/tap on input hint icons shows combined tooltip listing all 3 input methods (keyboard, touch, gamepad) with ✓/✗ status. Separate tight hover zone (mouse) and 48px-padded touch zone. Touch hold-and-release with 1.5s minimum display. Localized in 5 languages.
 

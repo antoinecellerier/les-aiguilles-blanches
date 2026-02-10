@@ -100,6 +100,7 @@ Alpine rock with warm brown tones (NOT gray):
 | Button shadow | Dark slate | `#1a3a5c` (hardcoded in MenuScene) |
 | Selection arrow | Gold | `0xffd700` |
 | Panel background | Dark gray | `0x222222` |
+| Settings panel | Muted teal | `0x2d4a63` |
 | Dialog background | Navy | `0x1a2a3e` |
 | Footer panel | Navy | `0x1a2a3e` |
 | Success/positive | Green | `0x22aa22` |

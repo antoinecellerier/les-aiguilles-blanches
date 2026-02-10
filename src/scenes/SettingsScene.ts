@@ -3,7 +3,7 @@ import { t, getLanguage, setLanguage, Accessibility, SupportedLanguage, Colorbli
 import { getKeyboardLayout, getLayoutDefaults, AVAILABLE_LAYOUTS, type KeyboardLayout } from '../utils/keyboardLayout';
 import { loadGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, type GamepadBindings } from '../utils/gamepad';
 import { THEME } from '../config/theme';
-import { BALANCE } from '../config/gameConfig';
+import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString, setString } from '../utils/storage';
 import { resetGameScenes } from '../utils/sceneTransitions';
@@ -14,6 +14,9 @@ import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
 import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager';
 import { AudioSystem, type VolumeChannel } from '../systems/AudioSystem';
 import { playClick, playCancel, playToggle, playPreview, playSensitivityBlip } from '../systems/UISounds';
+import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
+import { getSavedProgress } from '../utils/gameProgress';
+import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -24,6 +27,8 @@ import { playClick, playCancel, playToggle, playPreview, playSensitivityBlip } f
 const SCROLLBAR_TRACK_COLOR = 0x555555;
 const SCROLLBAR_THUMB_COLOR = 0x888888;
 const GP_HORIZ_COOLDOWN_MS = 200;
+/** Panel background — notably brighter than dark overlay for clear contrast. */
+const SECTION_PANEL_BG = 0x2d4a63;
 
 interface SettingsSceneData {
   returnTo?: string;
@@ -57,6 +62,7 @@ export default class SettingsScene extends Phaser.Scene {
   private pendingFocusIndex = -1;
   private gamepadNav: ReturnType<typeof createGamepadMenuNav> | null = null;
   private gpHorizCooldown = 0;
+  private wildlife: MenuWildlifeController | null = null;
 
   constructor() {
     super({ key: 'SettingsScene' });
@@ -70,7 +76,27 @@ export default class SettingsScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.cameras.main;
-    this.cameras.main.setBackgroundColor(THEME.colors.dialogBg);
+
+    // Alpine backdrop — reuse MenuScene terrain renderer
+    const snowLineY = height * 0.75;
+    const scaleFactor = Math.min(width / 1024, height / 768);
+    const progress = getSavedProgress();
+    const currentLevel = progress ? LEVELS[progress.currentLevel] : null;
+    const levelWeather = currentLevel
+      ? { isNight: currentLevel.isNight, weather: currentLevel.weather }
+      : undefined;
+    createMenuTerrain(this, width, height, snowLineY, 0, scaleFactor, levelWeather);
+
+    // Animated wildlife on the snow (behind overlay)
+    this.wildlife = new MenuWildlifeController(this);
+    this.wildlife.snowLineY = snowLineY;
+    this.wildlife.create(width, height, snowLineY, 0, scaleFactor, levelWeather);
+    this.wildlife.menuZone = { left: 0, right: width, top: snowLineY, bottom: height };
+
+    // Darken overlay so UI text stays readable over the terrain
+    this.add.rectangle(width / 2, height / 2, width, height, THEME.colors.darkBg)
+      .setAlpha(0.92).setDepth(DEPTHS.MENU_OVERLAY);
+
     this.keys = new KeybindingManager(this);
     this.keys.accentColor = THEME.colors.accent;
     this.keys.buttonBgColor = THEME.colors.buttonPrimaryHex;
@@ -177,6 +203,7 @@ export default class SettingsScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     this.gamepadNav?.update(delta);
     this.keys.checkGamepadRebind();
+    this.wildlife?.update(_time, delta);
 
     // Gamepad left/right for group cycling & slider (separate from vertical nav)
     this.gpHorizCooldown = Math.max(0, this.gpHorizCooldown - delta);
@@ -206,24 +233,24 @@ export default class SettingsScene extends Phaser.Scene {
   /** Wrap a content sizer in a scrollable panel with conditional scrollbar. */
   private wrapInScrollPanel(contentSizer: any, x: number, y: number, panelWidth: number, availableHeight: number): void {
     contentSizer.layout();
-    const contentHeight = contentSizer.height;
-    const needsScroll = contentHeight > availableHeight;
+    const needsScroll = contentSizer.height > availableHeight;
 
-    this.mainSizer = this.rexUI.add.scrollablePanel({
+    const config: any = {
       x, y, width: panelWidth, height: availableHeight, origin: 0,
       scrollMode: 'y',
       panel: { child: contentSizer },
-      slider: needsScroll ? {
+      mouseWheelScroller: { speed: 0.3 },
+      space: { panel: 5 },
+    };
+    if (needsScroll) {
+      config.slider = {
         track: this.rexUI.add.roundRectangle(0, 0, 6, 0, 3, SCROLLBAR_TRACK_COLOR),
         thumb: this.rexUI.add.roundRectangle(0, 0, 6, 40, 3, SCROLLBAR_THUMB_COLOR),
-      } : false,
-      mouseWheelScroller: needsScroll ? { speed: 0.3 } : false,
-      space: { panel: needsScroll ? 5 : 0 },
-    }).layout();
-
-    if (needsScroll) {
-      this.mainSizer.setChildrenInteractive();
+      };
     }
+    this.mainSizer = this.rexUI.add.scrollablePanel(config).layout();
+    this.mainSizer.setDepth(DEPTHS.MENU_UI);
+    this.mainSizer.setChildrenInteractive();
     this.focus.setScrollPanel(this.mainSizer);
   }
 
@@ -237,6 +264,10 @@ export default class SettingsScene extends Phaser.Scene {
     const tightSpacing = height < 600 ? Math.max(2, itemSpacing * 0.5) : itemSpacing;
     
     const sizerWidth = width - padding * 2;
+    
+    // Reduce contentWidth to account for panel padding
+    const panelPad = Math.round(this.fontSize * 0.6);
+    this.contentWidth = sizerWidth - 10 - panelPad * 2; // Scrollbar + panel padding
     
     // Create content sizer (will be placed inside scrollable panel)
     const contentSizer = this.rexUI.add.sizer({
@@ -269,27 +300,39 @@ export default class SettingsScene extends Phaser.Scene {
     // Reserve space for back button at bottom
     const backButtonSpace = this.fontSize * 3;
     const availableHeight = height - padding * 2 - backButtonSpace;
-    const colWidth = (width - padding * 3) / 2;
+    const totalWidth = width - padding * 2 - 10; // Account for scrollbar
+    const colWidth = (totalWidth - padding) / 2;
     
     // Update contentWidth for child elements in two-column mode
-    this.contentWidth = colWidth;
+    // Subtract panel padding so inner content fits within panel borders
+    const panelPad = Math.round(this.fontSize * 0.6);
+    this.contentWidth = colWidth - panelPad * 2;
     
-    // Root horizontal sizer for both columns
-    const rootSizer = this.rexUI.add.sizer({
-      width: width - padding * 2 - 10, // Account for potential scrollbar
+    // Outer vertical sizer: title + columns row
+    const outerSizer = this.rexUI.add.sizer({
+      width: totalWidth,
+      orientation: 'vertical',
+      space: { item: itemSpacing },
+    });
+
+    // Title centered above both columns
+    outerSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.2, THEME.colors.info, true), 
+      { align: 'center' });
+
+    // Horizontal sizer for the two columns
+    const rowSizer = this.rexUI.add.sizer({
+      width: totalWidth,
       orientation: 'horizontal',
       space: { item: padding },
     });
 
-    // Left column: Language + Accessibility
+    // Left column: Language + Accessibility + Audio
     const leftCol = this.rexUI.add.sizer({
       width: colWidth,
       orientation: 'vertical',
       space: { item: itemSpacing }
     });
     
-    leftCol.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.2, THEME.colors.info, true), 
-      { align: 'center' });
     this.addLanguageSection(leftCol);
     this.addAccessibilitySection(leftCol);
     this.addAudioSection(leftCol);
@@ -307,30 +350,30 @@ export default class SettingsScene extends Phaser.Scene {
     this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
     rightCol.add(this.statusText, { align: 'center' });
 
-    rootSizer.add(leftCol, { align: 'top' });
-    rootSizer.add(rightCol, { align: 'top' });
+    rowSizer.add(leftCol, { align: 'top', expand: true, proportion: 1 });
+    rowSizer.add(rightCol, { align: 'top', expand: true, proportion: 1 });
+    outerSizer.add(rowSizer, { expand: true });
 
-    this.wrapInScrollPanel(rootSizer, padding, padding, width - padding * 2, availableHeight);
+    this.wrapInScrollPanel(outerSizer, padding, padding, totalWidth, availableHeight);
   }
 
   private addLanguageSection(sizer: any): void {
-    sizer.add(this.createText('🌐 ' + (t('language') || 'Language'), this.fontSize, THEME.colors.textPrimary, true), 
-      { align: 'left' });
-    sizer.add(this.createLanguageButtons(), { align: 'left' });
+    const panel = this.createSectionPanel('🌐 ' + (t('language') || 'Language'), 6);
+    panel.add(this.createLanguageButtons(), { align: 'left' });
+    sizer.add(panel, { align: 'left' });
   }
 
   private addAccessibilitySection(sizer: any): void {
-    sizer.add(this.createText('♿ ' + (t('accessibility') || 'Accessibility'), this.fontSize, THEME.colors.textPrimary, true), 
-      { align: 'left' });
+    const panel = this.createSectionPanel('♿ ' + (t('accessibility') || 'Accessibility'), 6);
     
-    sizer.add(this.createToggleRow(t('highContrast') || 'High Contrast', 
+    panel.add(this.createToggleRow(t('highContrast') || 'High Contrast', 
       Accessibility.settings.highContrast, (val) => {
         Accessibility.settings.highContrast = val;
         Accessibility.saveSettings();
         this.broadcastAccessibility();
       }), { align: 'left' });
     
-    sizer.add(this.createToggleRow(t('reducedMotion') || 'Reduced Motion',
+    panel.add(this.createToggleRow(t('reducedMotion') || 'Reduced Motion',
       Accessibility.settings.reducedMotion, (val) => {
         Accessibility.settings.reducedMotion = val;
         Accessibility.saveSettings();
@@ -338,28 +381,31 @@ export default class SettingsScene extends Phaser.Scene {
       }), { align: 'left' });
 
     // Colorblind modes
-    sizer.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, THEME.colors.textSecondary), 
+    panel.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, THEME.colors.textSecondary), 
       { align: 'left' });
-    sizer.add(this.createColorblindButtons(), { align: 'left' });
+    panel.add(this.createColorblindButtons(), { align: 'left' });
+    sizer.add(panel, { align: 'left', padding: { top: 4 } });
   }
 
   private addAudioSection(sizer: any): void {
-    sizer.add(this.createText('🔊 ' + (t('audio') || 'Audio'), this.fontSize, THEME.colors.textPrimary, true),
-      { align: 'left' });
+    const panel = this.createSectionPanel('🔊 ' + (t('audio') || 'Audio'), 6);
 
     // Mute toggle
     const audio = AudioSystem.getInstance();
-    sizer.add(this.createToggleRow(t('mute') || 'Mute',
+    panel.add(this.createToggleRow(t('mute') || 'Mute',
       audio.isMuted(), (val) => {
         audio.setMuted(val);
       }), { align: 'left' });
 
     // Volume sliders
-    sizer.add(this.createVolumeSlider('master', t('masterVolume') || 'Master Volume'), { align: 'left' });
-    sizer.add(this.createVolumeSlider('music', t('musicVolume') || 'Music'), { align: 'left' });
-    sizer.add(this.createVolumeSlider('sfx', t('sfxVolume') || 'Sound Effects'), { align: 'left' });
-    sizer.add(this.createVolumeSlider('voice', t('voiceVolume') || 'Voice'), { align: 'left' });
-    sizer.add(this.createVolumeSlider('ambience', t('ambienceVolume') || 'Ambience'), { align: 'left' });
+    panel.add(this.createVolumeSlider('master', t('masterVolume') || 'Master Volume'), { align: 'left' });
+    panel.add(this.createVolumeSlider('music', t('musicVolume') || 'Music'), { align: 'left' });
+    panel.add(this.createVolumeSlider('sfx', t('sfxVolume') || 'Sound Effects'), { align: 'left' });
+    panel.add(this.createVolumeSlider('voice', t('voiceVolume') || 'Voice'), { align: 'left' });
+    panel.add(this.createVolumeSlider('ambience', t('ambienceVolume') || 'Ambience'), { align: 'left' });
+    // Spacer to compensate for slider Graphics underreporting height
+    panel.add(this.add.rectangle(0, 0, 1, 20, 0x000000, 0));
+    sizer.add(panel, { align: 'left' });
   }
 
   private createVolumeSlider(channel: VolumeChannel, label: string): any {
@@ -447,7 +493,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.input.on('pointerup', () => { dragging = false; });
 
     container.setSize(trackWidth, thumbSize);
-    wrapper.add(container, { align: 'left' });
+    wrapper.add(container, { align: 'left', padding: { bottom: 2 } });
 
     const STEP = 0.05;
     this.focus.items.push({
@@ -462,9 +508,8 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private addControlsSection(sizer: any): void {
-    sizer.add(this.createText('🎮 ' + (t('controls') || 'Controls'), this.fontSize, THEME.colors.textPrimary, true), 
-      { align: 'left' });
-    sizer.add(this.createText(t('clickToRebind') || 'Click to rebind', this.smallFont, THEME.colors.disabled), 
+    const panel = this.createSectionPanel('🎮 ' + (t('controls') || 'Controls'), 6);
+    panel.add(this.createText(t('clickToRebind') || 'Click to rebind', this.smallFont, THEME.colors.disabled), 
       { align: 'left' });
 
     // Key bindings
@@ -477,17 +522,17 @@ export default class SettingsScene extends Phaser.Scene {
       { id: 'winch', label: t('winch') || 'Winch' },
     ];
     actions.forEach(action => {
-      sizer.add(this.createBindingRow(action.id, action.label), { align: 'left' });
+      panel.add(this.createBindingRow(action.id, action.label), { align: 'left' });
     });
 
     // Layout selector
-    sizer.add(this.createLayoutSelector(), { align: 'left' });
+    panel.add(this.createLayoutSelector(), { align: 'left' });
 
     // Movement sensitivity slider
-    sizer.add(this.createSensitivitySlider(), { align: 'left' });
+    panel.add(this.createSensitivitySlider(), { align: 'left' });
 
     // Gamepad bindings section
-    sizer.add(this.createText('🎮 ' + (t('gamepadButtons') || 'Gamepad Buttons'), this.smallFont, THEME.colors.textSecondary),
+    panel.add(this.createText('🎮 ' + (t('gamepadButtons') || 'Gamepad Buttons'), this.smallFont, THEME.colors.textSecondary),
       { align: 'left', padding: { top: 10 } });
 
     const gpActions = [
@@ -496,13 +541,13 @@ export default class SettingsScene extends Phaser.Scene {
       { id: 'pause', label: t('pause') || 'Pause' },
     ];
     gpActions.forEach(action => {
-      sizer.add(this.createGamepadBindingRow(action.id, action.label), { align: 'left' });
+      panel.add(this.createGamepadBindingRow(action.id, action.label), { align: 'left' });
     });
 
     // Reset button
     const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset'), this.smallFont, '#ffaaaa', '#5a2d2d');
     resetBtn.on('pointerdown', () => { playClick(); this.keys.reset(); });
-    sizer.add(resetBtn, { align: 'left' });
+    panel.add(resetBtn, { align: 'left' });
 
     // Register reset button focus item
     this.focus.items.push({
@@ -515,12 +560,13 @@ export default class SettingsScene extends Phaser.Scene {
     const inputHints: string[] = [];
     if (hasTouchSetting) inputHints.push('📱 Touch');
     inputHints.push('🎮 Gamepad');
-    sizer.add(this.createText(inputHints.join('  '), this.smallFont, '#88aa88'), { align: 'left' });
+    panel.add(this.createText(inputHints.join('  '), this.smallFont, '#88aa88'), { align: 'left' });
 
     // Connected gamepad name (updates dynamically)
     this.gamepadNameText = this.createText('', this.smallFont, '#aaaaff');
     this.updateGamepadName();
-    sizer.add(this.gamepadNameText, { align: 'left' });
+    panel.add(this.gamepadNameText, { align: 'left' });
+    sizer.add(panel, { align: 'left', expand: true, proportion: 1 });
   }
 
   private createBackButton(width: number, height: number, padding: number): void {
@@ -530,6 +576,7 @@ export default class SettingsScene extends Phaser.Scene {
     const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, THEME.colors.textPrimary, THEME.colors.buttonDangerHex);
     backBtn.setPosition(width / 2, height - padding * 1.5);
     backBtn.setOrigin(0.5);
+    backBtn.setDepth(DEPTHS.MENU_UI);
     backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHoverHex }));
     backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHex }));
     backBtn.on('pointerdown', () => { playCancel(); this.goBack(); });
@@ -543,6 +590,25 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   // === UI Element Factory Methods ===
+
+  /** Create a section panel with rounded-rect background and header. */
+  private createSectionPanel(title: string, itemSpacing: number): any {
+    const panelPad = Math.round(this.fontSize * 0.6);
+    const panelWidth = this.contentWidth + panelPad * 2;
+    const panel = this.rexUI.add.sizer({
+      width: panelWidth,
+      orientation: 'vertical',
+      space: { item: itemSpacing, top: panelPad, bottom: panelPad, left: panelPad, right: panelPad },
+    });
+    const bg = this.rexUI.add.roundRectangle(0, 0, 10, 10, 4, SECTION_PANEL_BG)
+      .setStrokeStyle(3, THEME.colors.border);
+    panel.addBackground(bg);
+    panel.add(this.createText(title, this.fontSize * 1.05, THEME.colors.info, true), { align: 'left' });
+    // Gold accent divider under header
+    const divider = this.add.rectangle(0, 0, this.contentWidth * 0.6, 1, 0xffd700).setAlpha(0.35);
+    panel.add(divider, { align: 'left' });
+    return panel;
+  }
 
   private createText(text: string, fontSize: number, color: string, bold = false): Phaser.GameObjects.Text {
     return this.add.text(0, 0, text, {
@@ -754,7 +820,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.input.on('pointerup', () => { dragging = false; });
 
     container.setSize(trackWidth, thumbSize);
-    wrapper.add(container, { align: 'left' });
+    wrapper.add(container, { align: 'left', padding: { bottom: 2 } });
 
     // Register focus item with left/right adjustment
     const STEP = 0.05;
@@ -1022,6 +1088,8 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.wildlife?.destroy();
+    this.wildlife = null;
     this.input.keyboard?.removeAllListeners();
     this.input.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);
