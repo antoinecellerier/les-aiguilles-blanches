@@ -7,16 +7,16 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Bugs
 
 - [x] Firefox fullscreen button with gamepad - Added F keyboard shortcut + hint toast when gamepad fullscreen is rejected
-- [ ] HazardSystem avalanche timer leak — delayedCall not stored, fires on destroyed objects if scene shuts down
+- [x] HazardSystem avalanche timer leak — delayedCall not stored, fires on destroyed objects if scene shuts down
 - [x] Menu title text overflows its box horizontally
 - [ ] Colorblind buttons don't update visual state when opening Settings from Pause menu
 - [x] Navigation to Menu is broken on the failure screen
 
 ## Code Health
 
-- [ ] Direct localStorage calls bypass storage.ts — main.ts, HUDScene, GameScene should use getJSON/getString
-- [ ] Extract toggleFullscreen + hint toast to shared utility (duplicated in MenuScene + HUDScene)
-- [ ] Remove 22 console.log debug statements from GameScene
+- [x] Direct localStorage calls bypass storage.ts — main.ts, HUDScene, GameScene should use getJSON/getString
+- [x] Extract toggleFullscreen + hint toast to shared utility (duplicated in MenuScene + HUDScene)
+- [x] Remove 22 console.log debug statements from GameScene
 
 ## Testing
 
