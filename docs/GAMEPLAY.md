@@ -119,7 +119,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ● Green (Beginner)
 - **Objective**: Groom 80% of the beginner slope
-- **Time**: 5 minutes
+- **Time**: 1:00
 - **Skills**: Basic movement and grooming
 
 **Tips**: Take your time. Follow the natural slope pattern. Jean-Pierre will guide you.
@@ -129,7 +129,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ■ Blue (Intermediate)
 - **Objective**: Groom 85% before resort opens
-- **Time**: 4 minutes
+- **Time**: 1:30
 - **Skills**: Efficiency, coverage patterns
 
 **Tips**: Work in parallel strips. Don't backtrack unnecessarily.
@@ -139,7 +139,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: Park
 - **Objective**: Prepare freestyle features to 90%
-- **Time**: 5 minutes
+- **Time**: 1:30
 - **Skills**: Precision grooming around obstacles
 
 **Tips**: Be careful around jumps and rails. They need perfect landings!
@@ -149,7 +149,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ◆ Red (Advanced)
 - **Objective**: Groom 80% of steep terrain
-- **Time**: 4:40
+- **Time**: 1:30
 - **Skills**: Gradient handling, fuel management
 
 **Tips**: Watch your fuel consumption on steep sections. Use service roads (yellow/black poles) to climb back up.
@@ -159,7 +159,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ◆ Red (Advanced)
 - **Objective**: Groom 80% using the winch
-- **Time**: 5 minutes
+- **Time**: 1:30
 - **Skills**: Winch operation, steep slope navigation
 
 **Tips**: Thierry's set up the anchors. Press the winch key near a numbered post to attach — it stops you sliding on the 35-40° slopes. Two service roads help you reach the anchors.
@@ -169,7 +169,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: Park (Precision)
 - **Objective**: Groom 80% coverage
-- **Time**: 6 minutes
+- **Time**: 1:00
 - **Skills**: Precision grooming patterns
 
 **Tips**: The half-pipe walls need careful attention. Work from top to bottom.
@@ -179,7 +179,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ★ Black (Expert)
 - **Objective**: Groom 75% in darkness
-- **Time**: 6 minutes
+- **Time**: 2:00
 - **Skills**: Night visibility, winch operation
 
 **Tips**: Your groomer has directional headlights that illuminate the area in front and behind you. The lights rotate as you move, so they always shine where you're headed. Deploy the winch on steep sections - it only provides pulling force when you're downhill from the anchor.
@@ -189,7 +189,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ★ Black (Hazard)
 - **Objective**: Prepare 70% of hazard zone
-- **Time**: 5 minutes
+- **Time**: 1:30
 - **Skills**: Safety awareness, strategic routing
 
 **Tips**: Avoid marked avalanche zones. Listen to Thierry's safety briefing.
@@ -199,7 +199,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ◆ Red (Endurance)
 - **Objective**: Clear 85% after heavy snowfall
-- **Time**: 7 minutes
+- **Time**: 2:00
 - **Skills**: Heavy snow handling, time management
 
 **Tips**: Deep snow slows you down. Use the winch and eat hearty food for stamina.
@@ -209,7 +209,7 @@ The game's difficulty naturally increases as you progress:
 
 - **Difficulty**: ★ Black (Mastery)
 - **Objective**: Groom 85% — full mountain, night ops
-- **Time**: 6 minutes
+- **Time**: 2:30
 - **Skills**: Everything — winch, fuel, steep slopes, night visibility
 
 **Tips**: Jean-Pierre's final test. The FIS inspects tomorrow — every piste must be perfect. Use all the skills you've learned across the season.

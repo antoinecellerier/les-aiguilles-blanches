@@ -2,7 +2,7 @@
  * Unit tests for level configuration
  */
 import { describe, it, expect } from 'vitest';
-import { LEVELS } from './config-wrappers/index.js';
+import { LEVELS, computeTimeLimit } from './config-wrappers/index.js';
 
 describe('Level Configuration', () => {
     it('should have exactly 11 levels', () => {
@@ -91,6 +91,26 @@ describe('Level Configuration', () => {
         });
     });
 
+    it('all non-tutorial levels have auto-computed timeLimit > 0', () => {
+        LEVELS.forEach((level, i) => {
+            if (level.isTutorial) {
+                expect(level.timeLimit, `Tutorial timeLimit`).toBe(0);
+            } else {
+                expect(level.timeLimit, `Level ${i} timeLimit`).toBeGreaterThan(0);
+            }
+        });
+    });
+
+    it('all non-tutorial levels have speed_run target at 60% of timeLimit', () => {
+        LEVELS.forEach((level, i) => {
+            if (level.isTutorial) return;
+            const speedRun = level.bonusObjectives?.find(b => b.type === 'speed_run');
+            if (speedRun) {
+                expect(speedRun.target, `Level ${i} speed_run target`).toBe(Math.round(level.timeLimit * 0.6));
+            }
+        });
+    });
+
     it('winch anchors should not fall inside steep zones', () => {
         LEVELS.forEach((level, i) => {
             (level.winchAnchors ?? []).forEach((anchor, j) => {
@@ -99,6 +119,71 @@ describe('Level Configuration', () => {
                     expect(inside, `Level ${i} anchor ${j} (y=${anchor.y}) inside steep zone ${k} (${zone.startY}-${zone.endY})`).toBe(false);
                 });
             });
+        });
+    });
+});
+
+describe('computeTimeLimit', () => {
+    it('returns 0 for tutorial levels', () => {
+        expect(computeTimeLimit({
+            width: 30, height: 25, targetCoverage: 80,
+            difficulty: 'green', hasWinch: false, isTutorial: true,
+        })).toBe(0);
+    });
+
+    it('returns at least 60s for any non-tutorial level', () => {
+        expect(computeTimeLimit({
+            width: 10, height: 10, targetCoverage: 50,
+            difficulty: 'green', hasWinch: false, isTutorial: false,
+        })).toBeGreaterThanOrEqual(60);
+    });
+
+    it('result is always a multiple of 30', () => {
+        const difficulties = ['green', 'blue', 'park', 'red', 'black'];
+        for (const diff of difficulties) {
+            const t = computeTimeLimit({
+                width: 45, height: 35, targetCoverage: 85,
+                difficulty: diff, hasWinch: false, isTutorial: false,
+            });
+            expect(t % 30, `${diff} level time ${t} not multiple of 30`).toBe(0);
+        }
+    });
+
+    it('winch levels get more time than equivalent non-winch', () => {
+        const base = { width: 50, height: 40, targetCoverage: 90, difficulty: 'red', isTutorial: false };
+        const without = computeTimeLimit({ ...base, hasWinch: false });
+        const withWinch = computeTimeLimit({ ...base, hasWinch: true });
+        expect(withWinch).toBeGreaterThanOrEqual(without);
+    });
+
+    it('access paths add time', () => {
+        const base = { width: 40, height: 30, targetCoverage: 85, difficulty: 'blue', hasWinch: false, isTutorial: false };
+        const noPaths = computeTimeLimit({ ...base, accessPaths: [] });
+        const twoPaths = computeTimeLimit({ ...base, accessPaths: [
+            { startY: 0.2, endY: 0.4 },
+            { startY: 0.6, endY: 0.8 },
+        ] });
+        expect(twoPaths).toBeGreaterThanOrEqual(noPaths);
+    });
+
+    it('larger levels get more time', () => {
+        const base = { targetCoverage: 85, difficulty: 'blue', hasWinch: false, isTutorial: false };
+        const small = computeTimeLimit({ ...base, width: 30, height: 25 });
+        const large = computeTimeLimit({ ...base, width: 120, height: 100 });
+        expect(large).toBeGreaterThan(small);
+    });
+
+    it('green levels get more time than black for same geometry', () => {
+        const base = { width: 50, height: 40, targetCoverage: 90, hasWinch: false, isTutorial: false };
+        const green = computeTimeLimit({ ...base, difficulty: 'green' });
+        const black = computeTimeLimit({ ...base, difficulty: 'black' });
+        expect(green).toBeGreaterThanOrEqual(black);
+    });
+
+    it('matches LEVELS auto-applied values', () => {
+        LEVELS.forEach((level, i) => {
+            const computed = computeTimeLimit(level);
+            expect(level.timeLimit, `Level ${i} timeLimit mismatch`).toBe(computed);
         });
     });
 });

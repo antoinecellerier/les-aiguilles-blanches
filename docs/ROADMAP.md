@@ -33,10 +33,11 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
 - [x] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
 - [ ] Avalanche zones often overlap cliffs, they should be more distinct
-- [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
+- [x] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 - [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 - [x] Tutorial dialogue fatigue — skip tutorial option on replay
 - [ ] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
+- [ ] Winch cable should have infinite extension — currently limited, should only provide pulling force
 
 
 ## Future (Backlog)

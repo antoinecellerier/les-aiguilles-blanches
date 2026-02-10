@@ -21,7 +21,7 @@ if (typeof globalThis.navigator === 'undefined') {
 }
 
 // Re-export from TypeScript modules
-export { LEVELS } from '../../../src/config/levels.ts';
+export { LEVELS, computeTimeLimit } from '../../../src/config/levels.ts';
 export { TRANSLATIONS, t, setLanguage, getLanguage, detectLanguage } from '../../../src/config/localization.ts';
 export { GAME_CONFIG, DIFFICULTY_MARKERS, FOOD_ITEMS, BALANCE, DEPTHS, yDepth } from '../../../src/config/gameConfig.ts';
 export { getButtonName, getDefaultGamepadBindings, detectControllerType, isGamepadButtonPressed, captureGamepadButtons } from '../../../src/utils/gamepad.ts';

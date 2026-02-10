@@ -4,6 +4,7 @@
  */
 
 import type { DifficultyType } from './gameConfig';
+import { GAME_CONFIG } from './gameConfig';
 import type { AnimalType } from '../utils/animalSprites';
 
 export type WeatherType = 'clear' | 'light_snow' | 'storm';
@@ -73,6 +74,49 @@ export interface Level {
   accessPaths?: AccessPath[];
   bonusObjectives?: BonusObjective[];
   wildlife?: WildlifeSpawn[];
+}
+
+/**
+ * Compute a reasonable time limit for a level based on its geometry and mechanics.
+ *
+ * Formula: (tilesToGroom / groomRate) * navOverhead * difficultyScale + pathTime + winchOverhead
+ *
+ * - groomRate: groomer speed / tile size × groom strip width / tile size ≈ 14 tiles²/s
+ * - navOverhead: 1.6× for turns, overlaps, obstacle avoidance, refueling
+ * - difficultyScale: how generous the time budget is (lower = harder)
+ * - pathTime: 20s per access path for travel to/from anchors
+ * - winchOverhead: 30s for levels with winch (attach/detach, cable management)
+ *
+ * Round to nearest 30s. Returns 0 for tutorial (unlimited time).
+ */
+export function computeTimeLimit(level: Pick<Level, 'width' | 'height' | 'targetCoverage' | 'difficulty' | 'hasWinch' | 'accessPaths' | 'isTutorial'>): number {
+  if (level.isTutorial) return 0;
+
+  const tileSize = GAME_CONFIG.TILE_SIZE;
+  const groomRate = (GAME_CONFIG.GROOMER_SPEED / tileSize) * (GAME_CONFIG.GROOM_WIDTH / tileSize);
+  const tilesToGroom = level.width * level.height * (level.targetCoverage / 100);
+
+  // Navigation overhead: empirically calibrated so skilled play uses ~40-60% of time
+  const navOverhead = 0.3;
+
+  // Difficulty scales how much slack the player gets
+  const scales: Record<string, number> = {
+    tutorial: 0, green: 1.3, blue: 1.0, park: 1.4, red: 0.9, black: 0.75,
+  };
+  const scale = scales[level.difficulty] ?? 0.9;
+
+  const baseTime = (tilesToGroom / groomRate) * navOverhead * scale;
+  const pathTime = (level.accessPaths?.length ?? 0) * 10;
+  const winchOverhead = level.hasWinch ? 15 : 0;
+  const total = baseTime + pathTime + winchOverhead;
+
+  // Minimum floors per difficulty
+  const floors: Record<string, number> = {
+    green: 60, blue: 60, park: 60, red: 60, black: 60,
+  };
+  const floor = floors[level.difficulty] ?? 60;
+
+  return Math.ceil(Math.max(total, floor) / 30) * 30;
 }
 
 export const LEVELS: Level[] = [
@@ -452,3 +496,25 @@ export const LEVELS: Level[] = [
     ],
   },
 ];
+
+// Apply computed time limits and speed_run targets to all levels
+for (const level of LEVELS) {
+  level.timeLimit = computeTimeLimit(level);
+  // Auto-set speed_run bonus target to 60% of time limit
+  if (level.bonusObjectives) {
+    for (const obj of level.bonusObjectives) {
+      if (obj.type === 'speed_run') {
+        obj.target = Math.round(level.timeLimit * 0.6);
+      }
+    }
+  }
+}
+
+if (typeof console !== 'undefined') {
+  console.table(LEVELS.map(l => ({
+    id: l.id, name: l.nameKey.replace('level_', '').replace('Name', ''),
+    difficulty: l.difficulty, size: `${l.width}×${l.height}`,
+    target: `${l.targetCoverage}%`, timeLimit: `${l.timeLimit}s`,
+    paths: l.accessPaths?.length ?? 0, winch: l.hasWinch,
+  })));
+}

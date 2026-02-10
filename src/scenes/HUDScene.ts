@@ -959,7 +959,7 @@ export default class HUDScene extends Phaser.Scene {
     const secs = seconds % 60;
     this.timerText.setText(mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0'));
 
-    if (seconds <= 60) {
+    if (seconds <= Math.max(10, Math.round(this.level.timeLimit * 0.3))) {
       this.timerText.setStyle({ color: '#FF4444' });
     }
   }

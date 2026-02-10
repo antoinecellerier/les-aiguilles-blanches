@@ -308,12 +308,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // Delay accepting input to prevent held keys from prior scene from firing
     this.inputReady = false;
     this.inputReadyTimer = this.time.delayedCall(BALANCE.SCENE_INPUT_DELAY, () => { this.inputReady = true; });
+
+    this.events.once('shutdown', this.shutdown, this);
   }
 
   private resizing = false;
 
   private handleResize(): void {
-    if (this.resizing || !this.scene.isActive()) return;
+    if (this.resizing || !this.sys?.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
       this.scene.restart(this.scene.settings.data);

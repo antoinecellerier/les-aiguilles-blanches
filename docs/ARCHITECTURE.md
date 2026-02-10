@@ -253,7 +253,7 @@ const gameState = {
     nameKey: 'level_marmottesName',  // Localization key (descriptive, not numbered)
     taskKey: 'level_marmottesTask',
     difficulty: 'green',         // green/blue/red/black/park
-    timeLimit: 300,              // seconds
+    timeLimit: 60,               // seconds (auto-computed, see below)
     targetCoverage: 80,          // percentage
     width: 40,                   // tiles
     height: 60,
@@ -265,6 +265,40 @@ const gameState = {
     introSpeaker: 'Jean-Pierre'    // Character who delivers the intro
 }
 ```
+
+#### Time Limit Auto-Calculation
+
+`computeTimeLimit()` in `levels.ts` derives time limits from level geometry:
+
+```
+timeLimit = ceil( (tilesToGroom / groomRate) × navOverhead × difficultyScale + pathTime + winchOverhead )
+```
+
+- **groomRate** = `GROOMER_SPEED / TILE_SIZE × GROOM_WIDTH / TILE_SIZE` ≈ 14 tiles²/s
+- **navOverhead** = 0.3 (empirically calibrated so skilled play uses ~40-60% of time)
+- **difficultyScale**: green=1.3, blue=1.0, park=1.4, red=0.9, black=0.75
+- **pathTime** = 10s per access path
+- **winchOverhead** = 15s for winch levels
+- **Minimum floor** of 60s per level
+- Rounded to nearest 30s
+
+Speed run bonus targets are auto-set to 60% of the computed timeLimit.
+
+Timer thresholds are proportional: red at 30% remaining, warning sounds at 15% remaining.
+
+To tune: adjust `navOverhead` (overall tightness), `scales` (per-difficulty), or `floors` (minimums). `console.table` output at startup shows all computed values. `[level-complete]` logs show actual completion times.
+
+**Calibration reference** (experienced player, commit 013293e):
+
+| Level | Computed limit | Actual completion | Usage |
+|-------|---------------|-------------------|-------|
+| Marmottes (green) | 60s | 34-35s | 57% |
+| Tube (park) | 60s | 24s | 40% |
+| Verticale (black/winch) | 90s | 27s | 30% |
+| Col Dangereux (red/winch) | 90s | 40s | 44% |
+| Tempête (black/winch) | 90s | 48s | 53% |
+
+Target: skilled play should use 30-60% of time budget. New players get ~2× headroom.
 
 ### 8. Rendering Pipeline
 

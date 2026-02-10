@@ -991,8 +991,9 @@ export default class GameScene extends Phaser.Scene {
     if (this.level.timeLimit <= 0) return;
     if (this.timeRemaining > 0) {
       this.timeRemaining--;
-      // Urgent ticks when time is running low
-      if (this.timeRemaining <= 30 && this.timeRemaining > 0) {
+      // Urgent ticks when time is running low (last 15% of time limit)
+      const warnThreshold = Math.max(10, Math.round(this.level.timeLimit * 0.15));
+      if (this.timeRemaining <= warnThreshold && this.timeRemaining > 0) {
         const now = Date.now();
         // Speed up: 2s interval at 30s, 0.5s interval at 5s
         const interval = this.timeRemaining <= 5 ? 500 :
@@ -1373,6 +1374,9 @@ export default class GameScene extends Phaser.Scene {
     this.ambienceSounds.stop();
     // Music keeps playing through level complete screen
 
+    const timeUsed = this.level.timeLimit - this.timeRemaining;
+    console.log(`[level-complete] ${this.level.nameKey} ${won ? 'WON' : 'FAIL'} — time: ${timeUsed}s / ${this.level.timeLimit}s, coverage: ${this.getCoverage()}%`);
+
     // Emit final game state so HUD has correct values before stopping
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
 
@@ -1383,7 +1387,7 @@ export default class GameScene extends Phaser.Scene {
       won: won,
       level: this.levelIndex,
       coverage: this.getCoverage(),
-      timeUsed: this.level.timeLimit - this.timeRemaining,
+      timeUsed: timeUsed,
       failReason: failReason,
       fuelUsed: Math.round(this.fuelUsed),
       tumbleCount: this.tumbleCount,
