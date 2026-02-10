@@ -91,8 +91,13 @@ Launch the dev server and capture screenshots for visual verification:
        browser = p.chromium.launch()
        page = browser.new_page(viewport={"width": 1280, "height": 720})
        page.goto("http://localhost:3000")
-       # Wait for menu scene
-       page.wait_for_function("window.__PHASER_GAME__?.scene?.scenes?.some(s => s.scene.key === 'MenuScene' && s.scene.isActive)")
+       # Wait for menu scene (game instance is window.game)
+       page.wait_for_function("""() => {
+           const game = window.game;
+           if (!game || !game.scene) return false;
+           const scene = game.scene.getScene('MenuScene');
+           return scene && scene.sys && scene.sys.isActive();
+       }""")
        page.screenshot(path="tests/screenshots/art-review/menu.png")
    ```
 3. Capture screenshots of all affected screens (menu, gameplay, HUD, pause, settings, level complete)
