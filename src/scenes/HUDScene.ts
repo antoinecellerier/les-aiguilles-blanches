@@ -53,7 +53,7 @@ export default class HUDScene extends Phaser.Scene {
   private bonusTexts: Phaser.GameObjects.Text[] = [];
   private bonusObjectives: BonusObjective[] = [];
   private bonusFailed: boolean[] = []; // irreversible failure tracking
-  private bonusFadeTimer?: Phaser.Time.TimerEvent;
+
 
   // Touch controls state (emitted via GAME_EVENTS.TOUCH_INPUT)
   private touchUp = false;
@@ -351,17 +351,6 @@ export default class HUDScene extends Phaser.Scene {
         const txt = visorText(padding + i * colWidth, row3Y, '★ ' + label, fontSmall);
         this.bonusTexts.push(txt);
       });
-
-      // On compact screens, flash objectives then fade out after 4 seconds
-      if (isCompact) {
-        this.bonusFadeTimer = this.time.delayedCall(4000, () => {
-          this.bonusTexts.forEach(txt => {
-            if (txt?.active) {
-              this.tweens.add({ targets: txt, alpha: 0, duration: 800, ease: 'Power2' });
-            }
-          });
-        });
-      }
     }
 
     this.barWidth = barWidth;
@@ -979,12 +968,6 @@ export default class HUDScene extends Phaser.Scene {
         txt.setText(label + suffix);
         txt.setColor('#FFFFFF');
       }
-
-      // On compact screens, flash objective back when status changes
-      if (txt.alpha < 0.1 && txt.text !== prevText) {
-        txt.setAlpha(0.85);
-        this.tweens.add({ targets: txt, alpha: 0, duration: 800, delay: 2000, ease: 'Power2' });
-      }
     });
   }
 
@@ -1035,8 +1018,7 @@ export default class HUDScene extends Phaser.Scene {
     this.bonusTexts = [];
     this.bonusObjectives = [];
     this.bonusFailed = [];
-    this.bonusFadeTimer?.remove();
-    this.bonusFadeTimer = undefined;
+
     this.timerText = null;
     this.actionButtons = [];
   }
