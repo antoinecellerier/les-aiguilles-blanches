@@ -78,6 +78,10 @@ const cs: Record<string, string> = {
   howToPlayGroomGamepad: "pro úpravu sněhu",
   howToPlayGroomHybrid: "{groomKey} nebo klepněte na tlačítko úpravy",
   howToPlayFuel: "Hlídejte palivo a výdrž!",
+  howToPlayWinch: "{winchKey} u kotvy pro naviják",
+  howToPlayWinchTouch: "Držte 🔗 u kotvy pro naviják",
+  howToPlayWinchGamepad: "u kotvy pro naviják",
+  howToPlayWinchHybrid: "{winchKey} nebo držte 🔗 u kotvy",
 
   // Winch
   winchAttached: "🔗 Naviják připojen! Držte {winchKey} pro pomoc.",

@@ -78,6 +78,10 @@ const en: Record<string, string> = {
   howToPlayGroomGamepad: "to groom snow",
   howToPlayGroomHybrid: "{groomKey} or tap the groom button",
   howToPlayFuel: "Watch your fuel and stamina!",
+  howToPlayWinch: "{winchKey} near an anchor for winch",
+  howToPlayWinchTouch: "Hold 🔗 near an anchor for winch",
+  howToPlayWinchGamepad: "near an anchor for winch",
+  howToPlayWinchHybrid: "{winchKey} or hold 🔗 near an anchor",
   
   // Winch
   winchAttached: "🔗 Winch attached! Hold {winchKey} for assistance.",

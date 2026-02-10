@@ -78,6 +78,10 @@ const sv: Record<string, string> = {
   howToPlayGroomGamepad: "för att preparera snön",
   howToPlayGroomHybrid: "{groomKey} eller tryck på prepareringsknappen",
   howToPlayFuel: "Håll koll på bränsle och uthållighet!",
+  howToPlayWinch: "{winchKey} nära en förankring för vinsch",
+  howToPlayWinchTouch: "Håll 🔗 nära en förankring för vinsch",
+  howToPlayWinchGamepad: "nära en förankring för vinsch",
+  howToPlayWinchHybrid: "{winchKey} eller håll 🔗 nära en förankring",
 
   // Winch
   winchAttached: "🔗 Vinsch fäst! Håll {winchKey} för assistans.",

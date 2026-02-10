@@ -78,6 +78,10 @@ const tr: Record<string, string> = {
   howToPlayGroomGamepad: "kar ezmek için",
   howToPlayGroomHybrid: "{groomKey} veya ezme düğmesine dokunun",
   howToPlayFuel: "Yakıt ve dayanıklılığa dikkat!",
+  howToPlayWinch: "Vinç için {winchKey} ankraj yanında",
+  howToPlayWinchTouch: "Vinç için ankraj yanında 🔗 basılı tut",
+  howToPlayWinchGamepad: "ankraj yanında vinç için",
+  howToPlayWinchHybrid: "{winchKey} veya ankraj yanında 🔗 basılı tut",
 
   // Winch
   winchAttached: "🔗 Vinç bağlı! Yardım için {winchKey} basılı tutun.",

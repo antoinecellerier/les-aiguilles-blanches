@@ -77,6 +77,10 @@ const it: Record<string, string> = {
   howToPlayGroomTouch: "Tocca il pulsante di preparazione",
   howToPlayGroomGamepad: "per preparare la neve",
   howToPlayFuel: "Controlla carburante e resistenza!",
+  howToPlayWinch: "{winchKey} vicino a un ancoraggio per il verricello",
+  howToPlayWinchTouch: "Tieni 🔗 vicino a un ancoraggio per il verricello",
+  howToPlayWinchGamepad: "vicino a un ancoraggio per il verricello",
+  howToPlayWinchHybrid: "{winchKey} o tieni 🔗 vicino a un ancoraggio",
   
   // Winch
   winchAttached: "🔗 Verricello agganciato! Tieni {winchKey} per assistenza.",

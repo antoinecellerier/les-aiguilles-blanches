@@ -78,6 +78,10 @@ const ko: Record<string, string> = {
   howToPlayGroomGamepad: "으로 정설",
   howToPlayGroomHybrid: "{groomKey} 또는 정설 버튼 탭",
   howToPlayFuel: "연료와 체력에 주의!",
+  howToPlayWinch: "앵커 근처에서 {winchKey}로 윈치",
+  howToPlayWinchTouch: "앵커 근처에서 🔗 길게 눌러 윈치",
+  howToPlayWinchGamepad: "앵커 근처에서 윈치",
+  howToPlayWinchHybrid: "{winchKey} 또는 앵커 근처에서 🔗 길게 누르기",
 
   // Winch
   winchAttached: "🔗 윈치 연결! {winchKey} 길게 눌러 보조.",

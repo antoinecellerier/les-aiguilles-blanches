@@ -78,6 +78,10 @@ const sk: Record<string, string> = {
   howToPlayGroomGamepad: "pre úpravu snehu",
   howToPlayGroomHybrid: "{groomKey} alebo ťuknite na tlačidlo úpravy",
   howToPlayFuel: "Sledujte palivo a výdrž!",
+  howToPlayWinch: "{winchKey} pri kotve pre naviják",
+  howToPlayWinchTouch: "Držte 🔗 pri kotve pre naviják",
+  howToPlayWinchGamepad: "pri kotve pre naviják",
+  howToPlayWinchHybrid: "{winchKey} alebo držte 🔗 pri kotve",
 
   // Winch
   winchAttached: "🔗 Naviják pripojený! Držte {winchKey} pre pomoc.",

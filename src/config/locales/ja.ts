@@ -78,6 +78,10 @@ const ja: Record<string, string> = {
   howToPlayGroomGamepad: "で圧雪",
   howToPlayGroomHybrid: "{groomKey}または圧雪ボタンをタップ",
   howToPlayFuel: "燃料とスタミナに注意！",
+  howToPlayWinch: "アンカー付近で{winchKey}でウインチ",
+  howToPlayWinchTouch: "アンカー付近で🔗長押しでウインチ",
+  howToPlayWinchGamepad: "アンカー付近でウインチ",
+  howToPlayWinchHybrid: "{winchKey}またはアンカー付近で🔗長押し",
 
   // Winch
   winchAttached: "🔗 ウインチ接続！{winchKey}長押しで補助。",

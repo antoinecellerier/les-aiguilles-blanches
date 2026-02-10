@@ -78,6 +78,10 @@ const nb: Record<string, string> = {
   howToPlayGroomGamepad: "for å preparere snøen",
   howToPlayGroomHybrid: "{groomKey} eller trykk på prepareringsknappen",
   howToPlayFuel: "Hold øye med drivstoff og utholdenhet!",
+  howToPlayWinch: "{winchKey} nær en forankring for vinsj",
+  howToPlayWinchTouch: "Hold 🔗 nær en forankring for vinsj",
+  howToPlayWinchGamepad: "nær en forankring for vinsj",
+  howToPlayWinchHybrid: "{winchKey} eller hold 🔗 nær en forankring",
 
   // Winch
   winchAttached: "🔗 Vinsj festet! Hold {winchKey} for assistanse.",

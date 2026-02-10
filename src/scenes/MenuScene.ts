@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility, TRANSLATIONS, getLanguage as getCurrentLanguage } from '../setup';
-import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
+import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
 import { setString } from '../utils/storage';
 import { STORAGE_KEYS } from '../config/storageKeys';
@@ -936,35 +936,45 @@ export default class MenuScene extends Phaser.Scene {
     const showTouchHints = hasTouch && mobile && !hasGamepad;
     const keys = getMovementKeysString(); // e.g., "WASD" or "ZQSD"
     const groomKey = getGroomKeyName(); // e.g., "SPACE" or rebound key
+    const winchKey = getWinchKeyName(); // e.g., "SHIFT" or rebound key
     
     let moveHint: string;
     let groomHint: string;
+    let winchHint: string;
     
     if (hasGamepad) {
       // Gamepad connected - show gamepad controls
       moveHint = '🎮 ' + (t('howToPlayMoveGamepad') || 'Left stick or D-pad to move');
       groomHint = `❄️ ${getButtonName(loadGamepadBindings().groom, getConnectedControllerType())} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
+      winchHint = `🔗 ${getButtonName(loadGamepadBindings().winch, getConnectedControllerType())} ` + (t('howToPlayWinchGamepad') || 'near an anchor for winch');
     } else if (showTouchHints) {
       moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
       groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap the groom button');
+      winchHint = '🔗 ' + (t('howToPlayWinchTouch') || 'Hold 🔗 near an anchor for winch');
     } else if (hasTouch) {
       // PC with touchscreen - show both (use localized string with key placeholder)
       const moveText = t('howToPlayMoveHybrid') || `${keys}/Arrows or touch D-pad`;
       moveHint = '🚜 ' + moveText.replace('{keys}', keys);
       const groomText = t('howToPlayGroomHybrid') || `${groomKey} or tap the groom button`;
       groomHint = '❄️ ' + groomText.replace('{groomKey}', groomKey);
+      const winchText = t('howToPlayWinchHybrid') || `${winchKey} or hold 🔗 near an anchor`;
+      winchHint = '🔗 ' + winchText.replace('{winchKey}', winchKey);
     } else {
       // Keyboard only - use localized string with key placeholder
       const moveText = t('howToPlayMove') || `${keys} or Arrows to move`;
       moveHint = '🚜 ' + moveText.replace('{keys}', keys);
       const groomText = t('howToPlayGroom') || `${groomKey} to groom snow`;
       groomHint = '❄️ ' + groomText.replace('{groomKey}', groomKey);
+      const winchText = t('howToPlayWinch') || `${winchKey} near an anchor for winch`;
+      winchHint = '🔗 ' + winchText.replace('{winchKey}', winchKey);
     }
     
     this.overlay.show('howToPlay', [
       moveHint,
       '',
       groomHint,
+      '',
+      winchHint,
       '',
       '⛽ ' + (t('howToPlayFuel') || 'Watch your fuel and stamina!'),
     ]);
