@@ -28,6 +28,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
 - [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
 - [ ] Make the settings menu look nicer — visual polish pass
+- [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 
 
 ## Future (Backlog)
