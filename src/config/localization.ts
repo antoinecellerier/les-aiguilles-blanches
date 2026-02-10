@@ -232,6 +232,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
         
         // Changelog
+        changelog_20260210_date: "10 février 2026",
+        changelog_20260210: "🎵 Musique de piano procédurale\n🔊 Effets sonores moteur et environnement\n🗣️ Voix des personnages\n🔈 Réglages de volume",
+        changelog_20260209_date: "9 février 2026",
+        changelog_20260209: "🏔️ Écrans victoire/défaite alpins\n❄️ Neige de tempête sur les éléments\n🏆 Bonus sans faute\n🔊 Ambiances météo et faune",
         changelog_20260208_date: "8 février 2026",
         changelog_20260208: "📊 Nouveau tableau de bord\n🏔️ Le Glacier et Coupe des Aiguilles\n🦅 Faune alpine\n🎨 Portraits des personnages\n🎮 Navigation clavier/manette",
         changelog_20260207_date: "7 février 2026",
@@ -462,6 +466,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
         
         // Changelog
+        changelog_20260210_date: "February 10, 2026",
+        changelog_20260210: "🎵 Procedural piano music\n🔊 Engine and environment sound effects\n🗣️ Character voices\n🔈 Volume settings",
+        changelog_20260209_date: "February 9, 2026",
+        changelog_20260209: "🏔️ Alpine win/fail screens\n❄️ Storm snow accumulation\n🏆 Flawless bonus\n🔊 Weather and wildlife ambience",
         changelog_20260208_date: "February 8, 2026",
         changelog_20260208: "📊 Redesigned dashboard\n🏔️ Le Glacier and Coupe des Aiguilles\n🦅 Alpine wildlife\n🎨 Character portraits\n🎮 Keyboard & gamepad navigation",
         changelog_20260207_date: "February 7, 2026",
@@ -658,6 +666,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
         
         // Changelog
+        changelog_20260210_date: "10. Februar 2026",
+        changelog_20260210: "🎵 Prozedurale Klaviermusik\n🔊 Motor- und Umgebungsgeräusche\n🗣️ Charakterstimmen\n🔈 Lautstärkeeinstellungen",
+        changelog_20260209_date: "9. Februar 2026",
+        changelog_20260209: "🏔️ Alpine Sieg-/Niederlagenbilder\n❄️ Schneeakkumulation bei Sturm\n🏆 Fehlerlos-Bonus\n🔊 Wetter- und Tiergeräusche",
         changelog_20260208_date: "8. Februar 2026",
         changelog_20260208: "📊 Neues Dashboard\n🏔️ Le Glacier und Coupe des Aiguilles\n🦅 Alpine Tierwelt\n🎨 Charakterporträts\n🎮 Tastatur- & Gamepad-Navigation",
         changelog_20260207_date: "7. Februar 2026",
@@ -885,6 +897,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
         
         // Changelog
+        changelog_20260210_date: "10 febbraio 2026",
+        changelog_20260210: "🎵 Musica di pianoforte procedurale\n🔊 Effetti sonori motore e ambiente\n🗣️ Voci dei personaggi\n🔈 Impostazioni volume",
+        changelog_20260209_date: "9 febbraio 2026",
+        changelog_20260209: "🏔️ Schermate vittoria/sconfitta alpine\n❄️ Accumulo neve da tempesta\n🏆 Bonus senza errori\n🔊 Suoni meteo e fauna",
         changelog_20260208_date: "8 febbraio 2026",
         changelog_20260208: "📊 Nuovo cruscotto\n🏔️ Le Glacier e Coupe des Aiguilles\n🦅 Fauna alpina\n🎨 Ritratti dei personaggi\n🎮 Navigazione tastiera e gamepad",
         changelog_20260207_date: "7 febbraio 2026",
@@ -1112,6 +1128,10 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
         
         // Changelog
+        changelog_20260210_date: "10 de febrero de 2026",
+        changelog_20260210: "🎵 Música de piano procedural\n🔊 Efectos de sonido motor y ambiente\n🗣️ Voces de personajes\n🔈 Ajustes de volumen",
+        changelog_20260209_date: "9 de febrero de 2026",
+        changelog_20260209: "🏔️ Pantallas victoria/derrota alpinas\n❄️ Acumulación de nieve en tormenta\n🏆 Bonus sin fallos\n🔊 Sonidos de clima y fauna",
         changelog_20260208_date: "8 de febrero de 2026",
         changelog_20260208: "📊 Nuevo panel de control\n🏔️ Le Glacier y Coupe des Aiguilles\n🦅 Fauna alpina\n🎨 Retratos de personajes\n🎮 Navegación con teclado y mando",
         changelog_20260207_date: "7 de febrero de 2026",
