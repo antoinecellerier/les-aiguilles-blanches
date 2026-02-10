@@ -91,6 +91,63 @@ class TestLevelComplete:
         assert obj_l1 > 0, "Level 1 should have at least one bonus objective"
 
 
+    def test_flawless_bonus_restartcount_tracking(self, game_page: Page):
+        """Regression: restartCount tracks retries and affects flawless bonus."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+        skip_to_level(game_page, 'level_marmottesName')
+
+        # First attempt — restartCount should be 0
+        rc0 = game_page.evaluate("""() => {
+            const gs = window.game.scene.getScene('GameScene');
+            return gs?.restartCount;
+        }""")
+        assert rc0 == 0, f"First attempt restartCount should be 0, got {rc0}"
+
+        # Trigger a fail to get the Retry button
+        game_page.evaluate("""() => {
+            const gs = window.game.scene.getScene('GameScene');
+            gs.gameOver(false, 'fuel');
+        }""")
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+
+        # restartCount should be 0 on fail screen
+        rc_fail = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('LevelCompleteScene');
+            return scene?.restartCount;
+        }""")
+        assert rc_fail == 0, "First fail: restartCount should be 0"
+
+        # Click Retry (first button) — restartCount should increment
+        game_page.wait_for_function(
+            "() => window.game.scene.getScene('LevelCompleteScene')?.inputReady",
+            timeout=3000
+        )
+        game_page.keyboard.press("Enter")
+        wait_for_scene(game_page, 'GameScene', timeout=5000)
+
+        rc1 = game_page.evaluate("""() => {
+            const gs = window.game.scene.getScene('GameScene');
+            return gs?.restartCount;
+        }""")
+        assert rc1 == 1, f"After retry restartCount should be 1, got {rc1}"
+
+        # Win on second attempt — restartCount persists, flawless NOT met
+        game_page.evaluate("""() => {
+            const gs = window.game.scene.getScene('GameScene');
+            gs.gameOver(true);
+        }""")
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+
+        flawless_retry = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('LevelCompleteScene');
+            return { restartCount: scene?.restartCount, won: scene?.won };
+        }""")
+        assert flawless_retry['won'] == True
+        assert flawless_retry['restartCount'] == 1, \
+            f"After retry+win: restartCount should be 1, got {flawless_retry['restartCount']}"
+
+
 class TestFailScreen:
     """Test fail screen with taunt messages."""
 
