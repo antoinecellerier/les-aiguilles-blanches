@@ -12,7 +12,7 @@ const es: Record<string, string> = {
   howToPlayMove: "{keys} o Flechas para mover",
   howToPlayMoveHybrid: "{keys}/Flechas o D-pad táctil",
   howToPlayGroom: "{groomKey} para preparar",
-  howToPlayGroomHybrid: "{groomKey} o toca el botón",
+  howToPlayGroomHybrid: "{groomKey} o mantén el botón de preparar",
   fullscreen: "Pantalla completa",
   fullscreenHint: "Pulsa F para pantalla completa",
   exitFullscreen: "Salir pantalla completa",
@@ -74,13 +74,13 @@ const es: Record<string, string> = {
   // How to Play hints
   howToPlayMoveTouch: "Usa el D-pad virtual",
   howToPlayMoveGamepad: "Stick o D-pad para mover",
-  howToPlayGroomTouch: "Toca el botón de preparar",
+  howToPlayGroomTouch: "Mantén el botón de preparar",
   howToPlayGroomGamepad: "para preparar la nieve",
   howToPlayFuel: "¡Vigila el combustible y la resistencia!",
-  howToPlayWinch: "{winchKey} junto a un anclaje para el cabrestante",
-  howToPlayWinchTouch: "Mantén 🔗 junto a un anclaje para el cabrestante",
-  howToPlayWinchGamepad: "junto a un anclaje para el cabrestante",
-  howToPlayWinchHybrid: "{winchKey} o mantén 🔗 junto a un anclaje",
+  howToPlayWinch: "{winchKey} junto a un poste para el cabrestante",
+  howToPlayWinchTouch: "Mantén el botón cabrestante junto a un poste",
+  howToPlayWinchGamepad: "junto a un poste para el cabrestante",
+  howToPlayWinchHybrid: "{winchKey} o mantén el botón cabrestante junto a un poste",
   
   // Winch
   winchAttached: "🔗 ¡Cabrestante enganchado! Mantén {winchKey} para asistencia.",

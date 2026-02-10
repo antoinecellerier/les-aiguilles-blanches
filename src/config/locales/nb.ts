@@ -74,14 +74,14 @@ const nb: Record<string, string> = {
   howToPlayMoveGamepad: "Venstre stikke eller D-pad for å kjøre",
   howToPlayMoveHybrid: "{keys}/piler eller berørings-D-pad",
   howToPlayGroom: "{groomKey} for å preparere snøen",
-  howToPlayGroomTouch: "Trykk på prepareringsknappen",
+  howToPlayGroomTouch: "Hold prepareringsknappen",
   howToPlayGroomGamepad: "for å preparere snøen",
-  howToPlayGroomHybrid: "{groomKey} eller trykk på prepareringsknappen",
+  howToPlayGroomHybrid: "{groomKey} eller hold prepareringsknappen",
   howToPlayFuel: "Hold øye med drivstoff og utholdenhet!",
   howToPlayWinch: "{winchKey} nær en forankring for vinsj",
-  howToPlayWinchTouch: "Hold 🔗 nær en forankring for vinsj",
+  howToPlayWinchTouch: "Hold vinsjknappen nær en forankring",
   howToPlayWinchGamepad: "nær en forankring for vinsj",
-  howToPlayWinchHybrid: "{winchKey} eller hold 🔗 nær en forankring",
+  howToPlayWinchHybrid: "{winchKey} eller hold vinsjknappen nær en forankring",
 
   // Winch
   winchAttached: "🔗 Vinsj festet! Hold {winchKey} for assistanse.",

@@ -12,7 +12,7 @@ const de: Record<string, string> = {
   howToPlayMove: "{keys} oder Pfeiltasten bewegen",
   howToPlayMoveHybrid: "{keys}/Pfeile oder Touch-D-pad",
   howToPlayGroom: "{groomKey} zum Präparieren",
-  howToPlayGroomHybrid: "{groomKey} oder Präparier-Taste tippen",
+  howToPlayGroomHybrid: "{groomKey} oder Präparier-Taste halten",
   fullscreen: "Vollbild",
   fullscreenHint: "F drücken für Vollbild",
   exitFullscreen: "Vollbild beenden",
@@ -74,13 +74,13 @@ const de: Record<string, string> = {
   // How to Play hints
   howToPlayMoveTouch: "Verwende das virtuelle D-Pad",
   howToPlayMoveGamepad: "Stick oder D-Pad zum Bewegen",
-  howToPlayGroomTouch: "Tippe die Präparier-Taste",
+  howToPlayGroomTouch: "Präparier-Taste halten",
   howToPlayGroomGamepad: "zum Präparieren",
   howToPlayFuel: "Achte auf Kraftstoff und Ausdauer!",
-  howToPlayWinch: "{winchKey} bei einem Anker für die Winde",
-  howToPlayWinchTouch: "🔗 halten bei einem Anker für die Winde",
-  howToPlayWinchGamepad: "bei einem Anker für die Winde",
-  howToPlayWinchHybrid: "{winchKey} oder 🔗 halten bei einem Anker",
+  howToPlayWinch: "{winchKey} bei einem Ankerpfosten für die Winde",
+  howToPlayWinchTouch: "Winden-Taste bei einem Ankerpfosten halten",
+  howToPlayWinchGamepad: "bei einem Ankerpfosten für die Winde",
+  howToPlayWinchHybrid: "{winchKey} oder Winden-Taste bei einem Ankerpfosten halten",
   
   // Winch
   winchAttached: "🔗 Winde befestigt! Halte {winchKey} für Unterstützung.",

@@ -74,14 +74,14 @@ const fi: Record<string, string> = {
   howToPlayMoveGamepad: "Vasen tikku tai D-pad liikkumiseen",
   howToPlayMoveHybrid: "{keys}/nuolet tai kosketus-D-pad",
   howToPlayGroom: "{groomKey} tampataksesi lunta",
-  howToPlayGroomTouch: "Paina tampausnappia",
+  howToPlayGroomTouch: "Pidä tampausnappia pohjassa",
   howToPlayGroomGamepad: "tampataksesi lunta",
-  howToPlayGroomHybrid: "{groomKey} tai paina tampausnappia",
+  howToPlayGroomHybrid: "{groomKey} tai pidä tampausnappia pohjassa",
   howToPlayFuel: "Tarkkaile polttoainetta ja kestävyyttä!",
   howToPlayWinch: "{winchKey} ankkurin lähellä vinssiä varten",
-  howToPlayWinchTouch: "Pidä 🔗 ankkurin lähellä vinssiä varten",
+  howToPlayWinchTouch: "Pidä vinssipainiketta ankkurin lähellä",
   howToPlayWinchGamepad: "ankkurin lähellä vinssiä varten",
-  howToPlayWinchHybrid: "{winchKey} tai pidä 🔗 ankkurin lähellä",
+  howToPlayWinchHybrid: "{winchKey} tai pidä vinssipainiketta ankkurin lähellä",
 
   // Winch
   winchAttached: "🔗 Vinssi kiinnitetty! Pidä {winchKey} avustukseen.",

@@ -74,14 +74,14 @@ const cs: Record<string, string> = {
   howToPlayMoveGamepad: "Levá páčka nebo D-pad pro pohyb",
   howToPlayMoveHybrid: "{keys}/šipky nebo dotykový D-pad",
   howToPlayGroom: "{groomKey} pro úpravu sněhu",
-  howToPlayGroomTouch: "Klepněte na tlačítko úpravy",
+  howToPlayGroomTouch: "Držte tlačítko úpravy",
   howToPlayGroomGamepad: "pro úpravu sněhu",
-  howToPlayGroomHybrid: "{groomKey} nebo klepněte na tlačítko úpravy",
+  howToPlayGroomHybrid: "{groomKey} nebo držte tlačítko úpravy",
   howToPlayFuel: "Hlídejte palivo a výdrž!",
   howToPlayWinch: "{winchKey} u kotvy pro naviják",
-  howToPlayWinchTouch: "Držte 🔗 u kotvy pro naviják",
+  howToPlayWinchTouch: "Držte tlačítko navijáku u kotvy",
   howToPlayWinchGamepad: "u kotvy pro naviják",
-  howToPlayWinchHybrid: "{winchKey} nebo držte 🔗 u kotvy",
+  howToPlayWinchHybrid: "{winchKey} nebo držte tlačítko navijáku u kotvy",
 
   // Winch
   winchAttached: "🔗 Naviják připojen! Držte {winchKey} pro pomoc.",

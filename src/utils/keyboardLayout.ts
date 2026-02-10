@@ -154,8 +154,10 @@ function getSavedKeyName(bindingKey: string, fallback: string): string {
  */
 export function getGroomKeyName(): string {
   const keyName = getSavedKeyName('groom', 'SPACE');
-  const gpBindings = loadGamepadBindings();
-  const gpBtn = getButtonName(gpBindings.groom, getConnectedControllerType());
+  const gamepads = navigator.getGamepads?.() || [];
+  const hasGamepad = Array.from(gamepads).some(gp => gp !== null);
+  if (!hasGamepad) return keyName;
+  const gpBtn = getButtonName(loadGamepadBindings().groom, getConnectedControllerType());
   return keyName + ' / ' + gpBtn;
 }
 
@@ -164,8 +166,10 @@ export function getGroomKeyName(): string {
  */
 export function getWinchKeyName(): string {
   const keyName = getSavedKeyName('winch', 'SHIFT');
-  const gpBindings = loadGamepadBindings();
-  const gpBtn = getButtonName(gpBindings.winch, getConnectedControllerType());
+  const gamepads = navigator.getGamepads?.() || [];
+  const hasGamepad = Array.from(gamepads).some(gp => gp !== null);
+  if (!hasGamepad) return keyName;
+  const gpBtn = getButtonName(loadGamepadBindings().winch, getConnectedControllerType());
   return keyName + ' / ' + gpBtn;
 }
 
