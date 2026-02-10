@@ -146,7 +146,14 @@ export default class MenuScene extends Phaser.Scene {
   /** Returns the Y coordinate of the subtitle ribbon bottom edge. */
   private createTitle(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, titleSize: number, subtitleSize: number, isStorm?: boolean): number {
     const titleY = isPortrait ? height * 0.08 : height * 0.12;
-    const titleBgWidth = Math.round(Math.min(520 * scaleFactor, width - 20));
+    const titleText = 'Les Aiguilles Blanches';
+    // Measure title text to size the background box
+    const titleMeasure = this.add.text(0, -100, titleText, {
+      fontFamily: THEME.fonts.family, fontSize: titleSize + 'px', fontStyle: 'bold',
+    });
+    const titleTextW = titleMeasure.width;
+    titleMeasure.destroy();
+    const titleBgWidth = Math.round(Math.min(Math.max(titleTextW + 40, 520 * scaleFactor), width - 20));
     const titleBgHeight = Math.round(80 * scaleFactor);
     this.add.rectangle(width / 2, titleY, titleBgWidth + 8, titleBgHeight + 8, 0x2d2822, 0.45).setOrigin(0.5).setDepth(10);
     this.add.rectangle(width / 2, titleY, titleBgWidth, titleBgHeight, 0x1a2a3e, 0.4).setOrigin(0.5).setDepth(10);
