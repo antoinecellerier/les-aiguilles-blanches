@@ -158,9 +158,9 @@ E2E tests cover: menu navigation, all 11 levels, tutorial flow, grooming, pause,
 
 ## 🌐 Localization
 
-The game supports 12 languages, ordered by ski market size:
-- 🇫🇷 French (primary) · 🇬🇧 English · 🇩🇪 German · 🇮🇹 Italian
-- 🇸🇪 Swedish · 🇳🇴 Norwegian · 🇫🇮 Finnish · 🇨🇿 Czech
+The game supports 14 languages, ordered by ski market size:
+- 🇫🇷 French (primary) · 🇬🇧 English · 🇩🇪 German · 🇮🇹 Italian · 🇯🇵 Japanese
+- 🇸🇪 Swedish · 🇳🇴 Norwegian · 🇫🇮 Finnish · 🇰🇷 Korean · 🇨🇿 Czech
 - 🇵🇱 Polish · 🇹🇷 Turkish · 🇸🇰 Slovak · 🇪🇸 Spanish
 
 Per-language files are in `src/config/locales/`. To add a new language, create a locale file and register it in `src/config/localization.ts`.

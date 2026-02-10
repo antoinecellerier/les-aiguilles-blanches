@@ -61,7 +61,7 @@ export const THEME = {
 
   // Font configuration
   fonts: {
-    family: 'Courier New, monospace',
+    family: "'Courier New', 'Noto Sans JP', 'Noto Sans KR', 'Hiragino Sans', 'Yu Gothic', 'Malgun Gothic', monospace",
     familyEmoji: 'Arial',
 
     sizes: {

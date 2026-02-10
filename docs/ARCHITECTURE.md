@@ -161,7 +161,7 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
 - No build step required
 - Easy to add languages by extending TRANSLATIONS object
 - Supports dynamic placeholders for key rebindings
-- All 12 languages have complete translations
+- All 14 languages have complete translations
 - Per-language files in `src/config/locales/` for maintainability
 
 **Supported Languages** (ordered by ski market size):
@@ -169,14 +169,18 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
 - English (en) - US + Canada 78M skier visits
 - German (de) - Austria + Germany 60M
 - Italian (it) - 32M
+- Japanese (ja) - 24M
 - Swedish (sv) - 10.5M
 - Norwegian Bokmål (nb) - 7-9M
 - Finnish (fi) - 5-6M
+- Korean (ko) - 4-5M
 - Czech (cs) - 4-5M
 - Polish (pl) - 4-5M
 - Turkish (tr) - 2-3M
 - Slovak (sk) - 2-3M
 - Spanish (es) - 2M
+
+**Font Stack**: `Courier New` with CJK fallbacks (`Noto Sans JP`, `Noto Sans KR`, `Hiragino Sans`, `Yu Gothic`, `Malgun Gothic`) for Japanese and Korean system font rendering.
 
 **Dynamic Placeholders**:
 - `{keys}` - Movement keys (WASD/ZQSD based on layout/rebinding)

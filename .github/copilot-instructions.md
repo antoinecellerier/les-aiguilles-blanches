@@ -45,7 +45,7 @@ Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>
 
 ## Custom Agents
 - `code-health` — Thorough code audit against engineering best practices. Auto-activates as a skill when you ask about code quality, duplication, or tech debt. Also available explicitly via `/agent` → `code-health`
-- `content-review` — Expert content writer review of in-game text: dialogue, localization, lore, tone, and translation quality across all 12 languages
+- `content-review` — Expert content writer review of in-game text: dialogue, localization, lore, tone, and translation quality across all 14 languages
 - `game-design` — Experienced game designer review of narrative arc, difficulty curve, character development, mechanics coherence, and pacing across all levels
 - `art-review` — Art director review of visual code and rendered output against `docs/ART_STYLE.md`. Checks color palettes, shape compliance (rectangles only), dimensions, depth layering, and accessibility
 - `audio-review` — Audio director / sound designer review of game audio code. Checks sound palette coherence, Chopin nocturne-style music, Celeste-style voice gibberish, mixing balance, Web Audio API usage, and accessibility
@@ -78,7 +78,7 @@ MusicSystem is a singleton that persists across scene transitions. Use `MusicSys
 - `src/config/gameConfig.ts` - Game constants, BALANCE tuning values
 - `src/config/levels.ts` - Level definitions
 - `src/config/localization.ts` - Localization hub, imports from locales/
-- `src/config/locales/*.ts` - Per-language translation files (12 languages)
+- `src/config/locales/*.ts` - Per-language translation files (14 languages)
 - `src/utils/animalSprites.ts` - Procedural pixel art for alpine wildlife (6 species + bird variants)
 - `src/utils/foxBehavior.ts` - Shared fox hunting/lunge constants and decision logic
 - `src/utils/animalTracks.ts` - Shared track/footprint drawing
