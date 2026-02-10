@@ -10,6 +10,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] HazardSystem avalanche timer leak — delayedCall not stored, fires on destroyed objects if scene shuts down
 - [ ] Menu title text overflows its box horizontally
 - [ ] Colorblind buttons don't update visual state when opening Settings from Pause menu
+- [ ] Navigation to Menu is broken on the failure screen
 
 ## Code Health
 
@@ -31,6 +32,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 - [ ] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
 - [ ] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
+- [ ] Avalanche zones often overlap cliffs, they should be more distinct
+- [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 
 
 ## Future (Backlog)
@@ -43,6 +46,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package
+- [ ] Optionally let players ski or snowboard down a piste on level completion
+- [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 
 ## Recently Completed
 
