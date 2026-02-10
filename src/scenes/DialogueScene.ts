@@ -6,6 +6,7 @@ import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../util
 import { THEME } from '../config/theme';
 import { ResizeManager } from '../utils/resizeManager';
 import { playVoiceBlip } from '../systems/VoiceSounds';
+import { GAME_EVENTS } from '../types/GameSceneInterface';
 
 /**
  * Les Aiguilles Blanches - Dialogue Scene
@@ -53,6 +54,7 @@ export default class DialogueScene extends Phaser.Scene {
   private bevelBottom: Phaser.GameObjects.Rectangle | null = null;
   private bevelRight: Phaser.GameObjects.Rectangle | null = null;
   private currentBoxHeight = 130;
+  private countdownBar: Phaser.GameObjects.Rectangle | null = null;
 
   // Typewriter state
   public fullText = '';
@@ -337,6 +339,36 @@ export default class DialogueScene extends Phaser.Scene {
     }
   }
 
+  /** Show a countdown bar that shrinks to zero over the given duration. */
+  showCountdown(durationMs: number): void {
+    this.clearCountdown();
+    if (!this.container || !this.bg) return;
+    const barWidth = this.bg.width - 12;
+    const barHeight = 3;
+    // Position inside bottom bevel, same x-center as bg
+    const barY = this.currentBoxHeight / 2 - 10;
+    this.countdownBar = this.add.rectangle(this.bg.x, barY, barWidth, barHeight, THEME.colors.infoHex, 0.6)
+      .setOrigin(0.5);
+    this.container.add(this.countdownBar);
+    // Hide >> prompt while countdown is active
+    if (this.continueText) this.continueText.setVisible(false);
+    this.tweens.add({
+      targets: this.countdownBar,
+      scaleX: 0,
+      duration: durationMs,
+      ease: 'Linear',
+    });
+  }
+
+  private clearCountdown(): void {
+    if (this.countdownBar) {
+      this.tweens.killTweensOf(this.countdownBar);
+      this.countdownBar.destroy();
+      this.countdownBar = null;
+    }
+    if (this.continueText) this.continueText.setVisible(true);
+  }
+
   /** Split text into pages that fit within maxBoxHeight */
   private splitTextToPages(text: string): string[] {
     if (!this.dialogueText) return [text];
@@ -553,6 +585,8 @@ export default class DialogueScene extends Phaser.Scene {
 
     if (!this.container) return;
 
+    this.clearCountdown();
+
     // Kill any existing dialogue tweens to prevent hide/show races
     this.tweens.killTweensOf(this.container);
 
@@ -578,10 +612,11 @@ export default class DialogueScene extends Phaser.Scene {
     });
   }
 
-  private dismissAllDialogue(): void {
+  dismissAllDialogue(): void {
     // Clear queue and hide immediately
     this.dialogueQueue = [];
     this.hideDialogue();
+    this.game.events.emit(GAME_EVENTS.DIALOGUE_DISMISSED);
   }
 
   /** Check if dialogue is currently being displayed */

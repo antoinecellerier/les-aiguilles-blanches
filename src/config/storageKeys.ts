@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   VOICE_VOLUME: 'snowGroomer_voiceVolume',
   AMBIENCE_VOLUME: 'snowGroomer_ambienceVolume',
   AUDIO_MUTED: 'snowGroomer_audioMuted',
+  TUTORIAL_DONE: 'snowGroomer_tutorialDone',
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

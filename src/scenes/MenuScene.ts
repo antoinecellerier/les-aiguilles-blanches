@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { t, Accessibility, TRANSLATIONS, getLanguage as getCurrentLanguage } from '../setup';
 import { getMovementKeysString, getGroomKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
+import { setString } from '../utils/storage';
+import { STORAGE_KEYS } from '../config/storageKeys';
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
@@ -820,7 +822,8 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private confirmNewGame(): void {
-    // Clear progress and start fresh
+    // Mark tutorial as done before clearing progress (for skip prompt on replay)
+    setString(STORAGE_KEYS.TUTORIAL_DONE, '1');
     clearProgress();
     this.startGame(0);
   }

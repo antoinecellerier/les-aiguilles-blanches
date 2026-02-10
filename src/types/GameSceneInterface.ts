@@ -45,4 +45,6 @@ export const GAME_EVENTS = {
   VOLUME_CHANGED: 'volumeChanged',
   /** SettingsScene/PauseScene → AudioSystem: mute toggled */
   MUTE_CHANGED: 'muteChanged',
+  /** DialogueScene → GameScene: all dialogues dismissed via ESC/B (not advanced) */
+  DIALOGUE_DISMISSED: 'dialogueDismissed',
 } as const;

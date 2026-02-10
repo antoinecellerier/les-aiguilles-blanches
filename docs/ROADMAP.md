@@ -35,7 +35,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Avalanche zones often overlap cliffs, they should be more distinct
 - [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 - [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
-- [ ] Tutorial dialogue fatigue — consider shortening or auto-skipping tutorial on replay
+- [x] Tutorial dialogue fatigue — skip tutorial option on replay
 - [ ] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
 
 

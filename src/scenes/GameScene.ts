@@ -3,8 +3,8 @@ import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
-import { getString } from '../utils/storage';
-import { saveProgress } from '../utils/gameProgress';
+import { getString, setString } from '../utils/storage';
+import { saveProgress, getSavedProgress } from '../utils/gameProgress';
 import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
@@ -92,6 +92,8 @@ export default class GameScene extends Phaser.Scene {
   // Tutorial
   private tutorialStep = 0;
   private tutorialTriggered: TutorialTriggered = {};
+  private tutorialSkipped = false;
+  private tutorialSkipPending = false;
   private hasMoved = false;
   private hasGroomed = false;
 
@@ -304,6 +306,10 @@ export default class GameScene extends Phaser.Scene {
 
     this.tutorialStep = 0;
     this.tutorialTriggered = {};
+    this.tutorialSkipped = false;
+    const tutorialDone = !!getString(STORAGE_KEYS.TUTORIAL_DONE) ||
+      (getSavedProgress()?.currentLevel ?? 0) > 0;
+    this.tutorialSkipPending = this.level.isTutorial === true && tutorialDone;
     this.hasMoved = false;
     this.hasGroomed = false;
   }
@@ -354,8 +360,34 @@ export default class GameScene extends Phaser.Scene {
     this.scene.bringToTop('HUDScene');
 
     if (this.level.introDialogue) {
+      const offerSkip = this.level.isTutorial && this.tutorialSkipPending;
+
       this.time.delayedCall(500, () => {
-        this.showDialogue(this.level.introDialogue!, this.level.introSpeaker);
+        if (offerSkip) {
+          this.showDialogue('skipTutorial', this.level.introSpeaker);
+
+          // Auto-skip after 3s unless player interacts (tap/key/button = replay)
+          const skipDelay = 3000;
+          const dlg = this.scene.get('DialogueScene') as DialogueScene | null;
+          dlg?.showCountdown(skipDelay);
+          const autoSkipTimer = this.time.delayedCall(skipDelay, () => {
+            this.tutorialSkipped = true;
+            this.tutorialSkipPending = false;
+            dlg?.dismissAllDialogue();
+          });
+
+          // If player advances/dismisses the dialogue before timeout → replay tutorial
+          const checkClosed = this.time.addEvent({ delay: 200, loop: true, callback: () => {
+            if (this.tutorialSkipped) { checkClosed.destroy(); return; }
+            if (dlg && !dlg.isDialogueShowing()) {
+              autoSkipTimer.destroy();
+              this.tutorialSkipPending = false;
+              checkClosed.destroy();
+            }
+          }});
+        } else {
+          this.showDialogue(this.level.introDialogue!, this.level.introSpeaker);
+        }
       });
     }
   }
@@ -1064,7 +1096,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private checkTutorialProgress(): void {
-    if (!this.level.isTutorial || !this.level.tutorialSteps) return;
+    if (!this.level.isTutorial || !this.level.tutorialSteps || this.tutorialSkipped || this.tutorialSkipPending) return;
 
     const step = this.level.tutorialSteps[this.tutorialStep];
     if (!step || this.tutorialTriggered[step.trigger]) return;
@@ -1331,6 +1363,10 @@ export default class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
     this.isGameOver = true;
 
+    if (won && this.level.isTutorial) {
+      setString(STORAGE_KEYS.TUTORIAL_DONE, '1');
+    }
+
     // Stop gameplay sounds immediately — scene may linger without shutdown()
     this.engineSounds.stop();
     this.ambienceSounds.stop();
@@ -1384,6 +1420,7 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
     this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
+    this.game.events.off(GAME_EVENTS.DIALOGUE_DISMISSED);
 
     this.scale.off('resize', this.handleResize, this);
     this.input.gamepad?.removeAllListeners();
