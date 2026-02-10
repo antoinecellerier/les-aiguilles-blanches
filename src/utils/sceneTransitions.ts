@@ -10,7 +10,11 @@
 import Phaser from 'phaser';
 
 /** Registry of scene constructors, populated once at boot by main.ts. */
-let gameSceneEntries: Array<{ key: string; ctor: typeof Phaser.Scene }> = [];
+// Stored on window to survive Vite HMR module instance splits in dev mode
+const _global = globalThis as Record<string, unknown>;
+function getEntries(): Array<{ key: string; ctor: typeof Phaser.Scene }> {
+  return (_global.__gameSceneEntries as Array<{ key: string; ctor: typeof Phaser.Scene }>) || [];
+}
 
 /**
  * Register the game scene constructors. Call once from main.ts at startup.
@@ -19,11 +23,12 @@ let gameSceneEntries: Array<{ key: string; ctor: typeof Phaser.Scene }> = [];
 export function registerGameScenes(
   entries: Array<{ key: string; ctor: typeof Phaser.Scene }>,
 ): void {
-  gameSceneEntries = entries;
+  _global.__gameSceneEntries = entries;
 }
 
 /** Guard against double-fire (e.g. rapid button clicks queuing two transitions). */
-let transitionPending = false;
+function isTransitionPending(): boolean { return !!_global.__transitionPending; }
+function setTransitionPending(v: boolean): void { _global.__transitionPending = v; }
 
 /**
  * Remove all game scenes, re-add fresh instances, then start the target scene.
@@ -40,17 +45,18 @@ export function resetGameScenes(
   target: string,
   data: Record<string, unknown> = {},
 ): void {
-  if (transitionPending) return;
-  transitionPending = true;
+  if (isTransitionPending()) return;
+  setTransitionPending(true);
 
   // Defer ALL scene teardown to next event loop tick.
   // This prevents destroying scenes while their update() is still on the call stack
   // (e.g. HUDScene.update → skipLevel → emit SKIP_LEVEL → transitionToLevel → stop).
   setTimeout(() => {
+    const entries = getEntries();
     // Stop then remove all game scenes.
     // Stopping first ensures shutdown() runs, which cleans up game.events listeners.
     // Phaser's remove() only calls destroy() — it does NOT call shutdown().
-    for (const { key } of gameSceneEntries) {
+    for (const { key } of entries) {
       try {
         const scene = game.scene.getScene(key);
         if (scene) {
@@ -65,7 +71,7 @@ export function resetGameScenes(
     }
 
     // Re-add fresh instances (not started)
-    for (const { key, ctor } of gameSceneEntries) {
+    for (const { key, ctor } of entries) {
       game.scene.add(key, ctor, false);
     }
 
@@ -80,9 +86,9 @@ export function resetGameScenes(
     // before we allow new transitions.
     const targetScene = game.scene.getScene(target);
     if (targetScene) {
-      targetScene.events.once('update', () => { transitionPending = false; });
+      targetScene.events.once('update', () => { setTransitionPending(false); });
     } else {
-      transitionPending = false;
+      setTransitionPending(false);
     }
   }, 100);
 }

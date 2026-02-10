@@ -29,10 +29,14 @@ import GameScene from './scenes/GameScene';
 
 // Register game scenes for centralized cleanup (single source of truth)
 registerGameScenes([
+  { key: 'MenuScene', ctor: MenuScene },
+  { key: 'SettingsScene', ctor: SettingsScene },
   { key: 'GameScene', ctor: GameScene },
   { key: 'HUDScene', ctor: HUDScene },
   { key: 'DialogueScene', ctor: DialogueScene },
   { key: 'PauseScene', ctor: PauseScene },
+  { key: 'LevelCompleteScene', ctor: LevelCompleteScene },
+  { key: 'CreditsScene', ctor: CreditsScene },
 ]);
 
 declare global {
