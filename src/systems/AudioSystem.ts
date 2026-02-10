@@ -45,6 +45,8 @@ export class AudioSystem {
   private muted: boolean;
   private resumed = false;
   private game: Phaser.Game | null = null;
+  private onReadyCallbacks: Array<() => void> = [];
+  private visibilityHandler: (() => void) | null = null;
 
   private constructor() {
     this.volumes = this.loadVolumes();
@@ -73,7 +75,9 @@ export class AudioSystem {
 
   private ensureContext(): AudioContext {
     if (!this.ctx) {
-      this.ctx = new AudioContext();
+      // Safari fallback for older versions
+      const CtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      this.ctx = new CtxClass();
       this.buildGainChain();
     }
     // Nudge context out of suspended state if a user gesture has occurred
@@ -86,9 +90,18 @@ export class AudioSystem {
   private buildGainChain(): void {
     if (!this.ctx) return;
 
-    // master → destination
+    // Limiter/compressor before destination to prevent clipping
+    const compressor = this.ctx.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-6, this.ctx.currentTime);   // start compressing at -6dB
+    compressor.knee.setValueAtTime(12, this.ctx.currentTime);        // soft knee
+    compressor.ratio.setValueAtTime(4, this.ctx.currentTime);        // 4:1 ratio
+    compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);   // fast attack
+    compressor.release.setValueAtTime(0.15, this.ctx.currentTime);   // moderate release
+    compressor.connect(this.ctx.destination);
+
+    // master → compressor → destination
     this.masterGain = this.ctx.createGain();
-    this.masterGain.connect(this.ctx.destination);
+    this.masterGain.connect(compressor);
     this.channelGains.master = this.masterGain;
 
     // each channel → master
@@ -118,6 +131,11 @@ export class AudioSystem {
       document.removeEventListener('click', resume);
       document.removeEventListener('keydown', resume);
       document.removeEventListener('touchstart', resume);
+      // Notify anyone waiting for audio to be ready
+      for (const cb of this.onReadyCallbacks) {
+        try { cb(); } catch { /* don't break other callbacks */ }
+      }
+      this.onReadyCallbacks = [];
     };
 
     document.addEventListener('click', resume, { once: false });
@@ -127,14 +145,19 @@ export class AudioSystem {
 
   /** Suspend audio when tab is hidden, resume when visible */
   private setupVisibilityHandling(): void {
-    document.addEventListener('visibilitychange', () => {
+    // Remove previous listener if any (guards against duplicate registration)
+    if (this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+    }
+    this.visibilityHandler = () => {
       if (!this.ctx) return;
       if (document.hidden) {
         this.ctx.suspend().catch(() => {});
       } else if (this.resumed) {
         this.ctx.resume().catch(() => {});
       }
-    });
+    };
+    document.addEventListener('visibilitychange', this.visibilityHandler);
   }
 
   // --- Volume control ---
@@ -209,12 +232,30 @@ export class AudioSystem {
     return this.resumed;
   }
 
+  /**
+   * Register a callback to fire once audio is ready (user gesture detected).
+   * If already ready, fires immediately.
+   */
+  onReady(cb: () => void): void {
+    if (this.resumed) {
+      cb();
+    } else {
+      this.onReadyCallbacks.push(cb);
+    }
+  }
+
   // --- Cleanup ---
 
   /** Reset for testing. Not normally called in production. */
   static reset(): void {
-    if (AudioSystem.instance?.ctx) {
-      AudioSystem.instance.ctx.close().catch(() => {});
+    if (AudioSystem.instance) {
+      if (AudioSystem.instance.visibilityHandler) {
+        document.removeEventListener('visibilitychange', AudioSystem.instance.visibilityHandler);
+        AudioSystem.instance.visibilityHandler = null;
+      }
+      if (AudioSystem.instance.ctx) {
+        AudioSystem.instance.ctx.close().catch(() => {});
+      }
     }
     AudioSystem.instance = null;
   }

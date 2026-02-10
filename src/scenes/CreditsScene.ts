@@ -5,6 +5,7 @@ import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, simpleStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { playClick } from '../systems/UISounds';
+import { MusicSystem } from '../systems/MusicSystem';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { ResizeManager } from '../utils/resizeManager';
 
@@ -38,6 +39,10 @@ export default class CreditsScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.cameras.main;
+
+    // Switch to credits music (singleton crossfade)
+    MusicSystem.getInstance().start('credits');
+    this.events.once('shutdown', this.shutdown, this);
     
     // Reset navigation state
     this.menuButtons = [];
@@ -269,6 +274,7 @@ export default class CreditsScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    // Music persists (singleton)
     this.resizeManager.destroy();
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();

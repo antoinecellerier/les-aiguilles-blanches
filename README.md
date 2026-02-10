@@ -32,6 +32,7 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 - **Savoyard Culture**: Local food (tartiflette, fondue, génépi) that affects gameplay
 - **Full Accessibility**: High contrast, colorblind modes, screen reader support, rebindable controls
 - **Multi-Platform Input**: Keyboard, mouse, gamepad, and touch controls
+- **Procedural Audio**: Chopin nocturne-style piano music, engine sounds, weather ambience, Celeste-style voice gibberish — all generated via Web Audio API
 - **5 Languages**: French, English, German, Italian, Spanish
 
 ## 🎯 How to Play

@@ -71,14 +71,27 @@ export class EngineSounds {
   private grooming = false;
   private winchTaut = false;
   private started = false;
+  private destroyed = false;
 
   /** Start continuous engine sounds. Call once when GameScene.create() runs. */
   start(): void {
     // Stop any existing sounds from a previous level
     this.stop();
+    this.destroyed = false;
 
     const audio = AudioSystem.getInstance();
-    if (!audio.isReady()) return;
+    if (!audio.isReady()) {
+      // Defer until first user gesture
+      audio.onReady(() => {
+        if (!this.started && !this.destroyed) {
+          this.ctx = audio.getContext();
+          this.sfxNode = audio.getChannelNode('sfx');
+          this.started = true;
+          this.startEngine();
+        }
+      });
+      return;
+    }
 
     this.ctx = audio.getContext();
     this.sfxNode = audio.getChannelNode('sfx');
@@ -90,6 +103,7 @@ export class EngineSounds {
   /** Stop all sounds and release nodes. Call from GameScene.shutdown(). */
   stop(): void {
     this.started = false;
+    this.destroyed = true;
     this.stopEngine();
     this.stopGrooming();
     this.stopWinchTension();
@@ -260,6 +274,7 @@ export class EngineSounds {
       filter.connect(gain);
       gain.connect(this.sfxNode);
       source.start(now);
+      source.stop(now + CRUNCH_DURATION);
     }
   }
 
@@ -513,6 +528,7 @@ export class EngineSounds {
     windFilter.connect(windGain);
     windGain.connect(this.sfxNode);
     wind.start(now);
+    wind.stop(now + 1.2);
 
     // --- Layer 3: Rock impacts (accelerating cascade) ---
     const rocks = [
@@ -559,6 +575,7 @@ export class EngineSounds {
       nSrc.connect(nGain);
       nGain.connect(this.sfxNode);
       nSrc.start(t);
+      nSrc.stop(t + rock.dur);
     }
 
     // --- Layer 4: Final heavy crash ---
@@ -629,6 +646,7 @@ export class EngineSounds {
     noise.connect(nGain);
     nGain.connect(this.sfxNode);
     noise.start(now);
+    noise.stop(now + 0.08);
   }
 
   /** Fuel pump gurgle — bubbly low-frequency pulses. */
@@ -840,6 +858,7 @@ export class EngineSounds {
     filter.connect(nGain);
     nGain.connect(this.sfxNode);
     noise.start(now);
+    noise.stop(now + 2.0);
   }
 
   /** Short warning beep for low fuel. */

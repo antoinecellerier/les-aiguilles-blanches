@@ -18,6 +18,7 @@ import { ObstacleBuilder } from '../systems/ObstacleBuilder';
 import { EngineSounds } from '../systems/EngineSounds';
 import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
+import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -232,6 +233,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.engineSounds.start();
     this.ambienceSounds.start(this.level.weather || 'clear', !!this.level.isNight);
+    MusicSystem.getInstance().start(getMoodForLevel(this.level.weather || 'clear', !!this.level.isNight, this.level.difficulty));
   }
 
   private initWorldDimensions(screenWidth: number, screenHeight: number): { worldWidth: number; worldHeight: number } {
@@ -1222,6 +1224,7 @@ export default class GameScene extends Phaser.Scene {
     if (!this.scene.manager || !this.scene.isActive()) return;
     this.engineSounds.pause();
     this.ambienceSounds.pause();
+    // Music keeps playing through pause/settings
     this.scene.pause();
     this.scene.launch('PauseScene', { levelIndex: this.levelIndex });
     this.scene.bringToTop('PauseScene');
@@ -1356,6 +1359,7 @@ export default class GameScene extends Phaser.Scene {
     // Stop gameplay sounds immediately — scene may linger without shutdown()
     this.engineSounds.stop();
     this.ambienceSounds.stop();
+    // Music keeps playing through level complete screen
 
     // Emit final game state so HUD has correct values before stopping
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
@@ -1423,6 +1427,7 @@ export default class GameScene extends Phaser.Scene {
     this.geometry.reset();
     this.engineSounds.stop();
     this.ambienceSounds.stop();
+    // Music persists across scene transitions (singleton)
     this.buildingRects = [];
 
     this.children.removeAll(true);

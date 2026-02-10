@@ -357,6 +357,8 @@ export default class SettingsScene extends Phaser.Scene {
     sizer.add(this.createVolumeSlider('master', t('masterVolume') || 'Master Volume'), { align: 'left' });
     sizer.add(this.createVolumeSlider('music', t('musicVolume') || 'Music'), { align: 'left' });
     sizer.add(this.createVolumeSlider('sfx', t('sfxVolume') || 'Sound Effects'), { align: 'left' });
+    sizer.add(this.createVolumeSlider('voice', t('voiceVolume') || 'Voice'), { align: 'left' });
+    sizer.add(this.createVolumeSlider('ambience', t('ambienceVolume') || 'Ambience'), { align: 'left' });
   }
 
   private createVolumeSlider(channel: VolumeChannel, label: string): any {

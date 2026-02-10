@@ -69,6 +69,9 @@ GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/
 ### ScrollFactor(0) Coordinates
 `setScrollFactor(0)` disables scroll but NOT zoom. Use `worldToOverlay()` and `overlayFullScreen()` from `src/utils/cameraCoords.ts` for any drawing on scrollFactor(0) Graphics objects.
 
+### Music Persistence
+MusicSystem is a singleton that persists across scene transitions. Use `MusicSystem.getInstance().start(mood)` — it crossfades on mood change and no-ops on same mood. Never call `stop()` on scene shutdown.
+
 ## Key Files
 - `src/scenes/GameScene.ts` - Main gameplay, physics, cliff system
 - `src/config/gameConfig.ts` - Game constants, BALANCE tuning values
@@ -85,6 +88,8 @@ GameScene↔HUDScene use event-based communication via `GAME_EVENTS` (from `src/
 - `src/systems/ObstacleBuilder.ts` - Obstacle placement, buildings, chalets, building footprints
 - `src/systems/PisteRenderer.ts` - Boundary colliders, cliff visuals, markers, trees, access paths
 - `src/systems/WinchSystem.ts` - Winch anchors, cable rendering, attach/detach state
+- `src/systems/AudioSystem.ts` - Web Audio API singleton, volume channels, gain chain, compressor limiter
+- `src/systems/MusicSystem.ts` - Chopin nocturne procedural piano music (singleton, 5 moods, crossfade)
 - `src/types/GameSceneInterface.ts` - Cross-scene event types
 - `tests/e2e/conftest.py` - Test helpers
 

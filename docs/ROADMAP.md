@@ -32,7 +32,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
 - [x] Storm snow accumulation — Trees, mountains, groomer accumulate visible snow during storm weather
-- [ ] Sound effects and music (AudioSystem + settings UI + UI SFX + engine/movement SFX + ambience + hazard/warning SFX + level result + wildlife sounds + voice gibberish done; music pending)
+- [ ] Sound effects polish (character voice review, melody phrasing rests, piano legato sustain, pause menu mute toggle)
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
 - [ ] Leaderboards
@@ -40,6 +40,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Publish as standalone game package
 
 ## Recently Completed
+
+- ✅ **Nocturne music system** — Procedural Chopin nocturne-style piano music via MusicSystem singleton. Five moods (menu, calm, night, intense, credits) with GPT-5.2-composed melodies in distinct keys. Grand piano synthesis with 7 harmonics, inharmonicity, hammer noise, sympathetic resonance. Persists across scenes with crossfade on mood change. DynamicsCompressor limiter on master output. Safari `webkitAudioContext` fallback. Fixed 6 audio node leaks (buffer sources without `.stop()`), EngineSounds `onReady()` race condition, visibility listener cleanup. Added voice & ambience volume sliders to SettingsScene (5 languages).
 
 - ✅ **Win/fail screen visual redesign** — Alpine backgrounds via `createMenuTerrain()`, weather effects (night overlay, storm particles), wildlife via `MenuWildlifeController`, failure-specific groomer effects (tumble, avalanche, cliff, fuel, time).
 

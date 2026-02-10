@@ -7,6 +7,7 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
 import { playClick, playDeviceChime } from '../systems/UISounds';
+import { MusicSystem } from '../systems/MusicSystem';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, onTouchAvailable, isMobile } from '../utils/touchDetect';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
@@ -32,7 +33,7 @@ export default class MenuScene extends Phaser.Scene {
   private footerGithubRight = 0;
   private footerHintStyle: Phaser.Types.GameObjects.Text.TextStyle = {};
   private footerHintY = 0;
-  
+   
   constructor() {
     super({ key: 'MenuScene' });
   }
@@ -41,6 +42,10 @@ export default class MenuScene extends Phaser.Scene {
     this.overlay = new OverlayManager(this);
     this.wildlife = new MenuWildlifeController(this);
     this.inputHintTexts = [];
+    // Start menu music (singleton — crossfades if mood differs)
+    MusicSystem.getInstance().start('menu');
+    // Phaser emits 'shutdown' but doesn't auto-call the method
+    this.events.once('shutdown', this.shutdown, this);
     // Clean up previous gamepad/touch handlers if scene is restarting
     if (this.gamepadConnectHandler) {
       window.removeEventListener('gamepadconnected', this.gamepadConnectHandler);
@@ -553,6 +558,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    // Music persists across scenes (singleton) — no stop here
     // Close any open overlay dialog before teardown
     if (this.overlay.open) this.overlay.close();
     this.input.keyboard?.removeAllListeners();

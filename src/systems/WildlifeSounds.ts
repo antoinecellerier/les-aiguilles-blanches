@@ -89,6 +89,7 @@ export function playChamoisCall(): void {
   filter.connect(gain);
   gain.connect(sfx);
   noise.start(now);
+  noise.stop(now + 0.2);
 }
 
 /** Bird flutter — rapid short chirps as bird takes off. */
@@ -135,6 +136,7 @@ export function playBirdCall(): void {
   filter.connect(gain);
   gain.connect(sfx);
   noise.start(now);
+  noise.stop(now + 0.2);
 }
 
 /** Bunny thump — double hop thud as it bolts. */

@@ -72,6 +72,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         masterVolume: "Volume principal",
         musicVolume: "Musique",
         sfxVolume: "Effets sonores",
+        voiceVolume: "Voix",
+        ambienceVolume: "Ambiance",
         mute: "Muet",
         
         // How to Play hints
@@ -303,6 +305,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         masterVolume: "Master Volume",
         musicVolume: "Music",
         sfxVolume: "Sound Effects",
+        voiceVolume: "Voice",
+        ambienceVolume: "Ambience",
         mute: "Mute",
         
         // How to Play hints
@@ -534,6 +538,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         masterVolume: "Gesamtlautstärke",
         musicVolume: "Musik",
         sfxVolume: "Soundeffekte",
+        voiceVolume: "Stimme",
+        ambienceVolume: "Ambiente",
         mute: "Stumm",
         
         // How to Play hints
@@ -759,6 +765,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         masterVolume: "Volume principale",
         musicVolume: "Musica",
         sfxVolume: "Effetti sonori",
+        voiceVolume: "Voce",
+        ambienceVolume: "Ambiente",
         mute: "Muto",
         
         // How to Play hints
@@ -984,6 +992,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         masterVolume: "Volumen general",
         musicVolume: "Música",
         sfxVolume: "Efectos de sonido",
+        voiceVolume: "Voz",
+        ambienceVolume: "Ambiente",
         mute: "Silenciar",
         
         // How to Play hints
