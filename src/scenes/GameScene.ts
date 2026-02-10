@@ -1394,7 +1394,7 @@ export default class GameScene extends Phaser.Scene {
     this.time.removeAllEvents();
 
     this.weatherSystem.reset();
-    this.hazardSystem.reset();
+    this.hazardSystem.destroy();
     this.wildlifeSystem.reset();
     this.winchSystem.reset();
     this.obstacleBuilder.reset();

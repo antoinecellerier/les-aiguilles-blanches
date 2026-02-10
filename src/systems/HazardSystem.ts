@@ -14,6 +14,7 @@ export class HazardSystem {
   private scene: Phaser.Scene;
   private avalancheZones: AvalancheZone[] = [];
   private avalancheTriggered = false;
+  private avalancheTimer?: Phaser.Time.TimerEvent;
 
   /** Optional sound callback: 1 = warning1, 2 = warning2, 3 = trigger */
   onAvalancheSound: ((level: number) => void) | null = null;
@@ -29,6 +30,13 @@ export class HazardSystem {
   reset(): void {
     this.avalancheTriggered = false;
     this.avalancheZones = [];
+  }
+
+  destroy(): void {
+    if (this.avalancheTimer) {
+      this.avalancheTimer.destroy();
+      this.avalancheTimer = undefined;
+    }
   }
 
   createAvalancheZones(
@@ -215,7 +223,7 @@ export class HazardSystem {
 
     showDialogue('avalancheTrigger');
 
-    this.scene.time.delayedCall(2000, () => {
+    this.avalancheTimer = this.scene.time.delayedCall(2000, () => {
       avalancheParticles.destroy();
       gameOver(false, 'avalanche');
     });
