@@ -23,6 +23,7 @@ The setting is authentically Savoyard: tartiflette at Chez Marie, génépi in th
 | **Refuel** | Drive to station | ✅ Solid | 50% max refill, strategic placement |
 | **Eat** | Drive to Chez Marie | ⚠️ Shallow | Only staminaRegen works — see [Food Buffs](#food-buffs) |
 | **Push snow** (blade) | — | ❌ Not implemented | See [Snow Pushing](#snow-pushing-front-blade) |
+| **Ski/Snowboard** | WASD / stick / touch | ❌ Planned | Post-grooming reward run — see [Ski/Snowboard Reward Run](#skisnoboard-reward-run) |
 
 ## Level Progression
 
@@ -190,6 +191,59 @@ Current state: the restaurant restores stamina and provides named buffs, but **o
 
 **Priority**: Low. Wildlife serves its purpose as atmospheric decoration. Interaction risks feeling gimmicky unless carefully designed.
 
+### Ski/Snowboard Reward Run
+
+**Problem**: After completing a level, the player sees a stats screen and moves on. There's no payoff for the effort — no moment of "look what I built."
+
+**Proposal**: Optional post-grooming descent. After winning a level, a **"Ski it!"** button lets the player ski or snowboard down the piste they just groomed.
+
+**Core design**:
+- **Reward, not challenge** — No fail states, no timer pressure. The run is 30–60 seconds of pure downhill fun.
+- **Same top-down perspective** — Reuses existing camera, geometry, obstacles, and wildlife systems.
+- **Gravity-driven movement** — Player automatically moves downhill; input is lateral steering only (left/right).
+- **Grooming quality matters** — Groomed tiles = fast and smooth; ungroomed tiles = powder friction slowdown. Thorough grooming is directly rewarded with a better ski experience.
+- **Soft boundaries** — Hitting the piste edge creates powder spray and slowdown, not death. Obstacles cause a bump animation and brief speed loss.
+
+**Ski vs. Snowboard**:
+- Player chooses ski or snowboard in Settings (Gameplay section). Default: ski.
+- **Cosmetic only (v1)** — Same physics, different top-down sprite.
+- Skier: figure with two parallel skis and poles. Snowboarder: figure on single board, sideways stance.
+- Button text adapts: "Ski it!" vs. "Ride it!" based on preference.
+
+**Entry point**: "Ski it!" / "Ride it!" button on the Level Complete screen (win only, not on fail). Pressing it launches the descent on the same piste geometry.
+
+**Physics model**:
+- `GRAVITY_SPEED`: Base downhill velocity (constant gentle acceleration to max speed).
+- `LATERAL_SPEED`: Steering responsiveness (left/right).
+- Groomed tile speed multiplier vs. ungroomed tile friction.
+- Edge-of-piste powder zone: progressive slowdown as player drifts off-piste.
+- Obstacle collision: brief speed reduction + bump animation (no wipeout, no game over).
+
+**Visual effects**:
+- Snow spray on sharp carves and powder contact.
+- Speed lines at high velocity.
+- Trail behind skier/snowboarder.
+- Wildlife flees as the player descends (reuse WildlifeSystem).
+
+**Audio**:
+- Wind sound pitched to velocity.
+- Edge carving sound on sharp turns.
+- Powder spray sound on ungroomed terrain.
+- Bump/thud on obstacle contact (reuse existing sounds).
+- Music continues from level mood (or lighter variant).
+
+**HUD**: Minimal — current speed and elapsed time (informational only). No resource bars.
+
+**Post-run flow**: After reaching the bottom, brief celebration animation, then return to Level Complete screen. "Next Level" / "Menu" navigation unchanged.
+
+**v2 enhancements** (not in scope for v1):
+- Slalom gates on appropriate levels (timed gate runs).
+- Freestyle elements on park levels (L3 Air Zone, L6 Le Tube) — kickers, rails, trick scoring.
+- Per-level terrain modifications for variety.
+- Best time tracking and ghost replay.
+
+**Level suitability**: All levels support the reward run since all have piste geometry. Steep/dangerous levels become thrilling descents. Park levels naturally lend themselves to v2 freestyle additions.
+
 ### Ghost Replay (Future)
 
 Record player inputs for best run per level. On replay, show a semi-transparent ghost groomer following the recorded path.
@@ -209,11 +263,12 @@ Based on impact/effort ratio:
 | 1 | **Food buffs** | Medium | High | Makes existing system meaningful; touches 7 levels |
 | 2 | **Frost vignette** | Medium | High | Pairs with food buffs; adds pressure to 3 levels |
 | 3 | **Grooming quality** | Medium | High | Transforms core loop; natural difficulty scaling |
-| 4 | **Halfpipe scoring** | Medium | Medium | Makes L6 distinctive; self-contained change |
-| 5 | **Winch infinite** | Low | Low | Quick fix, already queued |
-| 6 | **Snow pushing** | High | Medium | New verb — defer until core mechanics are polished |
-| 7 | **Ghost replay** | High | Medium | Replayability — defer to post-launch polish |
-| 8 | **Wildlife interaction** | Low–Med | Low | Nice-to-have, risk of being gimmicky |
+| 4 | **Ski/snowboard reward run** | Medium–High | High | Satisfying payoff for grooming; reuses existing systems |
+| 5 | **Halfpipe scoring** | Medium | Medium | Makes L6 distinctive; self-contained change |
+| 6 | **Winch infinite** | Low | Low | Quick fix, already queued |
+| 7 | **Snow pushing** | High | Medium | New verb — defer until core mechanics are polished |
+| 8 | **Ghost replay** | High | Medium | Replayability — defer to post-launch polish |
+| 9 | **Wildlife interaction** | Low–Med | Low | Nice-to-have, risk of being gimmicky |
 
 ## Open Questions
 
@@ -221,3 +276,5 @@ Based on impact/effort ratio:
 - Should frost vignette affect the tutorial or only levels that explicitly have night/storm?
 - How does the precision buff (+1 tile radius) interact with grooming quality? Does wider radius mean harder to maintain quality?
 - Should snow drifts be a separate mechanic (front blade) or just a harder-to-groom surface (more passes needed)?
+- Ski reward run: should v2 slalom gates contribute to the level star rating, or be a separate "ski score"?
+- Ski reward run: should the descent camera reverse direction (looking downhill) or keep the same uphill-facing perspective as grooming?

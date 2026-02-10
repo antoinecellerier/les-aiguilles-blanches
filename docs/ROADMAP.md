@@ -40,6 +40,23 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Winch cable should have infinite extension — currently limited, should only provide pulling force
 
 
+## Planned: Ski/Snowboard Reward Run (v1)
+
+Optional post-grooming descent — after winning a level, ski or snowboard down the piste you just groomed. Relaxed reward run with no fail states.
+
+See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-reward-run) for full design.
+
+- [ ] Procedural skier & snowboarder sprites (`src/utils/skiSprites.ts`, generated in BootScene)
+- [ ] Ski/snowboard preference in Settings (Gameplay section, `STORAGE_KEYS.skiMode`)
+- [ ] Ski run physics constants (`BALANCE.SKI_RUN` in gameConfig.ts)
+- [ ] SkiRunScene — gravity-driven descent, lateral steering, groomed/ungroomed speed diff, soft boundaries
+- [ ] Minimal ski run HUD (speed + elapsed time, no resource bars)
+- [ ] "Ski it!" / "Ride it!" button on LevelCompleteScene (win only)
+- [ ] Ski run audio (wind, carving, powder spray, bump sounds)
+- [ ] Post-run flow (return to LevelCompleteScene, persist completion)
+- [ ] E2E tests (button visibility, scene loads, preference toggle, transitions)
+- [ ] Documentation (ROADMAP, GAMEPLAY, GAME_DESIGN, ARCHITECTURE)
+
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
@@ -50,7 +67,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package
-- [ ] Optionally let players ski or snowboard down a piste on level completion
+- [ ] Ski/snowboard reward run (v2) — Slalom gates, freestyle elements on park levels, per-level modifications, best time tracking
 - [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 
 ## Recently Completed
