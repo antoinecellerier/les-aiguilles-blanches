@@ -8,7 +8,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [x] Firefox fullscreen button with gamepad - Added F keyboard shortcut + hint toast when gamepad fullscreen is rejected
 - [ ] HazardSystem avalanche timer leak — delayedCall not stored, fires on destroyed objects if scene shuts down
-- [ ] Menu title text overflows its box horizontally
+- [x] Menu title text overflows its box horizontally
 - [ ] Colorblind buttons don't update visual state when opening Settings from Pause menu
 - [x] Navigation to Menu is broken on the failure screen
 
