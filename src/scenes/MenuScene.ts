@@ -946,12 +946,12 @@ export default class MenuScene extends Phaser.Scene {
       groomHint = `❄️ ${getButtonName(loadGamepadBindings().groom, getConnectedControllerType())} ` + (t('howToPlayGroomGamepad') || 'to groom snow');
     } else if (showTouchHints) {
       moveHint = '🚜 ' + (t('howToPlayMoveTouch') || 'Use the virtual D-pad');
-      groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap ❄️ to groom');
+      groomHint = '❄️ ' + (t('howToPlayGroomTouch') || 'Tap the groom button');
     } else if (hasTouch) {
       // PC with touchscreen - show both (use localized string with key placeholder)
       const moveText = t('howToPlayMoveHybrid') || `${keys}/Arrows or touch D-pad`;
       moveHint = '🚜 ' + moveText.replace('{keys}', keys);
-      const groomText = t('howToPlayGroomHybrid') || `${groomKey} or tap ❄️ to groom`;
+      const groomText = t('howToPlayGroomHybrid') || `${groomKey} or tap the groom button`;
       groomHint = '❄️ ' + groomText.replace('{groomKey}', groomKey);
     } else {
       // Keyboard only - use localized string with key placeholder

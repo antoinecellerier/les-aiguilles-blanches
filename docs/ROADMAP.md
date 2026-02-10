@@ -31,7 +31,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make the settings menu look nicer — visual polish pass
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 - [x] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
-- [ ] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
+- [x] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
 - [ ] Avalanche zones often overlap cliffs, they should be more distinct
 - [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 - [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
