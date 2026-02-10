@@ -366,7 +366,7 @@ export default class GameScene extends Phaser.Scene {
         if (offerSkip) {
           this.showDialogue('skipTutorial', this.level.introSpeaker);
 
-          // Auto-skip after 3s unless player interacts (tap/key/button = replay)
+          // Auto-skip after 3s: skip entire tutorial level → advance to level 1
           const skipDelay = 3000;
           const dlg = this.scene.get('DialogueScene') as DialogueScene | null;
           dlg?.showCountdown(skipDelay);
@@ -374,6 +374,7 @@ export default class GameScene extends Phaser.Scene {
             this.tutorialSkipped = true;
             this.tutorialSkipPending = false;
             dlg?.dismissAllDialogue();
+            this.transitionToLevel(this.levelIndex + 1);
           });
 
           // If player advances/dismisses the dialogue before timeout → replay tutorial
