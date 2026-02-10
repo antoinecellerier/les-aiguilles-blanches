@@ -147,11 +147,9 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data: GameSceneData): void {
-    console.log('GameScene.init:', data);
     this.levelIndex = data.level || 0;
     this.restartCount = data.restartCount || 0;
     this.level = LEVELS[this.levelIndex];
-    console.log('GameScene.init: loaded level', this.levelIndex, this.level?.nameKey);
 
     if (!this.level) {
       console.error('GameScene.init: LEVEL NOT FOUND!', this.levelIndex, 'LEVELS.length:', LEVELS.length);
@@ -189,7 +187,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private createLevel(): void {
-    console.log('GameScene.createLevel starting for level', this.levelIndex);
     const { width: screenWidth, height: screenHeight } = this.cameras.main;
 
     const { worldWidth, worldHeight } = this.initWorldDimensions(screenWidth, screenHeight);
@@ -197,7 +194,6 @@ export default class GameScene extends Phaser.Scene {
 
     // Create groomer
     this.createGroomer();
-    console.log('Groomer created, setting up camera...');
 
     // Camera setup - if world fits on screen, don't follow
     if (worldWidth <= screenWidth && worldHeight <= screenHeight) {
@@ -211,7 +207,6 @@ export default class GameScene extends Phaser.Scene {
         worldHeight + this.worldOffsetY * 2
       );
     }
-    console.log('Camera set up, initializing game state...');
 
     this.initGameState();
     this.setupLevelSystems();
@@ -221,7 +216,6 @@ export default class GameScene extends Phaser.Scene {
     // Handle window resize - keep camera bounds updated and groomer visible
     this.scale.on('resize', this.handleResize, this);
 
-    console.log('GameScene.createLevel complete!');
     // Pause on ESC (but not while dialogue is showing — ESC dismisses dialogue first)
     this.input.keyboard?.on('keydown-ESC', () => {
       const dlg = this.scene.get('DialogueScene') as DialogueScene;
@@ -247,7 +241,6 @@ export default class GameScene extends Phaser.Scene {
     this.tileSize = Math.max(12, Math.min(tilesByWidth, tilesByHeight, 28));
     this.originalScreenWidth = screenWidth;
     this.originalScreenHeight = screenHeight;
-    console.log('Tile size:', this.tileSize, 'level size:', this.level.width, 'x', this.level.height);
 
     const worldWidth = this.level.width * this.tileSize;
     const worldHeight = this.level.height * this.tileSize;
@@ -256,7 +249,6 @@ export default class GameScene extends Phaser.Scene {
     this.worldOffsetY = Math.max(marginY / 2, (screenHeight - worldHeight) / 2);
 
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
-    console.log('World bounds set');
 
     this.cameras.main.setBackgroundColor(
       this.level.isNight ? GAME_CONFIG.COLORS.SKY_NIGHT : GAME_CONFIG.COLORS.SKY_DAY
@@ -271,9 +263,7 @@ export default class GameScene extends Phaser.Scene {
   ): void {
     this.snowGrid = [];
     this.groomedCount = 0;
-    console.log('Creating snow grid...');
     this.createSnowGrid();
-    console.log('Snow grid created');
 
     this.pisteRenderer = new PisteRenderer(this, this.geometry);
 
@@ -287,14 +277,12 @@ export default class GameScene extends Phaser.Scene {
     );
 
     this.pisteRenderer.createPisteBoundaries(this.level, this.tileSize, worldWidth);
-    console.log('Piste boundaries created, creating obstacles...');
 
     this.obstacles = this.physics.add.staticGroup();
     this.interactables = this.physics.add.staticGroup();
     this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
     this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables);
     this.buildingRects = this.obstacleBuilder.buildingRects;
-    console.log('Obstacles created, creating groomer...');
   }
 
   private initGameState(): void {
@@ -317,13 +305,11 @@ export default class GameScene extends Phaser.Scene {
     this.tutorialTriggered = {};
     this.hasMoved = false;
     this.hasGroomed = false;
-    console.log('State initialized, creating winch/avalanche if needed...');
   }
 
   private setupLevelSystems(): void {
     if (this.level.hasWinch) {
       this.winchSystem.createAnchors(this.level, this.tileSize);
-      console.log('Winch anchors created');
     }
 
     if (this.level.hazards && this.level.hazards.includes('avalanche')) {
@@ -343,14 +329,11 @@ export default class GameScene extends Phaser.Scene {
         this.geometry.accessPathRects,
         this.winchSystem.anchors?.map(a => ({ x: a.x, y: a.baseY }))
       );
-      console.log('Avalanche zones created');
     }
   }
 
   private setupInputAndScenes(): void {
-    console.log('Setting up input...');
     this.setupInput();
-    console.log('Input set up, registering event listeners...');
 
     // Cross-scene event listeners (use bound handlers for clean removal)
     // IMPORTANT: Register BEFORE launching HUDScene to avoid race condition
@@ -361,16 +344,13 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
     this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
     
-    console.log('Launching HUD scene...');
     
     this.scene.launch('DialogueScene', { weather: this.level.weather });
-    console.log('Dialogue launched');
 
     this.scene.launch('HUDScene', {
       level: this.level,
     });
     this.scene.bringToTop('HUDScene');
-    console.log('HUD launched on top');
 
     if (this.level.introDialogue) {
       this.time.delayedCall(500, () => {
@@ -465,12 +445,6 @@ export default class GameScene extends Phaser.Scene {
     const bottomPath = this.geometry.pistePath[bottomYIndex] || { centerX: this.level.width / 2 };
     const startX = bottomPath.centerX * this.tileSize;
     const startY = bottomYIndex * this.tileSize;
-
-    console.log('Groomer spawn:', {
-      startX, startY, bottomYIndex,
-      pathCenter: bottomPath.centerX, pathWidth: (bottomPath as PistePath).width,
-      levelWidth: this.level.width, tileSize: this.tileSize
-    });
 
     const groomerTexture = this.level.weather === 'storm' ? 'groomer_storm' : 'groomer';
     this.groomer = this.physics.add.sprite(startX, startY, groomerTexture);
@@ -1403,7 +1377,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   shutdown(): void {
-    console.log('GameScene.shutdown');
 
     this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
     this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
