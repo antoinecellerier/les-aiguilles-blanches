@@ -13,7 +13,7 @@ Review all player-facing text **in the game** for quality, consistency, and auth
 
 Use explore agents to gather all content from these sources:
 
-1. **`src/config/localization.ts`** — All UI strings, dialogues, taunts, tutorials, changelog across 5 languages (fr, en, de, it, es)
+1. **`src/config/locales/*.ts`** — All UI strings, dialogues, taunts, tutorials, changelog across 12 languages (fr, en, de, it, es, sv, nb, fi, cs, pl, tr, sk)
 2. **`src/config/levels.ts`** — Level names, narrative context, difficulty descriptions
 
 ### Phase 2: Review dimensions
@@ -117,7 +117,7 @@ For each fix:
 1. Run TypeScript compilation (`npx tsc --noEmit`) — localization strings are typed
 2. Run test suite (`./run-tests.sh --browser chromium`) — some tests check for specific strings
 3. Visual check — open the game and navigate through affected screens
-4. Verify all 5 languages have matching keys (no missing translations)
+4. Verify all 12 languages have matching keys (no missing translations)
 
 ## Content style guide
 

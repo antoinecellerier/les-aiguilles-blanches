@@ -59,6 +59,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Settings menu visual polish** — Alpine terrain backdrop with animated wildlife (via `MenuWildlifeController`), section panels with borders and gold accent dividers, responsive two-column/single-column layout with conditional scrollbar. Panel width properly accounts for padding to prevent overflow. Centralized `DEPTHS.MENU_OVERLAY`/`MENU_UI` constants in gameConfig.ts.
 
+- ✅ **Localization expansion (Phase 1)** — Extended from 5 to 12 languages targeting top ski markets: Swedish 🇸🇪, Norwegian 🇳🇴, Finnish 🇫🇮, Czech 🇨🇿, Polish 🇵🇱, Turkish 🇹🇷, Slovak 🇸🇰. Split monolithic localization.ts into per-language files in `src/config/locales/`. Language selector ordered by skier visits (French first as home country). All 212 keys translated per language.
+
 - ✅ **Controller tooltips** — Hover/tap on input hint icons shows combined tooltip listing all 3 input methods (keyboard, touch, gamepad) with ✓/✗ status. Separate tight hover zone (mouse) and 48px-padded touch zone. Touch hold-and-release with 1.5s minimum display. Localized in 5 languages.
 
 - ✅ **Volume/mute indicator** — Menu screen bottom-left volume icon with hover slider (mouse) and tap-to-mute (touch). 48px touch target, forbidden-circle overlay when muted. Pointer-type detection (`wasTouch`) for hybrid devices. 7 E2E tests. conftest.py loads `.env.local` for port config.

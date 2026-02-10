@@ -161,14 +161,22 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
 - No build step required
 - Easy to add languages by extending TRANSLATIONS object
 - Supports dynamic placeholders for key rebindings
-- All 5 languages (FR, EN, DE, IT, ES) have complete translations
+- All 12 languages have complete translations
+- Per-language files in `src/config/locales/` for maintainability
 
-**Supported Languages**:
-- French (fr) - Primary locale, fallback source
-- English (en)
-- German (de)
-- Italian (it)
-- Spanish (es)
+**Supported Languages** (ordered by ski market size):
+- French (fr) - Primary locale, fallback source (home country)
+- English (en) - US + Canada 78M skier visits
+- German (de) - Austria + Germany 60M
+- Italian (it) - 32M
+- Swedish (sv) - 10.5M
+- Norwegian Bokmål (nb) - 7-9M
+- Finnish (fi) - 5-6M
+- Czech (cs) - 4-5M
+- Polish (pl) - 4-5M
+- Turkish (tr) - 2-3M
+- Slovak (sk) - 2-3M
+- Spanish (es) - 2M
 
 **Dynamic Placeholders**:
 - `{keys}` - Movement keys (WASD/ZQSD based on layout/rebinding)

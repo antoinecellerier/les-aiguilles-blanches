@@ -106,5 +106,5 @@ For each changed source file, ask: "Does this change affect any documentation?" 
 **Do:**
 - Keep the project structure tree in ARCHITECTURE.md current
 - Keep ROADMAP.md as the single source of truth for work status
-- Keep changelog entries in ALL 5 languages (FR/EN/DE/IT/ES)
+- Keep changelog entries in ALL 12 languages
 - Keep copilot-instructions.md lean — it's injected into every prompt

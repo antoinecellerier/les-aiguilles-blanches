@@ -14,18 +14,27 @@ import en from './locales/en';
 import de from './locales/de';
 import it from './locales/it';
 import es from './locales/es';
+import sv from './locales/sv';
+import nb from './locales/nb';
+import fi from './locales/fi';
+import cs from './locales/cs';
+import pl from './locales/pl';
+import tr from './locales/tr';
+import sk from './locales/sk';
 
-export type SupportedLanguage = 'fr' | 'en' | 'de' | 'it' | 'es';
+export type SupportedLanguage = 'fr' | 'en' | 'de' | 'it' | 'es' | 'sv' | 'nb' | 'fi' | 'cs' | 'pl' | 'tr' | 'sk';
 
 let currentLang: SupportedLanguage = 'fr';
 
 /**
  * All translations keyed by language code.
  * Order: French first (home), then by skier visits:
- * EN (US+CA 78M), DE (AT+DE 60M), IT (32M), ES (2M)
+ * EN (US+CA 78M), DE (AT+DE 60M), IT (32M), SE (10.5M),
+ * NO (7-9M), FI (5-6M), CZ (4-5M), PL (4-5M), TR (2-3M),
+ * SK (2-3M), ES (2M)
  */
 export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
-    fr, en, de, it, es,
+    fr, en, de, it, sv, nb, fi, cs, pl, tr, sk, es,
 };
 
 export function setLanguage(lang: SupportedLanguage): void {

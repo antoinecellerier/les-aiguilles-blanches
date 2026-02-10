@@ -640,11 +640,19 @@ export default class SettingsScene extends Phaser.Scene {
       space: { item: Math.round(this.fontSize * 0.3), line: Math.round(this.fontSize * 0.3) }
     });
     
+    // Ordered: French first (home), then by ski market size (skier visits/year)
     const languages: { code: SupportedLanguage; name: string }[] = [
       { code: 'fr', name: '🇫🇷' },
       { code: 'en', name: '🇬🇧' },
       { code: 'de', name: '🇩🇪' },
       { code: 'it', name: '🇮🇹' },
+      { code: 'sv', name: '🇸🇪' },
+      { code: 'nb', name: '🇳🇴' },
+      { code: 'fi', name: '🇫🇮' },
+      { code: 'cs', name: '🇨🇿' },
+      { code: 'pl', name: '🇵🇱' },
+      { code: 'tr', name: '🇹🇷' },
+      { code: 'sk', name: '🇸🇰' },
       { code: 'es', name: '🇪🇸' },
     ];
     const currentLang = getLanguage();

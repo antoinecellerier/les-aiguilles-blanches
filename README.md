@@ -82,6 +82,7 @@ snow-groomer/
 │   │   ├── gameConfig.ts   # Constants + BALANCE tuning
 │   │   ├── levels.ts
 │   │   ├── localization.ts
+│   │   ├── locales/       # Per-language translation files
 │   │   ├── storageKeys.ts
 │   │   └── theme.ts
 │   ├── systems/        # Extracted subsystems
@@ -157,14 +158,12 @@ E2E tests cover: menu navigation, all 11 levels, tutorial flow, grooming, pause,
 
 ## 🌐 Localization
 
-The game supports 5 languages:
-- 🇫🇷 French (primary)
-- 🇬🇧 English
-- 🇩🇪 German
-- 🇮🇹 Italian
-- 🇪🇸 Spanish
+The game supports 12 languages, ordered by ski market size:
+- 🇫🇷 French (primary) · 🇬🇧 English · 🇩🇪 German · 🇮🇹 Italian
+- 🇸🇪 Swedish · 🇳🇴 Norwegian · 🇫🇮 Finnish · 🇨🇿 Czech
+- 🇵🇱 Polish · 🇹🇷 Turkish · 🇸🇰 Slovak · 🇪🇸 Spanish
 
-Translations are in `src/config/localization.ts`. To add a new language, add a new key to the `TRANSLATIONS` object.
+Per-language files are in `src/config/locales/`. To add a new language, create a locale file and register it in `src/config/localization.ts`.
 
 ## ♿ Accessibility
 
