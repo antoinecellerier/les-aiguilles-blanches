@@ -20,8 +20,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Testing
 
-- [ ] Vitest: LevelGeometry pure functions (pathEdges, isOnCliff, isInPiste, isOnAccessPath)
-- [ ] Vitest: yDepth() and keyboardLayout pure functions
+- [x] Vitest: LevelGeometry pure functions (pathEdges, isOnCliff, isInPiste, isOnAccessPath)
+- [x] Vitest: yDepth() and keyboardLayout pure functions
 - [ ] E2E: Flawless bonus restartCount tracking regression test
 
 ## Polish (Medium Priority)
