@@ -2,6 +2,16 @@
 import os
 import pytest
 
+# Load .env.local if present (matches run-tests.sh behavior)
+_env_local = os.path.join(os.path.dirname(__file__), '..', '..', '.env.local')
+if os.path.isfile(_env_local):
+    with open(_env_local) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                key, val = line.split('=', 1)
+                os.environ.setdefault(key.strip(), val.strip())
+
 # Base URL for the game - can be overridden via GAME_URL or PORT env var
 _port = os.environ.get("PORT", "3000")
 GAME_URL = os.environ.get(

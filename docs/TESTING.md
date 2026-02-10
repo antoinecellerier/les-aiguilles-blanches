@@ -32,7 +32,7 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
   - `src/scenes/DialogueScene.ts` → also runs `test_dialogue_speakers.py`, `test_dialogue.py`
   - `src/scenes/PauseScene.ts` → also runs `test_pause_menu.py`
   - `src/scenes/LevelCompleteScene.ts` or `CreditsScene.ts` → also runs `test_level_complete.py`
-  - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`
+  - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`, `test_volume_indicator.py`
   - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
   - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
   - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`
@@ -149,6 +149,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_gamepad.py` | Controller detection, button mapping, Nintendo/PlayStation |
 | `test_touch_controls.py` | Touch input, orientation changes, resize |
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
+| `test_volume_indicator.py` | Volume icon, mute toggle, hover slider, overlay |
 
 ### Viewport / Resize Testing
 

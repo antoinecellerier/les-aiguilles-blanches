@@ -34,7 +34,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
 - [ ] Avalanche zones often overlap cliffs, they should be more distinct
 - [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
-- [ ] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
+- [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 - [ ] Tutorial dialogue fatigue — consider shortening or auto-skipping tutorial on replay
 - [ ] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
 
@@ -53,6 +53,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 
 ## Recently Completed
+
+- ✅ **Volume/mute indicator** — Menu screen bottom-left volume icon with hover slider (mouse) and tap-to-mute (touch). 48px touch target, forbidden-circle overlay when muted. Pointer-type detection (`wasTouch`) for hybrid devices. 7 E2E tests. conftest.py loads `.env.local` for port config.
 
 - ✅ **Nocturne music system** — Procedural Chopin nocturne-style piano music via MusicSystem singleton. Five moods (menu, calm, night, intense, credits) with GPT-5.2-composed melodies in distinct keys. Grand piano synthesis with 7 harmonics, inharmonicity, hammer noise, sympathetic resonance. Persists across scenes with crossfade on mood change. DynamicsCompressor limiter on master output. Safari `webkitAudioContext` fallback. Fixed 6 audio node leaks (buffer sources without `.stop()`), EngineSounds `onReady()` race condition, visibility listener cleanup. Added voice & ambience volume sliders to SettingsScene (5 languages).
 

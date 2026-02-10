@@ -6,8 +6,9 @@ import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
-import { playClick, playDeviceChime } from '../systems/UISounds';
+import { playClick, playDeviceChime, playToggle } from '../systems/UISounds';
 import { MusicSystem } from '../systems/MusicSystem';
+import { AudioSystem } from '../systems/AudioSystem';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, onTouchAvailable, isMobile } from '../utils/touchDetect';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
@@ -34,6 +35,13 @@ export default class MenuScene extends Phaser.Scene {
   private footerGithubRight = 0;
   private footerHintStyle: Phaser.Types.GameObjects.Text.TextStyle = {};
   private footerHintY = 0;
+  private volumeIndicator: Phaser.GameObjects.Text | null = null;
+  private volumeMuteOverlay: Phaser.GameObjects.Graphics | null = null;
+  private volumeSliderObjects: Phaser.GameObjects.GameObject[] = [];
+  private volumeSliderVisible = false;
+  private volumeIconZone: Phaser.GameObjects.Zone | null = null;
+  private volumeSliderTimer: Phaser.Time.TimerEvent | null = null;
+  private volumeSliderListeners: { onMove: Function; onUp: Function } | null = null;
    
   constructor() {
     super({ key: 'MenuScene' });
@@ -427,6 +435,7 @@ export default class MenuScene extends Phaser.Scene {
       color: THEME.colors.info,
     };
     this.updateInputHints();
+    this.createVolumeIndicator(scaleFactor);
   }
 
   private setupInput(): void {
@@ -473,6 +482,228 @@ export default class MenuScene extends Phaser.Scene {
 
   /** Expose for tests */
   get selectedIndex(): number { return this.buttonNav?.selectedIndex ?? 0; }
+
+  private createVolumeIndicator(scaleFactor: number): void {
+    if (this.volumeIndicator) { this.volumeIndicator.destroy(); this.volumeIndicator = null; }
+    if (this.volumeMuteOverlay) { this.volumeMuteOverlay.destroy(); this.volumeMuteOverlay = null; }
+    if (this.volumeIconZone) { this.volumeIconZone.destroy(); this.volumeIconZone = null; }
+    this.destroyVolumeSlider();
+
+    const audio = AudioSystem.getInstance();
+    const muted = audio.isMuted();
+    const leftMargin = Math.round(12 * scaleFactor);
+    const activeAlpha = 0.6;
+    const inactiveAlpha = 0.2;
+
+    const volumeIcon = (): string => {
+      if (audio.isMuted()) return '🔊';
+      const vol = audio.getVolume('master');
+      if (vol === 0) return '🔈';
+      if (vol <= 0.5) return '🔉';
+      return '🔊';
+    };
+
+    this.volumeIndicator = this.add.text(leftMargin, this.footerHintY, volumeIcon(), this.footerHintStyle)
+      .setOrigin(0, 0.5)
+      .setAlpha(muted ? inactiveAlpha : activeAlpha)
+      .setDepth(10);
+
+    // Use a zone for reliable hit detection and hand cursor (48px min touch target)
+    const minHit = 48;
+    const bounds = this.volumeIndicator.getBounds();
+    const hitW = Math.max(bounds.width, minHit);
+    const hitH = Math.max(bounds.height, minHit);
+    const hitZoneIcon = this.add.zone(
+      bounds.centerX, bounds.centerY, hitW, hitH
+    ).setDepth(13).setInteractive({ useHandCursor: true });
+    this.volumeIconZone = hitZoneIcon;
+
+    hitZoneIcon
+      .on('pointerover', (p: Phaser.Input.Pointer) => {
+        if (p.wasTouch) return;
+        this.volumeIndicator?.setAlpha(1);
+        this.showVolumeSlider(scaleFactor);
+      })
+      .on('pointermove', () => {
+        // Continuously re-assert hand cursor while pointer is over the icon zone.
+        // Phaser resets cursor when overlapping objects are destroyed (slider refresh).
+        this.game.canvas.style.cursor = 'pointer';
+      })
+      .on('pointerdown', (p: Phaser.Input.Pointer) => {
+        const a = AudioSystem.getInstance();
+        const nowMuted = !a.isMuted();
+        a.setMuted(nowMuted);
+        playToggle(!nowMuted);
+        this.volumeIndicator?.setText(volumeIcon());
+        this.volumeIndicator?.setAlpha(nowMuted ? inactiveAlpha : activeAlpha);
+        this.updateMuteOverlay();
+        if (!p.wasTouch) {
+          this.showVolumeSlider(scaleFactor);
+          this.refreshVolumeSlider(scaleFactor);
+        }
+      });
+
+    this.updateMuteOverlay();
+  }
+
+  /** Draw or clear the forbidden-circle overlay on the volume icon (matches controller hint style). */
+  private updateMuteOverlay(): void {
+    if (this.volumeMuteOverlay) { this.volumeMuteOverlay.destroy(); this.volumeMuteOverlay = null; }
+    if (!AudioSystem.getInstance().isMuted() || !this.volumeIndicator) return;
+
+    const iconMeasure = this.add.text(0, 0, '🔊', this.footerHintStyle).setVisible(false);
+    const iconWidth = iconMeasure.width;
+    iconMeasure.destroy();
+
+    const r = Math.round(this.volumeIndicator.height * 0.7);
+    const cx = this.volumeIndicator.x + iconWidth / 2;
+    const cy = this.footerHintY;
+
+    this.volumeMuteOverlay = this.add.graphics().setDepth(10);
+    this.volumeMuteOverlay.lineStyle(1.5, 0xcc2200, 0.6);
+    this.volumeMuteOverlay.strokeCircle(cx, cy, r);
+    const dx = r * Math.cos(Math.PI / 4);
+    const dy = r * Math.sin(Math.PI / 4);
+    this.volumeMuteOverlay.lineBetween(cx + dx, cy - dy, cx - dx, cy + dy);
+  }
+
+  private destroyVolumeSlider(): void {
+    if (this.volumeSliderTimer) {
+      this.volumeSliderTimer.remove(false);
+      this.volumeSliderTimer = null;
+    }
+    if (this.volumeSliderListeners) {
+      this.input.off('pointermove', this.volumeSliderListeners.onMove as any);
+      this.input.off('pointerup', this.volumeSliderListeners.onUp as any);
+      this.volumeSliderListeners = null;
+    }
+    this.volumeSliderObjects.forEach(o => { if (o.active) o.destroy(); });
+    this.volumeSliderObjects = [];
+    this.volumeSliderVisible = false;
+  }
+
+  private refreshVolumeSlider(scaleFactor: number): void {
+    if (!this.volumeSliderVisible) return;
+    this.destroyVolumeSlider();
+    this.showVolumeSlider(scaleFactor);
+  }
+
+  private showVolumeSlider(scaleFactor: number): void {
+    if (this.volumeSliderVisible || !this.volumeIndicator) return;
+    this.volumeSliderVisible = true;
+
+    const audio = AudioSystem.getInstance();
+    const trackWidth = Math.round(Math.max(60, 80 * scaleFactor));
+    const trackHeight = 6;
+    const thumbW = 10;
+    const thumbH = 16;
+    const padding = 6;
+
+    // Position slider above the icon
+    const sliderX = this.volumeIndicator.x;
+    const sliderY = this.footerHintY - this.volumeIndicator.height - padding - thumbH / 2;
+
+    // Background panel
+    const labelSpace = 20;
+    const panelW = trackWidth + padding * 2;
+    const panelH = thumbH + padding * 3 + labelSpace;
+    const panelY = sliderY - thumbH / 2 - padding * 2 - labelSpace;
+    const bg = this.add.graphics().setDepth(11);
+    bg.fillStyle(0x1a2a3a, 0.9);
+    bg.fillRoundedRect(sliderX - padding, panelY, panelW, panelH, 4);
+    bg.lineStyle(1, 0x4a6a8a, 0.5);
+    bg.strokeRoundedRect(sliderX - padding, panelY, panelW, panelH, 4);
+    this.volumeSliderObjects.push(bg);
+
+    // Volume percentage label
+    const vol = Math.round(audio.getVolume('master') * 100);
+    const pctLabel = this.add.text(sliderX + trackWidth / 2, sliderY - thumbH / 2 - padding, `${vol}%`, {
+      fontFamily: this.footerHintStyle.fontFamily as string,
+      fontSize: this.footerHintStyle.fontSize as string,
+      color: THEME.colors.textPrimary,
+    }).setOrigin(0.5, 1).setDepth(12);
+    this.volumeSliderObjects.push(pctLabel);
+
+    // Track
+    const track = this.add.graphics().setDepth(12);
+    track.fillStyle(0x2a4a5e, 1);
+    track.fillRect(sliderX, sliderY - trackHeight / 2, trackWidth, trackHeight);
+    this.volumeSliderObjects.push(track);
+
+    // Fill
+    const fill = this.add.graphics().setDepth(12);
+    const drawFill = (t: number) => {
+      fill.clear();
+      fill.fillStyle(0x87CEEB, 1);
+      fill.fillRect(sliderX, sliderY - trackHeight / 2, t * trackWidth, trackHeight);
+    };
+    drawFill(audio.getVolume('master'));
+    this.volumeSliderObjects.push(fill);
+
+    // Thumb
+    const thumb = this.add.graphics().setDepth(12);
+    const drawThumb = (t: number) => {
+      const x = sliderX + t * trackWidth;
+      thumb.clear();
+      thumb.fillStyle(0xffffff, 1);
+      thumb.fillRect(x - thumbW / 2, sliderY - thumbH / 2, thumbW, thumbH);
+    };
+    drawThumb(audio.getVolume('master'));
+    this.volumeSliderObjects.push(thumb);
+
+    // Hit zone covers the slider panel only — NOT the icon below (icon handles its own click at depth 10)
+    const hitX = sliderX - padding;
+    const hitY = panelY;
+    const hitW = panelW;
+    const hitH = panelH;
+    const hitZone = this.add.zone(hitX, hitY, hitW, hitH)
+      .setOrigin(0, 0).setDepth(11).setInteractive({ useHandCursor: true });
+    this.volumeSliderObjects.push(hitZone);
+
+    // Dismissal check area includes both panel and icon
+    const dismissX = hitX;
+    const dismissY = hitY;
+    const dismissW = hitW;
+    const dismissH = hitH + padding + this.volumeIndicator.height;
+
+    let dragging = false;
+
+    const applyFromPointer = (px: number) => {
+      const t = Math.max(0, Math.min(1, (px - sliderX) / trackWidth));
+      const newVal = Math.round(t * 20) / 20; // 5% steps
+      audio.setVolume('master', newVal);
+      drawFill(newVal);
+      drawThumb(newVal);
+      pctLabel.setText(`${Math.round(newVal * 100)}%`);
+      const icon = newVal === 0 ? '🔈' : newVal <= 0.5 ? '🔉' : '🔊';
+      this.volumeIndicator?.setText(icon);
+    };
+
+    hitZone.on('pointerdown', (p: Phaser.Input.Pointer) => {
+      dragging = true;
+      applyFromPointer(p.x);
+    });
+
+    const onMove = (p: Phaser.Input.Pointer) => { if (dragging) applyFromPointer(p.x); };
+    const onUp = () => { dragging = false; };
+    this.input.on('pointermove', onMove);
+    this.input.on('pointerup', onUp);
+    this.volumeSliderListeners = { onMove, onUp };
+
+    // Dismiss when pointer leaves the panel + icon area
+    this.volumeSliderTimer = this.time.addEvent({
+      delay: 200, loop: true,
+      callback: () => {
+        if (dragging) return;
+        const p = this.input.activePointer;
+        if (p.x < dismissX || p.x > dismissX + dismissW || p.y < dismissY || p.y > dismissY + dismissH) {
+          this.destroyVolumeSlider();
+          const m = AudioSystem.getInstance().isMuted();
+          this.volumeIndicator?.setAlpha(m ? 0.2 : 0.6);
+        }
+      },
+    });
+  }
 
   private updateInputHints(gamepadOverride?: boolean): void {
     // Destroy previous hint objects
