@@ -30,6 +30,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make the settings menu look nicer — visual polish pass
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 - [ ] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
+- [ ] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
 
 
 ## Future (Backlog)
