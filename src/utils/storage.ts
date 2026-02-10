@@ -32,3 +32,10 @@ export function setString(key: string, value: string): void {
     localStorage.setItem(key, value);
   } catch { /* Private browsing or quota exceeded */ }
 }
+
+/** Remove a key from localStorage. Silent on failure. */
+export function removeKey(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch { /* Private browsing */ }
+}

@@ -4,7 +4,7 @@
  */
 
 import { STORAGE_KEYS } from '../config/storageKeys';
-import { getJSON, setJSON } from './storage';
+import { getJSON, setJSON, removeKey } from './storage';
 
 interface GameProgress {
   currentLevel: number;
@@ -24,7 +24,7 @@ export function saveProgress(level: number): void {
 }
 
 export function clearProgress(): void {
-  localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+  removeKey(STORAGE_KEYS.PROGRESS);
 }
 
 export function hasSavedProgress(): boolean {

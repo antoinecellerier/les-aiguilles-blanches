@@ -34,6 +34,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
 - [ ] Avalanche zones often overlap cliffs, they should be more distinct
 - [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
+- [ ] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 
 
 ## Future (Backlog)

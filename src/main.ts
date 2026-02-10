@@ -8,6 +8,8 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 // Setup globals first (side-effect import)
 import './setup';
+import { STORAGE_KEYS } from './config/storageKeys';
+import { getString } from './utils/storage';
 
 // Scene transition registry (must be before scene imports to avoid circular deps)
 import { registerGameScenes } from './utils/sceneTransitions';
@@ -152,7 +154,7 @@ window.addEventListener('load', () => {
       // During gameplay, only toggle if F isn't bound to a game control
       if (window.game?.scene?.isActive('GameScene')) {
         try {
-          const saved = localStorage.getItem('snowGroomer_bindings');
+          const saved = getString(STORAGE_KEYS.BINDINGS);
           const codes = saved ? Object.values(JSON.parse(saved)) as number[] : [];
           if (codes.includes(e.keyCode)) return;
         } catch { /* use default bindings — F is not bound */ }

@@ -5,6 +5,7 @@ import { loadGamepadBindings, getDefaultGamepadBindings, getButtonName, getConne
 import { THEME } from '../config/theme';
 import { BALANCE } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { getString, setString } from '../utils/storage';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
@@ -664,7 +665,7 @@ export default class SettingsScene extends Phaser.Scene {
 
   private createSensitivitySlider(): any {
     const MIN = BALANCE.SENSITIVITY_MIN, MAX = BALANCE.SENSITIVITY_MAX, DEFAULT = BALANCE.SENSITIVITY_DEFAULT;
-    const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
+    const saved = getString(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     let value = saved ? parseFloat(saved) : DEFAULT;
     if (isNaN(value) || value < MIN || value > MAX) value = DEFAULT;
 
@@ -734,7 +735,7 @@ export default class SettingsScene extends Phaser.Scene {
       value = tToVal(t);
       drawThumb(valToT(value));
       valueText.setText(Math.round(value * 100) + '%');
-      localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+      setString(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
       const now = Date.now();
       if (now - lastSensPreview > SENS_COOLDOWN) {
         lastSensPreview = now;
@@ -764,14 +765,14 @@ export default class SettingsScene extends Phaser.Scene {
         value = Math.max(MIN, Math.round((value - STEP) * 20) / 20);
         drawThumb(valToT(value));
         valueText.setText(Math.round(value * 100) + '%');
-        localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+        setString(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
         playSensitivityBlip(valToT(value));
       },
       right: () => {
         value = Math.min(MAX, Math.round((value + STEP) * 20) / 20);
         drawThumb(valToT(value));
         valueText.setText(Math.round(value * 100) + '%');
-        localStorage.setItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
+        setString(STORAGE_KEYS.MOVEMENT_SENSITIVITY, String(value));
         playSensitivityBlip(valToT(value));
       },
       hasOwnSound: true,

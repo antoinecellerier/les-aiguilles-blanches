@@ -8,6 +8,7 @@ import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
 import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { getString } from '../utils/storage';
 import { Accessibility } from '../utils/accessibility';
 
 /**
@@ -753,7 +754,7 @@ export default class HUDScene extends Phaser.Scene {
 
   private isKeyBoundToGameControl(keyCode: number): boolean {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
+      const saved = getString(STORAGE_KEYS.BINDINGS);
       const codes = saved ? Object.values(JSON.parse(saved)) as number[] : [];
       return codes.includes(keyCode);
     } catch { return false; }

@@ -3,6 +3,7 @@ import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
+import { getString } from '../utils/storage';
 import { saveProgress } from '../utils/gameProgress';
 import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
@@ -163,7 +164,7 @@ export default class GameScene extends Phaser.Scene {
     this.steepWarningShown = false;
 
     // Load movement sensitivity from settings
-    const savedSensitivity = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
+    const savedSensitivity = getString(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     this.movementSensitivity = savedSensitivity ? parseFloat(savedSensitivity) : BALANCE.SENSITIVITY_DEFAULT;
     if (isNaN(this.movementSensitivity) || this.movementSensitivity < BALANCE.SENSITIVITY_MIN || this.movementSensitivity > BALANCE.SENSITIVITY_MAX) {
       this.movementSensitivity = BALANCE.SENSITIVITY_DEFAULT;
@@ -571,8 +572,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private loadKeyBindings(): { up: number; down: number; left: number; right: number; groom: number; winch: number } {
-    const savedVersion = localStorage.getItem(STORAGE_KEYS.BINDINGS_VERSION);
-    const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
+    const savedVersion = getString(STORAGE_KEYS.BINDINGS_VERSION);
+    const saved = getString(STORAGE_KEYS.BINDINGS);
     
     // Get layout-specific defaults
     const defaults = getLayoutDefaults();
@@ -1208,7 +1209,7 @@ export default class GameScene extends Phaser.Scene {
     if (!this.scene.manager) return;
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
     // Reload sensitivity in case it was changed in Settings
-    const saved = localStorage.getItem(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
+    const saved = getString(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     const val = saved ? parseFloat(saved) : BALANCE.SENSITIVITY_DEFAULT;
     this.movementSensitivity = (isNaN(val) || val < BALANCE.SENSITIVITY_MIN || val > BALANCE.SENSITIVITY_MAX) ? BALANCE.SENSITIVITY_DEFAULT : val;
     this.engineSounds.resume();

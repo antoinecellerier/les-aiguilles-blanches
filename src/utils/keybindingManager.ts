@@ -1,6 +1,7 @@
 import { getLayoutDefaults, setKeyboardLayout, type KeyboardLayout } from './keyboardLayout';
 import { isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from './gamepad';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
+import { getString, setString } from './storage';
 import { playClick, playCancel } from '../systems/UISounds';
 
 export interface KeyBindings {
@@ -42,9 +43,9 @@ export class KeybindingManager {
   }
 
   load(): void {
-    const savedVersion = localStorage.getItem(STORAGE_KEYS.BINDINGS_VERSION);
-    const saved = localStorage.getItem(STORAGE_KEYS.BINDINGS);
-    const savedNames = localStorage.getItem(STORAGE_KEYS.DISPLAY_NAMES);
+    const savedVersion = getString(STORAGE_KEYS.BINDINGS_VERSION);
+    const saved = getString(STORAGE_KEYS.BINDINGS);
+    const savedNames = getString(STORAGE_KEYS.DISPLAY_NAMES);
     const defaults = getLayoutDefaults();
 
     if (savedVersion !== String(BINDINGS_VERSION)) {
@@ -82,9 +83,9 @@ export class KeybindingManager {
 
   save(): void {
     try {
-      localStorage.setItem(STORAGE_KEYS.BINDINGS_VERSION, String(BINDINGS_VERSION));
-      localStorage.setItem(STORAGE_KEYS.BINDINGS, JSON.stringify(this.bindings));
-      localStorage.setItem(STORAGE_KEYS.DISPLAY_NAMES, JSON.stringify(this.displayNames));
+      setString(STORAGE_KEYS.BINDINGS_VERSION, String(BINDINGS_VERSION));
+      setString(STORAGE_KEYS.BINDINGS, JSON.stringify(this.bindings));
+      setString(STORAGE_KEYS.DISPLAY_NAMES, JSON.stringify(this.displayNames));
     } catch { /* Private browsing or quota exceeded */ }
   }
 
