@@ -78,6 +78,7 @@ Read `docs/ART_STYLE.md` in full, then launch parallel explore agents to check e
    - Color-blind-safe distinctions — not relying solely on red/green differentiation
    - Text readability against varying terrain backgrounds
    - HUD elements visible over both light (snow) and dark (night) scenes
+   - Small interactive elements should have generous touch targets (48px+ padding) when not adjacent to other interactive elements. Use separate zones: tight for mouse hover, large padded for touch/click.
 
 ### Phase 3: Visual inspection
 

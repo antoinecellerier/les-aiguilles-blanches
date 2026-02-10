@@ -44,6 +44,7 @@ export default class MenuScene extends Phaser.Scene {
   private volumeIconZone: Phaser.GameObjects.Zone | null = null;
   private volumeSliderTimer: Phaser.Time.TimerEvent | null = null;
   private volumeSliderListeners: { onMove: Function; onUp: Function } | null = null;
+  private inputTooltipObjects: Phaser.GameObjects.GameObject[] = [];
    
   constructor() {
     super({ key: 'MenuScene' });
@@ -711,6 +712,7 @@ export default class MenuScene extends Phaser.Scene {
     // Destroy previous hint objects
     this.inputHintTexts.forEach(t => { if (t.active) t.destroy(); });
     this.inputHintTexts = [];
+    this.destroyInputTooltip();
 
     const mobile = isMobile();
     const hasTouch = detectTouch();
@@ -725,11 +727,11 @@ export default class MenuScene extends Phaser.Scene {
     }
     this.lastInputKey = key;
 
-    // Define all hints: [icon, label, isAvailable] — always show all three
-    const allHints: [string, string, boolean][] = [
-      ['💻', 'Keyboard', !mobile],
-      ['✋', 'Touch', hasTouch],
-      ['🎮', 'Gamepad', hasGamepad],
+    // Define all hints: [icon, label, isAvailable, tooltipKeyOn, tooltipKeyOff]
+    const allHints: [string, string, boolean, string, string][] = [
+      ['💻', 'Keyboard', !mobile, 'inputKeyboard', 'inputKeyboardOff'],
+      ['✋', 'Touch', hasTouch, 'inputTouch', 'inputTouchOff'],
+      ['🎮', 'Gamepad', hasGamepad, 'inputGamepad', 'inputGamepadOff'],
     ];
 
     const width = this.scale.width;
@@ -741,7 +743,6 @@ export default class MenuScene extends Phaser.Scene {
 
     // Build full labels first to check if they fit
     const fullLabels = allHints.map(([icon, label]) => `${icon} ${label}`);
-    // Measure total width with full labels
     const measureText = this.add.text(0, 0, fullLabels.join('   '), this.footerHintStyle).setVisible(false);
     const totalWidth = measureText.width;
     measureText.destroy();
@@ -751,6 +752,7 @@ export default class MenuScene extends Phaser.Scene {
     
     // Place hints right-to-left
     let cursorX = width - rightMargin;
+    let hintsLeftX = cursorX;
     for (let i = allHints.length - 1; i >= 0; i--) {
       const [icon, label, available] = allHints[i];
       const text = useCompact ? icon : `${icon} ${label}`;
@@ -759,14 +761,13 @@ export default class MenuScene extends Phaser.Scene {
         .setAlpha(available ? activeAlpha : inactiveAlpha)
         .setDepth(10);
       this.inputHintTexts.push(hint);
+
       // Forbidden sign overlay centered on the icon
       if (!available) {
-        // Measure just the icon to find its center
         const iconMeasure = this.add.text(0, 0, icon, this.footerHintStyle).setVisible(false);
         const iconWidth = iconMeasure.width;
         iconMeasure.destroy();
         const r = Math.round(hint.height * 0.7);
-        // Icon is at the left edge of the hint text
         const cx = cursorX - hint.width + iconWidth / 2;
         const cy = this.footerHintY;
         const gfx = this.add.graphics().setDepth(10);
@@ -778,7 +779,103 @@ export default class MenuScene extends Phaser.Scene {
         this.inputHintTexts.push(gfx);
       }
       cursorX -= hint.width + gap;
+      hintsLeftX = cursorX + gap; // left edge of last placed hint
     }
+
+    // Single tooltip zone spanning all hints
+    const tooltipData = allHints.map(([icon, , avail, keyOn, keyOff]) => ({
+      text: `${icon}  ${t(avail ? keyOn : keyOff)}`,
+      available: avail,
+    }));
+    // Tight zone for mouse hover (matches visual hint area)
+    const hoverX = hintsLeftX;
+    const hoverW = width - rightMargin - hintsLeftX;
+    const hoverH = 32;
+    const hoverZone = this.add.zone(hoverX, this.footerHintY, hoverW, hoverH)
+      .setOrigin(0, 0.5).setDepth(13).setInteractive({ useHandCursor: false });
+    this.inputHintTexts.push(hoverZone);
+
+    // Large padded zone for touch/click
+    const zonePad = 48;
+    const zoneX = hintsLeftX - zonePad;
+    const zoneW = width - rightMargin - hintsLeftX + zonePad * 2;
+    const zoneH = hoverH + zonePad * 2;
+    const touchZone = this.add.zone(zoneX, this.footerHintY, zoneW, zoneH)
+      .setOrigin(0, 0.5).setDepth(12).setInteractive({ useHandCursor: false });
+    this.inputHintTexts.push(touchZone);
+
+    const tooltipAboveY = this.footerHintY - hoverH / 2;
+    let touchShowTime = 0;
+
+    hoverZone.on('pointerover', (p: Phaser.Input.Pointer) => {
+      if (p.wasTouch) return;
+      this.showInputTooltip(tooltipData, width - rightMargin, tooltipAboveY);
+    });
+    hoverZone.on('pointerout', () => { this.destroyInputTooltip(); });
+
+    touchZone.on('pointerdown', () => {
+      touchShowTime = Date.now();
+      this.showInputTooltip(tooltipData, width - rightMargin, tooltipAboveY);
+    });
+    touchZone.on('pointerup', () => {
+      const elapsed = Date.now() - touchShowTime;
+      const minDisplay = 1500;
+      if (elapsed >= minDisplay) {
+        this.destroyInputTooltip();
+      } else {
+        this.time.delayedCall(minDisplay - elapsed, () => this.destroyInputTooltip());
+      }
+    });
+  }
+
+  private showInputTooltip(items: { text: string; available: boolean }[], rightX: number, aboveY: number): void {
+    this.destroyInputTooltip();
+    const padding = 10;
+    const lineGap = 6;
+    const style = {
+      fontFamily: this.footerHintStyle.fontFamily as string,
+      fontSize: this.footerHintStyle.fontSize as string,
+    };
+
+    // Measure lines to get actual text height and max width
+    const measured: { text: string; available: boolean; w: number; h: number }[] = [];
+    let maxW = 0;
+    for (const item of items) {
+      const m = this.add.text(0, 0, item.text, style).setVisible(false);
+      measured.push({ ...item, w: m.width, h: m.height });
+      maxW = Math.max(maxW, m.width);
+      m.destroy();
+    }
+
+    const totalTextH = measured.reduce((s, m) => s + m.h, 0) + lineGap * (measured.length - 1);
+    const panelW = maxW + padding * 2;
+    const panelH = totalTextH + padding * 2;
+    const panelX = rightX - panelW;
+    const panelY = aboveY - panelH - 4;
+
+    // Background
+    const bg = this.add.graphics().setDepth(11);
+    bg.fillStyle(0x1a2a3a, 0.92);
+    bg.fillRoundedRect(panelX, panelY, panelW, panelH, 4);
+    bg.lineStyle(1, 0x4a6a8a, 0.5);
+    bg.strokeRoundedRect(panelX, panelY, panelW, panelH, 4);
+    this.inputTooltipObjects.push(bg);
+
+    // Lines with availability-based styling
+    let y = panelY + padding;
+    for (const item of measured) {
+      const label = this.add.text(panelX + padding, y, item.text, {
+        ...style,
+        color: item.available ? THEME.colors.textPrimary : '#667788',
+      }).setOrigin(0, 0).setDepth(12);
+      this.inputTooltipObjects.push(label);
+      y += item.h + lineGap;
+    }
+  }
+
+  private destroyInputTooltip(): void {
+    this.inputTooltipObjects.forEach(o => { if (o.active) o.destroy(); });
+    this.inputTooltipObjects = [];
   }
 
   update(time: number, delta: number): void {
