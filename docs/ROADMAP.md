@@ -10,7 +10,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] HazardSystem avalanche timer leak — delayedCall not stored, fires on destroyed objects if scene shuts down
 - [ ] Menu title text overflows its box horizontally
 - [ ] Colorblind buttons don't update visual state when opening Settings from Pause menu
-- [ ] Navigation to Menu is broken on the failure screen
+- [x] Navigation to Menu is broken on the failure screen
 
 ## Code Health
 
