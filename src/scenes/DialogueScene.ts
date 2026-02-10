@@ -5,6 +5,7 @@ import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
 import { ResizeManager } from '../utils/resizeManager';
+import { playVoiceBlip } from '../systems/VoiceSounds';
 
 /**
  * Les Aiguilles Blanches - Dialogue Scene
@@ -59,6 +60,7 @@ export default class DialogueScene extends Phaser.Scene {
   private typewriterIndex = 0;
   private isTyping = false;
   private typewriterSafetyTimer: Phaser.Time.TimerEvent | null = null;
+  private currentSpeaker = 'Jean-Pierre';
 
   constructor() {
     super({ key: 'DialogueScene' });
@@ -408,6 +410,7 @@ export default class DialogueScene extends Phaser.Scene {
 
     // Use explicit speaker, then DIALOGUE_SPEAKERS map, then default
     const speaker = dialogue.speaker || DIALOGUE_SPEAKERS[dialogue.key] || 'Jean-Pierre';
+    this.currentSpeaker = speaker;
 
     this.speakerText.setText(speaker);
     
@@ -467,6 +470,8 @@ export default class DialogueScene extends Phaser.Scene {
         repeat: targetLength - 1,
         callback: () => {
           this.typewriterIndex++;
+          const char = targetText[this.typewriterIndex - 1];
+          if (char) playVoiceBlip(this.currentSpeaker, char);
           if (this.dialogueText) {
             this.dialogueText.setText(targetText.substring(0, this.typewriterIndex));
           }

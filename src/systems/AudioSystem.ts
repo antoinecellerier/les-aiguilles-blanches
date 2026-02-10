@@ -63,6 +63,10 @@ export class AudioSystem {
     this.game = game;
     this.setupUserGestureResume();
     this.setupVisibilityHandling();
+    // Expose for Playwright testing — allows probing the actual singleton
+    if (typeof window !== 'undefined') {
+      (window as any).__audioSystem = this;
+    }
   }
 
   // --- AudioContext lifecycle ---

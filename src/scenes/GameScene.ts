@@ -85,6 +85,7 @@ export default class GameScene extends Phaser.Scene {
   private lastStaminaWarnTime = 0;
   private lastTimeWarnTime = 0;
   private staminaDepletedPlayed = false;
+  private dialogueDucked = false;
 
   // Tutorial
   private tutorialStep = 0;
@@ -406,6 +407,9 @@ export default class GameScene extends Phaser.Scene {
       );
       this.wildlifeSystem.bootstrapTracks();
       this.wildlifeSystem.onAnimalFlee = (type) => {
+        // Suppress flee sounds during dialogue to avoid drowning out voice
+        const dlg = this.scene.get('DialogueScene') as { isDialogueShowing?: () => boolean } | undefined;
+        if (dlg?.isDialogueShowing?.()) return;
         playAnimalCall(type);
       };
     }
@@ -670,6 +674,19 @@ export default class GameScene extends Phaser.Scene {
     const onGroomed = this.snowGrid[tileY]?.[tileX]?.groomed ?? false;
     this.engineSounds.update(speed, this.isGrooming, winchTaut, onGroomed, delta);
     this.ambienceSounds.update(delta);
+
+    // Duck ambience & engine during dialogue so voice is audible
+    const dlg = this.scene.get('DialogueScene') as { isDialogueShowing?: () => boolean } | undefined;
+    const dialogueActive = !!dlg?.isDialogueShowing?.();
+    if (dialogueActive && !this.dialogueDucked) {
+      this.dialogueDucked = true;
+      this.ambienceSounds.setDuck(0.2);
+      this.engineSounds.setDuck(0.3);
+    } else if (!dialogueActive && this.dialogueDucked) {
+      this.dialogueDucked = false;
+      this.ambienceSounds.setDuck(1);
+      this.engineSounds.setDuck(1);
+    }
 
     // Emit game state for HUD
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
@@ -1191,6 +1208,13 @@ export default class GameScene extends Phaser.Scene {
     const dlg = this.scene.get('DialogueScene') as DialogueScene | null;
     if (dlg?.showDialogue) {
       dlg.showDialogue(dialogueKey, speaker);
+      // Immediately duck engine/ambience so first voice blips are audible
+      // (the update loop also manages this, but may lag a few frames)
+      if (!this.dialogueDucked) {
+        this.dialogueDucked = true;
+        this.ambienceSounds.setDuck(0.2);
+        this.engineSounds.setDuck(0.3);
+      }
     }
   }
 

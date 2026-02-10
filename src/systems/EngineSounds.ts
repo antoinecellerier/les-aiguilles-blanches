@@ -46,6 +46,7 @@ const WINCH_TENSION_VOLUME = 0.03;
 export class EngineSounds {
   private ctx: AudioContext | null = null;
   private sfxNode: GainNode | null = null;
+  private duckLevel = 1; // 0-1 multiplier for dialogue ducking
 
   // Engine nodes
   private engineOsc: OscillatorNode | null = null;
@@ -94,6 +95,11 @@ export class EngineSounds {
     this.stopWinchTension();
     this.ctx = null;
     this.sfxNode = null;
+  }
+
+  /** Scale all engine output for ducking (0-1). */
+  setDuck(level: number): void {
+    this.duckLevel = level;
   }
 
   /** Mute continuous sounds when game is paused. */
@@ -178,7 +184,7 @@ export class EngineSounds {
     // Smooth transitions (avoid clicks)
     this.engineOsc.frequency.setTargetAtTime(freq, this.ctx.currentTime, 0.05);
     this.engineOsc2.frequency.setTargetAtTime(freq * ENGINE_OVERTONE_RATIO, this.ctx.currentTime, 0.05);
-    this.engineGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.05);
+    this.engineGain.gain.setTargetAtTime(vol * this.duckLevel, this.ctx.currentTime, 0.05);
   }
 
   // --- Snow crunch ---

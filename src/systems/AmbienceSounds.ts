@@ -89,6 +89,15 @@ export class AmbienceSounds {
     this.gustGain?.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
   }
 
+  /** Scale ambience output for ducking during dialogue (0-1). */
+  setDuck(level: number): void {
+    if (!this.ctx) return;
+    if (this.isStorm) {
+      this.windGain?.gain.setTargetAtTime(STORM_WIND_VOLUME * level, this.ctx.currentTime, 0.1);
+      this.gustGain?.gain.setTargetAtTime(STORM_GUST_VOLUME * level, this.ctx.currentTime, 0.1);
+    }
+  }
+
   /** Restore on resume. */
   resume(_weather: string, _isNight: boolean): void {
     if (!this.ctx) return;
