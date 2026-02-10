@@ -4,6 +4,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { LevelGeometry, LEVELS } from './config-wrappers/index.js';
 
+/** Ray-casting point-in-polygon (duplicated from HazardSystem for testing without Phaser). */
+function pointInPolygon(px, py, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x, yi = polygon[i].y;
+    const xj = polygon[j].x, yj = polygon[j].y;
+    if ((yi > py) !== (yj > py) &&
+        px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
 /** Minimal Level fixture for testing */
 function mockLevel(overrides = {}) {
   return {
@@ -132,6 +146,50 @@ describe('LevelGeometry', () => {
     });
   });
 
+  describe('getCliffAvoidRects', () => {
+    it('returns empty array when no cliff segments', () => {
+      expect(geo.getCliffAvoidRects(16)).toEqual([]);
+    });
+
+    it('returns bounding rect for left cliff', () => {
+      geo.cliffSegments = [{
+        side: 'left', startY: 100, endY: 300,
+        offset: 32, extent: 48,
+        getX: () => 200,
+      }];
+      const rects = geo.getCliffAvoidRects(16);
+      expect(rects).toHaveLength(1);
+      // cliffEnd = 200 - 32 = 168, cliffStart = 168 - 48 = 120
+      // leftX = 120 - 16 = 104, rightX = 168 + 16 = 184
+      expect(rects[0].startY).toBe(100);
+      expect(rects[0].endY).toBe(300);
+      expect(rects[0].leftX).toBe(104);
+      expect(rects[0].rightX).toBe(184);
+    });
+
+    it('returns bounding rect for right cliff', () => {
+      geo.cliffSegments = [{
+        side: 'right', startY: 50, endY: 250,
+        offset: 20, extent: 60,
+        getX: () => 400,
+      }];
+      const rects = geo.getCliffAvoidRects(16);
+      expect(rects).toHaveLength(1);
+      // cliffStart = 400 + 20 = 420, cliffEnd = 420 + 60 = 480
+      // leftX = 420 - 16 = 404, rightX = 480 + 16 = 496
+      expect(rects[0].leftX).toBe(404);
+      expect(rects[0].rightX).toBe(496);
+    });
+
+    it('returns one rect per cliff segment', () => {
+      geo.cliffSegments = [
+        { side: 'left', startY: 10, endY: 50, offset: 5, extent: 10, getX: () => 100 },
+        { side: 'right', startY: 60, endY: 120, offset: 5, extent: 10, getX: () => 300 },
+      ];
+      expect(geo.getCliffAvoidRects(16)).toHaveLength(2);
+    });
+  });
+
   describe('isOnAccessPath', () => {
     it('returns false when no access paths exist', () => {
       expect(geo.isOnAccessPath(10, 10)).toBe(false);
@@ -205,5 +263,43 @@ describe('LevelGeometry', () => {
         expect(geo.pistePath.length).toBe(level.height);
       }
     });
+  });
+});
+
+describe('pointInPolygon', () => {
+  const square = [
+    { x: 0, y: 0 }, { x: 10, y: 0 },
+    { x: 10, y: 10 }, { x: 0, y: 10 },
+  ];
+
+  it('detects point inside a square', () => {
+    expect(pointInPolygon(5, 5, square)).toBe(true);
+  });
+
+  it('rejects point outside a square', () => {
+    expect(pointInPolygon(15, 5, square)).toBe(false);
+    expect(pointInPolygon(-1, 5, square)).toBe(false);
+    expect(pointInPolygon(5, -1, square)).toBe(false);
+    expect(pointInPolygon(5, 11, square)).toBe(false);
+  });
+
+  it('works with irregular polygon', () => {
+    const triangle = [
+      { x: 0, y: 0 }, { x: 10, y: 0 }, { x: 5, y: 10 },
+    ];
+    expect(pointInPolygon(5, 3, triangle)).toBe(true);
+    expect(pointInPolygon(0, 10, triangle)).toBe(false);
+    expect(pointInPolygon(9, 9, triangle)).toBe(false);
+  });
+
+  it('works with concave polygon', () => {
+    // L-shape: concave polygon
+    const lShape = [
+      { x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 5 },
+      { x: 10, y: 5 }, { x: 10, y: 10 }, { x: 0, y: 10 },
+    ];
+    expect(pointInPolygon(2, 2, lShape)).toBe(true);   // top-left arm
+    expect(pointInPolygon(7, 7, lShape)).toBe(true);    // bottom-right arm
+    expect(pointInPolygon(7, 2, lShape)).toBe(false);   // concave notch
   });
 });

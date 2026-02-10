@@ -105,6 +105,29 @@ export class LevelGeometry {
     return false;
   }
 
+  /** Get bounding rects for cliff segments (for avalanche zone avoidance). */
+  getCliffAvoidRects(tileSize: number): { startY: number; endY: number; leftX: number; rightX: number }[] {
+    const rects: { startY: number; endY: number; leftX: number; rightX: number }[] = [];
+    for (const cliff of this.cliffSegments) {
+      // Sample getX at start/end to find X bounds
+      const edgeStart = cliff.getX(cliff.startY);
+      const edgeMid = cliff.getX((cliff.startY + cliff.endY) / 2);
+      const edgeEnd = cliff.getX(cliff.endY);
+      if (cliff.side === 'left') {
+        const maxEdge = Math.max(edgeStart, edgeMid, edgeEnd);
+        const cliffEnd = maxEdge - cliff.offset;
+        const cliffStart = cliffEnd - cliff.extent;
+        rects.push({ startY: cliff.startY, endY: cliff.endY, leftX: cliffStart - tileSize, rightX: cliffEnd + tileSize });
+      } else {
+        const minEdge = Math.min(edgeStart, edgeMid, edgeEnd);
+        const cliffStart = minEdge + cliff.offset;
+        const cliffEnd = cliffStart + cliff.extent;
+        rects.push({ startY: cliff.startY, endY: cliff.endY, leftX: cliffStart - tileSize, rightX: cliffEnd + tileSize });
+      }
+    }
+    return rects;
+  }
+
   isOnAccessPath(x: number, y: number): boolean {
     if (!this.accessPathRects) return false;
     for (const rect of this.accessPathRects) {
@@ -184,6 +207,13 @@ export class LevelGeometry {
 
     this.cliffSegments = [];
     const worldWidth = level.width * tileSize;
+    const worldHeight = level.height * tileSize;
+
+    // On levels with avalanche hazards, limit cliffs to top/bottom bands
+    // to leave the middle (0.15–0.65) clear for avalanche zone placement
+    const hasAvalanche = level.hazards?.includes('avalanche');
+    const cliffFreeTop = hasAvalanche ? worldHeight * 0.15 : 0;
+    const cliffFreeBottom = hasAvalanche ? worldHeight * 0.65 : worldHeight;
 
     const rand = (seed: number) => {
       const n = Math.sin(seed * 127.1) * 43758.5453;
@@ -214,7 +244,8 @@ export class LevelGeometry {
         r.side === 'right' && yPos >= r.startY && yPos <= r.endY
       ));
 
-      const hasLeftCliff = leftEdge > tileSize && !isLeftAccess;
+      const hasLeftCliff = leftEdge > tileSize && !isLeftAccess &&
+        !(hasAvalanche && yPos >= cliffFreeTop && yPos <= cliffFreeBottom);
       if (hasLeftCliff) {
         if (leftStart === null) leftStart = yPos;
         leftEdges.push({ y: yPos, x: leftEdge });
@@ -224,7 +255,8 @@ export class LevelGeometry {
         leftEdges.length = 0;
       }
 
-      const hasRightCliff = rightEdge < worldWidth - tileSize && !isRightAccess;
+      const hasRightCliff = rightEdge < worldWidth - tileSize && !isRightAccess &&
+        !(hasAvalanche && yPos >= cliffFreeTop && yPos <= cliffFreeBottom);
       if (hasRightCliff) {
         if (rightStart === null) rightStart = yPos;
         rightEdges.push({ y: yPos, x: rightEdge });

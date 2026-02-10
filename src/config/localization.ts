@@ -241,7 +241,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260210_date: "10 février 2026",
-        changelog_20260210: "🎵 Musique de piano procédurale\n🔊 Effets sonores moteur et environnement\n🗣️ Voix des personnages\n🔈 Réglages de volume",
+        changelog_20260210: "🎵 Musique et effets sonores\n🔈 Réglages de volume\n⏱️ Temps de niveau auto-calibrés\n⏭️ Option sauter le tutoriel\n🏔️ Refonte des zones d'avalanche",
         changelog_20260209_date: "9 février 2026",
         changelog_20260209: "🏔️ Écrans victoire/défaite alpins\n❄️ Neige de tempête sur les éléments\n🏆 Bonus sans faute\n🔊 Ambiances météo et faune",
         changelog_20260208_date: "8 février 2026",
@@ -483,7 +483,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260210_date: "February 10, 2026",
-        changelog_20260210: "🎵 Procedural piano music\n🔊 Engine and environment sound effects\n🗣️ Character voices\n🔈 Volume settings",
+        changelog_20260210: "🎵 Music and sound effects\n🔈 Volume settings\n⏱️ Auto-calibrated level times\n⏭️ Skip tutorial option\n🏔️ Avalanche zone redesign",
         changelog_20260209_date: "February 9, 2026",
         changelog_20260209: "🏔️ Alpine win/fail screens\n❄️ Storm snow accumulation\n🏆 Flawless bonus\n🔊 Weather and wildlife ambience",
         changelog_20260208_date: "February 8, 2026",
@@ -691,7 +691,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260210_date: "10. Februar 2026",
-        changelog_20260210: "🎵 Prozedurale Klaviermusik\n🔊 Motor- und Umgebungsgeräusche\n🗣️ Charakterstimmen\n🔈 Lautstärkeeinstellungen",
+        changelog_20260210: "🎵 Musik und Soundeffekte\n🔈 Lautstärkeeinstellungen\n⏱️ Automatisch kalibrierte Levelzeiten\n⏭️ Tutorial überspringen\n🏔️ Lawinenzonen-Redesign",
         changelog_20260209_date: "9. Februar 2026",
         changelog_20260209: "🏔️ Alpine Sieg-/Niederlagenbilder\n❄️ Schneeakkumulation bei Sturm\n🏆 Fehlerlos-Bonus\n🔊 Wetter- und Tiergeräusche",
         changelog_20260208_date: "8. Februar 2026",
@@ -930,7 +930,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260210_date: "10 febbraio 2026",
-        changelog_20260210: "🎵 Musica di pianoforte procedurale\n🔊 Effetti sonori motore e ambiente\n🗣️ Voci dei personaggi\n🔈 Impostazioni volume",
+        changelog_20260210: "🎵 Musica ed effetti sonori\n🔈 Impostazioni volume\n⏱️ Tempi livello auto-calibrati\n⏭️ Salta il tutorial\n🏔️ Riprogettazione zone valanga",
         changelog_20260209_date: "9 febbraio 2026",
         changelog_20260209: "🏔️ Schermate vittoria/sconfitta alpine\n❄️ Accumulo neve da tempesta\n🏆 Bonus senza errori\n🔊 Suoni meteo e fauna",
         changelog_20260208_date: "8 febbraio 2026",
@@ -1169,7 +1169,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
         
         // Changelog
         changelog_20260210_date: "10 de febrero de 2026",
-        changelog_20260210: "🎵 Música de piano procedural\n🔊 Efectos de sonido motor y ambiente\n🗣️ Voces de personajes\n🔈 Ajustes de volumen",
+        changelog_20260210: "🎵 Música y efectos de sonido\n🔈 Ajustes de volumen\n⏱️ Tiempos de nivel auto-calibrados\n⏭️ Saltar tutorial\n🏔️ Rediseño de zonas de avalancha",
         changelog_20260209_date: "9 de febrero de 2026",
         changelog_20260209: "🏔️ Pantallas victoria/derrota alpinas\n❄️ Acumulación de nieve en tormenta\n🏆 Bonus sin fallos\n🔊 Sonidos de clima y fauna",
         changelog_20260208_date: "8 de febrero de 2026",

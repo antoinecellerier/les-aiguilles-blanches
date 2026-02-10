@@ -333,8 +333,9 @@ export default class GameScene extends Phaser.Scene {
         () => this.isGrooming,
         (key: string) => this.showDialogue(key),
         (won: boolean, reason: string) => this.gameOver(won, reason),
-        this.geometry.accessPathRects,
-        this.winchSystem.anchors?.map(a => ({ x: a.x, y: a.baseY }))
+        this.geometry.getCliffAvoidRects(this.tileSize),
+        this.winchSystem.anchors?.map(a => ({ x: a.x, y: a.baseY })),
+        this.geometry.pistePath
       );
     }
   }

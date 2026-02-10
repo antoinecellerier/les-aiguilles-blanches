@@ -32,7 +32,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 - [x] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
 - [x] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
-- [ ] Avalanche zones often overlap cliffs, they should be more distinct
+- [x] Avalanche zones often overlap cliffs, they should be more distinct
 - [x] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 - [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 - [x] Tutorial dialogue fatigue — skip tutorial option on replay
@@ -54,6 +54,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 
 ## Recently Completed
+
+- ✅ **Avalanche/cliff overlap fix** — Avalanche zones now avoid cliff segments via `getCliffAvoidRects()` bounding rects passed as additional avoid regions.
 
 - ✅ **Settings menu visual polish** — Alpine terrain backdrop with animated wildlife (via `MenuWildlifeController`), section panels with borders and gold accent dividers, responsive two-column/single-column layout with conditional scrollbar. Panel width properly accounts for padding to prevent overflow. Centralized `DEPTHS.MENU_OVERLAY`/`MENU_UI` constants in gameConfig.ts.
 
