@@ -36,6 +36,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 - [ ] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 - [ ] Tutorial dialogue fatigue — consider shortening or auto-skipping tutorial on replay
+- [ ] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
 
 
 ## Future (Backlog)
