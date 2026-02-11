@@ -45,7 +45,7 @@ const it: Record<string, string> = {
   moveDown: "Giù",
   moveLeft: "Sinistra",
   moveRight: "Destra",
-  groom: "Battipista",
+  groom: "Preparare",
   winch: "Verricello",
   pause: "Pausa",
   clickToRebind: "Clicca per modificare",
@@ -118,6 +118,8 @@ const it: Record<string, string> = {
   restart: "Ricomincia",
   quit: "Esci",
   menu: "Menu",
+  levelSelect: "Scegli livello",
+  locked: "Bloccato",
   tutorial: "Tutorial",
   timeUsed: "Tempo impiegato",
   excellent: "Eccellente!",
@@ -205,7 +207,7 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 febbraio 2026",
-  changelog_20260211: "⛷️ Scia o fai snowboard sulla pista preparata\n🎯 Qualità della preparazione\n🏔️ Zone ripide visivamente distinte",
+  changelog_20260211: "⛷️ Scia o fai snowboard sulla pista preparata\n🎯 Qualità della preparazione\n🏔️ Zone ripide visivamente distinte\n🗺️ Selezione livello e valutazioni",
   changelog_20260210_date: "10 febbraio 2026",
   changelog_20260210: "🎵 Musica ed effetti sonori\n🔈 Impostazioni volume\n⏱️ Tempi livello auto-calibrati\n⏭️ Salta il tutorial\n🏔️ Riprogettazione zone valanga",
   changelog_20260209_date: "9 febbraio 2026",

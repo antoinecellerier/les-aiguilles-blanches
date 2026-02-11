@@ -42,7 +42,7 @@ const ko: Record<string, string> = {
   moveDown: "아래",
   moveLeft: "왼쪽",
   moveRight: "오른쪽",
-  groom: "정설",
+  groom: "정비",
   winch: "윈치",
   pause: "일시정지",
   clickToRebind: "클릭하여 변경",
@@ -138,6 +138,8 @@ const ko: Record<string, string> = {
   restart: "다시 시작",
   quit: "종료",
   menu: "메뉴",
+  levelSelect: "레벨 선택",
+  locked: "잠김",
   target: "목표",
   tutorial: "튜토리얼",
   timeUsed: "경과 시간",
@@ -239,7 +241,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "2026년 2월 11일",
-  changelog_20260211: "⛷️ 정비한 슬로프를 스키 또는 스노보드로 활강\n🎯 정비 품질\n🏔️ 급경사 구역 시각적 구분",
+  changelog_20260211: "⛷️ 정비한 슬로프를 스키 또는 스노보드로 활강\n🎯 정비 품질\n🏔️ 급경사 구역 시각적 구분\n🗺️ 레벨 선택과 별점",
   changelog_20260210_date: "2026년 2월 10일",
   changelog_20260210: "🎵 음악과 효과음\n🔈 볼륨 설정\n⏱️ 자동 조정 레벨 타임\n⏭️ 튜토리얼 건너뛰기\n🏔️ 눈사태 구역 재설계",
   changelog_20260209_date: "2026년 2월 9일",

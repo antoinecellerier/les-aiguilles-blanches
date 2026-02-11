@@ -30,6 +30,15 @@ export default class MenuScene extends Phaser.Scene {
   get overlayOpen(): boolean { return this.overlay?.open ?? false; }
   private wildlife: MenuWildlifeController = null!;
   private selectionArrow: Phaser.GameObjects.Text | null = null;
+  private menuContainer: Phaser.GameObjects.Container | null = null;
+  private menuScrollY = 0;
+  private menuMaxScroll = 0;
+  private menuScrollMask: Phaser.GameObjects.Graphics | null = null;
+  private menuDragStartY = 0;
+  private menuDragStartScroll = 0;
+  private menuScrollUpHint: Phaser.GameObjects.Text | null = null;
+  private menuScrollDownHint: Phaser.GameObjects.Text | null = null;
+  private menuUpdateScrollHints: (() => void) | null = null;
   private snowLineY = 0;
   private inputHintTexts: Phaser.GameObjects.GameObject[] = [];
   private lastInputKey: string | null = null;
@@ -255,13 +264,23 @@ export default class MenuScene extends Phaser.Scene {
   private createMenuButtons(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, buttonSize: number, buttonPadding: number, footerHeight: number, safeAreaBottom: number, subtitleBottom: number, isStorm?: boolean): void {
     const savedProgress = getSavedProgress();
     const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0;
+    const hasCompletedLevels = savedProgress?.levelStats != null &&
+      Object.values(savedProgress.levelStats).some(s => s.completed);
 
     const buttonDefs: Array<{ text: string; callback: () => void; primary: boolean }> = [];
     if (hasProgress) {
       buttonDefs.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel), primary: true });
-      buttonDefs.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
-    } else {
+    }
+    if (!hasProgress && !hasCompletedLevels) {
       buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
+    } else if (!hasProgress) {
+      buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
+    }
+    if (hasProgress) {
+      buttonDefs.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
+    }
+    if (hasProgress || hasCompletedLevels) {
+      buttonDefs.push({ text: 'levelSelect', callback: () => this.showLevelSelect(), primary: false });
     }
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
     buttonDefs.push({ text: 'changelog', callback: () => this.showChangelog(), primary: false });
@@ -276,7 +295,7 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     const menuStartY = subtitleBottom + 15 * scaleFactor;
-    const menuEndY = Math.min(snowLineY, height - footerHeight - safeAreaBottom) - 10 * scaleFactor;
+    const menuEndY = height - footerHeight - safeAreaBottom - 10 * scaleFactor;
     const menuAvailableH = menuEndY - menuStartY;
     const minButtonHeight = buttonSize + buttonPadding * 2;
     const minSpacing = minButtonHeight + (isPortrait ? 4 : 10);
@@ -285,11 +304,16 @@ export default class MenuScene extends Phaser.Scene {
       if (fsIdx !== -1) buttonDefs.splice(fsIdx, 1);
     }
     const buttonSpacing = Math.max(minSpacing, Math.min(Math.round(46 * scaleFactor), Math.round(menuAvailableH / (buttonDefs.length + 0.5))));
-    const menuY = menuStartY + buttonSpacing * 0.5;
+    const totalMenuH = buttonDefs.length * buttonSpacing;
+    const needsScroll = totalMenuH > menuAvailableH;
+    const localMenuY = buttonSpacing * 0.5;
 
     this.menuButtons = [];
     this.buttonShadows = [];
     this.buttonCallbacks = [];
+
+    // Container for all menu buttons — enables scrolling when needed
+    this.menuContainer = this.add.container(0, menuStartY).setDepth(10);
 
     const arrowSize = Math.round(22 * scaleFactor);
     this.selectionArrow = this.add.text(0, 0, '▶', {
@@ -298,11 +322,12 @@ export default class MenuScene extends Phaser.Scene {
       color: '#FFD700',
       stroke: '#2d2822',
       strokeThickness: 3,
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5);
+    this.menuContainer.add(this.selectionArrow);
 
     buttonDefs.forEach((btn, i) => {
       const btnText = t(btn.text) || btn.text;
-      const yPos = menuY + i * buttonSpacing;
+      const yPos = localMenuY + i * buttonSpacing;
       const shadowOffset = Math.round(4 * scaleFactor);
       const bgColor = btn.primary ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
       const shadowColor = btn.primary ? '#115511' : '#1a3a5c';
@@ -313,7 +338,8 @@ export default class MenuScene extends Phaser.Scene {
         color: '#ffffff',
         backgroundColor: shadowColor,
         padding: { x: Math.round(50 * scaleFactor), y: buttonPadding },
-      }).setOrigin(0.5).setAlpha(0.6).setDepth(10);
+      }).setOrigin(0.5).setAlpha(0.6);
+      this.menuContainer.add(shadow);
 
       const button = this.add.text(width / 2, yPos, btnText, {
         fontFamily: THEME.fonts.family,
@@ -323,7 +349,6 @@ export default class MenuScene extends Phaser.Scene {
         padding: { x: Math.round(50 * scaleFactor), y: buttonPadding },
       })
         .setOrigin(0.5)
-        .setDepth(10)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => {
           this.buttonNav.select(i);
@@ -335,7 +360,8 @@ export default class MenuScene extends Phaser.Scene {
           playClick();
           btn.callback();
         });
-      
+      this.menuContainer.add(button);
+
       this.menuButtons.push(button);
       this.buttonShadows.push(shadow);
       this.buttonCallbacks.push(btn.callback);
@@ -347,17 +373,74 @@ export default class MenuScene extends Phaser.Scene {
         const bw = btn.width;
         const bx = btn.x - bw / 2;
         const by = btn.y - btn.height / 2;
-        const sg = this.add.graphics().setDepth(11);
+        const sg = this.add.graphics();
         sg.fillStyle(0xf0f5f8, 0.8);
         for (let sx = 0; sx < bw; sx += 5) {
           const h = 1 + Math.abs(Math.sin(sx * 0.3 + btn.y * 0.1)) * 2;
           sg.fillRect(bx + sx, by - h + 1, 5, h);
         }
+        this.menuContainer!.add(sg);
       });
+    }
+
+    // Scroll support when buttons overflow
+    this.menuScrollY = 0;
+    this.menuMaxScroll = Math.max(0, totalMenuH - menuAvailableH);
+
+    if (needsScroll) {
+      const maskGfx = this.add.graphics().setDepth(10);
+      maskGfx.fillStyle(0xffffff);
+      maskGfx.fillRect(0, menuStartY, width, menuAvailableH);
+      maskGfx.setVisible(false);
+      this.menuScrollMask = maskGfx;
+      this.menuContainer.setMask(maskGfx.createGeometryMask());
+
+      // Scroll indicators
+      const hintSize = Math.round(Math.max(12, 16 * scaleFactor));
+      this.menuScrollUpHint = this.add.text(width / 2, menuStartY + 2, '▲', {
+        fontFamily: THEME.fonts.family, fontSize: hintSize + 'px', color: '#ffffff',
+      }).setOrigin(0.5, 0).setDepth(11).setAlpha(0);
+      this.menuScrollDownHint = this.add.text(width / 2, menuEndY - 2, '▼', {
+        fontFamily: THEME.fonts.family, fontSize: hintSize + 'px', color: '#ffffff',
+      }).setOrigin(0.5, 1).setDepth(11).setAlpha(0.7);
+
+      const updateScrollHints = () => {
+        if (this.menuScrollUpHint) this.menuScrollUpHint.setAlpha(this.menuScrollY > 0 ? 0.7 : 0);
+        if (this.menuScrollDownHint) this.menuScrollDownHint.setAlpha(this.menuScrollY < this.menuMaxScroll ? 0.7 : 0);
+      };
+      updateScrollHints();
+
+      // Wheel scroll
+      this.input.on('wheel', (_p: unknown, _gos: unknown, _dx: number, dy: number) => {
+        if (this.overlay.open) return;
+        this.menuScrollY = Phaser.Math.Clamp(this.menuScrollY + dy * 0.5, 0, this.menuMaxScroll);
+        this.menuContainer!.y = menuStartY - this.menuScrollY;
+        updateScrollHints();
+      });
+
+      // Touch drag scroll
+      this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
+        if (this.overlay.open) return;
+        this.menuDragStartY = p.y;
+        this.menuDragStartScroll = this.menuScrollY;
+      });
+      this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
+        if (!p.isDown || this.overlay.open) return;
+        const delta = this.menuDragStartY - p.y;
+        if (Math.abs(delta) > 8) {
+          this.menuScrollY = Phaser.Math.Clamp(this.menuDragStartScroll + delta, 0, this.menuMaxScroll);
+          this.menuContainer!.y = menuStartY - this.menuScrollY;
+          updateScrollHints();
+        }
+      });
+
+      this.menuUpdateScrollHints = updateScrollHints;
     }
 
     const shadows = this.buttonShadows;
     const arrow = this.selectionArrow;
+    const scrollMenuStartY = menuStartY;
+    const scrollMenuAvailH = menuAvailableH;
     this.buttonNav = createMenuButtonNav(
       this.menuButtons, this.buttonCallbacks,
       (buttons, selectedIndex) => {
@@ -369,6 +452,18 @@ export default class MenuScene extends Phaser.Scene {
             if (arrow) {
               arrow.setPosition(btn.x - btn.width / 2 - 20, btn.y);
               arrow.setVisible(true);
+            }
+            // Scroll into view if needed
+            if (this.menuMaxScroll > 0) {
+              const btnTop = btn.y - btn.height / 2;
+              const btnBottom = btn.y + btn.height / 2;
+              if (btnTop - this.menuScrollY < 0) {
+                this.menuScrollY = Math.max(0, btnTop - 5);
+              } else if (btnBottom - this.menuScrollY > scrollMenuAvailH) {
+                this.menuScrollY = Math.min(this.menuMaxScroll, btnBottom - scrollMenuAvailH + 5);
+              }
+              this.menuContainer!.y = scrollMenuStartY - this.menuScrollY;
+              this.menuUpdateScrollHints?.();
             }
           } else {
             btn.setStyle({ backgroundColor: isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex });
@@ -385,11 +480,12 @@ export default class MenuScene extends Phaser.Scene {
       const firstBtn = this.menuButtons[0];
       const lastBtn = this.menuButtons[this.menuButtons.length - 1];
       const btnHalfW = firstBtn.width / 2 + 30;
+      const containerY = menuStartY;
       this.wildlife.menuZone = {
         left: width / 2 - btnHalfW,
         right: width / 2 + btnHalfW,
-        top: firstBtn.y - firstBtn.height / 2 - 20,
-        bottom: lastBtn.y + lastBtn.height / 2 + 20,
+        top: containerY + firstBtn.y - firstBtn.height / 2 - 20,
+        bottom: containerY + lastBtn.y + lastBtn.height / 2 + 20,
       };
     }
   }
@@ -900,6 +996,9 @@ export default class MenuScene extends Phaser.Scene {
     // Close any open overlay dialog before teardown
     if (this.overlay.open) this.overlay.close();
     this.input.keyboard?.removeAllListeners();
+    this.input.off('wheel');
+    this.input.off('pointerdown');
+    this.input.off('pointermove');
     this.scale.off('resize', this.handleResize, this);
     if (this.gamepadConnectHandler) {
       window.removeEventListener('gamepadconnected', this.gamepadConnectHandler);
@@ -916,6 +1015,12 @@ export default class MenuScene extends Phaser.Scene {
     const game = this.game;
     this.scene.stop('MenuScene');
     resetGameScenes(game, 'GameScene', { level });
+  }
+
+  private showLevelSelect(): void {
+    const game = this.game;
+    this.scene.stop('MenuScene');
+    resetGameScenes(game, 'LevelSelectScene');
   }
 
   private confirmNewGame(): void {

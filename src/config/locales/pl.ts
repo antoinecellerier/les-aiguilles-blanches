@@ -42,7 +42,7 @@ const pl: Record<string, string> = {
   moveDown: "Dół",
   moveLeft: "Lewo",
   moveRight: "Prawo",
-  groom: "Ratrakuj",
+  groom: "Ratrakować",
   winch: "Wciągarka",
   pause: "Pauza",
   clickToRebind: "Kliknij aby zmienić",
@@ -138,6 +138,8 @@ const pl: Record<string, string> = {
   restart: "Restart",
   quit: "Wyjdź",
   menu: "Menu",
+  levelSelect: "Wybór trasy",
+  locked: "Zablokowany",
   target: "Cel",
   tutorial: "Samouczek",
   timeUsed: "Wykorzystany czas",
@@ -239,7 +241,7 @@ const pl: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11 lutego 2026",
-  changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie po przygotowanym stoku\n🎯 Jakość preparacji\n🏔️ Strome strefy wizualnie wyróżnione",
+  changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie po przygotowanym stoku\n🎯 Jakość preparacji\n🏔️ Strome strefy wizualnie wyróżnione\n🗺️ Wybór trasy i oceny gwiazdkowe",
   changelog_20260210_date: "10 lutego 2026",
   changelog_20260210: "🎵 Muzyka i efekty dźwiękowe\n🔈 Ustawienia głośności\n⏱️ Automatycznie kalibrowane czasy\n⏭️ Pomiń samouczek\n🏔️ Przeprojektowane strefy lawinowe",
   changelog_20260209_date: "9 lutego 2026",

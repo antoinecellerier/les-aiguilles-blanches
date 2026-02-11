@@ -138,6 +138,8 @@ const sk: Record<string, string> = {
   restart: "Reštartovať",
   quit: "Odísť",
   menu: "Menu",
+  levelSelect: "Výber trate",
+  locked: "Zamknuté",
   target: "Cieľ",
   tutorial: "Návod",
   timeUsed: "Spotrebovaný čas",
@@ -239,7 +241,7 @@ const sk: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11. februára 2026",
-  changelog_20260211: "⛷️ Lyžujte alebo snowboardujte po upravenej zjazdovke\n🎯 Kvalita úpravy\n🏔️ Strmé zóny vizuálne odlíšené",
+  changelog_20260211: "⛷️ Lyžujte alebo snowboardujte po upravenej zjazdovke\n🎯 Kvalita úpravy\n🏔️ Strmé zóny vizuálne odlíšené\n🗺️ Výber trate a hviezdičkové hodnotenie",
   changelog_20260210_date: "10. februára 2026",
   changelog_20260210: "🎵 Hudba a zvukové efekty\n🔈 Nastavenia hlasitosti\n⏱️ Automaticky kalibrované časy\n⏭️ Preskočiť tutoriál\n🏔️ Prepracované lavínové zóny",
   changelog_20260209_date: "9. februára 2026",

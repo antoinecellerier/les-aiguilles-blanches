@@ -138,6 +138,8 @@ const en: Record<string, string> = {
   restart: "Restart",
   quit: "Quit",
   menu: "Menu",
+  levelSelect: "Level Select",
+  locked: "Locked",
   target: "Target",
   tutorial: "Tutorial",
   timeUsed: "Time Used",
@@ -239,7 +241,7 @@ const en: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "February 11, 2026",
-  changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed\n🎯 Grooming quality\n🏔️ Steep zones visually distinct",
+  changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed\n🎯 Grooming quality\n🏔️ Steep zones visually distinct\n🗺️ Level select and star ratings",
   changelog_20260210_date: "February 10, 2026",
   changelog_20260210: "🎵 Music and sound effects\n🔈 Volume settings\n⏱️ Auto-calibrated level times\n⏭️ Skip tutorial option\n🏔️ Avalanche zone redesign",
   changelog_20260209_date: "February 9, 2026",

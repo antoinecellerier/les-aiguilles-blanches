@@ -141,6 +141,8 @@ const fr: Record<string, string> = {
   restart: "Recommencer",
   quit: "Quitter",
   menu: "Menu",
+  levelSelect: "Choix du niveau",
+  locked: "Verrouillé",
   target: "Objectif",
   tutorial: "Tutoriel",
   timeUsed: "Temps utilisé",
@@ -244,7 +246,7 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 février 2026",
-  changelog_20260211: "⛷️ Skiez ou snowboardez sur la piste damée\n🎯 Qualité de damage\n🏔️ Zones raides visuellement distinctes",
+  changelog_20260211: "⛷️ Skiez ou snowboardez sur la piste damée\n🎯 Qualité de damage\n🏔️ Zones raides visuellement distinctes\n🗺️ Sélection de niveau et étoiles",
   changelog_20260210_date: "10 février 2026",
   changelog_20260210: "🎵 Musique et effets sonores\n🔈 Réglages de volume\n⏱️ Temps de niveau auto-calibrés\n⏭️ Option sauter le tutoriel\n🏔️ Refonte des zones d'avalanche",
   changelog_20260209_date: "9 février 2026",

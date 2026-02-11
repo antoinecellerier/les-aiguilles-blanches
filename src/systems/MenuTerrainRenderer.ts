@@ -109,7 +109,8 @@ function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scal
 
 function createGroomer(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
-  const gx = width / 2 + 140 * sx;
+  const isLandscape = width > snowLineY * 1.5;
+  const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
   const s = 2.0 * scaleFactor;
   const g = scene.add.graphics().setDepth(5 + snowLineY * 0.001);
   // Side-view groomer sitting on snow — wide and low

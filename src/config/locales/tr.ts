@@ -42,7 +42,7 @@ const tr: Record<string, string> = {
   moveDown: "Aşağı",
   moveLeft: "Sol",
   moveRight: "Sağ",
-  groom: "Pistle",
+  groom: "Hazırla",
   winch: "Vinç",
   pause: "Duraklat",
   clickToRebind: "Değiştirmek için tıklayın",
@@ -138,6 +138,8 @@ const tr: Record<string, string> = {
   restart: "Yeniden Başlat",
   quit: "Çık",
   menu: "Menü",
+  levelSelect: "Pist Seç",
+  locked: "Kilitli",
   target: "Hedef",
   tutorial: "Öğretici",
   timeUsed: "Geçen Süre",
@@ -239,7 +241,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11 Şubat 2026",
-  changelog_20260211: "⛷️ Hazırladığınız pistte kayak veya snowboard yapın\n🎯 Hazırlama kalitesi\n🏔️ Dik bölgeler görsel olarak belirgin",
+  changelog_20260211: "⛷️ Hazırladığınız pistte kayak veya snowboard yapın\n🎯 Hazırlama kalitesi\n🏔️ Dik bölgeler görsel olarak belirgin\n🗺️ Pist seçimi ve yıldız puanları",
   changelog_20260210_date: "10 Şubat 2026",
   changelog_20260210: "🎵 Müzik ve ses efektleri\n🔈 Ses ayarları\n⏱️ Otomatik kalibreli seviye süreleri\n⏭️ Eğitimi atla\n🏔️ Çığ bölgeleri yeniden tasarlandı",
   changelog_20260209_date: "9 Şubat 2026",

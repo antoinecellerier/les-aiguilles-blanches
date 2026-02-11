@@ -84,6 +84,7 @@ snow-groomer/
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
+│   │   ├── LevelSelectScene.ts # Level select / replay (browse + star ratings)
 │   │   ├── SettingsScene.ts # Language, a11y, gameplay prefs, controls, keyboard layout
 │   │   ├── GameScene.ts    # Main gameplay
 │   │   ├── HUDScene.ts     # UI overlay (parallel to GameScene)
@@ -116,9 +117,9 @@ snow-groomer/
 
 ```
 BootScene → MenuScene → GameScene ⟷ HUDScene
-     ↑           ↑            ↓         ↓
-     │           │      DialogueScene   │
-     │           │            ↓         │
+     ↑           ↑↓           ↓         ↓
+     │    LevelSelectScene DialogueScene │
+     │           ↑            ↓         │
      │           │      PauseScene      │
      │           │            ↓         │
      │           └── LevelCompleteScene ┘

@@ -76,8 +76,11 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] Publish as standalone game package
 - [ ] Ski/snowboard reward run (v2) — Slalom gates, freestyle elements on park levels, per-level modifications, best time tracking
 - [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
+- [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Level select & replay** — New LevelSelectScene accessible from main menu when player has progress. Shows all 11 levels with difficulty markers, star ratings (⭐⭐⭐), and Groom/Ski buttons. Per-level stats persisted (best stars, best time, bonus objectives). Ski mode gated to completed levels. Locked levels shown grayed out. Keyboard/gamepad navigation, responsive layout, scroll support.
 
 - ✅ **Grooming quality system** — Steering stability (angular acceleration) + fall-line alignment determine per-tile quality (0–100%). Three visual texture tiers. Re-grooming upgrades quality (best-of-N). New `precision_grooming` bonus objective on L3, L6, L10. Localized in 14 languages.
 

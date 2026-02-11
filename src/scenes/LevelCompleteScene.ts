@@ -11,6 +11,7 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
+import { markLevelCompleted } from '../utils/gameProgress';
 import { clearGroomedTiles } from '../utils/skiRunState';
 
 /**
@@ -83,6 +84,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.buttonIsCTA = [];
     this.inputReady = false;
     this.isNavigating = false;
+
+    // Persist per-level completion stats on win
+    if (this.won) {
+      const stars = this.getStarCount();
+      const bonusMet = this.evaluateBonusObjectives().filter(r => r.met).length;
+      markLevelCompleted(this.levelIndex, stars, this.timeUsed, bonusMet);
+    }
   }
 
   create(): void {
@@ -434,19 +442,24 @@ export default class LevelCompleteScene extends Phaser.Scene {
     return options[Math.floor(Math.random() * options.length)];
   }
 
-  private getGrade(): string {
+  private getStarCount(): number {
     const level = LEVELS[this.levelIndex] as Level;
-    const timePercent = this.timeUsed / level.timeLimit;
+    const timePercent = level.timeLimit > 0 ? this.timeUsed / level.timeLimit : 0;
     const coverageBonus = this.coverage - level.targetCoverage;
     const bonusResults = this.evaluateBonusObjectives();
     const bonusMet = bonusResults.filter(r => r.met).length;
     const bonusTotal = bonusResults.length;
-
-    // Bonus objectives boost grade
     const bonusBoost = bonusTotal > 0 ? bonusMet / bonusTotal : 0;
 
-    if ((timePercent < 0.5 && coverageBonus >= 10) || (bonusBoost === 1 && coverageBonus >= 5)) return '⭐⭐⭐ ' + t('excellent');
-    if ((timePercent < 0.75 && coverageBonus >= 5) || bonusBoost >= 0.5) return '⭐⭐ ' + t('good');
+    if ((timePercent < 0.5 && coverageBonus >= 10) || (bonusBoost === 1 && coverageBonus >= 5)) return 3;
+    if ((timePercent < 0.75 && coverageBonus >= 5) || bonusBoost >= 0.5) return 2;
+    return 1;
+  }
+
+  private getGrade(): string {
+    const stars = this.getStarCount();
+    if (stars === 3) return '⭐⭐⭐ ' + t('excellent');
+    if (stars === 2) return '⭐⭐ ' + t('good');
     return '⭐ ' + t('passed');
   }
 

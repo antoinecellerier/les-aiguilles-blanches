@@ -138,6 +138,8 @@ const nb: Record<string, string> = {
   restart: "Start på nytt",
   quit: "Avslutt",
   menu: "Meny",
+  levelSelect: "Velg løype",
+  locked: "Låst",
   target: "Mål",
   tutorial: "Opplæring",
   timeUsed: "Tid brukt",
@@ -240,7 +242,7 @@ const nb: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11. februar 2026",
-  changelog_20260211: "⛷️ Stå på ski eller brett ned løypen du preparerte\n🎯 Prepareringskvalitet\n🏔️ Bratte soner visuelt tydelige",
+  changelog_20260211: "⛷️ Stå på ski eller brett ned løypen du preparerte\n🎯 Prepareringskvalitet\n🏔️ Bratte soner visuelt tydelige\n🗺️ Løypevalg og stjernerating",
   changelog_20260210_date: "10. februar 2026",
   changelog_20260210: "🎵 Musikk og lydeffekter\n🔈 Voluminnstillinger\n⏱️ Autokalibrerte nivåtider\n⏭️ Hopp over opplæring\n🏔️ Snøskredsoner redesignet",
   changelog_20260209_date: "9. februar 2026",

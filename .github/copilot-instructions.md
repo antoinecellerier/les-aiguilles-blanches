@@ -75,6 +75,7 @@ MusicSystem is a singleton that persists across scene transitions. Use `MusicSys
 
 ## Key Files
 - `src/scenes/GameScene.ts` - Main gameplay, physics, cliff system
+- `src/scenes/LevelSelectScene.ts` - Level select / replay with star ratings
 - `src/scenes/SkiRunScene.ts` - Post-grooming ski/snowboard descent (reward run)
 - `src/config/gameConfig.ts` - Game constants, BALANCE tuning values
 - `src/config/levels.ts` - Level definitions

@@ -138,6 +138,8 @@ const sv: Record<string, string> = {
   restart: "Starta om",
   quit: "Avsluta",
   menu: "Meny",
+  levelSelect: "Välj bana",
+  locked: "Låst",
   target: "Mål",
   tutorial: "Handledning",
   timeUsed: "Tid använd",
@@ -149,7 +151,7 @@ const sv: Record<string, string> = {
   bonusSpeed: "Tid",
   bonusWinch: "Vinsch-användningar",
   bonusExplore: "Vägar utforskade",
-  bonusPrecision: "Prepareringskvalltet",
+  bonusPrecision: "Prepareringskvalitet",
   retry: "Försök igen",
   gameComplete: "Spelet klart!",
   viewCredits: "Visa tack",
@@ -240,7 +242,7 @@ const sv: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11 februari 2026",
-  changelog_20260211: "⛷️ Åk skidor eller snowboard nerför pisten du preparerat\n🎯 Prepareringskvalltet\n🏔️ Branta zoner visuellt distinkta",
+  changelog_20260211: "⛷️ Åk skidor eller snowboard nerför pisten du preparerat\n🎯 Prepareringskvalitet\n🏔️ Branta zoner visuellt distinkta\n🗺️ Banval och stjärnbetyg",
   changelog_20260210_date: "10 februari 2026",
     changelog_20260210: "🎵 Musik och ljudeffekter\n🔈 Volyminställningar\n⏱️ Autokalibrerade nivåtider\n⏭️ Hoppa över handledning\n🏔️ Lavinzoner omdesignade",
   changelog_20260209_date: "9 februari 2026",

@@ -42,7 +42,7 @@ const ja: Record<string, string> = {
   moveDown: "下",
   moveLeft: "左",
   moveRight: "右",
-  groom: "圧雪",
+  groom: "整備する",
   winch: "ウインチ",
   pause: "ポーズ",
   clickToRebind: "クリックで変更",
@@ -138,6 +138,8 @@ const ja: Record<string, string> = {
   restart: "やり直し",
   quit: "終了",
   menu: "メニュー",
+  levelSelect: "レベル選択",
+  locked: "ロック中",
   target: "目標",
   tutorial: "チュートリアル",
   timeUsed: "経過時間",
@@ -239,7 +241,7 @@ const ja: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "2026年2月11日",
-  changelog_20260211: "⛷️ 整備したゲレンデをスキーやスノーボードで滑走\n🎯 整備品質\n🏔️ 急斜面の視覚的な識別",
+  changelog_20260211: "⛷️ 整備したゲレンデをスキーやスノーボードで滑走\n🎯 整備品質\n🏔️ 急斜面の視覚的な識別\n🗺️ レベル選択とスター評価",
   changelog_20260210_date: "2026年2月10日",
   changelog_20260210: "🎵 音楽と効果音\n🔈 音量設定\n⏱️ 自動調整レベルタイム\n⏭️ チュートリアルスキップ\n🏔️ 雪崩エリア再設計",
   changelog_20260209_date: "2026年2月9日",

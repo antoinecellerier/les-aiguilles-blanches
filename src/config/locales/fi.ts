@@ -42,7 +42,7 @@ const fi: Record<string, string> = {
   moveDown: "Alas",
   moveLeft: "Vasen",
   moveRight: "Oikea",
-  groom: "Tampata",
+  groom: "Ajaa rinnettä",
   winch: "Vinssi",
   pause: "Tauko",
   clickToRebind: "Klikkaa muuttaaksesi",
@@ -138,6 +138,8 @@ const fi: Record<string, string> = {
   restart: "Aloita alusta",
   quit: "Lopeta",
   menu: "Valikko",
+  levelSelect: "Valitse rinne",
+  locked: "Lukittu",
   target: "Tavoite",
   tutorial: "Opastus",
   timeUsed: "Käytetty aika",
@@ -240,7 +242,7 @@ const fi: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11. helmikuuta 2026",
-  changelog_20260211: "⛷️ Laskettele tai lumilautaile tampaamallasi rinteellä\n🎯 Tamppauksen laatu\n🏔️ Jyrkät vyöhykkeet visuaalisesti erottuvat",
+  changelog_20260211: "⛷️ Laskettele tai lumilautaile tampaamallasi rinteellä\n🎯 Tamppauksen laatu\n🏔️ Jyrkät vyöhykkeet visuaalisesti erottuvat\n🗺️ Rinteen valinta ja tähdet",
   changelog_20260210_date: "10. helmikuuta 2026",
   changelog_20260210: "🎵 Musiikki ja äänitehosteet\n🔈 Äänenvoimakkuusasetukset\n⏱️ Automaattisesti kalibroidut tasoajat\n⏭️ Ohita opastus\n🏔️ Lumivyöryalueet uudistettu",
   changelog_20260209_date: "9. helmikuuta 2026",

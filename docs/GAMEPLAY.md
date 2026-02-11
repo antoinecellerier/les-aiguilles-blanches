@@ -111,9 +111,18 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
 
 ### Saving Progress
 
-Your progress is automatically saved when you complete a level. When you return to the game:
+Your progress is automatically saved when you complete a level. Best star ratings, times, and bonus objectives are tracked per level. When you return to the game:
 - **Resume**: Continue from where you left off
+- **Level Select**: Browse all levels, replay completed ones, and aim for ⭐⭐⭐
 - **New Game**: Start fresh from the tutorial
+
+### Level Select
+
+Once you've completed the tutorial, the **Level Select** button appears on the main menu. From there you can:
+- **Groom** any unlocked level (replay or continue)
+- **Ski/Snowboard** any completed level (must groom it first!)
+- See your best star rating (⭐ to ⭐⭐⭐) for each level
+- Locked levels are visible but grayed out
 
 ### Difficulty Scaling
 
