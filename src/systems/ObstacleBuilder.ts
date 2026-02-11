@@ -129,9 +129,12 @@ export class ObstacleBuilder {
       rg.fillRect(restaurant.x - 28 * s, restaurant.y - 25 * s, 56 * s, 3 * s);
     }
 
-    // Fuel station at bottom of level
+    // Fuel station at bottom of level (shifted right on park levels to avoid features)
+    const fuelX = level.difficulty === 'park'
+      ? worldWidth - tileSize * 4
+      : worldWidth / 2 + tileSize * 4;
     const fuelStation = interactables.create(
-      worldWidth / 2 + tileSize * 4, worldHeight - tileSize * 3, 'fuel'
+      fuelX, worldHeight - tileSize * 3, 'fuel'
     );
     fuelStation.interactionType = 'fuel';
     fuelStation.setScale(tileSize / 16);

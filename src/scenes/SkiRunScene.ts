@@ -362,7 +362,7 @@ export default class SkiRunScene extends Phaser.Scene {
           y * tileSize + tileSize / 2,
           texture
         );
-        tile.setDisplaySize(tileSize, tileSize);
+        tile.setDisplaySize(tileSize + 1, tileSize + 1);
         if (isGroomable) tile.setDepth(DEPTHS.PISTE);
       }
     }

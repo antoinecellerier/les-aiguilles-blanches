@@ -203,9 +203,9 @@ export default class BootScene extends Phaser.Scene {
 
     // Ungroomed snow tile
     const snowGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
-    snowGraphics.fillStyle(0xd8e4e8);
+    snowGraphics.fillStyle(0xe8eff3);
     snowGraphics.fillRect(0, 0, 16, 16);
-    snowGraphics.fillStyle(0xc8d4d8);
+    snowGraphics.fillStyle(0xd8e2e8);
     snowGraphics.fillRect(2, 2, 3, 3);
     snowGraphics.fillRect(9, 5, 4, 3);
     snowGraphics.fillRect(4, 10, 3, 4);
