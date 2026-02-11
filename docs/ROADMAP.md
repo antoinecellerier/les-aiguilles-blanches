@@ -80,6 +80,8 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 
 ## Recently Completed
 
+- ✅ **Random ski/snowboard mode** — Default descent mode is now "Random" (50/50 ski or snowboard each run). Settings offers Random / Ski / Snowboard. Mode resolved once per run and shown on button label. Progressive turn drag: carving friction ramps from 10%→100% over 0.4s so initial turns are snappy.
+
 - ✅ **Gameplay QoL** — Groomer spawn exclusion zone (3 tiles), obstacle minimum spacing (6 tiles), halved obstacle density with 90% edge bias, progressive turning (hold ramps to 2.2× over 0.4s), halfpipe wall lip colliders with pump-effect speed boost, ski run tile overlap to fix sub-pixel gaps, ungroomed snow texture lightened, fuel station repositioned on park levels.
 
 - ✅ **Menu scroll & layout** — Scrollable main menu for phone landscape (container + geometry mask, wheel/touch/keyboard scroll, ▲/▼ indicators). Button reordering (Resume CTA → New Game → Level Select). Single green CTA. Groomer shifted to 82% width in landscape to avoid button overlap. Settings scene: back button + title inline at top, maximizing content area.

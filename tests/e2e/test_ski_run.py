@@ -148,7 +148,7 @@ class TestSkiSettings:
     """Test descent mode selector in settings."""
 
     def test_settings_shows_descent_mode(self, game_page: Page):
-        """Settings should have a descent mode selector with Ski and Snowboard buttons."""
+        """Settings should have a descent mode selector with Random, Ski and Snowboard buttons."""
         # Navigate to settings
         from conftest import navigate_to_settings
         navigate_to_settings(game_page)
@@ -160,8 +160,10 @@ class TestSkiSettings:
                 .filter(function(c) { return c.type === 'Text'; })
                 .map(function(c) { return c.text; });
         }""")
+        has_random = any('Random' in t or 'Aléatoire' in t or 'Zufällig' in t for t in texts)
         has_ski = any('Ski' in t for t in texts)
         has_snowboard = any('Snowboard' in t or 'snowboard' in t.lower() for t in texts)
+        assert has_random, f"Settings should show Random option, got: {texts}"
         assert has_ski, f"Settings should show Ski option, got: {texts}"
         assert has_snowboard, f"Settings should show Snowboard option, got: {texts}"
 

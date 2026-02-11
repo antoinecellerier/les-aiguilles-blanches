@@ -189,27 +189,14 @@ def dismiss_dialogues(page, timeout: int = 5000):
 def click_menu_button(page, button_index: int, button_name: str = "button"):
     """Click a menu button by index (0=Start, 1=How to Play, 2=Changelog, 3=Settings).
 
-    Queries actual button positions from the game scene for reliability across layouts.
+    Uses keyboard navigation for reliability across scrollable menu layouts.
     """
-    canvas = page.locator("canvas")
-    box = canvas.bounding_box()
-    assert box, "Canvas not found"
-
-    pos = page.evaluate(f"""() => {{
-        const scene = window.game?.scene?.getScene('MenuScene');
-        if (!scene || !scene.menuButtons) return null;
-        const btn = scene.menuButtons[{button_index}];
-        if (!btn) return null;
-        return {{ x: btn.x, y: btn.y }};
-    }}""")
-
-    if pos:
-        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
-    else:
-        for _ in range(button_index):
-            page.keyboard.press("ArrowDown")
-            page.wait_for_timeout(50)
-        page.keyboard.press("Enter")
+    # Keyboard navigation is most reliable since button positions are container-relative
+    # which doesn't map directly to screen coordinates in a scrollable menu.
+    for _ in range(button_index):
+        page.keyboard.press("ArrowDown")
+        page.wait_for_timeout(50)
+    page.keyboard.press("Enter")
 
 
 # Menu button index constants
@@ -310,39 +297,13 @@ def assert_not_on_menu(page):
 
 
 def navigate_to_settings(page):
-    """Navigate to Settings using click or fallback to direct scene start."""
-    canvas = page.locator("canvas")
-    box = canvas.bounding_box()
-
-    if not box:
-        page.evaluate("""() => {
-            if (window.game && window.game.scene) {
-                window.game.scene.start('SettingsScene');
-            }
-        }""")
-        wait_for_scene(page, 'SettingsScene')
-        return
-
-    pos = page.evaluate("""() => {
-        const scene = window.game?.scene?.getScene('MenuScene');
-        if (!scene || !scene.menuButtons) return null;
-        const btn = scene.menuButtons[3];
-        if (!btn) return null;
-        return { x: btn.x, y: btn.y };
+    """Navigate to Settings via direct scene start (most reliable)."""
+    page.evaluate("""() => {
+        if (window.game && window.game.scene) {
+            window.game.scene.start('SettingsScene');
+        }
     }""")
-
-    if pos:
-        page.mouse.click(box["x"] + pos["x"], box["y"] + pos["y"])
-        wait_for_scene(page, 'SettingsScene')
-
-    scenes = get_active_scenes(page)
-    if 'SettingsScene' not in scenes:
-        page.evaluate("""() => {
-            if (window.game && window.game.scene) {
-                window.game.scene.start('SettingsScene');
-            }
-        }""")
-        wait_for_scene(page, 'SettingsScene')
+    wait_for_scene(page, 'SettingsScene')
 
 
 @pytest.fixture(scope="session")

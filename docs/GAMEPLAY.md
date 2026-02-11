@@ -395,6 +395,7 @@ On levels with terrain park features (L3, L6), the ski run includes interactive 
 - **Rail grind tricks** — pass over a rail to grind with sparks. 4 random tricks: Boardslide (yellow sparks), 50-50 (cyan), Lipslide (orange-red), Tailslide (green). Each has a distinct rotation angle and spark color.
 - **Halfpipe tricks** — on L6, carve into a halfpipe wall to launch bigger air. 5 pipe-specific tricks: McTwist, Crippler, 900, Alley-oop, Stalefish. Higher amplitude and longer airtime than kicker tricks.
 - All tricks show the trick name in a popup and give a 1.3× speed boost.
+- **Progressive turning** — initial turns barely slow you down; only sustained carving bleeds speed (drag ramps 10%→100% over 0.4s).
 - Works identically for both skier and snowboarder modes.
 
 ### Dev Shortcut
@@ -403,7 +404,7 @@ Press **K** during gameplay to instantly groom to target coverage and launch a s
 
 ### Preference
 
-Choose between ski and snowboard in **Settings → Bonus → Descent Mode**. The choice is cosmetic (same physics, different sprite).
+Choose between Random, Ski, or Snowboard in **Settings → Bonus → Descent Mode**. Defaults to **Random** (50/50 each run). The choice is cosmetic (same physics, different sprite).
 
 ---
 
