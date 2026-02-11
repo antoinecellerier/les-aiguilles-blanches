@@ -56,7 +56,7 @@ export const DEPTHS = {
   GROUND_OBJECTS: 4,  // Base for yDepth() Y-sorted objects (trees, chalets, anchors)
   TREES: 4,           // Alias for GROUND_OBJECTS (both use yDepth())
   GROUND_LABELS: 7,   // Anchor numbers, text on ground objects
-  SIGNAGE: 8,         // Steep zone indicators, warning markers
+  SIGNAGE: 8,         // Avalanche warnings, hazard markers
   MARKERS: 9,         // Piste marker poles, service road poles
   WINCH_CABLE: 50,    // Winch cable graphics
   AIRBORNE: 55,       // Flying birds, airborne objects (above cable, below overlay)

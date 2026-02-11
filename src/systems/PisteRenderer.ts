@@ -1,5 +1,4 @@
-import { DEPTHS, DIFFICULTY_MARKERS, yDepth } from '../config/gameConfig';
-import { THEME } from '../config/theme';
+import { BALANCE, DEPTHS, DIFFICULTY_MARKERS, yDepth } from '../config/gameConfig';
 import type { Level } from '../config/levels';
 import type { LevelGeometry, CliffSegment } from './LevelGeometry';
 
@@ -517,38 +516,57 @@ export class PisteRenderer {
       const leftEdge = (path.centerX - path.width / 2) * tileSize;
       const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
-      // Warning triangle sign (per NF S52-102 — yellow/black triangle)
-      const markerX = (leftEdge + rightEdge) / 2;
-      const markerY = startY - 15;
-      const mg = this.scene.add.graphics();
-      mg.setDepth(DEPTHS.SIGNAGE);
-      const triSize = 12;
-      mg.fillStyle(0xffcc00, 1);
-      mg.beginPath();
-      mg.moveTo(markerX, markerY - triSize);
-      mg.lineTo(markerX - triSize, markerY + triSize * 0.6);
-      mg.lineTo(markerX + triSize, markerY + triSize * 0.6);
-      mg.closePath();
-      mg.fillPath();
-      mg.lineStyle(1, 0x000000, 0.8);
-      mg.beginPath();
-      mg.moveTo(markerX, markerY - triSize);
-      mg.lineTo(markerX - triSize, markerY + triSize * 0.6);
-      mg.lineTo(markerX + triSize, markerY + triSize * 0.6);
-      mg.closePath();
-      mg.strokePath();
-      mg.fillStyle(0x000000, 1);
-      mg.fillRect(markerX - 1, markerY - 5, 2, 6);
-      mg.fillRect(markerX - 1, markerY + 2, 2, 2);
-      mg.setAlpha(0.8);
-
-      this.scene.add.text(markerX + 14, markerY, zone.slope + '°', {
-        fontFamily: THEME.fonts.family,
-        fontSize: '9px',
-        color: '#FF6600',
-        backgroundColor: '#000000',
-        padding: { x: 3, y: 1 }
-      }).setOrigin(0, 0.5).setAlpha(0.8).setDepth(DEPTHS.SIGNAGE);
+      // Warning triangle on left piste border for tumble-danger zones (NF S52-102)
+      if (zone.slope >= BALANCE.TUMBLE_SLOPE_THRESHOLD) {
+        const startYIndex = Math.floor(zone.startY * level.height);
+        const edgePath = this.geometry.pistePath[startYIndex] || path;
+        const edgeLeftX = (edgePath.centerX - edgePath.width / 2) * tileSize;
+        let markerX = edgeLeftX - tileSize * 0.5;
+        const markerY = startY;
+        // If left border falls on a cliff, try the right border
+        if (this.geometry.isOnCliff(markerX, markerY)) {
+          const edgeRightX = (edgePath.centerX + edgePath.width / 2) * tileSize;
+          const rightMarkerX = edgeRightX + tileSize * 0.5;
+          if (!this.geometry.isOnCliff(rightMarkerX, markerY)) {
+            markerX = rightMarkerX;
+          }
+        }
+        const mg = this.scene.add.graphics();
+        mg.setDepth(DEPTHS.MARKERS);
+        const poleHeight = 28;
+        const poleWidth = 5;
+        const triSize = 12;
+        const triMid = markerY - poleHeight;
+        const triTop = triMid - triSize * 0.8;
+        const triBase = triMid + triSize * 0.8;
+        // Pole shaft (yellow/black danger pole per NF S52-102)
+        mg.fillStyle(0xddaa00, 1);
+        mg.fillRect(markerX - poleWidth / 2, markerY - poleHeight, poleWidth, poleHeight);
+        // Ground base
+        mg.fillStyle(0x222222, 1);
+        mg.fillRect(markerX - poleWidth / 2 - 1, markerY - 3, poleWidth + 2, 6);
+        // Yellow warning triangle
+        mg.fillStyle(0xffcc00, 1);
+        mg.beginPath();
+        mg.moveTo(markerX, triTop);
+        mg.lineTo(markerX - triSize, triBase);
+        mg.lineTo(markerX + triSize, triBase);
+        mg.closePath();
+        mg.fillPath();
+        // Triangle border
+        mg.lineStyle(1, 0x000000, 0.8);
+        mg.beginPath();
+        mg.moveTo(markerX, triTop);
+        mg.lineTo(markerX - triSize, triBase);
+        mg.lineTo(markerX + triSize, triBase);
+        mg.closePath();
+        mg.strokePath();
+        // Exclamation mark
+        const exclY = triTop + triSize * 0.45;
+        mg.fillStyle(0x000000, 1);
+        mg.fillRect(markerX - 1, exclY, 2, 6);
+        mg.fillRect(markerX - 1, exclY + 8, 2, 2);
+      }
 
       this.geometry.steepZoneRects.push({
         startY: startY,

@@ -158,7 +158,7 @@ Shared portrait colors: skin `0xffccaa`, eyes `0x000000`, mouth `0x553333`, hair
 **Jalon rules (NF S52-102):**
 - Right-side markers (going downhill) have orange top cap — since camera faces uphill, this is screen-left
 - Danger poles: yellow/black stripes (`0xffcc00`/`0x111111`)
-- Warning signs: yellow triangle with exclamation mark
+- Warning signs: yellow triangle with exclamation mark on yellow danger pole (`0xddaa00`), tumble zones only (≥40°), placed on left piste border
 - Avalanche barrier flags: yellow (`0xffcc00`)
 
 ## Wildlife
@@ -310,8 +310,8 @@ All depth values are centralized in `DEPTHS` from `src/config/gameConfig.ts`:
 | Cliffs | 3 | `CLIFFS` | Cliff rock textures |
 | Trees | 4 | `TREES` | Trees (above cliffs in top-down view) |
 | Ground labels | 5 | `GROUND_LABELS` | Anchor numbers, text on objects |
-| Signage | 6 | `SIGNAGE` | Steep zones, warnings |
-| Markers | 8 | `MARKERS` | Piste marker poles, road poles |
+| Signage | 8 | `SIGNAGE` | Avalanche warnings, hazards |
+| Markers | 9 | `MARKERS` | Piste poles, road poles, danger poles |
 | Winch cable | 50 | `WINCH_CABLE` | Cable graphics |
 | Night overlay | 100 | `NIGHT_OVERLAY` | Night/weather darkening |
 | Player | 101 | `PLAYER` | Groomer (above night for headlights) |
