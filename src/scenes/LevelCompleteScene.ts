@@ -265,23 +265,22 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const buttonY = Math.min(cursorY + 4, height - 50);
     const buttonPadding2 = { x: Math.max(15, padding), y: Math.max(8, padding * 0.6) };
     const buttonContainer = this.add.container(0, 0).setDepth(11);
+    let skiMode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
+    if (skiMode === 'random') skiMode = Math.random() < 0.5 ? 'ski' : 'snowboard';
+    const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
 
     if (this.won && this.levelIndex < LEVELS.length - 1) {
       this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true);
-      const skiMode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
-      const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex }));
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
         () => this.navigateTo('CreditsScene'), true);
-      const skiMode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
-      const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex }));
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else {

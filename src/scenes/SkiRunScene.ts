@@ -26,6 +26,7 @@ import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 
 interface SkiRunData {
   level: number;
+  mode?: 'ski' | 'snowboard';
 }
 
 export default class SkiRunScene extends Phaser.Scene {
@@ -73,6 +74,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private trickShadow: Phaser.GameObjects.Graphics | null = null;
   private trickShadowUpdater: (() => void) | null = null;
   private turnHoldTime = 0; // seconds of continuous lateral input
+  private resolvedMode = 'ski'; // resolved from 'random' once per run
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -88,6 +90,14 @@ export default class SkiRunScene extends Phaser.Scene {
     this.currentSpeed = 0;
     this.terrainBlend = 1.0;
     this.bumpSlowdownUntil = 0;
+    // Resolve mode: use passed value, or resolve random here
+    if (data.mode) {
+      this.resolvedMode = data.mode;
+    } else {
+      let mode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
+      if (mode === 'random') mode = Math.random() < 0.5 ? 'ski' : 'snowboard';
+      this.resolvedMode = mode;
+    }
   }
 
   create(): void {
@@ -390,8 +400,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.startX = startX;
     this.startY = startY;
 
-    const mode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
-    this.baseTexture = mode === 'snowboard' ? 'snowboarder' : 'skier';
+    this.baseTexture = this.resolvedMode === 'snowboard' ? 'snowboarder' : 'skier';
 
     this.skier = this.physics.add.sprite(startX, startY, this.baseTexture);
     this.skier.setCollideWorldBounds(true);
@@ -454,8 +463,7 @@ export default class SkiRunScene extends Phaser.Scene {
       .setOrigin(0).setScrollFactor(0).setAlpha(hc ? 0.8 : 0.4).setDepth(DEPTHS.FEEDBACK - 1);
 
     // Level name (left)
-    const mode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
-    const modeIcon = mode === 'snowboard' ? '🏂' : '⛷️';
+    const modeIcon = this.resolvedMode === 'snowboard' ? '🏂' : '⛷️';
     visorText(padding, row1Y, `${modeIcon} ${t(this.level.nameKey) || 'Ski Run'}`, Math.round(14 * uiScale));
 
     // Speed (left, row 2)

@@ -73,6 +73,7 @@ const fi: Record<string, string> = {
   skiMode: "Laskettelutila",
   ski: "Suksi",
   snowboard: "Lumilautailu",
+  random: "Satunnainen",
   skiIt: "Laskemaan!",
   rideIt: "Laudalle!",
   skiRunSpeed: "Nopeus",

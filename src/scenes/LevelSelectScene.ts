@@ -26,6 +26,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private wildlife!: MenuWildlifeController;
   private resizeManager!: ResizeManager;
   private isNavigating = false;
+  private resolvedSkiMode: 'ski' | 'snowboard' = 'ski';
   private inputReady = false;
   private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
   /** Maps each button index to its visual row (-1 = back button, 0..N = level rows) */
@@ -117,7 +118,9 @@ export default class LevelSelectScene extends Phaser.Scene {
 
     // Pre-measure button labels for consistent sizing and alignment
     const groomLabelText = t('groom') || 'Groom';
-    const skiModeVal = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
+    let skiModeVal = getString(STORAGE_KEYS.SKI_MODE) || 'random';
+    if (skiModeVal === 'random') skiModeVal = Math.random() < 0.5 ? 'ski' : 'snowboard';
+    this.resolvedSkiMode = skiModeVal as 'ski' | 'snowboard';
     const skiLabelText = skiModeVal === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
     const btnStyle = { fontFamily: THEME.fonts.family, fontSize: `${btnFontSize}px`, padding: { x: 10, y: 10 } };
     const groomMeasure = this.add.text(-999, -999, groomLabelText, btnStyle);
@@ -356,8 +359,11 @@ export default class LevelSelectScene extends Phaser.Scene {
   private startLevel(level: number, mode: 'groom' | 'ski'): void {
     if (this.isNavigating) return;
     this.isNavigating = true;
-    const target = mode === 'ski' ? 'SkiRunScene' : 'GameScene';
-    resetGameScenes(this.game, target, { level });
+    if (mode === 'ski') {
+      resetGameScenes(this.game, 'SkiRunScene', { level, mode: this.resolvedSkiMode });
+    } else {
+      resetGameScenes(this.game, 'GameScene', { level });
+    }
   }
 
   private goBack(): void {

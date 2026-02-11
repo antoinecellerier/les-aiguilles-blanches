@@ -76,6 +76,7 @@ const de: Record<string, string> = {
   skiMode: "Abfahrtsmodus",
   ski: "Ski",
   snowboard: "Snowboard",
+  random: "Zufällig",
   skiIt: "Abfahrt!",
   rideIt: "Boarden!",
   skiRunSpeed: "Tempo",

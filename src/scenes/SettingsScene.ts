@@ -407,7 +407,7 @@ export default class SettingsScene extends Phaser.Scene {
   private addGameplaySection(sizer: any): void {
     const panel = this.createSectionPanel('🎿 ' + (t('bonus') || 'Bonus'), 6);
     
-    const currentMode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
+    const currentMode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
 
     const row = this.rexUI.add.fixWidthSizer({
       width: this.contentWidth,
@@ -420,6 +420,7 @@ export default class SettingsScene extends Phaser.Scene {
     ));
 
     const modes = [
+      { id: 'random', label: t('random') || 'Random' },
       { id: 'ski', label: t('ski') || 'Ski' },
       { id: 'snowboard', label: t('snowboard') || 'Snowboard' },
     ];

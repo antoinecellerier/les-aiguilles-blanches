@@ -73,6 +73,7 @@ const ja: Record<string, string> = {
   skiMode: "滑走モード",
   ski: "スキー",
   snowboard: "スノーボード",
+  random: "ランダム",
   skiIt: "滑ろう！",
   rideIt: "ライド！",
   skiRunSpeed: "スピード",

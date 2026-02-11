@@ -73,6 +73,7 @@ const sk: Record<string, string> = {
   skiMode: "Režim zjazdu",
   ski: "Lyže",
   snowboard: "Snowboard",
+  random: "Náhodný",
   skiIt: "Lyžovať!",
   rideIt: "Na dosku!",
   skiRunSpeed: "Rýchlosť",

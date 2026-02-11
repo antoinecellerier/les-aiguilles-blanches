@@ -73,6 +73,7 @@ const ko: Record<string, string> = {
   skiMode: "활강 모드",
   ski: "스키",
   snowboard: "스노보드",
+  random: "랜덤",
   skiIt: "스키 타자!",
   rideIt: "보드 타자!",
   skiRunSpeed: "속도",

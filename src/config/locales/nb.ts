@@ -73,6 +73,7 @@ const nb: Record<string, string> = {
   skiMode: "Utforkjøring",
   ski: "Ski",
   snowboard: "Snowboard",
+  random: "Tilfeldig",
   skiIt: "Kjør ski!",
   rideIt: "Kjør brett!",
   skiRunSpeed: "Fart",

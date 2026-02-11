@@ -73,6 +73,7 @@ const sv: Record<string, string> = {
   skiMode: "Utförsläge",
   ski: "Skidor",
   snowboard: "Snowboard",
+  random: "Slumpmässig",
   skiIt: "Åk skidor!",
   rideIt: "Brädan!",
   skiRunSpeed: "Fart",

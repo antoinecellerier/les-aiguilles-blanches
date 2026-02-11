@@ -73,6 +73,7 @@ const tr: Record<string, string> = {
   skiMode: "İniş modu",
   ski: "Kayak",
   snowboard: "Snowboard",
+  random: "Rastgele",
   skiIt: "Kayağa!",
   rideIt: "Kaymaya!",
   skiRunSpeed: "Hız",
