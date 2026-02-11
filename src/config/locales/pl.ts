@@ -68,6 +68,16 @@ const pl: Record<string, string> = {
   ambienceVolume: "Otoczenie",
   mute: "Wycisz",
 
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "Tryb zjazdu",
+  ski: "Narty",
+  snowboard: "Snowboard",
+  skiIt: "Na narty!",
+  rideIt: "Na deskę!",
+  skiRunSpeed: "Prędkość",
+  skiRunTime: "Czas",
+
   // How to Play hints
   howToPlayMove: "{keys} lub strzałki aby się poruszać",
   howToPlayMoveTouch: "Użyj wirtualnego D-pada",
@@ -227,6 +237,8 @@ const pl: Record<string, string> = {
   marieWelcome: "Przyjdź się ogrzać do Chez Marie. Dobra tartiflette!",
 
   // Changelog
+  changelog_20260211_date: "11 lutego 2026",
+  changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie trasą, którą właśnie przygotowałeś",
   changelog_20260210_date: "10 lutego 2026",
   changelog_20260210: "🎵 Muzyka i efekty dźwiękowe\n🔈 Ustawienia głośności\n⏱️ Automatycznie kalibrowane czasy\n⏭️ Pomiń samouczek\n🏔️ Przeprojektowane strefy lawinowe",
   changelog_20260209_date: "9 lutego 2026",

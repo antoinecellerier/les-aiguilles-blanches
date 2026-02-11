@@ -167,6 +167,30 @@ export const BALANCE = {
   AUDIO_SFX_VOLUME_DEFAULT: 0.8,
   AUDIO_VOICE_VOLUME_DEFAULT: 0.8,
   AUDIO_AMBIENCE_VOLUME_DEFAULT: 0.5,
+
+  // Ski/snowboard reward run
+  SKI_GRAVITY_SPEED: 200,        // Base downhill velocity target (px/s)
+  SKI_MAX_SPEED: 380,            // Terminal velocity
+  SKI_LATERAL_SPEED: 140,        // Max left/right steering speed (px/s)
+  SKI_DRAG: 60,                  // Natural deceleration (px/s²)
+  SKI_GROOMED_MULTIPLIER: 1.0,   // Speed on groomed tiles (baseline)
+  SKI_UNGROOMED_MULTIPLIER: 0.65, // Speed on ungroomed tiles
+  SKI_POWDER_DRAG: 300,          // Extra drag at piste edges
+  SKI_BUMP_SLOWDOWN: 0.4,       // Speed multiplier on obstacle hit
+  SKI_BUMP_DURATION: 500,        // ms of slowdown after bump
+  SKI_CELEBRATION_DELAY: 1500,   // ms to show celebration before transition
+  SKI_ACCELERATION: 80,          // px/s² speed ramp-up rate (slow progressive build)
+  SKI_MIN_ZOOM: 0.5,            // Minimum camera zoom for ski run
+  SKI_BUMP_SHAKE: { duration: 150, intensity: 0.003 },
+  SKI_BRAKE_DECELERATION: 150,   // px/s² speed reduction while braking (gradual)
+  SKI_CRASH_DURATION: 1.2,       // seconds frozen after cliff wipeout
+  SKI_SLOPE_BASE: 15,            // default slope angle (degrees) for non-steep areas
+  SKI_SLOPE_SPEED_FACTOR: 0.03,  // speed multiplier per degree of slope above base
+  SKI_CARVE_DRAG: 0.6,           // fraction of speed lost per second when fully turning
+  SKI_HEADING_FACTOR: 0.7,       // how much lateral input reduces downhill acceleration (0=none, 1=full stop sideways)
+  SKI_SPEED_SCALE: 0.21,         // px/s → km/h conversion (maps ~380px/s to ~80km/h)
+  SKI_SPRITE_DEADZONE: 0.2,      // lateral input threshold for sprite direction change
+  SKI_FINISH_BUFFER: 3,          // tiles above bottom edge to trigger finish
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

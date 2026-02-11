@@ -26,6 +26,7 @@ import HUDScene from './scenes/HUDScene';
 import MenuScene from './scenes/MenuScene';
 import SettingsScene from './scenes/SettingsScene';
 import GameScene from './scenes/GameScene';
+import SkiRunScene from './scenes/SkiRunScene';
 
 // Register game scenes for centralized cleanup (single source of truth)
 registerGameScenes([
@@ -36,6 +37,7 @@ registerGameScenes([
   { key: 'DialogueScene', ctor: DialogueScene },
   { key: 'PauseScene', ctor: PauseScene },
   { key: 'LevelCompleteScene', ctor: LevelCompleteScene },
+  { key: 'SkiRunScene', ctor: SkiRunScene },
   { key: 'CreditsScene', ctor: CreditsScene },
 ]);
 
@@ -94,6 +96,7 @@ const config: Phaser.Types.Core.GameConfig = {
     DialogueScene,
     PauseScene,
     LevelCompleteScene,
+    SkiRunScene,
     CreditsScene,
   ],
 };

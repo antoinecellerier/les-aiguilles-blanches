@@ -77,17 +77,20 @@ snow-groomer/
 │   │   ├── cameraCoords.ts  # World↔overlay coordinate conversions for scrollFactor(0) objects
 │   │   ├── resizeManager.ts # Debounced resize-restart handler for scenes
 │   │   ├── sceneTransitions.ts # Centralized scene cleanup and transitions
+│   │   ├── skiRunState.ts    # Shared groomed-tile state between GameScene and SkiRunScene
+│   │   ├── skiSprites.ts     # Procedural pixel art for skier & snowboarder (20×28px, 8 variants each)
 │   │   ├── storage.ts       # Type-safe localStorage helpers (getJSON/setJSON/getString/setString)
 │   │   └── touchDetect.ts    # Touch detection with Firefox desktop fallback
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
-│   │   ├── SettingsScene.ts # Language, a11y, controls, keyboard layout
+│   │   ├── SettingsScene.ts # Language, a11y, gameplay prefs, controls, keyboard layout
 │   │   ├── GameScene.ts    # Main gameplay
 │   │   ├── HUDScene.ts     # UI overlay (parallel to GameScene)
 │   │   ├── DialogueScene.ts # Character dialogue overlay
 │   │   ├── PauseScene.ts   # Pause menu
 │   │   ├── LevelCompleteScene.ts
+│   │   ├── SkiRunScene.ts  # Post-grooming ski/snowboard descent (reward run)
 │   │   └── CreditsScene.ts
 ├── tests/
 │   ├── e2e/                # Playwright browser tests
@@ -119,8 +122,10 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
      │           │      PauseScene      │
      │           │            ↓         │
      │           └── LevelCompleteScene ┘
-     │                        ↓
-     └──────────── CreditsScene ────────
+     │                   ↓          ↓
+     │            SkiRunScene       │
+     │                   ↓          │
+     └──────────── CreditsScene ────┘
 ```
 
 ## Design Decisions

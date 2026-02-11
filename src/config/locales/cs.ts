@@ -68,6 +68,16 @@ const cs: Record<string, string> = {
   ambienceVolume: "Prostředí",
   mute: "Ztlumit",
 
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "Režim sjezdu",
+  ski: "Lyže",
+  snowboard: "Snowboard",
+  skiIt: "Lyžovat!",
+  rideIt: "Na prkno!",
+  skiRunSpeed: "Rychlost",
+  skiRunTime: "Čas",
+
   // How to Play hints
   howToPlayMove: "{keys} nebo šipky pro pohyb",
   howToPlayMoveTouch: "Použijte virtuální D-pad",
@@ -227,6 +237,8 @@ const cs: Record<string, string> = {
   marieWelcome: "Přijďte se ohřát k Chez Marie. Dobrá tartiflette!",
 
   // Changelog
+  changelog_20260211_date: "11. února 2026",
+  changelog_20260211: "⛷️ Sjeďte na lyžích nebo snowboardu sjezdovku, kterou jste právě upravili",
   changelog_20260210_date: "10. února 2026",
   changelog_20260210: "🎵 Hudba a zvukové efekty\n🔈 Nastavení hlasitosti\n⏱️ Automaticky kalibrované časy\n⏭️ Přeskočit tutoriál\n🏔️ Přepracované lavinové zóny",
   changelog_20260209_date: "9. února 2026",

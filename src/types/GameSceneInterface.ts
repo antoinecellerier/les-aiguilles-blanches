@@ -37,6 +37,8 @@ export const GAME_EVENTS = {
   RESUME_REQUEST: 'resumeRequest',
   /** HUDScene → GameScene: skip to next level */
   SKIP_LEVEL: 'skipLevel',
+  /** HUDScene → GameScene: start ski/snowboard reward run (dev shortcut) */
+  START_SKI_RUN: 'startSkiRun',
   /** HUDScene → GameScene: top edge of touch controls in screen pixels */
   TOUCH_CONTROLS_TOP: 'touchControlsTop',
   /** SettingsScene → HUDScene: accessibility settings changed, redraw needed */

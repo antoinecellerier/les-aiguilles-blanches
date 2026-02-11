@@ -334,4 +334,42 @@ A: Night levels have reduced visibility. Your headlights illuminate the path ahe
 
 ---
 
+## 🎿 Ski/Snowboard Reward Run
+
+After completing any level, a **"Ski it!"** (or **"Ride it!"** for snowboard) button appears on the win screen. Press it to descend the piste you just groomed! You can replay the run as many times as you like.
+
+### Controls
+
+Same lateral controls as grooming — left/right to steer. Movement downhill is automatic (gravity-driven). The winch key doubles as a brake.
+
+| Input | Action |
+|-------|--------|
+| A/D or ←/→ | Steer left/right |
+| Left stick | Steer (gamepad) |
+| Touch lower half | Drag left/right |
+| Shift / LB | Brake (snow plow) |
+| Touch top quarter | Brake |
+| ESC | End run early |
+
+### How It Works
+
+- **Slope-aware speed** — steeper sections accelerate faster, flat sections decelerate
+- **Groomed snow = fast**, ungroomed snow = friction slowdown
+- **Carving** — turning bleeds speed (sharper turns = more drag)
+- **Braking** — hold the winch key for a snow plow stop
+- **Obstacles** cause a brief speed bump (cooldown prevents chain-stuns)
+- **Cliff danger zones** — wipeout! Brief freeze then respawn at last safe position
+- **Soft boundaries** — drifting off-piste slows you down
+- **Replayable** — ski again from the win screen as many times as you want
+
+### Dev Shortcut
+
+Press **K** during gameplay to instantly groom to target coverage and launch a ski run (skips the win screen).
+
+### Preference
+
+Choose between ski and snowboard in **Settings → Bonus → Descent Mode**. The choice is cosmetic (same physics, different sprite).
+
+---
+
 *Bonne chance et bonne glisse!* 🎿

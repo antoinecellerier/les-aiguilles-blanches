@@ -330,6 +330,9 @@ export default class HUDScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-P', (e: KeyboardEvent) => {
       if (!this.isKeyBoundToGameControl(e.keyCode)) this.prevLevel();
     });
+    this.input.keyboard?.on('keydown-K', (e: KeyboardEvent) => {
+      if (!this.isKeyBoundToGameControl(e.keyCode)) this.startSkiRun();
+    });
     
     // Show keyboard hint on desktop (even with touchscreen), touch hint on mobile
 
@@ -748,6 +751,12 @@ export default class HUDScene extends Phaser.Scene {
     } else {
       resetGameScenes(this.game, 'CreditsScene');
     }
+  }
+
+  private startSkiRun(): void {
+    if (this.isSkipping) return;
+    this.isSkipping = true;
+    this.game.events.emit(GAME_EVENTS.START_SKI_RUN);
   }
 
   update(): void {

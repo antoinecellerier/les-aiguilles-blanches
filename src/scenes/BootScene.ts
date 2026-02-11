@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Accessibility, setLanguage, detectLanguage } from '../setup';
 import { detectKeyboardLayout } from '../utils/keyboardLayout';
+import { createSkierTexture, createSkierLeftTexture, createSkierRightTexture, createSkierBrakeTexture, createSnowboarderTexture, createSnowboarderLeftTexture, createSnowboarderRightTexture, createSnowboarderBrakeTexture } from '../utils/skiSprites';
 
 /**
  * Les Aiguilles Blanches - Boot Scene
@@ -131,6 +132,16 @@ export default class BootScene extends Phaser.Scene {
     groomerGraphics.fillRect(xo + 8, yo + 10, 16, 2);   // cabin top
     groomerGraphics.generateTexture('groomer_storm', 36, 58);
     groomerGraphics.destroy();
+
+    // Skier & snowboarder sprites (for reward run — 3 orientations + brake each)
+    createSkierTexture(this);
+    createSkierLeftTexture(this);
+    createSkierRightTexture(this);
+    createSkierBrakeTexture(this);
+    createSnowboarderTexture(this);
+    createSnowboarderLeftTexture(this);
+    createSnowboarderRightTexture(this);
+    createSnowboarderBrakeTexture(this);
 
     // Tree sprite
     const treeGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);

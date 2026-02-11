@@ -68,6 +68,16 @@ const ko: Record<string, string> = {
   ambienceVolume: "환경음",
   mute: "음소거",
 
+  // Gameplay
+  bonus: "보너스",
+  skiMode: "활강 모드",
+  ski: "스키",
+  snowboard: "스노보드",
+  skiIt: "스키 타자!",
+  rideIt: "보드 타자!",
+  skiRunSpeed: "속도",
+  skiRunTime: "시간",
+
   // How to Play hints
   howToPlayMove: "{keys} 또는 방향키로 이동",
   howToPlayMoveTouch: "가상 D패드로 이동",
@@ -227,6 +237,8 @@ const ko: Record<string, string> = {
   marieWelcome: "Chez Marie에서 몸 좀 녹여요. 맛있는 tartiflette가 있어요!",
 
   // Changelog
+  changelog_20260211_date: "2026년 2월 11일",
+  changelog_20260211: "⛷️ 방금 정비한 슬로프를 스키나 스노보드로 즐기세요",
   changelog_20260210_date: "2026년 2월 10일",
   changelog_20260210: "🎵 음악과 효과음\n🔈 볼륨 설정\n⏱️ 자동 조정 레벨 타임\n⏭️ 튜토리얼 건너뛰기\n🏔️ 눈사태 구역 재설계",
   changelog_20260209_date: "2026년 2월 9일",

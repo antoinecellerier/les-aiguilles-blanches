@@ -68,6 +68,16 @@ const tr: Record<string, string> = {
   ambienceVolume: "Ortam",
   mute: "Sessiz",
 
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "İniş modu",
+  ski: "Kayak",
+  snowboard: "Snowboard",
+  skiIt: "Kayağa!",
+  rideIt: "Kaymaya!",
+  skiRunSpeed: "Hız",
+  skiRunTime: "Süre",
+
   // How to Play hints
   howToPlayMove: "Hareket için {keys} veya ok tuşları",
   howToPlayMoveTouch: "Sanal D-pad'i kullanın",
@@ -227,6 +237,8 @@ const tr: Record<string, string> = {
   marieWelcome: "Chez Marie'de ısınmaya gelin. Güzel bir tartiflette!",
 
   // Changelog
+  changelog_20260211_date: "11 Şubat 2026",
+  changelog_20260211: "⛷️ Az önce hazırladığın pistte kayak veya snowboard yap",
   changelog_20260210_date: "10 Şubat 2026",
   changelog_20260210: "🎵 Müzik ve ses efektleri\n🔈 Ses ayarları\n⏱️ Otomatik kalibreli seviye süreleri\n⏭️ Eğitimi atla\n🏔️ Çığ bölgeleri yeniden tasarlandı",
   changelog_20260209_date: "9 Şubat 2026",

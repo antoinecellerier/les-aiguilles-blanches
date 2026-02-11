@@ -20,6 +20,7 @@ import { EngineSounds } from '../systems/EngineSounds';
 import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
+import { setGroomedTiles } from '../utils/skiRunState';
 import DialogueScene from './DialogueScene';
 
 /**
@@ -143,6 +144,7 @@ export default class GameScene extends Phaser.Scene {
   };
   private boundResumeHandler = () => { this.resumeGame(); };
   private boundSkipHandler = (nextLevel: number) => { this.transitionToLevel(nextLevel); };
+  private boundSkiRunHandler = () => { this.startSkiRun(); };
 
 
   constructor() {
@@ -350,6 +352,7 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
+    this.game.events.on(GAME_EVENTS.START_SKI_RUN, this.boundSkiRunHandler);
     this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
     
     
@@ -1375,6 +1378,18 @@ export default class GameScene extends Phaser.Scene {
     this.ambienceSounds.stop();
     // Music keeps playing through level complete screen
 
+    // Save groomed tile state for optional ski run
+    if (won) {
+      const tiles = new Set<string>();
+      for (let y = 0; y < this.level.height; y++) {
+        for (let x = 0; x < this.level.width; x++) {
+          const cell = this.snowGrid[y]?.[x];
+          if (cell?.groomable && cell.groomed) tiles.add(`${x},${y}`);
+        }
+      }
+      setGroomedTiles(tiles);
+    }
+
     const timeUsed = this.level.timeLimit - this.timeRemaining;
     console.log(`[level-complete] ${this.level.nameKey} ${won ? 'WON' : 'FAIL'} — time: ${timeUsed}s / ${this.level.timeLimit}s, coverage: ${this.getCoverage()}%`);
 
@@ -1419,12 +1434,60 @@ export default class GameScene extends Phaser.Scene {
     resetGameScenes(this.game, 'MenuScene');
   }
 
+  /** Dev shortcut: auto-groom to target coverage, save state, launch ski run */
+  private startSkiRun(): void {
+    if (this.isTransitioning || this.isGameOver) return;
+    this.isTransitioning = true;
+    this.isGameOver = true;
+
+    // Randomly groom tiles up to target coverage
+    const targetCount = Math.ceil(this.totalTiles * this.level.targetCoverage / 100);
+    const ungroomed: { x: number; y: number }[] = [];
+    for (let y = 0; y < this.level.height; y++) {
+      for (let x = 0; x < this.level.width; x++) {
+        const cell = this.snowGrid[y]?.[x];
+        if (cell?.groomable && !cell.groomed) ungroomed.push({ x, y });
+      }
+    }
+    // Shuffle and groom up to target
+    for (let i = ungroomed.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ungroomed[i], ungroomed[j]] = [ungroomed[j], ungroomed[i]];
+    }
+    const toGroom = Math.max(0, targetCount - this.groomedCount);
+    for (let i = 0; i < Math.min(toGroom, ungroomed.length); i++) {
+      const { x, y } = ungroomed[i];
+      const cell = this.snowGrid[y][x];
+      cell.groomed = true;
+      cell.tile.setTexture('snow_groomed');
+      this.groomedCount++;
+    }
+
+    // Save groomed state and transition
+    const tiles = new Set<string>();
+    for (let y = 0; y < this.level.height; y++) {
+      for (let x = 0; x < this.level.width; x++) {
+        const cell = this.snowGrid[y]?.[x];
+        if (cell?.groomable && cell.groomed) tiles.add(`${x},${y}`);
+      }
+    }
+    setGroomedTiles(tiles);
+
+    this.engineSounds.stop();
+    this.ambienceSounds.stop();
+    this.scene.stop('HUDScene');
+    this.scene.stop('DialogueScene');
+
+    resetGameScenes(this.game, 'SkiRunScene', { level: this.levelIndex });
+  }
+
   shutdown(): void {
 
     this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
     this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
+    this.game.events.off(GAME_EVENTS.START_SKI_RUN, this.boundSkiRunHandler);
     this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
     this.game.events.off(GAME_EVENTS.DIALOGUE_DISMISSED);
 

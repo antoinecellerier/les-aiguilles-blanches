@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from '../setup';
 import { THEME } from '../config/theme';
 import { BALANCE } from '../config/gameConfig';
+import { STORAGE_KEYS } from '../config/storageKeys';
+import { getString } from '../utils/storage';
 import { getMappingFromGamepad } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
@@ -9,6 +11,7 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
+import { clearGroomedTiles } from '../utils/skiRunState';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -255,11 +258,19 @@ export default class LevelCompleteScene extends Phaser.Scene {
     if (this.won && this.levelIndex < LEVELS.length - 1) {
       this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true);
+      const skiMode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
+      const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
+      this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex }));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
         () => this.navigateTo('CreditsScene'), true);
+      const skiMode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
+      const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
+      this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex }));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else {
@@ -375,6 +386,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private navigateTo(targetKey: string, data?: Record<string, unknown>): void {
     if (this.isNavigating) return;
     this.isNavigating = true;
+    // Clear groomed tile state when leaving for non-ski destinations
+    if (targetKey !== 'SkiRunScene') clearGroomedTiles();
     resetGameScenes(this.game, targetKey, data);
   }
 

@@ -68,6 +68,16 @@ const sv: Record<string, string> = {
   ambienceVolume: "Atmosfär",
   mute: "Ljud av",
 
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "Utförsläge",
+  ski: "Skidor",
+  snowboard: "Snowboard",
+  skiIt: "Åk skidor!",
+  rideIt: "Brädan!",
+  skiRunSpeed: "Fart",
+  skiRunTime: "Tid",
+
   // How to Play hints
   howToPlayMove: "{keys} eller pilar för att köra",
   howToPlayMoveTouch: "Använd den virtuella D-paden",
@@ -228,6 +238,8 @@ const sv: Record<string, string> = {
   marieWelcome: "Kom och värm dig Chez Marie. En god tartiflette!",
 
   // Changelog
+  changelog_20260211_date: "11 februari 2026",
+  changelog_20260211: "⛷️ Åk skidor eller snowboard på pisten du just preparerat",
   changelog_20260210_date: "10 februari 2026",
     changelog_20260210: "🎵 Musik och ljudeffekter\n🔈 Volyminställningar\n⏱️ Autokalibrerade nivåtider\n⏭️ Hoppa över handledning\n🏔️ Lavinzoner omdesignade",
   changelog_20260209_date: "9 februari 2026",

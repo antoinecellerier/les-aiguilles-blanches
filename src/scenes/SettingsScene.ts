@@ -284,6 +284,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.addLanguageSection(contentSizer);
     this.addAccessibilitySection(contentSizer);
     this.addAudioSection(contentSizer);
+    this.addGameplaySection(contentSizer);
     
     // Always add controls section (scrollable now handles overflow)
     this.addControlsSection(contentSizer);
@@ -336,6 +337,7 @@ export default class SettingsScene extends Phaser.Scene {
     this.addLanguageSection(leftCol);
     this.addAccessibilitySection(leftCol);
     this.addAudioSection(leftCol);
+    this.addGameplaySection(leftCol);
     
     // Right column: Controls
     const rightCol = this.rexUI.add.sizer({
@@ -406,6 +408,76 @@ export default class SettingsScene extends Phaser.Scene {
     // Spacer to compensate for slider Graphics underreporting height
     panel.add(this.add.rectangle(0, 0, 1, 20, 0x000000, 0));
     sizer.add(panel, { align: 'left' });
+  }
+
+  private addGameplaySection(sizer: any): void {
+    const panel = this.createSectionPanel('🎿 ' + (t('bonus') || 'Bonus'), 6);
+    
+    const currentMode = getString(STORAGE_KEYS.SKI_MODE) || 'ski';
+
+    const row = this.rexUI.add.fixWidthSizer({
+      width: this.contentWidth,
+      space: { item: Math.round(this.fontSize * 0.5), line: 2 }
+    });
+
+    row.add(this.createText(
+      (t('skiMode') || 'Descent Mode') + ':',
+      this.smallFont, THEME.colors.textSecondary
+    ));
+
+    const modes = [
+      { id: 'ski', label: t('ski') || 'Ski' },
+      { id: 'snowboard', label: t('snowboard') || 'Snowboard' },
+    ];
+
+    const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
+    const modeButtons: Phaser.GameObjects.Text[] = [];
+
+    const setMode = (modeId: string) => {
+      setString(STORAGE_KEYS.SKI_MODE, modeId);
+      modeButtons.forEach((btn, i) => {
+        const active = modes[i].id === modeId;
+        btn.setColor(active ? THEME.colors.textDark : THEME.colors.textPrimary);
+        btn.setBackgroundColor(active ? THEME.colors.info : '#555555');
+      });
+      this.mainSizer?.layout();
+    };
+
+    modes.forEach(mode => {
+      const isActive = currentMode === mode.id;
+      const btn = this.add.text(0, 0, mode.label, {
+        fontFamily: THEME.fonts.family,
+        fontSize: this.smallFont + 'px',
+        color: isActive ? THEME.colors.textDark : THEME.colors.textPrimary,
+        backgroundColor: isActive ? THEME.colors.info : '#555555',
+        padding: { x: Math.round(paddingY * 2), y: paddingY },
+      }).setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => { playClick(); setMode(mode.id); });
+      modeButtons.push(btn);
+      row.add(btn);
+    });
+
+    const currentIdx = modes.findIndex(m => m.id === currentMode);
+    const groupIndex = { value: Math.max(0, currentIdx) };
+    this.focus.items.push({
+      element: row,
+      buttons: modeButtons,
+      groupIndex: groupIndex.value,
+      activate: () => { playClick(); setMode(modes[groupIndex.value].id); },
+      left: () => {
+        groupIndex.value = (groupIndex.value - 1 + modes.length) % modes.length;
+        playClick();
+        setMode(modes[groupIndex.value].id);
+      },
+      right: () => {
+        groupIndex.value = (groupIndex.value + 1) % modes.length;
+        playClick();
+        setMode(modes[groupIndex.value].id);
+      },
+    });
+
+    panel.add(row, { align: 'left' });
+    sizer.add(panel, { align: 'left', padding: { top: 4 } });
   }
 
   private createVolumeSlider(channel: VolumeChannel, label: string): any {

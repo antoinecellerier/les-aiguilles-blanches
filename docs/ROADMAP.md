@@ -40,22 +40,29 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Winch cable should have infinite extension — currently limited, should only provide pulling force
 
 
-## Planned: Ski/Snowboard Reward Run (v1)
+## In Progress: Ski/Snowboard Reward Run (v1)
 
-Optional post-grooming descent — after winning a level, ski or snowboard down the piste you just groomed. Relaxed reward run with no fail states.
+Optional post-grooming descent — after winning a level, ski or snowboard down the piste you just groomed. Slope-aware physics, brake control, obstacle crashes, cliff wipeouts, replayable runs.
 
 See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-reward-run) for full design.
 
-- [ ] Procedural skier & snowboarder sprites (`src/utils/skiSprites.ts`, generated in BootScene)
-- [ ] Ski/snowboard preference in Settings (Gameplay section, `STORAGE_KEYS.skiMode`)
-- [ ] Ski run physics constants (`BALANCE.SKI_RUN` in gameConfig.ts)
-- [ ] SkiRunScene — gravity-driven descent, lateral steering, groomed/ungroomed speed diff, soft boundaries
-- [ ] Minimal ski run HUD (speed + elapsed time, no resource bars)
-- [ ] "Ski it!" / "Ride it!" button on LevelCompleteScene (win only)
+- [x] Procedural skier & snowboarder sprites (20×28px, 8 variants each: straight/left/right/brake)
+- [x] Ski/snowboard preference in Settings (Bonus section, multi-button selector)
+- [x] Ski run physics constants (`BALANCE.SKI_*` in gameConfig.ts)
+- [x] SkiRunScene — slope-aware descent, lateral steering, groomed/ungroomed speed diff, carving drag
+- [x] Visor-style HUD (speed in km/h + elapsed time, matching grooming HUD design)
+- [x] "Ski it!" / "Ride it!" button on LevelCompleteScene (win only, replayable)
+- [x] Brake mechanic (winch key: Shift / LB / touch top quarter)
+- [x] Obstacle bumps with cooldown, cliff danger zone wipeouts with respawn
+- [x] Post-run flow (return to LevelCompleteScene, replay available)
+- [x] Dev shortcut (K key: auto-groom + launch ski run)
+- [x] Dynamic heading-aware physics (lateral input reduces gravity, progressive acceleration)
+- [x] Directional sprite variants (texture swap instead of rotation)
+- [x] E2E tests (10 tests: button visibility, scene loads, preference toggle, transitions)
 - [ ] Ski run audio (wind, carving, powder spray, bump sounds)
-- [ ] Post-run flow (return to LevelCompleteScene, persist completion)
-- [ ] E2E tests (button visibility, scene loads, preference toggle, transitions)
-- [ ] Documentation (ROADMAP, GAMEPLAY, GAME_DESIGN, ARCHITECTURE)
+- [ ] Fun failure screens for ski crashes
+- [ ] Ski jumps (groom key)
+- [ ] Level-appropriate items, slalom gates, tricks
 
 ## Future (Backlog)
 

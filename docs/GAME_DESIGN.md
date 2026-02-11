@@ -23,7 +23,7 @@ The setting is authentically Savoyard: tartiflette at Chez Marie, génépi in th
 | **Refuel** | Drive to station | ✅ Solid | 50% max refill, strategic placement |
 | **Eat** | Drive to Chez Marie | ⚠️ Shallow | Only staminaRegen works — see [Food Buffs](#food-buffs) |
 | **Push snow** (blade) | — | ❌ Not implemented | See [Snow Pushing](#snow-pushing-front-blade) |
-| **Ski/Snowboard** | WASD / stick / touch | ❌ Planned | Post-grooming reward run — see [Ski/Snowboard Reward Run](#skisnoboard-reward-run) |
+| **Ski/Snowboard** | WASD / stick / touch / brake | ✅ Implemented | Post-grooming reward run — see [Ski/Snowboard Reward Run](#skisnoboard-reward-run) |
 
 ## Level Progression
 
@@ -198,26 +198,32 @@ Current state: the restaurant restores stamina and provides named buffs, but **o
 **Proposal**: Optional post-grooming descent. After winning a level, a **"Ski it!"** button lets the player ski or snowboard down the piste they just groomed.
 
 **Core design**:
-- **Reward, not challenge** — No fail states, no timer pressure. The run is 30–60 seconds of pure downhill fun.
+- **Fun with consequences** — Cliff danger zones cause wipeouts (freeze + respawn), obstacles cause bumps. Quick recovery keeps it enjoyable.
 - **Same top-down perspective** — Reuses existing camera, geometry, obstacles, and wildlife systems.
 - **Gravity-driven movement** — Player automatically moves downhill; input is lateral steering only (left/right).
+- **Slope-aware speed** — Steep zones (from level data) increase gravity and acceleration. Flat sections decelerate naturally.
 - **Grooming quality matters** — Groomed tiles = fast and smooth; ungroomed tiles = powder friction slowdown. Thorough grooming is directly rewarded with a better ski experience.
-- **Soft boundaries** — Hitting the piste edge creates powder spray and slowdown, not death. Obstacles cause a bump animation and brief speed loss.
+- **Braking** — Winch key (Shift / LB / touch top quarter) acts as a snow plow brake.
+- **Carving physics** — Turning bleeds speed proportional to turn sharpness.
+- **Soft boundaries** — Hitting the piste edge creates slowdown. Obstacles cause a bump with cooldown to prevent chain-stuns.
+- **Replayable** — Ski again from the win screen as many times as desired. Groomed tile state persists across replays.
 
 **Ski vs. Snowboard**:
-- Player chooses ski or snowboard in Settings (Gameplay section). Default: ski.
-- **Cosmetic only (v1)** — Same physics, different top-down sprite.
-- Skier: figure with two parallel skis and poles. Snowboarder: figure on single board, sideways stance.
+- Player chooses ski or snowboard in Settings (Bonus section). Default: ski.
+- **Cosmetic only (v1)** — Same physics, different top-down sprite (24×36px).
+- Skier: tuck position with parallel skis, poles, goggles. Snowboarder: sideways stance on wide board, arms out.
 - Button text adapts: "Ski it!" vs. "Ride it!" based on preference.
 
-**Entry point**: "Ski it!" / "Ride it!" button on the Level Complete screen (win only, not on fail). Pressing it launches the descent on the same piste geometry.
+**Entry point**: "Ski it!" / "Ride it!" button on the Level Complete screen (win only, not on fail). Button reappears after each ski run for replays. Dev shortcut: press K during gameplay to auto-groom and launch.
 
 **Physics model**:
-- `GRAVITY_SPEED`: Base downhill velocity (constant gentle acceleration to max speed).
+- `GRAVITY_SPEED`: Base downhill velocity, scaled by slope angle via `SLOPE_SPEED_FACTOR`.
 - `LATERAL_SPEED`: Steering responsiveness (left/right).
+- `BRAKE_DECELERATION`: Strong deceleration while brake held.
+- `CARVE_DRAG`: Speed bleed proportional to lateral input intensity.
 - Groomed tile speed multiplier vs. ungroomed tile friction.
-- Edge-of-piste powder zone: progressive slowdown as player drifts off-piste.
-- Obstacle collision: brief speed reduction + bump animation (no wipeout, no game over).
+- Obstacle collision: brief speed reduction + bump animation (cooldown prevents rapid re-triggering).
+- Cliff danger zones: wipeout → freeze → respawn at last safe on-piste position.
 
 **Visual effects**:
 - Snow spray on sharp carves and powder contact.
@@ -232,9 +238,9 @@ Current state: the restaurant restores stamina and provides named buffs, but **o
 - Bump/thud on obstacle contact (reuse existing sounds).
 - Music continues from level mood (or lighter variant).
 
-**HUD**: Minimal — current speed and elapsed time (informational only). No resource bars.
+**HUD**: Visor strip matching the grooming HUD design — dark semi-transparent bar with accent stripe. Shows mode icon + level name, speed, and elapsed time. No resource bars.
 
-**Post-run flow**: After reaching the bottom, brief celebration animation, then return to Level Complete screen. "Next Level" / "Menu" navigation unchanged.
+**Post-run flow**: After reaching the bottom, brief celebration animation, then return to Level Complete screen with "Ski it!" button available for replay. Groomed tile state only clears when navigating to menu or next level.
 
 **v2 enhancements** (not in scope for v1):
 - Slalom gates on appropriate levels (timed gate runs).

@@ -70,6 +70,16 @@ const de: Record<string, string> = {
   voiceVolume: "Stimme",
   ambienceVolume: "Ambiente",
   mute: "Stumm",
+
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "Abfahrtsmodus",
+  ski: "Ski",
+  snowboard: "Snowboard",
+  skiIt: "Abfahrt!",
+  rideIt: "Boarden!",
+  skiRunSpeed: "Tempo",
+  skiRunTime: "Zeit",
   
   // How to Play hints
   howToPlayMoveTouch: "Verwende das virtuelle D-Pad",
@@ -193,6 +203,8 @@ const de: Record<string, string> = {
   marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
   
   // Changelog
+  changelog_20260211_date: "11. Februar 2026",
+  changelog_20260211: "⛷️ Die frisch präparierte Piste mit Ski oder Snowboard hinunterfahren",
   changelog_20260210_date: "10. Februar 2026",
   changelog_20260210: "🎵 Musik und Soundeffekte\n🔈 Lautstärkeeinstellungen\n⏱️ Automatisch kalibrierte Levelzeiten\n⏭️ Tutorial überspringen\n🏔️ Lawinenzonen-Redesign",
   changelog_20260209_date: "9. Februar 2026",

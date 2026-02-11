@@ -21,6 +21,8 @@ The game uses a **retro pixel-art style** inspired by the 1991 Windows game SkiF
 | Rock | 24×16 | 1.5 tiles wide, 1 tile tall |
 | Restaurant | 60×50 | ~4 tiles wide, 3 tiles tall |
 | Fuel station | 44×44 | ~3 tiles square |
+| Skier | 20×28 | ~1.25 tiles wide, 1.75 tiles tall (8 variants) |
+| Snowboarder | 20×28 | ~1.25 tiles wide, 1.75 tiles tall (8 variants) |
 
 ## Color Palettes
 
@@ -165,6 +167,23 @@ Procedural pixel art animals generated in `animalSprites.ts`. All rectangle-only
 | Bunny | 6×5 | Near-white `0xF0F0F0`, pink inner ear `0xFFC0CB`, black ear tips |
 | Bird (Alpine chough) | 4×3 top-down, 6×3 side-flying, 2×3 perched | Black `0x111111`, yellow beak `0xFFCC00`, red legs `0xFF3333` |
 | Fox | 8×5 | Orange `0xCC6600`, cream belly `0xF0E0C0`, white tail tip |
+
+### Skier & Snowboarder Sprites
+
+Procedural pixel art generated in `skiSprites.ts` for the post-grooming reward run. Top-down view, 20×28px using direct `fillRect` calls (same approach as groomer sprite). Generated in BootScene. 8 texture variants per character: straight, left, right, brake.
+
+90s retro ski clothing style with neon color blocking.
+
+| Element | Dimensions | Key Colors |
+|---------|-----------|------------|
+| Skier (straight/left/right/brake) | 20×28px | Teal jacket `0x00aaaa`, magenta panels `0xcc2288`, dark teal `0x007777`, red bonnet `0xcc2200`, yellow pompom `0xffdd00`, goggles `0x87ceeb`, skis `0x666666` |
+| Snowboarder (straight/left/right/brake) | 20×28px | Hot pink jacket `0xff3388`, blue panels `0x3366ff`, dark pink `0xcc2266`, orange beanie `0xff6600`, board `0x8b4513`/`0x664422`, goggles `0x87ceeb` |
+
+Shared colors: boots `0x333333`, goggles `0x87ceeb`.
+
+**Skier variants:** Straight = parallel skis, bonnet with pompom on top. Left/right = skis angle into turn, body leans. Brake = pizza/snow plow stance (ski tips converge downhill, tails spread uphill).
+
+**Snowboarder variants:** Straight = vertical board (nose downhill). Left/right = board angled diagonally in turn direction. Brake = horizontal board (perpendicular to fall line), crouched stance.
 
 ### Bird Sprite Variants
 

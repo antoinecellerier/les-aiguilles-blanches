@@ -67,6 +67,16 @@ const en: Record<string, string> = {
   voiceVolume: "Voice",
   ambienceVolume: "Ambience",
   mute: "Mute",
+
+  // Bonus
+  bonus: "Bonus",
+  skiMode: "Descent Mode",
+  ski: "Ski",
+  snowboard: "Snowboard",
+  skiIt: "Ski it!",
+  rideIt: "Ride it!",
+  skiRunSpeed: "Speed",
+  skiRunTime: "Time",
   
   // How to Play hints
   howToPlayMove: "{keys} or Arrows to move",
@@ -227,6 +237,8 @@ const en: Record<string, string> = {
   marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
   
   // Changelog
+  changelog_20260211_date: "February 11, 2026",
+  changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed",
   changelog_20260210_date: "February 10, 2026",
   changelog_20260210: "🎵 Music and sound effects\n🔈 Volume settings\n⏱️ Auto-calibrated level times\n⏭️ Skip tutorial option\n🏔️ Avalanche zone redesign",
   changelog_20260209_date: "February 9, 2026",

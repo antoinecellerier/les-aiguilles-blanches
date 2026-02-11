@@ -75,11 +75,13 @@ MusicSystem is a singleton that persists across scene transitions. Use `MusicSys
 
 ## Key Files
 - `src/scenes/GameScene.ts` - Main gameplay, physics, cliff system
+- `src/scenes/SkiRunScene.ts` - Post-grooming ski/snowboard descent (reward run)
 - `src/config/gameConfig.ts` - Game constants, BALANCE tuning values
 - `src/config/levels.ts` - Level definitions
 - `src/config/localization.ts` - Localization hub, imports from locales/
 - `src/config/locales/*.ts` - Per-language translation files (14 languages)
 - `src/utils/animalSprites.ts` - Procedural pixel art for alpine wildlife (6 species + bird variants)
+- `src/utils/skiSprites.ts` - Procedural pixel art for skier & snowboarder sprites
 - `src/utils/foxBehavior.ts` - Shared fox hunting/lunge constants and decision logic
 - `src/utils/animalTracks.ts` - Shared track/footprint drawing
 - `src/utils/characterPortraits.ts` - Procedural pixel art generation

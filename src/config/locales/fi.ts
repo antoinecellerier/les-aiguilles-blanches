@@ -68,6 +68,16 @@ const fi: Record<string, string> = {
   ambienceVolume: "Tunnelma",
   mute: "Mykistä",
 
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "Laskettelutila",
+  ski: "Suksi",
+  snowboard: "Lumilautailu",
+  skiIt: "Laskemaan!",
+  rideIt: "Laudalle!",
+  skiRunSpeed: "Nopeus",
+  skiRunTime: "Aika",
+
   // How to Play hints
   howToPlayMove: "{keys} tai nuolet liikkumiseen",
   howToPlayMoveTouch: "Käytä virtuaalista D-padia",
@@ -228,6 +238,8 @@ const fi: Record<string, string> = {
   marieWelcome: "Tule lämmittelemään Chez Marie'hen. Hyvää tartiflette'a!",
 
   // Changelog
+  changelog_20260211_date: "11. helmikuuta 2026",
+  changelog_20260211: "⛷️ Laskettele tai lumilautaile juuri tamppaamallasi rinteellä",
   changelog_20260210_date: "10. helmikuuta 2026",
   changelog_20260210: "🎵 Musiikki ja äänitehosteet\n🔈 Äänenvoimakkuusasetukset\n⏱️ Automaattisesti kalibroidut tasoajat\n⏭️ Ohita opastus\n🏔️ Lumivyöryalueet uudistettu",
   changelog_20260209_date: "9. helmikuuta 2026",

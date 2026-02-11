@@ -70,6 +70,16 @@ const it: Record<string, string> = {
   voiceVolume: "Voce",
   ambienceVolume: "Ambiente",
   mute: "Muto",
+
+  // Gameplay
+  bonus: "Bonus",
+  skiMode: "Modalità discesa",
+  ski: "Sci",
+  snowboard: "Snowboard",
+  skiIt: "Sciare!",
+  rideIt: "Snowboard!",
+  skiRunSpeed: "Velocità",
+  skiRunTime: "Tempo",
   
   // How to Play hints
   howToPlayMoveTouch: "Usa il D-pad virtuale",
@@ -193,6 +203,8 @@ const it: Record<string, string> = {
   marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
   
   // Changelog
+  changelog_20260211_date: "11 febbraio 2026",
+  changelog_20260211: "⛷️ Scia o fai snowboard sulla pista appena battuta",
   changelog_20260210_date: "10 febbraio 2026",
   changelog_20260210: "🎵 Musica ed effetti sonori\n🔈 Impostazioni volume\n⏱️ Tempi livello auto-calibrati\n⏭️ Salta il tutorial\n🏔️ Riprogettazione zone valanga",
   changelog_20260209_date: "9 febbraio 2026",

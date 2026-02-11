@@ -68,6 +68,16 @@ const ja: Record<string, string> = {
   ambienceVolume: "環境音",
   mute: "ミュート",
 
+  // Gameplay
+  bonus: "ボーナス",
+  skiMode: "滑走モード",
+  ski: "スキー",
+  snowboard: "スノーボード",
+  skiIt: "滑ろう！",
+  rideIt: "ライド！",
+  skiRunSpeed: "スピード",
+  skiRunTime: "タイム",
+
   // How to Play hints
   howToPlayMove: "{keys}または矢印キーで移動",
   howToPlayMoveTouch: "仮想Dパッドで移動",
@@ -227,6 +237,8 @@ const ja: Record<string, string> = {
   marieWelcome: "Chez Marieで温まっていきなさい。美味しいtartifletteがあるわよ！",
 
   // Changelog
+  changelog_20260211_date: "2026年2月11日",
+  changelog_20260211: "⛷️ 整備したばかりのゲレンデをスキーやスノーボードで滑ろう",
   changelog_20260210_date: "2026年2月10日",
   changelog_20260210: "🎵 音楽と効果音\n🔈 音量設定\n⏱️ 自動調整レベルタイム\n⏭️ チュートリアルスキップ\n🏔️ 雪崩エリア再設計",
   changelog_20260209_date: "2026年2月9日",
