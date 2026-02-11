@@ -28,7 +28,10 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 ### Features
 
 - **11 Progressive Levels**: From guided tutorial through storm operations and night grooming
-- **Authentic Grooming Mechanics**: Tiller with quality system, blade, and winch
+- **Authentic Grooming Mechanics**: Tiller with quality system, blade, and winch with breakable cable
+- **Ski & Snowboard Reward Run**: Ski or snowboard down freshly groomed pistes with tricks on park features
+- **Terrain Park**: Kickers, rails, and halfpipe with zone-specific grooming challenges
+- **Level Select & Replay**: Browse all levels with star ratings, replay for better scores
 - **Savoyard Culture**: Local food (tartiflette, fondue, génépi) that affects gameplay
 - **Full Accessibility**: High contrast, colorblind modes, screen reader support, rebindable controls
 - **Multi-Platform Input**: Keyboard, mouse, gamepad, and touch controls

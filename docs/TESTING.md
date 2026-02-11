@@ -35,6 +35,7 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
   - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`, `test_volume_indicator.py`
   - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
   - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
+  - `src/scenes/SkiRunScene.ts`, `src/systems/ParkFeatureSystem.ts`, `src/utils/skiSprites.ts`, `src/utils/skiRunState.ts` → also runs `test_ski_run.py`
   - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`
   - `src/utils/keyboardLayout.ts` → also runs `test_key_hints.py`
   - `src/config/levels.ts`, `src/systems/*` → also runs `test_level_mechanics.py`
@@ -150,6 +151,8 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_touch_controls.py` | Touch input, orientation changes, resize |
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
 | `test_volume_indicator.py` | Volume icon, mute toggle, hover slider, overlay |
+| `test_level_select.py` | Level select navigation, star ratings, ski/groom buttons |
+| `test_ski_run.py` | Ski run HUD, descent mode settings, viewport bounds |
 
 ### Viewport / Resize Testing
 

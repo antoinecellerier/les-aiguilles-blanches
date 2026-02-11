@@ -102,13 +102,16 @@ snow-groomer/
 │   │   └── code-health.agent.md  # Code audit custom agent
 │   ├── skills/
 │   │   ├── art-review/    # Art director visual review skill
+│   │   ├── audio-review/  # Audio director review skill
 │   │   ├── code-health/   # Auto-invoked code audit skill
 │   │   ├── content-review/# Content writer review skill
-│   │   └── docs-update/   # Auto-invoked docs sync skill
+│   │   ├── docs-update/   # Auto-invoked docs sync skill
+│   │   └── game-design/   # Game design review skill
 │   └── copilot-instructions.md   # Copilot custom instructions
 └── docs/
     ├── ARCHITECTURE.md     # This file
     ├── GAMEPLAY.md         # Game mechanics
+    ├── GAME_DESIGN.md      # Design pillars, difficulty curve, food economy
     ├── TESTING.md          # Test helpers, debugging
     ├── ART_STYLE.md        # Visual style guide
     └── ROADMAP.md          # Work queue, bugs, future features
