@@ -249,8 +249,10 @@ const pl: Record<string, string> = {
   marieWelcome: "Przyjdź się ogrzać do Chez Marie. Dobra tartiflette!",
 
   // Changelog
+  changelog_20260212_date: "12 lutego 2026",
+  changelog_20260212: "📋 Wybór poziomu\n🔗 Zrywalne lina wciągarki\n🕹️ Płynniejsze sterowanie i rozmieszczenie",
   changelog_20260211_date: "11 lutego 2026",
-changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie po właśnie przygotowanym stoku\n🎯 System jakości preparacji\n🏔️ Strome strefy wizualnie wyróżnione\n🏗️ Park z trikami: airy, grindy i skoki z halfpipe",
+changelog_20260211: "⛷️ Zjazd na nartach po preparacji\n🎯 Jakość preparacji\n🏔️ Kolorowe strome strefy\n🏗️ Park i triki",
   changelog_20260210_date: "10 lutego 2026",
   changelog_20260210: "🎵 Muzyka i efekty dźwiękowe\n🔈 Ustawienia głośności\n⏱️ Automatycznie kalibrowane czasy\n⏭️ Pomiń samouczek\n🏔️ Przeprojektowane strefy lawinowe",
   changelog_20260209_date: "9 lutego 2026",

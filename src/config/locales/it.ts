@@ -207,8 +207,10 @@ const it: Record<string, string> = {
   marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
   
   // Changelog
+  changelog_20260212_date: "12 febbraio 2026",
+  changelog_20260212: "📋 Selezione livello\n🔗 Cavo del verricello fragile\n🕹️ Controlli e posizionamento migliorati",
   changelog_20260211_date: "11 febbraio 2026",
-changelog_20260211: "⛷️ Scia o fai snowboard sulla pista appena preparata\n🎯 Sistema di qualità della preparazione\n🏔️ Zone ripide visivamente distinte\n🏗️ Park con trick: air, grind e lanci da halfpipe",
+changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità della preparazione\n🏔️ Zone ripide colorate\n🏗️ Terrain park e trick",
   changelog_20260210_date: "10 febbraio 2026",
   changelog_20260210: "🎵 Musica ed effetti sonori\n🔈 Impostazioni volume\n⏱️ Tempi livello auto-calibrati\n⏭️ Salta il tutorial\n🏔️ Riprogettazione zone valanga",
   changelog_20260209_date: "9 febbraio 2026",

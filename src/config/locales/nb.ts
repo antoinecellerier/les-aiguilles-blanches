@@ -250,8 +250,10 @@ const nb: Record<string, string> = {
   marieWelcome: "Kom og varm deg Chez Marie. En god tartiflette!",
 
   // Changelog
+  changelog_20260212_date: "12. februar 2026",
+  changelog_20260212: "📋 Nivåvalg\n🔗 Vinsjkabel som kan ryke\n🕹️ Jevnere styring og plassering",
   changelog_20260211_date: "11. februar 2026",
-changelog_20260211: "⛷️ Stå på ski eller snowboard ned løypa du nettopp preparerte\n🎯 Prepareringskvalitetssystem\n🏔️ Bratte soner visuelt distinkte\n🏗️ Park med triks: airs, grinds og halfpipe-hopp",
+changelog_20260211: "⛷️ Skikjøring etter preparering\n🎯 Prepareringskvalitet\n🏔️ Fargekodede bratte soner\n🏗️ Park og triks",
   changelog_20260210_date: "10. februar 2026",
   changelog_20260210: "🎵 Musikk og lydeffekter\n🔈 Voluminnstillinger\n⏱️ Autokalibrerte nivåtider\n⏭️ Hopp over opplæring\n🏔️ Snøskredsoner redesignet",
   changelog_20260209_date: "9. februar 2026",

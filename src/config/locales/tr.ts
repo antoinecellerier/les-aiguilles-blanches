@@ -249,8 +249,10 @@ const tr: Record<string, string> = {
   marieWelcome: "Chez Marie'de ısınmaya gelin. Güzel bir tartiflette!",
 
   // Changelog
+  changelog_20260212_date: "12 Şubat 2026",
+  changelog_20260212: "📋 Seviye seçimi\n🔗 Kopabilen vinç kablosu\n🕹️ Daha akıcı kontroller ve yerleşim",
   changelog_20260211_date: "11 Şubat 2026",
-changelog_20260211: "⛷️ Az önce hazırladığınız pistte kayak veya snowboard yapın\n🎯 Hazırlama kalitesi sistemi\n🏔️ Dik bölgeler görsel olarak belirgin\n🏗️ Trick'li park: air, grind ve halfpipe atlayışları",
+changelog_20260211: "⛷️ Hazırlama sonrası kayak inişi\n🎯 Hazırlama kalitesi\n🏔️ Renk kodlu dik bölgeler\n🏗️ Park ve trick'ler",
   changelog_20260210_date: "10 Şubat 2026",
   changelog_20260210: "🎵 Müzik ve ses efektleri\n🔈 Ses ayarları\n⏱️ Otomatik kalibreli seviye süreleri\n⏭️ Eğitimi atla\n🏔️ Çığ bölgeleri yeniden tasarlandı",
   changelog_20260209_date: "9 Şubat 2026",

@@ -249,8 +249,10 @@ const ko: Record<string, string> = {
   marieWelcome: "Chez Marie에서 몸 좀 녹여요. 맛있는 tartiflette가 있어요!",
 
   // Changelog
+  changelog_20260212_date: "2026년 2월 12일",
+  changelog_20260212: "📋 레벨 선택\n🔗 끊어지는 윈치 케이블\n🕹️ 조작감 및 배치 개선",
   changelog_20260211_date: "2026년 2월 11일",
-changelog_20260211: "⛷️ 방금 정비한 슬로프에서 스키 또는 스노보드\n🎯 정비 품질 시스템\n🏔️ 급경사 구간 시각적 구분\n🏗️ 트릭이 있는 파크: 에어, 그라인드, 하프파이프",
+changelog_20260211: "⛷️ 정비 후 스키 활강\n🎯 정비 품질\n🏔️ 색상 구분된 급경사 구간\n🏗️ 파크와 트릭",
   changelog_20260210_date: "2026년 2월 10일",
   changelog_20260210: "🎵 음악과 효과음\n🔈 볼륨 설정\n⏱️ 자동 조정 레벨 타임\n⏭️ 튜토리얼 건너뛰기\n🏔️ 눈사태 구역 재설계",
   changelog_20260209_date: "2026년 2월 9일",

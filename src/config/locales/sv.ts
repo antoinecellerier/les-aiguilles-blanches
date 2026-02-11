@@ -250,8 +250,10 @@ const sv: Record<string, string> = {
   marieWelcome: "Kom och värm dig Chez Marie. En god tartiflette!",
 
   // Changelog
+  changelog_20260212_date: "12 februari 2026",
+  changelog_20260212: "📋 Nivåval\n🔗 Vinschkabel som kan brista\n🕹️ Smidigare styrning och placering",
   changelog_20260211_date: "11 februari 2026",
-changelog_20260211: "⛷️ Åk skidor eller snowboard nerför pisten du just preparerade\n🎯 Prepareringskvalitetssystem\n🏔️ Branta zoner visuellt distinkta\n🏗️ Park med tricks: airs, grinds och halfpipe-hopp",
+changelog_20260211: "⛷️ Skidåkning efter preparering\n🎯 Prepareringskvalitet\n🏔️ Färgkodade branta zoner\n🏗️ Park och tricks",
   changelog_20260210_date: "10 februari 2026",
     changelog_20260210: "🎵 Musik och ljudeffekter\n🔈 Volyminställningar\n⏱️ Autokalibrerade nivåtider\n⏭️ Hoppa över handledning\n🏔️ Lavinzoner omdesignade",
   changelog_20260209_date: "9 februari 2026",

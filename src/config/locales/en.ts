@@ -249,8 +249,10 @@ const en: Record<string, string> = {
   marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
   
   // Changelog
+  changelog_20260212_date: "February 12, 2026",
+  changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Smoother controls and placement",
   changelog_20260211_date: "February 11, 2026",
-changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed\n🎯 Grooming quality system\n🏔️ Steep zones visually distinct\n🏗️ Terrain park with tricks: airs, grinds, and halfpipe launches",
+changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔️ Color-coded steep zones\n🏗️ Terrain park and tricks",
   changelog_20260210_date: "February 10, 2026",
   changelog_20260210: "🎵 Music and sound effects\n🔈 Volume settings\n⏱️ Auto-calibrated level times\n⏭️ Skip tutorial option\n🏔️ Avalanche zone redesign",
   changelog_20260209_date: "February 9, 2026",

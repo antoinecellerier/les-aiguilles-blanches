@@ -75,10 +75,14 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package
 - [ ] Ski/snowboard reward run (v2) — Slalom gates, freestyle elements on park levels, per-level modifications, best time tracking
-- [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
+- [x] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Gameplay QoL** — Groomer spawn exclusion zone (3 tiles), obstacle minimum spacing (6 tiles), halved obstacle density with 90% edge bias, progressive turning (hold ramps to 2.2× over 0.4s), halfpipe wall lip colliders with pump-effect speed boost, ski run tile overlap to fix sub-pixel gaps, ungroomed snow texture lightened, fuel station repositioned on park levels.
+
+- ✅ **Menu scroll & layout** — Scrollable main menu for phone landscape (container + geometry mask, wheel/touch/keyboard scroll, ▲/▼ indicators). Button reordering (Resume CTA → New Game → Level Select). Single green CTA. Groomer shifted to 82% width in landscape to avoid button overlap. Settings scene: back button + title inline at top, maximizing content area.
 
 - ✅ **Level select & replay** — New LevelSelectScene accessible from main menu when player has progress. Shows all 11 levels with difficulty markers, star ratings (⭐⭐⭐), and Groom/Ski buttons. Per-level stats persisted (best stars, best time, bonus objectives). Ski mode gated to completed levels. Locked levels shown grayed out. Keyboard/gamepad navigation, responsive layout, scroll support.
 

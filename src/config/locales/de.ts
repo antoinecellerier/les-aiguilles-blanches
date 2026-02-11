@@ -207,8 +207,10 @@ const de: Record<string, string> = {
   marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
   
   // Changelog
+  changelog_20260212_date: "12. Februar 2026",
+  changelog_20260212: "📋 Levelauswahl\n🔗 Reißbares Seilwindenkabel\n🕹️ Verbesserte Steuerung und Platzierung",
   changelog_20260211_date: "11. Februar 2026",
-changelog_20260211: "⛷️ Skifahren oder snowboarden auf der frisch präparierten Piste\n🎯 Präparierqualitätssystem\n🏔️ Steile Zonen visuell unterscheidbar\n🏗️ Terrain-Park mit Tricks: Airs, Grinds und Halfpipe-Launches",
+changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqualität\n🏔️ Farblich markierte Steilzonen\n🏗️ Terrain-Park und Tricks",
   changelog_20260210_date: "10. Februar 2026",
   changelog_20260210: "🎵 Musik und Soundeffekte\n🔈 Lautstärkeeinstellungen\n⏱️ Automatisch kalibrierte Levelzeiten\n⏭️ Tutorial überspringen\n🏔️ Lawinenzonen-Redesign",
   changelog_20260209_date: "9. Februar 2026",

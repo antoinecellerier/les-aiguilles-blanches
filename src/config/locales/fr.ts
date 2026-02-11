@@ -254,8 +254,10 @@ const fr: Record<string, string> = {
   marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
   
   // Changelog
+  changelog_20260212_date: "12 février 2026",
+  changelog_20260212: "📋 Sélection de niveau\n🔗 Câble de treuil cassable\n🕹️ Contrôles et placement améliorés",
   changelog_20260211_date: "11 février 2026",
-changelog_20260211: "⛷️ Skiez ou snowboardez sur la piste que vous venez de damer\n🎯 Système de qualité de damage\n🏔️ Zones raides visuellement distinctes\n🏗️ Park avec tricks : airs, grinds et lâchers de halfpipe",
+changelog_20260211: "⛷️ Descente à ski après le damage\n🎯 Qualité de damage\n🏔️ Zones raides colorées\n🏗️ Terrain park et tricks",
   changelog_20260210_date: "10 février 2026",
   changelog_20260210: "🎵 Musique et effets sonores\n🔈 Réglages de volume\n⏱️ Temps de niveau auto-calibrés\n⏭️ Option sauter le tutoriel\n🏔️ Refonte des zones d'avalanche",
   changelog_20260209_date: "9 février 2026",

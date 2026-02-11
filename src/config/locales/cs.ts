@@ -249,8 +249,10 @@ const cs: Record<string, string> = {
   marieWelcome: "Přijďte se ohřát k Chez Marie. Dobrá tartiflette!",
 
   // Changelog
+  changelog_20260212_date: "12. února 2026",
+  changelog_20260212: "📋 Výběr úrovně\n🔗 Přetrhnutelné lano navijáku\n🕹️ Plynulejší ovládání a rozmístění",
   changelog_20260211_date: "11. února 2026",
-changelog_20260211: "⛷️ Lyžujte nebo jeďte na snowboardu po právě upravené sjezdovce\n🎯 Systém kvality úpravy\n🏔️ Strmé zóny vizuálně odlišné\n🏗️ Park s triky: airy, grindy a halfpipe skoky",
+changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\n🏔️ Barevně rozlišené strmé zóny\n🏗️ Park a triky",
   changelog_20260210_date: "10. února 2026",
   changelog_20260210: "🎵 Hudba a zvukové efekty\n🔈 Nastavení hlasitosti\n⏱️ Automaticky kalibrované časy\n⏭️ Přeskočit tutoriál\n🏔️ Přepracované lavinové zóny",
   changelog_20260209_date: "9. února 2026",

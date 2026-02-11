@@ -250,8 +250,10 @@ const fi: Record<string, string> = {
   marieWelcome: "Tule lämmittelemään Chez Marie'hen. Hyvää tartiflette'a!",
 
   // Changelog
+  changelog_20260212_date: "12. helmikuuta 2026",
+  changelog_20260212: "📋 Tasonvalinta\n🔗 Katkeava vinssikaapeli\n🕹️ Parannetut ohjaukset ja sijoittelu",
   changelog_20260211_date: "11. helmikuuta 2026",
-changelog_20260211: "⛷️ Laskettele tai lautaile juuri tamppaamallasi rinteellä\n🎯 Tamppauksen laatujärjestelmä\n🏔️ Jyrkät vyöhykkeet visuaalisesti erottuvat\n🏗️ Parkki trikeillä: airit, grindit ja halfpipe-hypyt",
+changelog_20260211: "⛷️ Laskettelulasku tamppauksen jälkeen\n🎯 Tamppauksen laatu\n🏔️ Värikoodatut jyrkät vyöhykkeet\n🏗️ Parkki ja trikit",
   changelog_20260210_date: "10. helmikuuta 2026",
   changelog_20260210: "🎵 Musiikki ja äänitehosteet\n🔈 Äänenvoimakkuusasetukset\n⏱️ Automaattisesti kalibroidut tasoajat\n⏭️ Ohita opastus\n🏔️ Lumivyöryalueet uudistettu",
   changelog_20260209_date: "9. helmikuuta 2026",
