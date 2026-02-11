@@ -18,6 +18,17 @@ Your vehicle is inspired by the legendary **PistenBully 600**, a powerful snow g
 | **Winch** | Anchors to steep slopes | Hold Winch button |
 | **Cabin** | Protects operator, houses controls | Your home! |
 
+### Grooming Quality
+
+Not all grooming is equal. Quality depends on two factors:
+
+- **Steering stability** — Smooth, committed passes produce better results than erratic zigzagging. Sweeping arcs are fine; rapid direction changes reduce quality.
+- **Fall-line alignment** — Grooming along the fall line (up/down the slope) produces higher quality than perpendicular passes, matching real groomer technique.
+
+Three visual tiers of groomed snow: smooth corduroy (high quality), uneven ridges (medium), and rough choppy (low). Re-grooming a tile with steadier steering upgrades its quality.
+
+Quality doesn't affect win/loss coverage — it feeds into the **precision grooming** bonus objective on select levels (Air Zone, Le Tube, Coupe des Aiguilles).
+
 ## 📊 HUD Elements
 
 ```

@@ -128,6 +128,7 @@ const it: Record<string, string> = {
   bonusSpeed: "Tempo",
   bonusWinch: "Usi del verricello",
   bonusExplore: "Strade esplorate",
+  bonusPrecision: "Qualità della preparazione",
   retry: "Riprova",
   gameComplete: "Gioco completato!",
   viewCredits: "Vedi crediti",
@@ -204,11 +205,9 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 febbraio 2026",
-  changelog_20260211: "⛷️ Scia o fai snowboard sulla pista appena battuta",
+  changelog_20260211: "⛷️ Scia o fai snowboard sulla pista preparata\n🎯 Qualità della preparazione\n🏔️ Zone ripide visivamente distinte",
   changelog_20260210_date: "10 febbraio 2026",
   changelog_20260210: "🎵 Musica ed effetti sonori\n🔈 Impostazioni volume\n⏱️ Tempi livello auto-calibrati\n⏭️ Salta il tutorial\n🏔️ Riprogettazione zone valanga",
-  changelog_20260211_date: "11 febbraio 2026",
-  changelog_20260211: "⛷️ Zone ripide visivamente distinte (tinta blu segnala il pericolo)",
   changelog_20260209_date: "9 febbraio 2026",
   changelog_20260209: "🏔️ Schermate vittoria/sconfitta alpine\n❄️ Accumulo neve da tempesta\n🏆 Bonus senza errori\n🔊 Suoni meteo e fauna",
   changelog_20260208_date: "8 febbraio 2026",

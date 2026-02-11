@@ -23,6 +23,20 @@ import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
 import { setGroomedTiles } from '../utils/skiRunState';
 import DialogueScene from './DialogueScene';
 
+/** Normalize angle difference to [-π, π] range */
+function normalizeAngle(a: number): number {
+  while (a > Math.PI) a -= 2 * Math.PI;
+  while (a < -Math.PI) a += 2 * Math.PI;
+  return a;
+}
+
+/** Map quality value (0–1) to a groomed snow texture key */
+function getGroomedTexture(quality: number): string {
+  if (quality >= 0.8) return 'snow_groomed';       // excellent corduroy
+  if (quality >= 0.5) return 'snow_groomed_med';   // decent but visible ridges
+  return 'snow_groomed_rough';                      // choppy, uneven
+}
+
 /**
  * Les Aiguilles Blanches - Game Scene
  * Main gameplay scene with grooming mechanics
@@ -37,6 +51,7 @@ interface SnowCell {
   tile: Phaser.GameObjects.Image;
   groomed: boolean;
   groomable: boolean;
+  quality: number; // 0–1, grooming quality (0 = ungroomed, best-of-N passes)
 }
 
 interface Buffs {
@@ -109,6 +124,13 @@ export default class GameScene extends Phaser.Scene {
   private groomedCount = 0;
   private groomableTiles = 0;
   private totalTiles = 0;
+  private groomQualitySum = 0; // sum of quality values for groomed tiles
+
+  // Grooming quality tracking
+  private rotationHistory: number[] = [];
+  private rotationTimestamps: number[] = [];
+  private steeringStability = 1.0; // 0–1, based on angular acceleration
+  private fallLineAlignment = 1.0; // 0.3–1.0, based on direction vs fall line
 
   // Piste path & geometry (extracted to LevelGeometry system)
   private geometry = new LevelGeometry();
@@ -268,6 +290,11 @@ export default class GameScene extends Phaser.Scene {
   ): void {
     this.snowGrid = [];
     this.groomedCount = 0;
+    this.groomQualitySum = 0;
+    this.rotationHistory = [];
+    this.rotationTimestamps = [];
+    this.steeringStability = 1.0;
+    this.fallLineAlignment = 1.0;
     this.createSnowGrid();
 
     this.pisteRenderer = new PisteRenderer(this, this.geometry);
@@ -462,7 +489,8 @@ export default class GameScene extends Phaser.Scene {
         this.snowGrid[y][x] = {
           tile: tile,
           groomed: !isGroomable,
-          groomable: isGroomable
+          groomable: isGroomable,
+          quality: 0,
         };
 
         if (isGroomable) {
@@ -882,7 +910,45 @@ export default class GameScene extends Phaser.Scene {
     if (vx !== 0 || vy !== 0) {
       this.groomer.rotation = Math.atan2(vy, vx) + Math.PI / 2;
       this.hasMoved = true;
+      this.updateGroomingQuality();
     }
+  }
+
+  /** Update steering stability and fall-line alignment for grooming quality. */
+  private updateGroomingQuality(): void {
+    const now = this.time.now;
+    const rotation = this.groomer.rotation;
+
+    // Track rotation history (rolling 500ms window)
+    this.rotationHistory.push(rotation);
+    this.rotationTimestamps.push(now);
+    const windowMs = 500;
+    while (this.rotationTimestamps.length > 0 && now - this.rotationTimestamps[0] > windowMs) {
+      this.rotationTimestamps.shift();
+      this.rotationHistory.shift();
+    }
+
+    // Compute angular acceleration (change in angular velocity)
+    // Need at least 3 samples to compute acceleration
+    if (this.rotationHistory.length >= 3) {
+      const n = this.rotationHistory.length;
+      // Angular velocities at two points
+      const dt1 = (this.rotationTimestamps[n - 2] - this.rotationTimestamps[n - 3]) / 1000 || 0.016;
+      const dt2 = (this.rotationTimestamps[n - 1] - this.rotationTimestamps[n - 2]) / 1000 || 0.016;
+      const av1 = normalizeAngle(this.rotationHistory[n - 2] - this.rotationHistory[n - 3]) / dt1;
+      const av2 = normalizeAngle(this.rotationHistory[n - 1] - this.rotationHistory[n - 2]) / dt2;
+      const angularAccel = Math.abs(av2 - av1) / ((dt1 + dt2) / 2);
+      // Max angular acceleration threshold (radians/s²) — tuned so smooth arcs pass
+      const maxAccel = 15;
+      this.steeringStability = Math.max(0.2, Math.min(1.0, 1.0 - angularAccel / maxAccel));
+    }
+
+    // Fall-line alignment: cos²(angle - π/2)
+    // Fall line is straight down = π/2 in Phaser coords (after the +π/2 offset, driving down = rotation 0)
+    // groomer.rotation = atan2(vy,vx) + π/2, so driving straight down → rotation = π
+    // We want alignment with vertical axis: cos²(rotation) gives 1 for 0/π (vertical), 0 for ±π/2 (horizontal)
+    const cos = Math.cos(this.groomer.rotation);
+    this.fallLineAlignment = 0.3 + 0.7 * cos * cos;
   }
 
   private handleGrooming(): void {
@@ -924,6 +990,9 @@ export default class GameScene extends Phaser.Scene {
     const baseRadius = Math.ceil(GAME_CONFIG.GROOM_WIDTH / this.tileSize / 2) + 1;
     const radius = Math.max(1, Math.floor(baseRadius * staminaFactor));
 
+    // Compute current grooming quality from stability + fall-line alignment
+    const quality = this.steeringStability * 0.5 + this.fallLineAlignment * 0.5;
+
     for (let dy = -radius; dy <= radius; dy++) {
       for (let dx = -radius; dx <= radius; dx++) {
         const tx = tileX + dx;
@@ -932,21 +1001,35 @@ export default class GameScene extends Phaser.Scene {
         if (tx >= 0 && tx < this.level.width &&
           ty >= 0 && ty < this.level.height) {
           const cell = this.snowGrid[ty][tx];
-          if (cell.groomable && !cell.groomed) {
-            cell.groomed = true;
+          if (cell.groomable) {
+            if (!cell.groomed) {
+              // First grooming pass
+              cell.groomed = true;
+              cell.quality = quality;
+              this.groomQualitySum += quality;
+              this.groomedCount++;
+              this.hasGroomed = true;
+            } else if (quality > cell.quality) {
+              // Re-grooming at higher quality (best-of-N)
+              this.groomQualitySum += quality - cell.quality;
+              cell.quality = quality;
+            } else {
+              continue; // No change needed
+            }
+            // Steep zones use dedicated tinted textures; flat zones use quality-based textures
             const worldY = ty * this.tileSize + this.tileSize / 2;
             const slope = this.getSlopeAtY(worldY);
             const bucket = this.getSteepTextureBucket(slope);
             if (this.weatherSystem.isHighContrast) {
-              // TODO: setTint doesn't work on Canvas renderer — needs texture variant
               cell.tile.setTexture(bucket > 0 ? `snow_groomed_steep_${bucket}` : 'snow_groomed');
             } else if (bucket > 0) {
               cell.tile.setTexture(`snow_groomed_steep_${bucket}`);
+              // Darken steep tiles for low quality (alpha fade toward base steep color)
+              cell.tile.setAlpha(0.7 + 0.3 * cell.quality);
             } else {
-              cell.tile.setTexture('snow_groomed');
+              cell.tile.setTexture(getGroomedTexture(cell.quality));
+              cell.tile.setAlpha(1);
             }
-            this.groomedCount++;
-            this.hasGroomed = true;
           }
         }
       }
@@ -1131,6 +1214,12 @@ export default class GameScene extends Phaser.Scene {
 
   getCoverage(): number {
     return Math.round((this.groomedCount / this.totalTiles) * 100);
+  }
+
+  /** Average grooming quality (0–100%) across all groomed tiles */
+  getAverageGroomQuality(): number {
+    if (this.groomedCount === 0) return 0;
+    return Math.round((this.groomQualitySum / this.groomedCount) * 100);
   }
 
   /** Expose for tests */
@@ -1433,7 +1522,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     const timeUsed = this.level.timeLimit - this.timeRemaining;
-    console.log(`[level-complete] ${this.level.nameKey} ${won ? 'WON' : 'FAIL'} — time: ${timeUsed}s / ${this.level.timeLimit}s, coverage: ${this.getCoverage()}%`);
+    console.log(`[level-complete] ${this.level.nameKey} ${won ? 'WON' : 'FAIL'} — time: ${timeUsed}s / ${this.level.timeLimit}s, coverage: ${this.getCoverage()}%, quality: ${this.getAverageGroomQuality()}%`);
 
     // Emit final game state so HUD has correct values before stopping
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
@@ -1445,6 +1534,7 @@ export default class GameScene extends Phaser.Scene {
       won: won,
       level: this.levelIndex,
       coverage: this.getCoverage(),
+      groomQuality: this.getAverageGroomQuality(),
       timeUsed: timeUsed,
       failReason: failReason,
       fuelUsed: Math.round(this.fuelUsed),

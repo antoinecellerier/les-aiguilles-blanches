@@ -128,6 +128,7 @@ const es: Record<string, string> = {
   bonusSpeed: "Tiempo",
   bonusWinch: "Usos del cabrestante",
   bonusExplore: "Caminos explorados",
+  bonusPrecision: "Calidad de preparación",
   retry: "Reintentar",
   gameComplete: "¡Juego completado!",
   viewCredits: "Ver créditos",
@@ -204,11 +205,9 @@ const es: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 de febrero de 2026",
-  changelog_20260211: "⛷️ Esquía o haz snowboard en la pista que acabas de pisar",
+  changelog_20260211: "⛷️ Esquía o haz snowboard por la pista preparada\n🎯 Calidad de preparación\n🏔️ Zonas empinadas visualmente distintas",
   changelog_20260210_date: "10 de febrero de 2026",
   changelog_20260210: "🎵 Música y efectos de sonido\n🔈 Ajustes de volumen\n⏱️ Tiempos de nivel auto-calibrados\n⏭️ Saltar tutorial\n🏔️ Rediseño de zonas de avalancha",
-  changelog_20260211_date: "11 de febrero de 2026",
-  changelog_20260211: "⛷️ Zonas empinadas visualmente distintas (tono azul advierte del peligro)",
   changelog_20260209_date: "9 de febrero de 2026",
   changelog_20260209: "🏔️ Pantallas victoria/derrota alpinas\n❄️ Acumulación de nieve en tormenta\n🏆 Bonus sin fallos\n🔊 Sonidos de clima y fauna",
   changelog_20260208_date: "8 de febrero de 2026",

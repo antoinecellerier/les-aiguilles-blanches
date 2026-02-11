@@ -22,6 +22,7 @@ interface LevelCompleteData {
   won: boolean;
   level: number;
   coverage: number;
+  groomQuality?: number;
   timeUsed: number;
   failReason?: string;
   fuelUsed?: number;
@@ -36,6 +37,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private won = false;
   private levelIndex = 0;
   private coverage = 0;
+  private groomQuality = 0;
   private timeUsed = 0;
   private failReason?: string;
   private fuelUsed = 0;
@@ -65,6 +67,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.won = data.won;
     this.levelIndex = data.level;
     this.coverage = data.coverage;
+    this.groomQuality = data.groomQuality ?? 0;
     this.timeUsed = data.timeUsed;
     this.failReason = data.failReason;
     this.fuelUsed = data.fuelUsed ?? 0;
@@ -475,6 +478,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
         case 'exploration':
           met = this.pathsVisited >= obj.target;
           label = t('bonusExplore') + ' ' + this.pathsVisited + '/' + this.totalPaths;
+          break;
+        case 'precision_grooming':
+          met = this.groomQuality >= obj.target;
+          label = t('bonusPrecision') + ' ' + this.groomQuality + '%';
           break;
       }
 

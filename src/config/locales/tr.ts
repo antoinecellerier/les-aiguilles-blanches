@@ -149,6 +149,7 @@ const tr: Record<string, string> = {
   bonusSpeed: "Süre",
   bonusWinch: "Vinç kullanımı",
   bonusExplore: "Keşfedilen yollar",
+  bonusPrecision: "Hazırlama kalitesi",
   retry: "Yeniden Dene",
   gameComplete: "Oyun Tamamlandı!",
   viewCredits: "Jenerikleri Gör",
@@ -238,11 +239,9 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11 Şubat 2026",
-  changelog_20260211: "⛷️ Az önce hazırladığın pistte kayak veya snowboard yap",
+  changelog_20260211: "⛷️ Hazırladığınız pistte kayak veya snowboard yapın\n🎯 Hazırlama kalitesi\n🏔️ Dik bölgeler görsel olarak belirgin",
   changelog_20260210_date: "10 Şubat 2026",
   changelog_20260210: "🎵 Müzik ve ses efektleri\n🔈 Ses ayarları\n⏱️ Otomatik kalibreli seviye süreleri\n⏭️ Eğitimi atla\n🏔️ Çığ bölgeleri yeniden tasarlandı",
-  changelog_20260211_date: "11 Şubat 2026",
-  changelog_20260211: "⛷️ Dik bölgeler görsel olarak belirgin (mavi ton tehlikeyi uyarır)",
   changelog_20260209_date: "9 Şubat 2026",
   changelog_20260209: "🏔️ Alp kazanma/kaybetme ekranları\n❄️ Fırtınada kar birikimi\n🏆 Kusursuz bonusu\n🔊 Hava ve doğa sesleri",
   changelog_20260208_date: "8 Şubat 2026",

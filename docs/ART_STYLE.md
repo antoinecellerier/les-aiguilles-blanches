@@ -204,13 +204,31 @@ Shared colors: boots `0x333333`, goggles `0x87ceeb`.
 All snow textures are 16×16 tiles with detail rectangles for texture:
 
 ```
-Groomed: White base + horizontal lines (every 3px)
+Groomed (high quality ≥80%): White base + even horizontal lines (every 3px)
 ┌────────────────┐
 │════════════════│  ← grooming line (1px, e8f0f8)
 │                │
 │════════════════│
 │                │
 │════════════════│
+└────────────────┘
+
+Groomed (medium quality 50-80%): Slightly grey + offset lines
+┌────────────────┐
+│══════════════  │  ← offset/shorter lines (dce6f0)
+│                │
+│ ════════════════
+│                │
+│═════════════   │
+└────────────────┘
+
+Groomed (low quality <50%): Grey base + scattered short dashes
+┌────────────────┐
+│ ══════         │  ← fragmented lines (d0dae4)
+│        ═══════ │
+│═════           │
+│          ════  │
+│   ════════     │
 └────────────────┘
 
 Ungroomed: Off-white base + irregular shadow patches

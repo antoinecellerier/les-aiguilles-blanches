@@ -289,6 +289,33 @@ export default class BootScene extends Phaser.Scene {
       gg.destroy();
     }
 
+    // Medium-quality groomed snow (visible ridges, less uniform lines)
+    const groomedMedGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
+    groomedMedGraphics.fillStyle(0xf8f8ff);
+    groomedMedGraphics.fillRect(0, 0, 16, 16);
+    groomedMedGraphics.fillStyle(0xdce6f0);
+    groomedMedGraphics.fillRect(0, 2, 14, 1);
+    groomedMedGraphics.fillRect(1, 5, 16, 1);
+    groomedMedGraphics.fillRect(0, 9, 13, 1);
+    groomedMedGraphics.fillRect(2, 13, 14, 1);
+    groomedMedGraphics.generateTexture('snow_groomed_med', 16, 16);
+    groomedMedGraphics.destroy();
+
+    // Low-quality groomed snow (rough, uneven cross-hatching)
+    const groomedRoughGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
+    groomedRoughGraphics.fillStyle(0xf0f0f8);
+    groomedRoughGraphics.fillRect(0, 0, 16, 16);
+    groomedRoughGraphics.fillStyle(0xd0dae4);
+    groomedRoughGraphics.fillRect(1, 1, 6, 1);
+    groomedRoughGraphics.fillRect(8, 3, 7, 1);
+    groomedRoughGraphics.fillRect(0, 6, 5, 1);
+    groomedRoughGraphics.fillRect(10, 7, 4, 1);
+    groomedRoughGraphics.fillRect(3, 10, 8, 1);
+    groomedRoughGraphics.fillRect(0, 13, 4, 1);
+    groomedRoughGraphics.fillRect(11, 14, 5, 1);
+    groomedRoughGraphics.generateTexture('snow_groomed_rough', 16, 16);
+    groomedRoughGraphics.destroy();
+
     // Packed snow (service roads — compacted by vehicle traffic, between off-piste and groomed)
     const packedGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
     packedGraphics.fillStyle(0xd8e4e8);  // Slightly blue-gray base

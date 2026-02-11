@@ -28,12 +28,12 @@ You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in t
 ### Features
 
 - **11 Progressive Levels**: From guided tutorial through storm operations and night grooming
-- **Authentic Grooming Mechanics**: Tiller, blade, and winch systems
+- **Authentic Grooming Mechanics**: Tiller with quality system, blade, and winch
 - **Savoyard Culture**: Local food (tartiflette, fondue, génépi) that affects gameplay
 - **Full Accessibility**: High contrast, colorblind modes, screen reader support, rebindable controls
 - **Multi-Platform Input**: Keyboard, mouse, gamepad, and touch controls
 - **Procedural Audio**: Chopin nocturne-style piano music, engine sounds, weather ambience, Celeste-style voice gibberish — all generated via Web Audio API
-- **5 Languages**: French, English, German, Italian, Spanish
+- **14 Languages**: French, English, German, Italian, Spanish, Swedish, Norwegian, Finnish, Czech, Polish, Turkish, Slovak, Japanese, Korean
 
 ## 🎯 How to Play
 

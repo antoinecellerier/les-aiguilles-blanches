@@ -942,7 +942,7 @@ Five failure groomer effects: **tumble** (upside-down groomer), **avalanche** (s
 
 ### Balance Constants
 
-All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights. Never hardcode magic numbers in GameScene — add them to `BALANCE`.
+All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights, grooming quality. Never hardcode magic numbers in GameScene — add them to `BALANCE`.
 
 ### Depth Constants
 

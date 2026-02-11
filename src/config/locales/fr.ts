@@ -152,6 +152,7 @@ const fr: Record<string, string> = {
   bonusSpeed: "Temps",
   bonusWinch: "Utilisations du treuil",
   bonusExplore: "Routes explorées",
+  bonusPrecision: "Qualité de damage",
   retry: "Réessayer",
   gameComplete: "Jeu terminé !",
   viewCredits: "Voir les crédits",
@@ -243,11 +244,9 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 février 2026",
-  changelog_20260211: "⛷️ Skiez ou surfez la piste que vous venez de damer",
+  changelog_20260211: "⛷️ Skiez ou snowboardez sur la piste damée\n🎯 Qualité de damage\n🏔️ Zones raides visuellement distinctes",
   changelog_20260210_date: "10 février 2026",
   changelog_20260210: "🎵 Musique et effets sonores\n🔈 Réglages de volume\n⏱️ Temps de niveau auto-calibrés\n⏭️ Option sauter le tutoriel\n🏔️ Refonte des zones d'avalanche",
-  changelog_20260211_date: "11 février 2026",
-  changelog_20260211: "⛷️ Zones raides visuellement distinctes (teinte bleue signale le danger)",
   changelog_20260209_date: "9 février 2026",
   changelog_20260209: "🏔️ Écrans victoire/défaite alpins\n❄️ Neige de tempête sur les éléments\n🏆 Bonus sans faute\n🔊 Ambiances météo et faune",
   changelog_20260208_date: "8 février 2026",

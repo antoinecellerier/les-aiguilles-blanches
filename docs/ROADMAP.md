@@ -27,7 +27,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Polish (Medium Priority)
 
 - [ ] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
-- [ ] Advanced tiller mechanics — Tiller raise/lower, speed-dependent grooming quality for harder levels
+- [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
 - [x] Make the settings menu look nicer — visual polish pass
 - [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
 - [x] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
@@ -78,6 +78,8 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] After a few levels have been completed, add a persistant menu to the home screen with direct level selection
 
 ## Recently Completed
+
+- ✅ **Grooming quality system** — Steering stability (angular acceleration) + fall-line alignment determine per-tile quality (0–100%). Three visual texture tiers. Re-grooming upgrades quality (best-of-N). New `precision_grooming` bonus objective on L3, L6, L10. Localized in 14 languages.
 
 - ✅ **Steep zone visual tinting** — Pre-generated snow texture variants (warm blue for slide 25°–35°, cold icy blue for tumble 40°–50°) applied via `setTexture()` since Canvas renderer ignores `setTint()`. Textures generated in BootScene, applied in GameScene. Persists after grooming.
 
