@@ -727,6 +727,7 @@ Firefox requires simplified Phaser configuration to render correctly. Key findin
 3. **Avoid render options**: `pixelArt`, `antialias`, `desynchronized` cause issues
 4. **Avoid callbacks**: `preBoot` and `postBoot` callbacks break rendering
 5. **Avoid Graphics methods**: `fillTriangle()` and `lineBetween()` may cause issues
+6. **No runtime tinting**: `setTint()` / `clearTint()` are silently ignored by the Canvas renderer. Use pre-generated texture variants via `setTexture()` instead (see steep zone textures in BootScene)
 
 Working Firefox configuration:
 ```javascript

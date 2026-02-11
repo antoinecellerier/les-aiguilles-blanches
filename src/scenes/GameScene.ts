@@ -282,6 +282,7 @@ export default class GameScene extends Phaser.Scene {
     );
 
     this.pisteRenderer.createPisteBoundaries(this.level, this.tileSize, worldWidth);
+    this.applySteepZoneTints();
 
     this.obstacles = this.physics.add.staticGroup();
     this.interactables = this.physics.add.staticGroup();
@@ -756,6 +757,42 @@ export default class GameScene extends Phaser.Scene {
     return 0;
   }
 
+  private getSlopeAtY(y: number): number {
+    for (const zone of this.geometry.steepZoneRects) {
+      if (y >= zone.startY && y <= zone.endY) {
+        return zone.slope;
+      }
+    }
+    return 0;
+  }
+
+  /** Returns the nearest steep texture slope bucket (25–50 in steps of 5), or 0. */
+  private getSteepTextureBucket(slope: number): number {
+    if (slope < 25) return 0;
+    return Math.min(50, Math.round(slope / 5) * 5);
+  }
+
+  /** Apply steep zone textures to all piste tiles within steep zones. */
+  private applySteepZoneTints(): void {
+    const ts = this.tileSize;
+    for (const zone of this.geometry.steepZoneRects) {
+      const bucket = this.getSteepTextureBucket(zone.slope);
+      if (bucket === 0) continue;
+      const texKey = `snow_steep_${bucket}`;
+      if (!this.textures.exists(texKey)) continue;
+      const yStart = Math.max(0, Math.floor(zone.startY / ts));
+      const yEnd = Math.min(this.level.height - 1, Math.floor(zone.endY / ts));
+      for (let y = yStart; y <= yEnd; y++) {
+        for (let x = 0; x < this.level.width; x++) {
+          const cell = this.snowGrid[y][x];
+          if (cell.groomable) {
+            cell.tile.setTexture(texKey);
+          }
+        }
+      }
+    }
+  }
+
   private triggerTumble(_slope: number): void {
     if (this.isTumbling) return;
     this.isTumbling = true;
@@ -897,11 +934,16 @@ export default class GameScene extends Phaser.Scene {
           const cell = this.snowGrid[ty][tx];
           if (cell.groomable && !cell.groomed) {
             cell.groomed = true;
-            cell.tile.setTexture('snow_groomed');
+            const worldY = ty * this.tileSize + this.tileSize / 2;
+            const slope = this.getSlopeAtY(worldY);
+            const bucket = this.getSteepTextureBucket(slope);
             if (this.weatherSystem.isHighContrast) {
-              cell.tile.setTint(0xAADDFF);
+              // TODO: setTint doesn't work on Canvas renderer — needs texture variant
+              cell.tile.setTexture(bucket > 0 ? `snow_groomed_steep_${bucket}` : 'snow_groomed');
+            } else if (bucket > 0) {
+              cell.tile.setTexture(`snow_groomed_steep_${bucket}`);
             } else {
-              cell.tile.clearTint();
+              cell.tile.setTexture('snow_groomed');
             }
             this.groomedCount++;
             this.hasGroomed = true;

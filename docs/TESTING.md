@@ -218,9 +218,19 @@ def test_cliff_visuals(self, game_page: Page):
 
 | Level | Feature | What to Check |
 |-------|---------|---------------|
+| 5 | Steep zones (slide + tumble) | Blue tint bands, warm→cold transition |
 | 6 | Black Piste (serpentine) | Left/right cliffs, night overlay |
 | 7 | Avalanche Zone (winding) | Cliff curves follow piste shape |
 | 8 | Storm Recovery (gentle_curve) | Cliffs + weather effects |
+
+### Loading a Specific Level in Playwright
+
+Use `game.scene.start('GameScene', { level: N })` where N is the 0-based level index. The data key is `level` (not `levelIndex`):
+
+```python
+page.evaluate("() => window.game.scene.start('GameScene', { level: 5 })")
+time.sleep(5)  # Wait for scene to load
+```
 
 ### Common Visual Issues
 

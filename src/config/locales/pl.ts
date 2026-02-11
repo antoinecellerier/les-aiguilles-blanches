@@ -241,6 +241,8 @@ const pl: Record<string, string> = {
   changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie trasą, którą właśnie przygotowałeś",
   changelog_20260210_date: "10 lutego 2026",
   changelog_20260210: "🎵 Muzyka i efekty dźwiękowe\n🔈 Ustawienia głośności\n⏱️ Automatycznie kalibrowane czasy\n⏭️ Pomiń samouczek\n🏔️ Przeprojektowane strefy lawinowe",
+  changelog_20260211_date: "11 lutego 2026",
+  changelog_20260211: "⛷️ Strome strefy wizualnie wyróżnione (niebieski odcień ostrzega przed niebezpieczeństwem)",
   changelog_20260209_date: "9 lutego 2026",
   changelog_20260209: "🏔️ Alpejskie ekrany wygranej/przegranej\n❄️ Akumulacja śniegu w burzy\n🏆 Bonus za bezbłędność\n🔊 Dźwięki pogody i przyrody",
   changelog_20260208_date: "8 lutego 2026",

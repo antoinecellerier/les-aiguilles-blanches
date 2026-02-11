@@ -246,6 +246,49 @@ export default class BootScene extends Phaser.Scene {
     groomedGraphics.generateTexture('snow_groomed', 16, 16);
     groomedGraphics.destroy();
 
+    // Steep-zone snow variants — palette-matched colors
+    // Slide zones (25°–35°): warm blue-gray, like shadowed snow
+    // Tumble zones (40°–50°): cold icy blue, like glacial ice
+    const steepPalette: Record<number, { base: number; detail: number; groomBase: number; groomLine: number }> = {
+      // Slide zones: warm blue-gray (subtle shadow feel)
+      25: { base: 0xd0dee6, detail: 0xc0ced6, groomBase: 0xeef3f8, groomLine: 0xdde6ee },
+      30: { base: 0xc8d8e2, detail: 0xb8c8d2, groomBase: 0xe8eff6, groomLine: 0xd6e0ea },
+      35: { base: 0xc0d2de, detail: 0xb0c2ce, groomBase: 0xe2ebf4, groomLine: 0xd0dae6 },
+      // Tumble zones: cold icy blue (glacial, desaturated)
+      40: { base: 0xb8d8ee, detail: 0xa8c8de, groomBase: 0xdcecfa, groomLine: 0xc8dcee },
+      45: { base: 0xaed0ea, detail: 0x9ec0da, groomBase: 0xd4e6f8, groomLine: 0xc0d4e8 },
+      50: { base: 0xa4c8e6, detail: 0x94b8d6, groomBase: 0xcce0f4, groomLine: 0xb8cce2 },
+    };
+
+    for (const [slopeStr, pal] of Object.entries(steepPalette)) {
+      const slope = Number(slopeStr);
+
+      // Ungroomed steep variant
+      const sg = this.make.graphics({ x: 0, y: 0 } as any, false);
+      sg.fillStyle(pal.base);
+      sg.fillRect(0, 0, 16, 16);
+      sg.fillStyle(pal.detail);
+      sg.fillRect(2, 2, 3, 3);
+      sg.fillRect(9, 5, 4, 3);
+      sg.fillRect(4, 10, 3, 4);
+      sg.fillRect(11, 11, 3, 3);
+      sg.generateTexture(`snow_steep_${slope}`, 16, 16);
+      sg.destroy();
+
+      // Groomed steep variant
+      const gg = this.make.graphics({ x: 0, y: 0 } as any, false);
+      gg.fillStyle(pal.groomBase);
+      gg.fillRect(0, 0, 16, 16);
+      gg.fillStyle(pal.groomLine);
+      gg.fillRect(0, 2, 16, 1);
+      gg.fillRect(0, 5, 16, 1);
+      gg.fillRect(0, 8, 16, 1);
+      gg.fillRect(0, 11, 16, 1);
+      gg.fillRect(0, 14, 16, 1);
+      gg.generateTexture(`snow_groomed_steep_${slope}`, 16, 16);
+      gg.destroy();
+    }
+
     // Packed snow (service roads — compacted by vehicle traffic, between off-piste and groomed)
     const packedGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
     packedGraphics.fillStyle(0xd8e4e8);  // Slightly blue-gray base

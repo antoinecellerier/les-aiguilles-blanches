@@ -242,6 +242,8 @@ const fi: Record<string, string> = {
   changelog_20260211: "⛷️ Laskettele tai lumilautaile juuri tamppaamallasi rinteellä",
   changelog_20260210_date: "10. helmikuuta 2026",
   changelog_20260210: "🎵 Musiikki ja äänitehosteet\n🔈 Äänenvoimakkuusasetukset\n⏱️ Automaattisesti kalibroidut tasoajat\n⏭️ Ohita opastus\n🏔️ Lumivyöryalueet uudistettu",
+  changelog_20260211_date: "11. helmikuuta 2026",
+  changelog_20260211: "⛷️ Jyrkät alueet visuaalisesti erottuvat (sininen sävy varoittaa vaarasta)",
   changelog_20260209_date: "9. helmikuuta 2026",
   changelog_20260209: "🏔️ Alppilaiset voitto/häviönäytöt\n❄️ Myrskyn lumikertymä\n🏆 Virheetön bonus\n🔊 Sää- ja eläinambienssit",
   changelog_20260208_date: "8. helmikuuta 2026",

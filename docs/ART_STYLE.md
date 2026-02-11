@@ -35,6 +35,12 @@ The game uses a **retro pixel-art style** inspired by the 1991 Windows game SkiF
 | Off-piste powder | `0xe8f0f4` (bright) | `0xf0f6fa` (mounds), `0xd8e4ec` (shadows) | Winter wonderland feel |
 | Ice | `0xb8e0f0` (blue-tint) | - | Hazardous surface |
 | Deep snow | `0xd0e0e8` (gray-blue) | - | Slower movement |
+| Steep slide (25°) | `0xd0dee6` (warm gray-blue) | `0xc0ced6` | Gentle slope warning |
+| Steep slide (30°) | `0xc8d8e2` (cool gray-blue) | `0xb8c8d2` | Moderate slope |
+| Steep slide (35°) | `0xc0d2de` (cool gray-blue) | `0xb0c2ce` | Near slide threshold |
+| Steep tumble (40°) | `0xb8d8ee` (cold blue) | `0xa8c8de` | Tumble danger zone |
+| Steep tumble (45°) | `0xaed0ea` (icy blue) | `0x9ec0da` | Severe danger |
+| Steep tumble (50°) | `0xa4c8e6` (icy blue) | `0x94b8d6` | Maximum danger |
 
 ### Cliffs & Rock
 
@@ -222,6 +228,11 @@ Off-piste: Bright base + mound highlights + subtle shadows
 │   ░░░░░░  ░░░  │
 │ ▪▪       ░░    │
 └────────────────┘
+
+Steep zones: Same patterns as ungroomed/groomed, but with blue-shifted palette.
+Slide zones (25°–35°) use warm gray-blue; tumble zones (40°–50°) use cold icy blue.
+Textures are pre-generated in BootScene (setTint does NOT work on Canvas renderer).
+Texture keys: snow_steep_{slope}, snow_groomed_steep_{slope} (slope: 25,30,35,40,45,50)
 ```
 
 ### Cliff Textures

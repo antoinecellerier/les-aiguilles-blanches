@@ -242,6 +242,8 @@ const sv: Record<string, string> = {
   changelog_20260211: "⛷️ Åk skidor eller snowboard på pisten du just preparerat",
   changelog_20260210_date: "10 februari 2026",
     changelog_20260210: "🎵 Musik och ljudeffekter\n🔈 Volyminställningar\n⏱️ Autokalibrerade nivåtider\n⏭️ Hoppa över handledning\n🏔️ Lavinzoner omdesignade",
+  changelog_20260211_date: "11 februari 2026",
+  changelog_20260211: "⛷️ Branta zoner visuellt tydliga (blå ton varnar för fara)",
   changelog_20260209_date: "9 februari 2026",
   changelog_20260209: "🏔️ Alpina vinst/förlust-skärmar\n❄️ Snöansamling under storm\n🏆 Felfri bonus\n🔊 Väder- och djurljud",
   changelog_20260208_date: "8 februari 2026",

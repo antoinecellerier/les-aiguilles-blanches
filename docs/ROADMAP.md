@@ -79,6 +79,8 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 
 ## Recently Completed
 
+- ✅ **Steep zone visual tinting** — Pre-generated snow texture variants (warm blue for slide 25°–35°, cold icy blue for tumble 40°–50°) applied via `setTexture()` since Canvas renderer ignores `setTint()`. Textures generated in BootScene, applied in GameScene. Persists after grooming.
+
 - ✅ **Avalanche/cliff overlap fix** — Avalanche zones now avoid cliff segments via `getCliffAvoidRects()` bounding rects passed as additional avoid regions.
 
 - ✅ **Settings menu visual polish** — Alpine terrain backdrop with animated wildlife (via `MenuWildlifeController`), section panels with borders and gold accent dividers, responsive two-column/single-column layout with conditional scrollbar. Panel width properly accounts for padding to prevent overflow. Centralized `DEPTHS.MENU_OVERLAY`/`MENU_UI` constants in gameConfig.ts.

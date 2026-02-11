@@ -241,6 +241,8 @@ const sk: Record<string, string> = {
   changelog_20260211: "⛷️ Zlyžujte alebo zjazdite na snowboarde svoju čerstvo upravenú zjazdovku",
   changelog_20260210_date: "10. februára 2026",
   changelog_20260210: "🎵 Hudba a zvukové efekty\n🔈 Nastavenia hlasitosti\n⏱️ Automaticky kalibrované časy\n⏭️ Preskočiť tutoriál\n🏔️ Prepracované lavínové zóny",
+  changelog_20260211_date: "11. februára 2026",
+  changelog_20260211: "⛷️ Strmé zóny vizuálne odlíšené (modrý odtieň varuje pred nebezpečenstvom)",
   changelog_20260209_date: "9. februára 2026",
   changelog_20260209: "🏔️ Alpské obrazovky výhier/prehier\n❄️ Snehová akumulácia pri búrke\n🏆 Bonus za bezchybnosť\n🔊 Zvuky počasia a zvierat",
   changelog_20260208_date: "8. februára 2026",

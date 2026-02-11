@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { resolve } from 'path';
 import { execSync } from 'child_process';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -43,7 +43,10 @@ function liveVersionPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Load .env.local so non-VITE_ vars like PORT are available
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
   base: './',
   define: {
     __APP_VERSION__: JSON.stringify(getVersion()),
@@ -82,7 +85,7 @@ export default defineConfig({
     }),
   ],
   server: {
-    port: parseInt(process.env.PORT || '3000'),
+    port: parseInt(env.PORT || '3000'),
     strictPort: true,
     open: false,
   },
@@ -91,4 +94,5 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  };
 });

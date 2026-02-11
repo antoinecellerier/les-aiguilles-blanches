@@ -207,6 +207,8 @@ const de: Record<string, string> = {
   changelog_20260211: "⛷️ Die frisch präparierte Piste mit Ski oder Snowboard hinunterfahren",
   changelog_20260210_date: "10. Februar 2026",
   changelog_20260210: "🎵 Musik und Soundeffekte\n🔈 Lautstärkeeinstellungen\n⏱️ Automatisch kalibrierte Levelzeiten\n⏭️ Tutorial überspringen\n🏔️ Lawinenzonen-Redesign",
+  changelog_20260211_date: "11. Februar 2026",
+  changelog_20260211: "⛷️ Steilzonen visuell unterscheidbar (Blautönung warnt vor Gefahr)",
   changelog_20260209_date: "9. Februar 2026",
   changelog_20260209: "🏔️ Alpine Sieg-/Niederlagenbilder\n❄️ Schneeakkumulation bei Sturm\n🏆 Fehlerlos-Bonus\n🔊 Wetter- und Tiergeräusche",
   changelog_20260208_date: "8. Februar 2026",

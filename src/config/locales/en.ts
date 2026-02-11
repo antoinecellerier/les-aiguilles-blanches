@@ -241,6 +241,8 @@ const en: Record<string, string> = {
   changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed",
   changelog_20260210_date: "February 10, 2026",
   changelog_20260210: "🎵 Music and sound effects\n🔈 Volume settings\n⏱️ Auto-calibrated level times\n⏭️ Skip tutorial option\n🏔️ Avalanche zone redesign",
+  changelog_20260211_date: "February 11, 2026",
+  changelog_20260211: "⛷️ Steep zones visually distinct (blue tint warns of danger)",
   changelog_20260209_date: "February 9, 2026",
   changelog_20260209: "🏔️ Alpine win/fail screens\n❄️ Storm snow accumulation\n🏆 Flawless bonus\n🔊 Weather and wildlife ambience",
   changelog_20260208_date: "February 8, 2026",
