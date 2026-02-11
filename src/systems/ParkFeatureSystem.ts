@@ -96,6 +96,7 @@ export class ParkFeatureSystem {
   private tileSize = 16;
   private gameObjects: Phaser.GameObjects.GameObject[] = [];
   private _featureGroup: Phaser.Physics.Arcade.StaticGroup | null = null;
+  private _pipeWallGroup: Phaser.Physics.Arcade.StaticGroup | null = null;
 
   /**
    * Generate and place park features based on level config.
@@ -123,6 +124,7 @@ export class ParkFeatureSystem {
 
     if (specials.includes('halfpipe')) {
       this.createHalfpipe(scene, level, geometry);
+      this.createPipeWallColliders(scene, level);
     }
   }
 
@@ -427,6 +429,37 @@ export class ParkFeatureSystem {
     this.renderHalfpipeWalls(scene, level, geometry);
   }
 
+  /** Create invisible physics colliders along halfpipe wall lips for trick detection */
+  private createPipeWallColliders(scene: Phaser.Scene, level: Level): void {
+    if (!this.halfpipe) return;
+    const ts = this.tileSize;
+    const group = scene.physics.add.staticGroup();
+    this._pipeWallGroup = group;
+    const marginY = 5;
+
+    // Place colliders at the outer wall edge (piste boundary), not the inner floor edge.
+    // floorLeft = centerX - halfW + PIPE_WALL_TILES, so outer left = floorLeft - PIPE_WALL_TILES
+    // floorRight = centerX + halfW - PIPE_WALL_TILES, so outer right = floorRight + PIPE_WALL_TILES
+    for (let y = marginY; y < level.height - marginY; y += 4) {
+      const fl = this.halfpipe.floorLeft[y];
+      const fr = this.halfpipe.floorRight[y];
+      if (fl === undefined) continue;
+      const segH = Math.min(4, level.height - marginY - y) * ts;
+      const outerLeft = (fl - PIPE_WALL_TILES) * ts;
+      const outerRight = (fr + PIPE_WALL_TILES) * ts;
+
+      // Left wall — at the outer piste edge
+      const leftWall = scene.add.rectangle(outerLeft, y * ts + segH / 2, ts * 0.5, segH, 0, 0);
+      scene.physics.add.existing(leftWall, true);
+      group.add(leftWall);
+
+      // Right wall — at the outer piste edge
+      const rightWall = scene.add.rectangle(outerRight, y * ts + segH / 2, ts * 0.5, segH, 0, 0);
+      scene.physics.add.existing(rightWall, true);
+      group.add(rightWall);
+    }
+  }
+
   private renderHalfpipeWalls(
     scene: Phaser.Scene,
     level: Level,
@@ -555,9 +588,37 @@ export class ParkFeatureSystem {
     return this.halfpipe !== null;
   }
 
+  /**
+   * Returns 0–1 indicating how far into the wall the position is.
+   * 0 = on the floor edge, 1 = at the outer piste edge. null = not on a wall.
+   */
+  getWallDepth(worldX: number, worldY: number, tileSize: number): number | null {
+    if (!this.halfpipe) return null;
+    const tileX = worldX / tileSize;
+    const tileY = Math.floor(worldY / tileSize);
+    if (tileY < 5 || tileY >= this.halfpipe.floorLeft.length - 5) return null;
+    const fl = this.halfpipe.floorLeft[tileY];
+    const fr = this.halfpipe.floorRight[tileY];
+    if (fl === undefined) return null;
+    if (tileX < fl) {
+      // On left wall: fl is inner edge, fl - PIPE_WALL_TILES is outer edge
+      return Math.min(1, (fl - tileX) / PIPE_WALL_TILES);
+    }
+    if (tileX > fr) {
+      // On right wall
+      return Math.min(1, (tileX - fr) / PIPE_WALL_TILES);
+    }
+    return null;
+  }
+
   /** Physics group for collision setup (call after create()) */
   get featureGroup(): Phaser.Physics.Arcade.StaticGroup | null {
     return this._featureGroup;
+  }
+
+  /** Physics group for halfpipe wall lip colliders (for trick detection) */
+  get pipeWallGroup(): Phaser.Physics.Arcade.StaticGroup | null {
+    return this._pipeWallGroup;
   }
 
   /** All zones for testing/inspection */
@@ -571,6 +632,8 @@ export class ParkFeatureSystem {
     }
     this._featureGroup?.destroy(true);
     this._featureGroup = null;
+    this._pipeWallGroup?.destroy(true);
+    this._pipeWallGroup = null;
     this.gameObjects = [];
     this.features = [];
     this.allZones = [];

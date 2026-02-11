@@ -72,6 +72,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private trickActive = false;
   private trickShadow: Phaser.GameObjects.Graphics | null = null;
   private trickShadowUpdater: (() => void) | null = null;
+  private turnHoldTime = 0; // seconds of continuous lateral input
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -169,6 +170,11 @@ export default class SkiRunScene extends Phaser.Scene {
       this.physics.add.overlap(this.skier, this.parkFeatures.featureGroup, (_skier, feature) => {
         const type = (feature as Phaser.Physics.Arcade.Sprite).texture.key === 'park_kicker' ? 'kicker' : 'rail';
         this.onFeatureTrick(type);
+      });
+    }
+    if (this.parkFeatures.pipeWallGroup) {
+      this.physics.add.overlap(this.skier, this.parkFeatures.pipeWallGroup, () => {
+        this.onFeatureTrick('halfpipe');
       });
     }
     this.physics.add.overlap(this.skier, dangerZones, () => this.onWipeout());
@@ -293,10 +299,26 @@ export default class SkiRunScene extends Phaser.Scene {
       this.currentSpeed *= (1 - BALANCE.SKI_CARVE_DRAG * Math.abs(lateralInput) * dt);
     }
 
+    // Halfpipe wall pump — riding down the wall transition boosts speed
+    if (this.parkFeatures.hasHalfpipe && !this.trickActive) {
+      const wallDepth = this.parkFeatures.getWallDepth(this.skier.x, this.skier.y, this.tileSize);
+      if (wallDepth !== null && wallDepth > 0) {
+        // Speed boost proportional to wall depth (deeper = steeper = more boost)
+        this.currentSpeed += BALANCE.SKI_GRAVITY_SPEED * wallDepth * 2.0 * dt;
+      }
+    }
+
     // Apply movement — lateral speed scales with downhill speed (need momentum to carve)
+    // Progressive turning: holding a direction builds up turn intensity over time
+    if (Math.abs(lateralInput) > 0.1) {
+      this.turnHoldTime = Math.min(this.turnHoldTime + dt, BALANCE.SKI_TURN_RAMP_TIME);
+    } else {
+      this.turnHoldTime = 0;
+    }
+    const turnRamp = 1 + (this.turnHoldTime / BALANCE.SKI_TURN_RAMP_TIME) * BALANCE.SKI_TURN_RAMP_BOOST;
     const vy = this.currentSpeed;
     const speedRatio = Math.min(this.currentSpeed / BALANCE.SKI_GRAVITY_SPEED, 1.5);
-    const vx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio;
+    const vx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;
     this.skier.setVelocity(vx, vy);
 
     // Directional sprite — skip during trick animation
@@ -324,7 +346,7 @@ export default class SkiRunScene extends Phaser.Scene {
     }
   }
 
-  private createSnowGrid(tileSize: number): void {
+   private createSnowGrid(tileSize: number): void {
     // Build groomed state lookup
     this.groomedGrid = [];
     for (let y = 0; y < this.level.height; y++) {
@@ -342,6 +364,19 @@ export default class SkiRunScene extends Phaser.Scene {
         );
         tile.setDisplaySize(tileSize, tileSize);
         if (isGroomable) tile.setDepth(DEPTHS.PISTE);
+      }
+    }
+
+    // Force spawn area to be groomed so skier doesn't rumble on first second
+    const spawnY = Math.max(3, Math.floor(this.level.height * 0.05));
+    const spawnPath = this.geometry.pistePath[spawnY] || { centerX: this.level.width / 2 };
+    const cx = Math.floor(spawnPath.centerX);
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -3; dx <= 3; dx++) {
+        const ty = spawnY + dy, tx = cx + dx;
+        if (ty >= 0 && ty < this.level.height && tx >= 0 && tx < this.level.width) {
+          if (this.groomedGrid[ty]) this.groomedGrid[ty][tx] = true;
+        }
       }
     }
   }

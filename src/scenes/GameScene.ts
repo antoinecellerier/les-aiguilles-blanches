@@ -316,7 +316,13 @@ export default class GameScene extends Phaser.Scene {
     this.obstacles = this.physics.add.staticGroup();
     this.interactables = this.physics.add.staticGroup();
     this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
-    this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables);
+    // Compute spawn position to create exclusion zone for obstacles
+    const spawnYIndex = Math.min(this.level.height - 8, Math.floor(this.level.height * 0.9));
+    const spawnPath = this.geometry.pistePath[spawnYIndex] || { centerX: this.level.width / 2 };
+    const spawnX = spawnPath.centerX * this.tileSize;
+    const spawnY = spawnYIndex * this.tileSize;
+    this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables,
+      [{ x: spawnX, y: spawnY, radius: this.tileSize * 3 }]);
     this.buildingRects = this.obstacleBuilder.buildingRects;
 
     // Park features (kickers, rails, halfpipe)

@@ -191,6 +191,8 @@ export const BALANCE = {
   SKI_SPEED_SCALE: 0.21,         // px/s → km/h conversion (maps ~380px/s to ~80km/h)
   SKI_SPRITE_DEADZONE: 0.2,      // lateral input threshold for sprite direction change
   SKI_FINISH_BUFFER: 3,          // tiles above bottom edge to trigger finish
+  SKI_TURN_RAMP_TIME: 0.4,      // seconds to reach max turn boost
+  SKI_TURN_RAMP_BOOST: 1.2,     // extra lateral speed at max hold (1.0 = +100%)
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

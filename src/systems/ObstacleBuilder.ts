@@ -27,7 +27,8 @@ export class ObstacleBuilder {
   create(
     level: Level, tileSize: number,
     obstacles: Phaser.Physics.Arcade.StaticGroup,
-    interactables: Phaser.Physics.Arcade.StaticGroup
+    interactables: Phaser.Physics.Arcade.StaticGroup,
+    avoidPoints?: { x: number; y: number; radius: number }[]
   ): void {
     this.buildingRects = [];
     const obstacleTypes = level.obstacles || [];
@@ -35,19 +36,23 @@ export class ObstacleBuilder {
     const worldHeight = level.height * tileSize;
     const isStorm = level.weather === 'storm';
 
-    // Difficulty-scaled obstacle count
+    // Difficulty-scaled obstacle count — kept low for realistic pistes
     const baseCount = Math.floor(level.width * level.height / 100);
     let difficultyMultiplier: number;
     switch (level.difficulty) {
-      case 'tutorial': difficultyMultiplier = 0.2; break;
-      case 'green': difficultyMultiplier = 0.4; break;
-      case 'blue': difficultyMultiplier = 0.6; break;
-      case 'red': difficultyMultiplier = 0.8; break;
-      case 'black': difficultyMultiplier = 1.0; break;
-      case 'park': difficultyMultiplier = 0.5; break;
-      default: difficultyMultiplier = 0.6;
+      case 'tutorial': difficultyMultiplier = 0.1; break;
+      case 'green': difficultyMultiplier = 0.2; break;
+      case 'blue': difficultyMultiplier = 0.3; break;
+      case 'red': difficultyMultiplier = 0.5; break;
+      case 'black': difficultyMultiplier = 0.6; break;
+      case 'park': difficultyMultiplier = 0.2; break;
+      default: difficultyMultiplier = 0.3;
     }
     const obstacleCount = Math.floor(baseCount * difficultyMultiplier);
+
+    const placedPositions: { x: number; y: number }[] = [];
+    const minSpacing = tileSize * 6; // comfortable gap for groomer to pass between any two
+    const minSpacingSq = minSpacing * minSpacing;
 
     for (let i = 0; i < obstacleCount; i++) {
       const type = Phaser.Utils.Array.GetRandom(obstacleTypes);
@@ -55,8 +60,20 @@ export class ObstacleBuilder {
 
       let x: number, y: number;
       let attempts = 0;
+      const tooClose = (px: number, py: number) => {
+        if (avoidPoints?.some(p => {
+          const dx = px - p.x, dy = py - p.y;
+          return dx * dx + dy * dy < p.radius * p.radius;
+        })) return true;
+        // Enforce minimum spacing between obstacles
+        return placedPositions.some(p => {
+          const dx = px - p.x, dy = py - p.y;
+          return dx * dx + dy * dy < minSpacingSq;
+        });
+      };
       do {
-        if (Math.random() < 0.7) {
+        if (Math.random() < 0.9) {
+          // Piste edges — where real obstacles naturally sit
           if (Math.random() < 0.5) {
             x = Phaser.Math.Between(tileSize * 3, tileSize * 6);
           } else {
@@ -68,8 +85,8 @@ export class ObstacleBuilder {
           y = Phaser.Math.Between(tileSize * 10, worldHeight - tileSize * 10);
         }
         attempts++;
-      } while ((this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y)) && attempts < 10);
-      if (this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y)) continue;
+      } while ((this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y) || tooClose(x, y)) && attempts < 30);
+      if (this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y) || tooClose(x, y)) continue;
 
       let texture = 'tree';
       if (type === 'rocks') texture = 'rock';
@@ -78,6 +95,7 @@ export class ObstacleBuilder {
       obstacle.setImmovable(true);
       obstacle.setScale(tileSize / 16);
       obstacle.setDepth(yDepth(y));
+      placedPositions.push({ x, y });
 
       if (isStorm) {
         const s = tileSize / 16;
