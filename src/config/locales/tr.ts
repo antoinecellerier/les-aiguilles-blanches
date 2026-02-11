@@ -218,6 +218,14 @@ const tr: Record<string, string> = {
   tauntTumble3: "Jean-Pierre nasıl bağlanacağını gösterdi. Uyuyor muydun?",
   tauntTumble4: "Bir PistenBully 400.000 € eder. Ederdi, demek lazım.",
   tauntTumble5: "Yamaç idare edilir miydi? Araç aynı fikirde değildi.",
+  featureDestroyedKicker: 'Park elemanının üzerinden geçtin! Kicker harap oldu.',
+  featureDestroyedRail: 'Park elemanının üzerinden geçtin! Rail harap oldu.',
+  tauntFeature1: 'O elemanı yapmak üç saat sürdü. Sen üç saniyede düzledin.',
+  tauntFeature2: 'Émilie o park elemanı hakkında seninle konuşacak.',
+  tauntFeature3: 'Park ekibi başyapıtlarını yıktığını izledi.',
+  tauntFeature4: 'Elemanlar kayakçılar için, kar eziciler için değil. Etrafından dön!',
+  tauntFeature5: 'Yarınki yarışma için bir eleman eksildi.',
+  bonusPipeMastery: 'Halfpipe ustalığı',
 
   // Taunts - Avalanche
   tauntAvalanche1: "Dağ nadiren affeder. Bu sefer affetmedi.",
@@ -241,7 +249,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11 Şubat 2026",
-  changelog_20260211: "⛷️ Hazırladığınız pistte kayak veya snowboard yapın\n🎯 Hazırlama kalitesi\n🏔️ Dik bölgeler görsel olarak belirgin\n🗺️ Pist seçimi ve yıldız puanları",
+changelog_20260211: "⛷️ Az önce hazırladığınız pistte kayak veya snowboard yapın\n🎯 Hazırlama kalitesi sistemi\n🏔️ Dik bölgeler görsel olarak belirgin\n🏗️ Trick'li park: air, grind ve halfpipe atlayışları",
   changelog_20260210_date: "10 Şubat 2026",
   changelog_20260210: "🎵 Müzik ve ses efektleri\n🔈 Ses ayarları\n⏱️ Otomatik kalibreli seviye süreleri\n⏭️ Eğitimi atla\n🏔️ Çığ bölgeleri yeniden tasarlandı",
   changelog_20260209_date: "9 Şubat 2026",

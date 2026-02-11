@@ -207,7 +207,7 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 febbraio 2026",
-  changelog_20260211: "⛷️ Scia o fai snowboard sulla pista preparata\n🎯 Qualità della preparazione\n🏔️ Zone ripide visivamente distinte\n🗺️ Selezione livello e valutazioni",
+changelog_20260211: "⛷️ Scia o fai snowboard sulla pista appena preparata\n🎯 Sistema di qualità della preparazione\n🏔️ Zone ripide visivamente distinte\n🏗️ Park con trick: air, grind e lanci da halfpipe",
   changelog_20260210_date: "10 febbraio 2026",
   changelog_20260210: "🎵 Musica ed effetti sonori\n🔈 Impostazioni volume\n⏱️ Tempi livello auto-calibrati\n⏭️ Salta il tutorial\n🏔️ Riprogettazione zone valanga",
   changelog_20260209_date: "9 febbraio 2026",
@@ -249,6 +249,14 @@ const it: Record<string, string> = {
   tauntTumble3: "Jean-Pierre ti ha mostrato come ancorarti. Dormivi?",
   tauntTumble4: "Un PistenBully costa 400.000€. Beh, costava.",
   tauntTumble5: "Il pendio sembrava gestibile? Il gatto non era d'accordo.",
+  featureDestroyedKicker: 'Sei passato sopra un modulo del park! Il kicker è distrutto.',
+  featureDestroyedRail: 'Sei passato sopra un modulo del park! Il rail è distrutto.',
+  tauntFeature1: 'Quel modulo ha richiesto tre ore. Tu l\'hai spianato in tre secondi.',
+  tauntFeature2: 'Émilie avrà qualcosa da dirti su quel modulo del park.',
+  tauntFeature3: 'Il team del park ti ha appena visto distruggere il loro capolavoro.',
+  tauntFeature4: 'I moduli sono per gli sciatori, non per i gatti delle nevi. Gira intorno!',
+  tauntFeature5: 'Un modulo in meno per la gara di domani.',
+  bonusPipeMastery: 'Padronanza dell\'halfpipe',
   // Taunts - Avalanche
   tauntAvalanche1: "La montagna perdona raramente. Non ha perdonato.",
   tauntAvalanche2: "Météo France diceva rischio 4. L'hai letto?",

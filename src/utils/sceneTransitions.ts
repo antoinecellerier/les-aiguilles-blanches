@@ -65,14 +65,22 @@ export function resetGameScenes(
           }
           game.scene.remove(key);
         }
-      } catch {
-        // Scene may already be removed
+      } catch (e) {
+        console.warn(`[resetGameScenes] cleanup error for ${key}:`, e);
       }
     }
 
     // Re-add fresh instances (not started)
     for (const { key, ctor } of entries) {
-      game.scene.add(key, ctor, false);
+      try {
+        // Guard: if removal failed silently, force-remove before re-adding
+        if (game.scene.getScene(key)) {
+          game.scene.remove(key);
+        }
+        game.scene.add(key, ctor, false);
+      } catch (e) {
+        console.warn(`[resetGameScenes] re-add error for ${key}:`, e);
+      }
     }
 
     // Start target

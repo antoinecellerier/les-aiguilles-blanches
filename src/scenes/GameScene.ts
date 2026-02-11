@@ -16,6 +16,7 @@ import { LevelGeometry, type PistePath } from '../systems/LevelGeometry';
 import { PisteRenderer } from '../systems/PisteRenderer';
 import { WinchSystem } from '../systems/WinchSystem';
 import { ObstacleBuilder } from '../systems/ObstacleBuilder';
+import { ParkFeatureSystem } from '../systems/ParkFeatureSystem';
 import { EngineSounds } from '../systems/EngineSounds';
 import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
@@ -146,6 +147,7 @@ export default class GameScene extends Phaser.Scene {
   private weatherSystem!: WeatherSystem;
   private wildlifeSystem!: WildlifeSystem;
   private obstacleBuilder!: ObstacleBuilder;
+  private parkFeatures = new ParkFeatureSystem();
   private buildingRects: ObstacleRect[] = [];
   private engineSounds = new EngineSounds();
   private ambienceSounds = new AmbienceSounds();
@@ -316,6 +318,28 @@ export default class GameScene extends Phaser.Scene {
     this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
     this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables);
     this.buildingRects = this.obstacleBuilder.buildingRects;
+
+    // Park features (kickers, rails, halfpipe)
+    this.parkFeatures.destroy();
+    this.parkFeatures.create(
+      this, this.level, this.geometry, this.tileSize
+    );
+    // Halfpipe walls reduce groomable area
+    if (this.parkFeatures.hasHalfpipe) {
+      for (let y = 0; y < this.level.height; y++) {
+        for (let x = 0; x < this.level.width; x++) {
+          if (this.parkFeatures.isInHalfpipeWall(x, y) && this.snowGrid[y]?.[x]?.groomable) {
+            const cell = this.snowGrid[y][x];
+            cell.groomable = false;
+            cell.groomed = true;
+            cell.tile.setTexture('snow_offpiste');
+            cell.tile.setDepth(DEPTHS.TERRAIN);
+            this.groomableTiles--;
+          }
+        }
+      }
+      this.totalTiles = this.groomableTiles;
+    }
   }
 
   private initGameState(): void {
@@ -523,6 +547,14 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.groomer, this.obstacles, () => this.onObstacleHit());
     this.physics.add.collider(this.groomer, this.boundaryWalls, () => this.onObstacleHit());
 
+    // Park feature collision — driving onto a feature = instant fail
+    if (this.parkFeatures.hasFeatures && this.parkFeatures.featureGroup) {
+      this.physics.add.collider(this.groomer, this.parkFeatures.featureGroup, (_groomer, featureSprite) => {
+        const featureType = (featureSprite as Phaser.Physics.Arcade.Sprite).texture.key === 'park_kicker' ? 'kicker' : 'rail';
+        this.triggerFeatureDestruction(featureType);
+      });
+    }
+
     // Cliff fall is checked per-frame via center-of-mass in checkCliffFall().
     // Danger zones exist as visual markers but have no physics interaction —
     // the groomer can extend its tracks/tiller over the edge safely until
@@ -590,6 +622,20 @@ export default class GameScene extends Phaser.Scene {
     this.showDialogue('cliffFall');
     this.time.delayedCall(BALANCE.CLIFF_FALL_DELAY, () => {
       this.gameOver(false, 'cliff');
+    });
+  }
+
+  private triggerFeatureDestruction(featureType: 'kicker' | 'rail'): void {
+    if (this.isGameOver || this.isFallingOffCliff || this.isTumbling) return;
+    this.isTumbling = true; // Reuse tumble flag to prevent double-fire
+
+    this.cameras.main.shake(300, 0.01);
+    this.groomer.setVelocity(0, 0);
+
+    const msgKey = featureType === 'kicker' ? 'featureDestroyedKicker' : 'featureDestroyedRail';
+    this.showDialogue(msgKey);
+    this.time.delayedCall(BALANCE.GAME_OVER_DELAY, () => {
+      this.gameOver(false, 'feature');
     });
   }
 
@@ -990,8 +1036,15 @@ export default class GameScene extends Phaser.Scene {
     const baseRadius = Math.ceil(GAME_CONFIG.GROOM_WIDTH / this.tileSize / 2) + 1;
     const radius = Math.max(1, Math.floor(baseRadius * staminaFactor));
 
-    // Compute current grooming quality from stability + fall-line alignment
-    const quality = this.steeringStability * 0.5 + this.fallLineAlignment * 0.5;
+    // Compute current grooming quality from stability + alignment
+    // In park zones, alignment uses the zone's optimal direction instead of fall-line
+    let alignment = this.fallLineAlignment;
+    const optDir = this.parkFeatures.getOptimalDirection(tileX, tileY);
+    if (optDir !== null) {
+      const cos = Math.cos(this.groomer.rotation - optDir);
+      alignment = 0.3 + 0.7 * cos * cos;
+    }
+    const quality = this.steeringStability * 0.5 + alignment * 0.5;
 
     for (let dy = -radius; dy <= radius; dy++) {
       for (let dx = -radius; dx <= radius; dx++) {
@@ -1643,6 +1696,7 @@ export default class GameScene extends Phaser.Scene {
     this.wildlifeSystem.reset();
     this.winchSystem.reset();
     this.obstacleBuilder.reset();
+    this.parkFeatures.destroy();
     this.geometry.reset();
     this.engineSounds.stop();
     this.ambienceSounds.stop();

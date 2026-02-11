@@ -218,6 +218,14 @@ const sk: Record<string, string> = {
   tauntTumble3: "Jean-Pierre vám ukázal, ako kotviť. Spali ste?",
   tauntTumble4: "PistenBully stojí 400 000 €. Teda, stál.",
   tauntTumble5: "Svah vyzeral zvládnuteľne? Fréza nesúhlasila.",
+  featureDestroyedKicker: 'Prešiel si cez parkový prvok! Kicker je zničený.',
+  featureDestroyedRail: 'Prešiel si cez parkový prvok! Rail je zničený.',
+  tauntFeature1: 'Ten prvok stavali tri hodiny. Ty si ho zrovnal za tri sekundy.',
+  tauntFeature2: 'Émilie si s tebou pohovorí o tom parkovom prvku.',
+  tauntFeature3: 'Parková posádka práve videla, ako ničíš ich dielo.',
+  tauntFeature4: 'Prvky sú pre lyžiarov, nie pre frézy. Obíď ich!',
+  tauntFeature5: 'O jeden prvok menej na zajtrajšie preteky.',
+  bonusPipeMastery: 'Zvládnutie halfpipe',
 
   // Taunts - Avalanche
   tauntAvalanche1: "Hora málokedy odpúšťa. Tentoraz neodpustila.",
@@ -241,7 +249,7 @@ const sk: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11. februára 2026",
-  changelog_20260211: "⛷️ Lyžujte alebo snowboardujte po upravenej zjazdovke\n🎯 Kvalita úpravy\n🏔️ Strmé zóny vizuálne odlíšené\n🗺️ Výber trate a hviezdičkové hodnotenie",
+changelog_20260211: "⛷️ Lyžujte alebo jazdite na snowboarde po práve upravenej zjazdovke\n🎯 Systém kvality úpravy\n🏔️ Strmé zóny vizuálne odlíšené\n🏗️ Park s trikmi: airy, grindy a halfpipe skoky",
   changelog_20260210_date: "10. februára 2026",
   changelog_20260210: "🎵 Hudba a zvukové efekty\n🔈 Nastavenia hlasitosti\n⏱️ Automaticky kalibrované časy\n⏭️ Preskočiť tutoriál\n🏔️ Prepracované lavínové zóny",
   changelog_20260209_date: "9. februára 2026",

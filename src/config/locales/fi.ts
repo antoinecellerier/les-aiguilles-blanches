@@ -218,6 +218,14 @@ const fi: Record<string, string> = {
   tauntTumble3: "Jean-Pierre näytti kuinka ankkuroidutaan. Nukuitko?",
   tauntTumble4: "PistenBully maksaa 400 000€. Siis, maksoi.",
   tauntTumble5: "Rinne tuntui hallittavalta? Rinnekone oli eri mieltä.",
+  featureDestroyedKicker: 'Ajoit parkkielementin yli! Kikkeri on tuhottu.',
+  featureDestroyedRail: 'Ajoit parkkielementin yli! Raili on tuhottu.',
+  tauntFeature1: 'Tuon elementin rakentaminen vei kolme tuntia. Litistit sen kolmessa sekunnissa.',
+  tauntFeature2: 'Émilie tulee puhumaan sinulle tuosta parkkielementistä.',
+  tauntFeature3: 'Parkkitiimi katsoi sinun tuhoavan heidän mestariteoksensa.',
+  tauntFeature4: 'Elementit ovat laskijoille, eivät rinnekoneille. Aja ympäri!',
+  tauntFeature5: 'Yksi elementti vähemmän huomisen kisaan.',
+  bonusPipeMastery: 'Halfpipen hallinta',
 
   // Taunts - Avalanche
   tauntAvalanche1: "Vuori antaa harvoin anteeksi. Ei antanut.",
@@ -242,7 +250,7 @@ const fi: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11. helmikuuta 2026",
-  changelog_20260211: "⛷️ Laskettele tai lumilautaile tampaamallasi rinteellä\n🎯 Tamppauksen laatu\n🏔️ Jyrkät vyöhykkeet visuaalisesti erottuvat\n🗺️ Rinteen valinta ja tähdet",
+changelog_20260211: "⛷️ Laskettele tai lautaile juuri tamppaamallasi rinteellä\n🎯 Tamppauksen laatujärjestelmä\n🏔️ Jyrkät vyöhykkeet visuaalisesti erottuvat\n🏗️ Parkki trikeillä: airit, grindit ja halfpipe-hypyt",
   changelog_20260210_date: "10. helmikuuta 2026",
   changelog_20260210: "🎵 Musiikki ja äänitehosteet\n🔈 Äänenvoimakkuusasetukset\n⏱️ Automaattisesti kalibroidut tasoajat\n⏭️ Ohita opastus\n🏔️ Lumivyöryalueet uudistettu",
   changelog_20260209_date: "9. helmikuuta 2026",

@@ -218,6 +218,14 @@ const nb: Record<string, string> = {
   tauntTumble3: "Jean-Pierre viste deg hvordan man forankrer. Sov du?",
   tauntTumble4: "En PistenBully koster 4 millioner kroner. Altså, kostet.",
   tauntTumble5: "Bakken virket overkommelig? Løypemaskinen var uenig.",
+  featureDestroyedKicker: 'Du kjørte over et parkelement! Kickeren er ødelagt.',
+  featureDestroyedRail: 'Du kjørte over et parkelement! Railen er ødelagt.',
+  tauntFeature1: 'Det elementet tok tre timer å bygge. Du flatet det på tre sekunder.',
+  tauntFeature2: 'Émilie kommer til å ha noen ord med deg om det parkelementet.',
+  tauntFeature3: 'Parkcrewet så deg akkurat ødelegge mesterverket deres.',
+  tauntFeature4: 'Elementer er for skiløpere, ikke for løypemaskiner. Kjør rundt!',
+  tauntFeature5: 'Ett element mindre til morgendagens konkurranse.',
+  bonusPipeMastery: 'Halfpipe-mestring',
 
   // Taunts - Avalanche
   tauntAvalanche1: "Fjellet tilgir sjelden. Det tilga ikke.",
@@ -242,7 +250,7 @@ const nb: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11. februar 2026",
-  changelog_20260211: "⛷️ Stå på ski eller brett ned løypen du preparerte\n🎯 Prepareringskvalitet\n🏔️ Bratte soner visuelt tydelige\n🗺️ Løypevalg og stjernerating",
+changelog_20260211: "⛷️ Stå på ski eller snowboard ned løypa du nettopp preparerte\n🎯 Prepareringskvalitetssystem\n🏔️ Bratte soner visuelt distinkte\n🏗️ Park med triks: airs, grinds og halfpipe-hopp",
   changelog_20260210_date: "10. februar 2026",
   changelog_20260210: "🎵 Musikk og lydeffekter\n🔈 Voluminnstillinger\n⏱️ Autokalibrerte nivåtider\n⏭️ Hopp over opplæring\n🏔️ Snøskredsoner redesignet",
   changelog_20260209_date: "9. februar 2026",

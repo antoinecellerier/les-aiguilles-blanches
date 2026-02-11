@@ -161,8 +161,9 @@ The game's difficulty naturally increases as you progress:
 - **Objective**: Prepare freestyle features to 90%
 - **Time**: 1:30
 - **Skills**: Precision grooming around obstacles
+- **Park Features**: 3 kickers (tabletop ramps) in a jump line, 3 rails (metallic bars) in a jib line
 
-**Tips**: Be careful around jumps and rails. They need perfect landings!
+**Tips**: Kickers and rails are indestructible features — driving or grooming onto one ends the run immediately. The park has two parallel lines: a **jump line** (left) with three kickers and a **jib line** (right) with three rails. Groom the approach and landing zones around each feature with smooth, straight passes along the fall line. Blue and orange paint marks highlight takeoff and landing spots.
 
 ### Level 4: Red Piste - L'Aigle
 *"Now we're talking steep!"*
@@ -190,9 +191,10 @@ The game's difficulty naturally increases as you progress:
 - **Difficulty**: Park (Precision)
 - **Objective**: Groom 80% coverage
 - **Time**: 1:00
-- **Skills**: Precision grooming patterns
+- **Skills**: Direction-aware halfpipe grooming
+- **Park Features**: Halfpipe walls (3-tile banks on each side)
 
-**Tips**: The half-pipe walls need careful attention. Work from top to bottom.
+**Tips**: The halfpipe walls narrow the groomable floor. Groom in lengthwise passes (along the pipe axis, top to bottom) — this is how real halfpipes are prepared. Cross-passes score poorly. The **pipe mastery** bonus requires 80%+ average grooming quality. Blue dye lines and chevron arrows guide you.
 
 ### Level 7: Black Piste - La Verticale
 *"Night shift on the steepest run."*
@@ -381,6 +383,16 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 - **Cliff danger zones** — wipeout! Brief freeze then respawn at last safe position
 - **Soft boundaries** — drifting off-piste slows you down
 - **Replayable** — ski again from the win screen as many times as you want
+
+### Tricks (Park Levels)
+
+On levels with terrain park features (L3, L6), the ski run includes interactive tricks:
+
+- **Kicker air tricks** — pass over a kicker to launch into an air trick. 5 random tricks: 360, 720, Backflip, Frontflip, Method grab. Skier scales up with a ground shadow.
+- **Rail grind tricks** — pass over a rail to grind with sparks. 4 random tricks: Boardslide (yellow sparks), 50-50 (cyan), Lipslide (orange-red), Tailslide (green). Each has a distinct rotation angle and spark color.
+- **Halfpipe tricks** — on L6, carve into a halfpipe wall to launch bigger air. 5 pipe-specific tricks: McTwist, Crippler, 900, Alley-oop, Stalefish. Higher amplitude and longer airtime than kicker tricks.
+- All tricks show the trick name in a popup and give a 1.3× speed boost.
+- Works identically for both skier and snowboarder modes.
 
 ### Dev Shortcut
 

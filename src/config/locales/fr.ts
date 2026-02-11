@@ -222,6 +222,14 @@ const fr: Record<string, string> = {
   tauntTumble3: "Jean-Pierre t'avait montré comment s'ancrer. Tu dormais ?",
   tauntTumble4: "Une PistenBully, ça coûte 400 000€. Enfin, ça coûtait.",
   tauntTumble5: "La pente te semblait gérable ? La dameuse n'était pas d'accord.",
+  featureDestroyedKicker: 'Tu as roulé sur un module du park ! Le kicker est détruit.',
+  featureDestroyedRail: 'Tu as roulé sur un module du park ! Le rail est détruit.',
+  tauntFeature1: 'Ce module a pris trois heures à construire. Tu l\'as aplati en trois secondes.',
+  tauntFeature2: 'Émilie va avoir deux mots à te dire à propos de ce module.',
+  tauntFeature3: 'L\'équipe du park vient de te regarder détruire leur chef-d\'œuvre.',
+  tauntFeature4: 'Les modules, c\'est pour les skieurs, pas pour les dameuses. Contourne-les !',
+  tauntFeature5: 'Un module en moins pour la compétition de demain.',
+  bonusPipeMastery: 'Maîtrise du halfpipe',
   
   // Taunts - Avalanche (emphasize danger, respect for mountain)
   tauntAvalanche1: "La montagne pardonne rarement. Elle n'a pas pardonné.",
@@ -246,7 +254,7 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11 février 2026",
-  changelog_20260211: "⛷️ Skiez ou snowboardez sur la piste damée\n🎯 Qualité de damage\n🏔️ Zones raides visuellement distinctes\n🗺️ Sélection de niveau et étoiles",
+changelog_20260211: "⛷️ Skiez ou snowboardez sur la piste que vous venez de damer\n🎯 Système de qualité de damage\n🏔️ Zones raides visuellement distinctes\n🏗️ Park avec tricks : airs, grinds et lâchers de halfpipe",
   changelog_20260210_date: "10 février 2026",
   changelog_20260210: "🎵 Musique et effets sonores\n🔈 Réglages de volume\n⏱️ Temps de niveau auto-calibrés\n⏭️ Option sauter le tutoriel\n🏔️ Refonte des zones d'avalanche",
   changelog_20260209_date: "9 février 2026",

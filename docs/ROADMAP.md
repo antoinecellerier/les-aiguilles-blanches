@@ -82,6 +82,10 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 
 - ✅ **Level select & replay** — New LevelSelectScene accessible from main menu when player has progress. Shows all 11 levels with difficulty markers, star ratings (⭐⭐⭐), and Groom/Ski buttons. Per-level stats persisted (best stars, best time, bonus objectives). Ski mode gated to completed levels. Locked levels shown grayed out. Keyboard/gamepad navigation, responsive layout, scroll support.
 
+- ✅ **Park zone system** — Terrain park features for L3 (Air Zone) and L6 (Le Tube). L3 gets 3 kickers and 3 rails in parallel lines (jump line left, jib line right); L6 gets halfpipe walls that narrow the groomable floor. Zone-specific optimal grooming direction overrides fall-line alignment. Driving onto a feature = instant fail (forgiving ~70% hitbox). Blue dye boundary lines and direction arrows. New `pipe_mastery` bonus on L6. Localized fail taunts in 14 languages. 21 unit tests.
+
+- ✅ **Ski run trick system** — Interactive tricks on park levels during the ski/snowboard reward run. Kicker air tricks (5 variants: 360, 720, Backflip, Frontflip, Method), rail grind tricks (4 variants: Boardslide, 50-50, Lipslide, Tailslide with distinct spark colors), and halfpipe wall tricks (5 pipe-specific: McTwist, Crippler, 900, Alley-oop, Stalefish). Trick name shown in popup, 1.3× speed boost. Halfpipe triggers on boundary wall collision. Works for both ski and snowboard modes.
+
 - ✅ **Grooming quality system** — Steering stability (angular acceleration) + fall-line alignment determine per-tile quality (0–100%). Three visual texture tiers. Re-grooming upgrades quality (best-of-N). New `precision_grooming` bonus objective on L3, L6, L10. Localized in 14 languages.
 
 - ✅ **Steep zone visual tinting** — Pre-generated snow texture variants (warm blue for slide 25°–35°, cold icy blue for tumble 40°–50°) applied via `setTexture()` since Canvas renderer ignores `setTint()`. Textures generated in BootScene, applied in GameScene. Persists after grooming.

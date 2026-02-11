@@ -253,6 +253,19 @@ Textures are pre-generated in BootScene (setTint does NOT work on Canvas rendere
 Texture keys: snow_steep_{slope}, snow_groomed_steep_{slope} (slope: 25,30,35,40,45,50)
 ```
 
+### Park Feature Visuals
+
+Terrain park features drawn procedurally via Phaser Graphics (no texture files):
+
+- **Kickers**: Wide tabletop ramp (~3×2 tiles). Two tiers: wide base (`0xdce4ee`) and narrower lip (`0xeef2fa`). Ground shadow (`0xb0bcc8`, 60% alpha) for contrast against snow. Lip edge accent (`0x8899aa`). Y-depth sorted.
+- **Rails**: Narrow metallic bar (~1×3 tiles). Dark gray body (`0x666677`), highlight stripe (`0x9999bb`), three support posts (top/middle/bottom, `0x444455`). Y-depth sorted.
+- **Line corridors**: Subtle lane tints along each feature line. Jump line blue (`0x4488cc`, 5% alpha), jib line orange (`0xcc8844`, 5% alpha). Small paint dots at corridor edges every 4 tiles (15% alpha).
+- **Zone paint marks**: Blue takeoff lines (`0x2266cc`, 40% alpha) at approach/run-in exit. Orange landing lines (`0xcc6622`, 35% alpha) at landing/run-out entry. Solid 2px-tall `fillRect` strips.
+- **Halfpipe walls**: Gradient fill along piste edges (3 tiles wide). Darker toward piste edge to simulate concave banking. Blue-gray tint (`0x8899bb`). Edge line marks the lip.
+- **Trick sparks** (ski run only): Small rectangles falling from skier during rail grinds. Each grind trick has a distinct spark color: Boardslide (`0xffdd44` yellow), 50-50 (`0x44ddff` cyan), Lipslide (`0xff6644` orange-red), Tailslide (`0x66ff44` green). 40% chance of white (`0xffffff`) fallback. 3px squares, falling 12×baseScale with 300ms fade.
+
+Physics collision textures (`park_kicker`, `park_rail`): 4×4px near-transparent sprites used as invisible physics bodies. Visuals are drawn separately by ParkFeatureSystem.
+
 ### Cliff Textures
 
 Cliffs use tile-sized (16×16) rock cells with layered detail:

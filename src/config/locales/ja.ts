@@ -218,6 +218,14 @@ const ja: Record<string, string> = {
   tauntTumble3: "Jean-Pierreがアンカーの使い方を見せた。寝てたのか？",
   tauntTumble4: "PistenBullyは4000万円する。したんだがな。",
   tauntTumble5: "この斜面は楽勝に見えた？圧雪車はそう思わなかった。",
+  featureDestroyedKicker: 'パークのモジュールに乗り上げた！キッカーが壊れてしまった。',
+  featureDestroyedRail: 'パークのモジュールに乗り上げた！レールが壊れてしまった。',
+  tauntFeature1: 'あのモジュール、3時間かけて作ったのに。3秒で潰したね。',
+  tauntFeature2: 'エミリーがあのパークモジュールについて一言あるそうだ。',
+  tauntFeature3: 'パーククルーが傑作を壊されるのを見ていたよ。',
+  tauntFeature4: 'モジュールはスキーヤー用。圧雪車は避けて通ろう！',
+  tauntFeature5: '明日の大会用のモジュールが一つ減った。',
+  bonusPipeMastery: 'ハーフパイプの達人',
 
   // Taunts - Avalanche
   tauntAvalanche1: "山はめったに許さない。今回も許さなかった。",
@@ -241,7 +249,7 @@ const ja: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "2026年2月11日",
-  changelog_20260211: "⛷️ 整備したゲレンデをスキーやスノーボードで滑走\n🎯 整備品質\n🏔️ 急斜面の視覚的な識別\n🗺️ レベル選択とスター評価",
+changelog_20260211: "⛷️ 整備したばかりのゲレンデをスキーやスノーボードで滑走\n🎯 整備品質システム\n🏔️ 急斜面ゾーンの視覚的区別\n🏗️ トリック付きパーク：エア、グラインド、ハーフパイプ",
   changelog_20260210_date: "2026年2月10日",
   changelog_20260210: "🎵 音楽と効果音\n🔈 音量設定\n⏱️ 自動調整レベルタイム\n⏭️ チュートリアルスキップ\n🏔️ 雪崩エリア再設計",
   changelog_20260209_date: "2026年2月9日",

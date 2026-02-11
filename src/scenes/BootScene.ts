@@ -334,5 +334,18 @@ export default class BootScene extends Phaser.Scene {
     packedGraphics.fillRect(5, 12, 4, 2);
     packedGraphics.generateTexture('snow_packed', 16, 16);
     packedGraphics.destroy();
+
+    // Park feature textures (used as invisible physics sprites — visuals drawn by ParkFeatureSystem)
+    const kickerTex = this.make.graphics({ x: 0, y: 0 } as any, false);
+    kickerTex.fillStyle(0xe8eef4, 0.01);
+    kickerTex.fillRect(0, 0, 4, 4);
+    kickerTex.generateTexture('park_kicker', 4, 4);
+    kickerTex.destroy();
+
+    const railTex = this.make.graphics({ x: 0, y: 0 } as any, false);
+    railTex.fillStyle(0x888899, 0.01);
+    railTex.fillRect(0, 0, 4, 4);
+    railTex.generateTexture('park_rail', 4, 4);
+    railTex.destroy();
   }
 }

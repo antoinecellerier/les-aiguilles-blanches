@@ -218,6 +218,14 @@ const en: Record<string, string> = {
   tauntTumble3: "Jean-Pierre showed you how to anchor. Were you asleep?",
   tauntTumble4: "A PistenBully costs €400,000. Well, it did.",
   tauntTumble5: "The slope seemed manageable? The groomer disagreed.",
+  featureDestroyedKicker: 'You drove onto a park feature! The kicker is ruined.',
+  featureDestroyedRail: 'You drove onto a park feature! The rail is wrecked.',
+  tauntFeature1: 'That feature took three hours to build. You flattened it in three seconds.',
+  tauntFeature2: 'Émilie is going to have words with you about that park module.',
+  tauntFeature3: 'The park crew just watched you destroy their masterpiece.',
+  tauntFeature4: 'Features are for skiers, not for groomers. Drive around them!',
+  tauntFeature5: 'One less feature for tomorrow\'s competition.',
+  bonusPipeMastery: 'Halfpipe mastery',
   
   // Taunts - Avalanche (emphasize danger, respect for mountain)
   tauntAvalanche1: "The mountain rarely forgives. It didn't forgive.",
@@ -241,7 +249,7 @@ const en: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "February 11, 2026",
-  changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed\n🎯 Grooming quality\n🏔️ Steep zones visually distinct\n🗺️ Level select and star ratings",
+changelog_20260211: "⛷️ Ski or snowboard down the piste you just groomed\n🎯 Grooming quality system\n🏔️ Steep zones visually distinct\n🏗️ Terrain park with tricks: airs, grinds, and halfpipe launches",
   changelog_20260210_date: "February 10, 2026",
   changelog_20260210: "🎵 Music and sound effects\n🔈 Volume settings\n⏱️ Auto-calibrated level times\n⏭️ Skip tutorial option\n🏔️ Avalanche zone redesign",
   changelog_20260209_date: "February 9, 2026",

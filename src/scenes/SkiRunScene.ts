@@ -7,6 +7,7 @@ import { getGroomedTiles } from '../utils/skiRunState';
 import { LevelGeometry } from '../systems/LevelGeometry';
 import { PisteRenderer } from '../systems/PisteRenderer';
 import { ObstacleBuilder } from '../systems/ObstacleBuilder';
+import { ParkFeatureSystem } from '../systems/ParkFeatureSystem';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
@@ -64,8 +65,13 @@ export default class SkiRunScene extends Phaser.Scene {
   private startX = 0;
   private startY = 0;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
+  private parkFeatures = new ParkFeatureSystem();
   private weatherSystem: WeatherSystem | null = null;
   private nightUpdateHandler?: () => void;
+  private lastTrickTime = 0;
+  private trickActive = false;
+  private trickShadow: Phaser.GameObjects.Graphics | null = null;
+  private trickShadowUpdater: (() => void) | null = null;
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -113,6 +119,20 @@ export default class SkiRunScene extends Phaser.Scene {
     const obstacleBuilder = new ObstacleBuilder(this, this.geometry);
     obstacleBuilder.create(this.level, tileSize, this.obstacles, interactables);
 
+    // Park features (kickers, rails, halfpipe)
+    if (this.level.specialFeatures?.length) {
+      this.parkFeatures.create(this, this.level, this.geometry, tileSize);
+      // Enlarge feature hitboxes for ski run — triggers tricks earlier
+      // (GameScene uses 70% for forgiving collision; ski run needs early detection)
+      if (this.parkFeatures.featureGroup) {
+        for (const sprite of this.parkFeatures.featureGroup.getChildren()) {
+          const body = (sprite as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.StaticBody;
+          body.setSize(body.width * 1.8, body.height * 1.8);
+          body.updateFromGameObject();
+        }
+      }
+    }
+
     // Weather (visual only)
     this.weatherSystem = new WeatherSystem(this, tileSize);
     if (this.level.isNight) {
@@ -144,7 +164,13 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Collisions
     this.physics.add.collider(this.skier, this.obstacles, () => this.onBump());
-    this.physics.add.collider(this.skier, boundaryWalls, () => this.onBump());
+    this.physics.add.collider(this.skier, boundaryWalls, () => this.onBoundaryHit());
+    if (this.parkFeatures.featureGroup) {
+      this.physics.add.overlap(this.skier, this.parkFeatures.featureGroup, (_skier, feature) => {
+        const type = (feature as Phaser.Physics.Arcade.Sprite).texture.key === 'park_kicker' ? 'kicker' : 'rail';
+        this.onFeatureTrick(type);
+      });
+    }
     this.physics.add.overlap(this.skier, dangerZones, () => this.onWipeout());
 
     // Input
@@ -273,16 +299,18 @@ export default class SkiRunScene extends Phaser.Scene {
     const vx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio;
     this.skier.setVelocity(vx, vy);
 
-    // Directional sprite — brake takes priority, then lateral input
-    const deadzone: number = BALANCE.SKI_SPRITE_DEADZONE;
-    if (braking) {
-      this.skier.setTexture(this.baseTexture + '_brake');
-    } else if (lateralInput < -deadzone) {
-      this.skier.setTexture(this.baseTexture + '_left');
-    } else if (lateralInput > deadzone) {
-      this.skier.setTexture(this.baseTexture + '_right');
-    } else {
-      this.skier.setTexture(this.baseTexture);
+    // Directional sprite — skip during trick animation
+    if (!this.trickActive) {
+      const deadzone: number = BALANCE.SKI_SPRITE_DEADZONE;
+      if (braking) {
+        this.skier.setTexture(this.baseTexture + '_brake');
+      } else if (lateralInput < -deadzone) {
+        this.skier.setTexture(this.baseTexture + '_left');
+      } else if (lateralInput > deadzone) {
+        this.skier.setTexture(this.baseTexture + '_right');
+      } else {
+        this.skier.setTexture(this.baseTexture);
+      }
     }
 
     // HUD update
@@ -411,6 +439,198 @@ export default class SkiRunScene extends Phaser.Scene {
     this.cameras.main.shake(BALANCE.SKI_BUMP_SHAKE.duration, BALANCE.SKI_BUMP_SHAKE.intensity);
   }
 
+  /** Boundary wall hit — in halfpipe, launch a trick instead of bumping */
+  private onBoundaryHit(): void {
+    if (this.parkFeatures.hasHalfpipe && !this.trickActive) {
+      const tileY = Math.floor(this.skier.y / this.tileSize);
+      // Only in the walled section (not entry/exit margins)
+      if (tileY >= 5 && tileY <= this.level.height - 5) {
+        this.onFeatureTrick('halfpipe');
+        return;
+      }
+    }
+    this.onBump();
+  }
+
+  private onFeatureTrick(type: 'kicker' | 'rail' | 'halfpipe'): void {
+    const now = this.game.getTime();
+    if (now - this.lastTrickTime < 1500 || this.trickActive) return;
+    this.lastTrickTime = now;
+    this.trickActive = true;
+
+    // Speed boost
+    this.currentSpeed *= 1.3;
+
+    const baseScale = this.tileSize / 16;
+
+    let trickName: string;
+    if (type === 'rail') {
+      trickName = this.doGrindTrick(baseScale);
+    } else if (type === 'halfpipe') {
+      trickName = this.doAirTrick(baseScale, true);
+    } else {
+      trickName = this.doAirTrick(baseScale);
+    }
+
+    // Popup text — show trick name
+    const isBoard = this.baseTexture.includes('snowboard');
+    const icon = isBoard ? '🏂' : '🎿';
+    const popup = this.add.text(this.skier.x, this.skier.y - 30, `${icon} ${trickName}!`, {
+      fontFamily: THEME.fonts.family,
+      fontSize: '18px',
+      fontStyle: 'bold',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+
+    this.tweens.add({
+      targets: popup,
+      y: popup.y - 40,
+      alpha: 0,
+      duration: 1200,
+      ease: 'Power2',
+      onComplete: () => popup.destroy(),
+    });
+  }
+
+  /** Air trick (kicker or halfpipe): scale up, spin, shadow below, then land */
+  private doAirTrick(baseScale: number, pipe = false): string {
+    const shadow = this.add.graphics().setDepth(DEPTHS.PLAYER - 1);
+    this.trickShadow = shadow;
+
+    const shadowY = this.skier.y + (pipe ? 14 : 10) * baseScale;
+    const updateShadow = () => {
+      if (!this.skier?.active) return;
+      shadow.clear();
+      shadow.fillStyle(0x1a1612, pipe ? 0.25 : 0.3);
+      const sw = (pipe ? 14 : 12) * this.skier.scaleX;
+      const sh = (pipe ? 5 : 4) * this.skier.scaleX;
+      shadow.fillRect(this.skier.x - sw / 2, shadowY, sw, sh);
+    };
+    this.events.on('update', updateShadow);
+    this.trickShadowUpdater = updateShadow;
+
+    const tricks = pipe
+      ? [
+          { angle: 540, name: 'McTwist' },
+          { angle: -540, name: 'Crippler' },
+          { angle: 900, name: '900' },
+          { angle: 360, name: 'Alley-oop' },
+          { angle: 0, name: 'Stalefish' },
+        ]
+      : [
+          { angle: 360, name: '360' },
+          { angle: 720, name: '720' },
+          { angle: 180, name: 'Backflip' },
+          { angle: -180, name: 'Frontflip' },
+          { angle: 0, name: 'Method' },
+        ];
+    const trick = tricks[Math.floor(Math.random() * tricks.length)];
+
+    const isGrab = trick.angle === 0;
+    const scaleMult = pipe ? (isGrab ? 2.0 : 1.8) : (isGrab ? 1.8 : 1.5);
+    const scaleMultY = pipe ? (isGrab ? 1.4 : 1.8) : (isGrab ? 1.2 : 1.5);
+    const launchDur = pipe ? 700 : 500;
+    const landDur = pipe ? 350 : 300;
+
+    this.tweens.add({
+      targets: this.skier,
+      scaleX: baseScale * scaleMult,
+      scaleY: baseScale * scaleMultY,
+      angle: trick.angle,
+      duration: launchDur,
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        this.tweens.add({
+          targets: this.skier,
+          scaleX: baseScale,
+          scaleY: baseScale,
+          angle: 0,
+          duration: landDur,
+          ease: 'Bounce.easeOut',
+          onComplete: () => {
+            this.trickActive = false;
+            this.cleanupTrickShadow();
+          },
+        });
+      },
+    });
+    return trick.name;
+  }
+
+  /** Remove shadow graphics and update listener */
+  private cleanupTrickShadow(): void {
+    if (this.trickShadowUpdater) {
+      this.events.off('update', this.trickShadowUpdater);
+      this.trickShadowUpdater = null;
+    }
+    this.trickShadow?.destroy();
+    this.trickShadow = null;
+  }
+
+  /** Rail grind: random grind style, sparks fly from contact point */
+  private doGrindTrick(baseScale: number): string {
+    const isBoard = this.baseTexture.includes('snowboard');
+
+    // Pick a random grind style — distinct angle + spark color + scaleX for visual variety
+    const grinds = [
+      { angle: isBoard ? 90 : 70, scaleX: 1, name: 'Boardslide', sparkColor: 0xffdd44 },
+      { angle: isBoard ? 15 : 10, scaleX: 1, name: '50-50', sparkColor: 0x44ddff },
+      { angle: isBoard ? -90 : -70, scaleX: -1, name: 'Lipslide', sparkColor: 0xff6644 },
+      { angle: isBoard ? 180 : 160, scaleX: 1, name: 'Tailslide', sparkColor: 0x66ff44 },
+    ];
+    const grind = grinds[Math.floor(Math.random() * grinds.length)];
+
+    const origScaleX = this.skier.scaleX;
+    this.tweens.add({
+      targets: this.skier,
+      angle: grind.angle,
+      scaleX: origScaleX * grind.scaleX,
+      duration: 150,
+      ease: 'Power2',
+    });
+
+    // Sparks — bright rectangles that fall from skier
+    const sparkSize = Math.max(3, Math.round(3 * baseScale));
+    const sparkTimer = this.time.addEvent({
+      delay: 80,
+      repeat: 6,
+      callback: () => {
+        if (!this.skier?.active) return;
+        const ox = (Math.random() - 0.5) * 8 * baseScale;
+        const x = this.skier.x + ox;
+        const y = this.skier.y;
+        const color = Math.random() > 0.4 ? grind.sparkColor : 0xffffff;
+
+        const spark = this.add.rectangle(x, y, sparkSize, sparkSize, color, 1)
+          .setDepth(DEPTHS.PLAYER + 1);
+        this.tweens.add({
+          targets: spark,
+          y: y + 12 * baseScale,
+          alpha: 0,
+          duration: 300,
+          onComplete: () => spark.destroy(),
+        });
+      },
+    });
+
+    this.time.delayedCall(600, () => {
+      sparkTimer.destroy();
+      this.tweens.add({
+        targets: this.skier,
+        angle: 0,
+        scaleX: Math.abs(origScaleX),
+        duration: 200,
+        ease: 'Power2',
+        onComplete: () => {
+          this.trickActive = false;
+        },
+      });
+    });
+    return grind.name;
+  }
+
   private onWipeout(): void {
     if (this.isCrashed || this.isFinished) return;
     this.isCrashed = true;
@@ -480,8 +700,13 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     this.weatherSystem?.reset();
     this.weatherSystem = null;
+    this.parkFeatures.destroy();
+    this.cleanupTrickShadow();
+    this.trickActive = false;
+    // Don't stop HUDScene here — resetGameScenes handles all scene cleanup.
+    // Stopping it during shutdown causes "duplicate key" errors when
+    // resetGameScenes has already removed HUDScene before this shutdown fires.
     this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
-    this.scene.stop('HUDScene');
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
   }

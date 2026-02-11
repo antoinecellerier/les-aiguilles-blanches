@@ -218,6 +218,14 @@ const ko: Record<string, string> = {
   tauntTumble3: "Jean-Pierre가 앵커 사용법을 보여줬는데. 자고 있었어?",
   tauntTumble4: "PistenBully는 5억 원이다. 이었다.",
   tauntTumble5: "이 경사면이 만만해 보였어? 설상차는 그렇게 생각 안 했어.",
+  featureDestroyedKicker: '파크 모듈 위로 지나갔어! 키커가 파괴됐어.',
+  featureDestroyedRail: '파크 모듈 위로 지나갔어! 레일이 파괴됐어.',
+  tauntFeature1: '그 모듈은 3시간 걸렸는데. 3초 만에 밀어버렸네.',
+  tauntFeature2: '에밀리가 그 파크 모듈에 대해 할 말이 있대.',
+  tauntFeature3: '파크 팀이 걸작이 파괴되는 걸 지켜봤어.',
+  tauntFeature4: '모듈은 스키어용이야. 설상차는 돌아가!',
+  tauntFeature5: '내일 대회용 모듈이 하나 줄었어.',
+  bonusPipeMastery: '하프파이프 마스터',
 
   // Taunts - Avalanche
   tauntAvalanche1: "산은 좀처럼 용서하지 않는다. 이번에도 용서하지 않았다.",
@@ -241,7 +249,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "2026년 2월 11일",
-  changelog_20260211: "⛷️ 정비한 슬로프를 스키 또는 스노보드로 활강\n🎯 정비 품질\n🏔️ 급경사 구역 시각적 구분\n🗺️ 레벨 선택과 별점",
+changelog_20260211: "⛷️ 방금 정비한 슬로프에서 스키 또는 스노보드\n🎯 정비 품질 시스템\n🏔️ 급경사 구간 시각적 구분\n🏗️ 트릭이 있는 파크: 에어, 그라인드, 하프파이프",
   changelog_20260210_date: "2026년 2월 10일",
   changelog_20260210: "🎵 음악과 효과음\n🔈 볼륨 설정\n⏱️ 자동 조정 레벨 타임\n⏭️ 튜토리얼 건너뛰기\n🏔️ 눈사태 구역 재설계",
   changelog_20260209_date: "2026년 2월 9일",

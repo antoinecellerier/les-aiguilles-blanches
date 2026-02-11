@@ -176,21 +176,22 @@ Works identically on keyboard, gamepad, and touch — all have rotational contro
 
 **Affected levels**: L7 (Verticale), L9 (Tempête), L10 (Coupe des Aiguilles).
 
-### Halfpipe Scoring
+### Halfpipe Scoring ✅ IMPLEMENTED
 
 **Problem**: Le Tube (L6) plays identically to normal levels — just drive over snow, hit 80% coverage.
 
-**Proposal**: Direction-aware quality scoring.
+**Implementation**: Direction-aware quality scoring + halfpipe walls.
 
-- The halfpipe has a defined axis (its length direction)
-- Grooming **along** the axis (±30°) = 100% quality
-- Grooming at **45°** to axis = 60% quality
-- Grooming **across** the axis (±30° of perpendicular) = 30% quality
-- Authentic to real halfpipe preparation: groomers make lengthwise passes, not cross-cuts
+- Halfpipe walls (3 tiles wide) narrow the groomable floor area
+- Grooming **along** the pipe axis = 100% quality (cos² formula)
+- Grooming **across** the axis = 30% quality
+- Blue dye boundary lines and direction arrows guide the player
+- Kickers and rails on L3 (Air Zone) also have directional zone scoring
+- Driving onto a feature = instant fail (forgiving ~70% hitbox)
 
-**Visual**: Flow arrows on the halfpipe surface show the optimal grooming direction.
+**Visual**: Gradient banks along piste edges + direction chevrons on floor.
 
-**Bonus objective**: Replace `speed_run` with `pipe_mastery` — achieve 90%+ average quality across the halfpipe zone.
+**Bonus objective**: `pipe_mastery` on L6 — achieve 80%+ average quality. `precision_grooming` on L3.
 
 ### Snow Pushing (Front Blade)
 
@@ -285,11 +286,11 @@ Works identically on keyboard, gamepad, and touch — all have rotational contro
 
 **v2 enhancements** (not in scope for v1):
 - Slalom gates on appropriate levels (timed gate runs).
-- Freestyle elements on park levels (L3 Air Zone, L6 Le Tube) — kickers, rails, trick scoring.
+- ~~Freestyle elements on park levels (L3 Air Zone, L6 Le Tube) — kickers, rails, trick scoring.~~ ✅ Implemented: air tricks (kicker + halfpipe) and grind tricks (rail) with visual animations and trick name popups. Scoring integration deferred.
 - Per-level terrain modifications for variety.
 - Best time tracking and ghost replay.
 
-**Level suitability**: All levels support the reward run since all have piste geometry. Steep/dangerous levels become thrilling descents. Park levels naturally lend themselves to v2 freestyle additions.
+**Level suitability**: All levels support the reward run since all have piste geometry. Steep/dangerous levels become thrilling descents. Park levels feature interactive kickers, rails, and halfpipe walls with trick animations.
 
 ### Ghost Replay (Future)
 

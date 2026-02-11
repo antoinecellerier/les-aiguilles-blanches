@@ -218,6 +218,14 @@ const pl: Record<string, string> = {
   tauntTumble3: "Jean-Pierre pokazał ci jak kotwić. Spałeś?",
   tauntTumble4: "PistenBully kosztuje 400 000 €. To znaczy kosztował.",
   tauntTumble5: "Stok wydawał się do ogarnięcia? Ratrak się nie zgodził.",
+  featureDestroyedKicker: 'Przejechałeś po module parkowym! Kicker jest zniszczony.',
+  featureDestroyedRail: 'Przejechałeś po module parkowym! Rail jest zniszczony.',
+  tauntFeature1: 'Ten moduł budowali trzy godziny. Zrównałeś go w trzy sekundy.',
+  tauntFeature2: 'Émilie będzie miała ci coś do powiedzenia o tym module parkowym.',
+  tauntFeature3: 'Ekipa parku właśnie patrzyła, jak niszczysz ich dzieło.',
+  tauntFeature4: 'Moduły są dla narciarzy, nie dla ratraków. Objedź je!',
+  tauntFeature5: 'Jeden moduł mniej na jutrzejsze zawody.',
+  bonusPipeMastery: 'Opanowanie halfpipe\'u',
 
   // Taunts - Avalanche
   tauntAvalanche1: "Góra rzadko wybacza. Tym razem nie wybaczyła.",
@@ -241,7 +249,7 @@ const pl: Record<string, string> = {
 
   // Changelog
   changelog_20260211_date: "11 lutego 2026",
-  changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie po przygotowanym stoku\n🎯 Jakość preparacji\n🏔️ Strome strefy wizualnie wyróżnione\n🗺️ Wybór trasy i oceny gwiazdkowe",
+changelog_20260211: "⛷️ Zjedź na nartach lub snowboardzie po właśnie przygotowanym stoku\n🎯 System jakości preparacji\n🏔️ Strome strefy wizualnie wyróżnione\n🏗️ Park z trikami: airy, grindy i skoki z halfpipe",
   changelog_20260210_date: "10 lutego 2026",
   changelog_20260210: "🎵 Muzyka i efekty dźwiękowe\n🔈 Ustawienia głośności\n⏱️ Automatycznie kalibrowane czasy\n⏭️ Pomiń samouczek\n🏔️ Przeprojektowane strefy lawinowe",
   changelog_20260209_date: "9 lutego 2026",

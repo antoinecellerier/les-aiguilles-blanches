@@ -415,6 +415,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       case 'time': return '⏰';
       case 'avalanche': return '❄️';
       case 'tumble': return '💥';
+      case 'feature': return '🚧';
       default: return '❌';
     }
   }
@@ -435,6 +436,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
       ],
       tumble: [
         t('tauntTumble1'), t('tauntTumble2'), t('tauntTumble3'), t('tauntTumble4'), t('tauntTumble5'),
+      ],
+      feature: [
+        t('tauntFeature1'), t('tauntFeature2'), t('tauntFeature3'), t('tauntFeature4'), t('tauntFeature5'),
       ],
     };
 
@@ -495,6 +499,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
         case 'precision_grooming':
           met = this.groomQuality >= obj.target;
           label = t('bonusPrecision') + ' ' + this.groomQuality + '%';
+          break;
+        case 'pipe_mastery':
+          met = this.groomQuality >= obj.target;
+          label = t('bonusPipeMastery') + ' ' + this.groomQuality + '%';
           break;
       }
 
@@ -679,6 +687,70 @@ export default class LevelCompleteScene extends Phaser.Scene {
           fontStyle: 'bold',
           color: '#aaaacc',
         }).setDepth(5 + snowLineY * 0.001 + 0.002).setAngle(-10);
+        break;
+      }
+      case 'feature': {
+        // Groomer crashed through a park feature — nose-dipped, debris scattered
+        // Tracks (front dipped from impact)
+        g.fillStyle(0x333333);
+        g.fillRect(gx - 24 * s, groundY - 10 * s, 26 * s, 6 * s); // rear level
+        g.fillRect(gx + 2 * s, groundY - 6 * s, 22 * s, 6 * s);   // front dropped
+        g.fillStyle(0x444444);
+        for (let tx = -22; tx < 0; tx += 6) {
+          g.fillRect(gx + tx * s, groundY - 9 * s, 3 * s, 4 * s);
+        }
+        for (let tx = 4; tx < 24; tx += 6) {
+          g.fillRect(gx + tx * s, groundY - 5 * s, 3 * s, 4 * s);
+        }
+        // Body (tilted forward)
+        g.fillStyle(0xcc2200);
+        g.fillRect(gx - 18 * s, groundY - 24 * s, 20 * s, 14 * s); // rear
+        g.fillRect(gx + 2 * s, groundY - 20 * s, 16 * s, 14 * s);  // front (lower)
+        // Cabin (on rear)
+        g.fillStyle(0x1e90ff);
+        g.fillRect(gx - 8 * s, groundY - 34 * s, 20 * s, 11 * s);
+        g.fillStyle(0x87ceeb);
+        g.fillRect(gx - 5 * s, groundY - 32 * s, 14 * s, 7 * s);
+        // Cabin roof
+        g.fillStyle(0xaa1a00);
+        g.fillRect(gx - 10 * s, groundY - 36 * s, 24 * s, 3 * s);
+        // Front blade (buried in debris)
+        g.fillStyle(0x888888);
+        g.fillRect(gx - 28 * s, groundY - 12 * s, 10 * s, 10 * s);
+        g.fillStyle(0xaaaaaa);
+        g.fillRect(gx - 29 * s, groundY - 14 * s, 4 * s, 12 * s);
+
+        // Destroyed feature remnants in front of groomer
+        // Smashed snow mound (kicker remains — visible gray-blue)
+        g.fillStyle(0xb0bcc8);
+        g.fillRect(gx - 42 * s, groundY - 8 * s, 14 * s, 8 * s);
+        g.fillRect(gx - 38 * s, groundY - 14 * s, 10 * s, 6 * s);
+        g.fillStyle(0x99aabb);
+        g.fillRect(gx - 40 * s, groundY - 10 * s, 4 * s, 3 * s);
+        // Scattered snow chunks (darker to stand out)
+        g.fillStyle(0xa8b8c8);
+        g.fillRect(gx + 24 * s, groundY - 6 * s, 8 * s, 5 * s);
+        g.fillRect(gx + 34 * s, groundY - 3 * s, 6 * s, 4 * s);
+        g.fillRect(gx - 46 * s, groundY - 4 * s, 5 * s, 4 * s);
+        // Bent metal rail pieces (visible dark)
+        g.fillStyle(0x555566);
+        g.fillRect(gx - 48 * s, groundY - 2 * s, 12 * s, 3 * s);
+        g.fillRect(gx + 28 * s, groundY - 12 * s, 10 * s, 3 * s);
+        // Impact dust/snow spray
+        g.fillStyle(0xb0bcc8, 0.6);
+        g.fillRect(gx - 36 * s, groundY - 22 * s, 10 * s, 8 * s);
+        g.fillRect(gx - 44 * s, groundY - 18 * s, 8 * s, 6 * s);
+        g.fillStyle(0xc8d4d8, 0.4);
+        g.fillRect(gx + 22 * s, groundY - 20 * s, 12 * s, 8 * s);
+        g.fillRect(gx + 30 * s, groundY - 16 * s, 8 * s, 6 * s);
+        // Exhaust pipe (tilted)
+        g.fillStyle(0x555555);
+        g.fillRect(gx + 10 * s, groundY - 38 * s, 3 * s, 8 * s);
+        // Storm snow
+        if (isStorm) {
+          g.fillStyle(0xf0f5f8);
+          g.fillRect(gx - 10 * s, groundY - 39 * s, 24 * s, 3 * s);
+        }
         break;
       }
     }

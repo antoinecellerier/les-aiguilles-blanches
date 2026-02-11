@@ -40,7 +40,7 @@ export interface TutorialStep {
   delay?: number;
 }
 
-export type BonusObjectiveType = 'fuel_efficiency' | 'flawless' | 'speed_run' | 'winch_mastery' | 'exploration' | 'precision_grooming';
+export type BonusObjectiveType = 'fuel_efficiency' | 'flawless' | 'speed_run' | 'winch_mastery' | 'exploration' | 'precision_grooming' | 'pipe_mastery';
 
 export interface BonusObjective {
   type: BonusObjectiveType;
@@ -227,7 +227,7 @@ export const LEVELS: Level[] = [
     hasWinch: false,
     isNight: false,
     weather: 'clear',
-    obstacles: ['jumps', 'rails'],
+    obstacles: [],
     specialFeatures: ['kickers', 'rails'],
     pisteShape: 'wide',
     pisteWidth: 0.7,
@@ -339,7 +339,7 @@ export const LEVELS: Level[] = [
     introDialogue: 'level_tubeIntro',
     introSpeaker: 'Émilie',
     bonusObjectives: [
-      { type: 'speed_run', target: 240 },
+      { type: 'pipe_mastery', target: 80 },
       { type: 'precision_grooming', target: 70 },
     ],
     wildlife: [

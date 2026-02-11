@@ -207,7 +207,7 @@ const de: Record<string, string> = {
   
   // Changelog
   changelog_20260211_date: "11. Februar 2026",
-  changelog_20260211: "⛷️ Ski oder Snowboard auf der präparierten Piste\n🎯 Präparierqualität\n🏔️ Steilzonen visuell unterscheidbar\n🗺️ Levelauswahl und Sternebewertung",
+changelog_20260211: "⛷️ Skifahren oder snowboarden auf der frisch präparierten Piste\n🎯 Präparierqualitätssystem\n🏔️ Steile Zonen visuell unterscheidbar\n🏗️ Terrain-Park mit Tricks: Airs, Grinds und Halfpipe-Launches",
   changelog_20260210_date: "10. Februar 2026",
   changelog_20260210: "🎵 Musik und Soundeffekte\n🔈 Lautstärkeeinstellungen\n⏱️ Automatisch kalibrierte Levelzeiten\n⏭️ Tutorial überspringen\n🏔️ Lawinenzonen-Redesign",
   changelog_20260209_date: "9. Februar 2026",
@@ -249,6 +249,14 @@ const de: Record<string, string> = {
   tauntTumble3: "Jean-Pierre hat dir gezeigt, wie man ankert. Hast du geschlafen?",
   tauntTumble4: "Ein PistenBully kostet 400.000€. Naja, kostete.",
   tauntTumble5: "Der Hang schien machbar? Die Raupe war anderer Meinung.",
+  featureDestroyedKicker: 'Du bist über ein Park-Element gefahren! Der Kicker ist zerstört.',
+  featureDestroyedRail: 'Du bist über ein Park-Element gefahren! Die Rail ist zerstört.',
+  tauntFeature1: 'Drei Stunden Bauzeit für das Element. Drei Sekunden zum Plattmachen.',
+  tauntFeature2: 'Émilie wird ein Wörtchen mit dir über dieses Park-Element reden.',
+  tauntFeature3: 'Das Park-Team hat gerade zugesehen, wie du ihr Meisterwerk zerstört hast.',
+  tauntFeature4: 'Die Module sind für Skifahrer, nicht für Pistenraupen. Drum herum fahren!',
+  tauntFeature5: 'Ein Element weniger für den Wettkampf morgen.',
+  bonusPipeMastery: 'Halfpipe-Beherrschung',
   // Taunts - Avalanche
   tauntAvalanche1: "Der Berg verzeiht selten. Er hat nicht verziehen.",
   tauntAvalanche2: "Météo France sagte Risikostufe 4. Hast du gelesen?",
