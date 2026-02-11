@@ -94,6 +94,7 @@ const en: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} or hold the winch button near an anchor post",
   
   // Winch
+  winchSnapped: "💥 Cable snapped!",
   winchAttached: "🔗 Winch attached! Hold {winchKey} for assistance.",
   winchActive: "WINCH",
   winchHint: "Press {winchKey} near a numbered anchor post to use winch",

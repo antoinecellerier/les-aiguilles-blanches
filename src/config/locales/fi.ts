@@ -94,6 +94,7 @@ const fi: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} tai pidä vinssipainiketta ankkurin lähellä",
 
   // Winch
+  winchSnapped: "💥 Kaapeli katkesi!",
   winchAttached: "🔗 Vinssi kiinnitetty! Pidä {winchKey} avustukseen.",
   winchActive: "VINSSI",
   winchHint: "Paina {winchKey} numeroidun ankkuritolpan lähellä käyttääksesi vinssiä",

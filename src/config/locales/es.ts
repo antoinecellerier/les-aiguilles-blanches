@@ -93,6 +93,7 @@ const es: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} o mantén el botón cabrestante junto a un poste",
   
   // Winch
+  winchSnapped: "💥 ¡Cable roto!",
   winchAttached: "🔗 ¡Cabrestante enganchado! Mantén {winchKey} para asistencia.",
   winchActive: "CABRESTANTE",
   winchHint: "Pulsa {winchKey} cerca de un poste de anclaje numerado para usar el cabrestante",

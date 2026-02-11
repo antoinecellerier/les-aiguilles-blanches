@@ -96,6 +96,7 @@ const fr: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} ou maintenir le bouton treuil près d'un poste",
   
   // Winch
+  winchSnapped: "💥 Câble cassé !",
   winchAttached: "🔗 Treuil attaché ! Maintenir {winchKey} pour assistance.",
   winchActive: "TREUIL",
   winchHint: "Appuyez sur {winchKey} près d'un ancrage numéroté pour utiliser le treuil",

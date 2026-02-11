@@ -104,6 +104,9 @@ export const BALANCE = {
   GROOMER_DRAG: 200,
   WINCH_FORCE: 0.3,
   WINCH_MIN_DISTANCE: 50,
+  WINCH_MAX_CABLE: 25,  // Max cable length in tiles before snap
+  WINCH_SNAP_STAMINA_COST: 20,
+  WINCH_SNAP_STUN_MS: 800,
 
   // Slopes
   TUMBLE_SLOPE_THRESHOLD: 40,
@@ -133,6 +136,7 @@ export const BALANCE = {
   SHAKE_WARNING_2: { duration: 300, intensity: 0.01 },
   SHAKE_AVALANCHE: { duration: 1000, intensity: 0.02 },
   SHAKE_TUMBLE: { duration: 500, intensity: 0.015 },
+  SHAKE_WINCH_SNAP: { duration: 300, intensity: 0.01 },
   VICTORY_FLASH_DURATION: 300,
   VICTORY_ZOOM: 1.2,
   VICTORY_ZOOM_DURATION: 500,

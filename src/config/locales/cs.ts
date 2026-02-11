@@ -94,6 +94,7 @@ const cs: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} nebo držte tlačítko navijáku u kotvy",
 
   // Winch
+  winchSnapped: "💥 Kabel praskl!",
   winchAttached: "🔗 Naviják připojen! Držte {winchKey} pro pomoc.",
   winchActive: "NAVIJÁK",
   winchHint: "Stiskněte {winchKey} u kotevního sloupku pro naviják",

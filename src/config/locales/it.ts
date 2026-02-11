@@ -93,6 +93,7 @@ const it: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} o tieni il pulsante verricello vicino a un palo",
   
   // Winch
+  winchSnapped: "💥 Cavo spezzato!",
   winchAttached: "🔗 Verricello agganciato! Tieni {winchKey} per assistenza.",
   winchActive: "VERRICELLO",
   winchHint: "Premi {winchKey} vicino a un paletto di ancoraggio numerato per il verricello",

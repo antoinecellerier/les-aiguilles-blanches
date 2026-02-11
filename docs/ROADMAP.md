@@ -37,7 +37,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 - [x] Tutorial dialogue fatigue — skip tutorial option on replay
 - [ ] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
-- [ ] Winch cable should have infinite extension — currently limited, should only provide pulling force
+- [x] Winch cable max extension — Cable snaps at 25 tiles with stun + stamina penalty. Tension drag slows groomer near limit.
 
 
 ## In Progress: Ski/Snowboard Reward Run (v1)

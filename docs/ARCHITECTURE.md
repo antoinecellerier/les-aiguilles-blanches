@@ -1234,10 +1234,21 @@ if (hasSlack) {
 }
 ```
 
+### Cable Extension Limit
+
+Cable has a maximum length (`BALANCE.WINCH_MAX_CABLE` tiles). As the groomer moves away from the anchor:
+
+- **70-100% extension**: Progressive drag slows movement away from anchor (100% speed → 30% speed)
+- **100% extension**: Cable snaps — 800ms stun, -20 stamina, camera shake
+- Tension is visible via cable color: gray (slack) → red (near snap)
+
+Players must switch between anchors on long descents rather than using one anchor for the entire slope.
+
 ### Visual Feedback
 
-- **Taut cable**: Straight line, color shifts gray→red with distance
+- **Taut cable**: Straight line, color shifts gray→red with distance (tension = dist/maxDist)
 - **Slack cable**: Curved/sagging line, thinner, grayer (0.7 opacity)
+- **Near snap**: Cable fully red, groomer visibly slowed
 
 ## HUD Scaling
 

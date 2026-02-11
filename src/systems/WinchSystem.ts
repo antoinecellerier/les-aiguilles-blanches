@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTHS, yDepth } from '../config/gameConfig';
+import { DEPTHS, yDepth, BALANCE } from '../config/gameConfig';
 import { Accessibility } from '../setup';
 import { t } from '../setup';
 import type { Level } from '../config/levels';
@@ -119,7 +119,7 @@ export class WinchSystem {
    * @param tileSize Current tile size
    * @param levelHeight Level height in tiles
    */
-  update(isWinchPressed: boolean, groomerX: number, groomerY: number, tileSize: number, levelHeight: number): void {
+  update(isWinchPressed: boolean, groomerX: number, groomerY: number, tileSize: number, levelHeight: number): boolean {
     if (isWinchPressed && !this.active) {
       this.anchor = this.getNearestAnchor(groomerX, groomerY, tileSize);
       if (this.anchor) {
@@ -138,6 +138,16 @@ export class WinchSystem {
       const anchorY = this.anchor.y;
       const cableGroomerY = groomerY - 10;
       
+      const dist = Phaser.Math.Distance.Between(groomerX, cableGroomerY, anchorX, anchorY);
+      const maxDist = BALANCE.WINCH_MAX_CABLE * tileSize;
+
+      // Snap cable if groomer exceeds max length
+      if (dist > maxDist) {
+        Accessibility.announce(t('winchSnapped') || 'Cable snapped!');
+        this.detach();
+        return true;
+      }
+
       const hasSlack = cableGroomerY <= anchorY;
       
       if (hasSlack) {
@@ -158,8 +168,6 @@ export class WinchSystem {
         }
         this.cableGraphics.strokePath();
       } else {
-        const dist = Phaser.Math.Distance.Between(groomerX, cableGroomerY, anchorX, anchorY);
-        const maxDist = levelHeight * tileSize * 0.8;
         const tension = Math.min(1, dist / maxDist);
         const cableColor = Phaser.Display.Color.Interpolate.ColorWithColor(
           new Phaser.Display.Color(136, 136, 136),
@@ -175,6 +183,7 @@ export class WinchSystem {
         this.cableGraphics.strokePath();
       }
     }
+    return false;
   }
 
   /** Detach winch and clear cable visual. */

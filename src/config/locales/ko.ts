@@ -94,6 +94,7 @@ const ko: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} 또는 앵커 근처에서 윈치 버튼 길게 누르기",
 
   // Winch
+  winchSnapped: "💥 케이블 끊김!",
   winchAttached: "🔗 윈치 연결! {winchKey} 길게 눌러 보조.",
   winchActive: "윈치",
   winchHint: "번호 앵커 포스트 근처에서 {winchKey}를 눌러 윈치 사용",

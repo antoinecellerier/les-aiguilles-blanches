@@ -94,6 +94,7 @@ const ja: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey}またはアンカー付近でウインチボタンを長押し",
 
   // Winch
+  winchSnapped: "💥 ケーブル切断！",
   winchAttached: "🔗 ウインチ接続！{winchKey}長押しで補助。",
   winchActive: "ウインチ",
   winchHint: "番号付きアンカーポストの近くで{winchKey}を押してウインチを使用",

@@ -80,6 +80,7 @@ export default class GameScene extends Phaser.Scene {
   private isGameOver = false;
   private isTransitioning = false;
   private isTumbling = false;
+  private isStunned = false;
   private isFallingOffCliff = false;
   private steepWarningShown = false;
   private gamepadBindings: GamepadBindings = loadGamepadBindings();
@@ -188,6 +189,7 @@ export default class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.isTransitioning = false;
     this.isTumbling = false;
+    this.isStunned = false;
     this.isFallingOffCliff = false;
     this.steepWarningShown = false;
 
@@ -742,10 +744,18 @@ export default class GameScene extends Phaser.Scene {
       const isWinchPressed = this.winchKey.isDown || this.touchInput.winch ||
         isGamepadButtonPressed(this.gamepad, this.gamepadBindings.winch);
       const wasActive = this.winchSystem.active;
-      this.winchSystem.update(isWinchPressed, this.groomer.x, this.groomer.y, this.tileSize, this.level.height);
+      const snapped = this.winchSystem.update(isWinchPressed, this.groomer.x, this.groomer.y, this.tileSize, this.level.height);
       // Winch attach/detach one-shot sounds
       if (this.winchSystem.active && !wasActive) this.engineSounds.playWinchAttach();
       else if (!this.winchSystem.active && wasActive) this.engineSounds.playWinchDetach();
+      // Cable snap: stun + stamina penalty
+      if (snapped) {
+        this.cameras.main.shake(BALANCE.SHAKE_WINCH_SNAP.duration, BALANCE.SHAKE_WINCH_SNAP.intensity);
+        this.stamina = Math.max(0, this.stamina - BALANCE.WINCH_SNAP_STAMINA_COST);
+        this.groomer.setVelocity(0, 0);
+        this.isStunned = true;
+        this.time.delayedCall(BALANCE.WINCH_SNAP_STUN_MS, () => { this.isStunned = false; });
+      }
     }
     this.checkSteepness();
     this.checkCliffFall();
@@ -898,9 +908,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleMovement(): void {
-    // Don't handle movement while dialogue is showing
+    // Don't handle movement while dialogue is showing or stunned
     const dialogueScene = this.scene.get('DialogueScene') as DialogueScene;
     if (dialogueScene && dialogueScene.isDialogueShowing()) {
+      this.groomer.setVelocity(0, 0);
+      return;
+    }
+    if (this.isStunned) {
       this.groomer.setVelocity(0, 0);
       return;
     }
@@ -954,6 +968,19 @@ export default class GameScene extends Phaser.Scene {
         const winchForce = BALANCE.WINCH_FORCE;
         vx += (dx / dist) * speed * winchForce;
         vy += (dy / dist) * speed * winchForce;
+      }
+
+      // Cable tension drag — slow down when near snapping point
+      const maxDist = BALANCE.WINCH_MAX_CABLE * this.tileSize;
+      const tensionRatio = dist / maxDist;
+      if (tensionRatio > 0.7) {
+        // Moving away from anchor? Apply drag proportional to tension
+        const dot = -(vx * dx + vy * dy); // positive = moving away
+        if (dot > 0) {
+          const drag = 1 - 0.7 * (tensionRatio - 0.7) / 0.3; // 1.0 at 70% → 0.3 at 100%
+          vx *= drag;
+          vy *= drag;
+        }
       }
     }
 

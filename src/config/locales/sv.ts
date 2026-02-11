@@ -94,6 +94,7 @@ const sv: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} eller håll vinschknappen nära en förankring",
 
   // Winch
+  winchSnapped: "💥 Kabeln brast!",
   winchAttached: "🔗 Vinsch fäst! Håll {winchKey} för assistans.",
   winchActive: "VINSCH",
   winchHint: "Tryck {winchKey} nära en numrerad förankringsstolpe för vinsch",

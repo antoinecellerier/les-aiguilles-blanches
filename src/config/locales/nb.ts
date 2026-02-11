@@ -94,6 +94,7 @@ const nb: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} eller hold vinsjknappen nær en forankring",
 
   // Winch
+  winchSnapped: "💥 Kabelen røk!",
   winchAttached: "🔗 Vinsj festet! Hold {winchKey} for assistanse.",
   winchActive: "VINSJ",
   winchHint: "Trykk {winchKey} nær en nummerert ankerstolpe for vinsj",

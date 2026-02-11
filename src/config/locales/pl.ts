@@ -94,6 +94,7 @@ const pl: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} lub przytrzymaj przycisk wciągarki przy kotwicy",
 
   // Winch
+  winchSnapped: "💥 Kabel pękł!",
   winchAttached: "🔗 Wciągarka podłączona! Przytrzymaj {winchKey} aby użyć.",
   winchActive: "WCIĄGARKA",
   winchHint: "Naciśnij {winchKey} przy słupku kotwicznym aby użyć wciągarki",

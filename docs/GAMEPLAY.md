@@ -348,6 +348,9 @@ A: Winch is only available on levels with steep terrain. You must be near a numb
 **Q: The winch cable looks loose!**
 A: When your groomer is above or level with the anchor, the cable has slack and won't prevent steep slope sliding or tumbling. Move below the anchor to tension the cable.
 
+**Q: The cable snapped!**
+A: The winch cable has a maximum extension. If you move too far from the anchor, the cable turns red and you'll feel resistance. Go further and it snaps — stunning you briefly and draining stamina. Switch to a lower anchor before reaching the limit.
+
 **Q: I can't reach the winch anchor!**
 A: Look for service roads (orange/black poles) on the side of the piste. These provide safe access to anchors.
 

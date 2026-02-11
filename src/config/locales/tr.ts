@@ -94,6 +94,7 @@ const tr: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} veya ankraj yanında vinç düğmesini basılı tut",
 
   // Winch
+  winchSnapped: "💥 Kablo koptu!",
   winchAttached: "🔗 Vinç bağlı! Yardım için {winchKey} basılı tutun.",
   winchActive: "VİNÇ",
   winchHint: "Vinç kullanmak için ankraj direğinin yanında {winchKey} basın",

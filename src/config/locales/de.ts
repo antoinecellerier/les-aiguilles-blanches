@@ -93,6 +93,7 @@ const de: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} oder Winden-Taste bei einem Ankerpfosten halten",
   
   // Winch
+  winchSnapped: "💥 Kabel gerissen!",
   winchAttached: "🔗 Winde befestigt! Halte {winchKey} für Unterstützung.",
   winchActive: "WINDE",
   winchHint: "Drücke {winchKey} bei einem nummerierten Ankerpfosten für die Winde",
