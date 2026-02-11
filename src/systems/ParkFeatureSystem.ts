@@ -161,9 +161,9 @@ export class ParkFeatureSystem {
       const pixelW = fw * this.tileSize;
       const pixelH = fh * this.tileSize;
 
-      // Forgiving hitbox (~70% of visual)
-      const shrinkW = pixelW * 0.15;
-      const shrinkH = pixelH * 0.15;
+      // Forgiving hitbox (~40% of visual)
+      const shrinkW = pixelW * 0.30;
+      const shrinkH = pixelH * 0.30;
 
       const inst: FeatureInstance = {
         def: { ...def, tileX: absTileX },
@@ -224,14 +224,14 @@ export class ParkFeatureSystem {
       this.features.push(inst);
       this.allZones.push(...inst.zones);
 
-      // Physics sprite for collision (invisible, forgiving hitbox)
+      // Physics sprite for collision (invisible, forgiving hitbox ~40% of visual)
       const texKey = def.type === 'kicker' ? 'park_kicker' : 'park_rail';
       const sprite = group.create(pixelX, pixelY, texKey) as Phaser.Physics.Arcade.Sprite;
-      const hitW = pixelW * 0.7;
-      const hitH = pixelH * 0.7;
-      sprite.setDisplaySize(hitW, hitH);
+      sprite.setDisplaySize(pixelW, pixelH);
       const body = sprite.body as Phaser.Physics.Arcade.StaticBody;
-      body.setSize(hitW, hitH);
+      // setSize with center=true auto-centers relative to the game object
+      body.setSize(pixelW * 0.4, pixelH * 0.4, true);
+      body.updateFromGameObject();
       sprite.setDepth(yDepth(pixelY));
       sprite.setAlpha(0); // invisible — we render separately
 
@@ -553,7 +553,7 @@ export class ParkFeatureSystem {
 
   /**
    * Check if a pixel position is on a feature (for fail condition).
-   * Uses forgiving hitbox (~70% of visual).
+   * Uses forgiving hitbox (~40% of visual).
    */
   isOnFeature(pixelX: number, pixelY: number): boolean {
     for (const f of this.features) {

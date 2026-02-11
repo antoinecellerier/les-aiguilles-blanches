@@ -556,8 +556,9 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.groomer, this.boundaryWalls, () => this.onObstacleHit());
 
     // Park feature collision — driving onto a feature = instant fail
+    // Uses overlap (not collider) so the groomer center must actually enter the hitbox
     if (this.parkFeatures.hasFeatures && this.parkFeatures.featureGroup) {
-      this.physics.add.collider(this.groomer, this.parkFeatures.featureGroup, (_groomer, featureSprite) => {
+      this.physics.add.overlap(this.groomer, this.parkFeatures.featureGroup, (_groomer, featureSprite) => {
         const featureType = (featureSprite as Phaser.Physics.Arcade.Sprite).texture.key === 'park_kicker' ? 'kicker' : 'rail';
         this.triggerFeatureDestruction(featureType);
       });
