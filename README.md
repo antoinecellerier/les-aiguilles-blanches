@@ -172,6 +172,19 @@ Per-language files are in `src/config/locales/`. To add a new language, create a
 - **Auditory**: Visual cues for all audio, subtitles for dialogue
 - **Cognitive**: Clear objectives, progressive difficulty, pause anytime
 
+## 🛠️ Development Hotkeys
+
+These shortcuts are available during gameplay for development and testing:
+
+| Key | Action |
+|-----|--------|
+| N | Skip to next level |
+| P | Go to previous level |
+| K | Auto-groom to target coverage & launch ski run |
+| Select (gamepad) | Skip to next level |
+
+> These keys are ignored if they conflict with a rebound game control.
+
 ## 📜 License
 
 MIT License - Feel free to modify and share!
