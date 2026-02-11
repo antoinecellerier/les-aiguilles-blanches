@@ -256,9 +256,10 @@ export default class SettingsScene extends Phaser.Scene {
 
   private createSingleColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
     // Single scrollable column for narrow/portrait screens
-    // Reserve space for back button at bottom
-    const backButtonSpace = this.fontSize * 3;
-    const availableHeight = height - padding * 2 - backButtonSpace;
+    // Reserve space for back button at top
+    const backButtonSpace = this.fontSize * 2.5;
+    const topOffset = padding + backButtonSpace;
+    const availableHeight = height - topOffset - padding;
     
     // Reduce spacing further on very small screens
     const tightSpacing = height < 600 ? Math.max(2, itemSpacing * 0.5) : itemSpacing;
@@ -276,10 +277,6 @@ export default class SettingsScene extends Phaser.Scene {
       space: { item: tightSpacing },
     });
 
-    // Title
-    contentSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.1, THEME.colors.info, true), 
-      { align: 'center' });
-
     // All sections in single column
     this.addLanguageSection(contentSizer);
     this.addAccessibilitySection(contentSizer);
@@ -293,14 +290,15 @@ export default class SettingsScene extends Phaser.Scene {
     this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
     contentSizer.add(this.statusText, { align: 'center' });
 
-    this.wrapInScrollPanel(contentSizer, padding, padding, sizerWidth, availableHeight);
+    this.wrapInScrollPanel(contentSizer, padding, topOffset, sizerWidth, availableHeight);
   }
 
   private createTwoColumnLayout(width: number, height: number, padding: number, itemSpacing: number): void {
     // Two-column layout for wide screens
-    // Reserve space for back button at bottom
-    const backButtonSpace = this.fontSize * 3;
-    const availableHeight = height - padding * 2 - backButtonSpace;
+    // Reserve space for back button at top
+    const backButtonSpace = this.fontSize * 2.5;
+    const topOffset = padding + backButtonSpace;
+    const availableHeight = height - topOffset - padding;
     const totalWidth = width - padding * 2 - 10; // Account for scrollbar
     const colWidth = (totalWidth - padding) / 2;
     
@@ -309,16 +307,12 @@ export default class SettingsScene extends Phaser.Scene {
     const panelPad = Math.round(this.fontSize * 0.6);
     this.contentWidth = colWidth - panelPad * 2;
     
-    // Outer vertical sizer: title + columns row
+    // Outer vertical sizer: columns row
     const outerSizer = this.rexUI.add.sizer({
       width: totalWidth,
       orientation: 'vertical',
       space: { item: itemSpacing },
     });
-
-    // Title centered above both columns
-    outerSizer.add(this.createText('⚙️ ' + (t('settings') || 'Settings'), this.fontSize * 1.2, THEME.colors.info, true), 
-      { align: 'center' });
 
     // Horizontal sizer for the two columns
     const rowSizer = this.rexUI.add.sizer({
@@ -356,7 +350,7 @@ export default class SettingsScene extends Phaser.Scene {
     rowSizer.add(rightCol, { align: 'top', expand: true, proportion: 1 });
     outerSizer.add(rowSizer, { expand: true });
 
-    this.wrapInScrollPanel(outerSizer, padding, padding, totalWidth, availableHeight);
+    this.wrapInScrollPanel(outerSizer, padding, topOffset, totalWidth, availableHeight);
   }
 
   private addLanguageSection(sizer: any): void {
@@ -646,12 +640,21 @@ export default class SettingsScene extends Phaser.Scene {
       : this.returnTo ? (t('backToGame') || 'Back to Game')
       : (t('back') || 'Back');
     const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, THEME.colors.textPrimary, THEME.colors.buttonDangerHex);
-    backBtn.setPosition(width / 2, height - padding * 1.5);
-    backBtn.setOrigin(0.5);
+    backBtn.setPosition(padding, padding);
+    backBtn.setOrigin(0, 0);
     backBtn.setDepth(DEPTHS.MENU_UI);
     backBtn.on('pointerover', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHoverHex }));
     backBtn.on('pointerout', () => backBtn.setStyle({ backgroundColor: THEME.colors.buttonDangerHex }));
     backBtn.on('pointerdown', () => { playCancel(); this.goBack(); });
+
+    // Title inline with back button
+    const title = this.add.text(width / 2, padding + backBtn.height / 2,
+      '⚙️ ' + (t('settings') || 'Settings'), {
+        fontFamily: THEME.fonts.family,
+        fontSize: Math.round(this.fontSize * 1.1) + 'px',
+        color: THEME.colors.info,
+        fontStyle: 'bold',
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
     // Register back button focus item (always last)
     this.focus.items.push({
