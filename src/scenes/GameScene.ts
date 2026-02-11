@@ -1440,27 +1440,34 @@ export default class GameScene extends Phaser.Scene {
     this.isTransitioning = true;
     this.isGameOver = true;
 
-    // Randomly groom tiles up to target coverage
-    const targetCount = Math.ceil(this.totalTiles * this.level.targetCoverage / 100);
-    const ungroomed: { x: number; y: number }[] = [];
+    // Groom per-row: each row gets uniform coverage, biased toward center
+    const targetRatio = this.level.targetCoverage / 100;
     for (let y = 0; y < this.level.height; y++) {
+      const rowTiles: { x: number; y: number }[] = [];
       for (let x = 0; x < this.level.width; x++) {
         const cell = this.snowGrid[y]?.[x];
-        if (cell?.groomable && !cell.groomed) ungroomed.push({ x, y });
+        if (cell?.groomable && !cell.groomed) rowTiles.push({ x, y });
       }
-    }
-    // Shuffle and groom up to target
-    for (let i = ungroomed.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [ungroomed[i], ungroomed[j]] = [ungroomed[j], ungroomed[i]];
-    }
-    const toGroom = Math.max(0, targetCount - this.groomedCount);
-    for (let i = 0; i < Math.min(toGroom, ungroomed.length); i++) {
-      const { x, y } = ungroomed[i];
-      const cell = this.snowGrid[y][x];
-      cell.groomed = true;
-      cell.tile.setTexture('snow_groomed');
-      this.groomedCount++;
+      if (rowTiles.length === 0) continue;
+      const path = this.geometry.pistePath[y];
+      // Sort by distance from center with random jitter for organic feel
+      rowTiles.sort((a, b) => {
+        const distA = path ? Math.abs(a.x - path.centerX) / (path.width / 2) : 1;
+        const distB = path ? Math.abs(b.x - path.centerX) / (path.width / 2) : 1;
+        return (distA + Math.random() * 0.8) - (distB + Math.random() * 0.8);
+      });
+      const rowTotal = rowTiles.length;
+      const alreadyGroomed = this.snowGrid[y]
+        .filter((c: SnowCell) => c.groomable && c.groomed).length;
+      const rowGroomable = rowTotal + alreadyGroomed;
+      const toGroom = Math.max(0, Math.ceil(rowGroomable * targetRatio) - alreadyGroomed);
+      for (let i = 0; i < Math.min(toGroom, rowTiles.length); i++) {
+        const { x } = rowTiles[i];
+        const cell = this.snowGrid[y][x];
+        cell.groomed = true;
+        cell.tile.setTexture('snow_groomed');
+        this.groomedCount++;
+      }
     }
 
     // Save groomed state and transition

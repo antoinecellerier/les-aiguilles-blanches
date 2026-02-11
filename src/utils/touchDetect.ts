@@ -22,6 +22,11 @@ if (typeof window !== 'undefined') {
   window.addEventListener('touchstart', onTouchDetected, { capture: true, once: true });
 }
 
+/** Returns true if a real touch event was observed at runtime. */
+export function touchConfirmed(): boolean {
+  return touchDetected;
+}
+
 /** Returns true if the device supports touch input. */
 export function hasTouch(): boolean {
   return touchDetected
