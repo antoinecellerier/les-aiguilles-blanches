@@ -1113,7 +1113,7 @@ export default class HUDScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
     this.game.events.off(GAME_EVENTS.ACCESSIBILITY_CHANGED, this.handleAccessibilityChanged, this);
 
-    this.resizeManager.destroy();
+    this.resizeManager?.destroy();
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);

@@ -304,21 +304,6 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     this.currentSpeed = Math.min(this.currentSpeed, maxSpeed);
 
-    // Carving friction — turning bleeds speed proportional to lateral input
-    if (Math.abs(lateralInput) > 0.1) {
-      this.currentSpeed *= (1 - BALANCE.SKI_CARVE_DRAG * Math.abs(lateralInput) * dt);
-    }
-
-    // Halfpipe wall pump — riding down the wall transition boosts speed
-    if (this.parkFeatures.hasHalfpipe && !this.trickActive) {
-      const wallDepth = this.parkFeatures.getWallDepth(this.skier.x, this.skier.y, this.tileSize);
-      if (wallDepth !== null && wallDepth > 0) {
-        // Speed boost proportional to wall depth (deeper = steeper = more boost)
-        this.currentSpeed += BALANCE.SKI_GRAVITY_SPEED * wallDepth * 2.0 * dt;
-      }
-    }
-
-    // Apply movement — lateral speed scales with downhill speed (need momentum to carve)
     // Progressive turning: holding a direction builds up turn intensity over time
     if (Math.abs(lateralInput) > 0.1) {
       this.turnHoldTime = Math.min(this.turnHoldTime + dt, BALANCE.SKI_TURN_RAMP_TIME);
@@ -326,6 +311,21 @@ export default class SkiRunScene extends Phaser.Scene {
       this.turnHoldTime = 0;
     }
     const turnRamp = 1 + (this.turnHoldTime / BALANCE.SKI_TURN_RAMP_TIME) * BALANCE.SKI_TURN_RAMP_BOOST;
+    // Drag ramps from 10% to 100% over the same hold time — initial turns barely slow you
+    const dragRamp = 0.1 + 0.9 * (this.turnHoldTime / BALANCE.SKI_TURN_RAMP_TIME);
+
+    // Carving friction — turning bleeds speed proportional to lateral input and hold time
+    if (Math.abs(lateralInput) > 0.1) {
+      this.currentSpeed *= (1 - BALANCE.SKI_CARVE_DRAG * dragRamp * Math.abs(lateralInput) * dt);
+    }
+
+    // Halfpipe wall pump — riding down the wall transition boosts speed
+    if (this.parkFeatures.hasHalfpipe && !this.trickActive) {
+      const wallDepth = this.parkFeatures.getWallDepth(this.skier.x, this.skier.y, this.tileSize);
+      if (wallDepth !== null && wallDepth > 0) {
+        this.currentSpeed += BALANCE.SKI_GRAVITY_SPEED * wallDepth * 2.0 * dt;
+      }
+    }
     const vy = this.currentSpeed;
     const speedRatio = Math.min(this.currentSpeed / BALANCE.SKI_GRAVITY_SPEED, 1.5);
     const vx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;

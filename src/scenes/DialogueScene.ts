@@ -320,6 +320,7 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   showDialogue(key: string, speaker?: string): void {
+    if (!this.dialogueText || !this.dialogueText.active) return;
     let text = t(key);
     if (!text || text === key) return;
 
@@ -371,7 +372,7 @@ export default class DialogueScene extends Phaser.Scene {
 
   /** Split text into pages that fit within maxBoxHeight */
   private splitTextToPages(text: string): string[] {
-    if (!this.dialogueText) return [text];
+    if (!this.dialogueText || !this.dialogueText.active) return [text];
 
     // Save current typewriter text to restore after measuring
     const savedText = this.isTyping
@@ -628,7 +629,7 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   shutdown(): void {
-    this.resizeManager.destroy();
+    this.resizeManager?.destroy();
     this.input.keyboard?.removeAllListeners();
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();
