@@ -18,7 +18,7 @@ The setting is authentically Savoyard: tartiflette at Chez Marie, génépi in th
 | Verb | Input | Current State | Notes |
 |------|-------|---------------|-------|
 | **Move** | WASD / stick / touch | ✅ Solid | Drag-based physics, 150px/s |
-| **Groom** (tiller) | Space / A / ❄️ | ⚠️ Binary | No quality dimension — see [Grooming Quality](#grooming-quality) |
+| **Groom** (tiller) | Space / A / ❄️ | ⚠️ Binary | No quality dimension — see [Grooming Quality](#grooming-quality). Steering stability determines quality |
 | **Winch** | Shift / LB / 🔗 | ⚠️ Limited | Artificial cable length — see [Winch](#winch-infinite-extension) |
 | **Refuel** | Drive to station | ✅ Solid | 50% max refill, strategic placement |
 | **Eat** | Drive to Chez Marie | ⚠️ Shallow | Only staminaRegen works — see [Food Buffs](#food-buffs) |
@@ -86,22 +86,63 @@ Current state: the restaurant restores stamina and provides named buffs, but **o
 
 **Problem**: Grooming is binary — hold button, area groomed. The core verb has no skill expression.
 
-**Proposal**: Speed-dependent grooming quality.
+**Proposal**: Quality determined by two factors: **steering stability** and **fall-line alignment**.
 
-- Grooming at low speed (≤40% of max) = **100% quality** (smooth, packed snow)
-- Grooming at medium speed (40–70%) = **80% quality** (acceptable, minor ridges)
-- Grooming at high speed (>70%) = **50% quality** (choppy, rough texture)
-- Final coverage score = `Σ(tile_quality) / total_tiles` instead of binary count
-- Low-quality tiles can be re-groomed to improve them
+#### Factor 1: Steering Stability (50% weight)
 
-**Impact on levels**:
-- Early levels (L1–L3): Barely noticeable — targets are low enough that 80% quality suffices
-- Mid levels (L4–L6): Players must slow down on precision sections
-- Late levels (L7–L10): Speed vs. quality becomes a real trade-off against the timer
+Clean, committed passes = high quality. Erratic zigzagging = low quality. Authentic to real grooming — professionals follow the piste contour with smooth, decisive lines.
 
-**Visual feedback**: Groomed snow texture varies — smooth parallel lines for high quality, rough cross-hatching for low quality.
+**Key distinction**: Smooth turns are fine. Only *jerky, indecisive steering* reduces quality. A sweeping arc along a serpentine piste maintains full stability. Rapid direction changes (zigzag, oscillation) tank it.
 
-**HUD**: No new HUD element needed. The coverage % already captures quality since partial-quality tiles contribute less. Optional: brief floating text "+100%" / "+80%" / "+50%" when grooming, throttled.
+- Measure **angular acceleration** (rate of change of angular velocity), not angular velocity itself
+- A steady curve has constant angular velocity → zero angular acceleration → high stability
+- A zigzag has rapidly changing angular velocity → high angular acceleration → low stability
+- Track angular acceleration over a rolling window (~0.5s)
+- Formula: `stability = clamp(1.0 - |angularAcceleration| / maxAngularAcceleration, 0.2, 1.0)`
+- This naturally handles serpentine pistes: committed arcs score well, panicked corrections score poorly
+
+#### Factor 2: Fall-Line Alignment (50% weight)
+
+Grooming along the fall line (up/down the slope) = higher quality. This is how real groomers work — especially on steep terrain with winch, they make vertical passes up and down. Perpendicular passes are used for snow redistribution, not for corduroy finishing.
+
+- The fall line is vertical (straight down the slope, increasing Y in screen coords)
+- Compute alignment: `cos²(groomerAngle - fallLineAngle)` — 1.0 when parallel, 0.0 when perpendicular
+- Minimum alignment quality: 30% (perpendicular isn't useless, just suboptimal)
+- Formula: `alignment = 0.3 + 0.7 * cos²(groomerAngle - π/2)`
+
+#### Combined Quality
+
+```
+tileQuality = stability * 0.5 + alignment * 0.5
+```
+
+Range: 10% (worst: zigzagging perpendicular) to 100% (best: straight pass along fall line).
+
+#### Storage & Re-grooming
+
+- Each tile stores a continuous 0–100% quality value (in the `SnowCell` grid)
+- Re-grooming upgrades quality (best-of-N passes) — rewards going back over rough patches with steady fall-line passes
+- Coverage remains binary (groomed or not) for win/loss. Quality feeds bonus objectives only
+
+#### Bonus Objective
+
+New `precision_grooming` type — target average quality across all groomed tiles. Example: "Achieve 80% average grooming quality." Available on levels where precision matters (park levels L3/L6, steep levels L5/L7, finale L10).
+
+#### Visual Feedback
+
+Groomed snow texture varies based on quality — smooth parallel corduroy lines for high quality, rough uneven texture for low quality. Retro SkiFree pixel art style. No floating text or HUD additions.
+
+#### Impact on Levels
+
+- **Early levels (L1–L3)**: Simple straight pistes make high quality natural. Bonus objective optional
+- **Mid levels (L4–L6)**: Winding pistes make fall-line passes harder. Quality becomes a conscious choice
+- **Park levels (L3, L6)**: Wide piste but precision features demand careful lines
+- **Steep + winch levels (L5, L7, L8, L10)**: Winch naturally encourages fall-line passes → synergy with quality mechanic
+- **Finale (L10)**: Night + steep + serpentine = maintaining quality is the ultimate mastery challenge
+
+#### Input Compatibility
+
+Works identically on keyboard, gamepad, and touch — all have rotational control. No analog throttle needed. The mechanic rewards *planning your line* and *committing to it*, not raw dexterity.
 
 ### Food Buffs
 
@@ -278,9 +319,18 @@ Based on impact/effort ratio:
 
 ## Open Questions
 
-- Should grooming quality affect the star rating formula, or just the coverage percentage?
+- ~~Should grooming quality affect the star rating formula, or just the coverage percentage?~~ → **Resolved**: Quality feeds into bonus objectives only, not coverage
 - Should frost vignette affect the tutorial or only levels that explicitly have night/storm?
 - How does the precision buff (+1 tile radius) interact with grooming quality? Does wider radius mean harder to maintain quality?
 - Should snow drifts be a separate mechanic (front blade) or just a harder-to-groom surface (more passes needed)?
 - Ski reward run: should v2 slalom gates contribute to the level star rating, or be a separate "ski score"?
 - Ski reward run: should the descent camera reverse direction (looking downhill) or keep the same uphill-facing perspective as grooming?
+
+## Settled Design Decisions
+
+- **Grooming quality input**: Steering stability (angular acceleration) + fall-line alignment. Works on all input methods
+- **Stability metric**: Angular *acceleration*, not velocity — smooth committed turns are fine, only jerky zigzag penalizes
+- **Quality granularity**: Continuous 0–100%, not discrete tiers
+- **Re-grooming**: Best-of-N — re-grooming at steadier steering upgrades the tile
+- **Quality vs. coverage**: Quality is bonus/mastery, coverage stays binary for win/loss
+- **Quality visual**: Snow texture variation only (retro pixel art), no floating text or HUD
