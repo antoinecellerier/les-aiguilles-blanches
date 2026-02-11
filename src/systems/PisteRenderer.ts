@@ -517,22 +517,6 @@ export class PisteRenderer {
       const leftEdge = (path.centerX - path.width / 2) * tileSize;
       const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
-      const g = this.scene.add.graphics();
-      g.setDepth(DEPTHS.SIGNAGE);
-      g.lineStyle(1, 0x4a423a, 0.3);
-
-      for (let ly = startY; ly < endY; ly += tileSize) {
-        g.beginPath();
-        g.moveTo(leftEdge, ly);
-        g.lineTo(leftEdge + 10, ly + 10);
-        g.strokePath();
-
-        g.beginPath();
-        g.moveTo(rightEdge, ly);
-        g.lineTo(rightEdge - 10, ly + 10);
-        g.strokePath();
-      }
-
       // Warning triangle sign (per NF S52-102 — yellow/black triangle)
       const markerX = (leftEdge + rightEdge) / 2;
       const markerY = startY - 15;
