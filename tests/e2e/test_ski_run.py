@@ -228,7 +228,7 @@ class TestSkiTouchControls:
         page.evaluate("localStorage.clear()")
 
     def test_touch_controls_present_in_ski_scene(self, touch_game: Page):
-        """Touch device should show joystick and brake button in SkiRunScene."""
+        """Touch device should show joystick and brake button via HUDScene in ski mode."""
         click_button(touch_game, BUTTON_START, "Start Game")
         wait_for_scene(touch_game, 'GameScene')
 
@@ -237,21 +237,22 @@ class TestSkiTouchControls:
         touch_game.wait_for_timeout(500)
 
         controls = touch_game.evaluate("""() => {
-            var scene = window.game.scene.getScene('SkiRunScene');
-            if (!scene) return null;
+            var hud = window.game.scene.getScene('HUDScene');
+            if (!hud) return null;
+            var container = hud.touchControlsContainer;
+            if (!container) return { hasContainer: false, circleCount: 0 };
             var circles = 0;
-            for (var i = 0; i < scene.children.list.length; i++) {
-                if (scene.children.list[i].type === 'Arc') circles++;
+            var list = container.list || [];
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].type === 'Arc') circles++;
             }
             return {
-                hasTouch: scene.hasTouch,
-                joystickThumb: scene.joystickThumb != null,
+                hasContainer: true,
                 circleCount: circles
             };
         }""")
-        assert controls is not None, "SkiRunScene should exist"
-        assert controls['hasTouch'], "Touch should be detected"
-        assert controls['joystickThumb'], "Joystick thumb should be created"
+        assert controls is not None, "HUDScene should exist in ski mode"
+        assert controls['hasContainer'], "Touch controls container should be created"
         # joystickBase + joystickThumb + joystickZone + brakeBg = at least 4 circles
         assert controls['circleCount'] >= 4, \
             f"Should have at least 4 circle objects (joystick + brake), got {controls['circleCount']}"
@@ -266,24 +267,20 @@ class TestSkiTouchControls:
         touch_game.wait_for_timeout(500)
 
         result = touch_game.evaluate("""() => {
-            var scene = window.game.scene.getScene('SkiRunScene');
-            if (!scene) return null;
-            var cam = scene.cameras.main;
-            var zoom = cam.zoom || 1;
-            var originX = cam.width * cam.originX;
-            var originY = cam.height * cam.originY;
-            var circles = scene.children.list.filter(function(c) {
+            var hud = window.game.scene.getScene('HUDScene');
+            if (!hud || !hud.touchControlsContainer) return null;
+            var cam = hud.cameras.main;
+            var list = hud.touchControlsContainer.list || [];
+            var circles = list.filter(function(c) {
                 return c.type === 'Arc' && c.radius > 5;
             });
             var results = [];
             for (var i = 0; i < circles.length; i++) {
                 var c = circles[i];
-                var screenX = c.x * zoom + originX * (1 - zoom);
-                var screenY = c.y * zoom + originY * (1 - zoom);
                 results.push({
-                    screenX: screenX,
-                    screenY: screenY,
-                    radius: c.radius * zoom,
+                    screenX: c.x,
+                    screenY: c.y,
+                    radius: c.radius,
                     w: cam.width,
                     h: cam.height
                 });

@@ -456,7 +456,7 @@ export default class MenuScene extends Phaser.Scene {
     window.addEventListener('gamepaddisconnected', this.gamepadConnectHandler);
 
     onTouchAvailable(() => {
-      if (this.scene.isActive()) this.updateInputHints();
+      if (this.scene?.manager && this.scene.isActive()) this.updateInputHints();
     });
 
     this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));

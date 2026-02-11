@@ -36,10 +36,11 @@ export function hasTouch(): boolean {
 
 /**
  * Register a callback to fire when touch is first detected at runtime.
- * If touch is already detected, the callback fires immediately.
+ * If touch was already confirmed at runtime, the callback fires immediately.
+ * Unlike hasTouch(), this waits for an actual touchstart event, not just capability.
  */
 export function onTouchAvailable(cb: () => void): void {
-  if (hasTouch()) {
+  if (touchDetected) {
     cb();
   } else {
     onDetectCallbacks.push(cb);

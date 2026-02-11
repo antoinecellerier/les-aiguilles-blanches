@@ -11,11 +11,11 @@ import { WeatherSystem } from '../systems/WeatherSystem';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { isGamepadButtonPressed, captureGamepadButtons, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
-import { hasTouch as detectTouch, isMobile, onTouchAvailable, touchConfirmed } from '../utils/touchDetect';
 import { playClick } from '../systems/UISounds';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { BINDINGS_VERSION } from '../config/storageKeys';
 import { overlayFullScreen } from '../utils/cameraCoords';
+import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 
 /**
  * SkiRunScene — Relaxed post-grooming descent.
@@ -49,11 +49,8 @@ export default class SkiRunScene extends Phaser.Scene {
   private wasd!: Record<string, Phaser.Input.Keyboard.Key>;
   private brakeKey!: Phaser.Input.Keyboard.Key;
   private gamepadBindings: GamepadBindings = loadGamepadBindings();
-  private hasTouch = false;
-  private touchInputX = 0;
-  private touchBraking = false;
-  private joystickThumb: Phaser.GameObjects.Arc | null = null;
-  private joystickPointer: Phaser.Input.Pointer | null = null;
+  private touchInput: TouchInputEvent = { left: false, right: false, up: false, down: false, groom: false, winch: false };
+  private boundTouchHandler = (data: TouchInputEvent) => { this.touchInput = data; };
 
   // HUD elements
   private speedText!: Phaser.GameObjects.Text;
@@ -164,33 +161,10 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     captureGamepadButtons(this, [14, 15, this.gamepadBindings.winch]);
 
-    // Touch controls — joystick + brake button (mirrors HUDScene pattern)
-    const phaserTouch = this.sys.game.device.input.touch;
-    const browserTouch = detectTouch();
-    this.hasTouch = phaserTouch || browserTouch;
-    const mobile = isMobile();
-    if (mobile && this.hasTouch) {
-      // Mobile: always show immediately
-      this.createTouchControls();
-    } else if (touchConfirmed()) {
-      // A real touch event already happened — show immediately
-      this.createTouchControls();
-    } else if (this.hasTouch) {
-      // Browser reports touch capability but no touch event yet — create hidden
-      this.createTouchControls(true);
-    } else {
-      // No touch capability reported (e.g. Firefox). Listen for first touch.
-      const reveal = () => {
-        if (!this.hasTouch && this.scene.isActive()) {
-          this.hasTouch = true;
-          this.createTouchControls();
-        }
-      };
-      onTouchAvailable(reveal);
-      this.input.once('pointerdown', (p: Phaser.Input.Pointer) => {
-        if (p.wasTouch) reveal();
-      });
-    }
+    // Launch HUDScene in ski mode for touch controls (joystick + brake)
+    this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
+    this.scene.launch('HUDScene', { level: this.level, mode: 'ski' });
+    this.scene.bringToTop('HUDScene');
 
     // HUD overlay
     this.createHUD();
@@ -235,15 +209,14 @@ export default class SkiRunScene extends Phaser.Scene {
       if (isGamepadButtonPressed(pad, 15)) lateralInput = 1;
     }
 
-    // Touch
-    if (this.hasTouch && Math.abs(this.touchInputX) > 0.1) {
-      lateralInput = this.touchInputX;
-    }
+    // Touch (via HUDScene TOUCH_INPUT event)
+    if (this.touchInput.left) lateralInput = -1;
+    if (this.touchInput.right) lateralInput = 1;
 
-    // Brake input (winch key / gamepad LB / touch)
+    // Brake input (winch key / gamepad LB / touch brake mapped to winch)
     let braking = this.brakeKey?.isDown ?? false;
     if (pad && isGamepadButtonPressed(pad, this.gamepadBindings.winch)) braking = true;
-    if (this.touchBraking) braking = true;
+    if (this.touchInput.winch) braking = true;
 
     // Terrain check — groomed vs ungroomed (smoothed transition)
     const tileX = Math.floor(this.skier.x / this.tileSize);
@@ -381,162 +354,6 @@ export default class SkiRunScene extends Phaser.Scene {
     return dist / (this.cameras.main.zoom || 1);
   }
 
-  /** Virtual joystick + brake button for touch devices (mirrors HUDScene pattern) */
-  private createTouchControls(startHidden = false): void {
-    const { width, height } = this.scale;
-    const mobile = isMobile();
-    const refWidth = 1024;
-    const uiScale = Math.max(0.6, Math.min(2.0, width / refWidth));
-    const baseSize = mobile ? Math.max(60, 50 * Math.max(1, uiScale)) : 50 * uiScale;
-    const btnSize = Math.round(baseSize);
-    const padding = Math.round(25 * uiScale);
-    const alpha = 0.7;
-    const touchObjects: Phaser.GameObjects.GameObject[] = [];
-
-    // Virtual joystick (bottom-left) — convert screen positions to overlay draw-space
-    const isNarrowTouch = width < 600;
-    const actionBtnSpace = isNarrowTouch ? (btnSize * 2.4 + padding * 1.5) : 0;
-    const maxJoystickRadius = isNarrowTouch
-      ? Math.floor((width - actionBtnSpace - padding * 2 - 10) / 2)
-      : Infinity;
-    const joystickRadiusScreen = Math.min(Math.round(btnSize * 1.8), maxJoystickRadius);
-    const thumbRadiusScreen = Math.round(btnSize * 0.6);
-
-    // Screen positions for joystick
-    const jScreenX = padding + joystickRadiusScreen;
-    const jScreenY = height - padding - joystickRadiusScreen;
-    const jPos = this.screenToOverlay(jScreenX, jScreenY);
-    const joystickRadius = this.screenDistToOverlay(joystickRadiusScreen);
-    const thumbRadius = this.screenDistToOverlay(thumbRadiusScreen);
-
-    const joystickBase = this.add.circle(jPos.x, jPos.y, joystickRadius, 0x222222, alpha * 0.7)
-      .setScrollFactor(0)
-      .setStrokeStyle(Math.max(3, Math.round(3 * uiScale / (this.cameras.main.zoom || 1))), 0x555555, alpha)
-      .setDepth(DEPTHS.FEEDBACK);
-    touchObjects.push(joystickBase);
-
-    // Left/right indicators
-    const indDist = joystickRadius * 0.7;
-    for (const ind of [
-      { x: -indDist, y: 0, label: '◀' },
-      { x: indDist, y: 0, label: '▶' },
-    ]) {
-      const label = this.add.text(jPos.x + ind.x, jPos.y + ind.y, ind.label, {
-        fontSize: Math.round(btnSize * 0.35 / (this.cameras.main.zoom || 1)) + 'px',
-        color: THEME.colors.textMuted,
-      }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.6).setDepth(DEPTHS.FEEDBACK);
-      touchObjects.push(label);
-    }
-
-    this.joystickThumb = this.add.circle(jPos.x, jPos.y, thumbRadius, 0x555555, alpha)
-      .setScrollFactor(0)
-      .setStrokeStyle(Math.max(2, Math.round(2 * uiScale / (this.cameras.main.zoom || 1))), 0x888888, alpha)
-      .setDepth(DEPTHS.FEEDBACK);
-    touchObjects.push(this.joystickThumb);
-
-    // Joystick interactive zone — uses screen-space pointer coords converted to overlay
-    const joystickZone = this.add.circle(jPos.x, jPos.y, joystickRadius * 1.2, 0x000000, 0)
-      .setScrollFactor(0)
-      .setDepth(DEPTHS.FEEDBACK + 1)
-      .setInteractive()
-      .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-        this.joystickPointer = pointer;
-        this.updateJoystickTouch(pointer, jPos.x, jPos.y, joystickRadius, thumbRadius);
-      })
-      .on('pointermove', (pointer: Phaser.Input.Pointer) => {
-        if (this.joystickPointer === pointer) {
-          this.updateJoystickTouch(pointer, jPos.x, jPos.y, joystickRadius, thumbRadius);
-        }
-      })
-      .on('pointerup', () => this.resetJoystickTouch(jPos.x, jPos.y))
-      .on('pointerout', () => this.resetJoystickTouch(jPos.x, jPos.y))
-      .on('pointercancel', () => this.resetJoystickTouch(jPos.x, jPos.y));
-    touchObjects.push(joystickZone);
-
-    // Brake button (bottom-right)
-    const bScreenX = width - padding - btnSize;
-    const bScreenY = height - padding - btnSize;
-    const bPos = this.screenToOverlay(bScreenX, bScreenY);
-    const brakeSize = this.screenDistToOverlay(Math.round(btnSize * 1.2));
-    const brakeColor = 0x7a1a1a;
-    const pressedColor = Phaser.Display.Color.ValueToColor(brakeColor).lighten(40).color;
-
-    const brakeBg = this.add.circle(bPos.x, bPos.y, brakeSize / 2, brakeColor, alpha)
-      .setScrollFactor(0)
-      .setStrokeStyle(Math.max(2, Math.round(2 * uiScale / (this.cameras.main.zoom || 1))),
-        Phaser.Display.Color.ValueToColor(brakeColor).lighten(30).color, alpha)
-      .setDepth(DEPTHS.FEEDBACK)
-      .setInteractive()
-      .on('pointerdown', () => {
-        this.touchBraking = true;
-        brakeBg.setFillStyle(pressedColor, alpha + 0.2).setScale(1.1);
-      })
-      .on('pointerup', () => {
-        this.touchBraking = false;
-        brakeBg.setFillStyle(brakeColor, alpha).setScale(1);
-      })
-      .on('pointerout', () => {
-        this.touchBraking = false;
-        brakeBg.setFillStyle(brakeColor, alpha).setScale(1);
-      })
-      .on('pointercancel', () => {
-        this.touchBraking = false;
-        brakeBg.setFillStyle(brakeColor, alpha).setScale(1);
-      });
-    touchObjects.push(brakeBg);
-
-    // Brake icon: two horizontal lines
-    const iconG = this.add.graphics().setScrollFactor(0).setAlpha(0.9).setDepth(DEPTHS.FEEDBACK);
-    const px = Math.max(2, Math.round(brakeSize * 0.06));
-    iconG.fillStyle(0xddddff);
-    iconG.fillRect(bPos.x - px * 3, bPos.y - px * 2, px * 6, px);
-    iconG.fillRect(bPos.x - px * 3, bPos.y + px, px * 6, px);
-    touchObjects.push(iconG);
-
-    // Hidden until first touch (Firefox desktop with touchscreen)
-    if (startHidden) {
-      for (const obj of touchObjects) (obj as unknown as Phaser.GameObjects.Components.Visible).setVisible(false);
-      onTouchAvailable(() => {
-        for (const obj of touchObjects) (obj as unknown as Phaser.GameObjects.Components.Visible).setVisible(true);
-      });
-    }
-  }
-
-  private updateJoystickTouch(
-    pointer: Phaser.Input.Pointer, centerX: number, centerY: number,
-    maxRadius: number, thumbRadius: number
-  ): void {
-    if (!this.joystickThumb) return;
-    // Convert screen-space pointer to overlay draw-space
-    const p = this.screenToOverlay(pointer.x, pointer.y);
-    const dx = p.x - centerX;
-    const dy = p.y - centerY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const clampedDist = Math.min(distance, maxRadius - thumbRadius);
-    const angle = Math.atan2(dy, dx);
-    this.joystickThumb.setPosition(
-      centerX + Math.cos(angle) * clampedDist,
-      centerY + Math.sin(angle) * clampedDist
-    );
-    this.joystickThumb.setFillStyle(0x6688cc, 0.9);
-
-    const deadZone = maxRadius * 0.2;
-    if (distance > deadZone) {
-      this.touchInputX = Phaser.Math.Clamp(dx / maxRadius, -1, 1);
-    } else {
-      this.touchInputX = 0;
-    }
-  }
-
-  private resetJoystickTouch(centerX: number, centerY: number): void {
-    this.joystickPointer = null;
-    if (this.joystickThumb) {
-      this.joystickThumb.setPosition(centerX, centerY);
-      this.joystickThumb.setFillStyle(0x666666, 0.7);
-    }
-    this.touchInputX = 0;
-  }
-
   private createHUD(): void {
     const { width } = this.scale;
     const cam = this.cameras.main;
@@ -663,8 +480,8 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     this.weatherSystem?.reset();
     this.weatherSystem = null;
-    this.joystickThumb = null;
-    this.joystickPointer = null;
+    this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
+    this.scene.stop('HUDScene');
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
   }

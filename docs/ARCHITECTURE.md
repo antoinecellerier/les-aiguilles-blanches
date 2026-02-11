@@ -123,7 +123,7 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
      │           │            ↓         │
      │           └── LevelCompleteScene ┘
      │                   ↓          ↓
-     │            SkiRunScene       │
+     │            SkiRunScene ⟷ HUDScene (ski mode)
      │                   ↓          │
      └──────────── CreditsScene ────┘
 ```
@@ -145,7 +145,8 @@ BootScene → MenuScene → GameScene ⟷ HUDScene
 
 **Design**:
 - GameScene polls keyboard (`this.cursors`, `this.wasd`) and gamepad in `update()`
-- HUDScene emits touch state via `GAME_EVENTS.TOUCH_INPUT` for GameScene to consume
+- HUDScene emits touch state via `GAME_EVENTS.TOUCH_INPUT` for GameScene and SkiRunScene to consume
+- HUDScene supports `mode: 'groom' | 'ski'` — ski mode shows joystick + brake instead of D-pad + action buttons
 - Gamepad button mappings are loaded via `loadGamepadBindings()` from localStorage
 - No unified InputManager — input is handled per-scene for simplicity
 
@@ -710,7 +711,8 @@ Firefox desktop does NOT expose `ontouchstart` or set `navigator.maxTouchPoints 
 
 **Solutions applied:**
 1. **Phaser config**: `input.touch: true` force-enables `TouchManager` so Phaser always registers touch event listeners (harmless on non-touch devices)
-2. **Application code**: `src/utils/touchDetect.ts` provides `hasTouch()` with a `touchstart` event listener fallback — all scenes import this instead of inline checks
+2. **Application code**: `src/utils/touchDetect.ts` provides `hasTouch()` (capability check), `touchConfirmed()` (runtime-only check), and `onTouchAvailable(cb)` (fires callback on first real `touchstart` event). All scenes import these instead of inline checks
+3. **Scene guards**: `onTouchAvailable` callbacks must guard against stale scene references with `this.scene?.manager && this.scene.isActive()` since the callback fires globally and the scene may have been shut down
 
 ### Firefox Gamepad Triggers
 

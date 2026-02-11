@@ -4,7 +4,7 @@ Tests virtual D-pad and action buttons.
 """
 
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, expect, TimeoutError as PlaywrightTimeout
 
 # Import the base URL from conftest
 from conftest import GAME_URL, skip_to_level, dismiss_dialogues, wait_for_scene, wait_for_game_ready
@@ -188,7 +188,7 @@ def test_touch_groom_button(touch_page: Page):
             }""" % initial_coverage,
             timeout=3000
         )
-    except TimeoutError:
+    except PlaywrightTimeout:
         pass  # OK — coverage assertion below handles both paths
     
     # Release

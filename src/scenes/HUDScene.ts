@@ -4,7 +4,7 @@ import { THEME } from '../config/theme';
 import { DEPTHS } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
+import { hasTouch as detectTouch, isMobile, onTouchAvailable } from '../utils/touchDetect';
 import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
 import { STORAGE_KEYS } from '../config/storageKeys';
@@ -19,10 +19,12 @@ import { Accessibility } from '../utils/accessibility';
 
 interface HUDSceneData {
   level: Level;
+  mode?: 'groom' | 'ski';
 }
 
 export default class HUDScene extends Phaser.Scene {
   private level!: Level;
+  private mode: 'groom' | 'ski' = 'groom';
   private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0, restartCount: 0 };
   private isSkipping = false;
   private gamepadSelectPressed = false;
@@ -84,6 +86,7 @@ export default class HUDScene extends Phaser.Scene {
 
   init(data: HUDSceneData): void {
     this.level = data.level;
+    this.mode = data.mode || 'groom';
     this.isSkipping = false;
   }
 
@@ -107,10 +110,16 @@ export default class HUDScene extends Phaser.Scene {
     const mobile = isMobile();
     const dpr = window.devicePixelRatio || 1;
     if (mobile && dpr > 1.5) {
-      // Boost scale by ~20% on high-DPI mobile for larger, more readable UI
       baseScale = Math.min(2.0, baseScale * 1.2);
     }
     this.uiScale = baseScale;
+
+    // Ski mode: only touch controls (joystick + brake), no grooming HUD
+    if (this.mode === 'ski') {
+      this.createSkiModeTouchControls(mobile);
+      this.events.once('shutdown', this.shutdown, this);
+      return;
+    }
 
     const padding = Math.round(10 * this.uiScale);
     const isNarrow = width < 600; // Portrait phone or small screen
@@ -373,6 +382,13 @@ export default class HUDScene extends Phaser.Scene {
     } else if (hasTouch) {
       // PC with touchscreen: create controls but hidden, show on first touch
       this.createTouchControls(true);
+    } else {
+      // Firefox desktop: touch not detected yet — create controls on first touch
+      onTouchAvailable(() => {
+        if (this.scene?.manager && this.scene.isActive() && !this.touchControlsContainer) {
+          this.createTouchControls();
+        }
+      });
     }
 
     // Touch-specific buttons (created AFTER touch controls so they render on top)
@@ -445,7 +461,7 @@ export default class HUDScene extends Phaser.Scene {
     
     if (startHidden) {
       this.touchControlsContainer.setVisible(false);
-      this.input.once('pointerdown', () => {
+      onTouchAvailable(() => {
         if (this.touchControlsContainer) {
           this.touchControlsContainer.setVisible(true);
         }
@@ -539,6 +555,165 @@ export default class HUDScene extends Phaser.Scene {
         0x7a4a1a, true
       );
     }
+  }
+
+  /** Ski mode: joystick (left/right only) + brake button (reuses winch touch state) */
+  private createSkiModeTouchControls(mobile: boolean): void {
+    const phaserTouch = this.sys.game.device.input.touch;
+    const browserTouch = detectTouch();
+    const hasTouch = phaserTouch || browserTouch;
+    if (mobile && hasTouch) {
+      this.createSkiTouchUI(mobile);
+    } else if (hasTouch) {
+      // PC with touchscreen: create hidden, reveal on first real touch
+      this.createSkiTouchUI(mobile, true);
+    } else {
+      // Firefox late-detect: create controls on first real touch
+      onTouchAvailable(() => {
+        if (this.scene?.manager && this.scene.isActive() && !this.touchControlsContainer) {
+          this.createSkiTouchUI(mobile);
+        }
+      });
+    }
+  }
+
+  private createSkiTouchUI(mobile: boolean, startHidden = false): void {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const baseSize = mobile ? Math.max(60, 50 * Math.max(1, this.uiScale)) : 50 * this.uiScale;
+    const btnSize = Math.round(baseSize);
+    const padding = Math.round(25 * this.uiScale);
+    const alpha = 0.7;
+
+    this.touchControlsContainer = this.add.container(0, 0);
+    this.touchControlsContainer.setScrollFactor(0);
+
+    if (startHidden) {
+      this.touchControlsContainer.setVisible(false);
+      onTouchAvailable(() => {
+        if (this.touchControlsContainer) this.touchControlsContainer.setVisible(true);
+      });
+    }
+
+    // Virtual joystick (bottom-left) — reuse same layout as groom mode
+    const isNarrowTouch = width < 600;
+    const actionBtnSpace = isNarrowTouch ? (btnSize * 2.4 + padding * 1.5) : 0;
+    const maxJoystickRadius = isNarrowTouch
+      ? Math.floor((width - actionBtnSpace - padding * 2 - 10) / 2)
+      : Infinity;
+    const joystickRadius = Math.min(Math.round(btnSize * 1.8), maxJoystickRadius);
+    const thumbRadius = Math.round(btnSize * 0.6);
+    const joystickX = Math.round(padding + joystickRadius);
+    const joystickY = Math.round(height - padding - joystickRadius);
+
+    this.joystickBase = this.add.circle(joystickX, joystickY, joystickRadius, 0x222222, alpha * 0.7)
+      .setScrollFactor(0)
+      .setStrokeStyle(Math.max(3, Math.round(3 * this.uiScale)), 0x555555, alpha);
+
+    // Left/right indicators only (skiing is lateral steering)
+    for (const ind of [
+      { x: -Math.round(joystickRadius * 0.7), y: 0, label: '◀' },
+      { x: Math.round(joystickRadius * 0.7), y: 0, label: '▶' },
+    ]) {
+      this.add.text(joystickX + ind.x, joystickY + ind.y, ind.label, {
+        fontSize: Math.round(btnSize * 0.35) + 'px',
+        color: THEME.colors.textMuted,
+      }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.6);
+    }
+
+    this.joystickThumb = this.add.circle(joystickX, joystickY, thumbRadius, 0x555555, alpha)
+      .setScrollFactor(0)
+      .setStrokeStyle(Math.max(2, Math.round(2 * this.uiScale)), 0x888888, alpha);
+
+    this.touchControlsContainer.add([this.joystickBase, this.joystickThumb]);
+
+    const joystickZone = this.add.circle(joystickX, joystickY, joystickRadius * 1.2, 0x000000, 0)
+      .setScrollFactor(0)
+      .setInteractive()
+      .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        this.joystickPointer = pointer;
+        this.updateJoystick(pointer, joystickX, joystickY, joystickRadius, thumbRadius);
+      })
+      .on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        if (this.joystickPointer === pointer) {
+          this.updateJoystick(pointer, joystickX, joystickY, joystickRadius, thumbRadius);
+        }
+      })
+      .on('pointerup', () => this.resetJoystick(joystickX, joystickY))
+      .on('pointerout', () => this.resetJoystick(joystickX, joystickY))
+      .on('pointercancel', () => this.resetJoystick(joystickX, joystickY));
+
+    this.touchControlsContainer.add(joystickZone);
+
+    // Brake button (bottom-right) — maps to touchWinch (same key binding as winch)
+    const actionX = Math.round(width - padding - btnSize);
+    const actionY = Math.round(height - padding - btnSize);
+    this.createTouchButton(
+      Math.round(actionX - btnSize - padding / 2), actionY, Math.round(btnSize * 1.2), 'BRK', alpha,
+      () => { this.touchWinch = true; },
+      () => { this.touchWinch = false; },
+      0x7a1a1a, true
+    );
+  }
+
+  /** Process action button overlaps and emit touch state for the consuming scene */
+  private emitTouchState(): void {
+    // Action button overlap detection
+    if (this.actionButtons.length > 0) {
+      const pointers = this.input.manager?.pointers;
+      if (!pointers) return;
+      for (const btn of this.actionButtons) {
+        if (!btn.bg?.active) continue;
+        let pressed = false;
+        for (const p of pointers) {
+          if (!p.isDown) continue;
+          const dx = p.x - btn.x;
+          const dy = p.y - btn.y;
+          if (dx * dx + dy * dy <= btn.radius * btn.radius) {
+            pressed = true;
+            break;
+          }
+        }
+        if (pressed && !btn.wasPressed) {
+          btn.bg.setFillStyle(btn.pressedColor, btn.alpha + 0.2);
+          btn.bg.setScale(1.1);
+          btn.onDown();
+        } else if (!pressed && btn.wasPressed) {
+          btn.bg.setFillStyle(btn.color, btn.alpha);
+          btn.bg.setScale(1);
+          btn.onUp();
+        }
+        btn.wasPressed = pressed;
+      }
+    }
+
+    // Safety: reset touch states if no active pointers
+    const activePointers = this.input.manager?.pointers?.filter(p => p.isDown);
+    if (!activePointers || activePointers.length === 0) {
+      for (const btn of this.actionButtons) {
+        if (btn.wasPressed && btn.bg?.active) {
+          btn.bg.setFillStyle(btn.color, btn.alpha);
+          btn.bg.setScale(1);
+          btn.onUp();
+          btn.wasPressed = false;
+        }
+      }
+      this.touchUp = false;
+      this.touchDown = false;
+      this.touchLeft = false;
+      this.touchRight = false;
+      this.touchGroom = false;
+      this.touchWinch = false;
+    }
+
+    this.game.events.emit(GAME_EVENTS.TOUCH_INPUT, {
+      left: this.touchLeft,
+      right: this.touchRight,
+      up: this.touchUp,
+      down: this.touchDown,
+      groom: this.touchGroom,
+      winch: this.touchWinch,
+    });
   }
 
   private updateJoystick(pointer: Phaser.Input.Pointer, centerX: number, centerY: number, maxRadius: number, thumbRadius: number): void {
@@ -712,6 +887,12 @@ export default class HUDScene extends Phaser.Scene {
       g.fillRect(cx + px * 1, cy + px * 2, px, px);
       // Bottom point
       g.fillRect(cx - px * 0.5, cy + px * 2, px, px * 2);
+    } else if (label === 'BRK') {
+      // Brake icon: two horizontal lines (stop/brake symbol)
+      const color = 0xddddff;
+      g.fillStyle(color);
+      g.fillRect(cx - px * 3, cy - px * 2, px * 6, px);
+      g.fillRect(cx - px * 3, cy + px, px * 6, px);
     } else {
       return null;
     }
@@ -761,6 +942,13 @@ export default class HUDScene extends Phaser.Scene {
 
   update(): void {
     if (!this.scene.isActive()) return;
+
+    // Ski mode: only emit touch state, no bar updates
+    if (this.mode === 'ski') {
+      this.emitTouchState();
+      return;
+    }
+
     if (!this.fuelBar?.active || !this.fuelText?.active) return;
 
     const { fuel, stamina, coverage, winchActive } = this.gameState;
@@ -800,64 +988,7 @@ export default class HUDScene extends Phaser.Scene {
     // Update bonus objectives display
     this.updateBonusObjectives();
 
-    // Action button overlap detection: check all active pointers against all
-    // action buttons so a thumb overlapping both groom and winch activates both
-    if (this.actionButtons.length > 0) {
-      const pointers = this.input.manager?.pointers;
-      if (!pointers) return;
-      for (const btn of this.actionButtons) {
-        if (!btn.bg?.active) continue;
-        let pressed = false;
-        for (const p of pointers) {
-          if (!p.isDown) continue;
-          const dx = p.x - btn.x;
-          const dy = p.y - btn.y;
-          if (dx * dx + dy * dy <= btn.radius * btn.radius) {
-            pressed = true;
-            break;
-          }
-        }
-        if (pressed && !btn.wasPressed) {
-          btn.bg.setFillStyle(btn.pressedColor, btn.alpha + 0.2);
-          btn.bg.setScale(1.1);
-          btn.onDown();
-        } else if (!pressed && btn.wasPressed) {
-          btn.bg.setFillStyle(btn.color, btn.alpha);
-          btn.bg.setScale(1);
-          btn.onUp();
-        }
-        btn.wasPressed = pressed;
-      }
-    }
-
-    // Safety: reset touch states if no active pointers (prevents stuck controls)
-    const activePointers = this.input.manager?.pointers?.filter(p => p.isDown);
-    if (!activePointers || activePointers.length === 0) {
-      for (const btn of this.actionButtons) {
-        if (btn.wasPressed && btn.bg?.active) {
-          btn.bg.setFillStyle(btn.color, btn.alpha);
-          btn.bg.setScale(1);
-          btn.onUp();
-          btn.wasPressed = false;
-        }
-      }
-      this.touchUp = false;
-      this.touchDown = false;
-      this.touchLeft = false;
-      this.touchRight = false;
-      this.touchGroom = false;
-      this.touchWinch = false;
-    }
-
-    // Emit touch state for GameScene
-    this.game.events.emit(GAME_EVENTS.TOUCH_INPUT, {
-      left: this.touchLeft,
-      right: this.touchRight,
-      up: this.touchUp,
-      down: this.touchDown,
-      groom: this.touchGroom,
-      winch: this.touchWinch,
-    });
+    this.emitTouchState();
 
     // Gamepad Select/Back button (button 8) for level skip
     if (this.input.gamepad && this.input.gamepad.total > 0) {
