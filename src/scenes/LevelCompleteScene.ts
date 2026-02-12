@@ -341,9 +341,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private resizing = false;
 
   private handleResize(): void {
-    if (this.resizing || !this.sys?.isActive()) return;
+    if (this.resizing || !this.scene?.manager || !this.sys?.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
+      if (!this.scene?.manager || !this.sys?.isActive()) {
+        this.resizing = false;
+        return;
+      }
       this.scene.restart(this.scene.settings.data);
       this.resizing = false;
     });

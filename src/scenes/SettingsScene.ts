@@ -198,9 +198,13 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private handleResize(): void {
-    if (this.resizing || !this.scene.isActive()) return;
+    if (this.resizing || !this.scene?.manager || !this.scene.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
+      if (!this.scene?.manager || !this.scene.isActive()) {
+        this.resizing = false;
+        return;
+      }
       this.restartScene();
       this.resizing = false;
     });

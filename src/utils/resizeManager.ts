@@ -47,7 +47,7 @@ export class ResizeManager {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       this.timer = null;
-      if (!this.scene.scene.isActive()) return;
+      if (!this.scene.scene?.manager || !this.scene.scene.isActive()) return;
       this.lastWidth = this.scene.cameras.main.width;
       this.lastHeight = this.scene.cameras.main.height;
       this.onBeforeRestart?.();

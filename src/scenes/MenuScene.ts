@@ -983,9 +983,13 @@ export default class MenuScene extends Phaser.Scene {
   private resizing = false;
 
   private handleResize(): void {
-    if (this.resizing || !this.scene.isActive()) return;
+    if (this.resizing || !this.scene?.manager || !this.scene.isActive()) return;
     this.resizing = true;
     requestAnimationFrame(() => {
+      if (!this.scene?.manager || !this.scene.isActive()) {
+        this.resizing = false;
+        return;
+      }
       this.scene.restart();
       this.resizing = false;
     });
