@@ -16,11 +16,13 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 ## Quick Commands
 
 ```bash
-npm run dev                       # Dev server
+./dev.sh                          # Start dev server (reads PORT from .env.local, default 3000)
 ./run-tests.sh --browser chromium # Fast test run
 ./run-tests.sh -k "test_name"     # Specific test
 ./run-tests.sh --smart            # Only tests affected by uncommitted changes
 ```
+
+> **Always use `./dev.sh`** to start the dev server — never `npm run dev` with a hardcoded port. It loads `.env.local`, reuses running servers, and cleans up stale processes. Use the same PORT for any manual browser testing.
 
 ## Rules (never break these)
 
