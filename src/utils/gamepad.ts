@@ -49,6 +49,7 @@ const BUTTON_NAMES_GENERIC: Record<number, string> = {
   4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
   8: 'Select', 9: 'Start',
   10: 'L3', 11: 'R3',
+  12: '↑', 13: '↓', 14: '←', 15: '→',
 };
 
 const BUTTON_NAMES_NINTENDO: Record<number, string> = {
@@ -56,6 +57,7 @@ const BUTTON_NAMES_NINTENDO: Record<number, string> = {
   4: 'L', 5: 'R', 6: 'ZL', 7: 'ZR',
   8: '⊖', 9: '⊕',
   10: 'L3', 11: 'R3',
+  12: '↑', 13: '↓', 14: '←', 15: '→',
 };
 
 const BUTTON_NAMES_PLAYSTATION: Record<number, string> = {
@@ -63,6 +65,7 @@ const BUTTON_NAMES_PLAYSTATION: Record<number, string> = {
   4: 'L1', 5: 'R1', 6: 'L2', 7: 'R2',
   8: 'Share', 9: 'Options',
   10: 'L3', 11: 'R3',
+  12: '↑', 13: '↓', 14: '←', 15: '→',
 };
 
 const BUTTON_NAMES_XBOX: Record<number, string> = {
@@ -70,6 +73,7 @@ const BUTTON_NAMES_XBOX: Record<number, string> = {
   4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
   8: 'View', 9: 'Menu',
   10: 'L3', 11: 'R3',
+  12: '↑', 13: '↓', 14: '←', 15: '→',
 };
 
 export function getDefaultGamepadBindings(): GamepadBindings {

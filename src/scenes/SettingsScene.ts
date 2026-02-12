@@ -17,6 +17,7 @@ import { playClick, playCancel, playToggle, playPreview, playSensitivityBlip } f
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { getSavedProgress } from '../utils/gameProgress';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
+import { GamepadDiagnosticPanel } from '../systems/GamepadDiagnostic';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -67,6 +68,7 @@ export default class SettingsScene extends Phaser.Scene {
   private gamepadNav: ReturnType<typeof createGamepadMenuNav> | null = null;
   private gpHorizCooldown = 0;
   private wildlife: MenuWildlifeController | null = null;
+  private diagnosticPanel: GamepadDiagnosticPanel | null = null;
 
   constructor() {
     super({ key: 'SettingsScene' });
@@ -235,6 +237,9 @@ export default class SettingsScene extends Phaser.Scene {
     if (this.gamepadNameText) {
       this.updateGamepadName();
     }
+
+    // Update gamepad diagnostic panel
+    this.diagnosticPanel?.update();
 
     // Update focus indicator position (follows elements during scroll)
     this.focus.updateIndicator();
@@ -586,10 +591,24 @@ export default class SettingsScene extends Phaser.Scene {
 
   private addControlsSection(sizer: any): void {
     const panel = this.createSectionPanel('🎮 ' + (t('controls') || 'Controls'), 6);
+
+    // Reset button — top of section so it's clearly global
+    const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset All'), this.smallFont, '#ffaaaa', '#5a2d2d');
+    resetBtn.on('pointerdown', () => { playClick(); this.keys.reset(); });
+    panel.add(resetBtn, { align: 'left' });
+    this.focus.items.push({
+      element: resetBtn,
+      activate: () => this.keys.reset(),
+    });
+
+    // Movement sensitivity — applies to all input methods
+    panel.add(this.createSensitivitySlider(), { align: 'left' });
+
+    // --- Keyboard sub-section ---
+    panel.add(this.createSubHeader('⌨️ ' + (t('keyboard') || 'Keyboard')), { align: 'left', padding: { top: 8 } });
     panel.add(this.createText(t('clickToRebind') || 'Click to rebind', this.smallFont, THEME.colors.disabled), 
       { align: 'left' });
 
-    // Key bindings
     const actions = [
       { id: 'up', label: t('moveUp') || 'Up' },
       { id: 'down', label: t('moveDown') || 'Down' },
@@ -602,15 +621,15 @@ export default class SettingsScene extends Phaser.Scene {
       panel.add(this.createBindingRow(action.id, action.label), { align: 'left' });
     });
 
-    // Layout selector
     panel.add(this.createLayoutSelector(), { align: 'left' });
 
-    // Movement sensitivity slider
-    panel.add(this.createSensitivitySlider(), { align: 'left' });
+    // --- Gamepad sub-section ---
+    panel.add(this.createSubHeader('🎮 ' + (t('gamepadButtons') || 'Gamepad')), { align: 'left', padding: { top: 8 } });
 
-    // Gamepad bindings section
-    panel.add(this.createText('🎮 ' + (t('gamepadButtons') || 'Gamepad Buttons'), this.smallFont, THEME.colors.textSecondary),
-      { align: 'left', padding: { top: 10 } });
+    // Connected gamepad name (updates dynamically)
+    this.gamepadNameText = this.createText('', this.smallFont, '#aaaaff');
+    this.updateGamepadName();
+    panel.add(this.gamepadNameText, { align: 'left' });
 
     const gpActions = [
       { id: 'groom', label: t('groom') || 'Groom' },
@@ -621,29 +640,16 @@ export default class SettingsScene extends Phaser.Scene {
       panel.add(this.createGamepadBindingRow(action.id, action.label), { align: 'left' });
     });
 
-    // Reset button
-    const resetBtn = this.createTouchButton('🔄 ' + (t('resetControls') || 'Reset'), this.smallFont, '#ffaaaa', '#5a2d2d');
-    resetBtn.on('pointerdown', () => { playClick(); this.keys.reset(); });
-    panel.add(resetBtn, { align: 'left' });
+    // Gamepad diagnostic — live button/stick/trigger readout
+    const diagHeader = this.createText(
+      '🔍 ' + (t('gamepadDiagnostic') || 'Controller Test'),
+      this.smallFont, THEME.colors.textSecondary
+    );
+    panel.add(diagHeader, { align: 'left', padding: { top: 8 } });
+    this.diagnosticPanel = new GamepadDiagnosticPanel();
+    this.diagnosticPanel.build(this, panel, this.contentWidth, this.smallFont, () => this.mainSizer?.layout());
 
-    // Register reset button focus item
-    this.focus.items.push({
-      element: resetBtn,
-      activate: () => this.keys.reset(),
-    });
-
-    // Input hints
-    const hasTouchSetting = detectTouch();
-    const inputHints: string[] = [];
-    if (hasTouchSetting) inputHints.push('📱 Touch');
-    inputHints.push('🎮 Gamepad');
-    panel.add(this.createText(inputHints.join('  '), this.smallFont, '#88aa88'), { align: 'left' });
-
-    // Connected gamepad name (updates dynamically)
-    this.gamepadNameText = this.createText('', this.smallFont, '#aaaaff');
-    this.updateGamepadName();
-    panel.add(this.gamepadNameText, { align: 'left' });
-    sizer.add(panel, { align: 'left', expand: true, proportion: 1 });
+    sizer.add(panel, { align: 'left-top', expand: true });
   }
 
   private createBackButton(width: number, height: number, padding: number): void {
@@ -694,6 +700,15 @@ export default class SettingsScene extends Phaser.Scene {
     const divider = this.add.rectangle(0, 0, this.contentWidth * 0.6, 1, 0xffd700).setAlpha(0.35);
     panel.add(divider, { align: 'left' });
     return panel;
+  }
+
+  /** Lightweight sub-section header: bold label + thin divider line */
+  private createSubHeader(title: string): any {
+    const row = this.rexUI.add.sizer({ orientation: 'vertical', space: { item: 2 } });
+    row.add(this.createText(title, this.smallFont, THEME.colors.textSecondary, true), { align: 'left' });
+    const line = this.add.rectangle(0, 0, this.contentWidth * 0.4, 1, 0x667788).setAlpha(0.5);
+    row.add(line, { align: 'left' });
+    return row;
   }
 
   private createText(text: string, fontSize: number, color: string, bold = false): Phaser.GameObjects.Text {
@@ -1184,6 +1199,8 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.diagnosticPanel?.destroy();
+    this.diagnosticPanel = null;
     this.wildlife?.destroy();
     this.wildlife = null;
     this.input.keyboard?.removeAllListeners();

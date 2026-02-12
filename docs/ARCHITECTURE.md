@@ -58,7 +58,8 @@ snow-groomer/
 │   │   ├── SkiRunSounds.ts # Ski descent audio: wind rush, carving, brake, tricks, bump/wipeout
 │   │   ├── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle, level win/fail)
 │   │   ├── VoiceSounds.ts  # Celeste-style voice gibberish (4 speaker profiles)
-│   │   └── WildlifeSounds.ts # Animal flee/alarm sounds (marmot, chamois, bird, bunny, bouquetin, fox)
+│   │   ├── WildlifeSounds.ts # Animal flee/alarm sounds (marmot, chamois, bird, bunny, bouquetin, fox)
+│   │   └── GamepadDiagnostic.ts # Live button/stick/trigger readout for controller testing in settings
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)

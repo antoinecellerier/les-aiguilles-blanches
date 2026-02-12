@@ -8,23 +8,25 @@ from conftest import (
 
 
 def get_settings_text_elements(page: Page) -> list:
-    """Get bounding boxes of all text elements in SettingsScene."""
+    """Get bounding boxes of all visible text elements in SettingsScene."""
     return page.evaluate("""() => {
         const scene = window.game.scene.getScene('SettingsScene');
         if (!scene) return [];
         
         const textObjects = [];
         scene.children.list.forEach(child => {
-            if (child.type === 'Text' && child.text && child.text.trim()) {
+            if (child.type === 'Text' && child.visible && child.alpha > 0 && child.text && child.text.trim()) {
                 const bounds = child.getBounds();
-                textObjects.push({
-                    text: child.text.substring(0, 30),
-                    x: bounds.x,
-                    y: bounds.y,
-                    width: bounds.width,
-                    height: bounds.height,
-                    fontSize: child.style ? parseInt(child.style.fontSize) || 0 : 0
-                });
+                if (bounds.width > 0 && bounds.height > 0) {
+                    textObjects.push({
+                        text: child.text.substring(0, 30),
+                        x: bounds.x,
+                        y: bounds.y,
+                        width: bounds.width,
+                        height: bounds.height,
+                        fontSize: child.style ? parseInt(child.style.fontSize) || 0 : 0
+                    });
+                }
             }
         });
         return textObjects;
@@ -202,7 +204,7 @@ class TestSettingsContentBounds:
             let maxX = -Infinity, maxY = -Infinity;
             
             scene.children.list.forEach(child => {
-                if (child.type === 'Text' && child.visible && child.text && child.text.trim()) {
+                if (child.type === 'Text' && child.visible && child.alpha > 0 && child.text && child.text.trim()) {
                     const bounds = child.getBounds();
                     minX = Math.min(minX, bounds.x);
                     minY = Math.min(minY, bounds.y);

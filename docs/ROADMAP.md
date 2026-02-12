@@ -26,7 +26,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Polish (Medium Priority)
 
-- [ ] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
+- [x] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
 - [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
 - [x] Make the settings menu look nicer — visual polish pass
 
@@ -79,6 +79,8 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Gamepad diagnostic in settings** — Live controller test panel in Settings showing all 16 buttons, dual analog sticks, and trigger values. Auto-detects controller type (Xbox/Nintendo/PlayStation) and adapts labels. Buttons highlight gold on press, stick dots track analog input, trigger bars fill proportionally. Hidden when no gamepad connected. D-pad buttons (↑↓←→) added to all controller name maps. Localized in 14 languages.
 
 - ✅ **Background update check** — On menu load, fetches `version.json` (generated at build time by Vite plugin) with cache-busting and compares against baked-in `__APP_VERSION__`. Shows clickable reload banner above footer when a newer version is deployed. Localized in 14 languages. Session-cached to avoid repeated fetches.
 
