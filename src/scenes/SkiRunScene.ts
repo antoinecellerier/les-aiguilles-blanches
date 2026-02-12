@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, type Level } from '../setup';
-import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { BALANCE, DEPTHS, yDepth } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString } from '../utils/storage';
 import { getGroomedTiles } from '../utils/skiRunState';
@@ -141,6 +141,23 @@ export default class SkiRunScene extends Phaser.Scene {
     const interactables = this.physics.add.staticGroup();
     const obstacleBuilder = new ObstacleBuilder(this, this.geometry);
     obstacleBuilder.create(this.level, tileSize, this.obstacles, interactables);
+
+    // Shrink obstacle hitboxes to trunk/core for skiing (full sprite includes foliage/snow)
+    const scale = tileSize / 16;
+    for (const sprite of this.obstacles.getChildren()) {
+      const s = sprite as Phaser.Physics.Arcade.Sprite;
+      const body = s.body as Phaser.Physics.Arcade.StaticBody;
+      body.updateFromGameObject();
+      if (s.texture.key === 'tree' || s.texture.key === 'tree_large') {
+        // Tree trunk: 6px wide, 14px tall in 30×40 texture, at x=12 y=26
+        body.setSize(6 * scale, 14 * scale);
+        body.setOffset((s.displayWidth - 6 * scale) / 2, s.displayHeight - 14 * scale);
+      } else if (s.texture.key === 'rock') {
+        // Rock: shrink to core (60% of display size)
+        body.setSize(s.displayWidth * 0.6, s.displayHeight * 0.6);
+        body.setOffset(s.displayWidth * 0.2, s.displayHeight * 0.2);
+      }
+    }
 
     // Park features (kickers, rails, halfpipe)
     if (this.level.specialFeatures?.length) {
@@ -379,6 +396,9 @@ export default class SkiRunScene extends Phaser.Scene {
     const vx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;
     this.skier.setVelocity(vx, vy);
 
+    // Y-sort depth so skier renders behind trees when above them
+    this.skier.setDepth(yDepth(this.skier.y));
+
     // Directional sprite — skip during trick animation
     if (!this.trickActive) {
       const deadzone: number = BALANCE.SKI_SPRITE_DEADZONE;
@@ -456,8 +476,15 @@ export default class SkiRunScene extends Phaser.Scene {
     this.skier = this.physics.add.sprite(startX, startY, this.baseTexture);
     this.skier.setCollideWorldBounds(true);
     this.skier.setDrag(BALANCE.SKI_DRAG);
-    this.skier.setScale(tileSize / 16);
+    const scale = tileSize / 16;
+    this.skier.setScale(scale);
     this.skier.setDepth(DEPTHS.PLAYER);
+
+    // Shrink body to feet/ski area (bottom 8px of 20×28 texture)
+    // so upper body doesn't collide with trees visually behind the skier
+    const body = this.skier.body as Phaser.Physics.Arcade.Body;
+    body.setSize(20, 8);
+    body.setOffset(0, 20);
   }
 
   /** Convert screen position to draw-space for scrollFactor(0) objects under zoomed camera */
