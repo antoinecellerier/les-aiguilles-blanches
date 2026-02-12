@@ -1,196 +1,66 @@
-# Les Aiguilles Blanches - Snow Groomer Simulation
+# Les Aiguilles Blanches — Snow Groomer Simulation
 
-## 🎮 Play Now
+**[▶️ Play Online](https://cellerier.net/les-aiguilles-blanches/)** — No installation required!
 
-**[▶️ Play Online](https://cellerier.net/les-aiguilles-blanches/)** - No installation required!
+<p align="center">
+  <img src="assets/screenshot-menu.png" alt="Main menu with alpine scenery" width="45%">
+  <img src="assets/screenshot-gameplay.png" alt="Grooming a red piste with dialogue" width="45%">
+</p>
+<p align="center">
+  <img src="assets/screenshot-level.png" alt="Level complete with trophy and stars" width="45%">
+  <img src="assets/screenshot-ski.png" alt="Ski trick in the terrain park" width="45%">
+</p>
 
-## Quick Start (Local Development)
+A retro-style snow groomer simulation set in a fictional Savoie ski resort, inspired by the classic **SkiFree** aesthetic. You operate a PistenBully-style grooming machine across 11 progressive levels — from a gentle tutorial through night operations, storm recovery, and FIS competition prep.
 
-```bash
-npm install
-npm run dev    # Start dev server at http://localhost:3000
-```
+## 🤖 Built with Copilot
 
-### Production Build
-```bash
-npm run build  # Build to dist/
-./publish.sh   # Or use publish script
-```
+This game is an experiment in building a complete, polished game almost entirely through conversation with **GitHub Copilot**. From game design and pixel art to physics, audio, localization, and testing — the vast majority of the code, assets, and documentation were generated through iterative AI pair-programming sessions.
 
----
+## ✨ Features
 
-A retro-style (SkiFree aesthetic) snow groomer simulation game set in a fictional Savoie ski resort.
-
-## 🏔️ About
-
-You are a snow groomer operator at **Les Aiguilles Blanches**, a ski resort in the French Alps (Savoie). Your job is to prepare the pistes before skiers arrive each morning, using a PistenBully-style grooming machine.
-
-### Features
-
-- **11 Progressive Levels**: From guided tutorial through storm operations and night grooming
-- **Authentic Grooming Mechanics**: Tiller with quality system, blade, and winch with breakable cable
-- **Ski & Snowboard Reward Run**: Ski or snowboard down freshly groomed pistes with tricks on park features
-- **Terrain Park**: Kickers, rails, and halfpipe with zone-specific grooming challenges
-- **Level Select & Replay**: Browse all levels with star ratings, replay for better scores
-- **Savoyard Culture**: Local food (tartiflette, fondue, génépi) that affects gameplay
-- **Full Accessibility**: High contrast, colorblind modes, screen reader support, rebindable controls
-- **Multi-Platform Input**: Keyboard, mouse, gamepad, and touch controls
-- **Procedural Audio**: Chopin nocturne-style piano music, engine sounds, weather ambience, Celeste-style voice gibberish — all generated via Web Audio API
-- **14 Languages**: French, English, German, Italian, Spanish, Swedish, Norwegian, Finnish, Czech, Polish, Turkish, Slovak, Japanese, Korean
-
-## 🎯 How to Play
-
-### Controls
-
-| Action | Keyboard | Gamepad | Touch (Mobile) |
-|--------|----------|---------|----------------|
-| Move | WASD / Arrows | D-pad / Left Stick | D-pad (◀▲▼▶) |
-| Groom | Space | A (Xbox) / ✕ (PS) / A (Nintendo) | ❄️ Button |
-| Winch | Shift | LB (Xbox) / L1 (PS) / L (Nintendo) | 🔗 Button |
-| Pause | Escape | Start / Options / + | ☰ Button |
-
-Touch controls appear automatically on mobile. Multitouch supported for simultaneous move + groom.
-
-**Gamepad Support**: The game auto-detects Xbox, PlayStation, and Nintendo controllers, mapping buttons correctly for each. Tutorial and UI hints adapt to your controller type.
-
-### Objectives
-
-1. **Groom the piste** - Drive over ungroomed snow while holding the groom button
-2. **Reach coverage target** - Each level requires a minimum coverage percentage
-3. **Manage resources** - Watch your fuel and stamina
-4. **Beat the clock** - Complete before time runs out
-
-### Tips
-
-- Visit **Chez Marie** 🏠 for food that restores stamina and grants buffs
-- Refuel at the **fuel station** ⛽ when running low
-- Use the **winch** on steep black pistes to prevent sliding
-- Avoid obstacles: trees 🌲, rocks 🪨, and lift pylons
-
-## 📁 Project Structure
-
-```
-snow-groomer/
-├── index.html          # Entry point
-├── vite.config.ts      # Vite bundler configuration
-├── tsconfig.json       # TypeScript configuration
-├── package.json        # npm dependencies and scripts
-├── publish.sh          # Build script for deployment
-├── run-tests.sh        # E2E test runner
-├── pytest.ini          # Pytest configuration (parallel)
-├── src/                # Game source (TypeScript)
-│   ├── main.ts         # Phaser initialization
-│   ├── setup.ts        # Global setup
-│   ├── config/         # Config files
-│   │   ├── gameConfig.ts   # Constants + BALANCE tuning
-│   │   ├── levels.ts
-│   │   ├── localization.ts
-│   │   ├── locales/       # Per-language translation files
-│   │   ├── storageKeys.ts
-│   │   └── theme.ts
-│   ├── systems/        # Extracted subsystems
-│   │   ├── WeatherSystem.ts
-│   │   └── HazardSystem.ts
-│   ├── types/          # TypeScript declarations
-│   │   ├── global.d.ts
-│   │   └── GameSceneInterface.ts
-│   ├── scenes/         # Phaser scenes
-│   │   ├── BootScene.ts
-│   │   ├── MenuScene.ts
-│   │   ├── GameScene.ts
-│   │   └── ...
-│   └── utils/          # Utilities
-│       ├── accessibility.ts
-│       ├── characterPortraits.ts
-│       ├── gamepad.ts
-│       ├── gamepadMenu.ts
-│       ├── gameProgress.ts
-│       ├── keyboardLayout.ts
-│       ├── menuButtonNav.ts
-│       └── sceneTransitions.ts
-├── tests/
-│   ├── e2e/            # Playwright E2E tests
-│   └── unit-js/        # Vitest unit tests
-├── docs/
-│   ├── ARCHITECTURE.md # Technical architecture
-│   ├── GAMEPLAY.md     # Detailed gameplay guide
-│   ├── ART_STYLE.md    # Visual style guide
-│   ├── ROADMAP.md      # Work queue and backlog
-│   └── TESTING.md      # Test helpers and debugging
-└── .github/
-    ├── copilot-instructions.md
-    ├── agents/         # Custom Copilot agents
-    └── skills/         # Auto-invoked Copilot skills
-```
+- **11 Progressive Levels** — Tutorial through storm operations, night grooming, and competition prep
+- **Authentic Grooming** — Tiller with quality system, blade, winch with breakable cable
+- **Terrain Park** — Kickers, rails, and halfpipe with zone-specific grooming challenges
+- **Ski & Snowboard Reward Run** — Carve down your freshly groomed pistes with tricks, off-piste powder, and ski tracks
+- **Savoyard Culture** — Tartiflette, fondue, and génépi that affect gameplay
+- **Procedural Audio** — Chopin-style piano, engine sounds, weather, and Celeste-style voice — all Web Audio API
+- **14 Languages** — 🇫🇷 🇬🇧 🇩🇪 🇮🇹 🇪🇸 🇸🇪 🇳🇴 🇫🇮 🇨🇿 🇵🇱 🇹🇷 🇸🇰 🇯🇵 🇰🇷
+- **Full Accessibility** — High contrast, colorblind modes, rebindable controls, screen reader support
+- **Multi-Platform Input** — Keyboard, mouse, gamepad (Xbox/PS/Nintendo), and touch
 
 ## 🚀 Quick Start
 
-1. `npm install` (first time only)
-2. `npm run dev` to start dev server
-3. Open http://localhost:3000
-4. Click "Commencer" (Start Game)
-5. Use WASD/Arrows to move, Space to groom
-6. Reach the coverage target before time runs out!
+```bash
+npm install
+npm run dev          # Dev server at http://localhost:3000
+npm run build        # Production build to dist/
+```
 
 ## 🧪 Testing
 
-### Unit Tests (Vitest)
 ```bash
-npm test
-```
-
-### E2E Tests (Playwright)
-Automated browser tests using Playwright (Chromium + Firefox, parallel):
-
-```bash
-# Setup (first time only)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install playwright pytest-playwright pytest-xdist
-python -m playwright install chromium firefox
-
-# Run tests (requires Vite dev server running)
-npm run dev &       # Start Vite in background
-./run-tests.sh      # Parallel, headless (both browsers)
-./run-tests.sh --headed           # Sequential, visible browser
-./run-tests.sh --browser chromium # Single browser only
+npm test                          # Vitest unit tests
+./run-tests.sh --browser chromium # E2E tests (Playwright)
 ./run-tests.sh --smart            # Only tests affected by uncommitted changes
 ```
 
-E2E tests cover: menu navigation, all 11 levels, tutorial flow, grooming, pause, credits, and restart cycle.
+See [docs/TESTING.md](docs/TESTING.md) for setup, helpers, and debugging.
 
-## 🌐 Localization
+## 📖 Documentation
 
-The game supports 14 languages, ordered by ski market size:
-- 🇫🇷 French (primary) · 🇬🇧 English · 🇩🇪 German · 🇮🇹 Italian · 🇯🇵 Japanese
-- 🇸🇪 Swedish · 🇳🇴 Norwegian · 🇫🇮 Finnish · 🇰🇷 Korean · 🇨🇿 Czech
-- 🇵🇱 Polish · 🇹🇷 Turkish · 🇸🇰 Slovak · 🇪🇸 Spanish
-
-Per-language files are in `src/config/locales/`. To add a new language, create a locale file and register it in `src/config/localization.ts`.
-
-## ♿ Accessibility
-
-- **Visual**: High contrast mode, 3 colorblind filters, scalable UI, reduced motion
-- **Motor**: Fully rebindable controls, no simultaneous key requirements
-- **Auditory**: Visual cues for all audio, subtitles for dialogue
-- **Cognitive**: Clear objectives, progressive difficulty, pause anytime
-
-## 🛠️ Development Hotkeys
-
-These shortcuts are available during gameplay for development and testing:
-
-| Key | Action |
+| Doc | Covers |
 |-----|--------|
-| N | Skip to next level |
-| P | Go to previous level |
-| K | Auto-groom to target coverage & launch ski run |
-| Select (gamepad) | Skip to next level |
-
-> These keys are ignored if they conflict with a rebound game control.
+| [GAMEPLAY.md](docs/GAMEPLAY.md) | Controls, level guide, objectives, tips |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Project structure, systems, patterns |
+| [GAME_DESIGN.md](docs/GAME_DESIGN.md) | Design pillars, difficulty curve, food economy |
+| [ART_STYLE.md](docs/ART_STYLE.md) | Visual style, palettes, sprite specs |
+| [TESTING.md](docs/TESTING.md) | Test helpers, smart selection, debugging |
+| [ROADMAP.md](docs/ROADMAP.md) | Work queue, backlog, tech debt |
 
 ## 📜 License
 
-MIT License - Feel free to modify and share!
+MIT License — Feel free to modify and share!
 
 ## 🧀 Credits
 

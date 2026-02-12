@@ -21,6 +21,15 @@ npm test                              # Unit tests only
 
 The test script auto-starts the dev server if not running.
 
+## E2E Setup (first time)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install playwright pytest-playwright pytest-xdist
+python -m playwright install chromium firefox
+```
+
 ## Smart Test Selection
 
 The `--smart` flag runs only tests affected by uncommitted changes (`git diff HEAD`):

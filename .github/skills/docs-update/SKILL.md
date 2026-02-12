@@ -84,14 +84,12 @@ Update `.github/skills/` or `.github/agents/` if:
 
 Update `README.md` if:
 
-- **Project structure tree** changed — new directories, files, or reorganization
 - **Features list** changed — new gameplay features, input methods, accessibility
-- **Controls table** changed — new bindings, new input types
 - **Quick start / testing instructions** changed — new commands, new setup steps
-- **Localization** changed — new languages added or removed
-- **Accessibility** features changed
+- **Documentation table** changed — new docs added or renamed
+- **Screenshots outdated** — significant visual changes warrant new screenshots. Use the `documentation-screenshots` skill to recapture them.
 
-The README is the public face of the project. Keep it accurate but concise.
+The README is the public face of the project. Keep it concise — detailed content belongs in `docs/`. Link to docs rather than duplicating.
 
 ## How to Apply
 

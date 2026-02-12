@@ -408,9 +408,16 @@ On levels with terrain park features (L3, L6), the ski run includes interactive 
 - **Progressive turning** — initial turns barely slow you down; only sustained carving bleeds speed (drag ramps 10%→100% over 0.4s).
 - Works identically for both skier and snowboarder modes.
 
-### Dev Shortcut
+### Dev Shortcuts
 
-Press **K** during gameplay to instantly groom to target coverage and launch a ski run (skips the win screen).
+These shortcuts are available during gameplay for development and testing. They are ignored if the key conflicts with a rebound game control.
+
+| Key | Action |
+|-----|--------|
+| K | Auto-groom to target coverage & launch ski run |
+| N | Skip to next level |
+| P | Go to previous level |
+| Select (gamepad) | Skip to next level |
 
 ### Preference
 
