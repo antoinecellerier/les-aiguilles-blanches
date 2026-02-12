@@ -127,6 +127,7 @@ export const BALANCE = {
   AVALANCHE_RISK_GROOMING: 0.008,
   AVALANCHE_WARNING_1: 0.25,
   AVALANCHE_WARNING_2: 0.6,
+  SKI_AVALANCHE_RISK_MULTIPLIER: 5, // Skiers accumulate risk faster (passing through quickly)
 
   // Camera
   CAMERA_LERP: 0.1,

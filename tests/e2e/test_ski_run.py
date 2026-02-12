@@ -190,6 +190,40 @@ class TestSkiRun:
         assert has_retry, f"Should show ski retry button, got: {buttons}"
         assert has_next, f"Should show Next Level button on ski fail (skiing is optional), got: {buttons}"
 
+    def test_ski_avalanche_shows_fail_screen(self, game_page: Page):
+        """Avalanche during ski run should show avalanche fail screen with ski retry."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        game_page.evaluate("""() => {
+            window.game.scene.start('LevelCompleteScene', {
+                won: false,
+                level: 8,
+                coverage: 0,
+                timeUsed: 5,
+                failReason: 'avalanche',
+                skiMode: 'ski',
+            });
+        }""")
+
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
+        game_page.wait_for_timeout(500)
+
+        buttons = game_page.evaluate("""() => {
+            var scene = window.game.scene.getScene('LevelCompleteScene');
+            if (!scene) return [];
+            var texts = [];
+            scene.children.list.forEach(function(c) {
+                if (c.list) c.list.forEach(function(child) {
+                    if (child.type === 'Text' && child.text) texts.push(child.text);
+                });
+            });
+            return texts;
+        }""")
+        has_retry = any('Again' in t or 'Re-' in t or 'Nochmal' in t or 'Otra' in t
+                        or 'もう一度' in t or '다시' in t for t in buttons)
+        assert has_retry, f"Should show ski retry button on avalanche, got: {buttons}"
+
 
 class TestSkiSettings:
     """Test descent mode selector in settings."""

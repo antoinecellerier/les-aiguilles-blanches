@@ -221,8 +221,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
       cursorY += tauntH + sectionGap;
     }
 
-    // --- Stats panel (skip for ski wipeouts — grooming stats aren't relevant) ---
-    if (this.failReason !== 'ski_wipeout') {
+    // --- Stats panel (skip for ski crashes — grooming stats aren't relevant) ---
+    const isSkiCrash = (this.failReason === 'ski_wipeout' || (this.failReason === 'avalanche' && this.skiMode));
+    if (!isSkiCrash) {
       const statsLines: string[] = [
         t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
         t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
@@ -293,7 +294,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
         () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
-    } else if (this.failReason === 'ski_wipeout') {
+    } else if (isSkiCrash) {
       // Ski crash — retry the run (re-randomize if needed) + next level + menu
       const retryLabel = skiMode === 'snowboard' ? (t('rideAgain') || 'Ride Again!') : (t('skiAgain') || 'Ski Again!');
       this.addButton(buttonContainer, retryLabel, buttonFontSize, buttonPadding2,
@@ -301,6 +302,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
       if (this.levelIndex < LEVELS.length - 1) {
         this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
           () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }));
+      } else {
+        this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
+          () => this.navigateTo('CreditsScene'));
       }
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
@@ -623,20 +627,42 @@ export default class LevelCompleteScene extends Phaser.Scene {
         break;
       }
       case 'avalanche': {
-        // Buried under snow: pile of snow over the groomer
-        g.fillStyle(0xf0f5f8);
-        g.fillRect(gx - 28 * s, groundY - 20 * s, 56 * s, 20 * s);
-        g.fillRect(gx - 22 * s, groundY - 28 * s, 44 * s, 10 * s);
-        g.fillRect(gx - 16 * s, groundY - 34 * s, 32 * s, 8 * s);
-        g.fillRect(gx - 10 * s, groundY - 38 * s, 20 * s, 6 * s);
-        // Snow texture detail
-        g.fillStyle(0xe0e8ef);
-        g.fillRect(gx - 18 * s, groundY - 22 * s, 6 * s, 3 * s);
-        g.fillRect(gx + 8 * s, groundY - 26 * s, 8 * s, 3 * s);
-        g.fillRect(gx - 4 * s, groundY - 32 * s, 10 * s, 2 * s);
-        // Tip of cabin roof poking out
-        g.fillStyle(0xaa1a00);
-        g.fillRect(gx - 6 * s, groundY - 40 * s, 12 * s, 3 * s);
+        if (this.skiMode) {
+          // Skier buried under snow — only hand and pole poking out
+          g.fillStyle(0xf0f5f8);
+          g.fillRect(gx - 24 * s, groundY - 16 * s, 48 * s, 16 * s);
+          g.fillRect(gx - 18 * s, groundY - 24 * s, 36 * s, 10 * s);
+          g.fillRect(gx - 12 * s, groundY - 30 * s, 24 * s, 8 * s);
+          g.fillRect(gx - 8 * s, groundY - 34 * s, 16 * s, 6 * s);
+          // Snow texture detail
+          g.fillStyle(0xe0e8ef);
+          g.fillRect(gx - 14 * s, groundY - 18 * s, 5 * s, 3 * s);
+          g.fillRect(gx + 6 * s, groundY - 22 * s, 6 * s, 3 * s);
+          // Gloved hand poking out
+          const isSnowboard = this.skiMode === 'snowboard';
+          g.fillStyle(isSnowboard ? 0xff3388 : 0xcc2288);
+          g.fillRect(gx + 8 * s, groundY - 38 * s, 4 * s, 6 * s);
+          // Ski pole at an angle
+          g.fillStyle(0x444444);
+          g.fillRect(gx + 10 * s, groundY - 50 * s, 2 * s, 16 * s);
+          g.fillStyle(0xffcc00);
+          g.fillRect(gx + 9 * s, groundY - 52 * s, 4 * s, 3 * s);
+        } else {
+          // Buried under snow: pile of snow over the groomer
+          g.fillStyle(0xf0f5f8);
+          g.fillRect(gx - 28 * s, groundY - 20 * s, 56 * s, 20 * s);
+          g.fillRect(gx - 22 * s, groundY - 28 * s, 44 * s, 10 * s);
+          g.fillRect(gx - 16 * s, groundY - 34 * s, 32 * s, 8 * s);
+          g.fillRect(gx - 10 * s, groundY - 38 * s, 20 * s, 6 * s);
+          // Snow texture detail
+          g.fillStyle(0xe0e8ef);
+          g.fillRect(gx - 18 * s, groundY - 22 * s, 6 * s, 3 * s);
+          g.fillRect(gx + 8 * s, groundY - 26 * s, 8 * s, 3 * s);
+          g.fillRect(gx - 4 * s, groundY - 32 * s, 10 * s, 2 * s);
+          // Tip of cabin roof poking out
+          g.fillStyle(0xaa1a00);
+          g.fillRect(gx - 6 * s, groundY - 40 * s, 12 * s, 3 * s);
+        }
         break;
       }
       case 'cliff': {

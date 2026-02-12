@@ -20,6 +20,7 @@ import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 import { SkiRunSounds } from '../systems/SkiRunSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem } from '../systems/MusicSystem';
+import { HazardSystem } from '../systems/HazardSystem';
 
 /**
  * SkiRunScene — Post-grooming descent reward run.
@@ -81,6 +82,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private resolvedMode = 'ski'; // resolved from 'random' once per run
   private skiSounds = new SkiRunSounds();
   private ambienceSounds = new AmbienceSounds();
+  private hazardSystem: HazardSystem | null = null;
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -200,6 +202,29 @@ export default class SkiRunScene extends Phaser.Scene {
       });
     }
     this.physics.add.overlap(this.skier, dangerZones, () => this.onWipeout());
+
+    // Avalanche zones — skier can trigger avalanches on hazardous levels
+    if (this.level.hazards?.includes('avalanche')) {
+      this.hazardSystem = new HazardSystem(this);
+      this.hazardSystem.riskMultiplier = BALANCE.SKI_AVALANCHE_RISK_MULTIPLIER;
+      this.hazardSystem.onAvalancheSound = (level: number) => {
+        if (level === 1) this.skiSounds.playAvalancheWarning1();
+        else if (level === 2) this.skiSounds.playAvalancheWarning2();
+        else if (level === 3) this.skiSounds.playAvalancheTrigger();
+      };
+      this.hazardSystem.createAvalancheZones(
+        this.level,
+        tileSize,
+        this.skier,
+        () => this.isCrashed || this.isFinished,
+        () => false, // skier is never grooming
+        () => {}, // no dialogue in ski runs
+        () => this.onWipeout('avalanche'),
+        this.geometry.getCliffAvoidRects(tileSize),
+        [],
+        this.geometry.pistePath
+      );
+    }
 
     // Input
     if (this.input.keyboard) {
@@ -695,7 +720,7 @@ export default class SkiRunScene extends Phaser.Scene {
     return grind.name;
   }
 
-  private onWipeout(): void {
+  private onWipeout(reason: 'ski_wipeout' | 'avalanche' = 'ski_wipeout'): void {
     if (this.isCrashed || this.isFinished) return;
     this.isCrashed = true;
     this.skier.setVelocity(0, 0);
@@ -704,14 +729,14 @@ export default class SkiRunScene extends Phaser.Scene {
     this.cameras.main.shake(300, 0.008);
     this.skiSounds.playWipeout();
 
-    // Cliff wipeout ends the run — transition to fail screen after a brief pause
+    // Wipeout ends the run — transition to fail screen after a brief pause
     this.time.delayedCall(BALANCE.SKI_CRASH_DURATION * 1000, () => {
       resetGameScenes(this.game, 'LevelCompleteScene', {
         won: false,
         level: this.levelIndex,
         coverage: 0,
         timeUsed: this.elapsedTime,
-        failReason: 'ski_wipeout',
+        failReason: reason,
         skiMode: this.resolvedMode,
       });
     });
@@ -781,6 +806,8 @@ export default class SkiRunScene extends Phaser.Scene {
   shutdown(): void {
     this.skiSounds.stop();
     this.ambienceSounds.stop();
+    this.hazardSystem?.destroy();
+    this.hazardSystem = null;
     if (this.nightUpdateHandler) {
       this.events.off('update', this.nightUpdateHandler);
       this.nightUpdateHandler = undefined;

@@ -20,6 +20,9 @@ export class HazardSystem {
   /** Optional sound callback: 1 = warning1, 2 = warning2, 3 = trigger */
   onAvalancheSound: ((level: number) => void) | null = null;
 
+  /** Multiplier for risk accumulation rate (default 1.0, higher = faster trigger). */
+  riskMultiplier = 1.0;
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
   }
@@ -249,13 +252,13 @@ export class HazardSystem {
     // Precise point-in-polygon check (broad-phase rect already passed)
     if (!HazardSystem.pointInPolygon(groomer.x, groomer.y, zone.zonePoints)) return;
 
-    zone.avalancheRisk += BALANCE.AVALANCHE_RISK_PER_FRAME;
+    zone.avalancheRisk += BALANCE.AVALANCHE_RISK_PER_FRAME * this.riskMultiplier;
 
     const riskAlpha = 0.05 + zone.avalancheRisk * 0.4;
     this.drawZonePolygon(zone.zoneVisual, zone.zonePoints, 0xFF2200, Math.min(0.5, riskAlpha));
 
     if (isGrooming()) {
-      zone.avalancheRisk += BALANCE.AVALANCHE_RISK_GROOMING;
+      zone.avalancheRisk += BALANCE.AVALANCHE_RISK_GROOMING * this.riskMultiplier;
     }
 
     if (zone.avalancheRisk > BALANCE.AVALANCHE_WARNING_1 && !zone.warning1Fired) {
@@ -293,12 +296,13 @@ export class HazardSystem {
       lifespan: 2000,
       speedY: { min: 400, max: 600 },
       speedX: { min: -50, max: 50 },
-      scale: { start: 0.8, end: 0.3 },
-      alpha: { start: 1, end: 0.5 },
-      quantity: 20,
-      frequency: 30,
+      scale: { start: 1.5, end: 0.6 },
+      alpha: { start: 1, end: 0.7 },
+      quantity: 50,
+      frequency: 20,
       tint: 0xFFFFFF
     });
+    avalancheParticles.setDepth(DEPTHS.WEATHER + 1);
 
     showDialogue('avalancheTrigger');
 
