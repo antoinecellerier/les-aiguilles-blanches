@@ -60,7 +60,14 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [x] Directional sprite variants (texture swap instead of rotation)
 - [x] E2E tests (10 tests: button visibility, scene loads, preference toggle, transitions)
 - [x] Ski run audio (wind, carving, powder spray, bump sounds)
-- [ ] Fun failure screens for ski crashes
+- [x] Fun failure screens for ski crashes (yard sale pixel art, avalanche burial art)
+- [x] Off-piste skiing with powder drag, packed-snow shoulder near edges
+- [x] Avalanche risk in ski mode (5× faster trigger than groomer)
+- [x] Fatal high-speed crashes (trees/rocks above 40 km/h)
+- [x] Ski/snowboard tracks on ungroomed and off-piste snow
+- [x] Smooth carving physics (lerped lateral velocity)
+- [x] Y-depth sorted obstacles (skier renders behind trees when above them)
+- [x] Default grooming generation when starting from level select
 - [ ] Ski jumps (groom key)
 - [ ] Level-appropriate items, slalom gates, tricks
 
@@ -79,6 +86,10 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Ski run realism pass** — Off-piste skiing with deep powder drag and packed-snow shoulder. Ski/snowboard tracks on ungroomed and off-piste snow (parallel lines for skis, single wide track for snowboard). Smooth carving physics via lerped lateral velocity. Fatal crashes above 40 km/h. Avalanche risk on hazardous levels (5× faster trigger). Y-depth sorted obstacles. Default grooming when starting from level select. Ski crash fail screens with yard sale and avalanche burial pixel art.
+
+- ✅ **Favicon** — Pixel-art SVG favicon with red groomer, snow-capped mountain, and groomed snow. Uses game palette colors with `crispEdges` rendering.
 
 - ✅ **Gamepad diagnostic in settings** — Live controller test panel in Settings showing all 16 buttons, dual analog sticks, and trigger values. Auto-detects controller type (Xbox/Nintendo/PlayStation) and adapts labels. Buttons highlight gold on press, stick dots track analog input, trigger bars fill proportionally. Hidden when no gamepad connected. D-pad buttons (↑↓←→) added to all controller name maps. Localized in 14 languages.
 

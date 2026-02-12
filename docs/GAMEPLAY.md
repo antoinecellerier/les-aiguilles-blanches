@@ -384,7 +384,10 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 - **Braking** — hold the winch key for a snow plow stop
 - **Obstacles** cause a brief speed bump (cooldown prevents chain-stuns)
 - **Cliff danger zones** — wipeout! Brief freeze then respawn at last safe position
-- **Soft boundaries** — drifting off-piste slows you down
+- **Soft boundaries** — drifting off-piste enters deep powder (major slowdown). A packed-snow shoulder near piste edges softens the transition.
+- **Ski tracks** — skis leave two parallel track lines on ungroomed and off-piste snow; snowboards leave a single wider track
+- **Avalanche zones** — on hazardous levels (L8–L10), skiing through avalanche zones triggers burial much faster than in a groomer
+- **Fatal crashes** — hitting a tree or rock above 40 km/h is fatal (wipeout instead of bump)
 - **Replayable** — ski again from the win screen as many times as you want
 
 ### Tricks (Park Levels)

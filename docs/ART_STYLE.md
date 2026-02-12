@@ -191,6 +191,19 @@ Shared colors: boots `0x333333`, goggles `0x87ceeb`.
 
 **Snowboarder variants:** Straight = vertical board (nose downhill). Left/right = board angled diagonally in turn direction. Brake = horizontal board (perpendicular to fall line), crouched stance.
 
+### Ski Tracks
+
+Drawn on ungroomed and off-piste snow via a persistent Graphics layer at `DEPTHS.PISTE + 0.5`:
+
+- **Skier** — Two parallel 1px lines with perpendicular offset following direction of travel. Gap = `tileSize × 0.15` from center.
+- **Snowboarder** — Single 3px wide line.
+- **Color** — `0x8899aa` (blue-gray). Alpha 0.15 on ungroomed piste, 0.25 off-piste.
+- **Spacing** — New segment drawn every `tileSize × 0.5` pixels for smooth curves.
+
+### Favicon
+
+SVG at `assets/favicon.svg`. Pixel-art style with `shape-rendering="crispEdges"`. Uses game palette: slate blue sky `#3a6d8e`, brown rock mountain `#4a423a`/`#6a5e52`, white snow cap, two-tone red groomer `#cc2200`/`#aa1a00`, blue windshield `#87ceeb`, white groomed snow with `#d8e4e8` corduroy lines.
+
 ### Bird Sprite Variants
 
 - **Top-down flying** (4×3): V-shape wings spread, used in game scene
