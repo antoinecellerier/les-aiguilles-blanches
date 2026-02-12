@@ -123,6 +123,11 @@ export default class SkiRunScene extends Phaser.Scene {
     // Generate geometry
     this.geometry.generate(this.level, tileSize);
 
+    // If no grooming data (e.g. starting from level select), generate default grooming
+    if (this.groomedTiles.size === 0) {
+      this.groomedTiles = this.generateDefaultGrooming();
+    }
+
     // Build the snow grid with groomed state from the completed level
     this.createSnowGrid(tileSize);
 
@@ -302,9 +307,14 @@ export default class SkiRunScene extends Phaser.Scene {
     const tileY = Math.floor(this.skier.y / this.tileSize);
     const onPiste = this.geometry.isInPiste(tileX, tileY, this.level);
     const onGroomed = this.groomedGrid[tileY]?.[tileX] ?? false;
-    const rawTerrainMult = onPiste
-      ? (onGroomed ? BALANCE.SKI_GROOMED_MULTIPLIER : BALANCE.SKI_UNGROOMED_MULTIPLIER)
-      : BALANCE.SKI_OFFPISTE_MULTIPLIER;
+    let rawTerrainMult: number;
+    if (onPiste) {
+      rawTerrainMult = onGroomed ? BALANCE.SKI_GROOMED_MULTIPLIER : BALANCE.SKI_UNGROOMED_MULTIPLIER;
+    } else {
+      // Check if near piste edge (packed snow shoulder, not deep powder)
+      const nearPiste = this.geometry.isNearPiste(tileX, tileY, this.level, BALANCE.SKI_PISTE_BUFFER);
+      rawTerrainMult = nearPiste ? BALANCE.SKI_UNGROOMED_MULTIPLIER : BALANCE.SKI_OFFPISTE_MULTIPLIER;
+    }
     // Lerp terrain blend for smooth groomed↔ungroomed transitions
     const blendRate = 3.0; // how fast terrain effect transitions (higher = faster)
     this.terrainBlend += (rawTerrainMult - this.terrainBlend) * Math.min(1, blendRate * dt);
@@ -518,6 +528,14 @@ export default class SkiRunScene extends Phaser.Scene {
   private onBump(): void {
     // Cooldown: don't re-trigger during an active bump slowdown
     if (this.game.getTime() < this.bumpSlowdownUntil) return;
+
+    // High-speed collisions with obstacles are fatal (~50 km/h threshold)
+    const kmh = this.currentSpeed * BALANCE.SKI_SPEED_SCALE;
+    if (kmh >= BALANCE.SKI_FATAL_CRASH_KMH) {
+      this.onWipeout();
+      return;
+    }
+
     this.bumpSlowdownUntil = this.game.getTime() + BALANCE.SKI_BUMP_DURATION;
     this.currentSpeed *= BALANCE.SKI_BUMP_SLOWDOWN;
     this.cameras.main.shake(BALANCE.SKI_BUMP_SHAKE.duration, BALANCE.SKI_BUMP_SHAKE.intensity);
@@ -801,6 +819,34 @@ export default class SkiRunScene extends Phaser.Scene {
       }
       return result;
     } catch { return defaults; }
+  }
+
+  /** Generate default grooming when starting ski run without prior grooming. */
+  private generateDefaultGrooming(): Set<string> {
+    const tiles = new Set<string>();
+    const targetRatio = this.level.targetCoverage / 100;
+    for (let y = 3; y < this.level.height - 2; y++) {
+      const path = this.geometry.pistePath[y];
+      if (!path) continue;
+      const halfW = path.width / 2;
+      const leftEdge = Math.floor(path.centerX - halfW);
+      const rightEdge = Math.ceil(path.centerX + halfW);
+      const rowTiles: number[] = [];
+      for (let x = leftEdge; x < rightEdge; x++) {
+        if (this.geometry.isInPiste(x, y, this.level)) rowTiles.push(x);
+      }
+      // Sort by distance from center with jitter for organic feel
+      rowTiles.sort((a, b) => {
+        const distA = Math.abs(a - path.centerX) / halfW;
+        const distB = Math.abs(b - path.centerX) / halfW;
+        return (distA + Math.random() * 0.8) - (distB + Math.random() * 0.8);
+      });
+      const toGroom = Math.ceil(rowTiles.length * targetRatio);
+      for (let i = 0; i < toGroom && i < rowTiles.length; i++) {
+        tiles.add(`${rowTiles[i]},${y}`);
+      }
+    }
+    return tiles;
   }
 
   shutdown(): void {

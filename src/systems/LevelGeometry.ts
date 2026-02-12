@@ -87,6 +87,15 @@ export class LevelGeometry {
     return x >= path.centerX - halfWidth && x < path.centerX + halfWidth;
   }
 
+  /** Check if tile is within `buffer` tiles of the piste edge (packed snow shoulder). */
+  isNearPiste(x: number, y: number, level: Level, buffer: number): boolean {
+    if (y < 3 || y >= level.height - 2) return false;
+    if (!this.pistePath || !this.pistePath[y]) return true;
+    const path = this.pistePath[y];
+    const halfWidth = path.width / 2 + buffer;
+    return x >= path.centerX - halfWidth && x < path.centerX + halfWidth;
+  }
+
   isOnCliff(x: number, y: number): boolean {
     if (!this.cliffSegments || this.cliffSegments.length === 0) return false;
     for (const cliff of this.cliffSegments) {

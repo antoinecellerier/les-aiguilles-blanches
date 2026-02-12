@@ -181,9 +181,11 @@ export const BALANCE = {
   SKI_GROOMED_MULTIPLIER: 1.0,   // Speed on groomed tiles (baseline)
   SKI_UNGROOMED_MULTIPLIER: 0.65, // Speed on ungroomed tiles
   SKI_OFFPISTE_MULTIPLIER: 0.35,  // Speed off-piste (deep powder)
+  SKI_PISTE_BUFFER: 3,            // Tiles of packed snow shoulder beyond piste edge
   SKI_POWDER_DRAG: 300,          // Extra drag at piste edges
   SKI_BUMP_SLOWDOWN: 0.4,       // Speed multiplier on obstacle hit
   SKI_BUMP_DURATION: 500,        // ms of slowdown after bump
+  SKI_FATAL_CRASH_KMH: 40,      // Obstacle collision above this speed is fatal
   SKI_CELEBRATION_DELAY: 1500,   // ms to show celebration before transition
   SKI_ACCELERATION: 80,          // px/s² speed ramp-up rate (slow progressive build)
   SKI_MIN_ZOOM: 0.5,            // Minimum camera zoom for ski run
