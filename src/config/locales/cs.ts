@@ -268,7 +268,7 @@ const cs: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12. února 2026",
-  changelog_20260212: "📋 Výběr úrovně\n🔗 Přetrhnutelné lano navijáku\n🕹️ Plynulejší ovládání a rozmístění\n🔊 Zvuky větru, carvingu a triků při sjezdu",
+  changelog_20260212: "📋 Výběr úrovně\n🔗 Přetržitelné lano navijáku\n🕹️ Diagnostika ovladače\n🍽️ Jídla od Marie",
   changelog_20260211_date: "11. února 2026",
 changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\n🏔️ Barevně rozlišené strmé zóny\n🏗️ Park a triky",
   changelog_20260210_date: "10. února 2026",

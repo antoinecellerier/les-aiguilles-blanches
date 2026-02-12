@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level, type BonusObjective } from '../setup';
 import { THEME } from '../config/theme';
-import { DEPTHS } from '../config/gameConfig';
+import { DEPTHS, BALANCE } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { hasTouch as detectTouch, isMobile, onTouchAvailable } from '../utils/touchDetect';
@@ -25,7 +25,7 @@ interface HUDSceneData {
 export default class HUDScene extends Phaser.Scene {
   private level!: Level;
   private mode: 'groom' | 'ski' = 'groom';
-  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0, restartCount: 0 };
+  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, activeBuff: null, buffTimeRemaining: 0, buffIcon: '', tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0, restartCount: 0 };
   private isSkipping = false;
   private gamepadSelectPressed = false;
   private uiScale = 1;
@@ -37,6 +37,7 @@ export default class HUDScene extends Phaser.Scene {
   private staminaBar: Phaser.GameObjects.Rectangle | null = null;
   private staminaBarBg: Phaser.GameObjects.Rectangle | null = null;
   private staminaText: Phaser.GameObjects.Text | null = null;
+  private buffIndicator: Phaser.GameObjects.Text | null = null;
   private coverageText: Phaser.GameObjects.Text | null = null;
   private coverageBar: Phaser.GameObjects.Rectangle | null = null;
   private coverageBarBg: Phaser.GameObjects.Rectangle | null = null;
@@ -174,6 +175,11 @@ export default class HUDScene extends Phaser.Scene {
 
     // Level name
     const levelNameText = visorText(padding, row1Y, t(this.level.nameKey) || 'Level', fontSmall);
+
+    // Buff indicator — shown right after level name on row 1
+    const buffX = levelNameText.x + levelNameText.width + Math.round(12 * this.uiScale);
+    this.buffIndicator = visorText(buffX, row1Y, '', fontSmall);
+    if (this.buffIndicator) this.buffIndicator.setAlpha(0);
 
     // === ROW 2: All three bars side by side ===
     const dotSize = Math.round(6 * this.uiScale);
@@ -964,6 +970,24 @@ export default class HUDScene extends Phaser.Scene {
     this.fuelBar.setFillStyle(fuelPercent > 0.3 ? THEME.colors.dangerHex : 0xff0000);
     if (this.staminaBar?.active) this.staminaBar.setFillStyle(staminaPercent > 0.3 ? THEME.colors.successHex : 0xffaa00);
 
+    // Buff indicator
+    if (this.buffIndicator?.active) {
+      const { activeBuff, buffTimeRemaining, buffIcon } = this.gameState;
+      if (activeBuff && buffTimeRemaining > 0) {
+        const secs = Math.ceil(buffTimeRemaining / 1000);
+        this.buffIndicator.setText(buffIcon + ' ' + secs + 's');
+        // Flash when about to expire
+        const shouldFlash = secs <= BALANCE.BUFF_FLASH_THRESHOLD;
+        const flashAlpha = Math.sin(Date.now() / BALANCE.BUFF_FLASH_PERIOD) > 0 
+          ? BALANCE.BUFF_FLASH_ALPHA_MAX 
+          : BALANCE.BUFF_FLASH_ALPHA_MIN;
+        this.buffIndicator.setAlpha(shouldFlash ? flashAlpha : 1);
+      } else {
+        this.buffIndicator.setText('');
+        this.buffIndicator.setAlpha(0);
+      }
+    }
+
     if (this.coverageText?.active) {
       this.coverageText.setText(coverage + '%');
       const targetMet = coverage >= this.level.targetCoverage;
@@ -1122,6 +1146,7 @@ export default class HUDScene extends Phaser.Scene {
     this.fuelText = null;
     this.staminaBar = null;
     this.staminaText = null;
+    this.buffIndicator = null;
     this.coverageText = null;
     this.coverageBar = null;
     this.coverageBarBg = null;

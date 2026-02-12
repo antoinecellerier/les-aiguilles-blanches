@@ -21,7 +21,7 @@ The setting is authentically Savoyard: tartiflette at Chez Marie, génépi in th
 | **Groom** (tiller) | Space / A / ❄️ | ⚠️ Binary | No quality dimension — see [Grooming Quality](#grooming-quality). Steering stability determines quality |
 | **Winch** | Shift / LB / 🔗 | ⚠️ Limited | Artificial cable length — see [Winch](#winch-infinite-extension) |
 | **Refuel** | Drive to station | ✅ Solid | 50% max refill, strategic placement |
-| **Eat** | Drive to Chez Marie | ⚠️ Shallow | Only staminaRegen works — see [Food Buffs](#food-buffs) |
+| **Eat** | Drive to Chez Marie | ✅ Implemented | Auto-selects best dish — see [Food Buffs](#food-buffs) |
 | **Push snow** (blade) | — | ❌ Not implemented | See [Snow Pushing](#snow-pushing-front-blade) |
 | **Ski/Snowboard** | WASD / stick / touch / brake | ✅ Implemented | Post-grooming reward run — see [Ski/Snowboard Reward Run](#skisnoboard-reward-run) |
 
@@ -144,20 +144,20 @@ Groomed snow texture varies based on quality — smooth parallel corduroy lines 
 
 Works identically on keyboard, gamepad, and touch — all have rotational control. No analog throttle needed. The mechanic rewards *planning your line* and *committing to it*, not raw dexterity.
 
-### Food Buffs
+### Food Buffs ✅ IMPLEMENTED
 
-**Problem**: Only staminaRegen buff is implemented. Chez Marie has no strategic depth — always pick tartiflette (max stamina).
+Marie auto-selects the best dish based on current game state. No new inputs needed — same drive-into-restaurant interaction. Priority: Warmth → Speed → Precision → Stamina Regen.
 
-**Proposal**: Implement all 4 remaining buffs as real gameplay modifiers.
+| Buff | Dish | Condition | Effect | Duration |
+|------|------|-----------|--------|----------|
+| **Warmth** | Vin Chaud 🍷 | Night or storm level | Halves stamina drain | 25s |
+| **Speed** | Croziflette 🍝 | Time remaining < 40% | +30% speed, +40% fuel burn | 20s |
+| **Precision** | Génépi 🥃 | Coverage > 70% | +1 grooming radius | 15s |
+| **Stamina Regen** | Fondue 🧀 | Default fallback | Passive stamina regen | 30s |
 
-| Buff | Mechanical Effect | When Useful |
-|------|-------------------|-------------|
-| **Speed** (Croziflette) | +30% max speed, +40% fuel consumption | Large open levels (L1, L4, L9) where coverage area is huge and time is tight |
-| **Precision** (Génépi) | +1 tile grooming radius | Tight-coverage levels (L3 Air Zone at 90%, L10 at 85%) where reaching edges matters |
-| **Warmth** (Vin Chaud) | Prevents frost vignette buildup for duration | Night/storm levels (L7, L9, L10) — see [Frost Vignette](#frost-vignette) |
-| **Cold Resist** (Tartiflette) | Halves frost accumulation rate (stacks with warmth) | Extended night operations where warmth alone isn't enough |
+Short burst durations create a pit-stop rhythm — players loop through Marie's restaurant. One buff active at a time; revisiting replaces the current buff and refills stamina to 100%.
 
-**Design goal**: Different levels reward different food choices. The "right" buff depends on what you're about to face.
+**Future**: coldResist (tartiflette) deferred until frost vignette mechanic is implemented.
 
 ### Frost Vignette
 

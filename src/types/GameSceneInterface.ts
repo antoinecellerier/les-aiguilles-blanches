@@ -5,6 +5,10 @@ export interface GameStateEvent {
   coverage: number;
   winchActive: boolean;
   levelIndex: number;
+  // Buff tracking
+  activeBuff: string | null;
+  buffTimeRemaining: number;
+  buffIcon: string;
   // Bonus objective tracking
   tumbleCount: number;
   fuelUsed: number;

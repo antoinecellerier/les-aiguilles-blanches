@@ -269,7 +269,7 @@ const fi: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12. helmikuuta 2026",
-  changelog_20260212: "📋 Tasonvalinta\n🔗 Katkeava vinssikaapeli\n🕹️ Parannetut ohjaukset ja sijoittelu\n🔊 Tuuli-, kaarros- ja temppuäänet laskussa",
+  changelog_20260212: "📋 Tason valinta\n🔗 Katkeava vinssikaapeli\n🕹️ Ohjaindiagnostiikka\n🍽️ Marien ruoat",
   changelog_20260211_date: "11. helmikuuta 2026",
 changelog_20260211: "⛷️ Laskettelulasku tamppauksen jälkeen\n🎯 Tamppauksen laatu\n🏔️ Värikoodatut jyrkät vyöhykkeet\n🏗️ Parkki ja trikit",
   changelog_20260210_date: "10. helmikuuta 2026",

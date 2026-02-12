@@ -42,7 +42,7 @@ Quality doesn't affect win/loss coverage — it feeds into the **precision groom
 
 - **⛽ Fuel**: Depletes while moving. Refuel at fuel stations (bottom of level). Shows ⛽+ feedback when refueling.
 - **❄️ Coverage**: Percentage of piste groomed. Reach target to win.
-- **💪 Stamina**: Operator energy. Drains faster on steep slopes without winch, slower with winch. Below 30%, grooming width decreases. Visit Chez Marie to restore (shows 🍲 Tartiflette! on first visit, 💪 for top-ups).
+- **💪 Stamina**: Operator energy. Drains faster on steep slopes without winch, slower with winch. Below 30%, grooming width decreases. Visit Chez Marie for food buffs.
 - **⏱️ Timer**: Time remaining. Complete before it hits 0:00.
 
 ## 🍽️ Service Points
@@ -51,11 +51,18 @@ Quality doesn't affect win/loss coverage — it feeds into the **precision groom
 Located at the bottom of each level. Drive over it to refuel automatically. Visual feedback shows when fuel is being added.
 
 ### Chez Marie (🍲)
-The resort restaurant near the top of the level. Drive over it to:
-- **First visit**: Full stamina restoration + 60 second regeneration buff
-- **While buff active**: Gradual stamina top-up
+The resort restaurant near the top of the level. Drive over it for full stamina restoration + a food buff. Marie reads your situation and serves the best dish:
 
-Pro tip: Plan your route to pass by Chez Marie before tackling steep sections!
+| Dish | Buff | When served | Effect | Duration |
+|------|------|-------------|--------|----------|
+| 🍷 Vin Chaud | Warmth | Night or storm levels | Halves stamina drain | 25s |
+| 🍝 Croziflette | Speed | Time remaining < 40% | +30% speed, +40% fuel burn | 20s |
+| 🥃 Génépi | Precision | Coverage > 70% | +1 grooming radius | 15s |
+| 🧀 Fondue | Stamina Regen | Default | Passive stamina regen | 30s |
+
+Only one buff active at a time — revisiting replaces the current buff. The HUD shows the active buff icon and countdown next to the level name.
+
+Pro tip: Time your visits strategically! Need to finish grooming edges? Visit at 70%+ coverage for precision. Running low on time? The speed boost helps but burns fuel fast.
 
 ## 🎮 Controls
 

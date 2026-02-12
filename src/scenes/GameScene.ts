@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
-import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { BALANCE, DEPTHS, FOOD_ITEMS, selectFoodBuff } from '../config/gameConfig';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { getString, setString } from '../utils/storage';
@@ -1071,7 +1071,8 @@ export default class GameScene extends Phaser.Scene {
     // Low stamina reduces grooming effectiveness (smaller radius)
     const staminaFactor = this.stamina > BALANCE.LOW_STAMINA_THRESHOLD ? 1 : (0.5 + this.stamina / (BALANCE.LOW_STAMINA_THRESHOLD * 2));
     const baseRadius = Math.ceil(GAME_CONFIG.GROOM_WIDTH / this.tileSize / 2) + 1;
-    const radius = Math.max(1, Math.floor(baseRadius * staminaFactor));
+    const precisionBonus = this.buffs.precision ? BALANCE.PRECISION_BUFF_RADIUS_BONUS : 0;
+    const radius = Math.max(1, Math.floor(baseRadius * staminaFactor) + precisionBonus);
 
     // Compute current grooming quality from stability + alignment
     // In park zones, alignment uses the zone's optimal direction instead of fall-line
@@ -1133,7 +1134,9 @@ export default class GameScene extends Phaser.Scene {
     const isMoving = (this.groomer.body as Phaser.Physics.Arcade.Body).velocity.length() > 0;
 
     if (isMoving) {
-      const fuelCost = GAME_CONFIG.FUEL_CONSUMPTION * dt * 100;
+      // Fuel cost — speed buff increases consumption
+      const fuelMultiplier = this.buffs.speed ? BALANCE.SPEED_BUFF_FUEL_MULTIPLIER : 1;
+      const fuelCost = GAME_CONFIG.FUEL_CONSUMPTION * dt * 100 * fuelMultiplier;
       this.fuel -= fuelCost;
       this.fuelUsed += fuelCost;
       
@@ -1156,6 +1159,11 @@ export default class GameScene extends Phaser.Scene {
       if (this.isGrooming) {
         // Operating the tiller adds effort
         staminaDrain *= BALANCE.STAMINA_GROOMING_MULTIPLIER;
+      }
+
+      // Warmth buff halves stamina drain
+      if (this.buffs.warmth) {
+        staminaDrain *= BALANCE.WARMTH_BUFF_STAMINA_MULTIPLIER;
       }
       
       this.stamina -= staminaDrain * dt * 100;
@@ -1243,19 +1251,27 @@ export default class GameScene extends Phaser.Scene {
         this.showInteractionFeedback(feedbackX, feedbackY, '🛢️', 0x44aaff, 28);
       }
     } else if (interactable.interactionType === 'food') {
-      // Restore stamina and give regen buff when visiting Chez Marie
-      if (!this.buffs.staminaRegen) {
+      // Chez Marie — auto-select the best dish based on current situation
+      const activeBuff = Object.keys(this.buffs).find(b => this.buffs[b] > 0);
+      if (!activeBuff) {
+        // No active buff — serve a new dish
+        const dish = this.selectFoodBuff();
+        const food = FOOD_ITEMS[dish];
         this.stamina = 100;
-        this.buffs.staminaRegen = BALANCE.FOOD_BUFF_DURATION; // 60 second regen buff
+        // Clear any previous buffs, apply new one
+        for (const b in this.buffs) delete this.buffs[b];
+        if (food.buff) {
+          this.buffs[food.buff] = food.buffDuration;
+        }
         const now = Date.now();
         if (now - this.lastRestaurantSoundTime > 2000) {
           this.lastRestaurantSoundTime = now;
           this.engineSounds.playRestaurant();
         }
         Accessibility.announce(t('marieWelcome'));
-        this.showInteractionFeedback(feedbackX, feedbackY, '🧀 Reblochon!', 0xffdd44, 32, true);
+        this.showInteractionFeedback(feedbackX, feedbackY, food.icon + ' ' + dish + '!', food.color, 32, true);
       } else if (this.stamina < 100) {
-        // If already have buff, just top up stamina
+        // Already have a buff — just top up stamina
         this.stamina = Math.min(100, this.stamina + BALANCE.FOOD_STAMINA_REFILL_RATE);
         const now = Date.now();
         if (now - this.lastRefuelSoundTime > 2000) {
@@ -1265,6 +1281,18 @@ export default class GameScene extends Phaser.Scene {
         this.showInteractionFeedback(feedbackX, feedbackY, '🧀', 0xffdd44, 24);
       }
     }
+  }
+
+  /** Auto-select the best dish based on current game state */
+  private selectFoodBuff(): string {
+    return selectFoodBuff({
+      isNight: !!this.level.isNight,
+      weather: this.level.weather || 'clear',
+      timeRemaining: this.timeRemaining,
+      timeLimit: this.level.timeLimit,
+      coverage: this.getCoverage(),
+      activeBuffs: this.buffs,
+    });
   }
 
   private lastFeedbackTime = 0;
@@ -1571,12 +1599,29 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private buildGameStatePayload(): GameStateEvent {
+    // Find the active buff with the most remaining time
+    let activeBuff: string | null = null;
+    let buffTimeRemaining = 0;
+    let buffIcon = '';
+    for (const b in this.buffs) {
+      if (this.buffs[b] > buffTimeRemaining) {
+        activeBuff = b;
+        buffTimeRemaining = this.buffs[b];
+        // Find matching food item icon
+        for (const key in FOOD_ITEMS) {
+          if (FOOD_ITEMS[key].buff === b) { buffIcon = FOOD_ITEMS[key].icon; break; }
+        }
+      }
+    }
     return {
       fuel: this.fuel,
       stamina: this.stamina,
       coverage: this.getCoverage(),
       winchActive: this.winchSystem?.active ?? false,
       levelIndex: this.levelIndex,
+      activeBuff,
+      buffTimeRemaining,
+      buffIcon,
       tumbleCount: this.tumbleCount,
       fuelUsed: Math.round(this.fuelUsed),
       winchUseCount: this.winchSystem?.useCount ?? 0,
@@ -1739,6 +1784,7 @@ export default class GameScene extends Phaser.Scene {
     this.ambienceSounds.stop();
     // Music persists across scene transitions (singleton)
     this.buildingRects = [];
+    this.buffs = {};
 
     this.children.removeAll(true);
   }

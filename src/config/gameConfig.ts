@@ -93,10 +93,18 @@ export const BALANCE = {
   FUEL_REFILL_RATE: 0.5,
   FUEL_REFILL_RATE_BUFFED: 0.3,
   FOOD_STAMINA_REFILL_RATE: 0.3,
-  FOOD_BUFF_DURATION: 60000,
+
+  // Buff UI
+  BUFF_FLASH_THRESHOLD: 5,         // seconds before expiry to start flashing
+  BUFF_FLASH_PERIOD: 150,          // milliseconds for flash oscillation
+  BUFF_FLASH_ALPHA_MAX: 1,         // opacity when fully visible
+  BUFF_FLASH_ALPHA_MIN: 0.3,       // opacity when dimmed
 
   // Movement
-  SPEED_BUFF_MULTIPLIER: 1.5,
+  SPEED_BUFF_MULTIPLIER: 1.3,
+  SPEED_BUFF_FUEL_MULTIPLIER: 1.4,
+  PRECISION_BUFF_RADIUS_BONUS: 1,
+  WARMTH_BUFF_STAMINA_MULTIPLIER: 0.5,
   SENSITIVITY_MIN: 0.25,
   SENSITIVITY_MAX: 2.0,
   SENSITIVITY_DEFAULT: 1.0,
@@ -256,28 +264,28 @@ export const FOOD_ITEMS: Record<string, FoodItem> = {
   croziflette: {
     stamina: 50,
     buff: 'speed',
-    buffDuration: 120000,
+    buffDuration: 20000,
     icon: '🍝',
     color: 0xf4a460,
   },
   fondue: {
     stamina: 30,
     buff: 'staminaRegen',
-    buffDuration: 180000,
+    buffDuration: 30000,
     icon: '🧀',
     color: 0xffd700,
   },
   genepi: {
     stamina: 20,
     buff: 'precision',
-    buffDuration: 90000,
+    buffDuration: 15000,
     icon: '🥃',
     color: 0x90ee90,
   },
   vinChaud: {
     stamina: 40,
     buff: 'warmth',
-    buffDuration: 150000,
+    buffDuration: 25000,
     icon: '🍷',
     color: 0x8b0000,
   },
@@ -289,3 +297,21 @@ export const FOOD_ITEMS: Record<string, FoodItem> = {
     color: 0x3e2723,
   },
 };
+
+/** Select the best dish based on current game state. Pure function for testability. */
+export function selectFoodBuff(opts: {
+  isNight: boolean;
+  weather: string;
+  timeRemaining: number;
+  timeLimit: number;
+  coverage: number;
+  activeBuffs: Record<string, number>;
+}): string {
+  const isNightOrStorm = opts.isNight || opts.weather === 'storm';
+  const timeRatio = opts.timeLimit > 0 ? opts.timeRemaining / opts.timeLimit : 1;
+
+  if (isNightOrStorm && !opts.activeBuffs.warmth) return 'vinChaud';
+  if (timeRatio < 0.4) return 'croziflette';
+  if (opts.coverage > 70) return 'genepi';
+  return 'fondue';
+}

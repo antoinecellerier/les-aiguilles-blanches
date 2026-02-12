@@ -269,7 +269,7 @@ const sv: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12 februari 2026",
-  changelog_20260212: "📋 Nivåval\n🔗 Vinschkabel som kan brista\n🕹️ Smidigare styrning och placering\n🔊 Vind-, svängnings- och trickljud under åket",
+  changelog_20260212: "📋 Nivåval\n🔗 Brytbar vinschkabel\n🕹️ Kontrolldiagnostik\n🍽️ Maries rätter",
   changelog_20260211_date: "11 februari 2026",
 changelog_20260211: "⛷️ Skidåkning efter preparering\n🎯 Prepareringskvalitet\n🏔️ Färgkodade branta zoner\n🏗️ Park och tricks",
   changelog_20260210_date: "10 februari 2026",

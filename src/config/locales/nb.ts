@@ -269,7 +269,7 @@ const nb: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12. februar 2026",
-  changelog_20260212: "📋 Nivåvalg\n🔗 Vinsjkabel som kan ryke\n🕹️ Jevnere styring og plassering\n🔊 Vind-, sving- og triks-lyder under løpet",
+  changelog_20260212: "📋 Nivåvalg\n🔗 Knekbar vinsjtau\n🕹️ Kontrolldiagnostikk\n🍽️ Maries retter",
   changelog_20260211_date: "11. februar 2026",
 changelog_20260211: "⛷️ Skikjøring etter preparering\n🎯 Prepareringskvalitet\n🏔️ Fargekodede bratte soner\n🏗️ Park og triks",
   changelog_20260210_date: "10. februar 2026",

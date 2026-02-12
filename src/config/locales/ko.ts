@@ -268,7 +268,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "2026년 2월 12일",
-  changelog_20260212: "📋 레벨 선택\n🔗 끊어지는 윈치 케이블\n🕹️ 조작감 및 배치 개선\n🔊 활강 중 바람, 카빙, 트릭 사운드",
+  changelog_20260212: "📋 레벨 선택\n🔗 끊어지는 윈치 케이블\n🕹️ 컨트롤러 진단\n🍽️ 마리의 요리",
   changelog_20260211_date: "2026년 2월 11일",
 changelog_20260211: "⛷️ 정비 후 스키 활강\n🎯 정비 품질\n🏔️ 색상 구분된 급경사 구간\n🏗️ 파크와 트릭",
   changelog_20260210_date: "2026년 2월 10일",

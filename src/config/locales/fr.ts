@@ -273,7 +273,7 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260212_date: "12 février 2026",
-  changelog_20260212: "📋 Sélection de niveau\n🔗 Câble de treuil cassable\n🕹️ Contrôles et placement améliorés\n🔊 Bruits de vent, carving et tricks en descente",
+  changelog_20260212: "📋 Sélection de niveau\n🔗 Câble de treuil cassable\n🕹️ Diagnostic manette\n🍽️ Les plats de Marie",
   changelog_20260211_date: "11 février 2026",
 changelog_20260211: "⛷️ Descente à ski après le damage\n🎯 Qualité de damage\n🏔️ Zones raides colorées\n🏗️ Terrain park et tricks",
   changelog_20260210_date: "10 février 2026",
