@@ -29,7 +29,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Gamepad diagnostic in settings — Live button readout to help users with Bluetooth controllers identify and rebind mismapped buttons
 - [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
 - [x] Make the settings menu look nicer — visual polish pass
-- [ ] Bundle size / load time optimization — Analyze bundle, consider async loading for heavy systems (e.g. audio) to speed up initial game load
+
 - [x] Add a tool tip on mouse over / touch for menu screen controller availability icons to explain what they mean to the user
 - [x] Review emojis in dialogues for consistency with in game UI. E.g. the grooming button on mobile no longer looks like a snowflake.
 - [x] Avalanche zones often overlap cliffs, they should be more distinct
