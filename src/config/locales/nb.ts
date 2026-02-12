@@ -21,6 +21,7 @@ const nb: Record<string, string> = {
   inputTouchOff: "✗ Ingen berøringsskjerm",
   inputGamepad: "✓ Gamepad tilkoblet",
   inputGamepadOff: "✗ Ingen gamepad",
+  updateAvailable: "Ny versjon tilgjengelig — trykk for å laste på nytt",
   madeIn: "Laget med ❄️ i Savoie",
   on: "✓ PÅ",
   off: "✗ AV",

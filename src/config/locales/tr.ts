@@ -21,6 +21,7 @@ const tr: Record<string, string> = {
   inputTouchOff: "✗ Dokunmatik ekran yok",
   inputGamepad: "✓ Gamepad bağlı",
   inputGamepadOff: "✗ Gamepad yok",
+  updateAvailable: "Yeni sürüm mevcut — yenilemek için dokunun",
   madeIn: "❄️ ile Savoie'da yapıldı",
   on: "✓ AÇIK",
   off: "✗ KAPALI",

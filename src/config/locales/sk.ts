@@ -21,6 +21,7 @@ const sk: Record<string, string> = {
   inputTouchOff: "✗ Žiadny dotykový displej",
   inputGamepad: "✓ Gamepad pripojený",
   inputGamepadOff: "✗ Žiadny gamepad",
+  updateAvailable: "Nová verzia k dispozícii — ťuknite pre obnovenie",
   madeIn: "Vyrobené s ❄️ v Savojsku",
   on: "✓ ZAP",
   off: "✗ VYP",

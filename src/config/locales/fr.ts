@@ -22,6 +22,7 @@ const fr: Record<string, string> = {
   inputTouchOff: "✗ Pas d'écran tactile",
   inputGamepad: "✓ Manette connectée",
   inputGamepadOff: "✗ Pas de manette",
+  updateAvailable: "Nouvelle version disponible — toucher pour recharger",
   madeIn: "Fait avec ❄️ en Savoie",
   on: "✓ OUI",
   off: "✗ NON",

@@ -21,6 +21,7 @@ const en: Record<string, string> = {
   inputTouchOff: "✗ No touchscreen",
   inputGamepad: "✓ Gamepad connected",
   inputGamepadOff: "✗ No gamepad",
+  updateAvailable: "New version available — tap to reload",
   madeIn: "Made with ❄️ in Savoie",
   on: "✓ ON",
   off: "✗ OFF",

@@ -21,6 +21,7 @@ const sv: Record<string, string> = {
   inputTouchOff: "✗ Ingen pekskärm",
   inputGamepad: "✓ Gamepad ansluten",
   inputGamepadOff: "✗ Ingen gamepad",
+  updateAvailable: "Ny version tillgänglig — tryck för att ladda om",
   madeIn: "Gjord med ❄️ i Savoie",
   on: "✓ PÅ",
   off: "✗ AV",

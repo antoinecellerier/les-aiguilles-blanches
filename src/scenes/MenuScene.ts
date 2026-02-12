@@ -8,6 +8,7 @@ import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
+import { checkForUpdate } from '../utils/updateCheck';
 import { playClick, playDeviceChime, playToggle } from '../systems/UISounds';
 import { MusicSystem } from '../systems/MusicSystem';
 import { AudioSystem } from '../systems/AudioSystem';
@@ -519,6 +520,22 @@ export default class MenuScene extends Phaser.Scene {
         })
         .catch(() => { /* Dev-only version fetch — ignore network errors */ });
     }
+
+    // Check for newer deployed version
+    checkForUpdate().then(remoteVersion => {
+      if (!remoteVersion || !githubLink.active) return;
+      const updateText = this.add.text(
+        width / 2, footerTop - Math.round(12 * scaleFactor),
+        '🔄 ' + (t('updateAvailable') || 'New version available — tap to reload'),
+        {
+          fontFamily: THEME.fonts.family,
+          fontSize: footerFontSize + 'px',
+          color: THEME.colors.accent,
+        }
+      ).setOrigin(0.5).setDepth(10)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => location.reload());
+    });
 
     this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {
       fontFamily: THEME.fonts.family,

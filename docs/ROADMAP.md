@@ -36,7 +36,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] Level durations should automatically be set based on difficulty level, area to groom, time to navigate access paths, etc.
 - [x] Volume/mute indicator on menu screen bottom-left corner, analogous to controller hint icons
 - [x] Tutorial dialogue fatigue — skip tutorial option on replay
-- [ ] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
+- [x] When running a browser cached version, check if a newer version is available and offer to update on the menu screen
 - [x] Winch cable max extension — Cable snaps at 25 tiles with stun + stamina penalty. Tension drag slows groomer near limit.
 
 
@@ -79,6 +79,8 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Background update check** — On menu load, fetches `version.json` (generated at build time by Vite plugin) with cache-busting and compares against baked-in `__APP_VERSION__`. Shows clickable reload banner above footer when a newer version is deployed. Localized in 14 languages. Session-cached to avoid repeated fetches.
 
 - ✅ **Ski run audio & pause** — Procedural descent audio via SkiRunSounds: speed-dependent wind rush, terrain-aware snow carving (groomed swishes vs ungroomed crunch), brake scrape, obstacle bump, cliff wipeout, trick launch/land whoosh, rail grind metallic scrape. AmbienceSounds (storm/night) and MusicSystem ('intense' mood) now active during ski runs. ESC opens pause menu with Skip Run option (was instant abort). Localized in 14 languages.
 

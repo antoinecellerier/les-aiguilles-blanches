@@ -21,6 +21,7 @@ const ja: Record<string, string> = {
   inputTouchOff: "✗ タッチスクリーンなし",
   inputGamepad: "✓ ゲームパッド接続済み",
   inputGamepadOff: "✗ ゲームパッドなし",
+  updateAvailable: "新しいバージョンがあります — タップで更新",
   madeIn: "❄️ サヴォワ製",
   on: "✓ オン",
   off: "✗ オフ",

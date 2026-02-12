@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { execSync } from 'child_process';
+import { writeFileSync } from 'fs';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 // Get git commit hash and build date for version string
@@ -43,6 +44,21 @@ function liveVersionPlugin(): Plugin {
   };
 }
 
+// Build plugin: writes version.json to dist/ for update checks
+function versionFilePlugin(): Plugin {
+  return {
+    name: 'version-file',
+    apply: 'build',
+    writeBundle({ dir }) {
+      const outDir = dir || 'dist';
+      writeFileSync(
+        join(outDir, 'version.json'),
+        JSON.stringify({ version: getVersion() }) + '\n'
+      );
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   // Load .env.local so non-VITE_ vars like PORT are available
   const env = loadEnv(mode, process.cwd(), '');
@@ -77,6 +93,7 @@ export default defineConfig(({ mode }) => {
   },
   plugins: [
     liveVersionPlugin(),
+    versionFilePlugin(),
     // Generate bundle analysis (run: npm run build && open stats.html)
     visualizer({
       filename: 'stats.html',

@@ -21,6 +21,7 @@ const pl: Record<string, string> = {
   inputTouchOff: "✗ Brak ekranu dotykowego",
   inputGamepad: "✓ Gamepad podłączony",
   inputGamepadOff: "✗ Brak gamepada",
+  updateAvailable: "Nowa wersja dostępna — dotknij, aby odświeżyć",
   madeIn: "Zrobione z ❄️ w Sabaudii",
   on: "✓ WŁ",
   off: "✗ WYŁ",

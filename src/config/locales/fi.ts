@@ -21,6 +21,7 @@ const fi: Record<string, string> = {
   inputTouchOff: "✗ Ei kosketusnäyttöä",
   inputGamepad: "✓ Peliohjain yhdistetty",
   inputGamepadOff: "✗ Ei peliohjainta",
+  updateAvailable: "Uusi versio saatavilla — napauta ladataksesi uudelleen",
   madeIn: "Tehty ❄️:lla Savoie'ssa",
   on: "✓ PÄÄLLÄ",
   off: "✗ POIS",

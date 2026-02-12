@@ -21,6 +21,7 @@ const ko: Record<string, string> = {
   inputTouchOff: "✗ 터치스크린 없음",
   inputGamepad: "✓ 게임패드 연결됨",
   inputGamepadOff: "✗ 게임패드 없음",
+  updateAvailable: "새 버전이 있습니다 — 탭하여 새로고침",
   madeIn: "❄️ 사부아에서 제작",
   on: "✓ 켜기",
   off: "✗ 끄기",
