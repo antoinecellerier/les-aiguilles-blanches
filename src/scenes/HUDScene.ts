@@ -25,7 +25,7 @@ interface HUDSceneData {
 export default class HUDScene extends Phaser.Scene {
   private level!: Level;
   private mode: 'groom' | 'ski' = 'groom';
-  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, activeBuff: null, buffTimeRemaining: 0, buffIcon: '', tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0, restartCount: 0 };
+  private gameState: GameStateEvent = { fuel: 100, stamina: 100, coverage: 0, winchActive: false, levelIndex: 0, activeBuff: null, buffTimeRemaining: 0, buffIcon: '', frostLevel: 0, tumbleCount: 0, fuelUsed: 0, winchUseCount: 0, pathsVisited: 0, totalPaths: 0, restartCount: 0 };
   private isSkipping = false;
   private gamepadSelectPressed = false;
   private uiScale = 1;
@@ -38,6 +38,7 @@ export default class HUDScene extends Phaser.Scene {
   private staminaBarBg: Phaser.GameObjects.Rectangle | null = null;
   private staminaText: Phaser.GameObjects.Text | null = null;
   private buffIndicator: Phaser.GameObjects.Text | null = null;
+  private frostIndicator: Phaser.GameObjects.Text | null = null;
   private coverageText: Phaser.GameObjects.Text | null = null;
   private coverageBar: Phaser.GameObjects.Rectangle | null = null;
   private coverageBarBg: Phaser.GameObjects.Rectangle | null = null;
@@ -180,6 +181,11 @@ export default class HUDScene extends Phaser.Scene {
     const buffX = levelNameText.x + levelNameText.width + Math.round(12 * this.uiScale);
     this.buffIndicator = visorText(buffX, row1Y, '', fontSmall);
     if (this.buffIndicator) this.buffIndicator.setAlpha(0);
+
+    // Frost indicator — shown after buff indicator on row 1
+    const frostX = buffX + Math.round(60 * this.uiScale);
+    this.frostIndicator = visorText(frostX, row1Y, '', fontSmall);
+    if (this.frostIndicator) this.frostIndicator.setAlpha(0);
 
     // === ROW 2: All three bars side by side ===
     const dotSize = Math.round(6 * this.uiScale);
@@ -997,6 +1003,27 @@ export default class HUDScene extends Phaser.Scene {
       }
     }
 
+    // Frost indicator
+    if (this.frostIndicator?.active) {
+      const frost = this.gameState.frostLevel;
+      if (frost > 5) {
+        const pct = Math.round(frost);
+        this.frostIndicator.setText('❄️ ' + pct + '%');
+        // Color shifts from white to red at penalty thresholds
+        if (pct >= BALANCE.FROST_SPEED_THRESHOLD_2) {
+          this.frostIndicator.setColor('#FF4444');
+        } else if (pct >= BALANCE.FROST_SPEED_THRESHOLD_1) {
+          this.frostIndicator.setColor('#FFAA44');
+        } else {
+          this.frostIndicator.setColor('#88CCFF');
+        }
+        this.frostIndicator.setAlpha(1);
+      } else {
+        this.frostIndicator.setText('');
+        this.frostIndicator.setAlpha(0);
+      }
+    }
+
     if (this.coverageText?.active) {
       this.coverageText.setText(coverage + '%');
       const targetMet = coverage >= this.level.targetCoverage;
@@ -1156,6 +1183,7 @@ export default class HUDScene extends Phaser.Scene {
     this.staminaBar = null;
     this.staminaText = null;
     this.buffIndicator = null;
+    this.frostIndicator = null;
     this.coverageText = null;
     this.coverageBar = null;
     this.coverageBarBg = null;

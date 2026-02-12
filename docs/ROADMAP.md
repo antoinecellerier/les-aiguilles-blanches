@@ -33,6 +33,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Ski headlamp** — Night ski runs use a narrow forward headlamp instead of wide groomer work lights. Single cone beam, head-mounted origin with forward projection. Shared `drawLightCone()` helper for both light types.
 
+- ✅ **Frost vignette cold exposure** — Icy overlay creeps from screen edges on late-game levels. Night 25%/min, storm 35%/min, light snow 15%/min. Speed -10% at 50% frost, -20% at 75%. Warmth buff pauses accumulation; Chez Marie resets to 0%. HUD ❄️ indicator with blue→orange→red color progression. L7 exempt (already teaches night+cliffs). Difficulty curve: L8 introduces gently, L9/L10 ramp up. Pure `getFrostRate()`/`getFrostSpeedMultiplier()` with 15 unit tests.
+
+- ✅ **Food buff auto-selection** — Chez Marie now reads the player's situation and serves the best dish automatically. Vin Chaud (warmth, 25s) on night/storm levels halves stamina drain. Croziflette (speed, 20s) when time < 40% gives +30% speed at +40% fuel cost. Génépi (precision, 15s) when coverage > 70% adds +1 grooming radius. Fondue (staminaRegen, 30s) as default fallback. Short burst durations create a pit-stop rhythm. One buff at a time; HUD shows active buff icon + countdown. Pure `selectFoodBuff()` function with 10 unit tests.
+
 - ✅ **Ski run realism pass** — Off-piste skiing with deep powder drag and packed-snow shoulder. Ski/snowboard tracks on ungroomed and off-piste snow. Smooth carving physics via lerped lateral velocity. Fatal crashes above 40 km/h. Avalanche risk on hazardous levels (5× faster trigger). Y-depth sorted obstacles. Default grooming when starting from level select. Ski crash fail screens with yard sale and avalanche burial pixel art.
 
 - ✅ **Favicon** — Pixel-art SVG favicon with red groomer, snow-capped mountain, and groomed snow.

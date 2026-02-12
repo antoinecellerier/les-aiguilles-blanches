@@ -6,6 +6,7 @@ import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
 export class WeatherSystem {
   private scene: Phaser.Scene;
   private nightOverlay: Phaser.GameObjects.Graphics | null = null;
+  private frostOverlay: Phaser.GameObjects.Graphics | null = null;
   private headlightDirection: { x: number; y: number } = { x: 0, y: -1 };
   private weatherParticles: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
   private windStreaks: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
@@ -230,6 +231,51 @@ export class WeatherSystem {
     }
   }
 
+  createFrostOverlay(): void {
+    this.frostOverlay = this.scene.add.graphics();
+    this.frostOverlay.setDepth(DEPTHS.FROST_OVERLAY);
+    this.frostOverlay.setScrollFactor(0);
+  }
+
+  updateFrostOverlay(frostLevel: number): void {
+    if (!this.frostOverlay) return;
+    this.frostOverlay.clear();
+    if (frostLevel <= 0) return;
+
+    const cam = this.scene.cameras.main;
+    const fullScreen = overlayFullScreen(cam, 10);
+    const { x, y, width, height } = fullScreen;
+
+    // Frost vignette: icy border creeps inward from edges
+    const maxInset = Math.min(width, height) * 0.3;
+    const inset = maxInset * (frostLevel / 100);
+    const steps = 12;
+    const frostColor = 0xd0e8ff; // Icy blue-white
+
+    for (let i = 0; i < steps; i++) {
+      const outerT = i / steps;
+      const innerT = (i + 1) / steps;
+      const outerInset = inset * outerT;
+      const innerInset = inset * innerT;
+      const bandWidth = innerInset - outerInset;
+      if (bandWidth < 1) continue;
+
+      // Outer bands are most opaque, fading inward
+      const alpha = (frostLevel / 100) * 0.7 * (1 - innerT * 0.85);
+      if (alpha < 0.01) continue;
+
+      this.frostOverlay.fillStyle(frostColor, alpha);
+      // Top
+      this.frostOverlay.fillRect(x, y + outerInset, width, bandWidth);
+      // Bottom
+      this.frostOverlay.fillRect(x, y + height - innerInset, width, bandWidth);
+      // Left (between top and bottom bands)
+      this.frostOverlay.fillRect(x + outerInset, y + innerInset, bandWidth, height - innerInset * 2);
+      // Right
+      this.frostOverlay.fillRect(x + width - innerInset, y + innerInset, bandWidth, height - innerInset * 2);
+    }
+  }
+
   applyAccessibilitySettings(): void {
     Accessibility.applyDOMSettings();
     this.highContrastMode = Accessibility.settings.highContrast;
@@ -239,6 +285,7 @@ export class WeatherSystem {
     this.weatherParticles = null;
     this.windStreaks = null;
     this.nightOverlay = null;
+    this.frostOverlay = null;
     this.headlightDirection = { x: 0, y: -1 };
   }
 }

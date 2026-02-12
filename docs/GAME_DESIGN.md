@@ -157,24 +157,23 @@ Marie auto-selects the best dish based on current game state. No new inputs need
 
 Short burst durations create a pit-stop rhythm — players loop through Marie's restaurant. One buff active at a time; revisiting replaces the current buff and refills stamina to 100%.
 
-**Future**: coldResist (tartiflette) deferred until frost vignette mechanic is implemented.
+**Future**: coldResist (tartiflette) deferred — warmth buff already counters frost.
 
-### Frost Vignette
+### Frost Vignette ✅ IMPLEMENTED
 
-**Problem**: Night and storm levels reduce visibility (headlights, fog) but create no resource pressure. The player adapts to low visibility and it becomes a non-factor.
+Cold exposure mechanic adding resource pressure to late-game levels.
 
-**Proposal**: Cold exposure mechanic.
-
-- On night and storm levels, a frost overlay gradually creeps from the screen edges
-- Rate: ~2% opacity per minute (night) or ~4% per minute (storm)
-- At 60% frost, movement speed drops 10% (cold hands)
-- At 80% frost, grooming radius shrinks (numb fingers)
-- **Warmth buff** pauses frost accumulation for its duration
-- **Cold resist buff** halves frost rate
+- Icy vignette overlay creeps from screen edges; intensity scales with frost level
+- **Rates**: Night 25%/min, Storm 35%/min, Light snow 15%/min
+- At 50% frost: speed -10% (cold hands)
+- At 75% frost: speed -20% (numb fingers)
+- **Warmth buff** (vin chaud) pauses frost accumulation
 - Visiting Chez Marie resets frost to 0%
-- Creates a natural "come in from the cold" loop on long night missions
+- HUD shows ❄️ percentage with color: blue → orange → red at penalty thresholds
+- **Difficulty curve**: L8 introduces frost gently (light snow, daytime), L9 ramps up (storm), L10 combines with night
+- L7 (Verticale) is exempt — already introduces night + cliffs + triple winch
 
-**Affected levels**: L7 (Verticale), L9 (Tempête), L10 (Coupe des Aiguilles).
+**Affected levels**: L8 (Col Dangereux), L9 (Tempête), L10 (Coupe des Aiguilles).
 
 ### Halfpipe Scoring ✅ IMPLEMENTED
 

@@ -222,7 +222,7 @@ const de: Record<string, string> = {
   changelog_20260213_date: "13. Februar 2026",
   changelog_20260213: "🚩 Slalomtore\n🏔️ Skisprünge\n🎿 Skifahrer und Snowboarder im Siegbildschirm\n⚙️ Einstellungen verbessert",
   changelog_20260212_date: "12. Februar 2026",
-  changelog_20260212: "📋 Levelauswahl\n🔗 Brechbares Windenseil\n🕹️ Controller-Diagnose\n🍽️ Maries Küche",
+  changelog_20260212: "📋 Levelauswahl\n🔗 Brechbares Windenseil\n🕹️ Controller-Diagnose\n🍽️ Maries Küche\n❄️ Kälteeinwirkung",
   changelog_20260211_date: "11. Februar 2026",
 changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqualität\n🏔️ Farblich markierte Steilzonen\n🏗️ Terrain-Park und Tricks",
   changelog_20260210_date: "10. Februar 2026",

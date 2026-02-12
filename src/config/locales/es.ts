@@ -222,7 +222,7 @@ const es: Record<string, string> = {
   changelog_20260213_date: "13 de febrero de 2026",
   changelog_20260213: "🚩 Puertas de eslalon\n🏔️ Saltos de esquí\n🎿 Esquiador y snowboarder en pantalla de victoria\n⚙️ Diseño de ajustes",
   changelog_20260212_date: "12 de febrero de 2026",
-  changelog_20260212: "📋 Selección de nivel\n🔗 Cable de cabrestante rompible\n🕹️ Diagnóstico del mando\n🍽️ Los platos de Marie",
+  changelog_20260212: "📋 Selección de nivel\n🔗 Cable de cabrestante rompible\n🕹️ Diagnóstico del mando\n🍽️ Los platos de Marie\n❄️ Exposición al frío",
   changelog_20260211_date: "11 de febrero de 2026",
 changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calidad de preparación\n🏔️ Zonas empinadas coloreadas\n🏗️ Terrain park y trucos",
   changelog_20260210_date: "10 de febrero de 2026",

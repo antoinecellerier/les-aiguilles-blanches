@@ -62,6 +62,7 @@ export const DEPTHS = {
   WINCH_CABLE: 50,    // Winch cable graphics
   AIRBORNE: 55,       // Flying birds, airborne objects (above cable, below overlay)
   NIGHT_OVERLAY: 100, // Night/weather darkening
+  FROST_OVERLAY: 100, // Frost vignette (same layer as night overlay)
   PLAYER: 101,        // Groomer (above night overlay so headlights work)
   FEEDBACK: 200,      // Floating text (+fuel, stamina, etc.)
   WEATHER: 200,       // Snow particles (same layer as feedback)
@@ -100,6 +101,16 @@ export const BALANCE = {
   BUFF_FLASH_PERIOD: 150,          // milliseconds for flash oscillation
   BUFF_FLASH_ALPHA_MAX: 1,         // opacity when fully visible
   BUFF_FLASH_ALPHA_MIN: 0.3,       // opacity when dimmed
+
+  // Frost
+  FROST_RATE_NIGHT: 25,       // % per minute on night levels
+  FROST_RATE_STORM: 35,       // % per minute on storm levels
+  FROST_RATE_LIGHT_SNOW: 15,  // % per minute on light_snow levels
+  FROST_SPEED_THRESHOLD_1: 50,  // frost % for first speed penalty
+  FROST_SPEED_THRESHOLD_2: 75,  // frost % for second speed penalty
+  FROST_SPEED_PENALTY_1: 0.9,   // speed multiplier at threshold 1
+  FROST_SPEED_PENALTY_2: 0.8,   // speed multiplier at threshold 2
+  FROST_MIN_LEVEL: 8,           // first level index with frost (L8 Col Dangereux, skip L7 Verticale)
 
   // Movement
   SPEED_BUFF_MULTIPLIER: 1.3,
@@ -332,4 +343,20 @@ export function selectFoodBuff(opts: {
   if (timeRatio < 0.4) return 'croziflette';
   if (opts.coverage > 70) return 'genepi';
   return 'fondue';
+}
+
+/** Get frost accumulation rate for a level. Pure function for testability. */
+export function getFrostRate(levelIndex: number, isNight: boolean, weather: string): number {
+  if (levelIndex < BALANCE.FROST_MIN_LEVEL) return 0;
+  if (weather === 'storm') return BALANCE.FROST_RATE_STORM;
+  if (weather === 'light_snow') return BALANCE.FROST_RATE_LIGHT_SNOW;
+  if (isNight) return BALANCE.FROST_RATE_NIGHT;
+  return 0;
+}
+
+/** Get frost speed penalty multiplier. Pure function for testability. */
+export function getFrostSpeedMultiplier(frostLevel: number): number {
+  if (frostLevel >= BALANCE.FROST_SPEED_THRESHOLD_2) return BALANCE.FROST_SPEED_PENALTY_2;
+  if (frostLevel >= BALANCE.FROST_SPEED_THRESHOLD_1) return BALANCE.FROST_SPEED_PENALTY_1;
+  return 1;
 }

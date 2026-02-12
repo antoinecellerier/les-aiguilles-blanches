@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
-import { BALANCE, DEPTHS, FOOD_ITEMS, selectFoodBuff } from '../config/gameConfig';
+import { BALANCE, DEPTHS, FOOD_ITEMS, selectFoodBuff, getFrostRate, getFrostSpeedMultiplier } from '../config/gameConfig';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { getString, setString } from '../utils/storage';
@@ -93,6 +93,8 @@ export default class GameScene extends Phaser.Scene {
   private isGrooming = false;
   private dialogueWasShowing = false;
   private buffs: Buffs = {};
+  private frostLevel = 0;
+  private frostRate = 0;
 
   // Stats tracking for bonus objectives
   private fuelUsed = 0;
@@ -199,6 +201,10 @@ export default class GameScene extends Phaser.Scene {
     if (isNaN(this.movementSensitivity) || this.movementSensitivity < BALANCE.SENSITIVITY_MIN || this.movementSensitivity > BALANCE.SENSITIVITY_MAX) {
       this.movementSensitivity = BALANCE.SENSITIVITY_DEFAULT;
     }
+
+    // Frost rate based on level weather (only on late-game levels)
+    this.frostLevel = 0;
+    this.frostRate = getFrostRate(this.levelIndex, !!this.level.isNight, this.level.weather || 'clear');
   }
 
   create(): void {
@@ -472,6 +478,10 @@ export default class GameScene extends Phaser.Scene {
 
     if (this.level.weather !== 'clear') {
       this.weatherSystem.createWeatherEffects(this.level);
+    }
+
+    if (this.frostRate > 0) {
+      this.weatherSystem.createFrostOverlay();
     }
 
     this.weatherSystem.applyAccessibilitySettings();
@@ -772,6 +782,11 @@ export default class GameScene extends Phaser.Scene {
       this.weatherSystem.updateNightOverlay(this.groomer);
     }
 
+    // Update frost vignette
+    if (this.frostRate > 0) {
+      this.weatherSystem.updateFrostOverlay(this.frostLevel);
+    }
+
     // Update wildlife (flee from groomer)
     this.wildlifeSystem.update(this.groomer.x, this.groomer.y, delta);
 
@@ -923,7 +938,10 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
-    const speed = GAME_CONFIG.GROOMER_SPEED * this.movementSensitivity * (this.buffs.speed ? BALANCE.SPEED_BUFF_MULTIPLIER : 1);
+    let speed = GAME_CONFIG.GROOMER_SPEED * this.movementSensitivity * (this.buffs.speed ? BALANCE.SPEED_BUFF_MULTIPLIER : 1);
+
+    // Frost slows movement
+    speed *= getFrostSpeedMultiplier(this.frostLevel);
 
     let vx = 0;
     let vy = 0;
@@ -1201,6 +1219,11 @@ export default class GameScene extends Phaser.Scene {
       this.stamina = Math.min(100, this.stamina + BALANCE.STAMINA_REGEN_RATE);
     }
 
+    // Frost accumulation — warmth buff pauses it
+    if (this.frostRate > 0 && !this.buffs.warmth) {
+      this.frostLevel = Math.min(100, this.frostLevel + (this.frostRate / 60) * dt);
+    }
+
     if (this.isGameOver) return;
 
     if (this.fuel <= 0) {
@@ -1252,6 +1275,7 @@ export default class GameScene extends Phaser.Scene {
       }
     } else if (interactable.interactionType === 'food') {
       // Chez Marie — auto-select the best dish based on current situation
+      this.frostLevel = 0; // Coming in from the cold
       const activeBuff = Object.keys(this.buffs).find(b => this.buffs[b] > 0);
       if (!activeBuff) {
         // No active buff — serve a new dish
@@ -1622,6 +1646,7 @@ export default class GameScene extends Phaser.Scene {
       activeBuff,
       buffTimeRemaining,
       buffIcon,
+      frostLevel: this.frostLevel,
       tumbleCount: this.tumbleCount,
       fuelUsed: Math.round(this.fuelUsed),
       winchUseCount: this.winchSystem?.useCount ?? 0,
@@ -1785,6 +1810,8 @@ export default class GameScene extends Phaser.Scene {
     // Music persists across scene transitions (singleton)
     this.buildingRects = [];
     this.buffs = {};
+    this.frostLevel = 0;
+    this.frostRate = 0;
 
     this.children.removeAll(true);
   }

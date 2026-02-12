@@ -9,6 +9,8 @@ export interface GameStateEvent {
   activeBuff: string | null;
   buffTimeRemaining: number;
   buffIcon: string;
+  // Frost tracking
+  frostLevel: number;
   // Bonus objective tracking
   tumbleCount: number;
   fuelUsed: number;

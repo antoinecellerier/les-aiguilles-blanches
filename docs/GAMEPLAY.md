@@ -50,17 +50,19 @@ Quality doesn't affect win/loss coverage — it feeds into the **precision groom
 
 **Timer (⏱️)**: Time remaining. Complete before it hits 0:00. Hidden on levels with no time limit.
 
+**❄️ Frost** (L8+): Cold exposure on snow/night levels. Creeps up over time — at 50% your speed drops 10%, at 75% it drops 20%. The warmth buff pauses frost; visiting Chez Marie resets it to 0%.
+
 ## 🍽️ Service Points
 
 ### Fuel Station (⛽)
 Located at the bottom of each level. Drive over it to refuel automatically. Visual feedback shows when fuel is being added.
 
 ### Chez Marie (🍲)
-The resort restaurant near the top of the level. Drive over it for full stamina restoration + a food buff. Marie reads your situation and serves the best dish:
+The resort restaurant near the top of the level. Drive over it for full stamina restoration + a food buff. Also resets frost to 0%. Marie reads your situation and serves the best dish:
 
 | Dish | Buff | When served | Effect | Duration |
 |------|------|-------------|--------|----------|
-| 🍷 Vin Chaud | Warmth | Night or storm levels | Halves stamina drain | 25s |
+| 🍷 Vin Chaud | Warmth | Night or storm levels | Halves stamina drain + pauses frost | 25s |
 | 🍝 Croziflette | Speed | Time remaining < 40% | +30% speed, +40% fuel burn | 20s |
 | 🥃 Génépi | Precision | Coverage > 70% | +1 grooming radius | 15s |
 | 🧀 Fondue | Stamina Regen | Default | Passive stamina regen | 30s |

@@ -271,7 +271,7 @@ const en: Record<string, string> = {
   changelog_20260213_date: "February 13, 2026",
   changelog_20260213: "🚩 Slalom gates\n🏔️ Ski jumps\n🎿 Skier and snowboarder on win screen\n⚙️ Settings layout polish",
   changelog_20260212_date: "February 12, 2026",
-  changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Controller diagnostics\n🍽️ Marie's kitchen",
+  changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Controller diagnostics\n🍽️ Marie's kitchen\n❄️ Frost exposure",
   changelog_20260211_date: "February 11, 2026",
 changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔️ Color-coded steep zones\n🏗️ Terrain park and tricks",
   changelog_20260210_date: "February 10, 2026",
