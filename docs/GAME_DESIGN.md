@@ -39,7 +39,7 @@ Tutorial → Marmottes → Chamois → Air Zone → Aigle → Glacier → Tube �
 | 0 | Tutorial | Movement + grooming basics | None (safe sandbox) |
 | 1 | Marmottes | Independent grooming, time pressure | Timer, obstacles |
 | 2 | Chamois | Slope awareness, efficiency | Steep zones (25°), tighter coverage |
-| 3 | Air Zone | Precision around features | Kickers/rails, 90% coverage |
+| 3 | Air Zone | Precision around features | Kickers/rails, 80% coverage |
 | 4 | Aigle | Fuel management, route planning | Service roads, winding piste, fuel scarcity |
 | 5 | Glacier | Winch operation | 35–40° slopes, tumble risk |
 | 6 | Tube | Halfpipe-specific grooming | Directional scoring (planned) |
@@ -71,11 +71,11 @@ Current state: the restaurant restores stamina and provides named buffs, but **o
 
 | Dish | Stamina | Buff | Duration | Strategic Role (planned) |
 |------|---------|------|----------|--------------------------|
-| Tartiflette | +100% | Cold resist | 2 min | Night/storm insulation |
-| Croziflette | +50% | Speed | 2 min | Fast coverage, high fuel burn |
-| Fondue | +30% | Stamina regen | 3 min | Sustained steep climbing |
-| Génépi | +20% | Precision | 1.5 min | Tight coverage targets |
-| Vin Chaud | +40% | Warmth | 2.5 min | Counter frost vignette |
+| Tartiflette | +100% | Cold resist | 120s | Night/storm insulation |
+| Croziflette | +50% | Speed | 20s | Fast coverage, high fuel burn |
+| Fondue | +30% | Stamina regen | 30s | Sustained steep climbing |
+| Génépi | +20% | Precision | 15s | Tight coverage targets |
+| Vin Chaud | +40% | Warmth | 25s | Counter frost vignette |
 | Café | +25% | None | — | Quick top-up, no detour |
 
 ---

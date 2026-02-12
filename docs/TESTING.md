@@ -55,7 +55,7 @@ This is maintenance-free for source files: new source files are covered by the `
 
 ## Test Helpers
 
-Core helpers are in `tests/e2e/conftest.py`, including `click_menu_button`, `click_button`, `BUTTON_*` constants, `assert_scene_active`, `get_active_scenes`, and other shared utilities.
+Core helpers are in `tests/e2e/conftest.py`, including `click_menu_button`, `click_button`, `BUTTON_*` constants, `LEVEL_INDEX`, `assert_scene_active`, `assert_scene_not_active`, `assert_no_error_message`, `assert_not_on_menu`, `assert_canvas_renders_content`, `get_active_scenes`, `get_current_level`, `navigate_to_settings`, and other shared utilities.
 
 ### Fixtures
 
@@ -78,6 +78,23 @@ wait_for_game_ready(page)                   # Wait for MenuScene (used by fixtur
 skip_to_level(page, 6)                      # Jump directly to level 6
 skip_to_credits(page)                       # Skip all levels (tests progression)
 wait_for_level_or_credits(page, level)      # Wait for level OR game end
+```
+
+### Menu & Navigation
+
+```python
+LEVEL_INDEX                                 # Dict mapping level nameKey → array index
+get_current_level(page)                     # Get current level index from GameScene
+navigate_to_settings(page)                  # Navigate to SettingsScene directly
+```
+
+### Assertions
+
+```python
+assert_no_error_message(page)               # Assert no error message on screen
+assert_canvas_renders_content(page)         # Assert canvas has non-black content
+assert_scene_not_active(page, 'MenuScene')  # Assert a scene is NOT active
+assert_not_on_menu(page)                    # Assert we're no longer on MenuScene
 ```
 
 ### Dialogue Management

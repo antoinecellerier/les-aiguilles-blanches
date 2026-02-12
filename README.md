@@ -32,16 +32,14 @@ This game is an experiment in building a complete, polished game almost entirely
 ## 🚀 Quick Start
 
 ```bash
-npm install
-npm run dev          # Dev server at http://localhost:3000
-npm run build        # Production build to dist/
+./setup.sh           # Install dependencies + Playwright browsers
+./dev.sh             # Start dev server (reuses existing if running)
 ```
 
 ## 🧪 Testing
 
 ```bash
-npm test                          # Vitest unit tests
-./run-tests.sh --browser chromium # E2E tests (Playwright)
+./run-tests.sh --browser chromium # Unit + E2E tests (Playwright)
 ./run-tests.sh --smart            # Only tests affected by uncommitted changes
 ```
 

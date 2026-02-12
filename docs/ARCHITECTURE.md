@@ -33,6 +33,11 @@ snow-groomer/
 ├── vite.config.ts          # Vite bundler config
 ├── tsconfig.json           # TypeScript config
 ├── publish.sh              # Build script for deployment
+├── publish-remote.sh       # Build and deploy to remote server via scp
+├── dev.sh                  # Ensure dev server is running (starts or reuses)
+├── setup.sh                # Download dependencies, set up dev environment
+├── run-tests.sh            # Run Playwright tests (headless, parallel, both browsers)
+├── test-update-check.sh    # Test version update check banner locally
 ├── src/
 │   ├── main.ts             # Phaser init, game creation
 │   ├── setup.ts            # Window globals initialization
@@ -85,7 +90,9 @@ snow-groomer/
 │   │   ├── skiRunState.ts    # Shared groomed-tile state between GameScene and SkiRunScene
 │   │   ├── skiSprites.ts     # Procedural pixel art for skier & snowboarder (20×28px, 8 variants each)
 │   │   ├── storage.ts       # Type-safe localStorage helpers (getJSON/setJSON/getString/setString)
-│   │   └── touchDetect.ts    # Touch detection with Firefox desktop fallback
+│   │   ├── touchDetect.ts    # Touch detection with Firefox desktop fallback
+│   │   ├── fullscreen.ts     # Toggle fullscreen with hint toast on rejection
+│   │   └── updateCheck.ts    # Checks for newer deployed version via version.json
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
@@ -915,7 +922,12 @@ GameScene and HUDScene communicate via Phaser's global event emitter (`game.even
 | `PAUSE_REQUEST` | HUD/Pause → GameScene | — | On button press |
 | `RESUME_REQUEST` | Pause → GameScene | — | On button press |
 | `SKIP_LEVEL` | HUD → GameScene | nextLevel | On button press |
+| `START_SKI_RUN` | HUD → GameScene | — | On button press |
 | `TOUCH_CONTROLS_TOP` | HUD → GameScene | topEdge (screen px) | On touch control layout |
+| `ACCESSIBILITY_CHANGED` | Settings → HUD | — | On setting change |
+| `VOLUME_CHANGED` | Settings → AudioSystem | — | On setting change |
+| `MUTE_CHANGED` | Settings/Pause → AudioSystem | — | On setting change |
+| `DIALOGUE_DISMISSED` | Dialogue → GameScene | — | On ESC/B press |
 
 Always clean up listeners in `shutdown()` with `this.game.events.off(GAME_EVENTS.*)`.
 

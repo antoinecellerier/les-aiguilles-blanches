@@ -44,14 +44,15 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 3. **`art-review`** — if visual files changed (scenes, sprites, theme, weather).
 4. **`audio-review`** — if audio files changed (audio system, SFX, volume).
 5. **`content-review`** — if changelog or localization strings changed. Changelog: 3–5 items, no enumerations, no parenthetical details.
+6. **`documentation-screenshots`** — if visual changes may require updated screenshots.
 
 ### During feature design
-6. **`game-design`** — invoke when designing or significantly changing: new levels, difficulty/balance tuning, new mechanics, progression changes, narrative/dialogue, food/economy systems, bonus objectives, or any feature that affects the player experience arc. This is advisory — it reviews then asks before changing.
-7. **`art-review`** — invoke when designing new visual elements (sprites, textures, UI components) to validate style compliance early, before implementation.
-8. **`audio-review`** — invoke when designing new sound effects, music moods, or voice profiles to validate audio direction early.
+7. **`game-design`** — invoke when designing or significantly changing: new levels, difficulty/balance tuning, new mechanics, progression changes, narrative/dialogue, food/economy systems, bonus objectives, or any feature that affects the player experience arc. This is advisory — it reviews then asks before changing.
+8. **`art-review`** — invoke when designing new visual elements (sprites, textures, UI components) to validate style compliance early, before implementation.
+9. **`audio-review`** — invoke when designing new sound effects, music moods, or voice profiles to validate audio direction early.
 
 ### Tests
-9. Regression test exists and passes.
+10. Regression test exists and passes.
 
 ## Commit Message Format
 

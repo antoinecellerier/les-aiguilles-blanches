@@ -33,17 +33,22 @@ Quality doesn't affect win/loss coverage — it feeds into the **precision groom
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Level Name                              ⛽ 100%         │
-│ Current Task                            ❄️ 45%          │
-│                                         ⚡ 100%         │
-│                                         ⏱️ 4:32         │
+│ Level Name  [buff icon]  [🔗 WINCH]          ⏱️ 4:32   │
+│ ⛽ ████░░ 72%  💪 █████░ 85%  ❄️ ██████░░ 45%          │
+│ ★ Fuel Efficiency ✓   ★ No Tumbles ✓                   │
 └─────────────────────────────────────────────────────────┘
 ```
 
+**Row 1:** Level name, active food buff with countdown, winch status (when active), timer (right).
+
+**Row 2:** Three horizontal bars side by side:
 - **⛽ Fuel**: Depletes while moving. Refuel at fuel stations (bottom of level). Shows ⛽+ feedback when refueling.
-- **❄️ Coverage**: Percentage of piste groomed. Reach target to win.
 - **💪 Stamina**: Operator energy. Drains faster on steep slopes without winch, slower with winch. Below 30%, grooming width decreases. Visit Chez Marie for food buffs.
-- **⏱️ Timer**: Time remaining. Complete before it hits 0:00.
+- **❄️ Coverage**: Percentage of piste groomed. Reach target to win.
+
+**Row 3:** Bonus objectives (when present) — each shows ★ label, turns green ✓ when met, red ✗ on irreversible failure.
+
+**Timer (⏱️)**: Time remaining. Complete before it hits 0:00. Hidden on levels with no time limit.
 
 ## 🍽️ Service Points
 
@@ -59,6 +64,7 @@ The resort restaurant near the top of the level. Drive over it for full stamina 
 | 🍝 Croziflette | Speed | Time remaining < 40% | +30% speed, +40% fuel burn | 20s |
 | 🥃 Génépi | Precision | Coverage > 70% | +1 grooming radius | 15s |
 | 🧀 Fondue | Stamina Regen | Default | Passive stamina regen | 30s |
+| ☕ Café | — | Anytime | Quick stamina boost (+25%), no buff | — |
 
 Only one buff active at a time — revisiting replaces the current buff. The HUD shows the active buff icon and countdown next to the level name.
 
@@ -190,7 +196,7 @@ The game's difficulty naturally increases as you progress:
 - **Time**: 1:30
 - **Skills**: Winch operation, steep slope navigation
 
-**Tips**: Thierry's set up the anchors. Press the winch key near a numbered post to attach — it stops you sliding on the 35-40° slopes. Two service roads help you reach the anchors.
+**Tips**: Thierry's set up the anchors. Press the winch key near a numbered post to attach — it stops you sliding on slopes ≥30° and tumbling on slopes ≥40°. Two service roads help you reach the anchors.
 
 ### Level 6: Half-pipe - Le Tube
 *"Competition tomorrow!"*
@@ -251,11 +257,11 @@ Visit the restaurant (🏠) to restore stamina with authentic Savoyard dishes:
 
 | Dish | Stamina | Special Effect |
 |------|---------|----------------|
-| **Tartiflette** 🥔 | +100% | Cold resistance (2 min) |
-| **Croziflette** 🍝 | +50% | Speed boost (2 min) |
-| **Fondue Savoyarde** 🧀 | +30% | Stamina regeneration (3 min) |
-| **Génépi** 🥃 | +20% | Precision handling (1.5 min) |
-| **Vin Chaud** 🍷 | +40% | Warmth in storms (2.5 min) |
+| **Tartiflette** 🥔 | +100% | Cold resistance (120s) |
+| **Croziflette** 🍝 | +50% | Speed boost (20s) |
+| **Fondue Savoyarde** 🧀 | +30% | Stamina regeneration (30s) |
+| **Génépi** 🥃 | +20% | Precision handling (15s) |
+| **Vin Chaud** 🍷 | +40% | Warmth in storms (25s) |
 | **Café** ☕ | +25% | Quick pick-me-up |
 
 **Pro tip**: Before tackling Level 8's storm, grab some Vin Chaud!
@@ -267,8 +273,8 @@ Each level awards 1-3 stars based on:
 | Stars | Requirements |
 |-------|--------------|
 | ⭐ | Complete the level |
-| ⭐⭐ | Reach 90%+ coverage, or meet half the bonus objectives |
-| ⭐⭐⭐ | Complete quickly with high coverage, or meet all bonus objectives |
+| ⭐⭐ | Finish in <75% of time with 5%+ over target coverage, or meet half the bonus objectives |
+| ⭐⭐⭐ | Finish in <50% of time with 10%+ over target, or meet all bonuses with 5%+ over target |
 
 ### Bonus Objectives
 
@@ -281,6 +287,8 @@ Most levels have optional bonus challenges displayed in the HUD below the visor 
 | **Speed run** | Complete within a time target |
 | **Winch mastery** | Successfully use the winch N times |
 | **Exploration** | Visit all service roads on the level |
+| **Precision grooming** | Achieve ≥ target % average grooming quality |
+| **Pipe mastery** | Achieve ≥ target % halfpipe grooming quality |
 
 Objectives turn green (✓) when met and red (✗) on irreversible failure (e.g., first tumble). On compact screens, objectives flash for 4 seconds at level start then fade, re-appearing briefly on status change.
 

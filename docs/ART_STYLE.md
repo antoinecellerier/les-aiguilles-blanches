@@ -31,7 +31,7 @@ The game uses a **retro pixel-art style** inspired by the 1991 Windows game SkiF
 | Surface | Base Color | Detail Colors | Notes |
 |---------|------------|---------------|-------|
 | Groomed piste | `0xffffff` (white) | `0xe8f0f8` (lines) | Horizontal grooming lines every 3px |
-| Ungroomed piste | `0xd8e4e8` (off-white) | `0xc8d4d8` (shadows) | Irregular shadow patches |
+| Ungroomed piste | `0xe8eff3` (off-white) | `0xc8d4d8` (shadows) | Irregular shadow patches |
 | Off-piste powder | `0xe8f0f4` (bright) | `0xf0f6fa` (mounds), `0xd8e4ec` (shadows) | Winter wonderland feel |
 | Ice | `0xb8e0f0` (blue-tint) | - | Hazardous surface |
 | Deep snow | `0xd0e0e8` (gray-blue) | - | Slower movement |
@@ -76,6 +76,7 @@ Alpine rock with warm brown tones (NOT gray):
 - Tiller drum: `0x555555` (dark mechanical gray)
 - Tiller arm: `0x777777` (mid mechanical gray)
 - Comb teeth: `0x999999` (light mechanical gray)
+- Storm variant (`groomer_storm`): same sprite with snow patches (`0xf0f5f8`) on roof and body
 
 **Trees:**
 - Foliage: `0x228b22` (forest green) — menu/texture
@@ -113,6 +114,8 @@ Alpine rock with warm brown tones (NOT gray):
 | Footer panel | Navy | `0x1a2a3e` |
 | Success/positive | Green | `0x22aa22` |
 | Warning/danger | Red | `0xcc2200` |
+| CTA button | Forest green | `0x228b22` |
+| CTA button hover | Bright green | `0x33bb33` |
 | Gold/highlight | Gold | `0xffd700` |
 
 ### Menu Screen
@@ -339,6 +342,7 @@ All depth values are centralized in `DEPTHS` from `src/config/gameConfig.ts`:
 | Signage | 8 | `SIGNAGE` | Avalanche warnings, hazards |
 | Markers | 9 | `MARKERS` | Piste poles, road poles, danger poles |
 | Winch cable | 50 | `WINCH_CABLE` | Cable graphics |
+| Airborne | 55 | `AIRBORNE` | Flying birds, airborne objects |
 | Night overlay | 100 | `NIGHT_OVERLAY` | Night/weather darkening |
 | Player | 101 | `PLAYER` | Groomer (above night for headlights) |
 | Feedback/Weather | 200 | `FEEDBACK`/`WEATHER` | Floating text, snow particles |
