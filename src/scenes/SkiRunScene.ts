@@ -79,10 +79,13 @@ export default class SkiRunScene extends Phaser.Scene {
   private trickShadow: Phaser.GameObjects.Graphics | null = null;
   private trickShadowUpdater: (() => void) | null = null;
   private turnHoldTime = 0; // seconds of continuous lateral input
+  private smoothedLateral = 0; // lerped lateral velocity for smooth carving
   private resolvedMode = 'ski'; // resolved from 'random' once per run
   private skiSounds = new SkiRunSounds();
   private ambienceSounds = new AmbienceSounds();
   private hazardSystem: HazardSystem | null = null;
+  private trackGraphics!: Phaser.GameObjects.Graphics;
+  private lastTrackPos: { x: number; y: number } | null = null;
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -130,6 +133,10 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Build the snow grid with groomed state from the completed level
     this.createSnowGrid(tileSize);
+
+    // Track marks layer — sits between snow tiles and ground objects
+    this.trackGraphics = this.add.graphics().setDepth(DEPTHS.PISTE + 0.5);
+    this.lastTrackPos = null;
 
     // Piste renderer (boundaries, markers, cliffs, trees)
     const pisteRenderer = new PisteRenderer(this, this.geometry);
@@ -337,6 +344,47 @@ export default class SkiRunScene extends Phaser.Scene {
     this.terrainBlend += (rawTerrainMult - this.terrainBlend) * Math.min(1, blendRate * dt);
     const terrainMultiplier = this.terrainBlend;
 
+    // Draw ski/snowboard tracks on ungroomed / off-piste snow
+    if (!onGroomed && this.currentSpeed > 5) {
+      const sx = this.skier.x;
+      const sy = this.skier.y;
+      const minDist = this.tileSize * 0.5;
+      // Only record a new point when moved enough distance for smooth curves
+      if (this.lastTrackPos) {
+        const dx = sx - this.lastTrackPos.x;
+        const dy = sy - this.lastTrackPos.y;
+        if (dx * dx + dy * dy >= minDist * minDist) {
+          const alpha = onPiste ? 0.15 : 0.25;
+          const isBoard = this.resolvedMode === 'snowboard';
+          if (isBoard) {
+            this.trackGraphics.lineStyle(3, 0x8899aa, alpha);
+            this.trackGraphics.beginPath();
+            this.trackGraphics.moveTo(this.lastTrackPos.x, this.lastTrackPos.y);
+            this.trackGraphics.lineTo(sx, sy);
+            this.trackGraphics.strokePath();
+          } else {
+            const halfGap = this.tileSize * 0.15;
+            // Perpendicular offset for parallel ski lines
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const px = (-dy / len) * halfGap;
+            const py = (dx / len) * halfGap;
+            this.trackGraphics.lineStyle(1, 0x8899aa, alpha);
+            this.trackGraphics.beginPath();
+            this.trackGraphics.moveTo(this.lastTrackPos.x + px, this.lastTrackPos.y + py);
+            this.trackGraphics.lineTo(sx + px, sy + py);
+            this.trackGraphics.moveTo(this.lastTrackPos.x - px, this.lastTrackPos.y - py);
+            this.trackGraphics.lineTo(sx - px, sy - py);
+            this.trackGraphics.strokePath();
+          }
+          this.lastTrackPos = { x: sx, y: sy };
+        }
+      } else {
+        this.lastTrackPos = { x: sx, y: sy };
+      }
+    } else {
+      this.lastTrackPos = null;
+    }
+
     // Slope detection — steeper sections = faster
     let slopeAngle: number = BALANCE.SKI_SLOPE_BASE;
     const skierY = this.skier.y;
@@ -393,8 +441,11 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     const vy = this.currentSpeed;
     const speedRatio = Math.min(this.currentSpeed / BALANCE.SKI_GRAVITY_SPEED, 1.5);
-    const vx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;
-    this.skier.setVelocity(vx, vy);
+    const targetVx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;
+    // Smooth lateral velocity — lerp toward target for carved turns, not instant zigzags
+    const lerpRate = 2.0; // higher = more responsive, lower = smoother
+    this.smoothedLateral += (targetVx - this.smoothedLateral) * Math.min(1, lerpRate * dt);
+    this.skier.setVelocity(this.smoothedLateral, vy);
 
     // Y-sort depth so skier renders behind trees when above them
     this.skier.setDepth(yDepth(this.skier.y));
