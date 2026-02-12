@@ -551,6 +551,9 @@ export default class GameScene extends Phaser.Scene {
     this.groomer.setDrag(BALANCE.GROOMER_DRAG);
     this.groomer.setScale(this.tileSize / 16);
     this.groomer.setDepth(DEPTHS.PLAYER); // Above night overlay
+    // Shrink physics body to cab width (~67%) so tracks overhang without colliding
+    const groomerBody = this.groomer.body as Phaser.Physics.Arcade.Body;
+    groomerBody.setSize(24, 48, true);
 
     this.physics.add.collider(this.groomer, this.obstacles, () => this.onObstacleHit());
     this.physics.add.collider(this.groomer, this.boundaryWalls, () => this.onObstacleHit());

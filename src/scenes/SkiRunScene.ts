@@ -134,12 +134,15 @@ export default class SkiRunScene extends Phaser.Scene {
     if (this.level.specialFeatures?.length) {
       this.parkFeatures.create(this, this.level, this.geometry, tileSize);
       // Enlarge feature hitboxes for ski run — triggers tricks earlier
-      // (GameScene uses 70% for forgiving collision; ski run needs early detection)
       if (this.parkFeatures.featureGroup) {
         for (const sprite of this.parkFeatures.featureGroup.getChildren()) {
           const body = (sprite as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.StaticBody;
-          body.setSize(body.width * 1.8, body.height * 1.8);
-          body.updateFromGameObject();
+          const newW = body.width * 1.8;
+          const newH = body.height * 1.8;
+          body.setSize(newW, newH);
+          // Re-center the enlarged body around the sprite's world position
+          const s = sprite as Phaser.Physics.Arcade.Sprite;
+          body.setOffset((s.displayWidth - newW) / 2, (s.displayHeight - newH) / 2);
         }
       }
     }

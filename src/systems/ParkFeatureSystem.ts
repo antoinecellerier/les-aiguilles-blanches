@@ -229,9 +229,13 @@ export class ParkFeatureSystem {
       const sprite = group.create(pixelX, pixelY, texKey) as Phaser.Physics.Arcade.Sprite;
       sprite.setDisplaySize(pixelW, pixelH);
       const body = sprite.body as Phaser.Physics.Arcade.StaticBody;
-      // setSize with center=true auto-centers relative to the game object
-      body.setSize(pixelW * 0.4, pixelH * 0.4, true);
+      // Sync position from game object first, then set absolute hitbox size
       body.updateFromGameObject();
+      const bw = pixelW * 0.4;
+      const bh = pixelH * 0.4;
+      // setSize resets offset to 0; re-center within the display bounds
+      body.setSize(bw, bh);
+      body.setOffset((pixelW - bw) / 2, (pixelH - bh) / 2);
       sprite.setDepth(yDepth(pixelY));
       sprite.setAlpha(0); // invisible — we render separately
 
