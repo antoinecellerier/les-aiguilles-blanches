@@ -79,6 +79,8 @@ const fr: Record<string, string> = {
   random: "Aléatoire",
   skiIt: "Skier !",
   rideIt: "Rider !",
+  skiAgain: "Re-skier !",
+  rideAgain: "Re-rider !",
   skiRunSpeed: "Vitesse",
   skiRunTime: "Temps",
   
@@ -241,6 +243,13 @@ const fr: Record<string, string> = {
   tauntAvalanche3: "Les pisteurs retrouveront la dameuse au printemps. Peut-être.",
   tauntAvalanche4: "Marie écoute l'alerte radio. Elle sait déjà que c'est toi.",
   tauntAvalanche5: "Le PIDA avait sécurisé le secteur. Tu l'as désécurisé.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Yard sale classique. Le matos partout, la dignité nulle part.",
+  tauntSkiWipeout2: "La falaise n'en avait rien à faire de ta technique.",
+  tauntSkiWipeout3: "Les pisteurs rigolent déjà. Ils ont tout vu.",
+  tauntSkiWipeout4: "Voilà ce qui arrive quand on skie sa propre piste.",
+  tauntSkiWipeout5: "Même les bouquetins ont grimacé en voyant l'atterrissage.",
   
   // Dialogues
   jeanPierreIntro: "Bienvenue aux Aiguilles Blanches, petit ! Je suis Jean-Pierre, le chef dameur.",

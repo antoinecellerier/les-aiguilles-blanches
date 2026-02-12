@@ -77,6 +77,8 @@ const tr: Record<string, string> = {
   random: "Rastgele",
   skiIt: "Kayağa!",
   rideIt: "Kaymaya!",
+  skiAgain: "Tekrar kay!",
+  rideAgain: "Tekrar kay!",
   skiRunSpeed: "Hız",
   skiRunTime: "Süre",
 
@@ -237,6 +239,13 @@ const tr: Record<string, string> = {
   tauntAvalanche3: "Kurtarma ekibi aracı baharda bulur. Belki.",
   tauntAvalanche4: "Marie telsiz alarmını duyuyor. Senin olduğunu zaten biliyor.",
   tauntAvalanche5: "Çığ ekibi o sektörü güvence altına almıştı. Sen güvensizleştirdin.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Klasik bit pazarı. Ekipman her yerde, onur hiçbir yerde.",
+  tauntSkiWipeout2: "Uçurumun kayak tekniğinle ilgilenmedi.",
+  tauntSkiWipeout3: "Pist kurtarma zaten gülüyor. Her şeyi gördüler.",
+  tauntSkiWipeout4: "Kendi hazırladığın pistte kayarsan böyle olur.",
+  tauntSkiWipeout5: "Dağ keçileri bile o inişe yüzlerini buruşturdu.",
 
   jeanPierreIntro: "Les Aiguilles Blanches'a hoş geldiniz! Ben Jean-Pierre, baş pistçi.",
   level_chamoisIntro: "Dün iyi iş çıkardın! Jean-Pierre seni mavi piste gönderiyor. Sadece yeşil için olmadığını göster.",

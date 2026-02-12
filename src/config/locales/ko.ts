@@ -77,6 +77,8 @@ const ko: Record<string, string> = {
   random: "랜덤",
   skiIt: "스키 타자!",
   rideIt: "보드 타자!",
+  skiAgain: "다시 타기!",
+  rideAgain: "다시 타기!",
   skiRunSpeed: "속도",
   skiRunTime: "시간",
 
@@ -237,6 +239,13 @@ const ko: Record<string, string> = {
   tauntAvalanche3: "봄이 되면 설상차를 찾을 수 있을 거다. 아마.",
   tauntAvalanche4: "Marie가 무전 경보를 들었다. 범인이 누군지 벌써 안다.",
   tauntAvalanche5: "눈사태 대응팀이 그 구역을 안전하게 만들었었다. 네가 원상복구시켰다.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "전형적인 야드세일. 장비는 사방에, 체면은 어디에도.",
+  tauntSkiWipeout2: "절벽은 당신의 스키 기술에 관심이 없었다.",
+  tauntSkiWipeout3: "구조대가 이미 웃고 있다. 전부 봤다.",
+  tauntSkiWipeout4: "자기가 정비한 슬로프에서 넘어지다니.",
+  tauntSkiWipeout5: "산양들도 그 착지를 보고 얼굴을 찡그렸다.",
 
   jeanPierreIntro: "Les Aiguilles Blanches에 오신 것을 환영합니다! 수석 정설 담당 Jean-Pierre입니다.",
   level_chamoisIntro: "어제 잘했어! Jean-Pierre가 중급 코스로 보낸다. 초급만 하는 게 아니라는 걸 보여줘.",

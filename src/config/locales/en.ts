@@ -77,6 +77,8 @@ const en: Record<string, string> = {
   random: "Random",
   skiIt: "Ski it!",
   rideIt: "Ride it!",
+  skiAgain: "Ski Again!",
+  rideAgain: "Ride Again!",
   skiRunSpeed: "Speed",
   skiRunTime: "Time",
   
@@ -237,6 +239,13 @@ const en: Record<string, string> = {
   tauntAvalanche3: "Ski patrol will find the groomer in spring. Maybe.",
   tauntAvalanche4: "Marie hears the radio alert. She already knows it's you.",
   tauntAvalanche5: "The avalanche team had secured that sector. You un-secured it.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Classic yard sale. Gear everywhere, dignity nowhere.",
+  tauntSkiWipeout2: "The cliff didn't care about your ski technique.",
+  tauntSkiWipeout3: "Ski patrol is already laughing. They saw the whole thing.",
+  tauntSkiWipeout4: "That's what you get for skiing a piste YOU groomed.",
+  tauntSkiWipeout5: "Even the bouquetins winced at that landing.",
   
   jeanPierreIntro: "Welcome to Les Aiguilles Blanches! I'm Jean-Pierre, head groomer.",
   level_chamoisIntro: "Nice work yesterday! Jean-Pierre's sending you to the blue run. Show him you're more than a green-run groomer.",

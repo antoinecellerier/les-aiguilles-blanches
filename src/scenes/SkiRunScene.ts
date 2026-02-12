@@ -22,9 +22,9 @@ import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem } from '../systems/MusicSystem';
 
 /**
- * SkiRunScene — Relaxed post-grooming descent.
+ * SkiRunScene — Post-grooming descent reward run.
  * Player skis/snowboards down the piste they just groomed.
- * No fail states; gravity-driven movement with lateral steering.
+ * Cliff wipeouts end the run with a fun fail screen.
  */
 
 interface SkiRunData {
@@ -67,7 +67,6 @@ export default class SkiRunScene extends Phaser.Scene {
   // State
   private isFinished = false;
   private isCrashed = false;
-  private crashTimer = 0;
   private startX = 0;
   private startY = 0;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
@@ -92,7 +91,6 @@ export default class SkiRunScene extends Phaser.Scene {
     this.level = LEVELS[this.levelIndex];
     this.isFinished = false;
     this.isCrashed = false;
-    this.crashTimer = 0;
     this.elapsedTime = 0;
     this.currentSpeed = 0;
     this.terrainBlend = 1.0;
@@ -241,17 +239,8 @@ export default class SkiRunScene extends Phaser.Scene {
 
     const dt = delta / 1000;
 
-    // Crash recovery: freeze movement, count down
-    if (this.isCrashed) {
-      this.crashTimer -= dt;
-      if (this.crashTimer <= 0) {
-        this.isCrashed = false;
-        this.skier.setAlpha(1);
-        this.skier.setPosition(this.startX, this.startY);
-        this.currentSpeed = 0;
-      }
-      return;
-    }
+    // Crash — waiting for transition to fail screen
+    if (this.isCrashed) return;
 
     this.elapsedTime += dt;
 
@@ -704,12 +693,23 @@ export default class SkiRunScene extends Phaser.Scene {
   private onWipeout(): void {
     if (this.isCrashed || this.isFinished) return;
     this.isCrashed = true;
-    this.crashTimer = BALANCE.SKI_CRASH_DURATION;
     this.skier.setVelocity(0, 0);
     this.currentSpeed = 0;
     this.skier.setAlpha(0.4);
     this.cameras.main.shake(300, 0.008);
     this.skiSounds.playWipeout();
+
+    // Cliff wipeout ends the run — transition to fail screen after a brief pause
+    this.time.delayedCall(BALANCE.SKI_CRASH_DURATION * 1000, () => {
+      resetGameScenes(this.game, 'LevelCompleteScene', {
+        won: false,
+        level: this.levelIndex,
+        coverage: 0,
+        timeUsed: this.elapsedTime,
+        failReason: 'ski_wipeout',
+        skiMode: this.resolvedMode,
+      });
+    });
   }
 
   private pauseGame(): void {

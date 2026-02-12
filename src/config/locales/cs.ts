@@ -77,6 +77,8 @@ const cs: Record<string, string> = {
   random: "Náhodný",
   skiIt: "Lyžovat!",
   rideIt: "Na prkno!",
+  skiAgain: "Ještě jednou!",
+  rideAgain: "Ještě jednou!",
   skiRunSpeed: "Rychlost",
   skiRunTime: "Čas",
 
@@ -237,6 +239,13 @@ const cs: Record<string, string> = {
   tauntAvalanche3: "Horská služba najde rolbu na jaře. Možná.",
   tauntAvalanche4: "Marie slyší poplach v rádiu. Už ví, že jste to vy.",
   tauntAvalanche5: "Lavinový tým zabezpečil ten sektor. Vy jste ho odjistil.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Klasický výprodej. Vybavení všude, důstojnost nikde.",
+  tauntSkiWipeout2: "Útesu bylo jedno, jakou máš techniku.",
+  tauntSkiWipeout3: "Horská služba se už směje. Viděli všechno.",
+  tauntSkiWipeout4: "To se stane, když lyžuješ na vlastní sjezdovce.",
+  tauntSkiWipeout5: "I kamzíci se při tom dopadu ušklíbli.",
 
   jeanPierreIntro: "Vítejte v Les Aiguilles Blanches! Jsem Jean-Pierre, hlavní rolbař.",
   level_chamoisIntro: "Dobrá práce včera! Jean-Pierre vás posílá na modrou. Ukažte, že nejste jen pro zelené.",

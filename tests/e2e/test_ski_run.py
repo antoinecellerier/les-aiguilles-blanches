@@ -152,6 +152,44 @@ class TestSkiRun:
         }""")
         assert has_ski_btn, "Ski/Ride button should be available for replay after finishing"
 
+    def test_ski_wipeout_shows_fail_screen(self, game_page: Page):
+        """Cliff wipeout during ski run should show fail screen with retry button."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        # Simulate a ski wipeout by transitioning directly to LevelCompleteScene
+        game_page.evaluate("""() => {
+            window.game.scene.start('LevelCompleteScene', {
+                won: false,
+                level: 0,
+                coverage: 0,
+                timeUsed: 12,
+                failReason: 'ski_wipeout',
+                skiMode: 'ski',
+            });
+        }""")
+
+        wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
+        game_page.wait_for_timeout(500)
+
+        # Should show retry button (Ski Again / Ride Again), not Next Level
+        buttons = game_page.evaluate("""() => {
+            var scene = window.game.scene.getScene('LevelCompleteScene');
+            if (!scene) return [];
+            var texts = [];
+            scene.children.list.forEach(function(c) {
+                if (c.list) c.list.forEach(function(child) {
+                    if (child.type === 'Text' && child.text) texts.push(child.text);
+                });
+            });
+            return texts;
+        }""")
+        has_retry = any('Again' in t or 'Re-' in t or 'Nochmal' in t or 'Otra' in t
+                        or 'もう一度' in t or '다시' in t for t in buttons)
+        has_next = any('Next' in t or 'Suivant' in t for t in buttons)
+        assert has_retry, f"Should show ski retry button, got: {buttons}"
+        assert not has_next, f"Should NOT show Next Level button on ski fail, got: {buttons}"
+
 
 class TestSkiSettings:
     """Test descent mode selector in settings."""

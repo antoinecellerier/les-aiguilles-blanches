@@ -80,6 +80,8 @@ const it: Record<string, string> = {
   random: "Casuale",
   skiIt: "Sciare!",
   rideIt: "Snowboard!",
+  skiAgain: "Riscia!",
+  rideAgain: "Ridi di nuovo!",
   skiRunSpeed: "Velocità",
   skiRunTime: "Tempo",
   
@@ -268,7 +270,14 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   tauntAvalanche2: "Météo France diceva rischio 4. L'hai letto?",
   tauntAvalanche3: "Il soccorso troverà il gatto in primavera. Forse.",
   tauntAvalanche4: "Marie sente l'allarme radio. Sa già che sei tu.",
-  tauntAvalanche5: "La squadra valanghe aveva messo in sicurezza il settore. Tu l'hai de-sicurato."
+  tauntAvalanche5: "La squadra valanghe aveva messo in sicurezza il settore. Tu l'hai de-sicurato.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Classica svendita. Attrezzatura ovunque, dignità da nessuna parte.",
+  tauntSkiWipeout2: "Al dirupo non importava della tua tecnica sciistica.",
+  tauntSkiWipeout3: "Il soccorso piste sta già ridendo. Hanno visto tutto.",
+  tauntSkiWipeout4: "Ecco cosa succede a sciare sulla propria pista.",
+  tauntSkiWipeout5: "Anche gli stambecchi hanno fatto una smorfia per quell'atterraggio.",
 };
 
 export default it;

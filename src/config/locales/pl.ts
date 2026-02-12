@@ -77,6 +77,8 @@ const pl: Record<string, string> = {
   random: "Losowy",
   skiIt: "Na narty!",
   rideIt: "Na deskę!",
+  skiAgain: "Jeszcze raz!",
+  rideAgain: "Jeszcze raz!",
   skiRunSpeed: "Prędkość",
   skiRunTime: "Czas",
 
@@ -237,6 +239,13 @@ const pl: Record<string, string> = {
   tauntAvalanche3: "GOPR znajdzie ratrak wiosną. Może.",
   tauntAvalanche4: "Marie słyszy alarm w radiu. Już wie, że to ty.",
   tauntAvalanche5: "Zespół lawinowy zabezpieczył ten sektor. Ty go odbezpieczyłeś.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Klasyczna wyprzedaż. Sprzęt wszędzie, godność nigdzie.",
+  tauntSkiWipeout2: "Urwisko nie interesowało się twoją techniką.",
+  tauntSkiWipeout3: "GOPR już się śmieje. Widzieli wszystko.",
+  tauntSkiWipeout4: "Tak bywa, gdy jeździ się po własnym stoku.",
+  tauntSkiWipeout5: "Nawet kozice skrzywiły się na ten lądowanie.",
 
   jeanPierreIntro: "Witaj w Les Aiguilles Blanches! Jestem Jean-Pierre, główny ratrakista.",
   level_chamoisIntro: "Dobra robota wczoraj! Jean-Pierre wysyła cię na niebieską. Pokaż, że nie jesteś tylko do zielonych.",

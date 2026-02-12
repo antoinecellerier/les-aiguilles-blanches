@@ -33,6 +33,7 @@ interface LevelCompleteData {
   totalPaths?: number;
   restartCount?: number;
   silent?: boolean;
+  skiMode?: string;
 }
 
 export default class LevelCompleteScene extends Phaser.Scene {
@@ -43,6 +44,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private groomQuality = 0;
   private timeUsed = 0;
   private failReason?: string;
+  private skiMode?: string;
   private fuelUsed = 0;
   private tumbleCount = 0;
   private restartCount = 0;
@@ -74,6 +76,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.groomQuality = data.groomQuality ?? 0;
     this.timeUsed = data.timeUsed;
     this.failReason = data.failReason;
+    this.skiMode = data.skiMode;
     this.fuelUsed = data.fuelUsed ?? 0;
     this.tumbleCount = data.tumbleCount ?? 0;
     this.restartCount = data.restartCount ?? 0;
@@ -218,42 +221,44 @@ export default class LevelCompleteScene extends Phaser.Scene {
       cursorY += tauntH + sectionGap;
     }
 
-    // --- Stats panel ---
-    const statsLines: string[] = [
-      t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
-      t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
-    ];
+    // --- Stats panel (skip for ski wipeouts — grooming stats aren't relevant) ---
+    if (this.failReason !== 'ski_wipeout') {
+      const statsLines: string[] = [
+        t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
+        t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
+      ];
 
-    let bonusResults: { objective: BonusObjective; met: boolean; label: string }[] = [];
-    if (this.won) {
-      bonusResults = this.evaluateBonusObjectives();
-      if (bonusResults.length > 0) {
-        statsLines.push('');
-        bonusResults.forEach(r => statsLines.push((r.met ? '✓ ' : '✗ ') + r.label));
+      let bonusResults: { objective: BonusObjective; met: boolean; label: string }[] = [];
+      if (this.won) {
+        bonusResults = this.evaluateBonusObjectives();
+        if (bonusResults.length > 0) {
+          statsLines.push('');
+          bonusResults.forEach(r => statsLines.push((r.met ? '✓ ' : '✗ ') + r.label));
+        }
       }
+
+      const statsText = this.add.text(cx, cursorY, statsLines.join('\n'), {
+        fontFamily: THEME.fonts.family,
+        fontSize: `${statsFontSize}px`,
+        color: THEME.colors.textPrimary,
+        align: 'center',
+        lineSpacing: 6,
+      }).setOrigin(0.5, 0).setDepth(11);
+
+      const statsPanelH = statsText.height + 24;
+      const statsPanelW = Math.max(panelW * 0.8, statsText.width + 40);
+      const statsPanelCY = cursorY + statsPanelH / 2;
+      this.add.rectangle(cx, statsPanelCY, statsPanelW, statsPanelH, 0x1a1a2e, 0.85)
+        .setStrokeStyle(1, this.won ? 0x3d7a9b : 0x664444).setDepth(10);
+      // Re-center text vertically in the panel
+      statsText.setY(statsPanelCY - statsText.height / 2);
+
+      if (this.won && bonusResults.length > 0 && bonusResults.every(r => r.met)) {
+        statsText.setColor(THEME.colors.success);
+      }
+
+      cursorY += statsPanelH + sectionGap;
     }
-
-    const statsText = this.add.text(cx, cursorY, statsLines.join('\n'), {
-      fontFamily: THEME.fonts.family,
-      fontSize: `${statsFontSize}px`,
-      color: THEME.colors.textPrimary,
-      align: 'center',
-      lineSpacing: 6,
-    }).setOrigin(0.5, 0).setDepth(11);
-
-    const statsPanelH = statsText.height + 24;
-    const statsPanelW = Math.max(panelW * 0.8, statsText.width + 40);
-    const statsPanelCY = cursorY + statsPanelH / 2;
-    this.add.rectangle(cx, statsPanelCY, statsPanelW, statsPanelH, 0x1a1a2e, 0.85)
-      .setStrokeStyle(1, this.won ? 0x3d7a9b : 0x664444).setDepth(10);
-    // Re-center text vertically in the panel
-    statsText.setY(statsPanelCY - statsText.height / 2);
-
-    if (this.won && bonusResults.length > 0 && bonusResults.every(r => r.met)) {
-      statsText.setColor(THEME.colors.success);
-    }
-
-    cursorY += statsPanelH + sectionGap;
 
     // Game complete message for final level win
     if (this.won && this.levelIndex === LEVELS.length - 1) {
@@ -286,6 +291,17 @@ export default class LevelCompleteScene extends Phaser.Scene {
         () => this.navigateTo('CreditsScene'), true);
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
         () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }));
+      this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
+        () => this.navigateTo('MenuScene'));
+    } else if (this.failReason === 'ski_wipeout') {
+      // Ski crash — retry the run (re-randomize if needed) + next level + menu
+      const retryLabel = skiMode === 'snowboard' ? (t('rideAgain') || 'Ride Again!') : (t('skiAgain') || 'Ski Again!');
+      this.addButton(buttonContainer, retryLabel, buttonFontSize, buttonPadding2,
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true);
+      if (this.levelIndex < LEVELS.length - 1) {
+        this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
+          () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }));
+      }
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else {
@@ -411,8 +427,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
   }
 
   private formatTime(seconds: number): string {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const s = Math.floor(seconds);
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
     return mins + ':' + secs.toString().padStart(2, '0');
   }
 
@@ -424,6 +441,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       case 'avalanche': return '❄️';
       case 'tumble': return '💥';
       case 'feature': return '🚧';
+      case 'ski_wipeout': return '🎿';
       default: return '❌';
     }
   }
@@ -447,6 +465,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
       ],
       feature: [
         t('tauntFeature1'), t('tauntFeature2'), t('tauntFeature3'), t('tauntFeature4'), t('tauntFeature5'),
+      ],
+      ski_wipeout: [
+        t('tauntSkiWipeout1'), t('tauntSkiWipeout2'), t('tauntSkiWipeout3'), t('tauntSkiWipeout4'), t('tauntSkiWipeout5'),
       ],
     };
 
@@ -758,6 +779,99 @@ export default class LevelCompleteScene extends Phaser.Scene {
         if (isStorm) {
           g.fillStyle(0xf0f5f8);
           g.fillRect(gx - 10 * s, groundY - 39 * s, 24 * s, 3 * s);
+        }
+        break;
+      }
+      case 'ski_wipeout': {
+        // Classic yard sale: skier/snowboarder face-planted in snow, gear scattered
+        // Colors match the in-game sprites from skiSprites.ts
+        const isSnowboard = this.skiMode === 'snowboard';
+
+        // Snow spray / impact crater around the crash site
+        g.fillStyle(0xe8eef4, 0.7);
+        g.fillRect(gx - 20 * s, groundY - 6 * s, 40 * s, 6 * s);
+        g.fillRect(gx - 14 * s, groundY - 10 * s, 28 * s, 4 * s);
+
+        // Body — face-planted, legs up at angle
+        // Jacket colors match skiSprites.ts palette
+        const jacketMain = isSnowboard ? 0xff3388 : 0x00aaaa; // boardPink / skiTeal
+        const jacketSide = isSnowboard ? 0x3366ff : 0xcc2288; // boardBlue / skiMagenta
+        const jacketDark = isSnowboard ? 0xcc2266 : 0x007777; // boardDark / skiDark
+        g.fillStyle(jacketMain);
+        g.fillRect(gx - 8 * s, groundY - 10 * s, 16 * s, 8 * s);
+        // Side panels
+        g.fillStyle(jacketSide);
+        g.fillRect(gx - 8 * s, groundY - 10 * s, 4 * s, 8 * s);
+        g.fillRect(gx + 4 * s, groundY - 10 * s, 4 * s, 8 * s);
+        // Legs (dark jacket color)
+        g.fillStyle(jacketDark);
+        g.fillRect(gx - 6 * s, groundY - 18 * s, 6 * s, 10 * s);
+        g.fillRect(gx + 0 * s, groundY - 20 * s, 6 * s, 12 * s);
+        // Boots
+        g.fillStyle(0x333333);
+        g.fillRect(gx - 6 * s, groundY - 22 * s, 5 * s, 4 * s);
+        g.fillRect(gx + 1 * s, groundY - 24 * s, 5 * s, 4 * s);
+        // Bonnet/beanie (buried in snow)
+        const hatColor = isSnowboard ? 0xff6600 : 0xcc2200; // boardBeanie / bonnet
+        g.fillStyle(hatColor);
+        g.fillRect(gx - 4 * s, groundY - 4 * s, 8 * s, 6 * s);
+        // Pompom (skier only)
+        if (!isSnowboard) {
+          g.fillStyle(0xffdd00);
+          g.fillRect(gx - 2 * s, groundY + 1 * s, 4 * s, 3 * s);
+        }
+        // Goggles
+        g.fillStyle(0x87ceeb);
+        g.fillRect(gx - 3 * s, groundY - 2 * s, 6 * s, 2 * s);
+        // Gloves (arms splayed)
+        g.fillStyle(jacketDark);
+        g.fillRect(gx - 18 * s, groundY - 6 * s, 5 * s, 4 * s);
+        g.fillRect(gx + 14 * s, groundY - 8 * s, 5 * s, 4 * s);
+        // Arms
+        g.fillStyle(jacketDark, 0.8);
+        g.fillRect(gx - 14 * s, groundY - 8 * s, 6 * s, 3 * s);
+        g.fillRect(gx + 10 * s, groundY - 10 * s, 6 * s, 3 * s);
+
+        // Scattered gear — the yard sale
+        if (isSnowboard) {
+          // Snowboard flung to the side (brown board, dark edges)
+          g.fillStyle(0x8b4513);
+          g.fillRect(gx + 30 * s, groundY - 16 * s, 4 * s, 18 * s);
+          g.fillStyle(0x664422);
+          g.fillRect(gx + 30 * s, groundY - 16 * s, 4 * s, 2 * s);
+          g.fillRect(gx + 30 * s, groundY, 4 * s, 2 * s);
+          // Binding detail
+          g.fillStyle(0x333333);
+          g.fillRect(gx + 30 * s, groundY - 10 * s, 4 * s, 2 * s);
+          g.fillRect(gx + 30 * s, groundY - 4 * s, 4 * s, 2 * s);
+        } else {
+          // Ski poles scattered (gray)
+          g.fillStyle(0x777777);
+          g.fillRect(gx - 36 * s, groundY - 14 * s, 2 * s, 16 * s);
+          g.fillRect(gx + 32 * s, groundY - 18 * s, 2 * s, 16 * s);
+          // Pole baskets
+          g.fillStyle(0x888888);
+          g.fillRect(gx - 37 * s, groundY + 1 * s, 4 * s, 2 * s);
+          g.fillRect(gx + 31 * s, groundY - 3 * s, 4 * s, 2 * s);
+          // Skis separated (gray like in-game)
+          g.fillStyle(0x666666);
+          g.fillRect(gx - 32 * s, groundY - 4 * s, 3 * s, 14 * s);
+          g.fillRect(gx + 28 * s, groundY - 12 * s, 3 * s, 14 * s);
+          // Ski tips (darker)
+          g.fillStyle(0x555555);
+          g.fillRect(gx - 32 * s, groundY - 6 * s, 3 * s, 3 * s);
+          g.fillRect(gx + 28 * s, groundY - 14 * s, 3 * s, 3 * s);
+        }
+
+        // Snow puff clouds
+        g.fillStyle(0xdde4ec, 0.5);
+        g.fillRect(gx - 24 * s, groundY - 12 * s, 6 * s, 4 * s);
+        g.fillRect(gx + 20 * s, groundY - 14 * s, 8 * s, 5 * s);
+        g.fillRect(gx - 10 * s, groundY - 14 * s, 5 * s, 3 * s);
+
+        if (isStorm) {
+          g.fillStyle(0xf0f5f8);
+          g.fillRect(gx - 8 * s, groundY - 12 * s, 16 * s, 2 * s);
         }
         break;
       }

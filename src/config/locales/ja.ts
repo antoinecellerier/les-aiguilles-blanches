@@ -77,6 +77,8 @@ const ja: Record<string, string> = {
   random: "ランダム",
   skiIt: "滑ろう！",
   rideIt: "ライド！",
+  skiAgain: "もう一度！",
+  rideAgain: "もう一度！",
   skiRunSpeed: "スピード",
   skiRunTime: "タイム",
 
@@ -237,6 +239,13 @@ const ja: Record<string, string> = {
   tauntAvalanche3: "春になれば圧雪車が見つかるだろう。たぶん。",
   tauntAvalanche4: "Marieが無線警報を聞いた。もう犯人が分かっている。",
   tauntAvalanche5: "雪崩対策チームがあのエリアを安全にした。君が台無しにした。",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "典型的なヤードセール。装備は散乱、プライドは粉々。",
+  tauntSkiWipeout2: "崖はあなたのスキー技術に興味がなかった。",
+  tauntSkiWipeout3: "パトロールはもう笑っている。全部見ていた。",
+  tauntSkiWipeout4: "自分で整備したゲレンデで転ぶとは。",
+  tauntSkiWipeout5: "アイベックスでさえ、あの着地には顔をしかめた。",
 
   jeanPierreIntro: "Les Aiguilles Blanchesへようこそ！チーフ圧雪担当のJean-Pierreだ。",
   level_chamoisIntro: "昨日はよくやった！Jean-Pierreが中級コースに送る。初級だけじゃないことを見せてやれ。",

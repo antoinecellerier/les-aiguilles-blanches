@@ -77,6 +77,8 @@ const sv: Record<string, string> = {
   random: "Slumpmässig",
   skiIt: "Åk skidor!",
   rideIt: "Brädan!",
+  skiAgain: "Åk igen!",
+  rideAgain: "Åk igen!",
   skiRunSpeed: "Fart",
   skiRunTime: "Tid",
 
@@ -237,6 +239,13 @@ const sv: Record<string, string> = {
   tauntAvalanche3: "Pistpatrullen hittar maskinen till våren. Kanske.",
   tauntAvalanche4: "Marie hör radiovarningen. Hon vet redan att det är du.",
   tauntAvalanche5: "Lavinteamet hade säkrat sektorn. Du avsäkrade den.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Klassisk utförsäljning. Utrustning överallt, värdighet ingenstans.",
+  tauntSkiWipeout2: "Stupet brydde sig inte om din skidteknik.",
+  tauntSkiWipeout3: "Pistpatrullen skrattar redan. De såg allt.",
+  tauntSkiWipeout4: "Det händer när man åker sin egen pist.",
+  tauntSkiWipeout5: "Även stenbockarna grimaserade vid den landningen.",
 
   // Dialogues
   jeanPierreIntro: "Välkommen till Les Aiguilles Blanches! Jag är Jean-Pierre, chefspistvakt.",

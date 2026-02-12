@@ -77,6 +77,8 @@ const fi: Record<string, string> = {
   random: "Satunnainen",
   skiIt: "Laskemaan!",
   rideIt: "Laudalle!",
+  skiAgain: "Laske uudestaan!",
+  rideAgain: "Laske uudestaan!",
   skiRunSpeed: "Nopeus",
   skiRunTime: "Aika",
 
@@ -237,6 +239,13 @@ const fi: Record<string, string> = {
   tauntAvalanche3: "Rinnepartio löytää koneen keväällä. Ehkä.",
   tauntAvalanche4: "Marie kuulee radiohälytyksen. Hän tietää jo että sinä se olit.",
   tauntAvalanche5: "Vyöryryhmä oli turvannut alueen. Sinä turvasit sen pois.",
+
+  // Taunts - Ski wipeout (fun, self-deprecating)
+  tauntSkiWipeout1: "Klassinen kirpputori. Varusteita kaikkialla, arvokkuutta ei missään.",
+  tauntSkiWipeout2: "Jyrkänne ei välittänyt hiihtotekniikastasi.",
+  tauntSkiWipeout3: "Rinnepoliisi nauraa jo. He näkivät kaiken.",
+  tauntSkiWipeout4: "Tätä saa kun hiihtää itse valmistamaansa rinnettä.",
+  tauntSkiWipeout5: "Jopa vuorikauriit irvistivät tuota laskeutumista.",
 
   // Dialogues
   jeanPierreIntro: "Tervetuloa Les Aiguilles Blanches'iin! Olen Jean-Pierre, rinnepäällikkö.",
