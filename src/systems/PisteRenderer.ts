@@ -148,24 +148,24 @@ export class PisteRenderer {
     if (isDangerous && this.geometry.cliffSegments.length > 0) {
       for (const cliff of this.geometry.cliffSegments) {
         for (let y = cliff.startY; y < cliff.endY; y += segmentHeight) {
-          if (isAccessZone(y, cliff.side)) continue;
-
           const pisteEdge = cliff.getX(y);
           const yEnd = Math.min(y + segmentHeight, cliff.endY);
           const height = yEnd - y;
+          const inAccessZone = isAccessZone(y, cliff.side);
           
           if (cliff.side === 'left') {
-            const cliffEnd = pisteEdge - cliff.offset;
-            const cliffStart = Math.max(0, cliffEnd - cliff.extent);
-            const width = cliffEnd - cliffStart;
-            if (width > 0) {
+            // Danger zone spans from piste edge to far side of cliff
+            // Always created — cliffs are dangerous even near access paths
+            const cliffStart = Math.max(0, pisteEdge - cliff.offset - cliff.extent);
+            const dangerWidth = pisteEdge - cliffStart;
+            if (dangerWidth > 0) {
               const wall = this.scene.add.rectangle(
-                cliffStart + width / 2, y + height / 2, width, height, 0x000000, 0
+                cliffStart + dangerWidth / 2, y + height / 2, dangerWidth, height, 0x000000, 0
               );
               scene.physics.add.existing(wall, true);
               dangerZones.add(wall);
             }
-            if (cliffStart > tileSize) {
+            if (!inAccessZone && cliffStart > tileSize) {
               const forestWall = this.scene.add.rectangle(
                 cliffStart / 2, y + height / 2, cliffStart, height, 0x000000, 0
               );
@@ -173,17 +173,17 @@ export class PisteRenderer {
               boundaryWalls.add(forestWall);
             }
           } else {
-            const cliffStart = pisteEdge + cliff.offset;
-            const cliffEnd = Math.min(worldWidth, cliffStart + cliff.extent);
-            const width = cliffEnd - cliffStart;
-            if (width > 0) {
+            // Danger zone spans from piste edge to far side of cliff
+            const cliffEnd = Math.min(worldWidth, pisteEdge + cliff.offset + cliff.extent);
+            const dangerWidth = cliffEnd - pisteEdge;
+            if (dangerWidth > 0) {
               const wall = this.scene.add.rectangle(
-                cliffStart + width / 2, y + height / 2, width, height, 0x000000, 0
+                pisteEdge + dangerWidth / 2, y + height / 2, dangerWidth, height, 0x000000, 0
               );
               scene.physics.add.existing(wall, true);
               dangerZones.add(wall);
             }
-            if (cliffEnd < worldWidth - tileSize) {
+            if (!inAccessZone && cliffEnd < worldWidth - tileSize) {
               const forestWidth = worldWidth - cliffEnd;
               const forestWall = this.scene.add.rectangle(
                 cliffEnd + forestWidth / 2, y + height / 2, forestWidth, height, 0x000000, 0
@@ -192,6 +192,38 @@ export class PisteRenderer {
               boundaryWalls.add(forestWall);
             }
           }
+        }
+      }
+      // Fill gaps: add boundary walls for Y-ranges not covered by any cliff segment
+      for (let y = 0; y < level.height; y += 4) {
+        if (y >= level.height - 2) continue;
+        const yPos = y * tileSize;
+        const yEnd = yPos + segmentHeight;
+        let leftCovered = false;
+        let rightCovered = false;
+        for (const cliff of this.geometry.cliffSegments) {
+          if (yPos < cliff.endY && yEnd > cliff.startY) {
+            if (cliff.side === 'left') leftCovered = true;
+            if (cliff.side === 'right') rightCovered = true;
+          }
+        }
+        const path = this.geometry.pistePath[y] || { centerX: level.width / 2, width: level.width * 0.5 };
+        const leftEdge = (path.centerX - path.width / 2) * tileSize;
+        const rightEdge = (path.centerX + path.width / 2) * tileSize;
+        if (!leftCovered && leftEdge > tileSize && !isAccessZone(yPos, 'left')) {
+          const wall = this.scene.add.rectangle(
+            leftEdge / 2, yPos + segmentHeight / 2, leftEdge, segmentHeight, 0x000000, 0
+          );
+          scene.physics.add.existing(wall, true);
+          boundaryWalls.add(wall);
+        }
+        if (!rightCovered && rightEdge < worldWidth - tileSize && !isAccessZone(yPos, 'right')) {
+          const wall = this.scene.add.rectangle(
+            rightEdge + (worldWidth - rightEdge) / 2, yPos + segmentHeight / 2,
+            worldWidth - rightEdge, segmentHeight, 0x000000, 0
+          );
+          scene.physics.add.existing(wall, true);
+          boundaryWalls.add(wall);
         }
       }
     } else {

@@ -179,6 +179,7 @@ export const BALANCE = {
   SKI_DRAG: 60,                  // Natural deceleration (px/s²)
   SKI_GROOMED_MULTIPLIER: 1.0,   // Speed on groomed tiles (baseline)
   SKI_UNGROOMED_MULTIPLIER: 0.65, // Speed on ungroomed tiles
+  SKI_OFFPISTE_MULTIPLIER: 0.35,  // Speed off-piste (deep powder)
   SKI_POWDER_DRAG: 300,          // Extra drag at piste edges
   SKI_BUMP_SLOWDOWN: 0.4,       // Speed multiplier on obstacle hit
   SKI_BUMP_DURATION: 500,        // ms of slowdown after bump

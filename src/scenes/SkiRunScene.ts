@@ -181,9 +181,13 @@ export default class SkiRunScene extends Phaser.Scene {
       this.events.on('update', this.nightUpdateHandler);
     }
 
-    // Collisions
+    // Collisions — skiers can go off-piste (powder drag slows them),
+    // but cliff danger zones cause wipeouts
     this.physics.add.collider(this.skier, this.obstacles, () => this.onBump());
-    this.physics.add.collider(this.skier, boundaryWalls, () => this.onBoundaryHit());
+    if (this.parkFeatures.hasHalfpipe) {
+      // Halfpipe wall hits trigger tricks, not boundary bounces
+      this.physics.add.collider(this.skier, boundaryWalls, () => this.onBoundaryHit());
+    }
     if (this.parkFeatures.featureGroup) {
       this.physics.add.overlap(this.skier, this.parkFeatures.featureGroup, (_skier, feature) => {
         const type = (feature as Phaser.Physics.Arcade.Sprite).texture.key === 'park_kicker' ? 'kicker' : 'rail';
@@ -268,13 +272,14 @@ export default class SkiRunScene extends Phaser.Scene {
     if (pad && isGamepadButtonPressed(pad, this.gamepadBindings.winch)) braking = true;
     if (this.touchInput.winch) braking = true;
 
-    // Terrain check — groomed vs ungroomed (smoothed transition)
+    // Terrain check — groomed vs ungroomed vs off-piste (smoothed transition)
     const tileX = Math.floor(this.skier.x / this.tileSize);
     const tileY = Math.floor(this.skier.y / this.tileSize);
+    const onPiste = this.geometry.isInPiste(tileX, tileY, this.level);
     const onGroomed = this.groomedGrid[tileY]?.[tileX] ?? false;
-    const rawTerrainMult = onGroomed
-      ? BALANCE.SKI_GROOMED_MULTIPLIER
-      : BALANCE.SKI_UNGROOMED_MULTIPLIER;
+    const rawTerrainMult = onPiste
+      ? (onGroomed ? BALANCE.SKI_GROOMED_MULTIPLIER : BALANCE.SKI_UNGROOMED_MULTIPLIER)
+      : BALANCE.SKI_OFFPISTE_MULTIPLIER;
     // Lerp terrain blend for smooth groomed↔ungroomed transitions
     const blendRate = 3.0; // how fast terrain effect transitions (higher = faster)
     this.terrainBlend += (rawTerrainMult - this.terrainBlend) * Math.min(1, blendRate * dt);
