@@ -101,7 +101,7 @@ export function computeTimeLimit(level: Pick<Level, 'width' | 'height' | 'target
 
   // Difficulty scales how much slack the player gets
   const scales: Record<string, number> = {
-    tutorial: 0, green: 1.3, blue: 1.0, park: 1.4, red: 0.9, black: 0.75,
+    tutorial: 0, green: 1.3, blue: 1.0, park: 1.5, red: 0.9, black: 0.75,
   };
   const scale = scales[level.difficulty] ?? 0.9;
 
@@ -221,7 +221,7 @@ export const LEVELS: Level[] = [
     taskKey: 'level_airZoneTask',
     difficulty: 'park',
     timeLimit: 300,
-    targetCoverage: 90,
+    targetCoverage: 80,
     width: 45,
     height: 50,
     hasWinch: false,
