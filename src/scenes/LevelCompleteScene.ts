@@ -32,10 +32,12 @@ interface LevelCompleteData {
   pathsVisited?: number;
   totalPaths?: number;
   restartCount?: number;
+  silent?: boolean;
 }
 
 export default class LevelCompleteScene extends Phaser.Scene {
   private won = false;
+  private silent = false;
   private levelIndex = 0;
   private coverage = 0;
   private groomQuality = 0;
@@ -66,6 +68,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
   init(data: LevelCompleteData): void {
     this.won = data.won;
+    this.silent = data.silent ?? false;
     this.levelIndex = data.level;
     this.coverage = data.coverage;
     this.groomQuality = data.groomQuality ?? 0;
@@ -133,8 +136,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // --- Responsive font sizes ---
     // Play result sound
-    if (this.won) playLevelWin();
-    else playLevelFail();
+    if (!this.silent) {
+      if (this.won) playLevelWin();
+      else playLevelFail();
+    }
     const baseFontSize = Math.min(20, width / 40, height / 30);
     const titleFontSize = Math.min(32, baseFontSize * 2);
     const statsFontSize = Math.min(22, baseFontSize * 1.25);

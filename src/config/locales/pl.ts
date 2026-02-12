@@ -138,6 +138,7 @@ const pl: Record<string, string> = {
   pressContinue: "Naciśnij spację lub dotknij aby kontynuować",
   pauseTitle: "⏸️ Wstrzymano",
   restart: "Restart",
+  skipRun: "Pomiń zjazd",
   quit: "Wyjdź",
   menu: "Menu",
   levelSelect: "Wybór trasy",
@@ -251,7 +252,7 @@ const pl: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12 lutego 2026",
-  changelog_20260212: "📋 Wybór poziomu\n🔗 Zrywalne lina wciągarki\n🕹️ Płynniejsze sterowanie i rozmieszczenie",
+  changelog_20260212: "📋 Wybór poziomu\n🔗 Zrywalne lina wciągarki\n🕹️ Płynniejsze sterowanie i rozmieszczenie\n🔊 Dźwięki wiatru, skręcania i trików podczas zjazdu",
   changelog_20260211_date: "11 lutego 2026",
 changelog_20260211: "⛷️ Zjazd na nartach po preparacji\n🎯 Jakość preparacji\n🏔️ Kolorowe strome strefy\n🏗️ Park i triki",
   changelog_20260210_date: "10 lutego 2026",

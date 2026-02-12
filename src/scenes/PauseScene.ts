@@ -18,10 +18,14 @@ import { ResizeManager } from '../utils/resizeManager';
 
 interface PauseSceneData {
   levelIndex: number;
+  skiMode?: boolean;
+  skiRunMode?: 'ski' | 'snowboard';
 }
 
 export default class PauseScene extends Phaser.Scene {
   private levelIndex = 0;
+  private skiMode = false;
+  private skiRunMode: 'ski' | 'snowboard' = 'ski';
   private inputReady = false;
   private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
 
@@ -31,6 +35,8 @@ export default class PauseScene extends Phaser.Scene {
 
   init(data: PauseSceneData): void {
     this.levelIndex = data.levelIndex;
+    this.skiMode = data.skiMode ?? false;
+    this.skiRunMode = data.skiRunMode ?? 'ski';
     this.inputReady = false;
   }
 
@@ -53,7 +59,8 @@ export default class PauseScene extends Phaser.Scene {
     const buttonPadY = Math.max(Math.round(8 * scaleFactor), Math.ceil((minTouchTarget - fontSize) / 2));
     const buttonSpacing = Math.max(6, Math.round(12 * scaleFactor));
     const buttonH = fontSize + buttonPadY * 2;
-    const panelHeight = Math.min(Math.round(titleFontSize + 30 * scaleFactor + (buttonH + buttonSpacing) * 4 + 20 * scaleFactor), height - 20);
+    const buttonCount = this.skiMode ? 5 : 4;
+    const panelHeight = Math.min(Math.round(titleFontSize + 30 * scaleFactor + (buttonH + buttonSpacing) * buttonCount + 20 * scaleFactor), height - 20);
 
     // Dim overlay
     this.add.rectangle(width / 2, height / 2, width, height, THEME.colors.overlayDim, THEME.opacity.overlay);
@@ -72,11 +79,19 @@ export default class PauseScene extends Phaser.Scene {
     btnStyle.fontSize = fontSize + 'px';
     btnStyle.padding = { x: Math.round(40 * scaleFactor), y: buttonPadY };
 
-    const buttonDefs = [
-      { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
-      { text: 'restart', callback: () => this.restartLevel(), isCTA: false },
-      { text: 'settings', callback: () => this.openSettings(), isCTA: false },
-      { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
+    const buttonDefs = this.skiMode
+      ? [
+          { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
+          { text: 'restart', callback: () => this.restartSkiRun(), isCTA: false },
+          { text: 'skipRun', callback: () => this.skipSkiRun(), isCTA: false },
+          { text: 'settings', callback: () => this.openSettings(), isCTA: false },
+          { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
+        ]
+      : [
+          { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
+          { text: 'restart', callback: () => this.restartLevel(), isCTA: false },
+          { text: 'settings', callback: () => this.openSettings(), isCTA: false },
+          { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
     ];
 
     this.menuButtons = [];
@@ -129,7 +144,7 @@ export default class PauseScene extends Phaser.Scene {
     this.inputReadyTimer = this.time.delayedCall(BALANCE.SCENE_INPUT_DELAY, () => { this.inputReady = true; });
 
     this.resizeManager = new ResizeManager(this, {
-      restartData: () => ({ levelIndex: this.levelIndex }),
+      restartData: () => ({ levelIndex: this.levelIndex, skiMode: this.skiMode, skiRunMode: this.skiRunMode }),
     });
     this.resizeManager.register();
   }
@@ -169,14 +184,30 @@ export default class PauseScene extends Phaser.Scene {
     resetGameScenes(this.game, 'GameScene', { level: this.levelIndex });
   }
 
+  private restartSkiRun(): void {
+    resetGameScenes(this.game, 'SkiRunScene', { level: this.levelIndex, mode: this.skiRunMode });
+  }
+
+  private skipSkiRun(): void {
+    resetGameScenes(this.game, 'LevelCompleteScene', {
+      won: true,
+      level: this.levelIndex,
+      coverage: 100,
+      timeUsed: 0,
+      silent: true,
+    });
+  }
+
   private openSettings(): void {
-    // Keep GameScene paused; just stop overlays and open Settings
+    // Keep parent scene paused; just stop overlays and open Settings
     const game = this.game;
     const levelIndex = this.levelIndex;
+    const skiMode = this.skiMode;
+    const skiRunMode = this.skiRunMode;
     this.scene.stop('HUDScene');
     this.scene.stop('DialogueScene');
     this.scene.stop('PauseScene');
-    game.scene.start('SettingsScene', { returnTo: 'PauseScene', levelIndex });
+    game.scene.start('SettingsScene', { returnTo: 'PauseScene', levelIndex, skiMode, skiRunMode });
     game.scene.bringToTop('SettingsScene');
   }
 

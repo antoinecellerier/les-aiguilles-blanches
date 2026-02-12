@@ -197,6 +197,21 @@ export const BALANCE = {
   SKI_FINISH_BUFFER: 3,          // tiles above bottom edge to trigger finish
   SKI_TURN_RAMP_TIME: 0.4,      // seconds to reach max turn boost
   SKI_TURN_RAMP_BOOST: 1.2,     // extra lateral speed at max hold (1.0 = +100%)
+
+  // Ski run audio tuning
+  SKI_WIND_MIN_FREQ: 400,       // Hz — wind bandpass at rest
+  SKI_WIND_MAX_FREQ: 2200,      // Hz — wind bandpass at max speed
+  SKI_WIND_MIN_VOLUME: 0.008,    // Subtle breeze at low speed
+  SKI_WIND_MAX_VOLUME: 0.045,    // Prominent rush at terminal velocity (below storm wind to avoid mud)
+  SKI_CARVE_INTERVAL_MIN: 60,   // ms between carve swishes at max speed
+  SKI_CARVE_INTERVAL_MAX: 200,  // ms at slow crawl
+  SKI_CARVE_VOLUME: 0.05,       // Peak volume for carve bursts
+  SKI_BRAKE_VOLUME: 0.08,       // Volume of brake scrape at full speed
+  SKI_BRAKE_FREQ: 600,          // Hz — brake noise center frequency
+  SKI_BUMP_SFX_VOLUME: 0.1,     // Impact sound volume
+  SKI_TRICK_VOLUME: 0.07,       // Trick launch/land volume
+  SKI_GRIND_VOLUME: 0.06,       // Rail grind volume
+  SKI_GRIND_FREQ: 3000,         // Hz — metallic grind center frequency
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

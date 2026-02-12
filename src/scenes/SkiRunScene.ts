@@ -12,11 +12,14 @@ import { WeatherSystem } from '../systems/WeatherSystem';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { isGamepadButtonPressed, captureGamepadButtons, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
-import { playClick } from '../systems/UISounds';
+import { playLevelWin } from '../systems/UISounds';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { BINDINGS_VERSION } from '../config/storageKeys';
 import { overlayFullScreen } from '../utils/cameraCoords';
 import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
+import { SkiRunSounds } from '../systems/SkiRunSounds';
+import { AmbienceSounds } from '../systems/AmbienceSounds';
+import { MusicSystem } from '../systems/MusicSystem';
 
 /**
  * SkiRunScene — Relaxed post-grooming descent.
@@ -53,6 +56,8 @@ export default class SkiRunScene extends Phaser.Scene {
   private gamepadBindings: GamepadBindings = loadGamepadBindings();
   private touchInput: TouchInputEvent = { left: false, right: false, up: false, down: false, groom: false, winch: false };
   private boundTouchHandler = (data: TouchInputEvent) => { this.touchInput = data; };
+  private boundPauseHandler = () => { this.pauseGame(); };
+  private boundResumeHandler = () => { this.resumeGame(); };
 
   // HUD elements
   private speedText!: Phaser.GameObjects.Text;
@@ -75,6 +80,8 @@ export default class SkiRunScene extends Phaser.Scene {
   private trickShadowUpdater: (() => void) | null = null;
   private turnHoldTime = 0; // seconds of continuous lateral input
   private resolvedMode = 'ski'; // resolved from 'random' once per run
+  private skiSounds = new SkiRunSounds();
+  private ambienceSounds = new AmbienceSounds();
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -214,8 +221,17 @@ export default class SkiRunScene extends Phaser.Scene {
     // HUD overlay
     this.createHUD();
 
-    // ESC aborts the run (returns to level complete without celebration)
-    this.input.keyboard?.on('keydown-ESC', () => this.abortRun());
+    // ESC opens pause menu
+    this.input.keyboard?.on('keydown-ESC', () => this.pauseGame());
+
+    // Audio
+    this.skiSounds.start();
+    this.ambienceSounds.start(this.level.weather, this.level.isNight);
+    MusicSystem.getInstance().start('intense');
+
+    // Pause/resume
+    this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
+    this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
 
     this.events.once('shutdown', this.shutdown, this);
   }
@@ -353,6 +369,9 @@ export default class SkiRunScene extends Phaser.Scene {
     this.speedText.setText(`${t('skiRunSpeed') || 'Speed'}: ${kmh} km/h`);
     this.timeText.setText(`${t('skiRunTime') || 'Time'}: ${this.formatTime(this.elapsedTime)}`);
 
+    // Audio update
+    this.skiSounds.update(this.currentSpeed, braking, onGroomed, delta);
+
     // Check if reached bottom
     if (this.skier.y >= (this.level.height - BALANCE.SKI_FINISH_BUFFER) * this.tileSize) {
       this.finishRun();
@@ -483,6 +502,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.bumpSlowdownUntil = this.game.getTime() + BALANCE.SKI_BUMP_DURATION;
     this.currentSpeed *= BALANCE.SKI_BUMP_SLOWDOWN;
     this.cameras.main.shake(BALANCE.SKI_BUMP_SHAKE.duration, BALANCE.SKI_BUMP_SHAKE.intensity);
+    this.skiSounds.playBump();
   }
 
   /** Boundary wall hit — in halfpipe, launch a trick instead of bumping */
@@ -512,10 +532,13 @@ export default class SkiRunScene extends Phaser.Scene {
     let trickName: string;
     if (type === 'rail') {
       trickName = this.doGrindTrick(baseScale);
+      this.skiSounds.playRailGrind();
     } else if (type === 'halfpipe') {
       trickName = this.doAirTrick(baseScale, true);
+      this.skiSounds.playTrickLaunch();
     } else {
       trickName = this.doAirTrick(baseScale);
+      this.skiSounds.playTrickLaunch();
     }
 
     // Popup text — show trick name
@@ -598,6 +621,7 @@ export default class SkiRunScene extends Phaser.Scene {
           onComplete: () => {
             this.trickActive = false;
             this.cleanupTrickShadow();
+            this.skiSounds.playTrickLand();
           },
         });
       },
@@ -685,6 +709,28 @@ export default class SkiRunScene extends Phaser.Scene {
     this.currentSpeed = 0;
     this.skier.setAlpha(0.4);
     this.cameras.main.shake(300, 0.008);
+    this.skiSounds.playWipeout();
+  }
+
+  private pauseGame(): void {
+    if (!this.scene.manager || !this.scene.isActive()) return;
+    this.skiSounds.pause();
+    this.ambienceSounds.pause();
+    this.scene.pause();
+    this.scene.launch('PauseScene', {
+      levelIndex: this.levelIndex,
+      skiMode: true,
+      skiRunMode: this.resolvedMode as 'ski' | 'snowboard',
+    });
+    this.scene.bringToTop('PauseScene');
+  }
+
+  private resumeGame(): void {
+    if (!this.scene.manager) return;
+    if (!this.scene.isActive() && !this.scene.isPaused()) return;
+    this.skiSounds.resume();
+    this.ambienceSounds.resume(this.level.weather, this.level.isNight);
+    this.scene.resume();
   }
 
   private finishRun(): void {
@@ -692,7 +738,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.isFinished = true;
 
     this.skier.setVelocity(0, 0);
-    playClick();
+    playLevelWin();
 
     this.time.delayedCall(BALANCE.SKI_CELEBRATION_DELAY, () => {
       resetGameScenes(this.game, 'LevelCompleteScene', {
@@ -701,18 +747,6 @@ export default class SkiRunScene extends Phaser.Scene {
         coverage: 100,
         timeUsed: 0,
       });
-    });
-  }
-
-  private abortRun(): void {
-    if (this.isFinished) return;
-    this.isFinished = true;
-    this.skier.setVelocity(0, 0);
-    resetGameScenes(this.game, 'LevelCompleteScene', {
-      won: true,
-      level: this.levelIndex,
-      coverage: 100,
-      timeUsed: 0,
     });
   }
 
@@ -740,6 +774,8 @@ export default class SkiRunScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    this.skiSounds.stop();
+    this.ambienceSounds.stop();
     if (this.nightUpdateHandler) {
       this.events.off('update', this.nightUpdateHandler);
       this.nightUpdateHandler = undefined;
@@ -753,6 +789,8 @@ export default class SkiRunScene extends Phaser.Scene {
     // Stopping it during shutdown causes "duplicate key" errors when
     // resetGameScenes has already removed HUDScene before this shutdown fires.
     this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
+    this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
+    this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
   }

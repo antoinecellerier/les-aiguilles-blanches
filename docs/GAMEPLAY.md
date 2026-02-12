@@ -374,7 +374,7 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 | Touch lower half | Drag left/right |
 | Shift / LB | Brake (snow plow) |
 | Touch top quarter | Brake |
-| ESC | End run early |
+| ESC | Pause menu |
 
 ### How It Works
 

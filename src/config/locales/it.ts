@@ -118,6 +118,7 @@ const it: Record<string, string> = {
   pressContinue: "Premi Spazio o tocca per continuare",
   pauseTitle: "⏸️ Pausa",
   restart: "Ricomincia",
+  skipRun: "Salta discesa",
   quit: "Esci",
   menu: "Menu",
   levelSelect: "Scegli livello",
@@ -209,7 +210,7 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260212_date: "12 febbraio 2026",
-  changelog_20260212: "📋 Selezione livello\n🔗 Cavo del verricello fragile\n🕹️ Controlli e posizionamento migliorati",
+  changelog_20260212: "📋 Selezione livello\n🔗 Cavo del verricello fragile\n🕹️ Controlli e posizionamento migliorati\n🔊 Suoni di vento, carving e trick in discesa",
   changelog_20260211_date: "11 febbraio 2026",
 changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità della preparazione\n🏔️ Zone ripide colorate\n🏗️ Terrain park e trick",
   changelog_20260210_date: "10 febbraio 2026",

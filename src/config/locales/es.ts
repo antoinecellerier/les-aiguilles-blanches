@@ -118,6 +118,7 @@ const es: Record<string, string> = {
   pressContinue: "Pulsa Espacio o toca para continuar",
   pauseTitle: "⏸️ Pausa",
   restart: "Reiniciar",
+  skipRun: "Saltar descenso",
   quit: "Salir",
   menu: "Menú",
   levelSelect: "Elegir nivel",
@@ -209,7 +210,7 @@ const es: Record<string, string> = {
   
   // Changelog
   changelog_20260212_date: "12 de febrero de 2026",
-  changelog_20260212: "📋 Selección de nivel\n🔗 Cable de cabrestante rompible\n🕹️ Controles y colocación mejorados",
+  changelog_20260212: "📋 Selección de nivel\n🔗 Cable de cabrestante rompible\n🕹️ Controles y colocación mejorados\n🔊 Sonidos de viento, carving y trucos en el descenso",
   changelog_20260211_date: "11 de febrero de 2026",
 changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calidad de preparación\n🏔️ Zonas empinadas coloreadas\n🏗️ Terrain park y trucos",
   changelog_20260210_date: "10 de febrero de 2026",

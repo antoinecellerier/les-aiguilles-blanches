@@ -34,12 +34,16 @@ interface SettingsSceneData {
   returnTo?: string;
   levelIndex?: number;
   focusIndex?: number;
+  skiMode?: boolean;
+  skiRunMode?: 'ski' | 'snowboard';
 }
 
 
 export default class SettingsScene extends Phaser.Scene {
   private returnTo: string | null = null;
   private levelIndex = 0;
+  private skiMode = false;
+  private skiRunMode: 'ski' | 'snowboard' = 'ski';
   private keys: KeybindingManager = null!;
   private statusText: Phaser.GameObjects.Text | null = null;
   private mainSizer: any = null;
@@ -71,6 +75,8 @@ export default class SettingsScene extends Phaser.Scene {
   init(data: SettingsSceneData): void {
     this.returnTo = data?.returnTo || null;
     this.levelIndex = data?.levelIndex || 0;
+    this.skiMode = data?.skiMode ?? false;
+    this.skiRunMode = data?.skiRunMode ?? 'ski';
     this.pendingFocusIndex = data?.focusIndex ?? -1;
   }
 
@@ -182,7 +188,7 @@ export default class SettingsScene extends Phaser.Scene {
   private resizing = false;
 
   private restartScene(): void {
-    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex, focusIndex: this.focus.index });
+    this.scene.restart({ returnTo: this.returnTo, levelIndex: this.levelIndex, focusIndex: this.focus.index, skiMode: this.skiMode, skiRunMode: this.skiRunMode });
   }
 
   /** Apply accessibility changes to DOM and notify running game scenes. */
@@ -1134,7 +1140,7 @@ export default class SettingsScene extends Phaser.Scene {
       this.scene.stop('SettingsScene');
       game.scene.start('HUDScene', { level: LEVELS[levelIndex] });
       game.scene.start('DialogueScene');
-      game.scene.start('PauseScene', { levelIndex });
+      game.scene.start('PauseScene', { levelIndex, skiMode: this.skiMode, skiRunMode: this.skiRunMode });
     } else if (this.returnTo === 'GameScene') {
       const game = this.game;
       this.scene.stop('SettingsScene');

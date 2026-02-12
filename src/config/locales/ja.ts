@@ -138,6 +138,7 @@ const ja: Record<string, string> = {
   pressContinue: "スペースキーまたはタップで続行",
   pauseTitle: "⏸️ 一時停止",
   restart: "やり直し",
+  skipRun: "滑走をスキップ",
   quit: "終了",
   menu: "メニュー",
   levelSelect: "レベル選択",
@@ -251,7 +252,7 @@ const ja: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "2026年2月12日",
-  changelog_20260212: "📋 レベル選択\n🔗 切断可能なウインチケーブル\n🕹️ 操作性と配置の改善",
+  changelog_20260212: "📋 レベル選択\n🔗 切断可能なウインチケーブル\n🕹️ 操作性と配置の改善\n🔊 滑走中の風・ターン・トリック音",
   changelog_20260211_date: "2026年2月11日",
 changelog_20260211: "⛷️ 整備後のスキー滑走\n🎯 整備品質\n🏔️ 急斜面の色分け表示\n🏗️ パークとトリック",
   changelog_20260210_date: "2026年2月10日",

@@ -118,6 +118,7 @@ const de: Record<string, string> = {
   pressContinue: "Leertaste oder tippen zum Fortfahren",
   pauseTitle: "⏸️ Pause",
   restart: "Neustart",
+  skipRun: "Abfahrt überspringen",
   quit: "Beenden",
   menu: "Menü",
   levelSelect: "Levelauswahl",
@@ -209,7 +210,7 @@ const de: Record<string, string> = {
   
   // Changelog
   changelog_20260212_date: "12. Februar 2026",
-  changelog_20260212: "📋 Levelauswahl\n🔗 Reißbares Seilwindenkabel\n🕹️ Verbesserte Steuerung und Platzierung",
+  changelog_20260212: "📋 Levelauswahl\n🔗 Reißbares Seilwindenkabel\n🕹️ Verbesserte Steuerung und Platzierung\n🔊 Wind-, Carving- und Trick-Sounds bei der Abfahrt",
   changelog_20260211_date: "11. Februar 2026",
 changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqualität\n🏔️ Farblich markierte Steilzonen\n🏗️ Terrain-Park und Tricks",
   changelog_20260210_date: "10. Februar 2026",

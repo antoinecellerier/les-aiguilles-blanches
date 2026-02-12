@@ -138,6 +138,7 @@ const en: Record<string, string> = {
   pressContinue: "Press Space or tap to continue",
   pauseTitle: "⏸️ Paused",
   restart: "Restart",
+  skipRun: "Skip Run",
   quit: "Quit",
   menu: "Menu",
   levelSelect: "Level Select",
@@ -251,7 +252,7 @@ const en: Record<string, string> = {
   
   // Changelog
   changelog_20260212_date: "February 12, 2026",
-  changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Smoother controls and placement",
+  changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Smoother controls and placement\n🔊 Ski run wind, carving and trick sounds",
   changelog_20260211_date: "February 11, 2026",
 changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔️ Color-coded steep zones\n🏗️ Terrain park and tricks",
   changelog_20260210_date: "February 10, 2026",

@@ -59,7 +59,7 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [x] Dynamic heading-aware physics (lateral input reduces gravity, progressive acceleration)
 - [x] Directional sprite variants (texture swap instead of rotation)
 - [x] E2E tests (10 tests: button visibility, scene loads, preference toggle, transitions)
-- [ ] Ski run audio (wind, carving, powder spray, bump sounds)
+- [x] Ski run audio (wind, carving, powder spray, bump sounds)
 - [ ] Fun failure screens for ski crashes
 - [ ] Ski jumps (groom key)
 - [ ] Level-appropriate items, slalom gates, tricks
@@ -79,6 +79,8 @@ See [GAME_DESIGN.md — Ski/Snowboard Reward Run](./GAME_DESIGN.md#skisnoboard-r
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Ski run audio & pause** — Procedural descent audio via SkiRunSounds: speed-dependent wind rush, terrain-aware snow carving (groomed swishes vs ungroomed crunch), brake scrape, obstacle bump, cliff wipeout, trick launch/land whoosh, rail grind metallic scrape. AmbienceSounds (storm/night) and MusicSystem ('intense' mood) now active during ski runs. ESC opens pause menu with Skip Run option (was instant abort). Localized in 14 languages.
 
 - ✅ **Random ski/snowboard mode** — Default descent mode is now "Random" (50/50 ski or snowboard each run). Settings offers Random / Ski / Snowboard. Mode resolved once per run and shown on button label. Progressive turn drag: carving friction ramps from 10%→100% over 0.4s so initial turns are snappy.
 

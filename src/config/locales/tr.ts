@@ -138,6 +138,7 @@ const tr: Record<string, string> = {
   pressContinue: "Devam için boşluk tuşuna basın veya dokunun",
   pauseTitle: "⏸️ Duraklatıldı",
   restart: "Yeniden Başlat",
+  skipRun: "Kaymayı atla",
   quit: "Çık",
   menu: "Menü",
   levelSelect: "Pist Seç",
@@ -251,7 +252,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12 Şubat 2026",
-  changelog_20260212: "📋 Seviye seçimi\n🔗 Kopabilen vinç kablosu\n🕹️ Daha akıcı kontroller ve yerleşim",
+  changelog_20260212: "📋 Seviye seçimi\n🔗 Kopabilen vinç kablosu\n🕹️ Daha akıcı kontroller ve yerleşim\n🔊 Kayış sırasında rüzgâr, viraj ve trik sesleri",
   changelog_20260211_date: "11 Şubat 2026",
 changelog_20260211: "⛷️ Hazırlama sonrası kayak inişi\n🎯 Hazırlama kalitesi\n🏔️ Renk kodlu dik bölgeler\n🏗️ Park ve trick'ler",
   changelog_20260210_date: "10 Şubat 2026",

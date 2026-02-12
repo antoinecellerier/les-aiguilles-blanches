@@ -138,6 +138,7 @@ const sk: Record<string, string> = {
   pressContinue: "Stlačte medzerník alebo ťuknite pre pokračovanie",
   pauseTitle: "⏸️ Pozastavené",
   restart: "Reštartovať",
+  skipRun: "Preskočiť zjazd",
   quit: "Odísť",
   menu: "Menu",
   levelSelect: "Výber trate",
@@ -251,7 +252,7 @@ const sk: Record<string, string> = {
 
   // Changelog
   changelog_20260212_date: "12. februára 2026",
-  changelog_20260212: "📋 Výber úrovne\n🔗 Pretrhnuteľné lano navijaku\n🕹️ Plynulejšie ovládanie a rozmiestnenie",
+  changelog_20260212: "📋 Výber úrovne\n🔗 Pretrhnuteľné lano navijaku\n🕹️ Plynulejšie ovládanie a rozmiestnenie\n🔊 Zvuky vetra, carvingu a trikov pri zjazde",
   changelog_20260211_date: "11. februára 2026",
 changelog_20260211: "⛷️ Zjazd na lyžiach po úprave\n🎯 Kvalita úpravy\n🏔️ Farebne rozlíšené strmé zóny\n🏗️ Park a triky",
   changelog_20260210_date: "10. februára 2026",

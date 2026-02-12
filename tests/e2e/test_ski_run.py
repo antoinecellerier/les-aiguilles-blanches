@@ -62,7 +62,7 @@ class TestSkiRun:
                             "Should return to LevelCompleteScene after reaching bottom")
 
     def test_ski_run_abort_with_escape(self, game_page: Page):
-        """ESC during ski run should abort and return to LevelCompleteScene."""
+        """ESC during ski run should open pause menu with Skip Run option."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
 
@@ -70,9 +70,18 @@ class TestSkiRun:
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
 
         game_page.keyboard.press("Escape")
+        wait_for_scene(game_page, 'PauseScene', timeout=5000)
+        assert_scene_active(game_page, 'PauseScene',
+                            "ESC should open pause menu during ski run")
+
+        # Wait for PauseScene input delay
+        game_page.wait_for_timeout(400)
+
+        # Click "Skip Run" (index 2 in ski mode: Resume, Restart, Skip Run, Settings, Quit)
+        click_button(game_page, 2, "Skip Run")
         wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
         assert_scene_active(game_page, 'LevelCompleteScene',
-                            "ESC should abort ski run and return to LevelCompleteScene")
+                            "Skip Run should return to LevelCompleteScene")
 
     def test_snowboard_mode_uses_snowboarder_texture(self, game_page: Page):
         """Setting snowboard mode should use snowboarder texture."""
