@@ -231,6 +231,16 @@ export const BALANCE = {
   SKI_TRICK_VOLUME: 0.07,       // Trick launch/land volume
   SKI_GRIND_VOLUME: 0.06,       // Rail grind volume
   SKI_GRIND_FREQ: 3000,         // Hz — metallic grind center frequency
+
+  // Ski jump
+  SKI_JUMP_MIN_SPEED: 60,       // Min speed (px/s) to get any air (~6 km/h)
+  SKI_JUMP_AIR_BASE: 350,       // Base air time (ms) at minimum speed
+  SKI_JUMP_AIR_MAX: 700,        // Max air time (ms) at full speed
+  SKI_JUMP_SCALE: 1.4,          // Skier scale at peak of jump
+  SKI_JUMP_BOOST: 1.15,         // Speed multiplier on clean landing (groomed)
+  SKI_CLIFF_JUMP_KMH: 30,      // Min km/h to clear a cliff with a jump
+  SKI_CLIFF_JUMP_AIR: 900,      // Air time (ms) for cliff jump
+  SKI_CLIFF_JUMP_SCALE: 1.8,    // Skier scale at peak of cliff jump
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

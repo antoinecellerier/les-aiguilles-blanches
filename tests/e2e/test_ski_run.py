@@ -436,3 +436,77 @@ class TestSlalomGates:
             return { totalGates: scene.slalomSystem.totalGates };
         }""")
         assert gate_info['totalGates'] == 0, f"Tutorial should have 0 gates, got {gate_info['totalGates']}"
+
+
+class TestSkiJump:
+    """Test ski jump mechanics (groom key triggers jump during ski run)."""
+
+    def _launch_ski_and_build_speed(self, page: Page, level: int = 2):
+        """Helper: launch SkiRunScene, dismiss dialogue, build speed."""
+        page.evaluate(f"""() => {{
+            localStorage.setItem('dialogueDismissed_level{level}Intro', 'true');
+            localStorage.setItem('dialogueDismissed_jeanPierreIntro', 'true');
+            window.game.scene.start('SkiRunScene', {{ level: {level}, mode: 'ski' }});
+        }}""")
+        wait_for_scene(page, 'SkiRunScene', timeout=10000)
+        page.wait_for_timeout(300)
+        # Accelerate downhill
+        page.keyboard.down('ArrowDown')
+        page.wait_for_function("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            return s && s.currentSpeed >= 100;
+        }""", timeout=5000)
+        page.keyboard.up('ArrowDown')
+
+    def test_jump_sets_airborne(self, game_page: Page):
+        """Calling doJump at speed should set isAirborne."""
+        self._launch_ski_and_build_speed(game_page)
+
+        game_page.evaluate("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            s.doJump();
+        }""")
+        game_page.wait_for_function("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            return s && s.isAirborne === true;
+        }""", timeout=3000)
+
+    def test_jump_lands_after_air_time(self, game_page: Page):
+        """After jump, skier should land (isAirborne returns to false)."""
+        self._launch_ski_and_build_speed(game_page)
+
+        game_page.evaluate("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            s.doJump();
+        }""")
+        game_page.wait_for_function("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            return s && s.isAirborne === true;
+        }""", timeout=3000)
+
+        # Wait for landing
+        game_page.wait_for_function("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            return s && s.isAirborne === false;
+        }""", timeout=3000)
+
+    def test_no_jump_at_low_speed(self, game_page: Page):
+        """Jump should not trigger at very low speed."""
+        game_page.evaluate("""() => {
+            localStorage.setItem('dialogueDismissed_level2Intro', 'true');
+            localStorage.setItem('dialogueDismissed_jeanPierreIntro', 'true');
+            window.game.scene.start('SkiRunScene', { level: 2, mode: 'ski' });
+        }""")
+        wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
+        page = game_page
+        # Don't build speed — press jump immediately
+        page.wait_for_timeout(200)
+        page.keyboard.down('Space')
+        page.wait_for_timeout(200)
+
+        airborne = page.evaluate("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            return s ? s.isAirborne : null;
+        }""")
+        page.keyboard.up('Space')
+        assert airborne is False, "Should not jump at low speed"

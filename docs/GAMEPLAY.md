@@ -389,6 +389,8 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 | Touch lower half | Drag left/right |
 | Shift / LB | Brake (snow plow) |
 | Touch top quarter | Brake |
+| Space / X (gamepad) | Jump |
+| Touch JMP button | Jump |
 | ESC | Pause menu |
 
 ### How It Works
@@ -403,6 +405,7 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 - **Ski tracks** — skis leave two parallel track lines on ungroomed and off-piste snow; snowboards leave a single wider track
 - **Avalanche zones** — on hazardous levels (L8–L10), skiing through avalanche zones triggers burial much faster than in a groomer
 - **Fatal crashes** — hitting a tree or rock above 40 km/h is fatal (wipeout instead of bump)
+- **Jumping** — press the groom key (Space) to jump. Requires minimum speed (~6 km/h). Higher speed = longer air time and bigger scale-up. Landing on groomed snow gives a 15% speed boost. At 30+ km/h, jumps are cliff-strength — you can clear danger zones mid-air instead of wiping out.
 - **Replayable** — ski again from the win screen as many times as you want
 
 ### Tricks (Park Levels)

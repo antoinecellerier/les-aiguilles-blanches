@@ -660,6 +660,15 @@ export default class HUDScene extends Phaser.Scene {
       () => { this.touchWinch = false; },
       0x7a1a1a, true
     );
+
+    // Jump button (above brake) — maps to touchGroom
+    this.createTouchButton(
+      Math.round(actionX - btnSize - padding / 2), Math.round(actionY - btnSize * 1.2 - padding * 0.6),
+      Math.round(btnSize * 1.2), 'JMP', alpha,
+      () => { this.touchGroom = true; },
+      () => { this.touchGroom = false; },
+      0x1a5a7a, true
+    );
   }
 
   /** Process action button overlaps and emit touch state for the consuming scene */

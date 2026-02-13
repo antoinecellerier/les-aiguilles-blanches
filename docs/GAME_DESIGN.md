@@ -266,6 +266,7 @@ Short burst durations create a pit-stop rhythm — players loop through Marie's 
 - Groomed tile speed multiplier vs. ungroomed tile friction.
 - Obstacle collision: brief speed reduction + bump animation (cooldown prevents rapid re-triggering).
 - Cliff danger zones: wipeout → freeze → respawn at last safe on-piste position.
+- Jump: groom key triggers a speed-dependent jump. At ≥30 km/h, becomes a cliff jump (longer air, bigger scale) that clears danger zones. Landing on groomed snow gives a 1.15× speed boost.
 
 **Visual effects**:
 - Snow spray on sharp carves and powder contact.

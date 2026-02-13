@@ -89,6 +89,8 @@ export default class SkiRunScene extends Phaser.Scene {
   private gateText: Phaser.GameObjects.Text | null = null;
   private trackGraphics!: Phaser.GameObjects.Graphics;
   private lastTrackPos: { x: number; y: number } | null = null;
+  private isAirborne = false;
+  private jumpKey: Phaser.Input.Keyboard.Key | null = null;
 
   constructor() {
     super({ key: 'SkiRunScene' });
@@ -105,6 +107,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.bumpSlowdownUntil = 0;
     this.slalomSystem = new SlalomGateSystem();
     this.gateText = null;
+    this.isAirborne = false;
     // Resolve mode: use passed value, or resolve random here
     if (data.mode) {
       this.resolvedMode = data.mode;
@@ -240,7 +243,9 @@ export default class SkiRunScene extends Phaser.Scene {
         this.onFeatureTrick('halfpipe');
       });
     }
-    this.physics.add.overlap(this.skier, dangerZones, () => this.onWipeout());
+    this.physics.add.overlap(this.skier, dangerZones, () => {
+      if (!this.isAirborne) this.onWipeout();
+    });
 
     // Avalanche zones — skier can trigger avalanches on hazardous levels
     if (this.level.hazards?.includes('avalanche')) {
@@ -276,8 +281,9 @@ export default class SkiRunScene extends Phaser.Scene {
         right: this.input.keyboard.addKey(bindings.right),
       };
       this.brakeKey = this.input.keyboard.addKey(bindings.winch);
+      this.jumpKey = this.input.keyboard.addKey(bindings.groom);
     }
-    captureGamepadButtons(this, [14, 15, this.gamepadBindings.winch]);
+    captureGamepadButtons(this, [14, 15, this.gamepadBindings.winch, this.gamepadBindings.groom]);
 
     // Launch HUDScene in ski mode for touch controls (joystick + brake)
     this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
@@ -335,6 +341,16 @@ export default class SkiRunScene extends Phaser.Scene {
     let braking = this.brakeKey?.isDown ?? false;
     if (pad && isGamepadButtonPressed(pad, this.gamepadBindings.winch)) braking = true;
     if (this.touchInput.winch) braking = true;
+
+    // Jump input (groom key / gamepad groom button / touch groom)
+    if (!this.isAirborne && !this.trickActive && !this.isCrashed) {
+      let jumpPressed = Phaser.Input.Keyboard.JustDown(this.jumpKey!) === true;
+      if (pad && isGamepadButtonPressed(pad, this.gamepadBindings.groom)) jumpPressed = true;
+      if (this.touchInput.groom) jumpPressed = true;
+      if (jumpPressed && this.currentSpeed >= BALANCE.SKI_JUMP_MIN_SPEED) {
+        this.doJump();
+      }
+    }
 
     // Terrain check — groomed vs ungroomed vs off-piste (smoothed transition)
     const tileX = Math.floor(this.skier.x / this.tileSize);
@@ -628,6 +644,8 @@ export default class SkiRunScene extends Phaser.Scene {
   }
 
   private onBump(): void {
+    // Airborne — skip ground-level collisions
+    if (this.isAirborne) return;
     // Cooldown: don't re-trigger during an active bump slowdown
     if (this.game.getTime() < this.bumpSlowdownUntil) return;
 
@@ -646,6 +664,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
   /** Boundary wall hit — in halfpipe, launch a trick instead of bumping */
   private onBoundaryHit(): void {
+    if (this.isAirborne) return;
     if (this.parkFeatures.hasHalfpipe && !this.trickActive) {
       const tileY = Math.floor(this.skier.y / this.tileSize);
       // Only in the walled section (not entry/exit margins)
@@ -658,6 +677,7 @@ export default class SkiRunScene extends Phaser.Scene {
   }
 
   private onFeatureTrick(type: 'kicker' | 'rail' | 'halfpipe'): void {
+    if (this.isAirborne) return;
     const now = this.game.getTime();
     if (now - this.lastTrickTime < 1500 || this.trickActive) return;
     this.lastTrickTime = now;
@@ -699,6 +719,72 @@ export default class SkiRunScene extends Phaser.Scene {
       duration: 1200,
       ease: 'Power2',
       onComplete: () => popup.destroy(),
+    });
+  }
+
+  /** Manual jump — groom key during ski run. Cliff jump if fast enough near danger zone. */
+  private doJump(): void {
+    this.isAirborne = true;
+    const baseScale = this.tileSize / 16;
+    const speedFrac = Math.min(1, this.currentSpeed / BALANCE.SKI_MAX_SPEED);
+
+    // Check if near a cliff danger zone for cliff jump
+    const kmh = (this.currentSpeed / BALANCE.SKI_MAX_SPEED) * 60;
+    const isCliffJump = kmh >= BALANCE.SKI_CLIFF_JUMP_KMH;
+
+    const peakScale = isCliffJump ? BALANCE.SKI_CLIFF_JUMP_SCALE : BALANCE.SKI_JUMP_SCALE;
+    const airTime = isCliffJump
+      ? BALANCE.SKI_CLIFF_JUMP_AIR
+      : BALANCE.SKI_JUMP_AIR_BASE + speedFrac * (BALANCE.SKI_JUMP_AIR_MAX - BALANCE.SKI_JUMP_AIR_BASE);
+    const launchDur = airTime * 0.55;
+    const landDur = airTime * 0.45;
+
+    // Shadow below skier during air
+    const shadow = this.add.graphics().setDepth(DEPTHS.PLAYER - 1);
+    this.trickShadow = shadow;
+    const shadowY = this.skier.y + 10 * baseScale;
+    const updateShadow = () => {
+      if (!this.skier?.active) return;
+      shadow.clear();
+      shadow.fillStyle(0x1a1612, 0.25);
+      const sw = 10 * this.skier.scaleX;
+      const sh = 3 * this.skier.scaleX;
+      shadow.fillRect(this.skier.x - sw / 2, shadowY, sw, sh);
+    };
+    this.events.on('update', updateShadow);
+    this.trickShadowUpdater = updateShadow;
+
+    this.skiSounds.playTrickLaunch();
+
+    // Launch phase
+    this.tweens.add({
+      targets: this.skier,
+      scaleX: baseScale * peakScale,
+      scaleY: baseScale * peakScale,
+      duration: launchDur,
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        // Land phase
+        this.tweens.add({
+          targets: this.skier,
+          scaleX: baseScale,
+          scaleY: baseScale,
+          duration: landDur,
+          ease: 'Bounce.easeOut',
+          onComplete: () => {
+            this.isAirborne = false;
+            this.cleanupTrickShadow();
+            this.skiSounds.playTrickLand();
+
+            // Clean landing boost on groomed snow
+            const tx = Math.floor(this.skier.x / this.tileSize);
+            const ty = Math.floor(this.skier.y / this.tileSize);
+            if (this.groomedGrid[ty]?.[tx]) {
+              this.currentSpeed *= BALANCE.SKI_JUMP_BOOST;
+            }
+          },
+        });
+      },
     });
   }
 
@@ -969,6 +1055,8 @@ export default class SkiRunScene extends Phaser.Scene {
     this.gateText = null;
     this.cleanupTrickShadow();
     this.trickActive = false;
+    this.isAirborne = false;
+    if (this.skier?.active) this.tweens.killTweensOf(this.skier);
     // Don't stop HUDScene here — resetGameScenes handles all scene cleanup.
     // Stopping it during shutdown causes "duplicate key" errors when
     // resetGameScenes has already removed HUDScene before this shutdown fires.
