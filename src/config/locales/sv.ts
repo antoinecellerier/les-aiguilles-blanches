@@ -273,7 +273,7 @@ const sv: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "13 februari 2026",
-  changelog_20260213: "🚩 Slalomportar\n🏔️ Skidhopp\n🎿 Skidåkare och snowboardåkare på vinstskärmen\n🎹 Nocturn pianomusik\n🔊 Motorvolym justerbar",
+  changelog_20260213: "🚩 Slalomportar\n🏔️ Skidhopp\n⚡ Förbättrad prestanda\n🎹 Nocturn pianomusik\n🔊 Motorvolym justerbar",
   changelog_20260212_date: "12 februari 2026",
   changelog_20260212: "📋 Nivåval\n🔗 Brytbar vinschkabel\n🕹️ Kontrolldiagnostik\n🍽️ Maries rätter\n❄️ Köldexponering",
   changelog_20260211_date: "11 februari 2026",

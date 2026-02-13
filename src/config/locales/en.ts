@@ -272,7 +272,7 @@ const en: Record<string, string> = {
   
   // Changelog
   changelog_20260213_date: "February 13, 2026",
-  changelog_20260213: "🚩 Slalom gates\n🏔️ Ski jumps\n🎿 Skier and snowboarder on win screen\n🎹 Nocturne piano music\n🔊 Engine volume control",
+  changelog_20260213: "🚩 Slalom gates\n🏔️ Ski jumps\n⚡ Smoother performance\n🎹 Nocturne piano music\n🔊 Engine volume control",
   changelog_20260212_date: "February 12, 2026",
   changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Controller diagnostics\n🍽️ Marie's kitchen\n❄️ Frost exposure",
   changelog_20260211_date: "February 11, 2026",

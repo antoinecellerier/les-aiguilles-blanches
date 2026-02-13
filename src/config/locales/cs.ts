@@ -272,7 +272,7 @@ const cs: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "13. února 2026",
-  changelog_20260213: "🚩 Slalomové brány\n🏔️ Skoky na lyžích\n🎿 Lyžař a snowboardista na obrazovce výhry\n🎹 Nokturní klavírní hudba\n🔊 Hlasitost motoru nastavitelná",
+  changelog_20260213: "🚩 Slalomové brány\n🏔️ Skoky na lyžích\n⚡ Vylepšený výkon\n🎹 Nokturní klavírní hudba\n🔊 Hlasitost motoru nastavitelná",
   changelog_20260212_date: "12. února 2026",
   changelog_20260212: "📋 Výběr úrovně\n🔗 Přetržitelné lano navijáku\n🕹️ Diagnostika ovladače\n🍽️ Jídla od Marie\n❄️ Expozice mrazu",
   changelog_20260211_date: "11. února 2026",

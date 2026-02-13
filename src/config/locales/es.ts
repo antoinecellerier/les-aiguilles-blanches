@@ -223,7 +223,7 @@ const es: Record<string, string> = {
   
   // Changelog
   changelog_20260213_date: "13 de febrero de 2026",
-  changelog_20260213: "🚩 Puertas de eslalon\n🏔️ Saltos de esquí\n🎿 Esquiador y snowboarder en pantalla de victoria\n🎹 Música nocturna de piano\n🔊 Volumen del motor ajustable",
+  changelog_20260213: "🚩 Puertas de eslalon\n🏔️ Saltos de esquí\n⚡ Rendimiento mejorado\n🎹 Música nocturna de piano\n🔊 Volumen del motor ajustable",
   changelog_20260212_date: "12 de febrero de 2026",
   changelog_20260212: "📋 Selección de nivel\n🔗 Cable de cabrestante rompible\n🕹️ Diagnóstico del mando\n🍽️ Los platos de Marie\n❄️ Exposición al frío",
   changelog_20260211_date: "11 de febrero de 2026",
