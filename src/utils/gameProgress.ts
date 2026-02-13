@@ -75,7 +75,11 @@ export function getLevelStats(level: number): LevelStats | null {
 export function isLevelUnlocked(level: number): boolean {
   if (level === 0) return true;
   const progress = getSavedProgress();
-  return (progress?.currentLevel ?? 0) >= level;
+  if (!progress) return false;
+  // Unlocked if current playthrough reached it, or if it was ever completed before
+  if (progress.currentLevel >= level) return true;
+  // Check if the previous level was completed in a prior playthrough
+  return progress.levelStats?.[level - 1]?.completed === true;
 }
 
 export function clearProgress(): void {

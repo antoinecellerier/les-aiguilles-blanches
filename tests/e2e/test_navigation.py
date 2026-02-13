@@ -382,9 +382,10 @@ class TestGameProgress:
         level = get_current_level(game_page)
         assert level == 0, f"New Game should start at level 0, got {level}"
         
-        # Progress should be cleared
-        progress = game_page.evaluate("localStorage.getItem('snowGroomer_progress')")
-        assert progress is None, "Progress should be cleared after New Game"
+        # Progress should be reset to level 0 but stats preserved
+        progress = game_page.evaluate("JSON.parse(localStorage.getItem('snowGroomer_progress'))")
+        assert progress is not None, "Progress should be preserved (stats kept)"
+        assert progress["currentLevel"] == 0, "currentLevel should be reset to 0"
 
 
 class TestLevelNavigation:
