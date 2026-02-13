@@ -17,7 +17,7 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 - [x] Bake cliff Graphics to textures — Two-pass approach: compute bounding box, draw at origin offset, `generateTexture()` per segment. Stale textures cleaned on level switch. L7 FPS +63%, L8 FPS +95%
 - [x] Bake animal track Graphics to textures — Pre-generate track textures per species (bunny, chamois, bouquetin, marmot, fox) in BootScene. WildlifeSystem uses Images instead of Graphics. L1 Graphics −72%, L7 Graphics −58%
 - [x] Reduce night overlay light cone commands — Reduced headlight step grid (6×8×12→4×5×8), compensated with larger circles (sizeFactor 0.25→0.4). Result: 12,524→3,632 commands per frame (−71%)
-- [ ] Camera culling for off-screen objects — Set `visible=false` on Graphics/sprites outside camera viewport. Reduces display list iteration
+- [x] Camera culling for off-screen objects — Extended snow tile culling to all static Images (trees, rocks, tracks). Reduced padding tree density (spacing 2→3, 1,076→439 trees). L9: 1,200+ objects hidden per frame
 
 **Key constraint:** `Game.step()` override freezes Firefox entirely — any frame-rate management must use Phaser's built-in config, not monkey-patching.
 
