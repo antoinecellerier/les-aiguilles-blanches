@@ -276,7 +276,7 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260213_date: "13 février 2026",
-  changelog_20260213: "🚩 Portes de slalom\n🏔️ Sauts à ski\n🎿 Skieur et snowboardeur sur l'écran de victoire\n⚙️ Ergonomie des paramètres",
+  changelog_20260213: "🚩 Portes de slalom\n🏔️ Sauts à ski\n🎿 Skieur et snowboardeur sur l'écran de victoire\n🎹 Musique nocturne au piano\n🔊 Volume moteur réglable",
   changelog_20260212_date: "12 février 2026",
   changelog_20260212: "📋 Sélection de niveau\n🔗 Câble de treuil cassable\n🕹️ Diagnostic manette\n🍽️ Les plats de Marie\n❄️ Exposition au froid",
   changelog_20260211_date: "11 février 2026",

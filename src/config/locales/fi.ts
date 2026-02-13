@@ -272,7 +272,7 @@ const fi: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "13. helmikuuta 2026",
-  changelog_20260213: "🚩 Pujotteluportit\n🏔️ Mäkihypyt\n🎿 Hiihtäjä ja lumilautailija voittonäytöllä\n⚙️ Asetukset parannettu",
+  changelog_20260213: "🚩 Pujotteluportit\n🏔️ Mäkihypyt\n🎿 Hiihtäjä ja lumilautailija voittonäytöllä\n🎹 Nokturni-pianomusiikki\n🔊 Moottorin äänenvoimakkuus säädettävä",
   changelog_20260212_date: "12. helmikuuta 2026",
   changelog_20260212: "📋 Tason valinta\n🔗 Katkeava vinssikaapeli\n🕹️ Ohjaindiagnostiikka\n🍽️ Marien ruoat\n❄️ Kylmäaltistus",
   changelog_20260211_date: "11. helmikuuta 2026",
