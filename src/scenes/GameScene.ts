@@ -532,11 +532,11 @@ export default class GameScene extends Phaser.Scene {
       const midPath = this.geometry.pistePath[Math.floor(this.level.height / 2)];
       const pisteLeft = midPath ? (midPath.centerX - midPath.width / 2) * this.tileSize : worldWidth * 0.3;
       const pisteRight = midPath ? (midPath.centerX + midPath.width / 2) * this.tileSize : worldWidth * 0.7;
-      this.wildlifeSystem.spawn(this.level.wildlife, worldWidth, worldHeight, pisteLeft, pisteRight, this.geometry.accessPathRects);
       this.wildlifeSystem.setObstacles(
         (px, py) => this.geometry.isOnCliff(px, py),
         this.buildingRects,
       );
+      this.wildlifeSystem.spawn(this.level.wildlife, worldWidth, worldHeight, pisteLeft, pisteRight, this.geometry.accessPathRects);
       this.wildlifeSystem.bootstrapTracks();
       this.wildlifeSystem.onAnimalFlee = (type) => {
         // Suppress flee sounds during dialogue to avoid drowning out voice

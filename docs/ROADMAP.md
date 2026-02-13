@@ -25,9 +25,8 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
 - [ ] Contextual win screen graphics — Level-specific victory scenes (e.g. night stars for L7, storm clearing for L9, avalanche debris for L8, park features for L3/L6)
-- [ ] Wildlife cliff awareness — Prevent ground animals (rabbits, marmots) from spawning on cliff tiles; restrict to safe terrain
+- ✅ **Wildlife cliff awareness** — Ground animals (rabbits, marmots, foxes) no longer spawn on cliff tiles; spawn retries up to 8 times for valid terrain
 - ✅ Sound effects polish — Character voice differentiation (pitch gap, vowel formant), melody phrasing rests, piano legato sustain, bass rebalancing
-- [ ] Pause menu mute toggle
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
 - [ ] Leaderboards

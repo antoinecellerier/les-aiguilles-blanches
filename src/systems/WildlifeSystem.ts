@@ -189,6 +189,17 @@ export class WildlifeSystem {
           if (onTrack) continue; // couldn't find valid spot, skip this marmot
         }
 
+        // Ground animals that can't climb must not spawn on cliffs
+        if (type !== 'bird' && type !== 'bouquetin' && type !== 'chamois' && this.isOnCliff) {
+          let attempts = 0;
+          while (this.isOnCliff(x, y) && attempts < 8) {
+            x = margin + Math.random() * (worldWidth - margin * 2);
+            y = margin + Math.random() * (worldHeight - margin * 2);
+            attempts++;
+          }
+          if (this.isOnCliff(x, y)) continue;
+        }
+
         this.createAnimal(type, x, y, worldWidth, worldHeight);
       }
     }
