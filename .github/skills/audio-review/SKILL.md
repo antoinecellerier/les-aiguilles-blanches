@@ -42,10 +42,12 @@ Read all audio-related source files, then launch parallel explore agents to chec
 
 #### 2. Music direction
 
-- **Primary style: Chopin's Nocturnes** — The soundtrack draws from the contemplative, lyrical quality of Chopin's nocturnes: gentle piano melodies, expressive dynamics, rubato phrasing, and a sense of solitary beauty that matches the alpine night atmosphere
-- **Chiptune piano rendering** — Nocturne-style melodies rendered through chiptune/retro synthesis to bridge the classical inspiration with the SkiFree aesthetic. Think: the emotional arc of a nocturne, the timbre of an 8-bit console
+- **Primary style: Chopin's Nocturnes** — The soundtrack draws from Op. 9 No. 1 (B♭ minor) and No. 2 (E♭ major): gentle piano melodies, expressive dynamics, rubato phrasing, and a sense of solitary beauty that matches the alpine night atmosphere
+- **Grand piano synthesis** — Realistic procedural piano via Web Audio API: string-pair detuning, pitch settling, felt-hammer attack, harmonic series with inharmonicity, sympathetic resonance, soundboard filtering. Not chiptune — the goal is warm, organic piano tone
+- **Polyphonic texture** — Counter-melody (diatonic thirds), ornamental echoes (neighbor-tone turns), distant cadential echoes, Picardy third coloring. Phrase-level dynamic swell (surges and ebbs). Triplet 12/8 bass subdivision
+- **Section form** — Night mood uses A–B–A' structure: ornamented outer sections in B♭ minor, contrasting middle in D♭ major (ascetic, octave doubling sotto voce, no ornaments)
 - **Dramatic exceptions** — High-intensity moments (avalanche warnings, storm levels, competition finale) may depart from the nocturne style toward more urgent, rhythmic compositions. These exceptions should feel like dramatic contrast, not a different game
-- **Level-appropriate mood** — Early tutorial levels: simple, sparse arrangements. Night levels (L6): full nocturne expression. Storm levels (L8): building intensity. Finale (L8): triumphant resolution
+- **Level-appropriate mood** — Early tutorial levels: simple, sparse arrangements. Night levels (L8): full nocturne expression with section form. Storm levels (L9-L10): building intensity. Credits: triumphant reprise
 - **Silence and space** — Nocturnes breathe. Allow rests, let notes decay naturally, don't fill every moment with sound. Mountain silence is part of the soundtrack
 
 #### 3. Mechanical feedback & game feel
@@ -161,7 +163,7 @@ For each finding, provide:
 2. **Procedural where possible** — Generate sounds in code, consistent with the game's procedural art approach
 3. **Alpine authenticity** — Audio should evoke Savoie mountains: wind, snow, mechanical rumble, distant echoes
 4. **Accessible by default** — The game works perfectly in silence; audio enriches but never gates
-5. **Nocturne soul** — The soundtrack channels the contemplative beauty of Chopin's nocturnes, rendered through retro synthesis
+5. **Nocturne soul** — The soundtrack channels the contemplative beauty of Chopin's nocturnes, rendered through realistic procedural grand piano synthesis
 6. **Celeste-style voice** — Character speech is expressive gibberish: no real words, no translation needed, pure personality
 
 ### Sound palette guidelines
@@ -173,20 +175,23 @@ For each finding, provide:
 | Weather/ambience | Layered, dynamic, spatial | Wind gusts, snowfall patter, night stillness |
 | UI/feedback | Short, clear, distinct | Click, confirm, warning beep, error buzz |
 | Wildlife | Natural, subtle, positional | Marmot whistle, eagle cry, distant cowbell |
-| Music | Nocturne-inspired, retro-rendered | Chiptune piano melodies, expressive dynamics, breathing rests |
+| Music | Nocturne-inspired, grand piano | Polyphonic melodies, phrase dynamics, section form, breathing rests |
 | Voice | Celeste-style gibberish | Per-character pitch/cadence, emotional inflection, no real words |
 
 ### Music reference
 
 **Primary influence: Chopin Nocturnes**
-- Op. 9 No. 2 (E♭ major) — the lyrical, singing quality for peaceful gameplay
+- Op. 9 No. 1 (B♭ minor) — section form (A–B–A'), sonorous thirds/sixths, Picardy third ending
+- Op. 9 No. 2 (E♭ major) — the lyrical, singing quality, ornamental variations, surges and ebbs
 - Op. 48 No. 1 (C minor) — the dramatic middle section for storm/avalanche intensity
 - Op. 27 No. 2 (D♭ major) — the gentle ornamental beauty for night levels
 
 **Rendering approach:**
-- Melodic contour and phrasing from the nocturne tradition
-- Timbre from chiptune synthesis (square/triangle waves, simple envelopes)
-- Rubato and dynamic expression preserved through programmatic timing variation
+- Grand piano synthesis via Web Audio API (not chiptune)
+- String-pair detuning, pitch settling, felt-hammer attack, harmonic inharmonicity
+- Polyphonic voices: counter-melody, ornamental echoes, cadential echoes
+- Rubato (±12%) and phrase-level dynamic swell for breathing, organic feel
+- Section form (A–B–A') for night mood with contrasting D♭ major middle
 - Allowed departures: percussion and rhythmic urgency for hazard/competition moments
 
 ### Forbidden patterns
@@ -199,5 +204,5 @@ For each finding, provide:
 - ❌ Audio processing on the main thread that could cause frame drops
 - ❌ Hardcoded volume values (use constants from `gameConfig.ts`)
 - ❌ Real words in character voice audio (Celeste-style gibberish only)
-- ❌ Generic chiptune music that doesn't reference nocturne phrasing
+- ❌ Generic synth music that doesn't reference nocturne phrasing or texture
 - ❌ Constant music with no breathing room (nocturnes need silence)
