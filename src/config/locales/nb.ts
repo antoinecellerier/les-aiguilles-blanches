@@ -72,6 +72,7 @@ const nb: Record<string, string> = {
   masterVolume: "Hovedvolum",
   musicVolume: "Musikk",
   sfxVolume: "Lydeffekter",
+  engineVolume: "Motor",
   voiceVolume: "Stemme",
   ambienceVolume: "Atmosfære",
   mute: "Demp",

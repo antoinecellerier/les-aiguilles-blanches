@@ -75,6 +75,7 @@ const es: Record<string, string> = {
   masterVolume: "Volumen general",
   musicVolume: "Música",
   sfxVolume: "Efectos de sonido",
+  engineVolume: "Motor",
   voiceVolume: "Voz",
   ambienceVolume: "Ambiente",
   mute: "Silenciar",

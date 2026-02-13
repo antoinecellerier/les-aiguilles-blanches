@@ -72,6 +72,7 @@ const cs: Record<string, string> = {
   masterVolume: "Hlavní hlasitost",
   musicVolume: "Hudba",
   sfxVolume: "Zvukové efekty",
+  engineVolume: "Motor",
   voiceVolume: "Hlasy",
   ambienceVolume: "Prostředí",
   mute: "Ztlumit",

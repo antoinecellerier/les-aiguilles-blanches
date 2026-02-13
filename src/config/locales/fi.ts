@@ -72,6 +72,7 @@ const fi: Record<string, string> = {
   masterVolume: "Äänenvoimakkuus",
   musicVolume: "Musiikki",
   sfxVolume: "Ääniefektit",
+  engineVolume: "Moottori",
   voiceVolume: "Puhe",
   ambienceVolume: "Tunnelma",
   mute: "Mykistä",

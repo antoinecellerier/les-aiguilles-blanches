@@ -72,6 +72,7 @@ const sv: Record<string, string> = {
   masterVolume: "Huvudvolym",
   musicVolume: "Musik",
   sfxVolume: "Ljudeffekter",
+  engineVolume: "Motor",
   voiceVolume: "Röst",
   ambienceVolume: "Atmosfär",
   mute: "Ljud av",

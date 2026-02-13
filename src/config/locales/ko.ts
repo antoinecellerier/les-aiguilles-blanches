@@ -72,6 +72,7 @@ const ko: Record<string, string> = {
   masterVolume: "마스터 볼륨",
   musicVolume: "음악",
   sfxVolume: "효과음",
+  engineVolume: "엔진",
   voiceVolume: "음성",
   ambienceVolume: "환경음",
   mute: "음소거",

@@ -72,6 +72,7 @@ const tr: Record<string, string> = {
   masterVolume: "Ana Ses",
   musicVolume: "Müzik",
   sfxVolume: "Ses Efektleri",
+  engineVolume: "Motor",
   voiceVolume: "Sesler",
   ambienceVolume: "Ortam",
   mute: "Sessiz",

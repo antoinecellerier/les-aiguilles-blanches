@@ -72,6 +72,7 @@ const ja: Record<string, string> = {
   masterVolume: "マスター音量",
   musicVolume: "音楽",
   sfxVolume: "効果音",
+  engineVolume: "エンジン",
   voiceVolume: "ボイス",
   ambienceVolume: "環境音",
   mute: "ミュート",

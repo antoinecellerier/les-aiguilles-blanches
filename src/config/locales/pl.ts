@@ -72,6 +72,7 @@ const pl: Record<string, string> = {
   masterVolume: "Głośność główna",
   musicVolume: "Muzyka",
   sfxVolume: "Efekty dźwiękowe",
+  engineVolume: "Silnik",
   voiceVolume: "Głosy",
   ambienceVolume: "Otoczenie",
   mute: "Wycisz",
