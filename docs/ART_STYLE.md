@@ -444,7 +444,8 @@ When adding new sprites or visual elements:
 3. **Simple shapes** - Rectangles only, no curves or complex polygons
 4. **Limited details** - 2-4 colors per simple element (rocks, markers), up to 9 for complex sprites (groomer, fuel station)
 5. **Generate in BootScene** - All textures created via Phaser Graphics
-6. **Test in context** - Verify against snow backgrounds and other elements
+6. **Set NEAREST scaleMode** - After `generateTexture()` or `addDynamicTexture()`, set `source[0].scaleMode = Phaser.ScaleModes.NEAREST` for crisp scaling. Set `context.imageSmoothingEnabled = false` on DynamicTexture contexts. Do NOT use global `pixelArt: true` (breaks Firefox Canvas)
+7. **Test in context** - Verify against snow backgrounds and other elements
 
 ## Anti-Patterns (Avoid)
 

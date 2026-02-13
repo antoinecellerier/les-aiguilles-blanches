@@ -51,7 +51,9 @@ export class PisteRenderer {
     const extKey = '__offpiste_ext_bg';
     if (this.scene.textures.exists(extKey)) this.scene.textures.remove(extKey);
     const extDt = this.scene.textures.addDynamicTexture(extKey, extW, extH)!;
+    extDt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
     const extCtx = extDt.context!;
+    extCtx.imageSmoothingEnabled = false;
     const extFrame = this.scene.textures.getFrame('snow_offpiste');
     const extSrc = extFrame.source.image as HTMLImageElement | HTMLCanvasElement;
     const extCd = extFrame.canvasData as { x: number; y: number; width: number; height: number };
@@ -459,6 +461,10 @@ export class PisteRenderer {
     g.generateTexture(key, texW, texH);
     g.destroy();
 
+    // Nearest-neighbor for crisp pixel art when zoomed
+    const cliffTex = this.scene.textures.get(key);
+    if (cliffTex?.source?.[0]) cliffTex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
+
     const img = this.scene.add.image(ox, oy, key);
     img.setOrigin(0, 0);
     img.setDepth(DEPTHS.CLIFFS);
@@ -572,7 +578,9 @@ export class PisteRenderer {
     const dtKey = '__world_trees';
     if (this.scene.textures.exists(dtKey)) this.scene.textures.remove(dtKey);
     const dt = this.scene.textures.addDynamicTexture(dtKey, worldWidth, worldHeight)!;
+    dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
     const ctx = dt.context!;
+    ctx.imageSmoothingEnabled = false;
 
     for (let yi = 3; yi < level.height - 2; yi += 2) {
       const path = this.geometry.pistePath[yi];
@@ -717,7 +725,9 @@ export class PisteRenderer {
     const dtKey = '__access_road';
     if (this.scene.textures.exists(dtKey)) this.scene.textures.remove(dtKey);
     const dt = this.scene.textures.addDynamicTexture(dtKey, worldW, worldH)!;
+    dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
     const ctx = dt.context!;
+    ctx.imageSmoothingEnabled = false;
     const frame = this.scene.textures.getFrame('snow_packed');
     const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
     const cd = frame.canvasData as { x: number; y: number; width: number; height: number };

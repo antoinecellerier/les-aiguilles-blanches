@@ -827,10 +827,18 @@ Firefox requires simplified Phaser configuration to render correctly. Key findin
 
 1. **Use Canvas renderer**: `type: Phaser.CANVAS` ensures consistent rendering
 2. **Avoid scale options**: `scale.mode` and `scale.autoCenter` can cause black screen
-3. **Avoid render options**: `pixelArt`, `antialias`, `desynchronized` cause issues
+3. **Avoid `pixelArt: true`**: Causes black screen on Firefox Canvas. Use per-texture `source[0].scaleMode = Phaser.ScaleModes.NEAREST` instead (see BootScene, PisteRenderer)
 4. **Avoid callbacks**: `preBoot` and `postBoot` callbacks break rendering
 5. **Avoid Graphics methods**: `fillTriangle()` and `lineBetween()` may cause issues
 6. **No runtime tinting**: `setTint()` / `clearTint()` are silently ignored by the Canvas renderer. Use pre-generated texture variants via `setTexture()` instead (see steep zone textures in BootScene)
+
+### Per-Texture Nearest-Neighbor Scaling
+
+For crisp retro pixel art without `pixelArt: true` (which breaks Firefox):
+
+1. **Generated textures**: After `generateTexture()`, set `textures.get(key).source[0].scaleMode = Phaser.ScaleModes.NEAREST`
+2. **DynamicTextures**: After `addDynamicTexture()`, set `dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST` AND `dt.context.imageSmoothingEnabled = false`
+3. **Exception**: Night overlay DynamicTexture keeps default smoothing (light cone gradient)
 
 Working Firefox configuration:
 ```javascript
@@ -840,6 +848,7 @@ const config = {
     width: 1024,
     height: 768,
     backgroundColor: '#2d5a7b',
+    render: { pixelArt: false, antialias: true, roundPixels: true },
     physics: {
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
@@ -851,10 +860,11 @@ const config = {
 
 **Do NOT include in Firefox:**
 - `scale: { mode: ..., autoCenter: ... }`
-- `render: { pixelArt: ..., antialias: ... }`
+- `render: { pixelArt: true }`
 - `callbacks: { preBoot: ..., postBoot: ... }`
 
 **Safe to include:**
+- `render: { pixelArt: false, antialias: true, roundPixels: true }`
 - `physics` configuration
 - `input` configuration  
 - `backgroundColor`

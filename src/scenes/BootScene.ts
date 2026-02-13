@@ -444,5 +444,33 @@ export default class BootScene extends Phaser.Scene {
       g.generateTexture(`track_${species}`, texSize, texSize);
       g.destroy();
     }
+
+    // Set nearest-neighbor scaling on all generated sprite textures
+    // so they stay crisp when camera-zoomed (retro pixel art style).
+    // Cannot use global pixelArt:true — it breaks Firefox Canvas renderer.
+    const NEAREST = Phaser.ScaleModes.NEAREST;
+    const spriteKeys = [
+      // Trees and rocks
+      ...treeSizes.flatMap(s => [`tree_${s}`, `tree_${s}_storm`]),
+      ...rockSizes.map(s => `rock_${s}`),
+      ...trackSpecies.map(s => `track_${s}`),
+      // Groomer, buildings, obstacles
+      'groomer', 'groomer_storm', 'tree', 'rock', 'restaurant', 'fuel',
+      // Snow tiles
+      'snow_ungroomed', 'snow_offpiste', 'snow_groomed', 'snow_packed',
+      'snow_groomed_med', 'snow_groomed_rough',
+      // Steep variants
+      ...['gentle', 'moderate', 'steep'].flatMap(s => [`snow_steep_${s}`, `snow_groomed_steep_${s}`]),
+      // Park features and slalom poles
+      'park_kicker', 'park_rail',
+      'slalom_pole_red', 'slalom_pole_blue',
+      // Skier/snowboarder sprites
+      'skier', 'skier_left', 'skier_right', 'skier_brake',
+      'snowboarder', 'snowboarder_left', 'snowboarder_right', 'snowboarder_brake',
+    ];
+    for (const key of spriteKeys) {
+      const tex = this.textures.get(key);
+      if (tex?.source?.[0]) tex.source[0].scaleMode = NEAREST;
+    }
   }
 }
