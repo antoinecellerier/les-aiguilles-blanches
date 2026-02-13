@@ -206,9 +206,9 @@ export default class SkiRunScene extends Phaser.Scene {
     const zoom = Math.max(zoomX, zoomY, BALANCE.SKI_MIN_ZOOM);
     this.cameras.main.setZoom(zoom);
 
-    // Night headlight follows skier
+    // Night headlamp follows skier
     if (this.level.isNight) {
-      this.nightUpdateHandler = () => this.weatherSystem?.updateNightOverlay(this.skier);
+      this.nightUpdateHandler = () => this.weatherSystem?.updateHeadlamp(this.skier);
       this.events.on('update', this.nightUpdateHandler);
     }
 

@@ -116,16 +116,9 @@ export class WeatherSystem {
     if (!this.nightOverlay || !groomer) return;
 
     const cam = this.scene.cameras.main;
-
-    // Convert groomer world position to overlay draw-space
     const { x: screenX, y: screenY } = worldToOverlay(cam, groomer.x, groomer.y);
 
-    // Update facing direction based on velocity
-    const body = groomer.body as Phaser.Physics.Arcade.Body;
-    if (body && (Math.abs(body.velocity.x) > 10 || Math.abs(body.velocity.y) > 10)) {
-      const len = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
-      this.headlightDirection = { x: body.velocity.x / len, y: body.velocity.y / len };
-    }
+    this.updateFacing(groomer, 10);
 
     // Groomer work lights - world-space distances (camera zoom handles visual scaling)
     const radiusFront = this.tileSize * BALANCE.HEADLIGHT_FRONT_TILES;
@@ -142,15 +135,7 @@ export class WeatherSystem {
     const rearX = screenX - Math.cos(angle) * groomerRadius;
     const rearY = screenY - Math.sin(angle) * groomerRadius;
 
-    this.nightOverlay.clear();
-
-    // Draw darker overlay covering entire screen (with margin for resize transitions)
-    const darkness = 0x000022;
-    const alpha = BALANCE.NIGHT_DARKNESS_ALPHA;
-
-    this.nightOverlay.fillStyle(darkness, alpha);
-    const fullScreen = overlayFullScreen(cam, 10);
-    this.nightOverlay.fillRect(fullScreen.x, fullScreen.y, fullScreen.width, fullScreen.height);
+    this.drawDarkness(cam);
 
     // Draw wide fan-shaped work lights
     const steps = BALANCE.HEADLIGHT_STEPS;
@@ -160,29 +145,87 @@ export class WeatherSystem {
 
       // Front work lights - wide flood pattern
       this.nightOverlay.fillStyle(0xffffee, stepAlpha);
-      this.drawFloodLight(frontX, frontY, angle, radiusFront * t, spreadAngle);
+      this.drawLightCone(frontX, frontY, angle, radiusFront * t, spreadAngle,
+        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.25, 0.5, 4);
 
       // Rear work lights - also wide
       this.nightOverlay.fillStyle(0xffddcc, stepAlpha * 0.7);
-      this.drawFloodLight(rearX, rearY, angle + Math.PI, radiusBack * t, spreadAngle * 0.9);
+      this.drawLightCone(rearX, rearY, angle + Math.PI, radiusBack * t, spreadAngle * 0.9,
+        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.25, 0.5, 4);
     }
   }
 
-  private drawFloodLight(cx: number, cy: number, angle: number, radius: number, spread: number): void {
-    if (!this.nightOverlay) return;
+  updateHeadlamp(skier: Phaser.Physics.Arcade.Sprite): void {
+    if (!this.nightOverlay || !skier) return;
 
-    const distSteps = BALANCE.HEADLIGHT_DIST_STEPS;
-    const arcSteps = BALANCE.HEADLIGHT_ARC_STEPS;
+    const cam = this.scene.cameras.main;
+    const { x: screenX, y: screenY } = worldToOverlay(cam, skier.x, skier.y);
+
+    this.updateFacing(skier, 5);
+
+    const radiusFront = this.tileSize * BALANCE.HEADLAMP_FRONT_TILES;
+    const spreadAngle = BALANCE.HEADLAMP_SPREAD;
+    const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
+
+    // Offset to head position (top of 20×28 sprite, ~10px above center)
+    // then project forward in facing direction so beam is ahead of skier
+    const zoom = cam.zoom || 1;
+    const headOffset = 10 * skier.scaleY * zoom;
+    const forwardOffset = this.tileSize * 0.6 * zoom;
+    const headX = screenX + Math.cos(angle) * forwardOffset;
+    const headY = screenY - headOffset + Math.sin(angle) * forwardOffset;
+
+    this.drawDarkness(cam);
+
+    // Single forward-facing headlamp cone from head
+    const steps = BALANCE.HEADLAMP_STEPS;
+    for (let i = steps - 1; i >= 0; i--) {
+      const t = (i + 1) / steps;
+      const stepAlpha = 0.12 * (steps - i) / steps;
+      this.nightOverlay.fillStyle(0xffffff, stepAlpha);
+      this.drawLightCone(headX, headY, angle, radiusFront * t, spreadAngle,
+        BALANCE.HEADLAMP_DIST_STEPS, BALANCE.HEADLAMP_ARC_STEPS, 0.2, 0.6, 3);
+    }
+
+    // Small ambient glow around skier (reflected snow light)
+    const glowRadius = this.tileSize * 1.2;
+    for (let i = 3; i >= 0; i--) {
+      this.nightOverlay.fillStyle(0xddeeff, 0.04 * (4 - i) / 4);
+      this.nightOverlay.fillCircle(screenX, screenY, glowRadius * (i + 1) / 4);
+    }
+  }
+
+  private updateFacing(sprite: Phaser.Physics.Arcade.Sprite, threshold: number): void {
+    const body = sprite.body as Phaser.Physics.Arcade.Body;
+    if (body && (Math.abs(body.velocity.x) > threshold || Math.abs(body.velocity.y) > threshold)) {
+      const len = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
+      this.headlightDirection = { x: body.velocity.x / len, y: body.velocity.y / len };
+    }
+  }
+
+  private drawDarkness(cam: Phaser.Cameras.Scene2D.Camera): void {
+    if (!this.nightOverlay) return;
+    this.nightOverlay.clear();
+    this.nightOverlay.fillStyle(0x000022, BALANCE.NIGHT_DARKNESS_ALPHA);
+    const fullScreen = overlayFullScreen(cam, 10);
+    this.nightOverlay.fillRect(fullScreen.x, fullScreen.y, fullScreen.width, fullScreen.height);
+  }
+
+  private drawLightCone(
+    cx: number, cy: number, angle: number, radius: number, spread: number,
+    distSteps: number, arcSteps: number, sizeFactor: number, falloff: number, minSize: number
+  ): void {
+    if (!this.nightOverlay) return;
 
     for (let d = 1; d <= distSteps; d++) {
       const dist = radius * (d / distSteps);
-      const circleRadius = radius * 0.25 * (1 - d / distSteps * 0.5);
+      const circleRadius = radius * sizeFactor * (1 - d / distSteps * falloff);
 
       for (let a = -arcSteps / 2; a <= arcSteps / 2; a++) {
         const arcAngle = angle + (a / arcSteps) * spread;
         const px = cx + Math.cos(arcAngle) * dist;
         const py = cy + Math.sin(arcAngle) * dist;
-        this.nightOverlay.fillCircle(px, py, Math.max(circleRadius, 4));
+        this.nightOverlay.fillCircle(px, py, Math.max(circleRadius, minSize));
       }
     }
   }

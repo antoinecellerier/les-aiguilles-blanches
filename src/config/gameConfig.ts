@@ -168,6 +168,13 @@ export const BALANCE = {
   HEADLIGHT_DIST_STEPS: 8,
   HEADLIGHT_ARC_STEPS: 12,
 
+  // Skier headlamp (narrower single beam, no rear light)
+  HEADLAMP_FRONT_TILES: 4,
+  HEADLAMP_SPREAD: Math.PI * 0.3,
+  HEADLAMP_STEPS: 5,
+  HEADLAMP_DIST_STEPS: 6,
+  HEADLAMP_ARC_STEPS: 8,
+
   // Wildlife
   WILDLIFE_FLEE_DISTANCE: 120,    // px — distance at which animals start fleeing
   WILDLIFE_CALM_DISTANCE: 200,    // px — distance at which fleeing animals return to idle
