@@ -6,24 +6,11 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
+(No active work items)
 
-## Next Up: Canvas Performance Deep Analysis
+## Next Up
 
-Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 40% sim speed in Firefox). Prior TileSprite optimization reduced objects from 10,668→3,369 but ~1,461 Graphics objects with 64,005 draw commands still consume ~35% CPU.
-
-- [x] Deep profiling session — Playwright probe on L0 and L9: L9 had 3,943 objects (1,588 Graphics, 2,251 Images). Detailed breakdown: 1,472 Graphics with 21-50 commands (trees/rocks), 30 with 51+ (cliffs), 26 with 11-20 (poles)
-- [x] Bake tree/rock Graphics to textures — Pre-generate tree textures (4 sizes × normal/storm) and rock textures (3 sizes) in BootScene. PisteRenderer uses Images instead of Graphics. Result: L9 Graphics 1,588→97 (-94%), L0 Graphics 307→39 (-87%)
-- [x] Bake cliff Graphics to textures — Two-pass approach: compute bounding box, draw at origin offset, `generateTexture()` per segment. Stale textures cleaned on level switch. L7 FPS +63%, L8 FPS +95%
-- [x] Bake animal track Graphics to textures — Pre-generate track textures per species (bunny, chamois, bouquetin, marmot, fox) in BootScene. WildlifeSystem uses Images instead of Graphics. L1 Graphics −72%, L7 Graphics −58%
-- [x] Reduce night overlay light cone commands — Reduced headlight step grid (6×8×12→4×5×8), compensated with larger circles (sizeFactor 0.25→0.4). Result: 12,524→3,632 commands per frame (−71%)
-- [x] Camera culling for off-screen objects — Extended snow tile culling to all static Images (trees, rocks, tracks). Reduced padding tree density (spacing 2→3, 1,076→439 trees). L9: 1,200+ objects hidden per frame
-- [x] Replace snow tile Images with DynamicTexture — Paint all piste snow tiles onto a single DynamicTexture at level start. One Image instead of hundreds of individual tiles
-- [x] Replace access road tile Images with DynamicTexture — Paint access road snow onto a single DynamicTexture. L4 FPS 33→60
-- [x] Replace night overlay Graphics with DynamicTexture — Paint darkness + light cone directly to canvas context each frame. Eliminates 7,416 Graphics commands per frame on L7. L7 FPS 32→60
-- [x] Replace TileSprite backgrounds with DynamicTexture — Pre-render off-piste tile pattern once via `createPattern()`. Eliminates TileSpriteCanvasRenderer (35% of CPU in Firefox profiler). Render time 0.9→0.2ms median
-
-**Key constraint:** `Game.step()` override freezes Firefox entirely — any frame-rate management must use Phaser's built-in config, not monkey-patching.
+- [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels
 
 ## Future (Backlog)
 
@@ -40,6 +27,8 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Canvas performance optimization** — Systematic profiling and optimization of Canvas renderer performance. L9 storm Firefox: 24 FPS → 68 FPS. Key techniques: DynamicTexture consolidation (trees, rocks, snow tiles, backgrounds, night overlay), Graphics→texture baking (trees, rocks, cliffs, animal tracks), camera culling. Final profile: 69% native pixel copy (irreducible), 0.2% JavaScript, 10% vsync idle. See ARCHITECTURE.md "Performance Considerations" for full analysis and profiling guide.
 
 - ✅ **Engine volume control** — Separate volume slider for continuous motor sounds (engine idle, snow crunch, grooming blade). New `engine` audio channel in AudioSystem. Default 50%. Winch and one-shot SFX remain on the SFX channel.
 

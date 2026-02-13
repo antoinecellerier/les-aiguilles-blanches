@@ -405,25 +405,94 @@ groomer.buffs = {
 
 ## Performance Considerations
 
-1. **Tile culling**: Only render tiles within camera viewport (+ 2-tile margin). `cullSnowTiles()` in GameScene sets `tile.visible = false` for off-screen tiles, skipping only when camera hasn't moved a full tile
-2. **Background DynamicTexture**: Off-piste snow and extended forest backgrounds use `DynamicTexture` with `createPattern('repeat')` to pre-render the tile pattern once at level start, displayed as a single Image — eliminates per-frame TileSprite pattern fills (was 35% of CPU in Firefox profiler)
-3. **Static overlays as textures**: The frost vignette is pre-rendered into a texture via `generateTexture()` at creation, then displayed as an Image with alpha updates only — avoids per-frame Graphics.clear()+redraw which is extremely expensive on Canvas
-4. **Object pooling**: Reuse particle objects for weather
-5. **RequestAnimationFrame**: Synchronized with display refresh
-6. **Reduced motion**: Skip particle effects when enabled
-7. **Extended background sizing**: Use `screen * 1.3` — enough for URL bar/viewport jitter, not `max(screen, 2560) * 1.5` which creates thousands of unnecessary game objects and tanks mobile FPS
-8. **HUD resize debounce**: Mobile browsers fire frequent resize events (URL bar, soft keyboard); debounce with 300ms + 10px threshold to prevent rapid scene restarts
+### Canvas Renderer Performance Model
+
+The game uses Canvas renderer (`Phaser.CANVAS`) because WebGL causes black screens on some configurations. On Canvas, **the dominant cost is native pixel copy** (`drawImage` → `memcpy`), not JavaScript execution.
+
+**Firefox profiler** on L9 (storm, heaviest level — 51s capture, 68 FPS):
+
+| Category | CPU % | Notes |
+|----------|-------|-------|
+| `__memcpy_avx_unaligned_erms` | 69% | Native pixel blitting from `drawImage()` — irreducible |
+| `__syscall_cancel_arch` | 10% | Vsync idle wait — indicates CPU headroom |
+| `ImageCanvasRenderer` | <1% | JS wrapper around drawImage |
+| JavaScript (game logic, physics, audio) | 0.2% | Negligible — 56 samples in 51s |
+| GC | 0% | No garbage collection pressure |
+
+Chrome DevTools on the same L9 session (47s capture, 68 FPS / 100% sim speed):
+
+| Category | Time | % | Notes |
+|----------|------|---|-------|
+| Idle | ~36.5s | 77% | Chrome has massive headroom |
+| Scripting | 7,247ms | 15% | Phaser main loop + canvas state |
+| Painting | 2,953ms | 6% | `Commit` (compositing) + `drawImage` |
+| System | 670ms | 1.4% | OS-level overhead |
+| Rendering | 110ms | 0.2% | Layout/style recalc |
+| C++ GC | ~1,300ms | 2.7% | Minor garbage collection |
+
+Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`/`setTransform`/`restore`/`setColor`) 3-4% each. Game code (`stampPisteTile`, `ImageCanvasRenderer`) rounds to 0.0%.
+
+**Firefox is the binding constraint** — Chrome runs L9 at 77% idle while Firefox runs at 10% idle. Both hit 68 FPS but Firefox has far less headroom. Always profile in Firefox first.
+
+**Key insight:** Reducing per-pixel work is impossible without hiding content. The lever is **reducing the number of `drawImage` calls** — fewer objects on the display list means fewer function calls, less depth sorting, and fewer `willRender()` checks per frame. This is why DynamicTexture consolidation yields such large FPS gains even when the total pixel count is similar.
+
+### Optimization Techniques (in order of impact)
+
+1. **DynamicTexture consolidation** — Paint many small objects onto a single DynamicTexture at level start. One `drawImage` call replaces hundreds. Used for: off-piste background (tiled pattern via `createPattern('repeat')`), piste snow tiles, access road tiles, background trees/rocks, piste-edge trees. L9 went from 876 Images to 65 (-93%)
+2. **Graphics → texture baking** — Graphics objects replay their command buffer every frame on Canvas. Static decorations (trees, rocks, cliffs, animal tracks) are pre-generated as textures in BootScene via `generateTexture()`. L9 Graphics went from 1,588 to ~97 (-94%)
+3. **Night overlay DynamicTexture** — Headlight cone drawn directly to canvas context each frame instead of 7,416 Graphics commands. L7 FPS 32→60
+4. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
+5. **Camera culling** — `cullSnowTiles()` hides objects outside viewport (+ 2-tile margin). Only checked when camera moves a full tile. ~1,200 objects hidden per frame on L9
+6. **Extended background sizing** — Use `screen × 1.3` — enough for URL bar/viewport jitter without creating excessive objects
+7. **HUD resize debounce** — 300ms + 10px threshold prevents rapid scene restarts from mobile resize events
 
 ### Canvas Renderer Constraints
 
-The game uses Canvas renderer (`Phaser.CANVAS`) because WebGL causes black screens on some configurations. Key constraints:
+- **`setTint()` does NOT work** — use pre-generated texture variants via `setTexture()` instead
+- **Graphics objects are expensive** — they re-render from their command list every frame. Always prefer `generateTexture()` for static content
+- **`Graphics.clear()` + redraw per frame** — use only for dynamic content (night overlay headlights, winch cable)
+- **TileSprite is expensive** — re-tiles every frame (~35% CPU for world-sized backgrounds). Replace with DynamicTexture + `createPattern('repeat')`
+- **Display list iteration** — Phaser iterates ALL game objects for depth sort and `willRender()` every frame. Reducing object count has outsized impact vs reducing per-object pixel size
+- **DynamicTexture `.update()` is unnecessary on Canvas** — the Canvas renderer reads the source canvas directly, so painting to the context is immediately reflected
 
-- **`setTint()` does NOT work** — use pre-generated texture variants instead
-- **Graphics objects are re-rendered from their command list every frame** — for static decorations, prefer `generateTexture()` to bake into a bitmap. Trees and rocks are pre-baked in BootScene; remaining Graphics objects include cliffs and marker poles
-- **Pre-baked texture pattern** — BootScene generates tree textures (4 sizes × normal/storm) and rock textures (3 sizes) using `generateTexture()`. PisteRenderer uses `scene.add.image()` with these textures instead of per-instance Graphics
-- **`Graphics.clear()` + redraw per frame** is expensive — use for dynamic content only (night overlay headlights, winch cable). For overlays that change slowly (frost vignette), pre-render to texture and update alpha
-- **TileSprite** costs ~12% CPU for world-sized backgrounds but replaces thousands of individual tile objects — a net win
-- **Display list iteration**: Phaser iterates ALL game objects for depth sort and visibility checks every frame. Reducing object count has outsized performance impact
+### Performance Journey (L9 Storm, Firefox)
+
+| Milestone | FPS | Change |
+|-----------|-----|--------|
+| Baseline (before optimization) | 24 | — |
+| Tree/rock/cliff Graphics → textures | ~35 | +46% |
+| Camera culling for off-screen objects | ~40 | +14% |
+| Snow tiles → DynamicTexture | ~45 | +13% |
+| Night overlay → DynamicTexture (L7 mainly) | +10 on L7 | — |
+| TileSprite → DynamicTexture | 50-60 | +22% |
+| Tree/rock consolidation into DynamicTextures | **68** | +19% |
+
+### Profiling Guide
+
+To re-profile if performance regresses:
+
+**Firefox** (binding constraint — least headroom):
+1. Open Firefox DevTools → Performance tab → Start recording
+2. Play L9 (storm level, heaviest) for ~30-60 seconds
+3. Stop recording, switch to Call Tree → Invert call stacks
+4. Look at the top self-time entries:
+   - `__memcpy_avx_unaligned_erms` > 60% is normal (pixel copy)
+   - `__syscall_cancel_arch` > 5% means CPU has headroom (vsync wait)
+   - `TileSpriteCanvasRenderer` appearing means a TileSprite was reintroduced — replace it
+   - `GraphicsCanvasRenderer` > 5% means un-baked Graphics objects — use `generateTexture()`
+   - JavaScript > 2% means game logic needs optimization
+5. Check the Categories panel: DOM should be ~100%, JavaScript < 1%
+
+**Chrome** (more headroom, better for isolating JS bottlenecks):
+1. Open DevTools → Performance tab → Record
+2. Play L9 for ~30-60 seconds, stop recording
+3. Check Summary tab: Idle should be >70%, Scripting <20%, Painting <10%
+4. Bottom-up tab: `Commit` + `drawImage` should dominate self-time
+5. If Scripting % rises significantly, use Bottom-up to find the JS function responsible
+
+**Both browsers:**
+- Use `window.game.__perfStats` in console for live object counts (imageCount, graphicsCount, etc.)
+- Run multiple captures to isolate outliers from external factors (background processes, thermal throttling)
 
 ## Centralized Theme System
 
