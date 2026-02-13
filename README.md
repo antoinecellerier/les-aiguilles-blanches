@@ -15,7 +15,7 @@ A retro-style snow groomer simulation set in a fictional Savoie ski resort, insp
 
 ## 🤖 Built with Copilot
 
-This game is an experiment in building a complete, polished game almost entirely through conversation with **GitHub Copilot**. From game design and pixel art to physics, audio, localization, and testing — the vast majority of the code, assets, and documentation were generated through iterative AI pair-programming sessions.
+This game is an experiment in building a complete, polished game almost entirely through conversation with **GitHub Copilot CLI**. From game design and pixel art to physics, audio, localization, and testing — the vast majority of the code, assets, and documentation were generated through iterative AI pair-programming sessions.
 
 ## ✨ Features
 
