@@ -240,8 +240,9 @@ Layer 2: ARIA Enhancement
 └── role attributes for custom widgets
 
 Layer 3: Visual Accessibility
-├── CSS-based high contrast mode
+├── CSS contrast(1.4) + saturate(1.3) filter on canvas for high contrast
 ├── SVG filters for colorblind modes
+├── High contrast + colorblind filters compose via CSS filter chain
 ├── Reduced motion preference detection
 └── Scalable UI (rem-based sizing)
 
@@ -551,11 +552,13 @@ The HUD uses a "visor" pattern: a full-width semi-transparent dark strip across 
 ### Accessibility Adaptation
 
 When high-contrast or colorblind modes are active:
+- Canvas receives CSS `contrast(1.4) saturate(1.3)` filter, boosting game world visibility
 - Visor background alpha increases from 0.55 to 0.80
 - All visor text gains a black stroke outline for readability
 - Bar borders brighten from `0x555555` to `0x999999`
 - Colorblind mode replaces colored dots with text labels ("F"/"S") so users don't rely on red/green color differentiation
 - Bottom accent line doubles in thickness
+- High contrast and colorblind filters compose: `canvas.style.filter` chains both when enabled simultaneously
 
 ### Responsive Layout
 

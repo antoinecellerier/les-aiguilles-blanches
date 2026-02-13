@@ -90,12 +90,20 @@ export const Accessibility: AccessibilityModule = {
 
     const canvas = document.querySelector('#game-container canvas') as HTMLCanvasElement | null;
     if (canvas) {
+      const filters: string[] = [];
+
+      // High contrast: boost contrast + saturate so game world elements stand out
+      if (this.settings.highContrast) {
+        filters.push('contrast(1.4) saturate(1.3)');
+      }
+
+      // Colorblind: apply SVG color matrix filter
       if (this.settings.colorblindMode && this.settings.colorblindMode !== 'none') {
         this.ensureColorblindFilters();
-        canvas.style.filter = `url(#${this.settings.colorblindMode}-filter)`;
-      } else {
-        canvas.style.filter = '';
+        filters.push(`url(#${this.settings.colorblindMode}-filter)`);
       }
+
+      canvas.style.filter = filters.join(' ');
     }
   },
 

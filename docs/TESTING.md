@@ -170,6 +170,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_level_complete.py` | Level complete, fail screen, credits, keyboard nav |
 | `test_scene_layering.py` | Scene depth ordering, menu depth, resize behavior |
 | `test_accessibility.py` | Colorblind filters, high contrast, HUD, background rendering |
+| `test_accessibility_full.py` | Full a11y pass: HC canvas filter, all CB modes, reduced motion, ARIA, persistence, responsive form factors, combined modes |
 | `test_key_hints.py` | Dynamic key hints, rebound keys, AZERTY layout |
 | `test_level_mechanics.py` | Night, winch, cliffs, forests, access paths, wildlife |
 | `test_dialogue_speakers.py` | Speaker assignment, character portraits per level |
