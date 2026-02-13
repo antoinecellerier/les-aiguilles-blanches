@@ -344,7 +344,7 @@ All depth values are centralized in `DEPTHS` from `src/config/gameConfig.ts`:
 | Layer | Depth | Constant | Contents |
 |-------|-------|----------|----------|
 | Background tiles | -100 | `BG_FOREST_TILES` | Off-piste snow beyond world bounds |
-| Background rocks | -50 | `BG_FOREST_ROCKS` | Rocks beyond world bounds |
+| Background trees/rocks | 1 | `BG_FOREST_ROCKS` | Trees/rocks beyond world bounds |
 | Terrain | 0 | `TERRAIN` | Off-piste snow tiles (base layer) |
 | Access roads | 1 | `ACCESS_ROAD` | Packed snow on service roads |
 | Piste | 2 | `PISTE` | Piste snow tiles (above access roads) |

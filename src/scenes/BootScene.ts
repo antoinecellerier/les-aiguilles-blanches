@@ -360,5 +360,53 @@ export default class BootScene extends Phaser.Scene {
       g.generateTexture(name, sPolW, sPolH);
       g.destroy();
     }
+
+    // Tree textures — 4 size variants × 2 (normal/storm)
+    // Sizes must match PisteRenderer.createTree()
+    const treeSizes = [8, 10, 12, 14];
+    for (const size of treeSizes) {
+      const w = Math.ceil(size) + 2;
+      const h = Math.ceil(size * 1.4) + 2;
+      const cx = w / 2;  // center X
+      const by = h - 1;  // base Y (bottom)
+
+      const g = this.make.graphics({ x: 0, y: 0 } as any, false);
+      // Trunk
+      g.fillStyle(0x4a3728, 1);
+      g.fillRect(cx - 2, by - size * 0.4, 4, size * 0.4);
+      // Lower foliage
+      g.fillStyle(0x1a4a2a, 1);
+      g.fillRect(cx - size / 2, by - size * 0.4 - size * 0.5, size, size * 0.5);
+      // Upper foliage
+      g.fillRect(cx - size / 3, by - size * 0.4 - size, size * 0.66, size * 0.5);
+      g.generateTexture(`tree_${size}`, w, h);
+
+      // Storm variant: add snow lines
+      g.fillStyle(0xf0f5f8, 1);
+      g.fillRect(cx - size / 3, by - size * 0.4 - size, size * 0.66, 2);
+      g.fillRect(cx - size / 2, by - size * 0.4 - size * 0.5, size, 2);
+      g.generateTexture(`tree_${size}_storm`, w, h);
+      g.destroy();
+    }
+
+    // Rock textures — 3 size variants
+    // Sizes must match PisteRenderer.createRock()
+    const rockSizes = [6, 10, 14];
+    for (const size of rockSizes) {
+      const w = Math.ceil(size) + 2;
+      const h = Math.ceil(size * 0.6) + 2;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      const g = this.make.graphics({ x: 0, y: 0 } as any, false);
+      g.fillStyle(0x6B6B6B, 1);
+      g.fillRect(cx - size / 2, cy - size * 0.3, size, size * 0.6);
+      g.fillStyle(0x8B8B8B, 1);
+      g.fillRect(cx - size / 3, cy - size * 0.3, size * 0.3, size * 0.2);
+      g.fillStyle(0x4A4A4A, 1);
+      g.fillRect(cx, cy + size * 0.1, size * 0.4, size * 0.15);
+      g.generateTexture(`rock_${size}`, w, h);
+      g.destroy();
+    }
   }
 }

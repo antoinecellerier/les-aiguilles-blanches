@@ -179,6 +179,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_volume_indicator.py` | Volume icon, mute toggle, hover slider, overlay |
 | `test_level_select.py` | Level select navigation, star ratings, ski/groom buttons |
 | `test_ski_run.py` | Ski run HUD, descent mode settings, viewport bounds |
+| `test_performance.py` | Baseline object counts (L0 vs L9), object count stability (leak detection) |
 
 ### Viewport / Resize Testing
 

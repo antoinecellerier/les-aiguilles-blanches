@@ -222,6 +222,46 @@ export default class GameScene extends Phaser.Scene {
 
     // Phaser emits 'shutdown' but doesn't auto-call the method
     this.events.once('shutdown', this.shutdown, this);
+
+    // Expose performance stats for Playwright profiling
+    this.exposePerfStats();
+  }
+
+  private exposePerfStats(): void {
+    const scene = this;
+    (window as unknown as Record<string, unknown>).__perfStats = {
+      get totalObjects() { return scene.children?.length ?? 0; },
+      get graphicsCount() {
+        let n = 0;
+        scene.children?.each((c: Phaser.GameObjects.GameObject) => {
+          if (c.type === 'Graphics') n++;
+        });
+        return n;
+      },
+      get imageCount() {
+        let n = 0;
+        scene.children?.each((c: Phaser.GameObjects.GameObject) => {
+          if (c.type === 'Image') n++;
+        });
+        return n;
+      },
+      get textCount() {
+        let n = 0;
+        scene.children?.each((c: Phaser.GameObjects.GameObject) => {
+          if (c.type === 'Text') n++;
+        });
+        return n;
+      },
+      get tilespriteCount() {
+        let n = 0;
+        scene.children?.each((c: Phaser.GameObjects.GameObject) => {
+          if (c.type === 'TileSprite') n++;
+        });
+        return n;
+      },
+      get fps() { return Math.round(scene.game.loop.actualFps); },
+      get level() { return scene.levelIndex; },
+    };
   }
 
   private createLevel(): void {
@@ -1860,6 +1900,8 @@ export default class GameScene extends Phaser.Scene {
     this.buffs = {};
     this.frostLevel = 0;
     this.frostRate = 0;
+
+    delete (window as unknown as Record<string, unknown>).__perfStats;
 
     this.children.removeAll(true);
   }

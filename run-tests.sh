@@ -106,7 +106,7 @@ if [ "$SMART_MODE" = true ]; then
 
     # Validate: every E2E test file on disk must be known to the selection logic.
     # This catches new test files that haven't been added to the mapping above.
-    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_key_hints.py test_level_mechanics.py test_level_select.py test_ski_run.py test_volume_indicator.py"
+    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_key_hints.py test_level_mechanics.py test_level_select.py test_ski_run.py test_volume_indicator.py test_performance.py"
     UNKNOWN_E2E=()
     for f in tests/e2e/test_*.py; do
         [ -f "$f" ] || continue

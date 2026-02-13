@@ -48,7 +48,7 @@ export const GAME_CONFIG: GameConfigType = {
 export const DEPTHS = {
   // Extended background (outside game world, fills screen edges)
   BG_FOREST_TILES: -100, // Off-piste snow beyond world bounds
-  BG_FOREST_ROCKS: -50,  // Rocks beyond world bounds
+  BG_FOREST_ROCKS: 1,   // Trees/rocks beyond world bounds (above off-piste TileSprite)
   TERRAIN: 0,         // Off-piste snow tiles (base layer)
   ACCESS_ROAD: 1,     // Packed snow on service roads (above off-piste, below piste)
   PISTE: 2,           // Piste snow tiles (above access roads so grooming is visible)

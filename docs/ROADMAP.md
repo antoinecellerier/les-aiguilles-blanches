@@ -12,10 +12,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 40% sim speed in Firefox). Prior TileSprite optimization reduced objects from 10,668→3,369 but ~1,461 Graphics objects with 64,005 draw commands still consume ~35% CPU.
 
-- [ ] Deep profiling session — Profile L9 in Firefox DevTools to identify exact bottleneck distribution (Graphics vs display list vs physics vs scene overhead)
-- [ ] Bake static Graphics to textures — Trees, rocks, cliffs from Graphics → `generateTexture()`. Per-chunk approach (not one huge texture). Target: reduce GraphicsCanvasRenderer from 35% to <5%
+- [x] Deep profiling session — Playwright probe on L0 and L9: L9 had 3,943 objects (1,588 Graphics, 2,251 Images). Detailed breakdown: 1,472 Graphics with 21-50 commands (trees/rocks), 30 with 51+ (cliffs), 26 with 11-20 (poles)
+- [x] Bake tree/rock Graphics to textures — Pre-generate tree textures (4 sizes × normal/storm) and rock textures (3 sizes) in BootScene. PisteRenderer uses Images instead of Graphics. Result: L9 Graphics 1,588→97 (-94%), L0 Graphics 307→39 (-87%)
+- [ ] Bake cliff Graphics to textures — 28 cliff Graphics with 51+ commands each. Use `generateTexture()` per cliff segment
 - [ ] Camera culling for off-screen objects — Set `visible=false` on Graphics/sprites outside camera viewport. Reduces display list iteration
-- [ ] Investigate `fps.limit` for adaptive throttle — Phaser's built-in `stepLimitFPS()` can cap to 30 FPS but couples update+render. Evaluate if delta-based physics tolerates larger steps
 
 **Key constraint:** `Game.step()` override freezes Firefox entirely — any frame-rate management must use Phaser's built-in config, not monkey-patching.
 
@@ -143,4 +143,4 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 - Silent storage errors: `storage.ts` catch blocks have no user notification. Consider toast/banner for critical save failures (progress, bindings).
 - Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
 - Bonus evaluation duplication: HUDScene.updateBonusObjectives() and LevelCompleteScene.evaluateBonusObjectives() both evaluate 5 bonus types with similar switch logic. Extract shared `evaluateBonusObjective()` and `getBonusLabel()` to `src/utils/bonusObjectives.ts`.
-- Static Graphics to textures: PisteRenderer creates ~1,400 individual Graphics objects (trees, rocks, cliffs, marker poles) that Phaser re-renders every frame (~35% CPU on Canvas). Bake static decorations into textures via `generateTexture()` at creation time — same pattern used for frost overlay. Priority: in-world trees/rocks (highest count), then cliff segments (most draw commands).
+- Static Graphics to textures: Trees/rocks done (1,588→97 Graphics on L9). Remaining: ~28 cliff Graphics (51+ commands each), ~26 pole/marker Graphics (11-20 commands). Bake via `generateTexture()` per chunk.

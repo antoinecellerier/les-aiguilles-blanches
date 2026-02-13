@@ -87,18 +87,11 @@ export class PisteRenderer {
   }
 
   private createRock(x: number, y: number): void {
-    const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.BG_FOREST_ROCKS);
-    const size = 6 + Math.random() * 8;
-
-    g.fillStyle(0x6B6B6B, 1);
-    g.fillRect(x - size / 2, y - size / 3, size, size * 0.6);
-
-    g.fillStyle(0x8B8B8B, 1);
-    g.fillRect(x - size / 3, y - size / 3, size * 0.3, size * 0.2);
-
-    g.fillStyle(0x4A4A4A, 1);
-    g.fillRect(x, y + size * 0.1, size * 0.4, size * 0.15);
+    const sizes = [6, 10, 14]; // must match BootScene rock textures
+    const size = sizes[Math.floor(Math.random() * sizes.length)];
+    const img = this.scene.add.image(x, y, `rock_${size}`);
+    img.setOrigin(0.5, 0.5);
+    img.setDepth(DEPTHS.BG_FOREST_ROCKS);
   }
 
   /**
@@ -511,22 +504,12 @@ export class PisteRenderer {
   }
 
   private createTree(x: number, y: number, depth?: number, isStorm?: boolean): void {
-    const g = this.scene.add.graphics();
-    g.setDepth(depth ?? yDepth(y));
-    const size = 8 + Math.random() * 6;
-
-    g.fillStyle(0x4a3728, 1);
-    g.fillRect(x - 2, y, 4, size * 0.4);
-
-    g.fillStyle(0x1a4a2a, 1);
-    g.fillRect(x - size / 2, y - size * 0.6, size, size * 0.5);
-    g.fillRect(x - size / 3, y - size, size * 0.66, size * 0.5);
-
-    if (isStorm) {
-      g.fillStyle(0xf0f5f8, 1);
-      g.fillRect(x - size / 3, y - size, size * 0.66, 2);
-      g.fillRect(x - size / 2, y - size * 0.6, size, 2);
-    }
+    const sizes = [8, 10, 12, 14]; // must match BootScene tree textures
+    const size = sizes[Math.floor(Math.random() * sizes.length)];
+    const key = isStorm ? `tree_${size}_storm` : `tree_${size}`;
+    const img = this.scene.add.image(x, y, key);
+    img.setOrigin(0.5, 1); // anchor at trunk base
+    img.setDepth(depth ?? yDepth(y));
   }
 
   private createSteepZoneIndicators(level: Level, tileSize: number): void {

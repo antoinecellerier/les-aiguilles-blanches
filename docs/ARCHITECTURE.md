@@ -419,7 +419,8 @@ groomer.buffs = {
 The game uses Canvas renderer (`Phaser.CANVAS`) because WebGL causes black screens on some configurations. Key constraints:
 
 - **`setTint()` does NOT work** — use pre-generated texture variants instead
-- **Graphics objects are re-rendered from their command list every frame** — even static trees/rocks. For static decorations, prefer `generateTexture()` to bake into a bitmap. Current known cost: ~35% CPU on late-game levels from ~1,400 Graphics objects (trees, rocks, cliffs, marker poles)
+- **Graphics objects are re-rendered from their command list every frame** — for static decorations, prefer `generateTexture()` to bake into a bitmap. Trees and rocks are pre-baked in BootScene; remaining Graphics objects include cliffs and marker poles
+- **Pre-baked texture pattern** — BootScene generates tree textures (4 sizes × normal/storm) and rock textures (3 sizes) using `generateTexture()`. PisteRenderer uses `scene.add.image()` with these textures instead of per-instance Graphics
 - **`Graphics.clear()` + redraw per frame** is expensive — use for dynamic content only (night overlay headlights, winch cable). For overlays that change slowly (frost vignette), pre-render to texture and update alpha
 - **TileSprite** costs ~12% CPU for world-sized backgrounds but replaces thousands of individual tile objects — a net win
 - **Display list iteration**: Phaser iterates ALL game objects for depth sort and visibility checks every frame. Reducing object count has outsized performance impact
