@@ -97,61 +97,6 @@ class TestWinchMechanics:
         assert anchor_info['hasY'], "Anchor should have y (hook position) for cable"
 
 
-class TestCliffMechanics:
-    """Tests for cliff physics and visual alignment."""
-    
-    def test_cliff_physics_matches_visuals(self, game_page: Page):
-        """Test that danger zones use same offset/extent as visual cliffs."""
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
-        
-        skip_to_level(game_page, 'level_verticaleName')
-        
-        cliff_params = game_page.evaluate("""() => {
-            const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.geometry?.cliffSegments?.length) return null;
-            const cliff = gameScene.geometry.cliffSegments[0];
-            const tileSize = gameScene.tileSize || 16;
-            return {
-                offset: cliff.offset,
-                extent: cliff.extent,
-                tileSize: tileSize,
-                offsetInTiles: cliff.offset / tileSize,
-                extentInTiles: cliff.extent / tileSize
-            };
-        }""")
-        
-        assert cliff_params is not None, "Should have cliff parameters"
-        assert 1.4 <= cliff_params['offsetInTiles'] <= 3.1, \
-            f"Cliff offset should be 1.5-3 tiles, got {cliff_params['offsetInTiles']}"
-        assert 2.9 <= cliff_params['extentInTiles'] <= 5.1, \
-            f"Cliff extent should be 3-5 tiles, got {cliff_params['extentInTiles']}"
-    
-    def test_markers_not_on_cliffs(self, game_page: Page):
-        """Test that piste markers are not placed on cliff areas."""
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
-        
-        skip_to_level(game_page, 'level_verticaleName')
-        
-        marker_check = game_page.evaluate("""() => {
-            const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene) return { error: 'no scene' };
-            
-            const hasMethod = typeof gameScene.geometry.isOnCliff === 'function';
-            const cliffCount = gameScene.geometry.cliffSegments?.length || 0;
-            
-            return {
-                hasIsOnCliffMethod: hasMethod,
-                cliffSegmentCount: cliffCount,
-                hasCliffs: cliffCount > 0
-            };
-        }""")
-        
-        assert marker_check is not None, "Should get marker check results"
-        assert marker_check.get('hasCliffs'), "Level 7 should have cliff segments"
-
-
 class TestForestBoundaries:
     """Tests for forest boundary colliders preventing groomer from entering forest."""
 
@@ -183,31 +128,6 @@ class TestForestBoundaries:
 
 class TestAccessPaths:
     """Tests for service road (access path) physics and geometry."""
-
-    def test_access_path_rects_have_side(self, game_page: Page):
-        """Test that accessPathRects include side field for correct boundary exemption."""
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
-
-        skip_to_level(game_page, 'level_aigleName')
-        dismiss_dialogues(game_page)
-
-        info = game_page.evaluate("""() => {
-            const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs?.geometry?.accessPathRects?.length) return null;
-            const r = gs.geometry.accessPathRects[0];
-            return {
-                count: gs.geometry.accessPathRects.length,
-                hasSide: 'side' in r,
-                sides: [...new Set(gs.geometry.accessPathRects.map(r => r.side))],
-            };
-        }""")
-
-        assert info is not None, "Level 4 should have accessPathRects"
-        assert info['count'] > 0, "Should have multiple rects"
-        assert info['hasSide'], "accessPathRects should have side field"
-        assert 'left' in info['sides'], "Level 4 should have a left road"
-        assert 'right' in info['sides'], "Level 4 should have a right road"
 
     def test_no_boundary_walls_on_access_path(self, game_page: Page):
         """Test that boundary walls don't overlap access path rects (non-dangerous level)."""

@@ -263,6 +263,48 @@ describe('LevelGeometry', () => {
         expect(geo.pistePath.length).toBe(level.height);
       }
     });
+
+    it('cliff levels have segments with valid tile ranges', () => {
+      // Level 7 (La Verticale) has cliffs
+      geo.reset();
+      geo.generate(LEVELS[7], 32);
+      expect(geo.cliffSegments.length).toBeGreaterThan(0);
+      for (const cliff of geo.cliffSegments) {
+        const offsetTiles = cliff.offset / 32;
+        const extentTiles = cliff.extent / 32;
+        expect(offsetTiles).toBeGreaterThanOrEqual(1.4);
+        expect(offsetTiles).toBeLessThanOrEqual(3.1);
+        expect(extentTiles).toBeGreaterThanOrEqual(2.9);
+        expect(extentTiles).toBeLessThanOrEqual(5.1);
+      }
+    });
+
+    it('tutorial has no cliffs', () => {
+      geo.reset();
+      geo.generate(LEVELS[0], 32);
+      expect(geo.cliffSegments.length).toBe(0);
+    });
+
+    it('levels with accessPaths generate rects with side field', () => {
+      for (const level of LEVELS) {
+        if (!level.accessPaths?.length) continue;
+        geo.reset();
+        geo.generate(level, 32);
+        expect(geo.accessPathRects.length).toBeGreaterThan(0);
+        for (const rect of geo.accessPathRects) {
+          expect(rect.side).toMatch(/^(left|right)$/);
+        }
+      }
+    });
+
+    it('levels with accessPaths generate matching curve count', () => {
+      for (const level of LEVELS) {
+        if (!level.accessPaths?.length) continue;
+        geo.reset();
+        geo.generate(level, 32);
+        expect(geo.accessPathCurves.length).toBe(level.accessPaths.length);
+      }
+    });
   });
 });
 
