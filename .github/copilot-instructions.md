@@ -33,6 +33,7 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 - **`worldToOverlay()` / `overlayFullScreen()`** for `scrollFactor(0)` drawing (`src/utils/cameraCoords.ts`) — `setScrollFactor(0)` doesn't prevent zoom.
 - **`MusicSystem.getInstance().start(mood)`** — singleton persists across scenes; never call `stop()` on shutdown.
 - **Deep copy arrays** before capturing in closures if reused/cleared (see cliff system in ARCHITECTURE.md).
+- **Use `gpt-5.2` for melody composition** — when composing or rewriting MusicSystem melody/bass arrays, always delegate to `gpt-5.2` model for best nocturne-style results.
 
 ## Skill Triggers
 

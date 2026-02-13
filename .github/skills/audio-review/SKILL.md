@@ -100,6 +100,8 @@ For significant audio reviews (new audio system, major sound palette changes):
 - When running as Opus: consult `gpt-5.2` (creative/aesthetic judgment) and `gemini-3-pro-preview` (technical analysis)
 - When running as any other model: consult `claude-opus-4.6`
 
+**For melody composition**: always use `gpt-5.2` — it produces the best nocturne-style melodies with proper romantic phrasing, dynamic arcs, and chromatic color.
+
 Share code and ask reviewers to evaluate:
 - Nocturne-style music quality and emotional effectiveness
 - Celeste-style voice gibberish character differentiation
