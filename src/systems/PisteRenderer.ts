@@ -43,20 +43,16 @@ export class PisteRenderer {
     const extraRight = Math.max(0, bgWidth - worldWidth - extraLeft);
     const extraBottom = Math.max(0, bgHeight - worldHeight - extraTop);
 
-    for (let x = Math.floor(-extraLeft / tileSize) - 1; x < Math.ceil((worldWidth + extraRight) / tileSize) + 1; x++) {
-      for (let y = Math.floor(-extraTop / tileSize) - 1; y < Math.ceil((worldHeight + extraBottom) / tileSize) + 1; y++) {
-        const isOutside = x < 0 || x >= level.width || y < 0 || y >= level.height;
-        if (isOutside) {
-          const tile = this.scene.add.image(
-            x * tileSize + tileSize / 2,
-            y * tileSize + tileSize / 2,
-            'snow_offpiste'
-          );
-          tile.setDisplaySize(tileSize, tileSize);
-          tile.setDepth(DEPTHS.BG_FOREST_TILES);
-        }
-      }
-    }
+    // Single TileSprite for the extended snow background (replaces thousands of tiles)
+    const totalW = worldWidth + extraLeft + extraRight;
+    const totalH = worldHeight + extraTop + extraBottom;
+    const bg = this.scene.add.tileSprite(
+      worldWidth / 2 + (extraRight - extraLeft) / 2,
+      worldHeight / 2 + (extraBottom - extraTop) / 2,
+      totalW + tileSize * 2, totalH + tileSize * 2,
+      'snow_offpiste'
+    );
+    bg.setDepth(DEPTHS.BG_FOREST_TILES);
 
     const treeSpacing = tileSize * 2;
     const margin = tileSize;

@@ -404,12 +404,24 @@ groomer.buffs = {
 
 ## Performance Considerations
 
-1. **Tile culling**: Only render visible tiles
-2. **Object pooling**: Reuse particle objects for weather
-3. **RequestAnimationFrame**: Synchronized with display refresh
-4. **Reduced motion**: Skip particle effects when enabled
-5. **Extended background sizing**: Use `screen * 1.3` — enough for URL bar/viewport jitter, not `max(screen, 2560) * 1.5` which creates thousands of unnecessary game objects and tanks mobile FPS
-6. **HUD resize debounce**: Mobile browsers fire frequent resize events (URL bar, soft keyboard); debounce with 300ms + 10px threshold to prevent rapid scene restarts
+1. **Tile culling**: Only render tiles within camera viewport (+ 2-tile margin). `cullSnowTiles()` in GameScene sets `tile.visible = false` for off-screen tiles, skipping only when camera hasn't moved a full tile
+2. **Background TileSprite**: Off-piste snow and extended forest backgrounds use `TileSprite` (1 object) instead of thousands of individual Image tiles — the single biggest performance win (7,300+ objects eliminated)
+3. **Static overlays as textures**: The frost vignette is pre-rendered into a texture via `generateTexture()` at creation, then displayed as an Image with alpha updates only — avoids per-frame Graphics.clear()+redraw which is extremely expensive on Canvas
+4. **Object pooling**: Reuse particle objects for weather
+5. **RequestAnimationFrame**: Synchronized with display refresh
+6. **Reduced motion**: Skip particle effects when enabled
+7. **Extended background sizing**: Use `screen * 1.3` — enough for URL bar/viewport jitter, not `max(screen, 2560) * 1.5` which creates thousands of unnecessary game objects and tanks mobile FPS
+8. **HUD resize debounce**: Mobile browsers fire frequent resize events (URL bar, soft keyboard); debounce with 300ms + 10px threshold to prevent rapid scene restarts
+
+### Canvas Renderer Constraints
+
+The game uses Canvas renderer (`Phaser.CANVAS`) because WebGL causes black screens on some configurations. Key constraints:
+
+- **`setTint()` does NOT work** — use pre-generated texture variants instead
+- **Graphics objects are re-rendered from their command list every frame** — even static trees/rocks. For static decorations, prefer `generateTexture()` to bake into a bitmap. Current known cost: ~35% CPU on late-game levels from ~1,400 Graphics objects (trees, rocks, cliffs, marker poles)
+- **`Graphics.clear()` + redraw per frame** is expensive — use for dynamic content only (night overlay headlights, winch cable). For overlays that change slowly (frost vignette), pre-render to texture and update alpha
+- **TileSprite** costs ~12% CPU for world-sized backgrounds but replaces thousands of individual tile objects — a net win
+- **Display list iteration**: Phaser iterates ALL game objects for depth sort and visibility checks every frame. Reducing object count has outsized performance impact
 
 ## Centralized Theme System
 
@@ -1042,7 +1054,9 @@ Also call `this.tweens.killAll()` and `this.children.removeAll(true)` in shutdow
 
 - Create all objects in `create()`, never in `update()` — the update loop runs 60fps
 - Use `generateTexture()` in `preload()` for procedural textures, destroy the temp Graphics immediately
-- Reuse Graphics objects with `.clear()` for things drawn every frame (e.g., night overlay, winch cable)
+- **Prefer TileSprite over individual Image tiles** for uniform backgrounds (off-piste snow, forest floor). One TileSprite = one game object vs thousands of tiles
+- **Bake static overlays to textures**: For overlays that change infrequently (frost vignette), draw into an off-screen Graphics with `scene.make.graphics({} as any, false)`, call `generateTexture()`, destroy the Graphics, and display as an Image. Update only alpha per frame
+- Reuse Graphics objects with `.clear()` for things drawn every frame (e.g., night overlay headlights, winch cable) — but minimize the number of such objects
 - Use consistent depth values with gaps between layers for future insertions
 
 ### ScrollFactor(0) Coordinate System

@@ -62,7 +62,7 @@ export const DEPTHS = {
   WINCH_CABLE: 50,    // Winch cable graphics
   AIRBORNE: 55,       // Flying birds, airborne objects (above cable, below overlay)
   NIGHT_OVERLAY: 100, // Night/weather darkening
-  FROST_OVERLAY: 100, // Frost vignette (same layer as night overlay)
+  FROST_OVERLAY: 250, // Frost vignette (above player and weather)
   PLAYER: 101,        // Groomer (above night overlay so headlights work)
   FEEDBACK: 200,      // Floating text (+fuel, stamina, etc.)
   WEATHER: 200,       // Snow particles (same layer as feedback)

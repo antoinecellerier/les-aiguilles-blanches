@@ -6,7 +6,9 @@ import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
 export class WeatherSystem {
   private scene: Phaser.Scene;
   private nightOverlay: Phaser.GameObjects.Graphics | null = null;
-  private frostOverlay: Phaser.GameObjects.Graphics | null = null;
+  private frostOverlay: Phaser.GameObjects.Image | null = null;
+  private frostTexKey = '__frost_vignette';
+  private frostTexSize = { w: 0, h: 0 };
   private headlightDirection: { x: number; y: number } = { x: 0, y: -1 };
   private weatherParticles: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
   private windStreaks: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
@@ -232,47 +234,72 @@ export class WeatherSystem {
   }
 
   createFrostOverlay(): void {
-    this.frostOverlay = this.scene.add.graphics();
-    this.frostOverlay.setDepth(DEPTHS.FROST_OVERLAY);
-    this.frostOverlay.setScrollFactor(0);
+    this.rebuildFrostTexture();
+  }
+
+  /** Build (or rebuild) the frost vignette texture at current screen size. */
+  private rebuildFrostTexture(): void {
+    const cam = this.scene.cameras.main;
+    const w = cam.width;
+    const h = cam.height;
+
+    // Skip if size hasn't changed (avoids expensive generateTexture on pause/resume)
+    if (w === this.frostTexSize.w && h === this.frostTexSize.h && this.frostOverlay) return;
+    this.frostTexSize = { w, h };
+
+    // Draw frost vignette into an off-screen Graphics, then snapshot to texture
+    const gfx = this.scene.make.graphics({ x: 0, y: 0 } as any, false);
+    const frostColor = 0xc8e8ff;
+
+    // Full-screen wash — visible even at low frost levels
+    gfx.fillStyle(frostColor, 0.35);
+    gfx.fillRect(0, 0, w, h);
+
+    // Thick edge bands creating a vignette from edges toward center
+    const maxInset = Math.min(w, h) * 0.35;
+    const steps = 8;
+    for (let i = 0; i < steps; i++) {
+      const t = (i + 1) / steps;
+      const d = maxInset * t;
+      const alpha = (1 - t * 0.6) * 0.6;
+      gfx.fillStyle(frostColor, alpha);
+      gfx.fillRect(0, 0, w, d);             // Top
+      gfx.fillRect(0, h - d, w, d);         // Bottom
+      gfx.fillRect(0, 0, d, h);             // Left
+      gfx.fillRect(w - d, 0, d, h);         // Right
+    }
+
+    // Convert to a static texture (single bitmap — zero per-frame cost)
+    if (this.scene.textures.exists(this.frostTexKey)) {
+      this.scene.textures.remove(this.frostTexKey);
+    }
+    gfx.generateTexture(this.frostTexKey, w, h);
+    gfx.destroy();
+
+    // Create or update the Image
+    if (this.frostOverlay) {
+      this.frostOverlay.setTexture(this.frostTexKey);
+      this.frostOverlay.setDisplaySize(w, h);
+    } else {
+      this.frostOverlay = this.scene.add.image(w / 2, h / 2, this.frostTexKey);
+      this.frostOverlay.setDepth(DEPTHS.FROST_OVERLAY);
+      this.frostOverlay.setScrollFactor(0);
+      this.frostOverlay.setAlpha(0);
+    }
   }
 
   updateFrostOverlay(frostLevel: number): void {
     if (!this.frostOverlay) return;
-    this.frostOverlay.clear();
-    if (frostLevel <= 0) return;
+    // Just update alpha — the texture is static, so Canvas blits one bitmap
+    this.frostOverlay.setAlpha(frostLevel / 100);
+  }
 
-    const cam = this.scene.cameras.main;
-    const fullScreen = overlayFullScreen(cam, 10);
-    const { x, y, width, height } = fullScreen;
-
-    // Frost vignette: icy border creeps inward from edges
-    const maxInset = Math.min(width, height) * 0.3;
-    const inset = maxInset * (frostLevel / 100);
-    const steps = 12;
-    const frostColor = 0xd0e8ff; // Icy blue-white
-
-    for (let i = 0; i < steps; i++) {
-      const outerT = i / steps;
-      const innerT = (i + 1) / steps;
-      const outerInset = inset * outerT;
-      const innerInset = inset * innerT;
-      const bandWidth = innerInset - outerInset;
-      if (bandWidth < 1) continue;
-
-      // Outer bands are most opaque, fading inward
-      const alpha = (frostLevel / 100) * 0.7 * (1 - innerT * 0.85);
-      if (alpha < 0.01) continue;
-
-      this.frostOverlay.fillStyle(frostColor, alpha);
-      // Top
-      this.frostOverlay.fillRect(x, y + outerInset, width, bandWidth);
-      // Bottom
-      this.frostOverlay.fillRect(x, y + height - innerInset, width, bandWidth);
-      // Left (between top and bottom bands)
-      this.frostOverlay.fillRect(x + outerInset, y + innerInset, bandWidth, height - innerInset * 2);
-      // Right
-      this.frostOverlay.fillRect(x + width - innerInset, y + innerInset, bandWidth, height - innerInset * 2);
+  /** Rebuild frost texture on window resize so it covers the new viewport. */
+  handleFrostResize(): void {
+    if (this.frostOverlay) {
+      const alpha = this.frostOverlay.alpha;
+      this.rebuildFrostTexture();
+      this.frostOverlay!.setAlpha(alpha);
     }
   }
 
@@ -286,6 +313,7 @@ export class WeatherSystem {
     this.windStreaks = null;
     this.nightOverlay = null;
     this.frostOverlay = null;
+    this.frostTexSize = { w: 0, h: 0 };
     this.headlightDirection = { x: 0, y: -1 };
   }
 }

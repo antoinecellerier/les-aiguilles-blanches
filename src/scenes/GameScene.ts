@@ -49,7 +49,7 @@ interface GameSceneData {
 }
 
 interface SnowCell {
-  tile: Phaser.GameObjects.Image;
+  tile: Phaser.GameObjects.Image | null;
   groomed: boolean;
   groomable: boolean;
   quality: number; // 0–1, grooming quality (0 = ungroomed, best-of-N passes)
@@ -129,6 +129,7 @@ export default class GameScene extends Phaser.Scene {
   private groomableTiles = 0;
   private totalTiles = 0;
   private groomQualitySum = 0; // sum of quality values for groomed tiles
+  private lastCullBounds = { x: 0, y: 0, w: 0, h: 0 };
 
   // Grooming quality tracking
   private rotationHistory: number[] = [];
@@ -515,31 +516,43 @@ export default class GameScene extends Phaser.Scene {
 
     this.groomableTiles = 0;
 
+    // Single TileSprite for off-piste background — tiles the snow texture across the world
+    const bgW = this.level.width * tileSize;
+    const bgH = this.level.height * tileSize;
+    const offPisteBg = this.add.tileSprite(bgW / 2, bgH / 2, bgW, bgH, 'snow_offpiste');
+    offPisteBg.setDepth(DEPTHS.TERRAIN);
+
     for (let y = 0; y < this.level.height; y++) {
       this.snowGrid[y] = [];
       for (let x = 0; x < this.level.width; x++) {
         const isGroomable = this.geometry.isInPiste(x, y, this.level);
 
-        const tile = this.add.image(
-          x * tileSize + tileSize / 2,
-          y * tileSize + tileSize / 2,
-          isGroomable ? 'snow_ungroomed' : 'snow_offpiste'
-        );
-        tile.setDisplaySize(tileSize, tileSize);
-        if (isGroomable) tile.setDepth(DEPTHS.PISTE);
-
-        this.snowGrid[y][x] = {
-          tile: tile,
-          groomed: !isGroomable,
-          groomable: isGroomable,
-          quality: 0,
-        };
-
         if (isGroomable) {
-          this.groomableTiles++;
-        }
+          const tile = this.add.image(
+            x * tileSize + tileSize / 2,
+            y * tileSize + tileSize / 2,
+            'snow_ungroomed'
+          );
+          tile.setDisplaySize(tileSize, tileSize);
+          tile.setDepth(DEPTHS.PISTE);
 
-        this.snowTiles.add(tile);
+          this.snowGrid[y][x] = {
+            tile: tile,
+            groomed: false,
+            groomable: true,
+            quality: 0,
+          };
+
+          this.groomableTiles++;
+          this.snowTiles.add(tile);
+        } else {
+          this.snowGrid[y][x] = {
+            tile: null,
+            groomed: true,
+            groomable: false,
+            quality: 0,
+          };
+        }
       }
     }
 
@@ -776,6 +789,7 @@ export default class GameScene extends Phaser.Scene {
     this.updateResources(delta);
     this.checkTutorialProgress();
     this.checkWinCondition();
+    this.cullSnowTiles();
     
     // Update night overlay with headlight position
     if (this.level.isNight) {
@@ -1426,6 +1440,38 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
+  /** Hide tiles outside camera view to avoid drawing thousands of off-screen sprites. */
+  private cullSnowTiles(): void {
+    const cam = this.cameras.main;
+    const margin = this.tileSize * 2;
+    const left = cam.worldView.x - margin;
+    const right = cam.worldView.right + margin;
+    const top = cam.worldView.y - margin;
+    const bottom = cam.worldView.bottom + margin;
+
+    // Only recalculate when camera moves enough (1 tile)
+    const b = this.lastCullBounds;
+    if (Math.abs(left - b.x) < this.tileSize && Math.abs(top - b.y) < this.tileSize &&
+        Math.abs(right - b.x - b.w) < this.tileSize && Math.abs(bottom - b.y - b.h) < this.tileSize) {
+      return;
+    }
+    this.lastCullBounds = { x: left, y: top, w: right - left, h: bottom - top };
+
+    const ts = this.tileSize;
+    const minCol = Math.max(0, Math.floor(left / ts));
+    const maxCol = Math.min(this.level.width - 1, Math.ceil(right / ts));
+    const minRow = Math.max(0, Math.floor(top / ts));
+    const maxRow = Math.min(this.level.height - 1, Math.ceil(bottom / ts));
+
+    for (let y = 0; y < this.level.height; y++) {
+      const visible = y >= minRow && y <= maxRow;
+      for (let x = 0; x < this.level.width; x++) {
+        const t = this.snowGrid[y][x].tile;
+        if (t) t.visible = visible && x >= minCol && x <= maxCol;
+      }
+    }
+  }
+
   private triggerVictory(): void {
     if (this.isGameOver || this.isTransitioning) return;
     this.isTransitioning = true; // Prevent further updates, but don't block gameOver
@@ -1566,6 +1612,8 @@ export default class GameScene extends Phaser.Scene {
     if (this.groomer) {
       this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
     }
+
+    this.weatherSystem.handleFrostResize();
   }
 
   /** Camera follow offset to keep groomer above touch controls (world-space) */
