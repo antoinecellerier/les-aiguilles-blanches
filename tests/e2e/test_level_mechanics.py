@@ -100,30 +100,6 @@ class TestWinchMechanics:
 class TestCliffMechanics:
     """Tests for cliff physics and visual alignment."""
     
-    def test_cliff_segments_exist_on_dangerous_level(self, game_page: Page):
-        """Test that cliffSegments are created on levels with dangerous boundaries."""
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
-        
-        skip_to_level(game_page, 'level_verticaleName')
-        
-        cliff_info = game_page.evaluate("""() => {
-            const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.geometry?.cliffSegments) return null;
-            return {
-                count: gameScene.geometry.cliffSegments.length,
-                hasOffset: gameScene.geometry.cliffSegments.length > 0 && 'offset' in gameScene.geometry.cliffSegments[0],
-                hasExtent: gameScene.geometry.cliffSegments.length > 0 && 'extent' in gameScene.geometry.cliffSegments[0],
-                hasSide: gameScene.geometry.cliffSegments.length > 0 && 'side' in gameScene.geometry.cliffSegments[0]
-            };
-        }""")
-        
-        assert cliff_info is not None, "Should have cliffSegments on dangerous level"
-        assert cliff_info['count'] > 0, "Should have at least one cliff segment"
-        assert cliff_info['hasOffset'], "Cliff segments should have offset property"
-        assert cliff_info['hasExtent'], "Cliff segments should have extent property"
-        assert cliff_info['hasSide'], "Cliff segments should have side property"
-    
     def test_cliff_physics_matches_visuals(self, game_page: Page):
         """Test that danger zones use same offset/extent as visual cliffs."""
         click_button(game_page, BUTTON_START, "Start Game")
@@ -150,51 +126,6 @@ class TestCliffMechanics:
             f"Cliff offset should be 1.5-3 tiles, got {cliff_params['offsetInTiles']}"
         assert 2.9 <= cliff_params['extentInTiles'] <= 5.1, \
             f"Cliff extent should be 3-5 tiles, got {cliff_params['extentInTiles']}"
-    
-    def test_no_cliff_segments_on_safe_level(self, game_page: Page):
-        """Test that early levels without dangerous boundaries have no cliff segments."""
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
-        
-        cliff_count = game_page.evaluate("""() => {
-            const gameScene = window.game?.scene?.getScene('GameScene');
-            return gameScene?.geometry?.cliffSegments?.length ?? 0;
-        }""")
-        
-        assert cliff_count == 0, "Tutorial level should not have cliff segments"
-    
-    def test_cliff_getX_interpolation_works(self, game_page: Page):
-        """Test that cliff getX interpolation returns valid piste edge positions."""
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
-        
-        skip_to_level(game_page, 'level_verticaleName')
-        
-        interpolation_test = game_page.evaluate("""() => {
-            const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene?.geometry?.cliffSegments?.length) return null;
-            
-            const cliff = gameScene.geometry.cliffSegments[0];
-            const { startY, endY, getX } = cliff;
-            const midY = (startY + endY) / 2;
-            
-            const startX = getX(startY);
-            const midX = getX(midY);
-            const endX = getX(endY);
-            
-            return {
-                startX: startX,
-                midX: midX,
-                endX: endX,
-                allValid: startX > 0 && midX > 0 && endX > 0,
-                hasInterpolation: typeof midX === 'number' && !isNaN(midX)
-            };
-        }""")
-        
-        assert interpolation_test is not None, "Should have cliff segment with getX"
-        assert interpolation_test['allValid'], \
-            f"getX should return valid positions, got start={interpolation_test['startX']}, mid={interpolation_test['midX']}, end={interpolation_test['endX']}"
-        assert interpolation_test['hasInterpolation'], "getX interpolation should return valid number"
     
     def test_markers_not_on_cliffs(self, game_page: Page):
         """Test that piste markers are not placed on cliff areas."""

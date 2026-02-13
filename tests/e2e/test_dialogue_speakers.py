@@ -93,20 +93,6 @@ class TestDialogueSpeakers:
             f"Level {level_index}: expected speaker '{expected_speaker}', got '{speaker}'"
         )
 
-    def test_dialogue_speakers_map_covers_all_intros(self, game_page: Page):
-        """Verify DIALOGUE_SPEAKERS map covers every level's introDialogue key."""
-        result = game_page.evaluate("""() => {
-            // Access levels config and dialogue speakers from the game modules
-            const gameScene = window.game?.scene?.getScene('GameScene');
-            if (!gameScene) return { error: 'GameScene not found' };
-            return { success: true };
-        }""")
-        # This test verifies at the config level - checked via TypeScript compilation
-        # and the parametrized tests above cover runtime behavior
-        assert result.get('success') or result.get('error') == 'GameScene not found', (
-            f"Expected success or GameScene not found, got: {result}"
-        )
-
     def test_system_dialogues_default_to_jean_pierre(self, game_page: Page):
         """System warnings (cliffFall, tumble, etc.) default to Jean-Pierre."""
         start_game(game_page)
