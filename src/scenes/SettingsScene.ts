@@ -627,7 +627,8 @@ export default class SettingsScene extends Phaser.Scene {
     panel.add(this.createSubHeader('🎮 ' + (t('gamepadButtons') || 'Gamepad')), { align: 'left', padding: { top: 8 } });
 
     // Connected gamepad name (updates dynamically)
-    this.gamepadNameText = this.createText('', this.smallFont, '#aaaaff');
+    const noGpMsg = t('noGamepadConnected') || '🎮 No gamepad connected';
+    this.gamepadNameText = this.createText(noGpMsg, this.smallFont, '#aaaaff');
     this.updateGamepadName();
     panel.add(this.gamepadNameText, { align: 'left' });
 
