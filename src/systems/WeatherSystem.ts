@@ -1,11 +1,14 @@
 import Phaser from 'phaser';
 import { Accessibility, type Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
-import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
+import { worldToOverlay } from '../utils/cameraCoords';
 
 export class WeatherSystem {
   private scene: Phaser.Scene;
-  private nightOverlay: Phaser.GameObjects.Graphics | null = null;
+  private nightOverlay: Phaser.GameObjects.Image | null = null;
+  private nightTexKey = '__night_overlay';
+  private nightCtx: CanvasRenderingContext2D | null = null;
+  private nightDynTex: Phaser.Textures.DynamicTexture | null = null;
   private frostOverlay: Phaser.GameObjects.Image | null = null;
   private frostTexKey = '__frost_vignette';
   private frostTexSize = { w: 0, h: 0 };
@@ -110,58 +113,80 @@ export class WeatherSystem {
   }
 
   createNightOverlay(): void {
-    this.nightOverlay = this.scene.add.graphics();
+    const cam = this.scene.cameras.main;
+    const w = cam.width;
+    const h = cam.height;
+
+    if (this.scene.textures.exists(this.nightTexKey)) {
+      this.scene.textures.remove(this.nightTexKey);
+    }
+    this.nightDynTex = this.scene.textures.addDynamicTexture(this.nightTexKey, w, h)!;
+    this.nightCtx = this.nightDynTex.context!;
+
+    this.nightOverlay = this.scene.add.image(w / 2, h / 2, this.nightTexKey);
     this.nightOverlay.setDepth(DEPTHS.NIGHT_OVERLAY);
     this.nightOverlay.setScrollFactor(0);
   }
 
   updateNightOverlay(groomer: Phaser.Physics.Arcade.Sprite): void {
-    if (!this.nightOverlay || !groomer) return;
+    if (!this.nightCtx || !this.nightOverlay || !groomer) return;
 
     const cam = this.scene.cameras.main;
+    const ctx = this.nightCtx;
+    const w = cam.width;
+    const h = cam.height;
+
     const { x: screenX, y: screenY } = worldToOverlay(cam, groomer.x, groomer.y);
 
     this.updateFacing(groomer, 10);
 
-    // Groomer work lights - world-space distances (camera zoom handles visual scaling)
     const radiusFront = this.tileSize * BALANCE.HEADLIGHT_FRONT_TILES;
     const radiusBack = this.tileSize * BALANCE.HEADLIGHT_REAR_TILES;
     const spreadAngle = BALANCE.HEADLIGHT_SPREAD;
 
-    // Offset lights from groomer center (half the sprite size)
     const groomerRadius = this.tileSize * 0.5;
     const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
 
-    // Front and rear light origins
     const frontX = screenX + Math.cos(angle) * groomerRadius;
     const frontY = screenY + Math.sin(angle) * groomerRadius;
     const rearX = screenX - Math.cos(angle) * groomerRadius;
     const rearY = screenY - Math.sin(angle) * groomerRadius;
 
-    this.drawDarkness(cam);
+    // Fill darkness
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = BALANCE.NIGHT_DARKNESS_ALPHA;
+    ctx.fillStyle = '#000022';
+    ctx.fillRect(0, 0, w, h);
 
-    // Draw wide fan-shaped work lights
+    // Draw light circles on top (same approach as original Phaser Graphics)
     const steps = BALANCE.HEADLIGHT_STEPS;
     for (let i = steps - 1; i >= 0; i--) {
       const t = (i + 1) / steps;
       const stepAlpha = 0.1 * (steps - i) / steps;
 
-      // Front work lights - wide flood pattern
-      this.nightOverlay.fillStyle(0xffffee, stepAlpha);
-      this.drawLightCone(frontX, frontY, angle, radiusFront * t, spreadAngle,
-        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.4, 0.5, 6);
+      // Front work lights
+      ctx.fillStyle = '#ffffee';
+      this.drawLightConeCanvas(ctx, frontX, frontY, angle, radiusFront * t, spreadAngle,
+        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.4, 0.5, 6, stepAlpha);
 
-      // Rear work lights - also wide
-      this.nightOverlay.fillStyle(0xffddcc, stepAlpha * 0.7);
-      this.drawLightCone(rearX, rearY, angle + Math.PI, radiusBack * t, spreadAngle * 0.9,
-        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.4, 0.5, 6);
+      // Rear work lights
+      ctx.fillStyle = '#ffddcc';
+      this.drawLightConeCanvas(ctx, rearX, rearY, angle + Math.PI, radiusBack * t, spreadAngle * 0.9,
+        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.4, 0.5, 6, stepAlpha * 0.7);
     }
+
+    ctx.globalAlpha = 1;
   }
 
   updateHeadlamp(skier: Phaser.Physics.Arcade.Sprite): void {
-    if (!this.nightOverlay || !skier) return;
+    if (!this.nightCtx || !this.nightOverlay || !skier) return;
 
     const cam = this.scene.cameras.main;
+    const ctx = this.nightCtx;
+    const w = cam.width;
+    const h = cam.height;
+
     const { x: screenX, y: screenY } = worldToOverlay(cam, skier.x, skier.y);
 
     this.updateFacing(skier, 5);
@@ -170,32 +195,41 @@ export class WeatherSystem {
     const spreadAngle = BALANCE.HEADLAMP_SPREAD;
     const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
 
-    // Offset to head position (top of 20×28 sprite, ~10px above center)
-    // then project forward in facing direction so beam is ahead of skier
     const zoom = cam.zoom || 1;
     const headOffset = 10 * skier.scaleY * zoom;
     const forwardOffset = this.tileSize * 0.6 * zoom;
     const headX = screenX + Math.cos(angle) * forwardOffset;
     const headY = screenY - headOffset + Math.sin(angle) * forwardOffset;
 
-    this.drawDarkness(cam);
+    // Fill darkness
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = BALANCE.NIGHT_DARKNESS_ALPHA;
+    ctx.fillStyle = '#000022';
+    ctx.fillRect(0, 0, w, h);
 
-    // Single forward-facing headlamp cone from head
+    // Draw light circles on top
+    ctx.fillStyle = '#ffffff';
     const steps = BALANCE.HEADLAMP_STEPS;
     for (let i = steps - 1; i >= 0; i--) {
       const t = (i + 1) / steps;
       const stepAlpha = 0.12 * (steps - i) / steps;
-      this.nightOverlay.fillStyle(0xffffff, stepAlpha);
-      this.drawLightCone(headX, headY, angle, radiusFront * t, spreadAngle,
-        BALANCE.HEADLAMP_DIST_STEPS, BALANCE.HEADLAMP_ARC_STEPS, 0.2, 0.6, 3);
+      this.drawLightConeCanvas(ctx, headX, headY, angle, radiusFront * t, spreadAngle,
+        BALANCE.HEADLAMP_DIST_STEPS, BALANCE.HEADLAMP_ARC_STEPS, 0.2, 0.6, 3, stepAlpha);
     }
 
-    // Small ambient glow around skier (reflected snow light)
+    // Ambient glow around skier
+    ctx.fillStyle = '#ddeeff';
     const glowRadius = this.tileSize * 1.2;
     for (let i = 3; i >= 0; i--) {
-      this.nightOverlay.fillStyle(0xddeeff, 0.04 * (4 - i) / 4);
-      this.nightOverlay.fillCircle(screenX, screenY, glowRadius * (i + 1) / 4);
+      const alpha = 0.04 * (4 - i) / 4;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, glowRadius * (i + 1) / 4, 0, Math.PI * 2);
+      ctx.fill();
     }
+
+    ctx.globalAlpha = 1;
   }
 
   private updateFacing(sprite: Phaser.Physics.Arcade.Sprite, threshold: number): void {
@@ -206,31 +240,28 @@ export class WeatherSystem {
     }
   }
 
-  private drawDarkness(cam: Phaser.Cameras.Scene2D.Camera): void {
-    if (!this.nightOverlay) return;
-    this.nightOverlay.clear();
-    this.nightOverlay.fillStyle(0x000022, BALANCE.NIGHT_DARKNESS_ALPHA);
-    const fullScreen = overlayFullScreen(cam, 10);
-    this.nightOverlay.fillRect(fullScreen.x, fullScreen.y, fullScreen.width, fullScreen.height);
-  }
-
-  private drawLightCone(
+  /** Draw light cone circles directly to canvas, erasing darkness */
+  private drawLightConeCanvas(
+    ctx: CanvasRenderingContext2D,
     cx: number, cy: number, angle: number, radius: number, spread: number,
-    distSteps: number, arcSteps: number, sizeFactor: number, falloff: number, minSize: number
+    distSteps: number, arcSteps: number, sizeFactor: number, falloff: number,
+    minSize: number, alpha: number
   ): void {
-    if (!this.nightOverlay) return;
-
+    ctx.globalAlpha = alpha;
     for (let d = 1; d <= distSteps; d++) {
       const dist = radius * (d / distSteps);
-      const circleRadius = radius * sizeFactor * (1 - d / distSteps * falloff);
+      const circleRadius = Math.max(radius * sizeFactor * (1 - d / distSteps * falloff), minSize);
 
       for (let a = -arcSteps / 2; a <= arcSteps / 2; a++) {
         const arcAngle = angle + (a / arcSteps) * spread;
         const px = cx + Math.cos(arcAngle) * dist;
         const py = cy + Math.sin(arcAngle) * dist;
-        this.nightOverlay.fillCircle(px, py, Math.max(circleRadius, minSize));
+        ctx.beginPath();
+        ctx.arc(px, py, circleRadius, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
+    ctx.globalAlpha = 1;
   }
 
   createFrostOverlay(): void {
@@ -312,6 +343,8 @@ export class WeatherSystem {
     this.weatherParticles = null;
     this.windStreaks = null;
     this.nightOverlay = null;
+    this.nightCtx = null;
+    this.nightDynTex = null;
     this.frostOverlay = null;
     this.frostTexSize = { w: 0, h: 0 };
     this.headlightDirection = { x: 0, y: -1 };
