@@ -157,7 +157,17 @@ export class AudioSystem {
       if (document.hidden) {
         this.ctx.suspend().catch(() => {});
       } else if (this.resumed) {
-        this.ctx.resume().catch(() => {});
+        // Mute before resuming to avoid a burst of stale audio
+        if (this.masterGain) {
+          this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
+        }
+        this.ctx.resume().then(() => {
+          // Fade master back in over 200ms
+          if (this.masterGain && this.ctx) {
+            const vol = this.muted ? 0 : this.volumes.master;
+            this.masterGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.06);
+          }
+        }).catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', this.visibilityHandler);
