@@ -128,6 +128,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // Weather effects (night overlay, snow particles)
     this.createWeather(width, height, levelWeather);
 
+    // Contextual victory props (level-specific decorations near the groomer)
+    if (this.won && !this.skiMode) {
+      this.drawVictoryProps(width, snowLineY, scaleFactor, this.levelIndex);
+    }
+    if (this.won && this.skiMode) {
+      this.drawSkiVictoryProps(width, snowLineY, scaleFactor, this.levelIndex);
+    }
+
     // Wildlife
     this.wildlife = new MenuWildlifeController(this);
     this.wildlife.snowLineY = snowLineY;
@@ -588,6 +596,233 @@ export default class LevelCompleteScene extends Phaser.Scene {
     }
   }
 
+  /** Draw level-specific props near the groomer on victory. */
+  private drawVictoryProps(width: number, snowLineY: number, scaleFactor: number, levelIndex: number): void {
+    const sx = width / 1024;
+    const isLandscape = width > snowLineY * 1.5;
+    const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
+    const s = 3.0 * scaleFactor;
+    const groundY = snowLineY;
+    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.002);
+
+    switch (levelIndex) {
+      case 1: // Marmottes — cozy chalet
+        this.drawChalet(g, gx - 50 * s, groundY, s);
+        break;
+      case 2: // Chamois — rock with snow patch
+        this.drawSnowRock(g, gx - 50 * s, groundY, s);
+        break;
+      case 3: // Air Zone — kicker ramp
+        this.drawParkKicker(g, gx - 40 * s, groundY, s);
+        break;
+      case 4: // L'Aigle — steep slope warning sign
+        this.drawSlopeSign(g, gx - 35 * s, groundY, s);
+        break;
+      case 5: // Le Glacier — winch anchor with cable to groomer
+        this.drawWinchPost(g, gx - 45 * s, groundY, s, gx);
+        break;
+      case 6: // Tube — halfpipe walls
+        this.drawHalfpipeWalls(g, gx, groundY, s);
+        break;
+      case 7: // La Verticale — stars and moon
+        this.drawNightSky(width, snowLineY, s);
+        break;
+      case 8: // Col Dangereux — avalanche debris
+        this.drawAvalancheDebris(g, gx - 50 * s, groundY, s);
+        break;
+      case 10: // Coupe des Aiguilles — trophy
+        this.drawTrophy(g, gx - 40 * s, groundY, s);
+        break;
+    }
+  }
+
+  private drawChalet(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Walls
+    g.fillStyle(0x8b4513);
+    g.fillRect(x - 10 * s, groundY - 16 * s, 20 * s, 16 * s);
+    // Roof
+    g.fillStyle(0xa52a2a);
+    g.fillRect(x - 12 * s, groundY - 22 * s, 24 * s, 6 * s);
+    // Roof overhang
+    g.fillStyle(0x8b2020);
+    g.fillRect(x - 12 * s, groundY - 16 * s, 24 * s, 1 * s);
+    // Snow on roof
+    g.fillStyle(0xf0f5f8);
+    g.fillRect(x - 11 * s, groundY - 24 * s, 22 * s, 3 * s);
+    // Windows (warm glow)
+    g.fillStyle(0xffff00);
+    g.fillRect(x - 7 * s, groundY - 13 * s, 4 * s, 4 * s);
+    g.fillRect(x + 3 * s, groundY - 13 * s, 4 * s, 4 * s);
+    // Door
+    g.fillStyle(0x5a3018);
+    g.fillRect(x - 2 * s, groundY - 8 * s, 4 * s, 8 * s);
+  }
+
+  private drawSnowRock(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Rock base
+    g.fillStyle(0x696969);
+    g.fillRect(x - 10 * s, groundY - 10 * s, 20 * s, 10 * s);
+    // Rock top
+    g.fillStyle(0x888888);
+    g.fillRect(x - 8 * s, groundY - 14 * s, 16 * s, 4 * s);
+    // Snow patch on top
+    g.fillStyle(0xf0f5f8);
+    g.fillRect(x - 6 * s, groundY - 16 * s, 12 * s, 3 * s);
+    // Shadow detail
+    g.fillStyle(0x555555);
+    g.fillRect(x - 10 * s, groundY - 2 * s, 20 * s, 2 * s);
+  }
+
+  private drawParkKicker(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Snow ramp — stepped rectangles to approximate a slope
+    g.fillStyle(0xddeeff);
+    g.fillRect(x - 12 * s, groundY - 3 * s, 24 * s, 3 * s);
+    g.fillRect(x - 6 * s, groundY - 6 * s, 18 * s, 3 * s);
+    g.fillRect(x, groundY - 9 * s, 12 * s, 3 * s);
+    g.fillRect(x + 4 * s, groundY - 12 * s, 8 * s, 3 * s);
+    g.fillRect(x + 7 * s, groundY - 15 * s, 5 * s, 3 * s);
+    g.fillRect(x + 9 * s, groundY - 18 * s, 3 * s, 3 * s);
+    // Ramp edge highlight
+    g.fillStyle(0xaabbcc);
+    g.fillRect(x - 12 * s, groundY - 3 * s, 1 * s, 3 * s);
+    g.fillRect(x - 6 * s, groundY - 6 * s, 1 * s, 3 * s);
+    g.fillRect(x, groundY - 9 * s, 1 * s, 3 * s);
+    g.fillRect(x + 4 * s, groundY - 12 * s, 1 * s, 3 * s);
+    g.fillRect(x + 7 * s, groundY - 15 * s, 1 * s, 3 * s);
+    g.fillRect(x + 9 * s, groundY - 18 * s, 1 * s, 3 * s);
+  }
+
+  private drawSlopeSign(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Danger pole — yellow/black stripes
+    g.fillStyle(0xffcc00);
+    g.fillRect(x - 1.5 * s, groundY - 30 * s, 3 * s, 30 * s);
+    g.fillStyle(0x111111);
+    for (let i = 0; i < 5; i++) {
+      g.fillRect(x - 1.5 * s, groundY - (6 + i * 6) * s, 3 * s, 3 * s);
+    }
+    // Warning sign — yellow diamond with exclamation
+    g.fillStyle(0xddaa00);
+    g.fillRect(x - 6 * s, groundY - 38 * s, 12 * s, 12 * s);
+    // Border
+    g.fillStyle(0x111111);
+    g.fillRect(x - 6 * s, groundY - 38 * s, 12 * s, 1 * s);
+    g.fillRect(x - 6 * s, groundY - 27 * s, 12 * s, 1 * s);
+    g.fillRect(x - 6 * s, groundY - 38 * s, 1 * s, 12 * s);
+    g.fillRect(x + 5 * s, groundY - 38 * s, 1 * s, 12 * s);
+    // Exclamation mark
+    g.fillRect(x - 1 * s, groundY - 36 * s, 2 * s, 6 * s);
+    g.fillRect(x - 1 * s, groundY - 29 * s, 2 * s, 2 * s);
+  }
+
+  private drawWinchPost(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number, groomerX: number): void {
+    // Anchor post
+    g.fillStyle(0x888888);
+    g.fillRect(x - 2 * s, groundY - 24 * s, 4 * s, 24 * s);
+    // Anchor cross-bar
+    g.fillRect(x - 6 * s, groundY - 24 * s, 12 * s, 3 * s);
+    // Cable from anchor top to groomer rear
+    g.fillStyle(0x999999);
+    const cableY = groundY - 22 * s;
+    const cableEndX = groomerX - 8 * s;
+    const cableEndY = groundY - 10 * s;
+    // Stepped cable segments (rectangle-only catenary)
+    const steps = 6;
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps;
+      const nx = x + 6 * s + (cableEndX - x - 6 * s) * t;
+      const sag = Math.sin(t * Math.PI) * 4 * s;
+      const ny = cableY + (cableEndY - cableY) * t + sag;
+      const segW = (cableEndX - x - 6 * s) / steps;
+      g.fillRect(nx, ny, segW + 1, 1.5 * s);
+    }
+  }
+
+  private drawHalfpipeWalls(g: Phaser.GameObjects.Graphics, cx: number, groundY: number, s: number): void {
+    // Left wall — stepped rectangles
+    g.fillStyle(0xddeeff);
+    g.fillRect(cx - 45 * s, groundY - 22 * s, 3 * s, 22 * s);
+    g.fillRect(cx - 42 * s, groundY - 14 * s, 3 * s, 14 * s);
+    g.fillRect(cx - 39 * s, groundY - 8 * s, 2 * s, 8 * s);
+    g.fillRect(cx - 37 * s, groundY - 4 * s, 2 * s, 4 * s);
+    // Right wall — stepped rectangles
+    g.fillRect(cx + 42 * s, groundY - 22 * s, 3 * s, 22 * s);
+    g.fillRect(cx + 39 * s, groundY - 14 * s, 3 * s, 14 * s);
+    g.fillRect(cx + 37 * s, groundY - 8 * s, 2 * s, 8 * s);
+    g.fillRect(cx + 35 * s, groundY - 4 * s, 2 * s, 4 * s);
+    // Lip highlights
+    g.fillStyle(0xaabbcc);
+    g.fillRect(cx - 42 * s, groundY - 22 * s, 1 * s, 22 * s);
+    g.fillRect(cx + 42 * s, groundY - 22 * s, 1 * s, 22 * s);
+  }
+
+  private drawNightSky(_width: number, snowLineY: number, s: number): void {
+    const g = this.add.graphics().setDepth(3);
+    const w = this.scale.width;
+    // Moon — rectangle with bite taken out (crescent)
+    g.fillStyle(0xffffcc);
+    g.fillRect(120 * s - 10 * s, snowLineY * 0.15 - 10 * s, 20 * s, 20 * s);
+    // Shadow bite for crescent
+    g.fillStyle(0x000022);
+    g.fillRect(124 * s - 8 * s, snowLineY * 0.14 - 10 * s, 18 * s, 20 * s);
+    // Stars — small squares
+    g.fillStyle(0xffffff);
+    const starPositions = [
+      [0.15, 0.08], [0.3, 0.05], [0.45, 0.12], [0.55, 0.04],
+      [0.7, 0.09], [0.85, 0.06], [0.25, 0.15], [0.65, 0.14],
+      [0.4, 0.02], [0.8, 0.11], [0.1, 0.18], [0.5, 0.08],
+    ];
+    for (const [px, py] of starPositions) {
+      const sz = (1 + Math.random() * 1.5) * s;
+      g.fillRect(w * px, snowLineY * py, sz, sz);
+    }
+  }
+
+  private drawAvalancheDebris(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Snow boulders — stacked rectangles
+    g.fillStyle(0xdde8f0);
+    g.fillRect(x - 6 * s, groundY - 10 * s, 12 * s, 10 * s);
+    g.fillRect(x - 18 * s, groundY - 6 * s, 8 * s, 6 * s);
+    g.fillRect(x + 6 * s, groundY - 8 * s, 10 * s, 8 * s);
+    g.fillRect(x - 10 * s, groundY - 12 * s, 6 * s, 5 * s);
+    // Rock fragments
+    g.fillStyle(0x696969);
+    g.fillRect(x - 12 * s, groundY - 4 * s, 3 * s, 3 * s);
+    g.fillRect(x + 8 * s, groundY - 2 * s, 2 * s, 2 * s);
+    // Broken tree
+    g.fillStyle(0x5a3a1a);
+    g.fillRect(x + 15 * s, groundY - 12 * s, 2 * s, 12 * s);
+    g.fillStyle(0x2d5a1a);
+    g.fillRect(x + 12 * s, groundY - 16 * s, 8 * s, 5 * s);
+  }
+
+  private drawTrophy(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Pedestal
+    g.fillStyle(0x4a3a2a);
+    g.fillRect(x - 8 * s, groundY - 6 * s, 16 * s, 6 * s);
+    g.fillStyle(0x5a4a3a);
+    g.fillRect(x - 6 * s, groundY - 8 * s, 12 * s, 2 * s);
+    // Cup stem
+    g.fillStyle(0xffd700);
+    g.fillRect(x - 1.5 * s, groundY - 18 * s, 3 * s, 10 * s);
+    // Cup bowl
+    g.fillRect(x - 7 * s, groundY - 28 * s, 14 * s, 10 * s);
+    // Cup interior
+    g.fillStyle(0xffd700);
+    g.fillRect(x - 5 * s, groundY - 26 * s, 10 * s, 6 * s);
+    // Handles — small rectangles on sides
+    g.fillStyle(0xffd700);
+    g.fillRect(x - 10 * s, groundY - 26 * s, 3 * s, 2 * s);
+    g.fillRect(x - 10 * s, groundY - 24 * s, 2 * s, 4 * s);
+    g.fillRect(x - 10 * s, groundY - 20 * s, 3 * s, 2 * s);
+    g.fillRect(x + 7 * s, groundY - 26 * s, 3 * s, 2 * s);
+    g.fillRect(x + 8 * s, groundY - 24 * s, 2 * s, 4 * s);
+    g.fillRect(x + 7 * s, groundY - 20 * s, 3 * s, 2 * s);
+    // Star on cup — small cross
+    g.fillStyle(0xfffff0);
+    g.fillRect(x - 2 * s, groundY - 24 * s, 4 * s, 1 * s);
+    g.fillRect(x - 0.5 * s, groundY - 25.5 * s, 1 * s, 4 * s);
+  }
+
   /** Draw failure-specific visual effects on the terrain groomer. */
   private drawGroomerFailEffect(width: number, snowLineY: number, scaleFactor: number, weather: { isNight: boolean; weather: string }): void {
     const sx = width / 1024;
@@ -1009,5 +1244,38 @@ export default class LevelCompleteScene extends Phaser.Scene {
       g.fillRect(gx - 4 * s, groundY - 37 * s, 8 * s, 2 * s);
       g.fillRect(gx - 7 * s, groundY - 29 * s, 14 * s, 2 * s);
     }
+  }
+
+  /** Draw ski/snowboard victory props: slalom gates on gate levels, park features on park levels. */
+  private drawSkiVictoryProps(width: number, snowLineY: number, scaleFactor: number, levelIndex: number): void {
+    const sx = width / 1024;
+    const isLandscape = width > snowLineY * 1.5;
+    const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
+    const s = 3.0 * scaleFactor;
+    const groundY = snowLineY;
+    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.002);
+
+    const level = LEVELS[levelIndex] as Level;
+
+    if (level.slalomGates) {
+      this.drawSlalomGatePair(g, gx - 45 * s, groundY, s);
+    } else if (levelIndex === 3) {
+      this.drawParkKicker(g, gx - 40 * s, groundY, s);
+    } else if (levelIndex === 6) {
+      this.drawHalfpipeWalls(g, gx, groundY, s);
+    }
+  }
+
+  private drawSlalomGatePair(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Red gate pole
+    g.fillStyle(0xcc2222);
+    g.fillRect(x - 1.5 * s, groundY - 26 * s, 3 * s, 26 * s);
+    g.fillStyle(0x111111);
+    g.fillRect(x - 1.5 * s, groundY - 4 * s, 3 * s, 4 * s);
+    // Blue gate pole (offset right)
+    g.fillStyle(0x1e90ff);
+    g.fillRect(x + 12 * s, groundY - 26 * s, 3 * s, 26 * s);
+    g.fillStyle(0x111111);
+    g.fillRect(x + 12 * s, groundY - 4 * s, 3 * s, 4 * s);
   }
 }

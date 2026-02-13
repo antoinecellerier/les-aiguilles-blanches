@@ -24,7 +24,7 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
-- [ ] Contextual win screen graphics — Level-specific victory scenes (e.g. night stars for L7, storm clearing for L9, avalanche debris for L8, park features for L3/L6)
+- ✅ **Contextual win screen graphics** — Level-specific victory props next to groomer: chalet (L1), snow rock (L2), kicker ramp (L3), fuel can (L4), winch post (L5), halfpipe walls (L6), moon and stars (L7), avalanche debris (L8), gold trophy (L10). Rectangle-only pixel art.
 - ✅ **Wildlife cliff awareness** — Ground animals (rabbits, marmots, foxes) no longer spawn on cliff tiles; spawn retries up to 8 times for valid terrain
 - ✅ Sound effects polish — Character voice differentiation (pitch gap, vowel formant), melody phrasing rests, piano legato sustain, bass rebalancing
 - [ ] More character dialogues per level

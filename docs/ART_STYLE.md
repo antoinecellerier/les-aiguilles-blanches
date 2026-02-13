@@ -177,6 +177,30 @@ Paired red/blue poles placed along the piste on L4, L5, L10. Rectangles only.
 - Depth: `DEPTHS.MARKERS` (9)
 - On miss: poles dim to 30% alpha
 
+### Victory Screen Props
+
+Level-specific pixel art props drawn next to the groomer on the win screen. All rectangle-only, no curves. Scale: `3.0 × scaleFactor`. Positioned left of the groomer at the snow line.
+
+| Level | Prop | Key Colors |
+|-------|------|------------|
+| L1 Les Marmottes | Chalet | Walls `0x8b4513`, roof `0xa52a2a`, snow `0xf0f5f8`, windows `0xffff00`, door `0x5a3018` |
+| L2 Le Chamois | Snow rock | Base `0x696969`, highlight `0x888888`, snow cap `0xf0f5f8` |
+| L3 Air Zone | Kicker ramp | Snow `0xddeeff`, edge highlight `0xaabbcc` (stepped rectangles) |
+| L4 L'Aigle | Slope warning sign | Pole `0xffcc00`/`0x111111` stripes, sign `0xddaa00`, exclamation `0x111111` |
+| L5 Le Glacier | Winch post | Post `0x888888`, drum `0x666666`, cable `0x999999` |
+| L6 Le Tube | Halfpipe walls | Snow `0xddeeff`, lip highlight `0xaabbcc` (stepped rectangles) |
+| L7 La Verticale | Moon & stars | Moon `0xffffcc`, shadow `0x000022`, stars `0xffffff` (depth 3) |
+| L8 Col Dangereux | Avalanche debris | Snow `0xdde8f0`, rock `0x696969`, trunk `0x5a3a1a`, foliage `0x2d5a1a` |
+| L10 Coupe des Aiguilles | Trophy | Gold `0xffd700`, pedestal `0x4a3a2a`/`0x5a4a3a`, star `0xfffff0` |
+
+L0 (Tutorial) and L9 (Tempête) have no props — tutorial is introductory, storm weather effects are sufficient.
+
+**Ski/snowboard wins** show level-appropriate features:
+- **Gate levels** (L4, L5, L10): Red/blue slalom gate pair
+- **L3** (Air Zone): Kicker ramp (same as groomer win)
+- **L6** (Le Tube): Halfpipe walls (same as groomer win)
+- Other levels: no props (character alone is sufficient)
+
 ## Wildlife
 
 Procedural pixel art animals generated in `animalSprites.ts`. All rectangle-only, no curves. Fox uses shared hunting logic from `foxBehavior.ts`. Track marks drawn via `animalTracks.ts` in blue-gray (`0xb8c4d0`).
