@@ -49,7 +49,6 @@ interface GameSceneData {
 }
 
 interface SnowCell {
-  tile: Phaser.GameObjects.Image | null;
   groomed: boolean;
   groomable: boolean;
   quality: number; // 0–1, grooming quality (0 = ungroomed, best-of-N passes)
@@ -124,7 +123,7 @@ export default class GameScene extends Phaser.Scene {
   private boundaryWalls!: Phaser.Physics.Arcade.StaticGroup;
   private dangerZones!: Phaser.Physics.Arcade.StaticGroup;
   private snowGrid: SnowCell[][] = [];
-  private snowTiles!: Phaser.GameObjects.Group;
+  private pisteDynTex!: Phaser.Textures.DynamicTexture;
   private groomedCount = 0;
   private groomableTiles = 0;
   private totalTiles = 0;
@@ -387,8 +386,10 @@ export default class GameScene extends Phaser.Scene {
             const cell = this.snowGrid[y][x];
             cell.groomable = false;
             cell.groomed = true;
-            cell.tile.setTexture('snow_offpiste');
-            cell.tile.setDepth(DEPTHS.TERRAIN);
+            // Clear this tile from the piste texture (off-piste TileSprite shows through)
+            const ts = this.tileSize;
+            const ctx = this.pisteDynTex.context!;
+            ctx.clearRect(x * ts, y * ts, ts, ts);
             this.groomableTiles--;
           }
         }
@@ -547,8 +548,21 @@ export default class GameScene extends Phaser.Scene {
   }
 
 
+  /** Paint a single tile onto the piste DynamicTexture via its raw Canvas context. */
+  private stampPisteTile(texKey: string, tx: number, ty: number, alpha = 1): void {
+    const dt = this.pisteDynTex;
+    const ctx = dt.context!;
+    const frame = this.textures.getFrame(texKey);
+    if (!frame) return;
+    const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
+    const cd = frame.canvasData as { x: number; y: number; width: number; height: number };
+    const ts = this.tileSize;
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(src, cd.x, cd.y, cd.width, cd.height, tx * ts, ty * ts, ts, ts);
+    ctx.globalAlpha = 1;
+  }
+
   private createSnowGrid(): void {
-    this.snowTiles = this.add.group();
     const tileSize = this.tileSize;
 
     // Generate all geometry (piste path, access zones, cliffs)
@@ -562,32 +576,26 @@ export default class GameScene extends Phaser.Scene {
     const offPisteBg = this.add.tileSprite(bgW / 2, bgH / 2, bgW, bgH, 'snow_offpiste');
     offPisteBg.setDepth(DEPTHS.TERRAIN);
 
+    // DynamicTexture for piste tiles — paints all snow as a single texture
+    const dtKey = '__piste_snow';
+    if (this.textures.exists(dtKey)) this.textures.remove(dtKey);
+    this.pisteDynTex = this.textures.addDynamicTexture(dtKey, bgW, bgH)!;
+
     for (let y = 0; y < this.level.height; y++) {
       this.snowGrid[y] = [];
       for (let x = 0; x < this.level.width; x++) {
         const isGroomable = this.geometry.isInPiste(x, y, this.level);
 
         if (isGroomable) {
-          const tile = this.add.image(
-            x * tileSize + tileSize / 2,
-            y * tileSize + tileSize / 2,
-            'snow_ungroomed'
-          );
-          tile.setDisplaySize(tileSize, tileSize);
-          tile.setDepth(DEPTHS.PISTE);
-
           this.snowGrid[y][x] = {
-            tile: tile,
             groomed: false,
             groomable: true,
             quality: 0,
           };
-
           this.groomableTiles++;
-          this.snowTiles.add(tile);
+          this.stampPisteTile('snow_ungroomed', x, y);
         } else {
           this.snowGrid[y][x] = {
-            tile: null,
             groomed: true,
             groomable: false,
             quality: 0,
@@ -595,6 +603,10 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     }
+
+    // Single Image displays the entire piste texture
+    const pisteImg = this.add.image(bgW / 2, bgH / 2, dtKey);
+    pisteImg.setDepth(DEPTHS.PISTE);
 
     this.totalTiles = this.groomableTiles;
   }
@@ -949,7 +961,7 @@ export default class GameScene extends Phaser.Scene {
         for (let x = 0; x < this.level.width; x++) {
           const cell = this.snowGrid[y][x];
           if (cell.groomable) {
-            cell.tile.setTexture(texKey);
+            this.stampPisteTile(texKey, x, y);
           }
         }
       }
@@ -1183,16 +1195,17 @@ export default class GameScene extends Phaser.Scene {
             const worldY = ty * this.tileSize + this.tileSize / 2;
             const slope = this.getSlopeAtY(worldY);
             const bucket = this.getSteepTextureBucket(slope);
+            let texKey: string;
+            let alpha = 1;
             if (this.weatherSystem.isHighContrast) {
-              cell.tile.setTexture(bucket > 0 ? `snow_groomed_steep_${bucket}` : 'snow_groomed');
+              texKey = bucket > 0 ? `snow_groomed_steep_${bucket}` : 'snow_groomed';
             } else if (bucket > 0) {
-              cell.tile.setTexture(`snow_groomed_steep_${bucket}`);
-              // Darken steep tiles for low quality (alpha fade toward base steep color)
-              cell.tile.setAlpha(0.7 + 0.3 * cell.quality);
+              texKey = `snow_groomed_steep_${bucket}`;
+              alpha = 0.7 + 0.3 * cell.quality;
             } else {
-              cell.tile.setTexture(getGroomedTexture(cell.quality));
-              cell.tile.setAlpha(1);
+              texKey = getGroomedTexture(cell.quality);
             }
+            this.stampPisteTile(texKey, tx, ty, alpha);
           }
         }
       }
@@ -1496,21 +1509,6 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
     this.lastCullBounds = { x: left, y: top, w: right - left, h: bottom - top };
-
-    // Cull snow tiles via grid (fast path)
-    const ts = this.tileSize;
-    const minCol = Math.max(0, Math.floor(left / ts));
-    const maxCol = Math.min(this.level.width - 1, Math.ceil(right / ts));
-    const minRow = Math.max(0, Math.floor(top / ts));
-    const maxRow = Math.min(this.level.height - 1, Math.ceil(bottom / ts));
-
-    for (let y = 0; y < this.level.height; y++) {
-      const visible = y >= minRow && y <= maxRow;
-      for (let x = 0; x < this.level.width; x++) {
-        const t = this.snowGrid[y][x].tile;
-        if (t) t.visible = visible && x >= minCol && x <= maxCol;
-      }
-    }
 
     // Cull all static Images (trees, rocks, tracks) by world position
     const children = this.children.list;
@@ -1860,7 +1858,7 @@ export default class GameScene extends Phaser.Scene {
         const { x } = rowTiles[i];
         const cell = this.snowGrid[y][x];
         cell.groomed = true;
-        cell.tile.setTexture('snow_groomed');
+        this.stampPisteTile('snow_groomed', x, y);
         this.groomedCount++;
       }
     }
