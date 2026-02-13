@@ -263,6 +263,13 @@ export class PisteRenderer {
   }
 
   private createCliffEdgeVisuals(level: Level, tileSize: number): void {
+    // Remove stale cliff textures from previous level loads
+    const existingKeys = this.scene.textures.getTextureKeys().filter(k => k.startsWith('cliff_'));
+    for (const key of existingKeys) {
+      this.scene.textures.remove(key);
+    }
+    this.cliffTextureIndex = 0;
+
     const worldWidth = level.width * tileSize;
     const isStorm = level.weather === 'storm';
     for (const cliff of this.geometry.cliffSegments) {
@@ -270,10 +277,9 @@ export class PisteRenderer {
     }
   }
 
+  private cliffTextureIndex = 0;
+
   private drawContinuousCliff(cliff: CliffSegment, tileSize: number, worldWidth: number, isStorm: boolean): void {
-    const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.CLIFFS);
-    
     const { side, startY, endY, offset, extent, getX } = cliff;
 
     const rand = (i: number) => {
@@ -285,55 +291,147 @@ export class PisteRenderer {
 
     const detailSize = Math.max(2, Math.floor(tileSize * 0.2));
     const detailLarge = Math.max(3, Math.floor(tileSize * 0.3));
-    
-    for (let y = startY; y <= endY; y += tileSize) {
-      const pisteEdge = getX(y);
-      const rowVariation = Math.abs(rand(y * 0.3 + 55) - 0.5) * tileSize;
-      
-      let cliffStart: number, cliffEnd: number;
-      if (side === 'left') {
-        cliffEnd = pisteEdge - offset - rowVariation * 0.3;
-        cliffStart = Math.max(0, cliffEnd - extent - rowVariation);
-      } else {
-        cliffStart = pisteEdge + offset + rowVariation * 0.3;
-        cliffEnd = Math.min(worldWidth, cliffStart + extent + rowVariation);
+
+    // Iterate cliff rock tiles, calling visitor for each non-skipped tile
+    const forEachTile = (visit: (x: number, y: number) => void) => {
+      for (let y = startY; y <= endY; y += tileSize) {
+        const pisteEdge = getX(y);
+        const rowVariation = Math.abs(rand(y * 0.3 + 55) - 0.5) * tileSize;
+        let cliffStart: number, cliffEnd: number;
+        if (side === 'left') {
+          cliffEnd = pisteEdge - offset - rowVariation * 0.3;
+          cliffStart = Math.max(0, cliffEnd - extent - rowVariation);
+        } else {
+          cliffStart = pisteEdge + offset + rowVariation * 0.3;
+          cliffEnd = Math.min(worldWidth, cliffStart + extent + rowVariation);
+        }
+        for (let x = cliffStart; x < cliffEnd; x += tileSize) {
+          const isEdgeTile = (side === 'left' && x < cliffStart + tileSize * 1.5) ||
+                            (side === 'right' && x > cliffEnd - tileSize * 1.5) ||
+                            (y < startY + tileSize * 1.5) ||
+                            (y > endY - tileSize * 1.5);
+          if (isEdgeTile && rand(x * 0.1 + y * 0.2 + 33) > 0.7) continue;
+          visit(x, y);
+        }
       }
-      
-      for (let x = cliffStart; x < cliffEnd; x += tileSize) {
-        const isEdgeTile = (side === 'left' && x < cliffStart + tileSize * 1.5) ||
-                          (side === 'right' && x > cliffEnd - tileSize * 1.5) ||
-                          (y < startY + tileSize * 1.5) ||
-                          (y > endY - tileSize * 1.5);
-        if (isEdgeTile && rand(x * 0.1 + y * 0.2 + 33) > 0.7) continue;
+    };
+
+    // First pass: compute bounding box of all cliff geometry
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const expandBB = (x: number, y: number, w: number, h: number) => {
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x + w > maxX) maxX = x + w;
+      if (y + h > maxY) maxY = y + h;
+    };
+
+    forEachTile((x, y) => expandBB(x, y, tileSize + 1, tileSize + 1));
+    // Warning poles extend above their y position
+    for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
+      const pisteEdge = getX(y);
+      const poleOffset = offset * 0.3;
+      const poleX = side === 'left' ? pisteEdge - poleOffset : pisteEdge + poleOffset;
+      expandBB(poleX - 3.5, y - 28, 7, 28);
+    }
+    // Snow patches
+    const snowSpacing = isStorm ? tileSize : tileSize * 2;
+    const snowThreshold = isStorm ? 0.35 : 0.65;
+    for (let y = startY + snowSpacing; y < endY - snowSpacing; y += snowSpacing) {
+      if (rand(y + 200) < snowThreshold) continue;
+      const pisteEdge = getX(y);
+      const snowDist = offset + rand(y + 201) * extent * 0.6;
+      const snowX = side === 'left'
+        ? Math.max(tileSize, pisteEdge - snowDist)
+        : Math.min(worldWidth - tileSize, pisteEdge + snowDist);
+      const patchW = isStorm ? detailLarge * 3 : detailLarge * 2;
+      expandBB(snowX, y, patchW + detailLarge, detailSize * 2);
+    }
+
+    if (minX >= Infinity) return;
+
+    // Origin offset: all drawing is relative to (minX, minY) so texture starts at (0,0)
+    const ox = minX;
+    const oy = minY;
+    const texW = Math.ceil(maxX - minX);
+    const texH = Math.ceil(maxY - minY);
+
+    const g = this.scene.make.graphics({} as any, false);
+
+    // Rock tiles (second pass — uses same iteration as bounding box)
+    forEachTile((x, y) => {
         
         g.fillStyle(this.CLIFF_COLORS.midRock, 1);
-        g.fillRect(x, y, tileSize + 1, tileSize + 1);
+        g.fillRect(x - ox, y - oy, tileSize + 1, tileSize + 1);
         
         const seed = x * 0.1 + y * 0.07;
         
         g.fillStyle(this.CLIFF_COLORS.lightRock, 1);
-        g.fillRect(x + detailSize, y + detailSize, detailLarge, detailSize);
+        g.fillRect(x - ox + detailSize, y - oy + detailSize, detailLarge, detailSize);
         if (rand(seed + 1) > 0.4) {
-          g.fillRect(x + tileSize * 0.5, y + detailSize * 2, detailLarge + detailSize, detailLarge);
+          g.fillRect(x - ox + tileSize * 0.5, y - oy + detailSize * 2, detailLarge + detailSize, detailLarge);
         }
         if (rand(seed + 2) > 0.5) {
-          g.fillRect(x + detailSize * 2, y + tileSize * 0.5, detailLarge, detailLarge);
+          g.fillRect(x - ox + detailSize * 2, y - oy + tileSize * 0.5, detailLarge, detailLarge);
         }
         
         g.fillStyle(this.CLIFF_COLORS.darkRock, 1);
         if (rand(seed + 3) > 0.3) {
-          g.fillRect(x + tileSize * 0.3, y + detailSize, detailSize, detailSize);
+          g.fillRect(x - ox + tileSize * 0.3, y - oy + detailSize, detailSize, detailSize);
         }
         if (rand(seed + 4) > 0.4) {
-          g.fillRect(x + tileSize * 0.7, y + tileSize * 0.4, detailSize, detailLarge);
+          g.fillRect(x - ox + tileSize * 0.7, y - oy + tileSize * 0.4, detailSize, detailLarge);
         }
         if (rand(seed + 5) > 0.5) {
-          g.fillRect(x + tileSize * 0.5, y + tileSize * 0.7, detailSize, detailSize);
+          g.fillRect(x - ox + tileSize * 0.5, y - oy + tileSize * 0.7, detailSize, detailSize);
         }
+    });
+  
+    // Snow patches on cliff
+    for (let y = startY + snowSpacing; y < endY - snowSpacing; y += snowSpacing) {
+      if (rand(y + 200) < snowThreshold) continue;
+      
+      const pisteEdge = getX(y);
+      const snowDist = offset + rand(y + 201) * extent * 0.6;
+      const snowX = side === 'left' 
+        ? Math.max(tileSize, pisteEdge - snowDist)
+        : Math.min(worldWidth - tileSize, pisteEdge + snowDist);
+      
+      g.fillStyle(this.CLIFF_COLORS.snow, 1);
+      const patchW = isStorm ? detailLarge * 3 : detailLarge * 2;
+      g.fillRect(snowX - ox, y - oy, patchW, detailSize);
+      if (rand(y + 202) > 0.5) {
+        g.fillRect(snowX - ox + detailSize, y - oy + detailSize, detailLarge, detailSize);
       }
     }
   
-    // Sparse trees on cliff
+    // Warning poles
+    for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
+      const pisteEdge = getX(y);
+      const poleOffset = offset * 0.3;
+      const poleX = side === 'left' ? pisteEdge - poleOffset : pisteEdge + poleOffset;
+      const poleHeight = 28;
+      const poleWidth = 5;
+      
+      g.fillStyle(0x000000, 1);
+      g.fillRect(poleX - ox - poleWidth / 2, y - oy - poleHeight, poleWidth, poleHeight);
+      
+      const stripeH = poleHeight / 5;
+      for (let j = 0; j < 5; j++) {
+        g.fillStyle(j % 2 === 0 ? 0xffcc00 : 0x111111, 1);
+        g.fillRect(poleX - ox - poleWidth / 2 - 1, y - oy - poleHeight + j * stripeH, poleWidth + 2, stripeH);
+      }
+    }
+
+    // Bake to texture and replace with Image at world position
+    const key = `cliff_${this.cliffTextureIndex++}`;
+    g.generateTexture(key, texW, texH);
+    g.destroy();
+
+    const img = this.scene.add.image(ox, oy, key);
+    img.setOrigin(0, 0);
+    img.setDepth(DEPTHS.CLIFFS);
+
+    // Sparse trees on cliff (separate Images, not part of cliff texture)
     const treeSpacing = tileSize * 4;
     for (let y = startY + treeSpacing; y < endY - treeSpacing; y += treeSpacing) {
       if (rand(y + 300) < 0.95) continue;
@@ -353,44 +451,6 @@ export class PisteRenderer {
           const cy = y + offsetY + (rand(y + 306 + c) - 0.5) * tileSize * 1.5;
           this.createTree(cx, cy, undefined, isStorm);
         }
-      }
-    }
-  
-    // Snow patches on cliff — denser during storms
-    const snowSpacing = isStorm ? tileSize : tileSize * 2;
-    const snowThreshold = isStorm ? 0.35 : 0.65;
-    for (let y = startY + snowSpacing; y < endY - snowSpacing; y += snowSpacing) {
-      if (rand(y + 200) < snowThreshold) continue;
-      
-      const pisteEdge = getX(y);
-      const snowDist = offset + rand(y + 201) * extent * 0.6;
-      const snowX = side === 'left' 
-        ? Math.max(tileSize, pisteEdge - snowDist)
-        : Math.min(worldWidth - tileSize, pisteEdge + snowDist);
-      
-      g.fillStyle(this.CLIFF_COLORS.snow, 1);
-      const patchW = isStorm ? detailLarge * 3 : detailLarge * 2;
-      g.fillRect(snowX, y, patchW, detailSize);
-      if (rand(y + 202) > 0.5) {
-        g.fillRect(snowX + detailSize, y + detailSize, detailLarge, detailSize);
-      }
-    }
-  
-    // Warning poles
-    for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
-      const pisteEdge = getX(y);
-      const poleOffset = offset * 0.3;
-      const poleX = side === 'left' ? pisteEdge - poleOffset : pisteEdge + poleOffset;
-      const poleHeight = 28;
-      const poleWidth = 5;
-      
-      g.fillStyle(0x000000, 1);
-      g.fillRect(poleX - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
-      
-      const stripeH = poleHeight / 5;
-      for (let j = 0; j < 5; j++) {
-        g.fillStyle(j % 2 === 0 ? 0xffcc00 : 0x111111, 1);
-        g.fillRect(poleX - poleWidth / 2 - 1, y - poleHeight + j * stripeH, poleWidth + 2, stripeH);
       }
     }
   }
