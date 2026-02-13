@@ -15,6 +15,8 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 - [x] Deep profiling session — Playwright probe on L0 and L9: L9 had 3,943 objects (1,588 Graphics, 2,251 Images). Detailed breakdown: 1,472 Graphics with 21-50 commands (trees/rocks), 30 with 51+ (cliffs), 26 with 11-20 (poles)
 - [x] Bake tree/rock Graphics to textures — Pre-generate tree textures (4 sizes × normal/storm) and rock textures (3 sizes) in BootScene. PisteRenderer uses Images instead of Graphics. Result: L9 Graphics 1,588→97 (-94%), L0 Graphics 307→39 (-87%)
 - [x] Bake cliff Graphics to textures — Two-pass approach: compute bounding box, draw at origin offset, `generateTexture()` per segment. Stale textures cleaned on level switch. L7 FPS +63%, L8 FPS +95%
+- [x] Bake animal track Graphics to textures — Pre-generate track textures per species (bunny, chamois, bouquetin, marmot, fox) in BootScene. WildlifeSystem uses Images instead of Graphics. L1 Graphics −72%, L7 Graphics −58%
+- [x] Reduce night overlay light cone commands — Reduced headlight step grid (6×8×12→4×5×8), compensated with larger circles (sizeFactor 0.25→0.4). Result: 12,524→3,632 commands per frame (−71%)
 - [ ] Camera culling for off-screen objects — Set `visible=false` on Graphics/sprites outside camera viewport. Reduces display list iteration
 
 **Key constraint:** `Game.step()` override freezes Firefox entirely — any frame-rate management must use Phaser's built-in config, not monkey-patching.
@@ -143,4 +145,4 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 - Silent storage errors: `storage.ts` catch blocks have no user notification. Consider toast/banner for critical save failures (progress, bindings).
 - Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
 - Bonus evaluation duplication: HUDScene.updateBonusObjectives() and LevelCompleteScene.evaluateBonusObjectives() both evaluate 5 bonus types with similar switch logic. Extract shared `evaluateBonusObjective()` and `getBonusLabel()` to `src/utils/bonusObjectives.ts`.
-- Static Graphics to textures: Trees/rocks/cliffs baked. Remaining: ~26 pole/marker Graphics (11-20 commands). Bake via `generateTexture()` per chunk.
+- Static Graphics to textures: Trees/rocks/cliffs/animal tracks baked. Night overlay light cone commands reduced 71%. Remaining: ~26 pole/marker Graphics (11-20 commands each, diminishing returns).
