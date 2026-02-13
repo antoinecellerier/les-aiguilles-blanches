@@ -267,7 +267,51 @@ const NIGHT_BASS: MelodyNote[] = [
 ];
 
 /**
- * Intense — C minor, storm departure.
+ * Night middle section — D♭ major, inspired by Op. 9 No. 1's contrasting section.
+ * "A melody without ornaments, almost ascetic and strong, led in octaves sotto voce,
+ * repeating the same phrases over and over."
+ * Simpler, no ornaments; octave doubling added by the scheduler.
+ */
+const NIGHT_MIDDLE_MELODY: MelodyNote[] = [
+  { freq: NOTE.Db4, duration: 1.5, velocity: 0.42 },
+  { freq: NOTE.Eb4, duration: 0.5, velocity: 0.38 },
+  { freq: NOTE.F4,  duration: 1.0, velocity: 0.44 },
+  { freq: NOTE.Eb4, duration: 0.5, velocity: 0.40 },
+  { freq: NOTE.Db4, duration: 0.5, velocity: 0.38 },
+  { freq: NOTE.Ab3, duration: 1.5, velocity: 0.40 },
+  { freq: NOTE.Bb3, duration: 0.5, velocity: 0.36 },
+  { freq: NOTE.Db4, duration: 1.0, velocity: 0.42 },
+  // Repeat the phrase (sotto voce repetition)
+  { freq: NOTE.Db4, duration: 1.5, velocity: 0.40 },
+  { freq: NOTE.Eb4, duration: 0.5, velocity: 0.36 },
+  { freq: NOTE.F4,  duration: 1.0, velocity: 0.42 },
+  { freq: NOTE.Ab4, duration: 1.0, velocity: 0.46 },
+  { freq: NOTE.F4,  duration: 0.5, velocity: 0.40 },
+  { freq: NOTE.Eb4, duration: 0.5, velocity: 0.38 },
+  { freq: NOTE.Db4, duration: 2.0, velocity: 0.44 },
+  { freq: 0,        duration: 2.0, velocity: 0 },
+];
+
+const NIGHT_MIDDLE_BASS: MelodyNote[] = [
+  { freq: NOTE.Db3, duration: 0.5, velocity: 0.30 },
+  { freq: NOTE.Ab3, duration: 0.5, velocity: 0.24 },
+  { freq: NOTE.F3,  duration: 0.5, velocity: 0.22 },
+  { freq: NOTE.Ab3, duration: 0.5, velocity: 0.24 },
+  { freq: NOTE.Db3, duration: 0.5, velocity: 0.30 },
+  { freq: NOTE.Ab3, duration: 0.5, velocity: 0.24 },
+  { freq: NOTE.F3,  duration: 0.5, velocity: 0.22 },
+  { freq: NOTE.Ab3, duration: 0.5, velocity: 0.24 },
+  { freq: NOTE.Ab3, duration: 0.5, velocity: 0.28 },
+  { freq: NOTE.Eb3, duration: 0.5, velocity: 0.22 },
+  { freq: NOTE.C3,  duration: 0.5, velocity: 0.22 },
+  { freq: NOTE.Eb3, duration: 0.5, velocity: 0.22 },
+  { freq: NOTE.Db3, duration: 1.0, velocity: 0.28 },
+  { freq: NOTE.Ab3, duration: 1.0, velocity: 0.22 },
+  { freq: NOTE.F3,  duration: 1.0, velocity: 0.22 },
+  { freq: NOTE.Db3, duration: 1.0, velocity: 0.26 },
+];
+
+/**
  * Opens with rapid Eb5 descending scale, urgent chromatic figures.
  * The passionate middle section of Op. 9 No. 1.
  */
@@ -415,20 +459,115 @@ const CREDITS_BASS: MelodyNote[] = [
   { freq: NOTE.Eb3, duration: 1.0, velocity: 0.34 },
 ];
 
+// ── Polyphonic voice settings per mood ─────────────────────────────
+// Counter-melody: diatonic third/sixth below the melody note.
+// Ornamental echo: quiet neighbor-tone turn after longer notes.
+interface PolyphonyConfig {
+  harmonyChance: number;   // 0–1: probability a melody note gets a harmony voice
+  harmonyVolume: number;   // volume multiplier vs melody note velocity
+  harmonyDelay: number;    // seconds: slight spread like a pianist's hand
+  echoChance: number;      // 0–1: probability a long note (≥1 beat) gets an ornament
+  echoVolume: number;      // volume multiplier vs melody note velocity
+}
+
+// ── Scale definitions for diatonic harmony ─────────────────────────
+// Chromatic pitch classes (0=C) → scale degree membership.
+// We look up the melody pitch class, step down the scale by 2 degrees (a third)
+// or 4 degrees (a sixth) to find the diatonic harmony note.
+const SCALES: Record<string, number[]> = {
+  'Eb_major': [3, 5, 7, 8, 10, 0, 2],   // Eb F G Ab Bb C D
+  'Ab_major': [8, 10, 0, 1, 3, 5, 7],    // Ab Bb C Db Eb F G
+  'Bb_minor': [10, 0, 1, 3, 5, 6, 8],    // Bb C Db Eb F Gb Ab
+  'C_minor':  [0, 2, 3, 5, 7, 8, 10],    // C D Eb F G Ab Bb
+  'Db_major': [1, 3, 5, 6, 8, 10, 0],    // Db Eb F Gb Ab Bb C
+};
+
+/** Return a frequency a diatonic third below the given freq in the given scale. */
+function diatonicThirdBelow(freq: number, scale: number[]): number {
+  // Find the nearest pitch class
+  const semitones = 12 * Math.log2(freq / 261.63); // relative to C4
+  const pitchClass = ((Math.round(semitones) % 12) + 12) % 12;
+  const idx = scale.indexOf(pitchClass);
+  if (idx < 0) {
+    // Chromatic note — fall back to minor third (3 semitones below)
+    return freq / Math.pow(2, 3 / 12);
+  }
+  // Step down 2 scale degrees for a diatonic third
+  const targetIdx = ((idx - 2) % scale.length + scale.length) % scale.length;
+  const targetPC = scale[targetIdx];
+  const interval = ((pitchClass - targetPC) % 12 + 12) % 12;
+  return freq / Math.pow(2, interval / 12);
+}
+
 // ── Mood-to-melody mapping ─────────────────────────────────────────
 type Mood = 'menu' | 'calm' | 'night' | 'intense' | 'credits';
 
-const MOOD_DATA: Record<Mood, { melody: MelodyNote[]; bass: MelodyNote[]; tempo: number }> = {
-  menu:    { melody: MENU_MELODY,    bass: MENU_BASS,    tempo: 1.4 },
-  calm:    { melody: CALM_MELODY,    bass: CALM_BASS,    tempo: 1.2 },
-  night:   { melody: NIGHT_MELODY,   bass: NIGHT_BASS,   tempo: 1.2 },
-  intense: { melody: INTENSE_MELODY, bass: INTENSE_BASS, tempo: 1.6 },
-  credits: { melody: CREDITS_MELODY, bass: CREDITS_BASS, tempo: 1.2 },
+interface MoodConfig {
+  melody: MelodyNote[];
+  bass: MelodyNote[];
+  tempo: number;
+  scale: number[];
+  polyphony: PolyphonyConfig;
+  // Optional contrasting middle section (A-B-A' form)
+  middleMelody?: MelodyNote[];
+  middleBass?: MelodyNote[];
+  middleScale?: number[];
+  // Section form: how many loops of A before switching to B
+  sectionLoopsA?: number;
+  sectionLoopsB?: number;
+  // Triplet bass: subdivide bass notes into 3 sub-attacks
+  tripletBass?: boolean;
+  // Picardy third: chance of major-mode color on final cadence
+  picardyChance?: number;
+}
+
+const MOOD_DATA: Record<Mood, MoodConfig> = {
+  menu: {
+    melody: MENU_MELODY, bass: MENU_BASS, tempo: 1.4,
+    scale: SCALES['Eb_major'],
+    polyphony: { harmonyChance: 0.35, harmonyVolume: 0.38, harmonyDelay: 0.04,
+                 echoChance: 0.25, echoVolume: 0.22 },
+    tripletBass: true,
+  },
+  calm: {
+    melody: CALM_MELODY, bass: CALM_BASS, tempo: 1.2,
+    scale: SCALES['Ab_major'],
+    polyphony: { harmonyChance: 0.20, harmonyVolume: 0.30, harmonyDelay: 0.05,
+                 echoChance: 0.20, echoVolume: 0.18 },
+    tripletBass: true,
+  },
+  night: {
+    melody: NIGHT_MELODY, bass: NIGHT_BASS, tempo: 1.2,
+    scale: SCALES['Bb_minor'],
+    polyphony: { harmonyChance: 0.30, harmonyVolume: 0.35, harmonyDelay: 0.05,
+                 echoChance: 0.30, echoVolume: 0.20 },
+    middleMelody: NIGHT_MIDDLE_MELODY,
+    middleBass: NIGHT_MIDDLE_BASS,
+    middleScale: SCALES['Db_major'],
+    sectionLoopsA: 2,
+    sectionLoopsB: 1,
+    tripletBass: true,
+    picardyChance: 0.15,
+  },
+  intense: {
+    melody: INTENSE_MELODY, bass: INTENSE_BASS, tempo: 1.6,
+    scale: SCALES['C_minor'],
+    polyphony: { harmonyChance: 0.45, harmonyVolume: 0.42, harmonyDelay: 0.03,
+                 echoChance: 0.15, echoVolume: 0.20 },
+    // Intense keeps straight bass for urgency
+  },
+  credits: {
+    melody: CREDITS_MELODY, bass: CREDITS_BASS, tempo: 1.2,
+    scale: SCALES['Eb_major'],
+    polyphony: { harmonyChance: 0.40, harmonyVolume: 0.40, harmonyDelay: 0.04,
+                 echoChance: 0.30, echoVolume: 0.25 },
+    tripletBass: true,
+  },
 };
 
 // ── Volume constants ───────────────────────────────────────────────
 const MELODY_VOLUME = 0.18;  // Base melody volume (before velocity)
-const BASS_VOLUME = 0.17;    // Base bass volume — near-equal presence with melody
+const BASS_VOLUME = 0.13;    // Base bass volume — understated foundation under polyphony
 const FADE_TIME = 2.0;       // Crossfade duration in seconds
 
 // ── Music system class ─────────────────────────────────────────────
@@ -439,6 +578,8 @@ export class MusicSystem {
   private ctx: AudioContext | null = null;
   private musicNode: GainNode | null = null;
   private masterGain: GainNode | null = null;
+  private reverbNode: ConvolverNode | null = null;
+  private reverbGain: GainNode | null = null;
   private melodyTimerId: ReturnType<typeof setTimeout> | null = null;
   private bassTimerId: ReturnType<typeof setTimeout> | null = null;
   private currentMood: Mood | null = null;
@@ -446,6 +587,10 @@ export class MusicSystem {
   private bassIndex = 0;
   private playing = false;
   private paused = false;
+
+  // Section form state (A–B–A' for night mood)
+  private section: 'A' | 'B' | 'Aprime' = 'A';
+  private sectionLoops = 0;
 
   private pendingMood: Mood | null = null;
 
@@ -492,11 +637,21 @@ export class MusicSystem {
     this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
     this.masterGain.connect(this.musicNode);
 
+    // ── Global Reverb (Convolver) ──
+    // Procedural impulse response for wooden body resonance
+    this.reverbNode = this.ctx.createConvolver();
+    this.reverbNode.buffer = this.generateReverbBuffer(2.0, 4); // 2s tail
+    this.reverbGain = this.ctx.createGain();
+    this.reverbGain.gain.value = 0.35; // Wet mix
+    this.reverbNode.connect(this.reverbGain);
+    this.reverbGain.connect(this.masterGain);
+
     this.currentMood = mood;
-    // Start at a random position so the same mood doesn't always open identically
-    const data = MOOD_DATA[mood];
-    this.melodyIndex = Math.floor(Math.random() * data.melody.length);
-    this.bassIndex = Math.floor(Math.random() * data.bass.length);
+    // Both voices start together for harmonic alignment
+    this.melodyIndex = 0;
+    this.bassIndex = 0;
+    this.section = 'A';
+    this.sectionLoops = 0;
     this.playing = true;
     this.paused = false;
 
@@ -585,25 +740,143 @@ export class MusicSystem {
 
   // ── Internal scheduling ───────────────────────────────────────────
 
+  /** Get the active melody/bass/scale arrays based on current section. */
+  private getActiveArrays(): { melody: MelodyNote[]; bass: MelodyNote[]; scale: number[] } {
+    const data = MOOD_DATA[this.currentMood!];
+    if (this.section === 'B' && data.middleMelody && data.middleBass) {
+      return {
+        melody: data.middleMelody,
+        bass: data.middleBass,
+        scale: data.middleScale || data.scale,
+      };
+    }
+    return { melody: data.melody, bass: data.bass, scale: data.scale };
+  }
+
+  /** Handle section transitions (A→B→A') when melody loops back to index 0. */
+  private advanceSection(): void {
+    const data = MOOD_DATA[this.currentMood!];
+    if (!data.middleMelody) return; // No section form for this mood
+
+    this.sectionLoops++;
+    const loopsA = data.sectionLoopsA ?? 2;
+    const loopsB = data.sectionLoopsB ?? 1;
+
+    if (this.section === 'A' && this.sectionLoops >= loopsA) {
+      this.section = 'B';
+      this.sectionLoops = 0;
+      this.melodyIndex = 0;
+      this.bassIndex = 0;
+    } else if (this.section === 'B' && this.sectionLoops >= loopsB) {
+      this.section = 'Aprime';
+      this.sectionLoops = 0;
+      this.melodyIndex = 0;
+      this.bassIndex = 0;
+    } else if (this.section === 'Aprime' && this.sectionLoops >= 1) {
+      this.section = 'A';
+      this.sectionLoops = 0;
+      this.melodyIndex = 0;
+      this.bassIndex = 0;
+    }
+  }
+
   private scheduleMelodyNote(): void {
     if (!this.playing || this.paused || !this.currentMood || !this.ctx) return;
 
     const data = MOOD_DATA[this.currentMood];
-    const note = data.melody[this.melodyIndex];
-    const beatDuration = 1 / data.tempo; // seconds per beat
+    const { melody, scale } = this.getActiveArrays();
+    const note = melody[this.melodyIndex];
+    const beatDuration = 1 / data.tempo;
     const noteDuration = note.duration * beatDuration;
+
+    // ── Phrase-level dynamic swell ──
+    // Op. 9 No. 2: "continual surges and ebbs" — sine-shaped volume contour
+    const phraseT = melody.length > 1 ? this.melodyIndex / (melody.length - 1) : 0.5;
+    const phraseShape = 0.78 + 0.40 * Math.sin(Math.PI * phraseT);
 
     // Add rubato: ±12% timing variation for Chopin-like temporal freedom
     const rubato = 1 + (Math.random() - 0.5) * 0.24;
     const actualDuration = noteDuration * rubato;
 
     if (note.freq > 0) {
-      // Notes ring for 90% of their slot — legato, flowing
-      this.playNote(note.freq, actualDuration * 0.9, note.velocity * MELODY_VOLUME, false);
+      const swelledVolume = note.velocity * MELODY_VOLUME * phraseShape;
+      this.playNote(note.freq, actualDuration * 0.9, swelledVolume, false);
+
+      const inMiddleSection = this.section === 'B';
+
+      // ── Octave doubling in middle section (sotto voce) ──
+      // Op. 9 No. 1: "led in octaves sotto voce"
+      if (inMiddleSection) {
+        const octaveVol = swelledVolume * 0.35;
+        setTimeout(() => {
+          this.playNote(note.freq * 2, actualDuration * 0.8, octaveVol, false);
+        }, 15); // 15ms spread
+      }
+
+      // Polyphonic voices only in outer sections (middle is "ascetic")
+      if (!inMiddleSection) {
+        const poly = data.polyphony;
+        // Scale harmony/echo chances by phrase shape
+        const effectiveHarmonyChance = poly.harmonyChance * (0.7 + 0.9 * (phraseShape - 0.78));
+        const effectiveEchoChance = poly.echoChance * (0.6 + 1.2 * (phraseShape - 0.78));
+
+        // ── Counter-melody: diatonic third below ──
+        if (Math.random() < effectiveHarmonyChance) {
+          const harmFreq = diatonicThirdBelow(note.freq, scale);
+          if (harmFreq > 130) {
+            const harmVol = swelledVolume * poly.harmonyVolume;
+            setTimeout(() => {
+              this.playNote(harmFreq, actualDuration * 0.85, harmVol, false);
+            }, poly.harmonyDelay * 1000);
+          }
+        }
+
+        // ── Ornamental echo: neighbor-tone turn on longer notes ──
+        if (note.duration >= 1.0 && Math.random() < effectiveEchoChance) {
+          const semitone = Math.pow(2, 1 / 12);
+          const upperNeighbor = note.freq * semitone * semitone;
+          const echoVol = swelledVolume * poly.echoVolume;
+          const graceDelay = actualDuration * 0.3;
+          const graceDuration = actualDuration * 0.12;
+          setTimeout(() => {
+            this.playNote(upperNeighbor, graceDuration, echoVol, false);
+          }, graceDelay * 1000);
+          setTimeout(() => {
+            this.playNote(note.freq, graceDuration, echoVol * 0.8, false);
+          }, (graceDelay + graceDuration) * 1000);
+        }
+
+        // ── Distant echo at cadences ──
+        // Op. 9 No. 1: "sonorous music... immediately followed by its distant echo"
+        if (note.duration >= 3.0) {
+          const echoDelay = 0.25;
+          const echoVol = swelledVolume * 0.14;
+          setTimeout(() => {
+            this.playNote(note.freq * 2, actualDuration * 0.15, echoVol, false);
+          }, echoDelay * 1000);
+        }
+
+        // ── Picardy third on night cadence ──
+        // Op. 9 No. 1: "dying away not in B♭ minor, but in B♭ major"
+        if (data.picardyChance && note.duration >= 3.5 && Math.random() < data.picardyChance) {
+          const picardyNotes = [NOTE.D4, NOTE.F4, NOTE.Bb4]; // B♭ major color
+          picardyNotes.forEach((pFreq, i) => {
+            const pDelay = 0.4 + i * 0.15;
+            const pVol = swelledVolume * (0.12 - i * 0.02);
+            setTimeout(() => {
+              this.playNote(pFreq, 0.4, pVol, false);
+            }, pDelay * 1000);
+          });
+        }
+      }
     }
 
-    // Advance and loop
-    this.melodyIndex = (this.melodyIndex + 1) % data.melody.length;
+    // Advance and handle section looping
+    this.melodyIndex++;
+    if (this.melodyIndex >= melody.length) {
+      this.melodyIndex = 0;
+      this.advanceSection();
+    }
 
     this.melodyTimerId = setTimeout(
       () => this.scheduleMelodyNote(),
@@ -615,7 +888,8 @@ export class MusicSystem {
     if (!this.playing || this.paused || !this.currentMood || !this.ctx) return;
 
     const data = MOOD_DATA[this.currentMood];
-    const note = data.bass[this.bassIndex];
+    const { bass, scale } = this.getActiveArrays();
+    const note = bass[this.bassIndex];
     const beatDuration = 1 / data.tempo;
     const noteDuration = note.duration * beatDuration;
 
@@ -623,11 +897,25 @@ export class MusicSystem {
     const actualDuration = noteDuration * rubato;
 
     if (note.freq > 0) {
-      // Bass rings for 80% — a bit shorter than melody for clarity
-      this.playNote(note.freq, actualDuration * 0.8, note.velocity * BASS_VOLUME, true);
+      if (data.tripletBass && note.duration >= 0.5) {
+        // ── Triplet bass: 12/8 nocturne accompaniment ──
+        // Roll the same pitch with diminishing velocity for lulling feel
+        const subDur = actualDuration / 3;
+        const vols = [1.0, 0.65, 0.50];
+        vols.forEach((v, i) => {
+          setTimeout(() => {
+            this.playNote(note.freq, subDur * 0.8, note.velocity * BASS_VOLUME * v, true);
+          }, i * subDur * 1000);
+        });
+      } else {
+        this.playNote(note.freq, actualDuration * 0.8, note.velocity * BASS_VOLUME, true);
+      }
     }
 
-    this.bassIndex = (this.bassIndex + 1) % data.bass.length;
+    this.bassIndex++;
+    if (this.bassIndex >= bass.length) {
+      this.bassIndex = 0;
+    }
 
     this.bassTimerId = setTimeout(
       () => this.scheduleBassNote(),
@@ -653,100 +941,171 @@ export class MusicSystem {
 
     const now = this.ctx.currentTime;
 
-    // ── Output chain: note gain → low-pass (soundboard) → master ──
+    // ── Output chain: note gain → panner → soundboard → master ──
     const noteGain = this.ctx.createGain();
+    
+    // Stereo spread: Bass left (-0.5), Treble right (+0.5)
+    const panner = this.ctx.createStereoPanner();
+    // Map freq 100Hz..2000Hz to -0.5..0.5
+    const panPos = Math.max(-0.6, Math.min(0.6, (Math.log2(freq / 261.6) * 0.15)));
+    panner.pan.value = panPos;
+
     const soundboard = this.ctx.createBiquadFilter();
     soundboard.type = 'lowpass';
-    // Velocity-dependent brightness: louder notes open up the filter
-    const baseFreq = isBass ? 1800 : 3500;
-    const brightBoost = (volume / 0.2) * (isBass ? 800 : 2500);
+    // Piano soundboard: warm, rounded — lower cutoff than harpsichord
+    const baseFreq = isBass ? 1400 : 2800;
+    const brightBoost = (volume / 0.2) * (isBass ? 500 : 1500);
     soundboard.frequency.setValueAtTime(baseFreq + brightBoost, now);
     // Brightness fades as the note decays (real piano behavior)
-    soundboard.frequency.setTargetAtTime(baseFreq * 0.6, now + 0.05, duration * 0.4);
-    soundboard.Q.setValueAtTime(0.5, now);
-    noteGain.connect(soundboard);
+    soundboard.frequency.setTargetAtTime(baseFreq * 0.5, now + 0.05, duration * 0.5);
+    soundboard.Q.setValueAtTime(0.4, now);
+    noteGain.connect(panner);
+    panner.connect(soundboard);
     soundboard.connect(this.masterGain);
 
-    // ── Piano envelope: two-stage decay ──
-    // Warm Chopin nocturne tone: generous sustain, long singing tail
-    const attack = 0.004;
-    const sustainLevel = 0.42;
-    const stage1Time = duration * 0.18;
-    const stage2Time = duration * 0.50;
+    // Reverb send (post-panner, post-soundboard for cohesion)
+    if (this.reverbNode) {
+      const send = this.ctx.createGain();
+      // Send less bass to reverb to avoid mud
+      send.gain.value = isBass ? 0.4 : 0.7;
+      soundboard.connect(send);
+      send.connect(this.reverbNode);
+    }
+
+    // ── Release noise: damper falling back ──
+    const releaseTime = now + duration;
+    // Only audible on longer notes where the release is distinct
+    if (duration > 0.3) {
+      const dGain = this.ctx.createGain();
+      const dOsc = this.ctx.createOscillator();
+      // Low thud (50Hz) + high click filter would be better, but simple sine thud works
+      dOsc.frequency.value = 40;
+      dGain.gain.setValueAtTime(0, releaseTime);
+      dGain.gain.linearRampToValueAtTime(volume * 0.04, releaseTime + 0.02);
+      dGain.gain.exponentialRampToValueAtTime(0.001, releaseTime + 0.15);
+      dOsc.connect(dGain);
+      dGain.connect(this.masterGain);
+      dOsc.start(releaseTime);
+      dOsc.stop(releaseTime + 0.2);
+    }
+
+    // ── Piano envelope: soft felt-hammer attack, long singing sustain ──
+    // Real piano: hammer compresses, tone blooms gradually, sustain rings
+    const attack = 0.020;
+    const sustainLevel = 0.62;
+    const stage1Time = duration * 0.28;
+    const stage2Time = duration * 0.70;
 
     noteGain.gain.setValueAtTime(0, now);
-    noteGain.gain.linearRampToValueAtTime(volume, now + attack);
+    // Exponential ramp for softer bloom (not linear snap)
+    noteGain.gain.setTargetAtTime(volume, now, attack / 3);
     noteGain.gain.setTargetAtTime(volume * sustainLevel, now + attack, stage1Time);
-    noteGain.gain.setTargetAtTime(0.001, now + duration * 0.6, stage2Time);
+    noteGain.gain.setTargetAtTime(0.001, now + duration * 0.7, stage2Time);
 
-    // ── Hammer strike: brief noise burst ──
-    const noiseLen = 0.015;
+    // ── Hammer strike: very subtle felt thud ──
+    const noiseLen = 0.008;
     const noiseBuf = this.ctx.createBuffer(1, Math.ceil(this.ctx.sampleRate * noiseLen), this.ctx.sampleRate);
     const noiseData = noiseBuf.getChannelData(0);
     for (let i = 0; i < noiseData.length; i++) {
       // Shape the noise: sharper at start, fading
       const env = 1 - (i / noiseData.length);
-      noiseData[i] = (Math.random() * 2 - 1) * env * 0.7;
+      noiseData[i] = (Math.random() * 2 - 1) * env * 0.4;
     }
     const noiseSrc = this.ctx.createBufferSource();
     noiseSrc.buffer = noiseBuf;
     const noiseGain = this.ctx.createGain();
     const noiseFilter = this.ctx.createBiquadFilter();
     noiseFilter.type = 'bandpass';
-    noiseFilter.frequency.setValueAtTime(Math.min(freq * 4, 8000), now);
-    noiseFilter.Q.setValueAtTime(1.2, now);
-    noiseGain.gain.setValueAtTime(volume * (isBass ? 0.2 : 0.35), now);
+    noiseFilter.frequency.setValueAtTime(Math.min(freq * 3, 6000), now);
+    noiseFilter.Q.setValueAtTime(0.8, now);
+    noiseGain.gain.setValueAtTime(volume * (isBass ? 0.06 : 0.08), now);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, now + noiseLen);
     noiseSrc.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-    noiseGain.connect(noteGain);
+    noiseGain.connect(panner); // Bypass note envelope for crisp attack
     noiseSrc.start(now);
     noiseSrc.stop(now + noiseLen);
+
+    // ── Hammer Thump (low frequency impact) ──
+    const thudOsc = this.ctx.createOscillator();
+    const thudGain = this.ctx.createGain();
+    // Pitch drop mimics physical impact
+    thudOsc.frequency.setValueAtTime(120, now);
+    thudOsc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+    // Quick burst
+    thudGain.gain.setValueAtTime(volume * (isBass ? 0.3 : 0.15), now);
+    thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    thudOsc.connect(thudGain);
+    thudGain.connect(panner); // Bypass note envelope
+    thudOsc.start(now);
+    thudOsc.stop(now + 0.1);
 
     // ── Harmonic series with inharmonicity ──
     // B = inharmonicity coefficient (real piano: ~0.0004 for mid-range)
     const B = isBass ? 0.0003 : 0.0005;
 
     const harmonics = isBass
-      ? [ // Bass: warm, 5 partials
+      ? [ // Bass: warm fundamental-heavy
           { ratio: 1, vol: 1.0 },
-          { ratio: 2, vol: 0.45 },
-          { ratio: 3, vol: 0.15 },
-          { ratio: 4, vol: 0.06 },
-          { ratio: 5, vol: 0.02 },
+          { ratio: 2, vol: 0.35 },
+          { ratio: 3, vol: 0.10 },
+          { ratio: 4, vol: 0.04 },
+          { ratio: 5, vol: 0.015 },
         ]
-      : [ // Melody: 7 partials for realistic timbre
+      : [ // Melody: round piano tone, fundamental dominant
           { ratio: 1, vol: 1.0 },
-          { ratio: 2, vol: 0.50 },
-          { ratio: 3, vol: 0.22 },
-          { ratio: 4, vol: 0.11 },
-          { ratio: 5, vol: 0.06 },
-          { ratio: 6, vol: 0.03 },
-          { ratio: 7, vol: 0.015 },
+          { ratio: 2, vol: 0.38 },
+          { ratio: 3, vol: 0.14 },
+          { ratio: 4, vol: 0.06 },
+          { ratio: 5, vol: 0.025 },
+          { ratio: 6, vol: 0.012 },
+          { ratio: 7, vol: 0.006 },
         ];
 
-    const endTime = now + duration + 0.3;
+    const endTime = now + duration + 0.5;
 
     for (const h of harmonics) {
-      const osc = this.ctx.createOscillator();
-      const hGain = this.ctx.createGain();
-
-      osc.type = 'sine';
       // Inharmonicity: f_n = n * f0 * sqrt(1 + B * n^2)
       const stretchedFreq = freq * h.ratio * Math.sqrt(1 + B * h.ratio * h.ratio);
-      osc.frequency.setValueAtTime(stretchedFreq, now);
 
-      hGain.gain.setValueAtTime(h.vol, now);
-      // Higher harmonics decay much faster — brightness fades while warmth lingers
+      // Per-note volume randomization (±5%) — no two notes identical
+      const noteVariation = 1 + (Math.random() - 0.5) * 0.10;
+      const hGain = this.ctx.createGain();
+      hGain.gain.setValueAtTime(h.vol * noteVariation, now);
       if (h.ratio > 1) {
-        const harmonicDecay = duration * (0.1 / h.ratio);
-        hGain.gain.setTargetAtTime(h.vol * 0.03, now + attack, harmonicDecay);
+        const harmonicDecay = duration * (0.2 / h.ratio);
+        hGain.gain.setTargetAtTime(h.vol * noteVariation * 0.08, now + attack, harmonicDecay);
       }
-
-      osc.connect(hGain);
       hGain.connect(noteGain);
-      osc.start(now);
-      osc.stop(endTime);
+
+      // ── String pair: two slightly detuned oscillators per harmonic ──
+      // Real pianos have 2–3 strings per note, never perfectly in tune.
+      // The beating between them creates warmth and "life".
+      const pairCount = h.ratio <= 2 ? 2 : 1; // only double fundamental+2nd
+      for (let p = 0; p < pairCount; p++) {
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        // Each string detuned ±3 cents (wider spread than before)
+        const detuneCents = pairCount > 1
+          ? (p === 0 ? -2.5 : 2.5) + (Math.random() - 0.5) * 1.5
+          : (Math.random() - 0.5) * 4;
+        const detunedFreq = stretchedFreq * Math.pow(2, detuneCents / 1200);
+
+        // ── Pitch settling: strings start slightly sharp then relax ──
+        // Real piano strings overshoot on hammer impact, settle over ~50ms
+        const settleAmount = isBass ? 8 : 5; // cents overshoot
+        const startFreq = detunedFreq * Math.pow(2, settleAmount / 1200);
+        osc.frequency.setValueAtTime(startFreq, now);
+        osc.frequency.setTargetAtTime(detunedFreq, now + 0.003, 0.015);
+
+        // Scale volume for string pairs (split evenly)
+        const pairGain = this.ctx.createGain();
+        pairGain.gain.setValueAtTime(pairCount > 1 ? 0.55 : 1.0, now);
+        osc.connect(pairGain);
+        pairGain.connect(hGain);
+        osc.start(now);
+        osc.stop(endTime);
+      }
     }
 
     // ── Sympathetic resonance: ghost tones ──
@@ -775,6 +1134,21 @@ export class MusicSystem {
     }
   }
 
+  private generateReverbBuffer(duration: number, decay: number): AudioBuffer {
+    const rate = this.ctx!.sampleRate;
+    const length = rate * duration;
+    const impulse = this.ctx!.createBuffer(2, length, rate);
+    const left = impulse.getChannelData(0);
+    const right = impulse.getChannelData(1);
+    for (let i = 0; i < length; i++) {
+      const n = i / length;
+      const env = Math.pow(1 - n, decay);
+      left[i] = (Math.random() * 2 - 1) * env;
+      right[i] = (Math.random() * 2 - 1) * env;
+    }
+    return impulse;
+  }
+
   private cleanup(): void {
     if (this.melodyTimerId) { clearTimeout(this.melodyTimerId); this.melodyTimerId = null; }
     if (this.bassTimerId) { clearTimeout(this.bassTimerId); this.bassTimerId = null; }
@@ -782,6 +1156,11 @@ export class MusicSystem {
       try { this.masterGain.disconnect(); } catch { /* already disconnected */ }
       this.masterGain = null;
     }
+    if (this.reverbGain) {
+      try { this.reverbGain.disconnect(); } catch { /* ok */ }
+      this.reverbGain = null;
+    }
+    this.reverbNode = null;
     this.playing = false;
     this.paused = false;
   }
