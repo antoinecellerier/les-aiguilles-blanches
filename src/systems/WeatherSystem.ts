@@ -149,12 +149,12 @@ export class WeatherSystem {
       // Front work lights - wide flood pattern
       this.nightOverlay.fillStyle(0xffffee, stepAlpha);
       this.drawLightCone(frontX, frontY, angle, radiusFront * t, spreadAngle,
-        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.25, 0.5, 4);
+        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.4, 0.5, 6);
 
       // Rear work lights - also wide
       this.nightOverlay.fillStyle(0xffddcc, stepAlpha * 0.7);
       this.drawLightCone(rearX, rearY, angle + Math.PI, radiusBack * t, spreadAngle * 0.9,
-        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.25, 0.5, 4);
+        BALANCE.HEADLIGHT_DIST_STEPS, BALANCE.HEADLIGHT_ARC_STEPS, 0.4, 0.5, 6);
     }
   }
 
