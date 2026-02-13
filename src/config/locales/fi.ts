@@ -87,6 +87,7 @@ const fi: Record<string, string> = {
   rideAgain: "Laske uudestaan!",
   skiRunSpeed: "Nopeus",
   skiRunTime: "Aika",
+  skiRunGates: "Portit",
 
   // How to Play hints
   howToPlayMove: "{keys} tai nuolet liikkumiseen",
@@ -268,6 +269,8 @@ const fi: Record<string, string> = {
   marieWelcome: "Tule lämmittelemään Chez Marie'hen. Hyvää tartiflette'a!",
 
   // Changelog
+  changelog_20260213_date: "13. helmikuuta 2026",
+  changelog_20260213: "🚩 Pujotteluportit\n⚙️ Asetukset parannettu",
   changelog_20260212_date: "12. helmikuuta 2026",
   changelog_20260212: "📋 Tason valinta\n🔗 Katkeava vinssikaapeli\n🕹️ Ohjaindiagnostiikka\n🍽️ Marien ruoat",
   changelog_20260211_date: "11. helmikuuta 2026",

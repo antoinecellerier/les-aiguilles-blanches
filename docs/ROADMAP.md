@@ -7,7 +7,6 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Active Work
 
 - [ ] Ski jumps (groom key trigger during ski run)
-- [ ] Level-appropriate items, slalom gates, tricks
 - [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
 
 ## Future (Backlog)
@@ -19,10 +18,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package
-- [ ] Ski/snowboard reward run (v2) — Slalom gates, freestyle elements on park levels, per-level modifications, best time tracking
+- [ ] Ski/snowboard reward run (v2) — Freestyle elements on park levels, per-level modifications, best time tracking
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (12 tight). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. 3 E2E tests.
 
 - ✅ **Settings layout polish** — Adaptive inline/stacked layout for multi-select button groups (colorblind, ski mode, keyboard layout): measures whether label + buttons fit on one line, stacks if not. Touch sub-section in Controls showing detection status. Scene auto-restarts on first touch event to resize targets. Language flag buttons scale with touch target size. Updated `inputTouchOff` across 14 locales.
 

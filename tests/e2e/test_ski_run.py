@@ -378,3 +378,61 @@ class TestSkiTouchControls:
                 f"Circle at screenX={item['screenX']:.0f} outside viewport width={item['w']}"
             assert -margin <= item['screenY'] <= item['h'] + margin, \
                 f"Circle at screenY={item['screenY']:.0f} outside viewport height={item['h']}"
+
+
+class TestSlalomGates:
+    """Test slalom gate system on levels that have gates."""
+
+    def test_slalom_gates_spawn_on_level4(self, game_page: Page):
+        """Slalom gates should appear on L4 ski run (8 gates configured)."""
+        # Launch SkiRunScene on L4 directly
+        game_page.evaluate("""() => {
+            window.game.scene.start('SkiRunScene', { level: 4, mode: 'ski' });
+        }""")
+        wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
+        game_page.wait_for_timeout(500)
+
+        gate_info = game_page.evaluate("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            if (!scene || !scene.slalomSystem) return null;
+            return {
+                totalGates: scene.slalomSystem.totalGates,
+                gateCount: scene.slalomSystem.gates.length
+            };
+        }""")
+        assert gate_info is not None, "SlalomGateSystem should exist on SkiRunScene"
+        assert gate_info['totalGates'] == 8, f"L4 should have 8 gates, got {gate_info['totalGates']}"
+
+    def test_slalom_hud_counter_visible(self, game_page: Page):
+        """Gate counter text should appear in HUD for slalom levels."""
+        game_page.evaluate("""() => {
+            window.game.scene.start('SkiRunScene', { level: 4, mode: 'ski' });
+        }""")
+        wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
+        game_page.wait_for_timeout(500)
+
+        hud_texts = game_page.evaluate("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            if (!scene) return [];
+            return scene.children.list
+                .filter(function(c) { return c.type === 'Text'; })
+                .map(function(c) { return c.text; });
+        }""")
+        has_gate_counter = any('0/8' in t or 'Gates' in t or 'Portes' in t or 'Tore' in t for t in hud_texts)
+        assert has_gate_counter, f"HUD should show gate counter, got: {hud_texts}"
+
+    def test_no_slalom_gates_on_tutorial(self, game_page: Page):
+        """Tutorial level (L0) should not have slalom gates."""
+        click_button(game_page, BUTTON_START, "Start Game")
+        wait_for_scene(game_page, 'GameScene')
+
+        game_page.keyboard.press("k")
+        wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
+        game_page.wait_for_timeout(500)
+
+        gate_info = game_page.evaluate("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            if (!scene || !scene.slalomSystem) return { totalGates: 0 };
+            return { totalGates: scene.slalomSystem.totalGates };
+        }""")
+        assert gate_info['totalGates'] == 0, f"Tutorial should have 0 gates, got {gate_info['totalGates']}"

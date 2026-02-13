@@ -87,6 +87,7 @@ const ja: Record<string, string> = {
   rideAgain: "もう一度！",
   skiRunSpeed: "スピード",
   skiRunTime: "タイム",
+  skiRunGates: "ゲート",
 
   // How to Play hints
   howToPlayMove: "{keys}または矢印キーで移動",
@@ -267,6 +268,8 @@ const ja: Record<string, string> = {
   marieWelcome: "Chez Marieで温まっていきなさい。美味しいtartifletteがあるわよ！",
 
   // Changelog
+  changelog_20260213_date: "2026年2月13日",
+  changelog_20260213: "🚩 スラロームゲート\n⚙️ 設定レイアウト改善",
   changelog_20260212_date: "2026年2月12日",
   changelog_20260212: "📋 レベル選択\n🔗 切断可能ウインチケーブル\n🕹️ コントローラー診断\n🍽️ マリーの料理",
   changelog_20260211_date: "2026年2月11日",

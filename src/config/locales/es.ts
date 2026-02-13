@@ -90,6 +90,7 @@ const es: Record<string, string> = {
   rideAgain: "¡Otra vez!",
   skiRunSpeed: "Velocidad",
   skiRunTime: "Tiempo",
+  skiRunGates: "Puertas",
   
   // How to Play hints
   howToPlayMoveTouch: "Usa el D-pad virtual",
@@ -218,6 +219,8 @@ const es: Record<string, string> = {
   marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
   
   // Changelog
+  changelog_20260213_date: "13 de febrero de 2026",
+  changelog_20260213: "🚩 Puertas de eslalon\n⚙️ Diseño de ajustes",
   changelog_20260212_date: "12 de febrero de 2026",
   changelog_20260212: "📋 Selección de nivel\n🔗 Cable de cabrestante rompible\n🕹️ Diagnóstico del mando\n🍽️ Los platos de Marie",
   changelog_20260211_date: "11 de febrero de 2026",

@@ -416,6 +416,16 @@ On levels with terrain park features (L3, L6), the ski run includes interactive 
 - **Progressive turning** — initial turns barely slow you down; only sustained carving bleeds speed (drag ramps 10%→100% over 0.4s).
 - Works identically for both skier and snowboarder modes.
 
+### Slalom Gates (L4, L5, L10)
+
+Certain levels feature slalom gates — paired red/blue poles placed along the piste:
+
+- **Pass through** a gate (between the poles) for a ✓ and a chime sound
+- **Miss** a gate for a ✗ and a buzz — the poles dim but there's no speed penalty
+- **Gate counter** shows progress in the HUD (e.g., "Gates: 5/8")
+- **Results** displayed on the level complete screen (perfect run highlighted in green)
+- Gate difficulty scales: L4 has 8 wide gates, L5 has 10 tighter gates, L10 has 12 tight gates at night
+
 ### Dev Shortcuts
 
 These shortcuts are available during gameplay for development and testing. They are ignored if the key conflicts with a rebound game control.

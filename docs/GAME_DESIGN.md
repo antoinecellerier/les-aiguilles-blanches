@@ -278,6 +278,14 @@ Short burst durations create a pit-stop rhythm — players loop through Marie's 
 - Edge carving sound on sharp turns.
 - Powder spray sound on ungroomed terrain.
 - Bump/thud on obstacle contact (reuse existing sounds).
+- Ascending chime on slalom gate pass, soft buzz on miss.
+
+**Slalom gates** (levels 4, 5, 10):
+- Paired red/blue poles placed along the piste at even intervals.
+- Non-punitive: ✓/✗ visual feedback per gate, counter in HUD, stats on level complete.
+- Gate width narrows with difficulty: L4 (5 tiles, 8 gates), L5 (4 tiles, 10 gates), L10 (3 tiles, 12 gates).
+- Alternating lateral offset from piste center for slalom feel.
+- Missing a gate dims the poles to 30% alpha; no speed penalty.
 - Music continues from level mood (or lighter variant).
 
 **HUD**: Visor strip matching the grooming HUD design — dark semi-transparent bar with accent stripe. Shows mode icon + level name, speed, and elapsed time. No resource bars.

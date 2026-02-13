@@ -561,6 +561,44 @@ export class SkiRunSounds {
     noise.stop(now + 1.6);
   }
 
+  /** Short chime for passing through a slalom gate. */
+  playGatePass(): void {
+    if (!this.ctx || !this.sfxNode) return;
+    const now = this.ctx.currentTime;
+
+    // Bright two-note ascending chime
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.setValueAtTime(1175, now + 0.06);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.12);
+    osc.connect(gain);
+    gain.connect(this.sfxNode);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+
+  /** Soft buzz for missing a slalom gate. */
+  playGateMiss(): void {
+    if (!this.ctx || !this.sfxNode) return;
+    const now = this.ctx.currentTime;
+
+    // Low dissonant buzz
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.linearRampToValueAtTime(100, now + 0.15);
+    gain.gain.setValueAtTime(0.10, now);
+    gain.gain.linearRampToValueAtTime(0, now + 0.15);
+    osc.connect(gain);
+    gain.connect(this.sfxNode);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
   /** Massive avalanche trigger — building roar with crumbling texture. */
   playAvalancheTrigger(): void {
     if (!this.ctx || !this.sfxNode) return;

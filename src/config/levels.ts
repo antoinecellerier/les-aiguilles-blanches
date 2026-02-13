@@ -69,6 +69,8 @@ export interface Level {
   isTutorial?: boolean;
   tutorialSteps?: TutorialStep[];
   specialFeatures?: SpecialFeature[];
+  /** Slalom gates for ski reward run — number of gates and corridor width (tiles). */
+  slalomGates?: { count: number; width: number };
   hasDangerousBoundaries?: boolean;
   hazards?: HazardType[];
   accessPaths?: AccessPath[];
@@ -274,6 +276,7 @@ export const LEVELS: Level[] = [
       { type: 'fuel_efficiency', target: 50 },
       { type: 'exploration', target: 2 },
     ],
+    slalomGates: { count: 8, width: 5 },
     wildlife: [
       { type: 'chamois', count: 3 },
       { type: 'marmot', count: 2 },
@@ -312,6 +315,7 @@ export const LEVELS: Level[] = [
       { type: 'winch_mastery', target: 3 },
       { type: 'flawless', target: 0 },
     ],
+    slalomGates: { count: 10, width: 4 },
     wildlife: [
       { type: 'chamois', count: 2 },
       { type: 'marmot', count: 3 },
@@ -491,6 +495,7 @@ export const LEVELS: Level[] = [
       { type: 'flawless', target: 0 },
       { type: 'precision_grooming', target: 60 },
     ],
+    slalomGates: { count: 12, width: 3 },
     wildlife: [
       { type: 'bouquetin', count: 2 },
       { type: 'chamois', count: 3 },

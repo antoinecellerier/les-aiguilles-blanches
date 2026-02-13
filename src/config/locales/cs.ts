@@ -87,6 +87,7 @@ const cs: Record<string, string> = {
   rideAgain: "Ještě jednou!",
   skiRunSpeed: "Rychlost",
   skiRunTime: "Čas",
+  skiRunGates: "Brány",
 
   // How to Play hints
   howToPlayMove: "{keys} nebo šipky pro pohyb",
@@ -267,6 +268,8 @@ const cs: Record<string, string> = {
   marieWelcome: "Přijďte se ohřát k Chez Marie. Dobrá tartiflette!",
 
   // Changelog
+  changelog_20260213_date: "13. února 2026",
+  changelog_20260213: "🚩 Slalomové brány\n⚙️ Rozložení nastavení",
   changelog_20260212_date: "12. února 2026",
   changelog_20260212: "📋 Výběr úrovně\n🔗 Přetržitelné lano navijáku\n🕹️ Diagnostika ovladače\n🍽️ Jídla od Marie",
   changelog_20260211_date: "11. února 2026",

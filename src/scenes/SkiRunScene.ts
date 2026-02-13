@@ -21,6 +21,7 @@ import { SkiRunSounds } from '../systems/SkiRunSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem } from '../systems/MusicSystem';
 import { HazardSystem } from '../systems/HazardSystem';
+import { SlalomGateSystem } from '../systems/SlalomGateSystem';
 
 /**
  * SkiRunScene — Post-grooming descent reward run.
@@ -84,6 +85,8 @@ export default class SkiRunScene extends Phaser.Scene {
   private skiSounds = new SkiRunSounds();
   private ambienceSounds = new AmbienceSounds();
   private hazardSystem: HazardSystem | null = null;
+  private slalomSystem = new SlalomGateSystem();
+  private gateText: Phaser.GameObjects.Text | null = null;
   private trackGraphics!: Phaser.GameObjects.Graphics;
   private lastTrackPos: { x: number; y: number } | null = null;
 
@@ -100,6 +103,8 @@ export default class SkiRunScene extends Phaser.Scene {
     this.currentSpeed = 0;
     this.terrainBlend = 1.0;
     this.bumpSlowdownUntil = 0;
+    this.slalomSystem = new SlalomGateSystem();
+    this.gateText = null;
     // Resolve mode: use passed value, or resolve random here
     if (data.mode) {
       this.resolvedMode = data.mode;
@@ -181,6 +186,11 @@ export default class SkiRunScene extends Phaser.Scene {
           body.setOffset((s.displayWidth - newW) / 2, (s.displayHeight - newH) / 2);
         }
       }
+    }
+
+    // Slalom gates
+    if (this.level.slalomGates) {
+      this.slalomSystem.create(this, this.level, this.geometry, tileSize);
     }
 
     // Weather (visual only)
@@ -472,6 +482,14 @@ export default class SkiRunScene extends Phaser.Scene {
     // Audio update
     this.skiSounds.update(this.currentSpeed, braking, onGroomed, delta);
 
+    // Slalom gate detection
+    if (this.slalomSystem.totalGates > 0) {
+      const gateResult = this.slalomSystem.update(this.skier.x, this.skier.y, this.tileSize, this);
+      if (gateResult === 'hit') this.skiSounds.playGatePass();
+      else if (gateResult === 'miss') this.skiSounds.playGateMiss();
+      this.gateText?.setText(`${t('skiRunGates') || 'Gates'}: ${this.slalomSystem.gatesHit}/${this.slalomSystem.totalGates}`);
+    }
+
     // Check if reached bottom
     if (this.skier.y >= (this.level.height - BALANCE.SKI_FINISH_BUFFER) * this.tileSize) {
       this.finishRun();
@@ -601,6 +619,12 @@ export default class SkiRunScene extends Phaser.Scene {
     // Time (right-aligned)
     this.timeText = visorText(width - padding, row1Y, '', Math.round(24 * uiScale))
       .setOrigin(1, 0);
+
+    // Gate counter (right-aligned, row 2) — only for levels with slalom gates
+    if (this.level.slalomGates) {
+      this.gateText = visorText(width - padding, row2Y, '', Math.round(14 * uiScale))
+        .setOrigin(1, 0);
+    }
   }
 
   private onBump(): void {
@@ -872,6 +896,8 @@ export default class SkiRunScene extends Phaser.Scene {
         level: this.levelIndex,
         coverage: 100,
         timeUsed: 0,
+        skiGatesHit: this.slalomSystem.totalGates > 0 ? this.slalomSystem.gatesHit : undefined,
+        skiGatesTotal: this.slalomSystem.totalGates > 0 ? this.slalomSystem.totalGates : undefined,
       });
     });
   }
@@ -939,6 +965,8 @@ export default class SkiRunScene extends Phaser.Scene {
     this.weatherSystem?.reset();
     this.weatherSystem = null;
     this.parkFeatures.destroy();
+    this.slalomSystem.destroy();
+    this.gateText = null;
     this.cleanupTrickShadow();
     this.trickActive = false;
     // Don't stop HUDScene here — resetGameScenes handles all scene cleanup.

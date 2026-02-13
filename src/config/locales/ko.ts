@@ -87,6 +87,7 @@ const ko: Record<string, string> = {
   rideAgain: "다시 타기!",
   skiRunSpeed: "속도",
   skiRunTime: "시간",
+  skiRunGates: "게이트",
 
   // How to Play hints
   howToPlayMove: "{keys} 또는 방향키로 이동",
@@ -267,6 +268,8 @@ const ko: Record<string, string> = {
   marieWelcome: "Chez Marie에서 몸 좀 녹여요. 맛있는 tartiflette가 있어요!",
 
   // Changelog
+  changelog_20260213_date: "2026년 2월 13일",
+  changelog_20260213: "🚩 슬라럼 게이트\n⚙️ 설정 레이아웃 개선",
   changelog_20260212_date: "2026년 2월 12일",
   changelog_20260212: "📋 레벨 선택\n🔗 끊어지는 윈치 케이블\n🕹️ 컨트롤러 진단\n🍽️ 마리의 요리",
   changelog_20260211_date: "2026년 2월 11일",

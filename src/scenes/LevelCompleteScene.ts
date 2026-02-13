@@ -34,6 +34,8 @@ interface LevelCompleteData {
   restartCount?: number;
   silent?: boolean;
   skiMode?: string;
+  skiGatesHit?: number;
+  skiGatesTotal?: number;
 }
 
 export default class LevelCompleteScene extends Phaser.Scene {
@@ -51,6 +53,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private winchUseCount = 0;
   private pathsVisited = 0;
   private totalPaths = 0;
+  private skiGatesHit = 0;
+  private skiGatesTotal = 0;
   
   // Keyboard/gamepad navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -83,6 +87,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.winchUseCount = data.winchUseCount ?? 0;
     this.pathsVisited = data.pathsVisited ?? 0;
     this.totalPaths = data.totalPaths ?? 0;
+    this.skiGatesHit = data.skiGatesHit ?? 0;
+    this.skiGatesTotal = data.skiGatesTotal ?? 0;
     
     // Reset navigation state
     this.menuButtons = [];
@@ -236,6 +242,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
           statsLines.push('');
           bonusResults.forEach(r => statsLines.push((r.met ? '✓ ' : '✗ ') + r.label));
         }
+      }
+
+      // Slalom gate results inside the stats panel
+      if (this.won && this.skiGatesTotal > 0) {
+        statsLines.push('');
+        const gatePrefix = this.skiGatesHit === this.skiGatesTotal ? '✓ ' : '';
+        statsLines.push(`${gatePrefix}${t('skiRunGates') || 'Gates'}: ${this.skiGatesHit}/${this.skiGatesTotal}`);
       }
 
       const statsText = this.add.text(cx, cursorY, statsLines.join('\n'), {

@@ -87,6 +87,7 @@ const en: Record<string, string> = {
   rideAgain: "Ride Again!",
   skiRunSpeed: "Speed",
   skiRunTime: "Time",
+  skiRunGates: "Gates",
   
   // How to Play hints
   howToPlayMove: "{keys} or Arrows to move",
@@ -267,6 +268,8 @@ const en: Record<string, string> = {
   marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
   
   // Changelog
+  changelog_20260213_date: "February 13, 2026",
+  changelog_20260213: "🚩 Slalom gates\n⚙️ Settings layout polish",
   changelog_20260212_date: "February 12, 2026",
   changelog_20260212: "📋 Level select\n🔗 Breakable winch cable\n🕹️ Controller diagnostics\n🍽️ Marie's kitchen",
   changelog_20260211_date: "February 11, 2026",

@@ -90,6 +90,7 @@ const de: Record<string, string> = {
   rideAgain: "Nochmal Ride!",
   skiRunSpeed: "Tempo",
   skiRunTime: "Zeit",
+  skiRunGates: "Tore",
   
   // How to Play hints
   howToPlayMoveTouch: "Verwende das virtuelle D-Pad",
@@ -218,6 +219,8 @@ const de: Record<string, string> = {
   marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
   
   // Changelog
+  changelog_20260213_date: "13. Februar 2026",
+  changelog_20260213: "🚩 Slalomtore\n⚙️ Einstellungen verbessert",
   changelog_20260212_date: "12. Februar 2026",
   changelog_20260212: "📋 Levelauswahl\n🔗 Brechbares Windenseil\n🕹️ Controller-Diagnose\n🍽️ Maries Küche",
   changelog_20260211_date: "11. Februar 2026",

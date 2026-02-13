@@ -87,6 +87,7 @@ const sv: Record<string, string> = {
   rideAgain: "Åk igen!",
   skiRunSpeed: "Fart",
   skiRunTime: "Tid",
+  skiRunGates: "Portar",
 
   // How to Play hints
   howToPlayMove: "{keys} eller pilar för att köra",
@@ -268,6 +269,8 @@ const sv: Record<string, string> = {
   marieWelcome: "Kom och värm dig Chez Marie. En god tartiflette!",
 
   // Changelog
+  changelog_20260213_date: "13 februari 2026",
+  changelog_20260213: "🚩 Slalomportar\n⚙️ Inställningar förbättrade",
   changelog_20260212_date: "12 februari 2026",
   changelog_20260212: "📋 Nivåval\n🔗 Brytbar vinschkabel\n🕹️ Kontrolldiagnostik\n🍽️ Maries rätter",
   changelog_20260211_date: "11 februari 2026",

@@ -347,5 +347,18 @@ export default class BootScene extends Phaser.Scene {
     railTex.fillRect(0, 0, 4, 4);
     railTex.generateTexture('park_rail', 4, 4);
     railTex.destroy();
+
+    // Slalom gate poles — colored shaft with black base (French style)
+    // 3px wide × 36px tall. Full color except bottom 6px black ground section.
+    const sPolW = 3, sPolH = 36, sBaseH = 6;
+    for (const [name, color] of [['slalom_red', 0xcc2222], ['slalom_blue', 0x1e90ff]] as const) {
+      const g = this.make.graphics({ x: 0, y: 0 } as any, false);
+      g.fillStyle(color);
+      g.fillRect(0, 0, sPolW, sPolH - sBaseH);
+      g.fillStyle(0x111111);
+      g.fillRect(0, sPolH - sBaseH, sPolW, sBaseH);
+      g.generateTexture(name, sPolW, sPolH);
+      g.destroy();
+    }
   }
 }

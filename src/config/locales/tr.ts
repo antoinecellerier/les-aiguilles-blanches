@@ -87,6 +87,7 @@ const tr: Record<string, string> = {
   rideAgain: "Tekrar kay!",
   skiRunSpeed: "Hız",
   skiRunTime: "Süre",
+  skiRunGates: "Kapılar",
 
   // How to Play hints
   howToPlayMove: "Hareket için {keys} veya ok tuşları",
@@ -267,6 +268,8 @@ const tr: Record<string, string> = {
   marieWelcome: "Chez Marie'de ısınmaya gelin. Güzel bir tartiflette!",
 
   // Changelog
+  changelog_20260213_date: "13 Şubat 2026",
+  changelog_20260213: "🚩 Slalom kapıları\n⚙️ Ayarlar düzeni",
   changelog_20260212_date: "12 Şubat 2026",
   changelog_20260212: "📋 Seviye seçimi\n🔗 Kırılabilir vinç kablosu\n🕹️ Kumanda teşhisi\n🍽️ Marie'nin yemekleri",
   changelog_20260211_date: "11 Şubat 2026",

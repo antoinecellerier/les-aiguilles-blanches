@@ -89,6 +89,7 @@ const fr: Record<string, string> = {
   rideAgain: "Re-rider !",
   skiRunSpeed: "Vitesse",
   skiRunTime: "Temps",
+  skiRunGates: "Portes",
   
   // How to Play hints
   howToPlayMove: "{keys} ou Flèches pour se déplacer",
@@ -272,6 +273,8 @@ const fr: Record<string, string> = {
   marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
   
   // Changelog
+  changelog_20260213_date: "13 février 2026",
+  changelog_20260213: "🚩 Portes de slalom\n⚙️ Ergonomie des paramètres",
   changelog_20260212_date: "12 février 2026",
   changelog_20260212: "📋 Sélection de niveau\n🔗 Câble de treuil cassable\n🕹️ Diagnostic manette\n🍽️ Les plats de Marie",
   changelog_20260211_date: "11 février 2026",

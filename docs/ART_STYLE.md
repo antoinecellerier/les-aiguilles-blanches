@@ -164,6 +164,19 @@ Shared portrait colors: skin `0xffccaa`, eyes `0x000000`, mouth `0x553333`, hair
 - Warning signs: yellow triangle with exclamation mark on yellow danger pole (`0xddaa00`), tumble zones only (≥40°), placed on left piste border
 - Avalanche barrier flags: yellow (`0xffcc00`)
 
+### Slalom Gate Poles (Ski Reward Run)
+
+Paired red/blue poles placed along the piste on L4, L5, L10. Rectangles only.
+
+| Element | Size | Colors |
+|---------|------|--------|
+| Color shaft | 3×30 px | Red `0xcc2222` or Blue `0x1e90ff` |
+| Ground base | 3×6 px | Black `0x111111` |
+
+- Base texture: 3×36 px, no scaling (world-coordinate size, like piste markers)
+- Depth: `DEPTHS.MARKERS` (9)
+- On miss: poles dim to 30% alpha
+
 ## Wildlife
 
 Procedural pixel art animals generated in `animalSprites.ts`. All rectangle-only, no curves. Fox uses shared hunting logic from `foxBehavior.ts`. Track marks drawn via `animalTracks.ts` in blue-gray (`0xb8c4d0`).
