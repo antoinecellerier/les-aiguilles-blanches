@@ -17,6 +17,7 @@ export const STORAGE_KEYS = {
   MASTER_VOLUME: 'snowGroomer_masterVolume',
   MUSIC_VOLUME: 'snowGroomer_musicVolume',
   SFX_VOLUME: 'snowGroomer_sfxVolume',
+  ENGINE_VOLUME: 'snowGroomer_engineVolume',
   VOICE_VOLUME: 'snowGroomer_voiceVolume',
   AMBIENCE_VOLUME: 'snowGroomer_ambienceVolume',
   AUDIO_MUTED: 'snowGroomer_audioMuted',

@@ -10,12 +10,13 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 import { BALANCE } from '../config/gameConfig';
 import { getJSON, setJSON, getString, setString } from '../utils/storage';
 
-export type VolumeChannel = 'master' | 'music' | 'sfx' | 'voice' | 'ambience';
+export type VolumeChannel = 'master' | 'music' | 'sfx' | 'engine' | 'voice' | 'ambience';
 
 const CHANNEL_STORAGE_KEYS: Record<VolumeChannel, string> = {
   master: STORAGE_KEYS.MASTER_VOLUME,
   music: STORAGE_KEYS.MUSIC_VOLUME,
   sfx: STORAGE_KEYS.SFX_VOLUME,
+  engine: STORAGE_KEYS.ENGINE_VOLUME,
   voice: STORAGE_KEYS.VOICE_VOLUME,
   ambience: STORAGE_KEYS.AMBIENCE_VOLUME,
 };
@@ -24,6 +25,7 @@ const CHANNEL_DEFAULTS: Record<VolumeChannel, number> = {
   master: BALANCE.AUDIO_MASTER_VOLUME_DEFAULT,
   music: BALANCE.AUDIO_MUSIC_VOLUME_DEFAULT,
   sfx: BALANCE.AUDIO_SFX_VOLUME_DEFAULT,
+  engine: BALANCE.AUDIO_ENGINE_VOLUME_DEFAULT,
   voice: BALANCE.AUDIO_VOICE_VOLUME_DEFAULT,
   ambience: BALANCE.AUDIO_AMBIENCE_VOLUME_DEFAULT,
 };
@@ -37,6 +39,7 @@ export class AudioSystem {
     master: null,
     music: null,
     sfx: null,
+    engine: null,
     voice: null,
     ambience: null,
   };
@@ -105,7 +108,7 @@ export class AudioSystem {
     this.channelGains.master = this.masterGain;
 
     // each channel → master
-    for (const ch of ['music', 'sfx', 'voice', 'ambience'] as VolumeChannel[]) {
+    for (const ch of ['music', 'sfx', 'engine', 'voice', 'ambience'] as VolumeChannel[]) {
       const gain = this.ctx.createGain();
       gain.connect(this.masterGain);
       this.channelGains[ch] = gain;

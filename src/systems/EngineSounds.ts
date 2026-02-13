@@ -46,6 +46,7 @@ const WINCH_TENSION_VOLUME = 0.03;
 export class EngineSounds {
   private ctx: AudioContext | null = null;
   private sfxNode: GainNode | null = null;
+  private engineNode: GainNode | null = null; // Separate channel for continuous motor sounds
   private duckLevel = 1; // 0-1 multiplier for dialogue ducking
 
   // Engine nodes
@@ -86,6 +87,7 @@ export class EngineSounds {
         if (!this.started && !this.destroyed) {
           this.ctx = audio.getContext();
           this.sfxNode = audio.getChannelNode('sfx');
+          this.engineNode = audio.getChannelNode('engine');
           this.started = true;
           this.startEngine();
         }
@@ -95,6 +97,7 @@ export class EngineSounds {
 
     this.ctx = audio.getContext();
     this.sfxNode = audio.getChannelNode('sfx');
+    this.engineNode = audio.getChannelNode('engine');
     this.started = true;
 
     this.startEngine();
@@ -109,6 +112,7 @@ export class EngineSounds {
     this.stopWinchTension();
     this.ctx = null;
     this.sfxNode = null;
+    this.engineNode = null;
   }
 
   /** Scale all engine output for ducking (0-1). */
@@ -143,7 +147,7 @@ export class EngineSounds {
    * @param delta Frame delta in ms
    */
   update(speed: number, isGrooming: boolean, winchTaut: boolean, onGroomed: boolean, delta: number): void {
-    if (!this.started || !this.ctx || !this.sfxNode) return;
+    if (!this.started || !this.ctx || !this.sfxNode || !this.engineNode) return;
 
     const t = Math.min(1, speed / MAX_SPEED);
 
@@ -156,11 +160,11 @@ export class EngineSounds {
   // --- Engine ---
 
   private startEngine(): void {
-    if (!this.ctx || !this.sfxNode) return;
+    if (!this.ctx || !this.engineNode) return;
 
     this.engineGain = this.ctx.createGain();
     this.engineGain.gain.setValueAtTime(ENGINE_IDLE_VOLUME, this.ctx.currentTime);
-    this.engineGain.connect(this.sfxNode);
+    this.engineGain.connect(this.engineNode);
 
     // Primary: low sawtooth
     this.engineOsc = this.ctx.createOscillator();
@@ -204,7 +208,7 @@ export class EngineSounds {
   // --- Snow crunch ---
 
   private updateCrunch(t: number, onGroomed: boolean, delta: number): void {
-    if (!this.ctx || !this.sfxNode) return;
+    if (!this.ctx || !this.engineNode) return;
 
     const wasMoving = this.moving;
     this.moving = t > 0.01;
@@ -229,7 +233,7 @@ export class EngineSounds {
   }
 
   private playCrunch(t: number, onGroomed: boolean): void {
-    if (!this.ctx || !this.sfxNode) return;
+    if (!this.ctx || !this.engineNode) return;
 
     const now = this.ctx.currentTime;
 
@@ -244,7 +248,7 @@ export class EngineSounds {
       gain.gain.setValueAtTime(volume, now);
       gain.gain.linearRampToValueAtTime(0, now + 0.03);
       osc.connect(gain);
-      gain.connect(this.sfxNode);
+      gain.connect(this.engineNode);
       osc.start(now);
       osc.stop(now + 0.03);
     } else {
@@ -272,7 +276,7 @@ export class EngineSounds {
 
       source.connect(filter);
       filter.connect(gain);
-      gain.connect(this.sfxNode);
+      gain.connect(this.engineNode);
       source.start(now);
       source.stop(now + CRUNCH_DURATION);
     }
@@ -289,14 +293,14 @@ export class EngineSounds {
   }
 
   private startGrooming(): void {
-    if (!this.ctx || !this.sfxNode) return;
+    if (!this.ctx || !this.engineNode) return;
     this.grooming = true;
 
     this.groomGain = this.ctx.createGain();
     // Fade in
     this.groomGain.gain.setValueAtTime(0, this.ctx.currentTime);
     this.groomGain.gain.linearRampToValueAtTime(GROOM_VOLUME, this.ctx.currentTime + 0.1);
-    this.groomGain.connect(this.sfxNode);
+    this.groomGain.connect(this.engineNode);
 
     // Main buzz: triangle wave for softer texture
     this.groomOsc = this.ctx.createOscillator();

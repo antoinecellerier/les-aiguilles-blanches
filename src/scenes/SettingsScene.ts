@@ -424,6 +424,7 @@ export default class SettingsScene extends Phaser.Scene {
     panel.add(this.createVolumeSlider('master', t('masterVolume') || 'Master Volume'), { align: 'left' });
     panel.add(this.createVolumeSlider('music', t('musicVolume') || 'Music'), { align: 'left' });
     panel.add(this.createVolumeSlider('sfx', t('sfxVolume') || 'Sound Effects'), { align: 'left' });
+    panel.add(this.createVolumeSlider('engine', t('engineVolume') || 'Engine'), { align: 'left' });
     panel.add(this.createVolumeSlider('voice', t('voiceVolume') || 'Voice'), { align: 'left' });
     panel.add(this.createVolumeSlider('ambience', t('ambienceVolume') || 'Ambience'), { align: 'left' });
     // Spacer to compensate for slider Graphics underreporting height

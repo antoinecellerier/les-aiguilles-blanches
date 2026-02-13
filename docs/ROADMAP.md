@@ -38,6 +38,8 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 
 ## Recently Completed
 
+- ✅ **Engine volume control** — Separate volume slider for continuous motor sounds (engine idle, snow crunch, grooming blade). New `engine` audio channel in AudioSystem. Default 50%. Winch and one-shot SFX remain on the SFX channel.
+
 - ✅ **Ski jumps** — Groom key triggers speed-dependent jump during ski runs. Cliff jumps clear danger zones at 30+ km/h. Airborne skiers skip all ground-level collisions. Touch JMP button for mobile. Win screen shows celebrating skier/snowboarder. Park features render below player. 3 E2E tests.
 
 - ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (12 tight). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. 3 E2E tests.
