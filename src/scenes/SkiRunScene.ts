@@ -592,27 +592,29 @@ export default class SkiRunScene extends Phaser.Scene {
   private createHUD(): void {
     const { width } = this.scale;
     const cam = this.cameras.main;
+    const zoom = cam.zoom || 1;
     const a11y = Accessibility.settings;
     const hc = a11y.highContrast;
     const cb = a11y.colorblindMode !== 'none';
 
-    // Scale calculations matching HUDScene
+    // All layout in screen-space, then convert to overlay-space for drawing.
+    // Font sizes, gaps, and positions are computed in screen pixels first.
     const refWidth = 1024;
     const uiScale = Math.max(0.6, Math.min(2.0, width / refWidth));
     const padding = Math.round(10 * uiScale);
-    const fontSize = (px: number) => Math.max(12, Math.round(px / (cam.zoom || 1))) + 'px';
+    const fontSize = (px: number) => Math.max(12, px) + 'px';
 
     const a11yStroke = (hc || cb) ? '#000000' : undefined;
-    const a11yStrokeThickness = (hc || cb) ? Math.max(2, Math.round(3 * uiScale / (cam.zoom || 1))) : 0;
+    const a11yStrokeThickness = (hc || cb) ? Math.max(2, Math.round(3 * uiScale)) : 0;
     const visorText = (sx: number, sy: number, content: string, basePx: number, color = '#FFFFFF') => {
       const pos = this.screenToOverlay(sx, sy);
       return this.add.text(pos.x, pos.y, content, {
         fontFamily: THEME.fonts.family, fontSize: fontSize(basePx), fontStyle: 'bold', color,
-        stroke: a11yStroke, strokeThickness: a11yStrokeThickness,
-      }).setScrollFactor(0).setDepth(DEPTHS.FEEDBACK);
+        stroke: a11yStroke, strokeThickness: a11yStrokeThickness / zoom,
+      }).setScrollFactor(0).setScale(1 / zoom).setDepth(DEPTHS.FEEDBACK);
     };
 
-    // Visor strip
+    // Visor strip — screen-space layout
     const row1Y = padding;
     const row2Y = row1Y + Math.round(26 * uiScale);
     const visorHeight = row2Y + Math.round(18 * uiScale);
