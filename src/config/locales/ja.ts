@@ -59,6 +59,7 @@ const ja: Record<string, string> = {
   keyboardLayout: "レイアウト",
   customBindings: "カスタム",
   gamepadSupported: "ゲームパッド OK",
+  touch: "タッチ",
   touchSupported: "タッチ OK",
   noGamepadConnected: "ゲームパッド未接続",
   gamepadDiagnostic: "コントローラーテスト",

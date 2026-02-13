@@ -59,6 +59,7 @@ const fr: Record<string, string> = {
   controlsReset: "Contrôles réinitialisés !",
   movementSensitivity: "Sensibilité",
   gamepadSupported: "Manette OK",
+  touch: "Tactile",
   touchSupported: "Tactile OK",
   keyboardLayout: "Disposition clavier",
   customBindings: "Personnalisé",

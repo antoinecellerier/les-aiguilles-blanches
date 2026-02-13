@@ -59,6 +59,7 @@ const pl: Record<string, string> = {
   keyboardLayout: "Układ",
   customBindings: "Własne",
   gamepadSupported: "Gamepad OK",
+  touch: "Dotyk",
   touchSupported: "Dotyk OK",
   noGamepadConnected: "Brak podłączonego gamepada",
   gamepadDiagnostic: "Test kontrolera",

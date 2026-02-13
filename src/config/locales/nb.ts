@@ -59,6 +59,7 @@ const nb: Record<string, string> = {
   keyboardLayout: "Layout",
   customBindings: "Egendefinert",
   gamepadSupported: "Gamepad OK",
+  touch: "Berøring",
   touchSupported: "Berøring OK",
   noGamepadConnected: "Ingen gamepad tilkoblet",
   gamepadDiagnostic: "Kontrollertest",

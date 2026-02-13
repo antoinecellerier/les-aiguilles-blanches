@@ -59,6 +59,7 @@ const fi: Record<string, string> = {
   keyboardLayout: "Asettelu",
   customBindings: "Mukautettu",
   gamepadSupported: "Peliohjain OK",
+  touch: "Kosketus",
   touchSupported: "Kosketus OK",
   noGamepadConnected: "Ei peliohjainta",
   gamepadDiagnostic: "Ohjaimen testi",

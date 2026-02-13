@@ -59,6 +59,7 @@ const sv: Record<string, string> = {
   keyboardLayout: "Layout",
   customBindings: "Anpassad",
   gamepadSupported: "Gamepad OK",
+  touch: "Pekskärm",
   touchSupported: "Pekskärm OK",
   noGamepadConnected: "Ingen gamepad ansluten",
   gamepadDiagnostic: "Kontrolltest",

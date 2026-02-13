@@ -59,6 +59,7 @@ const cs: Record<string, string> = {
   keyboardLayout: "Rozložení",
   customBindings: "Vlastní",
   gamepadSupported: "Gamepad OK",
+  touch: "Dotyk",
   touchSupported: "Dotyk OK",
   noGamepadConnected: "Žádný gamepad připojen",
   gamepadDiagnostic: "Test ovladače",

@@ -59,6 +59,7 @@ const tr: Record<string, string> = {
   keyboardLayout: "Düzen",
   customBindings: "Özel",
   gamepadSupported: "Gamepad OK",
+  touch: "Dokunmatik",
   touchSupported: "Dokunma OK",
   noGamepadConnected: "Gamepad bağlı değil",
   gamepadDiagnostic: "Kumanda testi",

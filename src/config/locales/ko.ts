@@ -59,6 +59,7 @@ const ko: Record<string, string> = {
   keyboardLayout: "레이아웃",
   customBindings: "사용자 지정",
   gamepadSupported: "게임패드 OK",
+  touch: "터치",
   touchSupported: "터치 OK",
   noGamepadConnected: "게임패드 미연결",
   gamepadDiagnostic: "컨트롤러 테스트",
