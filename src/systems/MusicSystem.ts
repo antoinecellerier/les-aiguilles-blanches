@@ -76,6 +76,7 @@ const MENU_MELODY: MelodyNote[] = [
   { freq: NOTE.Bb4, duration: 0.5, velocity: 0.56 },
   { freq: NOTE.G4,  duration: 0.5, velocity: 0.56 },
   { freq: NOTE.Eb5, duration: 3.5, velocity: 0.74 },
+  { freq: 0,        duration: 2.0, velocity: 0 },     // breath between phrases
 ];
 
 /** Bass — flowing broken chord arpeggios in the nocturne style */
@@ -150,6 +151,7 @@ const CALM_MELODY: MelodyNote[] = [
   { freq: NOTE.C5,  duration: 0.5, velocity: 0.48 },
   { freq: NOTE.Bb4, duration: 0.5, velocity: 0.44 },
   { freq: NOTE.Ab4, duration: 4.0, velocity: 0.60 },
+  { freq: 0,        duration: 2.5, velocity: 0 },     // breath between phrases
 ];
 
 const CALM_BASS: MelodyNote[] = [
@@ -226,6 +228,7 @@ const NIGHT_MELODY: MelodyNote[] = [
   { freq: NOTE.Bb3, duration: 1.0, velocity: 0.50 },
   { freq: NOTE.Db4, duration: 0.5, velocity: 0.52 },
   { freq: NOTE.Bb4, duration: 4.0, velocity: 0.60 },
+  { freq: 0,        duration: 3.0, velocity: 0 },     // breath between phrases — longer for nocturnal mood
 ];
 
 const NIGHT_BASS: MelodyNote[] = [
@@ -299,6 +302,7 @@ const INTENSE_MELODY: MelodyNote[] = [
   { freq: NOTE.G4,  duration: 1.0, velocity: 0.62 },
   { freq: NOTE.C5,  duration: 1.0, velocity: 0.70 },
   { freq: NOTE.C5,  duration: 3.5, velocity: 0.76 },
+  { freq: 0,        duration: 1.5, velocity: 0 },     // brief breath — intense mood keeps tension
 ];
 
 const INTENSE_BASS: MelodyNote[] = [
@@ -373,6 +377,7 @@ const CREDITS_MELODY: MelodyNote[] = [
   { freq: NOTE.Ab5, duration: 0.5, velocity: 0.78 },
   { freq: NOTE.G5,  duration: 1.0, velocity: 0.76 },
   { freq: NOTE.Eb5, duration: 4.0, velocity: 0.82 },
+  { freq: 0,        duration: 2.0, velocity: 0 },     // breath between phrases
 ];
 
 const CREDITS_BASS: MelodyNote[] = [
@@ -423,7 +428,7 @@ const MOOD_DATA: Record<Mood, { melody: MelodyNote[]; bass: MelodyNote[]; tempo:
 
 // ── Volume constants ───────────────────────────────────────────────
 const MELODY_VOLUME = 0.18;  // Base melody volume (before velocity)
-const BASS_VOLUME = 0.10;    // Base bass volume (before velocity)
+const BASS_VOLUME = 0.17;    // Base bass volume — near-equal presence with melody
 const FADE_TIME = 2.0;       // Crossfade duration in seconds
 
 // ── Music system class ─────────────────────────────────────────────
@@ -657,21 +662,22 @@ export class MusicSystem {
     const brightBoost = (volume / 0.2) * (isBass ? 800 : 2500);
     soundboard.frequency.setValueAtTime(baseFreq + brightBoost, now);
     // Brightness fades as the note decays (real piano behavior)
-    soundboard.frequency.setTargetAtTime(baseFreq * 0.6, now + 0.05, duration * 0.3);
+    soundboard.frequency.setTargetAtTime(baseFreq * 0.6, now + 0.05, duration * 0.4);
     soundboard.Q.setValueAtTime(0.5, now);
     noteGain.connect(soundboard);
     soundboard.connect(this.masterGain);
 
     // ── Piano envelope: two-stage decay ──
+    // Warm Chopin nocturne tone: generous sustain, long singing tail
     const attack = 0.004;
-    const sustainLevel = 0.30;
-    const stage1Time = duration * 0.12;
-    const stage2Time = duration * 0.35;
+    const sustainLevel = 0.42;
+    const stage1Time = duration * 0.18;
+    const stage2Time = duration * 0.50;
 
     noteGain.gain.setValueAtTime(0, now);
     noteGain.gain.linearRampToValueAtTime(volume, now + attack);
     noteGain.gain.setTargetAtTime(volume * sustainLevel, now + attack, stage1Time);
-    noteGain.gain.setTargetAtTime(0.001, now + duration * 0.5, stage2Time);
+    noteGain.gain.setTargetAtTime(0.001, now + duration * 0.6, stage2Time);
 
     // ── Hammer strike: brief noise burst ──
     const noiseLen = 0.015;

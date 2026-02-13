@@ -37,17 +37,17 @@ const VOICES: Record<string, VoiceProfile> = {
     volume: 0.20,
   },
   'Émilie': {
-    basePitch: 240,     // Higher, bright
-    pitchRange: 50,
+    basePitch: 250,     // Higher, bright and lively
+    pitchRange: 55,
     type: 'sine',
     speed: 1.1,
     volume: 0.18,
   },
   'Marie': {
-    basePitch: 210,     // Warm, medium-high
-    pitchRange: 45,
+    basePitch: 200,     // Warm, rounded — lower than Émilie
+    pitchRange: 40,
     type: 'sine',
-    speed: 1.0,
+    speed: 0.95,        // slightly more relaxed pace
     volume: 0.18,
   },
 };
@@ -118,4 +118,20 @@ export function playVoiceBlip(speaker: string, char: string): void {
   gain.connect(voiceNode);
   osc.start(now);
   osc.stop(now + duration);
+
+  // Vowel formant: quiet second harmonic adds body to vowel sounds
+  const isVowel = 'aeiouyéèêàùî'.includes(lower);
+  if (isVowel) {
+    const formant = ctx.createOscillator();
+    const fGain = ctx.createGain();
+    formant.type = 'sine';
+    formant.frequency.setValueAtTime(pitch * 2.1, now);
+    fGain.gain.setValueAtTime(0, now);
+    fGain.gain.linearRampToValueAtTime(voice.volume * 0.15, now + 0.005);
+    fGain.gain.linearRampToValueAtTime(0, now + duration);
+    formant.connect(fGain);
+    fGain.connect(voiceNode);
+    formant.start(now);
+    formant.stop(now + duration);
+  }
 }
