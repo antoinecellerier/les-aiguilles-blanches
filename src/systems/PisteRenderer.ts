@@ -54,7 +54,7 @@ export class PisteRenderer {
     );
     bg.setDepth(DEPTHS.BG_FOREST_TILES);
 
-    const treeSpacing = tileSize * 2;
+    const treeSpacing = tileSize * 3; // Sparser padding trees for performance
     const margin = tileSize;
 
     const isStorm = level.weather === 'storm';
@@ -62,7 +62,7 @@ export class PisteRenderer {
     for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing) {
       for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing) {
         const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
-        if (isOutside && Math.random() > 0.35) {
+        if (isOutside && Math.random() > 0.4) {
           const offsetX = (Math.random() - 0.5) * treeSpacing * 0.8;
           const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
           const tx = x + offsetX, ty = y + offsetY;

@@ -829,7 +829,7 @@ export default class GameScene extends Phaser.Scene {
     this.updateResources(delta);
     this.checkTutorialProgress();
     this.checkWinCondition();
-    this.cullSnowTiles();
+    this.cullOffscreen();
     
     // Update night overlay with headlight position
     if (this.level.isNight) {
@@ -1480,10 +1480,10 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  /** Hide tiles outside camera view to avoid drawing thousands of off-screen sprites. */
-  private cullSnowTiles(): void {
+  /** Hide objects outside camera view to reduce Canvas draw calls. */
+  private cullOffscreen(): void {
     const cam = this.cameras.main;
-    const margin = this.tileSize * 2;
+    const margin = this.tileSize * 3; // Slightly larger margin for trees (taller than 1 tile)
     const left = cam.worldView.x - margin;
     const right = cam.worldView.right + margin;
     const top = cam.worldView.y - margin;
@@ -1497,6 +1497,7 @@ export default class GameScene extends Phaser.Scene {
     }
     this.lastCullBounds = { x: left, y: top, w: right - left, h: bottom - top };
 
+    // Cull snow tiles via grid (fast path)
     const ts = this.tileSize;
     const minCol = Math.max(0, Math.floor(left / ts));
     const maxCol = Math.min(this.level.width - 1, Math.ceil(right / ts));
@@ -1508,6 +1509,20 @@ export default class GameScene extends Phaser.Scene {
       for (let x = 0; x < this.level.width; x++) {
         const t = this.snowGrid[y][x].tile;
         if (t) t.visible = visible && x >= minCol && x <= maxCol;
+      }
+    }
+
+    // Cull all static Images (trees, rocks, tracks) by world position
+    const children = this.children.list;
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
+      if (c.type === 'Image' && (c as Phaser.GameObjects.Image).scrollFactorX === 1) {
+        const img = c as Phaser.GameObjects.Image;
+        const d = img.depth;
+        // Only cull objects at terrain/forest/tree depths (not UI, overlays, player)
+        if (d <= DEPTHS.MARKERS) {
+          img.visible = img.x > left && img.x < right && img.y > top && img.y < bottom;
+        }
       }
     }
   }
