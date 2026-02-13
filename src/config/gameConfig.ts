@@ -53,6 +53,7 @@ export const DEPTHS = {
   ACCESS_ROAD: 1,     // Packed snow on service roads (above off-piste, below piste)
   PISTE: 2,           // Piste snow tiles (above access roads so grooming is visible)
   CLIFFS: 3,          // Cliff rock textures (always below trees/buildings)
+  PARK_FEATURES: 3.5, // Park kickers/rails (flat on snow, below Y-sorted objects)
   GROUND_OBJECTS: 4,  // Base for yDepth() Y-sorted objects (trees, chalets, anchors)
   TREES: 4,           // Alias for GROUND_OBJECTS (both use yDepth())
   GROUND_LABELS: 7,   // Anchor numbers, text on ground objects

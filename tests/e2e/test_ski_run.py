@@ -441,7 +441,7 @@ class TestSlalomGates:
 class TestSkiJump:
     """Test ski jump mechanics (groom key triggers jump during ski run)."""
 
-    def _launch_ski_and_build_speed(self, page: Page, level: int = 2):
+    def _launch_ski_and_build_speed(self, page: Page, level: int = 4):
         """Helper: launch SkiRunScene, dismiss dialogue, build speed."""
         page.evaluate(f"""() => {{
             localStorage.setItem('dialogueDismissed_level{level}Intro', 'true');
@@ -449,14 +449,12 @@ class TestSkiJump:
             window.game.scene.start('SkiRunScene', {{ level: {level}, mode: 'ski' }});
         }}""")
         wait_for_scene(page, 'SkiRunScene', timeout=10000)
-        page.wait_for_timeout(300)
-        # Accelerate downhill
-        page.keyboard.down('ArrowDown')
+        page.wait_for_timeout(500)
+        # Wait for gravity to build speed (auto-accelerates downhill)
         page.wait_for_function("""() => {
             var s = window.game.scene.getScene('SkiRunScene');
-            return s && s.currentSpeed >= 100;
+            return s && s.currentSpeed >= 80;
         }""", timeout=5000)
-        page.keyboard.up('ArrowDown')
 
     def test_jump_sets_airborne(self, game_page: Page):
         """Calling doJump at speed should set isAirborne."""
@@ -493,9 +491,9 @@ class TestSkiJump:
     def test_no_jump_at_low_speed(self, game_page: Page):
         """Jump should not trigger at very low speed."""
         game_page.evaluate("""() => {
-            localStorage.setItem('dialogueDismissed_level2Intro', 'true');
+            localStorage.setItem('dialogueDismissed_level4Intro', 'true');
             localStorage.setItem('dialogueDismissed_jeanPierreIntro', 'true');
-            window.game.scene.start('SkiRunScene', { level: 2, mode: 'ski' });
+            window.game.scene.start('SkiRunScene', { level: 4, mode: 'ski' });
         }""")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
         page = game_page

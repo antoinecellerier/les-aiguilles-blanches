@@ -246,7 +246,7 @@ export class ParkFeatureSystem {
 
   private renderFeature(scene: Phaser.Scene, inst: FeatureInstance): void {
     const g = scene.add.graphics();
-    g.setDepth(yDepth(inst.visualY + inst.visualH / 2));
+    g.setDepth(DEPTHS.PARK_FEATURES);
 
     if (inst.def.type === 'kicker') {
       // Kicker: wide tabletop ramp (SkiFree pixel style)
