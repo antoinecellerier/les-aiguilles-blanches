@@ -982,6 +982,7 @@ export default class SkiRunScene extends Phaser.Scene {
         level: this.levelIndex,
         coverage: 100,
         timeUsed: 0,
+        skiMode: this.resolvedMode,
         skiGatesHit: this.slalomSystem.totalGates > 0 ? this.slalomSystem.gatesHit : undefined,
         skiGatesTotal: this.slalomSystem.totalGates > 0 ? this.slalomSystem.totalGates : undefined,
       });

@@ -122,7 +122,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const footerHeight = Math.round(36 * scaleFactor);
 
     const levelWeather = { isNight: level.isNight ?? false, weather: level.weather ?? 'clear' };
-    const skipGroomer = !this.won && !!this.failReason;
+    const skipGroomer = (!this.won && !!this.failReason) || !!this.skiMode;
     createMenuTerrain(this, width, height, snowLineY, footerHeight, scaleFactor, levelWeather, skipGroomer);
 
     // Weather effects (night overlay, snow particles)
@@ -134,8 +134,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.wildlife.create(width, height, snowLineY, footerHeight, scaleFactor, levelWeather);
 
     // Failure-specific groomer effects (replace the stock groomer)
-    if (skipGroomer) {
+    if (!this.won && !!this.failReason) {
       this.drawGroomerFailEffect(width, snowLineY, scaleFactor, levelWeather);
+    }
+
+    // Ski run win — draw standing skier/snowboarder instead of groomer
+    if (this.won && this.skiMode) {
+      this.drawSkierCelebration(width, snowLineY, scaleFactor, levelWeather);
     }
 
     // Fail: somber red-brown tint overlay above terrain (above groomer effects)
@@ -914,6 +919,95 @@ export default class LevelCompleteScene extends Phaser.Scene {
         }
         break;
       }
+    }
+  }
+
+  /** Draw a celebrating skier or snowboarder on the win screen. */
+  private drawSkierCelebration(
+    width: number, snowLineY: number, scaleFactor: number,
+    weather: { isNight: boolean; weather: string }
+  ): void {
+    const sx = width / 1024;
+    const isLandscape = width > snowLineY * 1.5;
+    const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
+    const s = 2.0 * scaleFactor;
+    const groundY = snowLineY;
+    const isStorm = weather.weather === 'storm';
+    const isSnowboard = this.skiMode === 'snowboard';
+    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001);
+
+    // Colors match skiSprites.ts palette
+    const jacketMain = isSnowboard ? 0xff3388 : 0x00aaaa;
+    const jacketSide = isSnowboard ? 0x3366ff : 0xcc2288;
+    const jacketDark = isSnowboard ? 0xcc2266 : 0x007777;
+    const hatColor = isSnowboard ? 0xff6600 : 0xcc2200;
+
+    // Boots on snow
+    g.fillStyle(0x333333);
+    g.fillRect(gx - 6 * s, groundY - 4 * s, 5 * s, 4 * s);
+    g.fillRect(gx + 1 * s, groundY - 4 * s, 5 * s, 4 * s);
+
+    // Legs / pants
+    g.fillStyle(jacketDark);
+    g.fillRect(gx - 5 * s, groundY - 16 * s, 5 * s, 12 * s);
+    g.fillRect(gx + 0 * s, groundY - 16 * s, 5 * s, 12 * s);
+
+    // Torso / jacket
+    g.fillStyle(jacketMain);
+    g.fillRect(gx - 7 * s, groundY - 28 * s, 14 * s, 12 * s);
+    // Side panels
+    g.fillStyle(jacketSide);
+    g.fillRect(gx - 7 * s, groundY - 28 * s, 3 * s, 12 * s);
+    g.fillRect(gx + 4 * s, groundY - 28 * s, 3 * s, 12 * s);
+
+    // Arms raised in celebration
+    g.fillStyle(jacketMain);
+    g.fillRect(gx - 14 * s, groundY - 38 * s, 5 * s, 14 * s);
+    g.fillRect(gx + 9 * s, groundY - 38 * s, 5 * s, 14 * s);
+    // Gloves
+    g.fillStyle(jacketDark);
+    g.fillRect(gx - 14 * s, groundY - 42 * s, 5 * s, 4 * s);
+    g.fillRect(gx + 9 * s, groundY - 42 * s, 5 * s, 4 * s);
+
+    // Head — bonnet / beanie
+    g.fillStyle(hatColor);
+    g.fillRect(gx - 4 * s, groundY - 36 * s, 8 * s, 8 * s);
+    // Goggles
+    g.fillStyle(0x87ceeb);
+    g.fillRect(gx - 3 * s, groundY - 32 * s, 6 * s, 3 * s);
+    // Pompom (skier only)
+    if (!isSnowboard) {
+      g.fillStyle(0xffdd00);
+      g.fillRect(gx - 2 * s, groundY - 39 * s, 4 * s, 3 * s);
+    }
+
+    // Equipment on snow beside them
+    if (isSnowboard) {
+      // Snowboard standing upright beside them
+      g.fillStyle(0x8b4513);
+      g.fillRect(gx + 20 * s, groundY - 20 * s, 4 * s, 20 * s);
+      g.fillStyle(0x664422);
+      g.fillRect(gx + 20 * s, groundY - 20 * s, 4 * s, 2 * s);
+      g.fillRect(gx + 20 * s, groundY - 2 * s, 4 * s, 2 * s);
+    } else {
+      // Ski poles planted in snow
+      g.fillStyle(0x777777);
+      g.fillRect(gx - 16 * s, groundY - 40 * s, 2 * s, 40 * s);
+      g.fillRect(gx + 14 * s, groundY - 40 * s, 2 * s, 40 * s);
+      // Pole baskets
+      g.fillStyle(0x888888);
+      g.fillRect(gx - 17 * s, groundY - 2 * s, 4 * s, 2 * s);
+      g.fillRect(gx + 13 * s, groundY - 2 * s, 4 * s, 2 * s);
+    }
+
+    // Snow spray from stop
+    g.fillStyle(0xdde4ec, 0.4);
+    g.fillRect(gx - 18 * s, groundY - 3 * s, 36 * s, 3 * s);
+
+    if (isStorm) {
+      g.fillStyle(0xf0f5f8);
+      g.fillRect(gx - 4 * s, groundY - 37 * s, 8 * s, 2 * s);
+      g.fillRect(gx - 7 * s, groundY - 29 * s, 14 * s, 2 * s);
     }
   }
 }

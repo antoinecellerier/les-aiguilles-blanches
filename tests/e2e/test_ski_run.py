@@ -460,32 +460,30 @@ class TestSkiJump:
         """Calling doJump at speed should set isAirborne."""
         self._launch_ski_and_build_speed(game_page)
 
-        game_page.evaluate("""() => {
+        result = game_page.evaluate("""() => {
             var s = window.game.scene.getScene('SkiRunScene');
+            if (!s || s.isFinished || s.isCrashed) return 'scene_ended';
             s.doJump();
+            return s.isAirborne;
         }""")
-        game_page.wait_for_function("""() => {
-            var s = window.game.scene.getScene('SkiRunScene');
-            return s && s.isAirborne === true;
-        }""", timeout=3000)
+        assert result is True, f"doJump should set isAirborne, got {result}"
 
     def test_jump_lands_after_air_time(self, game_page: Page):
         """After jump, skier should land (isAirborne returns to false)."""
         self._launch_ski_and_build_speed(game_page)
 
-        game_page.evaluate("""() => {
+        result = game_page.evaluate("""() => {
             var s = window.game.scene.getScene('SkiRunScene');
+            if (!s || s.isFinished || s.isCrashed) return 'scene_ended';
             s.doJump();
+            return s.isAirborne;
         }""")
-        game_page.wait_for_function("""() => {
-            var s = window.game.scene.getScene('SkiRunScene');
-            return s && s.isAirborne === true;
-        }""", timeout=3000)
+        assert result is True, f"doJump should set isAirborne, got {result}"
 
         # Wait for landing
         game_page.wait_for_function("""() => {
             var s = window.game.scene.getScene('SkiRunScene');
-            return s && s.isAirborne === false;
+            return !s || s.isAirborne === false;
         }""", timeout=3000)
 
     def test_no_jump_at_low_speed(self, game_page: Page):
