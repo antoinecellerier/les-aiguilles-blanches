@@ -6,12 +6,12 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] Ski jumps (groom key trigger during ski run)
 - [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
 
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
+- [ ] Contextual win screen graphics — Level-specific victory scenes (e.g. night stars for L7, storm clearing for L9, avalanche debris for L8, park features for L3/L6)
 - [ ] Sound effects polish (character voice review, melody phrasing rests, piano legato sustain, pause menu mute toggle)
 - [ ] More character dialogues per level
 - [ ] Procedural level generation
@@ -22,6 +22,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Ski jumps** — Groom key triggers speed-dependent jump during ski runs. Cliff jumps clear danger zones at 30+ km/h. Airborne skiers skip all ground-level collisions. Touch JMP button for mobile. Win screen shows celebrating skier/snowboarder. Park features render below player. 3 E2E tests.
 
 - ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (12 tight). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. 3 E2E tests.
 

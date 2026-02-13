@@ -269,7 +269,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "13 Şubat 2026",
-  changelog_20260213: "🚩 Slalom kapıları\n⚙️ Ayarlar düzeni",
+  changelog_20260213: "🚩 Slalom kapıları\n🏔️ Kayak atlayışları\n🎿 Zafer ekranında kayakçı ve snowboardcu\n⚙️ Ayarlar düzeni",
   changelog_20260212_date: "12 Şubat 2026",
   changelog_20260212: "📋 Seviye seçimi\n🔗 Kırılabilir vinç kablosu\n🕹️ Kumanda teşhisi\n🍽️ Marie'nin yemekleri",
   changelog_20260211_date: "11 Şubat 2026",

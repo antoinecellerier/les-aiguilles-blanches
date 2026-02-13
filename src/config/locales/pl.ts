@@ -269,7 +269,7 @@ const pl: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "13 lutego 2026",
-  changelog_20260213: "🚩 Bramki slalomowe\n⚙️ Układ ustawień",
+  changelog_20260213: "🚩 Bramki slalomowe\n🏔️ Skoki narciarskie\n🎿 Narciarz i snowboardzista na ekranie zwycięstwa\n⚙️ Układ ustawień",
   changelog_20260212_date: "12 lutego 2026",
   changelog_20260212: "📋 Wybór poziomu\n🔗 Zrywalna lina wciągarki\n🕹️ Diagnostyka kontrolera\n🍽️ Dania Marie",
   changelog_20260211_date: "11 lutego 2026",

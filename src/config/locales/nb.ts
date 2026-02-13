@@ -270,7 +270,7 @@ const nb: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "13. februar 2026",
-  changelog_20260213: "🚩 Slalomporter\n⚙️ Innstillinger forbedret",
+  changelog_20260213: "🚩 Slalomporter\n🏔️ Skihopp\n🎿 Skiløper og snowboarder på vindusskjermen\n⚙️ Innstillinger forbedret",
   changelog_20260212_date: "12. februar 2026",
   changelog_20260212: "📋 Nivåvalg\n🔗 Knekbar vinsjtau\n🕹️ Kontrolldiagnostikk\n🍽️ Maries retter",
   changelog_20260211_date: "11. februar 2026",

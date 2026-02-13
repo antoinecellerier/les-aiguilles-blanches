@@ -269,7 +269,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260213_date: "2026년 2월 13일",
-  changelog_20260213: "🚩 슬라럼 게이트\n⚙️ 설정 레이아웃 개선",
+  changelog_20260213: "🚩 슬라럼 게이트\n🏔️ 스키 점프\n🎿 승리 화면에 스키어와 스노보더\n⚙️ 설정 레이아웃 개선",
   changelog_20260212_date: "2026년 2월 12일",
   changelog_20260212: "📋 레벨 선택\n🔗 끊어지는 윈치 케이블\n🕹️ 컨트롤러 진단\n🍽️ 마리의 요리",
   changelog_20260211_date: "2026년 2월 11일",

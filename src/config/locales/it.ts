@@ -220,7 +220,7 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260213_date: "13 febbraio 2026",
-  changelog_20260213: "🚩 Porte di slalom\n⚙️ Layout impostazioni",
+  changelog_20260213: "🚩 Porte di slalom\n🏔️ Salti con gli sci\n🎿 Sciatore e snowboarder nella schermata vittoria\n⚙️ Layout impostazioni",
   changelog_20260212_date: "12 febbraio 2026",
   changelog_20260212: "📋 Selezione livello\n🔗 Cavo verricello fragile\n🕹️ Diagnostica controller\n🍽️ I piatti di Marie",
   changelog_20260211_date: "11 febbraio 2026",
