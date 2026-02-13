@@ -1075,7 +1075,7 @@ export default class HUDScene extends Phaser.Scene {
         const targetFps = this.game.loop.targetFps || 60;
         const simPct = Math.min(100, Math.round((this.game.loop.actualFps / targetFps) * 100));
         const throttleFlag = isRenderThrottled() ? ' ⏬' : '';
-        this.fpsText.setText(fps + ' FPS · ' + simPct + '%' + throttleFlag);
+        this.fpsText.setText('L' + this.gameState.levelIndex + ' · ' + fps + ' FPS · ' + simPct + '%' + throttleFlag);
       }
     }
 
