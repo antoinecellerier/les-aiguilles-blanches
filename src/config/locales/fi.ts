@@ -32,6 +32,7 @@ const fi: Record<string, string> = {
   accessibility: "Esteettömyys",
   highContrast: "Korkea kontrasti",
   reducedMotion: "Vähennetty liike",
+  showFps: "Show FPS",
   colorblindMode: "Värisokeus",
   none: "Ei mitään",
   deuteranopia: "Deutan.",

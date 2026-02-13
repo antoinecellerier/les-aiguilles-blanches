@@ -86,6 +86,7 @@ snow-groomer/
 │   │   ├── keybindingManager.ts # Keyboard/gamepad binding load, save, rebind, reset
 │   │   ├── overlayManager.ts # Modal overlay dialogs (simple + scrollable) with keyboard dismiss
 │   │   ├── cameraCoords.ts  # World↔overlay coordinate conversions for scrollFactor(0) objects
+│   │   ├── renderThrottle.ts # Passive FPS monitor with rolling average and throttle state detection
 │   │   ├── resizeManager.ts # Debounced resize-restart handler for scenes
 │   │   ├── sceneTransitions.ts # Centralized scene cleanup and transitions
 │   │   ├── skiRunState.ts    # Shared groomed-tile state between GameScene and SkiRunScene

@@ -400,6 +400,13 @@ export default class SettingsScene extends Phaser.Scene {
 
     // Colorblind modes
     panel.add(this.createColorblindSelector(), { align: 'left' });
+
+    // FPS counter toggle
+    panel.add(this.createToggleRow(t('showFps') || 'Show FPS',
+      getString(STORAGE_KEYS.SHOW_FPS) !== 'false', (val) => {
+        setString(STORAGE_KEYS.SHOW_FPS, val ? 'true' : 'false');
+      }), { align: 'left' });
+
     sizer.add(panel, { align: 'left', padding: { top: 4 } });
   }
 

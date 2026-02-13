@@ -8,6 +8,17 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels (grooming quality now implemented via steering stability + fall-line alignment)
 
+## Next Up: Canvas Performance Deep Analysis
+
+Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 40% sim speed in Firefox). Prior TileSprite optimization reduced objects from 10,668→3,369 but ~1,461 Graphics objects with 64,005 draw commands still consume ~35% CPU.
+
+- [ ] Deep profiling session — Profile L9 in Firefox DevTools to identify exact bottleneck distribution (Graphics vs display list vs physics vs scene overhead)
+- [ ] Bake static Graphics to textures — Trees, rocks, cliffs from Graphics → `generateTexture()`. Per-chunk approach (not one huge texture). Target: reduce GraphicsCanvasRenderer from 35% to <5%
+- [ ] Camera culling for off-screen objects — Set `visible=false` on Graphics/sprites outside camera viewport. Reduces display list iteration
+- [ ] Investigate `fps.limit` for adaptive throttle — Phaser's built-in `stepLimitFPS()` can cap to 30 FPS but couples update+render. Evaluate if delta-based physics tolerates larger steps
+
+**Key constraint:** `Game.step()` override freezes Firefox entirely — any frame-rate management must use Phaser's built-in config, not monkey-patching.
+
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
@@ -26,6 +37,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ **Ski jumps** — Groom key triggers speed-dependent jump during ski runs. Cliff jumps clear danger zones at 30+ km/h. Airborne skiers skip all ground-level collisions. Touch JMP button for mobile. Win screen shows celebrating skier/snowboarder. Park features render below player. 3 E2E tests.
 
 - ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (12 tight). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. 3 E2E tests.
+
+- ✅ **FPS counter & simulation monitor** — In-game FPS display in visor bottom-right with simulation speed percentage (actualFps/targetFps). Passive FPS monitoring via Phaser `poststep` event with rolling 30-frame average and hysteresis-based throttle detection. Togglable in Settings → Accessibility → Show FPS. Green monospace font, 500ms update interval. Localized in 14 languages. Investigated Phaser `fps.limit` config — `stepLimitFPS()` couples update+render so can't decouple physics from rendering.
+
+- ✅ **Ski run realism pass** — Off-piste skiing with deep powder drag and packed-snow shoulder. Ski/snowboard tracks on ungroomed and off-piste snow (parallel lines for skis, single wide track for snowboard). Smooth carving physics via lerped lateral velocity. Fatal crashes above 40 km/h. Avalanche risk on hazardous levels (5× faster trigger). Y-depth sorted obstacles. Default grooming when starting from level select. Ski crash fail screens with yard sale and avalanche burial pixel art.
 
 - ✅ **Settings layout polish** — Adaptive inline/stacked layout for multi-select button groups (colorblind, ski mode, keyboard layout): measures whether label + buttons fit on one line, stacks if not. Touch sub-section in Controls showing detection status. Scene auto-restarts on first touch event to resize targets. Language flag buttons scale with touch target size. Updated `inputTouchOff` across 14 locales.
 

@@ -32,6 +32,7 @@ const en: Record<string, string> = {
   accessibility: "Accessibility",
   highContrast: "High Contrast",
   reducedMotion: "Reduced Motion",
+  showFps: "Show FPS",
   colorblindMode: "Colorblind",
   none: "None",
   deuteranopia: "Deutan.",

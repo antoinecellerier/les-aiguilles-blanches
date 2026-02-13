@@ -15,6 +15,7 @@ import { getString } from './utils/storage';
 import { registerGameScenes } from './utils/sceneTransitions';
 import { attachCanvasTouchDetect } from './utils/touchDetect';
 import { AudioSystem } from './systems/AudioSystem';
+import { installRenderThrottle } from './utils/renderThrottle';
 
 // TypeScript scenes
 import BootScene from './scenes/BootScene';
@@ -112,6 +113,9 @@ window.addEventListener('load', () => {
   }
 
   window.game = new Phaser.Game(config);
+
+  // Install adaptive render throttle (60 Hz physics, 30 Hz render when FPS < 45)
+  installRenderThrottle(window.game);
 
   // Initialize audio system
   AudioSystem.getInstance().init(window.game);

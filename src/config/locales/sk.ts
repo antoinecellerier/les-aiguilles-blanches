@@ -32,6 +32,7 @@ const sk: Record<string, string> = {
   accessibility: "Prístupnosť",
   highContrast: "Vysoký kontrast",
   reducedMotion: "Obmedzený pohyb",
+  showFps: "Show FPS",
   colorblindMode: "Farbosleposť",
   none: "Žiadne",
   deuteranopia: "Deutan.",

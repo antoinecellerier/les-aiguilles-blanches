@@ -8,6 +8,7 @@
  * - No circular imports — constructors are registered at boot via registerGameScenes()
  */
 import Phaser from 'phaser';
+import { resetSettleFrames } from './renderThrottle';
 
 /** Registry of scene constructors, populated once at boot by main.ts. */
 // Stored on window to survive Vite HMR module instance splits in dev mode
@@ -84,6 +85,7 @@ export function resetGameScenes(
     }
 
     // Start target
+    resetSettleFrames();
     game.scene.start(target, data);
 
     // Delay guard reset until the target scene's first update() frame completes.

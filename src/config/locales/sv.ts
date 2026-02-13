@@ -32,6 +32,7 @@ const sv: Record<string, string> = {
   accessibility: "Tillgänglighet",
   highContrast: "Hög kontrast",
   reducedMotion: "Reducerad rörelse",
+  showFps: "Show FPS",
   colorblindMode: "Färgblindhet",
   none: "Ingen",
   deuteranopia: "Deutan.",

@@ -11,6 +11,7 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString } from '../utils/storage';
 import { toggleFullscreen } from '../utils/fullscreen';
 import { Accessibility } from '../utils/accessibility';
+import { isRenderThrottled } from '../utils/renderThrottle';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -58,6 +59,11 @@ export default class HUDScene extends Phaser.Scene {
   // Bonus objectives panel
   private bonusTexts: Phaser.GameObjects.Text[] = [];
   private bonusObjectives: BonusObjective[] = [];
+
+  // FPS counter
+  private fpsText: Phaser.GameObjects.Text | null = null;
+  private showFps = false;
+  private fpsUpdateTimer = 0;
   private bonusFailed: boolean[] = []; // irreversible failure tracking
 
 
@@ -380,6 +386,16 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     this.barWidth = barWidth;
+
+    // FPS counter — visor bottom-right, toggled in Settings (default: on)
+    this.showFps = getString(STORAGE_KEYS.SHOW_FPS) !== 'false';
+    const fpsFontSize = Math.max(10, Math.round(11 * this.uiScale)) + 'px';
+    const fpsY = visorHeight - padding;
+    this.fpsText = this.add.text(width - padding, fpsY, '', {
+      fontFamily: 'monospace', fontSize: fpsFontSize, color: '#88ff88',
+    }).setOrigin(1, 1).setScrollFactor(0).setAlpha(0.7).setVisible(this.showFps);
+    this.fpsUpdateTimer = 0;
+
     this.game.events.on(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.on(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
     this.game.events.on(GAME_EVENTS.ACCESSIBILITY_CHANGED, this.handleAccessibilityChanged, this);
@@ -1050,6 +1066,19 @@ export default class HUDScene extends Phaser.Scene {
 
     this.emitTouchState();
 
+    // FPS counter — update every ~500ms to avoid text churn
+    if (this.showFps && this.fpsText?.active) {
+      this.fpsUpdateTimer += this.game.loop.delta;
+      if (this.fpsUpdateTimer >= 500) {
+        this.fpsUpdateTimer = 0;
+        const fps = Math.round(this.game.loop.actualFps);
+        const targetFps = this.game.loop.targetFps || 60;
+        const simPct = Math.min(100, Math.round((this.game.loop.actualFps / targetFps) * 100));
+        const throttleFlag = isRenderThrottled() ? ' ⏬' : '';
+        this.fpsText.setText(fps + ' FPS · ' + simPct + '%' + throttleFlag);
+      }
+    }
+
     // Gamepad Select/Back button (button 8) for level skip
     if (this.input.gamepad && this.input.gamepad.total > 0) {
       const pad = this.input.gamepad.getPad(0);
@@ -1193,6 +1222,8 @@ export default class HUDScene extends Phaser.Scene {
     this.bonusFailed = [];
 
     this.timerText = null;
+    this.fpsText = null;
+    this.fpsUpdateTimer = 0;
     this.actionButtons = [];
   }
 }

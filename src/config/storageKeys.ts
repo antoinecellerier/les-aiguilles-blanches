@@ -22,6 +22,7 @@ export const STORAGE_KEYS = {
   AUDIO_MUTED: 'snowGroomer_audioMuted',
   TUTORIAL_DONE: 'snowGroomer_tutorialDone',
   SKI_MODE: 'snowGroomer_skiMode',
+  SHOW_FPS: 'snowGroomer_showFps',
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

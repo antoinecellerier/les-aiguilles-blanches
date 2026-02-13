@@ -36,6 +36,7 @@ const de: Record<string, string> = {
   accessibility: "Barrierefreiheit",
   highContrast: "Hoher Kontrast",
   reducedMotion: "Weniger Bewegung",
+  showFps: "Show FPS",
   colorblindMode: "Farbenblind",
   none: "Keine",
   deuteranopia: "Deuteran.",

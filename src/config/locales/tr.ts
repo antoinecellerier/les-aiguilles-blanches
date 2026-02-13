@@ -32,6 +32,7 @@ const tr: Record<string, string> = {
   accessibility: "Erişilebilirlik",
   highContrast: "Yüksek Kontrast",
   reducedMotion: "Azaltılmış Hareket",
+  showFps: "Show FPS",
   colorblindMode: "Renk Körlüğü",
   none: "Yok",
   deuteranopia: "Deutan.",
