@@ -28,3 +28,4 @@ export { getButtonName, getDefaultGamepadBindings, detectControllerType, isGamep
 export { STORAGE_KEYS } from '../../../src/config/storageKeys.ts';
 export { LevelGeometry } from '../../../src/systems/LevelGeometry.ts';
 export { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, getMovementKeyNames, getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../../../src/utils/keyboardLayout.ts';
+export { getSavedProgress, saveProgress, markLevelCompleted, isLevelUnlocked, clearProgress, getLevelStats } from '../../../src/utils/gameProgress.ts';
