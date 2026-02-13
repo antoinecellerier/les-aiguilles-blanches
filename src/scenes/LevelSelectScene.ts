@@ -34,6 +34,14 @@ export default class LevelSelectScene extends Phaser.Scene {
   /** Lists button indices per row, keyed by row number */
   private rowButtons: Map<number, number[]> = new Map();
 
+  // Scroll state (positive = scrolled down, matching MenuScene convention)
+  private scrollY = 0;
+  private maxScroll = 0;
+  private listStartY = 0;
+  private rowH = 0;
+  private listContainer: Phaser.GameObjects.Container | null = null;
+  private updateScrollHints: (() => void) | null = null;
+
   constructor() {
     super({ key: 'LevelSelectScene' });
   }
@@ -109,10 +117,14 @@ export default class LevelSelectScene extends Phaser.Scene {
     const startY = title.y + title.height + Math.round(height * 0.02);
     const maxListH = height - startY - Math.round(height * 0.04);
     const totalListH = LEVELS.length * rowH;
-    let scrollY = 0;
+    this.scrollY = 0;
+    this.maxScroll = Math.max(0, totalListH - maxListH);
+    this.listStartY = startY;
+    this.rowH = rowH;
     const needsScroll = totalListH > maxListH;
 
-    const listContainer = this.add.container(0, 0).setDepth(DEPTHS.MENU_UI);
+    const listContainer = this.add.container(0, startY).setDepth(DEPTHS.MENU_UI);
+    this.listContainer = listContainer;
 
     const progress = getSavedProgress();
 
@@ -133,7 +145,7 @@ export default class LevelSelectScene extends Phaser.Scene {
     // Build rows
     for (let i = 0; i < LEVELS.length; i++) {
       const level = LEVELS[i] as Level;
-      const y = startY + i * rowH;
+      const y = i * rowH;
       const unlocked = isLevelUnlocked(i);
       const completed = isLevelCompleted(i);
       const stats = getLevelStats(i);
@@ -157,6 +169,8 @@ export default class LevelSelectScene extends Phaser.Scene {
         fontFamily: THEME.fonts.family,
         fontSize: `${rowFontSize}px`,
         color: '#' + markerColor.toString(16).padStart(6, '0'),
+        stroke: '#ffffff',
+        strokeThickness: markerColor < 0x404040 ? 2 : 0,
       }).setOrigin(0, 0.5);
       listContainer.add(mg);
 
@@ -267,10 +281,28 @@ export default class LevelSelectScene extends Phaser.Scene {
     const geomMask = mask.createGeometryMask();
     listContainer.setMask(geomMask);
 
-    const maxScroll = Math.max(0, totalListH - maxListH);
+    // Scroll indicators (▲/▼)
+    let scrollUpHint: Phaser.GameObjects.Text | null = null;
+    let scrollDownHint: Phaser.GameObjects.Text | null = null;
+    const updateScrollHints = () => {
+      if (scrollUpHint) scrollUpHint.setAlpha(this.scrollY > 0 ? 0.7 : 0);
+      if (scrollDownHint) scrollDownHint.setAlpha(this.scrollY < this.maxScroll ? 0.7 : 0);
+    };
+    this.updateScrollHints = updateScrollHints;
+    if (needsScroll) {
+      const hintSize = Math.round(Math.max(12, 16 * scaleFactor));
+      scrollUpHint = this.add.text(cx, startY + 2, '▲', {
+        fontFamily: THEME.fonts.family, fontSize: hintSize + 'px', color: '#ffffff',
+      }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_UI + 1).setAlpha(0);
+      scrollDownHint = this.add.text(cx, startY + maxListH - 2, '▼', {
+        fontFamily: THEME.fonts.family, fontSize: hintSize + 'px', color: '#ffffff',
+      }).setOrigin(0.5, 1).setDepth(DEPTHS.MENU_UI + 1).setAlpha(0.7);
+    }
+
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _gos: unknown[], _dx: number, dy: number) => {
-      scrollY = Phaser.Math.Clamp(scrollY - dy * 0.5, -maxScroll, 0);
-      listContainer.y = scrollY;
+      this.scrollY = Phaser.Math.Clamp(this.scrollY + dy * 0.5, 0, this.maxScroll);
+      listContainer.y = startY - this.scrollY;
+      updateScrollHints();
     });
 
     // Touch drag scrolling for mobile
@@ -278,27 +310,56 @@ export default class LevelSelectScene extends Phaser.Scene {
     let dragScrollStart = 0;
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       dragStartY = pointer.y;
-      dragScrollStart = scrollY;
+      dragScrollStart = this.scrollY;
     });
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (!pointer.isDown || maxScroll <= 0) return;
-      const dy = pointer.y - dragStartY;
-      if (Math.abs(dy) > 8) {  // dead zone to avoid accidental scroll
-        scrollY = Phaser.Math.Clamp(dragScrollStart + dy, -maxScroll, 0);
-        listContainer.y = scrollY;
+      if (!pointer.isDown || this.maxScroll <= 0) return;
+      const delta = dragStartY - pointer.y;
+      if (Math.abs(delta) > 8) {
+        this.scrollY = Phaser.Math.Clamp(dragScrollStart + delta, 0, this.maxScroll);
+        listContainer.y = startY - this.scrollY;
+        updateScrollHints();
       }
     });
 
+    // Selection arrow indicator (gold ▶, like MenuScene)
+    const arrowSize = Math.round(Math.max(12, 16 * scaleFactor));
+    const selectionArrow = this.add.text(0, 0, '▶', {
+      fontFamily: THEME.fonts.family,
+      fontSize: arrowSize + 'px',
+      color: '#FFD700',
+      stroke: '#2d2822',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setVisible(false);
+    listContainer.add(selectionArrow);
+
     // --- Navigation ---
+    const buttonRowMap = this.buttonRow;
+    const arrowX = rowStartX - arrowSize;
     this.buttonNav = createMenuButtonNav(
       this.menuButtons,
       this.buttonCallbacks,
-      ctaStyler(this.buttonIsCTA),
+      (buttons, selectedIndex) => {
+        // Apply CTA-aware styling
+        ctaStyler(this.buttonIsCTA)(buttons, selectedIndex);
+        // Position arrow at the selected row
+        const row = buttonRowMap[selectedIndex];
+        if (row >= 0) {
+          const rowCenterY = row * rowH + rowH / 2;
+          selectionArrow.setPosition(arrowX, rowCenterY);
+          selectionArrow.setVisible(true);
+        } else {
+          selectionArrow.setVisible(false);
+        }
+      },
     );
 
     // Select the current level's groom button by default
     const defaultIdx = this.buttonIsCTA.indexOf(true);
-    if (defaultIdx >= 0) this.buttonNav.select(defaultIdx);
+    if (defaultIdx >= 0) {
+      this.buttonNav.select(defaultIdx);
+      this.scrollToRow(this.buttonRow[defaultIdx]);
+    }
 
     this.setupInput();
     this.inputReadyTimer = this.time.delayedCall(BALANCE.SCENE_INPUT_DELAY, () => { this.inputReady = true; });
@@ -345,6 +406,7 @@ export default class LevelSelectScene extends Phaser.Scene {
       const colInCurrent = (this.rowButtons.get(currentRow) ?? []).indexOf(currentIdx);
       const targetIdx = btns[Math.min(colInCurrent, btns.length - 1)];
       this.buttonNav.select(targetIdx);
+      this.scrollToRow(nextRow);
     } else if (dx !== 0) {
       // Move within current row
       const btns = this.rowButtons.get(currentRow);
@@ -354,6 +416,29 @@ export default class LevelSelectScene extends Phaser.Scene {
       if (nextCol < 0 || nextCol >= btns.length) return;
       this.buttonNav.select(btns[nextCol]);
     }
+  }
+
+  /** Scroll the list so the given level row is fully visible. */
+  private scrollToRow(row: number): void {
+    if (this.maxScroll <= 0 || !this.listContainer) return;
+    // Back button (row -1) is outside the list — no scroll needed
+    if (row < 0) return;
+
+    const { height } = this.cameras.main;
+    const maxListH = height - this.listStartY - Math.round(height * 0.04);
+    const rowTop = row * this.rowH;
+    const rowBottom = rowTop + this.rowH;
+
+    if (rowTop < this.scrollY) {
+      this.scrollY = Math.max(0, rowTop - 5);
+    } else if (rowBottom > this.scrollY + maxListH) {
+      this.scrollY = Math.min(this.maxScroll, rowBottom - maxListH + 5);
+    } else {
+      return; // already visible
+    }
+
+    this.listContainer.y = this.listStartY - this.scrollY;
+    this.updateScrollHints?.();
   }
 
   private startLevel(level: number, mode: 'groom' | 'ski'): void {
@@ -408,5 +493,7 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.input.off('wheel');
     this.resizeManager?.destroy();
     this.wildlife?.destroy();
+    this.listContainer = null;
+    this.updateScrollHints = null;
   }
 }
