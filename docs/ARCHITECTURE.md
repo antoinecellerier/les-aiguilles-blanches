@@ -406,7 +406,7 @@ groomer.buffs = {
 ## Performance Considerations
 
 1. **Tile culling**: Only render tiles within camera viewport (+ 2-tile margin). `cullSnowTiles()` in GameScene sets `tile.visible = false` for off-screen tiles, skipping only when camera hasn't moved a full tile
-2. **Background TileSprite**: Off-piste snow and extended forest backgrounds use `TileSprite` (1 object) instead of thousands of individual Image tiles — the single biggest performance win (7,300+ objects eliminated)
+2. **Background DynamicTexture**: Off-piste snow and extended forest backgrounds use `DynamicTexture` with `createPattern('repeat')` to pre-render the tile pattern once at level start, displayed as a single Image — eliminates per-frame TileSprite pattern fills (was 35% of CPU in Firefox profiler)
 3. **Static overlays as textures**: The frost vignette is pre-rendered into a texture via `generateTexture()` at creation, then displayed as an Image with alpha updates only — avoids per-frame Graphics.clear()+redraw which is extremely expensive on Canvas
 4. **Object pooling**: Reuse particle objects for weather
 5. **RequestAnimationFrame**: Synchronized with display refresh

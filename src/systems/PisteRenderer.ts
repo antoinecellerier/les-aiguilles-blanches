@@ -43,14 +43,33 @@ export class PisteRenderer {
     const extraRight = Math.max(0, bgWidth - worldWidth - extraLeft);
     const extraBottom = Math.max(0, bgHeight - worldHeight - extraTop);
 
-    // Single TileSprite for the extended snow background (replaces thousands of tiles)
+    // Pre-rendered off-piste extended background — paint tile pattern once
     const totalW = worldWidth + extraLeft + extraRight;
     const totalH = worldHeight + extraTop + extraBottom;
-    const bg = this.scene.add.tileSprite(
+    const extW = totalW + tileSize * 2;
+    const extH = totalH + tileSize * 2;
+    const extKey = '__offpiste_ext_bg';
+    if (this.scene.textures.exists(extKey)) this.scene.textures.remove(extKey);
+    const extDt = this.scene.textures.addDynamicTexture(extKey, extW, extH)!;
+    const extCtx = extDt.context!;
+    const extFrame = this.scene.textures.getFrame('snow_offpiste');
+    const extSrc = extFrame.source.image as HTMLImageElement | HTMLCanvasElement;
+    const extCd = extFrame.canvasData as { x: number; y: number; width: number; height: number };
+    const extPat = extCtx.createPattern(extSrc, 'repeat');
+    if (extPat) {
+      extCtx.fillStyle = extPat;
+      extCtx.fillRect(0, 0, extW, extH);
+    } else {
+      for (let ty = 0; ty < extH; ty += extCd.height) {
+        for (let tx = 0; tx < extW; tx += extCd.width) {
+          extCtx.drawImage(extSrc, extCd.x, extCd.y, extCd.width, extCd.height, tx, ty, extCd.width, extCd.height);
+        }
+      }
+    }
+    const bg = this.scene.add.image(
       worldWidth / 2 + (extraRight - extraLeft) / 2,
       worldHeight / 2 + (extraBottom - extraTop) / 2,
-      totalW + tileSize * 2, totalH + tileSize * 2,
-      'snow_offpiste'
+      extKey
     );
     bg.setDepth(DEPTHS.BG_FOREST_TILES);
 

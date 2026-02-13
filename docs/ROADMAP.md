@@ -18,6 +18,10 @@ Profile and fix the root cause of FPS drops on heavy levels (L9 storm: 24 FPS / 
 - [x] Bake animal track Graphics to textures — Pre-generate track textures per species (bunny, chamois, bouquetin, marmot, fox) in BootScene. WildlifeSystem uses Images instead of Graphics. L1 Graphics −72%, L7 Graphics −58%
 - [x] Reduce night overlay light cone commands — Reduced headlight step grid (6×8×12→4×5×8), compensated with larger circles (sizeFactor 0.25→0.4). Result: 12,524→3,632 commands per frame (−71%)
 - [x] Camera culling for off-screen objects — Extended snow tile culling to all static Images (trees, rocks, tracks). Reduced padding tree density (spacing 2→3, 1,076→439 trees). L9: 1,200+ objects hidden per frame
+- [x] Replace snow tile Images with DynamicTexture — Paint all piste snow tiles onto a single DynamicTexture at level start. One Image instead of hundreds of individual tiles
+- [x] Replace access road tile Images with DynamicTexture — Paint access road snow onto a single DynamicTexture. L4 FPS 33→60
+- [x] Replace night overlay Graphics with DynamicTexture — Paint darkness + light cone directly to canvas context each frame. Eliminates 7,416 Graphics commands per frame on L7. L7 FPS 32→60
+- [x] Replace TileSprite backgrounds with DynamicTexture — Pre-render off-piste tile pattern once via `createPattern()`. Eliminates TileSpriteCanvasRenderer (35% of CPU in Firefox profiler). Render time 0.9→0.2ms median
 
 **Key constraint:** `Game.step()` override freezes Firefox entirely — any frame-rate management must use Phaser's built-in config, not monkey-patching.
 
