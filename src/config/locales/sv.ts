@@ -18,7 +18,7 @@ const sv: Record<string, string> = {
   inputKeyboard: "✓ Tangentbord upptäckt",
   inputKeyboardOff: "✗ Inget tangentbord",
   inputTouch: "✓ Pekskärm upptäckt",
-  inputTouchOff: "✗ Ingen pekskärm",
+  inputTouchOff: "✗ Ingen pekskärm upptäckt",
   inputGamepad: "✓ Gamepad ansluten",
   inputGamepadOff: "✗ Ingen gamepad",
   updateAvailable: "Ny version tillgänglig — tryck för att ladda om",

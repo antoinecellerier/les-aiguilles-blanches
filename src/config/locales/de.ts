@@ -22,7 +22,7 @@ const de: Record<string, string> = {
   inputKeyboard: "✓ Tastatur erkannt",
   inputKeyboardOff: "✗ Keine Tastatur",
   inputTouch: "✓ Touchscreen erkannt",
-  inputTouchOff: "✗ Kein Touchscreen",
+  inputTouchOff: "✗ Kein Touchscreen erkannt",
   inputGamepad: "✓ Gamepad verbunden",
   inputGamepadOff: "✗ Kein Gamepad",
   updateAvailable: "Neue Version verfügbar — tippen zum Neuladen",

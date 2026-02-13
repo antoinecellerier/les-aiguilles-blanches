@@ -18,7 +18,7 @@ const fi: Record<string, string> = {
   inputKeyboard: "✓ Näppäimistö havaittu",
   inputKeyboardOff: "✗ Ei näppäimistöä",
   inputTouch: "✓ Kosketusnäyttö havaittu",
-  inputTouchOff: "✗ Ei kosketusnäyttöä",
+  inputTouchOff: "✗ Kosketusnäyttöä ei havaittu",
   inputGamepad: "✓ Peliohjain yhdistetty",
   inputGamepadOff: "✗ Ei peliohjainta",
   updateAvailable: "Uusi versio saatavilla — napauta ladataksesi uudelleen",

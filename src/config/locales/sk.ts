@@ -18,7 +18,7 @@ const sk: Record<string, string> = {
   inputKeyboard: "✓ Klávesnica nájdená",
   inputKeyboardOff: "✗ Žiadna klávesnica",
   inputTouch: "✓ Dotykový displej nájdený",
-  inputTouchOff: "✗ Žiadny dotykový displej",
+  inputTouchOff: "✗ Dotykový displej nenájdený",
   inputGamepad: "✓ Gamepad pripojený",
   inputGamepadOff: "✗ Žiadny gamepad",
   updateAvailable: "Nová verzia k dispozícii — ťuknite pre obnovenie",

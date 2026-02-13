@@ -18,7 +18,7 @@ const pl: Record<string, string> = {
   inputKeyboard: "✓ Klawiatura wykryta",
   inputKeyboardOff: "✗ Brak klawiatury",
   inputTouch: "✓ Ekran dotykowy wykryty",
-  inputTouchOff: "✗ Brak ekranu dotykowego",
+  inputTouchOff: "✗ Nie wykryto ekranu dotykowego",
   inputGamepad: "✓ Gamepad podłączony",
   inputGamepadOff: "✗ Brak gamepada",
   updateAvailable: "Nowa wersja dostępna — dotknij, aby odświeżyć",

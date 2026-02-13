@@ -18,7 +18,7 @@ const en: Record<string, string> = {
   inputKeyboard: "✓ Keyboard detected",
   inputKeyboardOff: "✗ No keyboard",
   inputTouch: "✓ Touchscreen detected",
-  inputTouchOff: "✗ No touchscreen",
+  inputTouchOff: "✗ No touchscreen detected",
   inputGamepad: "✓ Gamepad connected",
   inputGamepadOff: "✗ No gamepad",
   updateAvailable: "New version available — tap to reload",

@@ -18,7 +18,7 @@ const tr: Record<string, string> = {
   inputKeyboard: "✓ Klavye algılandı",
   inputKeyboardOff: "✗ Klavye yok",
   inputTouch: "✓ Dokunmatik ekran algılandı",
-  inputTouchOff: "✗ Dokunmatik ekran yok",
+  inputTouchOff: "✗ Dokunmatik ekran algılanmadı",
   inputGamepad: "✓ Gamepad bağlı",
   inputGamepadOff: "✗ Gamepad yok",
   updateAvailable: "Yeni sürüm mevcut — yenilemek için dokunun",

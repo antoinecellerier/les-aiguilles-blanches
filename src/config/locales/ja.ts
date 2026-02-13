@@ -18,7 +18,7 @@ const ja: Record<string, string> = {
   inputKeyboard: "✓ キーボード検出",
   inputKeyboardOff: "✗ キーボードなし",
   inputTouch: "✓ タッチスクリーン検出",
-  inputTouchOff: "✗ タッチスクリーンなし",
+  inputTouchOff: "✗ タッチスクリーン未検出",
   inputGamepad: "✓ ゲームパッド接続済み",
   inputGamepadOff: "✗ ゲームパッドなし",
   updateAvailable: "新しいバージョンがあります — タップで更新",

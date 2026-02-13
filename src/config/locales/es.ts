@@ -22,7 +22,7 @@ const es: Record<string, string> = {
   inputKeyboard: "✓ Teclado detectado",
   inputKeyboardOff: "✗ Sin teclado",
   inputTouch: "✓ Pantalla táctil detectada",
-  inputTouchOff: "✗ Sin pantalla táctil",
+  inputTouchOff: "✗ Pantalla táctil no detectada",
   inputGamepad: "✓ Mando conectado",
   inputGamepadOff: "✗ Sin mando",
   updateAvailable: "Nueva versión disponible — toca para recargar",

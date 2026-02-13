@@ -18,7 +18,7 @@ const ko: Record<string, string> = {
   inputKeyboard: "✓ 키보드 감지됨",
   inputKeyboardOff: "✗ 키보드 없음",
   inputTouch: "✓ 터치스크린 감지됨",
-  inputTouchOff: "✗ 터치스크린 없음",
+  inputTouchOff: "✗ 터치스크린 감지 안 됨",
   inputGamepad: "✓ 게임패드 연결됨",
   inputGamepadOff: "✗ 게임패드 없음",
   updateAvailable: "새 버전이 있습니다 — 탭하여 새로고침",

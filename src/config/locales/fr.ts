@@ -19,7 +19,7 @@ const fr: Record<string, string> = {
   inputKeyboard: "✓ Clavier détecté",
   inputKeyboardOff: "✗ Pas de clavier",
   inputTouch: "✓ Écran tactile détecté",
-  inputTouchOff: "✗ Pas d'écran tactile",
+  inputTouchOff: "✗ Aucun écran tactile détecté",
   inputGamepad: "✓ Manette connectée",
   inputGamepadOff: "✗ Pas de manette",
   updateAvailable: "Nouvelle version disponible — toucher pour recharger",

@@ -18,7 +18,7 @@ const nb: Record<string, string> = {
   inputKeyboard: "✓ Tastatur oppdaget",
   inputKeyboardOff: "✗ Ingen tastatur",
   inputTouch: "✓ Berøringsskjerm oppdaget",
-  inputTouchOff: "✗ Ingen berøringsskjerm",
+  inputTouchOff: "✗ Ingen berøringsskjerm oppdaget",
   inputGamepad: "✓ Gamepad tilkoblet",
   inputGamepadOff: "✗ Ingen gamepad",
   updateAvailable: "Ny versjon tilgjengelig — trykk for å laste på nytt",

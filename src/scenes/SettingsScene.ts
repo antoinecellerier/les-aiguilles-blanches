@@ -7,7 +7,7 @@ import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString, setString } from '../utils/storage';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch } from '../utils/touchDetect';
+import { hasTouch as detectTouch, onTouchAvailable } from '../utils/touchDetect';
 import { createGamepadMenuNav } from '../utils/gamepadMenu';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
@@ -185,6 +185,13 @@ export default class SettingsScene extends Phaser.Scene {
     this.scale.on('resize', this.handleResize, this);
     
     Accessibility.announce((t('settings') || 'Settings'));
+
+    // Restart scene if touch is first detected while viewing settings
+    if (!hasTouch) {
+      onTouchAvailable(() => {
+        if (this.scene.isActive()) this.restartScene();
+      });
+    }
   }
 
   private resizing = false;
@@ -392,9 +399,7 @@ export default class SettingsScene extends Phaser.Scene {
       }), { align: 'left' });
 
     // Colorblind modes
-    panel.add(this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, THEME.colors.textSecondary), 
-      { align: 'left' });
-    panel.add(this.createColorblindButtons(), { align: 'left' });
+    panel.add(this.createColorblindSelector(), { align: 'left' });
     sizer.add(panel, { align: 'left', padding: { top: 4 } });
   }
 
@@ -424,15 +429,11 @@ export default class SettingsScene extends Phaser.Scene {
     
     const currentMode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
 
-    const row = this.rexUI.add.fixWidthSizer({
-      width: this.contentWidth,
-      space: { item: Math.round(this.fontSize * 0.5), line: 2 }
-    });
-
-    row.add(this.createText(
+    const spacing = Math.round(this.fontSize * 0.5);
+    const modeLabel = this.createText(
       (t('skiMode') || 'Descent Mode') + ':',
       this.smallFont, THEME.colors.textSecondary
-    ));
+    );
 
     const modes = [
       { id: 'random', label: t('random') || 'Random' },
@@ -464,13 +465,29 @@ export default class SettingsScene extends Phaser.Scene {
       }).setInteractive({ useHandCursor: true })
         .on('pointerdown', () => { playClick(); setMode(mode.id); });
       modeButtons.push(btn);
-      row.add(btn);
     });
+
+    // Measure if label + all buttons fit on one line
+    const totalWidth = modeLabel.width + modeButtons.reduce((sum, b) => sum + b.width + spacing, 0);
+    const fitsInline = totalWidth <= this.contentWidth;
+
+    let modeContainer: any;
+    if (fitsInline) {
+      modeContainer = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      modeContainer.add(modeLabel);
+      modeButtons.forEach(btn => modeContainer.add(btn));
+    } else {
+      modeContainer = this.rexUI.add.sizer({ orientation: 'y', space: { item: 2 } });
+      modeContainer.add(modeLabel, { align: 'left' });
+      const btnRow = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      modeButtons.forEach(btn => btnRow.add(btn));
+      modeContainer.add(btnRow, { align: 'left' });
+    }
 
     const currentIdx = modes.findIndex(m => m.id === currentMode);
     const groupIndex = { value: Math.max(0, currentIdx) };
     this.focus.items.push({
-      element: row,
+      element: modeContainer,
       buttons: modeButtons,
       groupIndex: groupIndex.value,
       activate: () => { playClick(); setMode(modes[groupIndex.value].id); },
@@ -486,7 +503,7 @@ export default class SettingsScene extends Phaser.Scene {
       },
     });
 
-    panel.add(row, { align: 'left' });
+    panel.add(modeContainer, { align: 'left' });
     sizer.add(panel, { align: 'left', padding: { top: 4 } });
   }
 
@@ -650,6 +667,15 @@ export default class SettingsScene extends Phaser.Scene {
     this.diagnosticPanel = new GamepadDiagnosticPanel();
     this.diagnosticPanel.build(this, panel, this.contentWidth, this.smallFont, () => this.mainSizer?.layout());
 
+    // --- Touch sub-section ---
+    panel.add(this.createSubHeader('✋ ' + (t('touch') || 'Touch')), { align: 'left', padding: { top: 8 } });
+    const hasTouch = detectTouch();
+    const touchStatus = hasTouch
+      ? (t('inputTouch') || '✓ Touchscreen detected')
+      : (t('inputTouchOff') || '✗ No touchscreen');
+    const touchColor = hasTouch ? '#aaffaa' : THEME.colors.disabled;
+    panel.add(this.createText(touchStatus, this.smallFont, touchColor), { align: 'left' });
+
     sizer.add(panel, { align: 'left-top', expand: true });
   }
 
@@ -765,7 +791,7 @@ export default class SettingsScene extends Phaser.Scene {
     languages.forEach(lang => {
       const isActive = currentLang === lang.code;
       // Smaller padding on narrow screens
-      const paddingY = Math.max(2, Math.min(6, (this.minTouchTarget - this.fontSize) / 2));
+      const paddingY = Math.max(2, (this.minTouchTarget - this.fontSize) / 2);
       const paddingX = Math.max(3, Math.round(paddingY * 0.6));
       const btn = this.add.text(0, 0, lang.name, {
         fontFamily: THEME.fonts.family,
@@ -959,27 +985,39 @@ export default class SettingsScene extends Phaser.Scene {
     return wrapper;
   }
 
-  private createColorblindButtons(): any {
+  private createColorblindSelector(): any {
     const cbModes: ColorblindMode[] = ['none', 'deuteranopia', 'protanopia', 'tritanopia'];
-    
-    // Always use fixWidthSizer for auto-wrapping with width constraint
-    const container = this.rexUI.add.fixWidthSizer({ 
-      width: this.contentWidth,
-      space: { item: 4, line: 4 }
-    });
+    const spacing = 4;
+
+    const labelText = this.createText(t('colorblindMode') || 'Colorblind:', this.smallFont, THEME.colors.textSecondary);
     const cbButtons: Phaser.GameObjects.Text[] = [];
     cbModes.forEach(mode => {
-      const btn = this.createColorblindBtn(mode);
-      cbButtons.push(btn);
-      container.add(btn);
+      cbButtons.push(this.createColorblindBtn(mode));
     });
+
+    // Measure if label + all buttons fit on one line
+    const totalWidth = labelText.width + cbButtons.reduce((sum, b) => sum + b.width + spacing, 0);
+    const fitsInline = totalWidth <= this.contentWidth;
+
+    let wrapper: any;
+    if (fitsInline) {
+      wrapper = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: spacing } });
+      wrapper.add(labelText);
+      cbButtons.forEach(btn => wrapper.add(btn));
+    } else {
+      wrapper = this.rexUI.add.sizer({ orientation: 'y', space: { item: 2 } });
+      wrapper.add(labelText, { align: 'left' });
+      const btnRow = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: spacing } });
+      cbButtons.forEach(btn => btnRow.add(btn));
+      wrapper.add(btnRow, { align: 'left' });
+    }
 
     // Register as group focus item
     const currentMode = Accessibility.settings.colorblindMode;
     const currentIdx = cbModes.indexOf(currentMode);
     const groupIndex = { value: Math.max(0, currentIdx) };
     this.focus.items.push({
-      element: container,
+      element: wrapper,
       buttons: cbButtons,
       groupIndex: groupIndex.value,
       activate: () => {
@@ -1004,7 +1042,7 @@ export default class SettingsScene extends Phaser.Scene {
       },
     });
 
-    return container;
+    return wrapper;
   }
 
   private createColorblindBtn(mode: ColorblindMode): Phaser.GameObjects.Text {
@@ -1087,12 +1125,8 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private createLayoutSelector(): any {
-    const row = this.rexUI.add.fixWidthSizer({ 
-      width: this.contentWidth,
-      space: { item: Math.round(this.fontSize * 0.4), line: 2 }
-    });
-    
-    row.add(this.createText('⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', this.smallFont, THEME.colors.textSecondary));
+    const spacing = Math.round(this.fontSize * 0.4);
+    const labelText = this.createText('⌨️ ' + (t('keyboardLayout') || 'Layout') + ':', this.smallFont, THEME.colors.textSecondary);
     
     // Check for custom bindings
     const hasCustomBindings = Object.keys(this.keys.bindings).some(key => 
@@ -1100,46 +1134,64 @@ export default class SettingsScene extends Phaser.Scene {
     );
 
     if (hasCustomBindings) {
+      const row = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      row.add(labelText);
       row.add(this.createText(t('customBindings') || 'Custom', this.smallFont, THEME.colors.accent));
-      // No navigation for custom mode
       this.focus.items.push({ element: row, activate: () => {} });
-    } else {
-      const currentLayout = getKeyboardLayout();
-      const layoutButtons: Phaser.GameObjects.Text[] = [];
-      AVAILABLE_LAYOUTS.forEach(layout => {
-        const isActive = currentLayout === layout.id;
-        const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
-        const btn = this.add.text(0, 0, layout.id.toUpperCase(), {
-          fontFamily: THEME.fonts.family,
-          fontSize: this.smallFont + 'px',
-          color: isActive ? THEME.colors.textDark : THEME.colors.textPrimary,
-          backgroundColor: isActive ? THEME.colors.info : '#555555',
-          padding: { x: Math.round(paddingY * 2), y: paddingY },
-        }).setInteractive({ useHandCursor: true })
-          .on('pointerdown', () => { playClick(); this.keys.setLayout(layout.id); });
-        layoutButtons.push(btn);
-        row.add(btn);
-      });
-
-      // Register as group focus item
-      const currentIdx = AVAILABLE_LAYOUTS.findIndex(l => l.id === currentLayout);
-      const groupIndex = { value: Math.max(0, currentIdx) };
-      this.focus.items.push({
-        element: row,
-        buttons: layoutButtons,
-        groupIndex: groupIndex.value,
-        activate: () => this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id),
-        left: () => {
-          groupIndex.value = (groupIndex.value - 1 + AVAILABLE_LAYOUTS.length) % AVAILABLE_LAYOUTS.length;
-          this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
-        },
-        right: () => {
-          groupIndex.value = (groupIndex.value + 1) % AVAILABLE_LAYOUTS.length;
-          this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
-        },
-      });
+      return row;
     }
-    return row;
+
+    const currentLayout = getKeyboardLayout();
+    const layoutButtons: Phaser.GameObjects.Text[] = [];
+    AVAILABLE_LAYOUTS.forEach(layout => {
+      const isActive = currentLayout === layout.id;
+      const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
+      const btn = this.add.text(0, 0, layout.id.toUpperCase(), {
+        fontFamily: THEME.fonts.family,
+        fontSize: this.smallFont + 'px',
+        color: isActive ? THEME.colors.textDark : THEME.colors.textPrimary,
+        backgroundColor: isActive ? THEME.colors.info : '#555555',
+        padding: { x: Math.round(paddingY * 2), y: paddingY },
+      }).setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => { playClick(); this.keys.setLayout(layout.id); });
+      layoutButtons.push(btn);
+    });
+
+    // Measure if label + all buttons fit on one line
+    const totalWidth = labelText.width + layoutButtons.reduce((sum, b) => sum + b.width + spacing, 0);
+    const fitsInline = totalWidth <= this.contentWidth;
+
+    let wrapper: any;
+    if (fitsInline) {
+      wrapper = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      wrapper.add(labelText);
+      layoutButtons.forEach(btn => wrapper.add(btn));
+    } else {
+      wrapper = this.rexUI.add.sizer({ orientation: 'y', space: { item: 2 } });
+      wrapper.add(labelText, { align: 'left' });
+      const btnRow = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      layoutButtons.forEach(btn => btnRow.add(btn));
+      wrapper.add(btnRow, { align: 'left' });
+    }
+
+    // Register as group focus item
+    const currentIdx = AVAILABLE_LAYOUTS.findIndex(l => l.id === currentLayout);
+    const groupIndex = { value: Math.max(0, currentIdx) };
+    this.focus.items.push({
+      element: wrapper,
+      buttons: layoutButtons,
+      groupIndex: groupIndex.value,
+      activate: () => this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id),
+      left: () => {
+        groupIndex.value = (groupIndex.value - 1 + AVAILABLE_LAYOUTS.length) % AVAILABLE_LAYOUTS.length;
+        this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
+      },
+      right: () => {
+        groupIndex.value = (groupIndex.value + 1) % AVAILABLE_LAYOUTS.length;
+        this.keys.setLayout(AVAILABLE_LAYOUTS[groupIndex.value].id);
+      },
+    });
+    return wrapper;
   }
 
   private setLang(code: SupportedLanguage): void {
