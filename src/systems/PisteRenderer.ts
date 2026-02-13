@@ -460,7 +460,7 @@ export class PisteRenderer {
    */
   createPisteBoundaries(level: Level, tileSize: number, worldWidth: number): void {
     this.createPisteMarkers(level, tileSize);
-    this.createAccessPaths(tileSize);
+    this.createAccessPaths(level, tileSize);
     this.createForestBoundaries(level, tileSize, worldWidth);
     this.createSteepZoneIndicators(level, tileSize);
   }
@@ -649,8 +649,20 @@ export class PisteRenderer {
     });
   }
 
-  private createAccessPaths(tileSize: number): void {
+  private createAccessPaths(level: Level, tileSize: number): void {
     if (this.geometry.accessPathCurves.length === 0) return;
+
+    const worldW = level.width * tileSize;
+    const worldH = level.height * tileSize;
+
+    // DynamicTexture for access road tiles (replaces hundreds of individual Images)
+    const dtKey = '__access_road';
+    if (this.scene.textures.exists(dtKey)) this.scene.textures.remove(dtKey);
+    const dt = this.scene.textures.addDynamicTexture(dtKey, worldW, worldH)!;
+    const ctx = dt.context!;
+    const frame = this.scene.textures.getFrame('snow_packed');
+    const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
+    const cd = frame.canvasData as { x: number; y: number; width: number; height: number };
 
     const poleSpacing = tileSize * 15;
 
@@ -671,13 +683,8 @@ export class PisteRenderer {
             const key = `${tx},${ty}`;
             if (!placedTiles.has(key)) {
               placedTiles.add(key);
-              const tile = this.scene.add.image(
-                tx * tileSize + tileSize / 2,
-                ty * tileSize + tileSize / 2,
-                'snow_packed'
-              );
-              tile.setDisplaySize(tileSize, tileSize);
-              tile.setDepth(DEPTHS.ACCESS_ROAD);
+              ctx.drawImage(src, cd.x, cd.y, cd.width, cd.height,
+                tx * tileSize, ty * tileSize, tileSize, tileSize);
             }
           }
         }
@@ -714,6 +721,10 @@ export class PisteRenderer {
         }
       }
     });
+
+    // Display the access road DynamicTexture as a single Image
+    const roadImg = this.scene.add.image(worldW / 2, worldH / 2, dtKey);
+    roadImg.setDepth(DEPTHS.ACCESS_ROAD);
   }
 
   private createServiceRoadPole(x: number, y: number): void {
