@@ -3,7 +3,6 @@ import { BALANCE, DEPTHS, yDepth } from '../config/gameConfig';
 import type { WildlifeSpawn } from '../config/levels';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
 import { drawAnimal, ANIMAL_GRID, type AnimalType } from '../utils/animalSprites';
-import { drawTrackShape } from '../utils/animalTracks';
 
 /** Per-species behavior constants */
 const SPECIES = {
@@ -46,7 +45,7 @@ interface Animal {
 }
 
 interface Track {
-  graphics: Phaser.GameObjects.Graphics;
+  image: Phaser.GameObjects.Image;
   age: number;              // ms since placed
   x: number;
   y: number;
@@ -94,7 +93,7 @@ export class WildlifeSystem {
       const dx = t.x - x;
       const dy = t.y - y;
       if (dx * dx + dy * dy < radius * radius) {
-        t.graphics.destroy();
+        t.image.destroy();
         this.tracks.splice(i, 1);
       }
     }
@@ -133,7 +132,7 @@ export class WildlifeSystem {
         if (track) {
           track.age = TRACK_LIFETIME * (0.3 + Math.random() * 0.5);
           const fade = 1 - track.age / TRACK_LIFETIME;
-          track.graphics.setAlpha(fade * 0.5);
+          track.image.setAlpha(fade * 0.5);
         }
       }
     }
@@ -453,10 +452,10 @@ export class WildlifeSystem {
       track.age += delta;
       const fade = 1 - track.age / TRACK_LIFETIME;
       if (fade <= 0) {
-        track.graphics.destroy();
+        track.image.destroy();
         this.tracks.splice(i, 1);
       } else {
-        track.graphics.setAlpha(fade * 0.5);
+        track.image.setAlpha(fade * 0.5);
       }
     }
   }
@@ -465,20 +464,17 @@ export class WildlifeSystem {
     // Cap total tracks
     if (this.tracks.length >= MAX_TRACKS) {
       const oldest = this.tracks.shift();
-      if (oldest) oldest.graphics.destroy();
+      if (oldest) oldest.image.destroy();
     }
 
-    const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.PISTE + 0.5);
-    const s = 2;
+    const key = `track_${animal.type}`;
     const angle = Math.atan2(animal.vy, animal.vx);
 
-    drawTrackShape(g, animal.type, s);
-
-    g.setPosition(animal.x, animal.y);
-    g.setRotation(angle);
-    g.setAlpha(0.5);
-    this.tracks.push({ graphics: g, age: 0, x: animal.x, y: animal.y });
+    const img = this.scene.add.image(animal.x, animal.y, key);
+    img.setDepth(DEPTHS.PISTE + 0.5);
+    img.setRotation(angle);
+    img.setAlpha(0.5);
+    this.tracks.push({ image: img, age: 0, x: animal.x, y: animal.y });
   }
 
   private pickWanderAction(animal: Animal): void {
@@ -752,7 +748,7 @@ export class WildlifeSystem {
     }
     this.animals = [];
     for (const track of this.tracks) {
-      track.graphics.destroy();
+      track.image.destroy();
     }
     this.tracks = [];
     this.buildings = [];

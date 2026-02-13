@@ -408,5 +408,41 @@ export default class BootScene extends Phaser.Scene {
       g.generateTexture(`rock_${size}`, w, h);
       g.destroy();
     }
+
+    // Animal track textures — one per species
+    // Size s=2 matches WildlifeSystem.leaveTrack()
+    const trackSpecies = ['bunny', 'chamois', 'bouquetin', 'marmot', 'fox'];
+    const trackS = 2;
+    const trackPad = 2; // padding around shapes
+    for (const species of trackSpecies) {
+      const g = this.make.graphics({ x: 0, y: 0 } as any, false);
+      // Translate so shapes drawn at origin end up centered in texture
+      const texSize = Math.ceil(trackS * 4) + trackPad * 2;
+      const cx = texSize / 2;
+      const cy = texSize / 2;
+      g.fillStyle(0xb8c4d0, 1);
+      switch (species) {
+        case 'bunny':
+          g.fillEllipse(cx + trackS * 1.2, cy - trackS, trackS * 1.2, trackS * 2);
+          g.fillEllipse(cx + trackS * 1.2, cy + trackS, trackS * 1.2, trackS * 2);
+          g.fillCircle(cx - trackS * 1.0, cy - trackS * 0.2, trackS * 0.5);
+          g.fillCircle(cx - trackS * 1.8, cy + trackS * 0.2, trackS * 0.5);
+          break;
+        case 'chamois':
+        case 'bouquetin':
+          g.fillEllipse(cx, cy - trackS * 0.5, trackS * 1.6, trackS * 0.5);
+          g.fillEllipse(cx, cy + trackS * 0.5, trackS * 1.6, trackS * 0.5);
+          break;
+        case 'marmot':
+          g.fillCircle(cx, cy - trackS * 0.3, trackS * 0.4);
+          g.fillCircle(cx, cy + trackS * 0.3, trackS * 0.4);
+          break;
+        default: // fox and others
+          g.fillCircle(cx, cy, trackS * 0.5);
+          break;
+      }
+      g.generateTexture(`track_${species}`, texSize, texSize);
+      g.destroy();
+    }
   }
 }
