@@ -138,6 +138,8 @@ export default class DialogueScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.events.once('shutdown', this.shutdown, this);
+
     this.dialogueQueue = [];
     this.isShowing = false;
 

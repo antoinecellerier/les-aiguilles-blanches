@@ -41,6 +41,8 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.events.once('shutdown', this.shutdown, this);
+
     // Bring pause menu to top so it renders above dialogue and HUD
     this.scene.bringToTop();
     

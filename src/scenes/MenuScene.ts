@@ -523,6 +523,7 @@ export default class MenuScene extends Phaser.Scene {
 
     // Check for newer deployed version
     checkForUpdate().then(remoteVersion => {
+      if (!this.sys.isActive()) return;
       if (!remoteVersion || !githubLink.active) return;
       const updateText = this.add.text(
         width / 2, footerTop - Math.round(12 * scaleFactor),
@@ -535,7 +536,7 @@ export default class MenuScene extends Phaser.Scene {
       ).setOrigin(0.5).setDepth(10)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => location.reload());
-    });
+    }).catch(() => {});
 
     this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {
       fontFamily: THEME.fonts.family,
