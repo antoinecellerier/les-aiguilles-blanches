@@ -199,7 +199,7 @@ const tr: Record<string, string> = {
   tutorialMove: "➡️ Haydi, dene! Pistte hareket et — tüm beyaz kar bakıma ihtiyaç duyuyor.",
   tutorialGroomIntro: "✅ Güzel! Şimdi pist bakımını öğrenelim.",
   tutorialGroomAction: "❄️ Sürerken {groomKey} basılı tutarak karı ez. Düzleşecek.",
-  tutorialGroomActionTouch: "❄️ Sürerken sağdaki ezme düğmesini basılı tutun.",
+  tutorialGroomActionTouch: "❄️ Sürerken sağdaki ezme düğmesini basılı tut.",
   tutorialGroomActionGamepad: "❄️ Sürerken {groomKey} basılı tutarak karı ez. Düzleşecek.",
   tutorialCoverage: "📊 Gördün mü? Kar daha pürüzsüz! Pisti ezmeye devam et.",
   tutorialHUD: "📈 Üstteki paneli kontrol et: kırmızı yakıt, yeşil dayanıklılık, beyaz kapsam. Zaman akıyor!",
@@ -233,10 +233,10 @@ const tr: Record<string, string> = {
   fuelEmpty: "⛽ YAKIT BİTTİ! Bir damla dizel kalmadı...",
   // UNUSED avalancheZone: "ÇIĞ BÖLGESİ",
   riskLevelHigh: "YÜKSEK",
-  avalancheWarning: "⚠️ TEHLİKE! Kar örtüsü dengesiz! Bölgeden çıkın!",
+  avalancheWarning: "⚠️ TEHLİKE! Kar örtüsü dengesiz! Bölgeden çık!",
   avalancheTrigger: "🏔️💨 ÇIĞ TETİKLENDİ! Kaçış yok!",
-  steepWarning: "⚠️ DİK YAMAÇ! Vinç kullanın ({winchKey}) yoksa kayarsınız!",
-  steepWarningNoWinch: "⚠️ DİK YAMAÇ! Yavaşlayın ve servis yollarını kullanarak dolanın!",
+  steepWarning: "⚠️ DİK YAMAÇ! Vinç kullan ({winchKey}) yoksa kayarsın!",
+  steepWarningNoWinch: "⚠️ DİK YAMAÇ! Yavaşla ve servis yollarını kullanarak dolan!",
   tumble: "🔄 DEVRİLME! Araç yamaçta devrildi!",
 
   // Taunts - Tumble
