@@ -1,31 +1,24 @@
 const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const {
-  IPC_CHANNELS,
-  VALID_DISPLAY_MODES,
-  DEFAULT_DISPLAY_MODE,
-  WINDOW_CONFIG,
-  CONFIG_FILENAME,
-  F11_DEBOUNCE_MS,
-} = require('./constants.cjs');
 
 const iconPath = path.join(__dirname, 'icon.png');
 
 // Persist display mode to a file so we can read it before window creation
-const configPath = path.join(app.getPath('userData'), CONFIG_FILENAME);
+const configPath = path.join(app.getPath('userData'), 'display.json');
+const VALID_MODES = ['windowed', 'fullscreen', 'borderless'];
 
 function readSavedMode() {
   try {
     const data = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    if (VALID_DISPLAY_MODES.includes(data.mode)) return data.mode;
+    if (VALID_MODES.includes(data.mode)) return data.mode;
   } catch (err) {
     // First launch, file missing, or corrupt JSON — use default
     if (err.code !== 'ENOENT') {
       console.warn(`Failed to read display config: ${err.message}`);
     }
   }
-  return DEFAULT_DISPLAY_MODE;
+  return 'borderless';
 }
 
 function saveModeToFile(mode) {
@@ -37,7 +30,7 @@ function saveModeToFile(mode) {
 }
 
 // Quit when the game requests it
-ipcMain.on(IPC_CHANNELS.QUIT, () => app.quit());
+ipcMain.on('quit', () => app.quit());
 
 // Window state
 let mainWin = null;
@@ -46,7 +39,7 @@ let savedMode = readSavedMode(); // user's preference from settings
 let isRecreating = false;
 
 // Fullscreen IPC — transient toggle, doesn't change saved preference
-ipcMain.on(IPC_CHANNELS.TOGGLE_FULLSCREEN, () => {
+ipcMain.on('toggle-fullscreen', () => {
   if (!mainWin) return;
   if (mainWin.isFullScreen()) {
     fullscreenTarget = false;
@@ -56,12 +49,12 @@ ipcMain.on(IPC_CHANNELS.TOGGLE_FULLSCREEN, () => {
     mainWin.setFullScreen(true);
   }
 });
-ipcMain.on(IPC_CHANNELS.IS_FULLSCREEN, (event) => {
+ipcMain.on('is-fullscreen', (event) => {
   event.returnValue = mainWin ? mainWin.isFullScreen() : false;
 });
 
 // Display mode IPC — used by settings, persists preference
-ipcMain.on(IPC_CHANNELS.SET_DISPLAY_MODE, (_event, mode) => {
+ipcMain.on('set-display-mode', (_event, mode) => {
   applyDisplayMode(mode);
 });
 
@@ -91,8 +84,8 @@ function applyDisplayMode(mode) {
       fullscreenTarget = false;
       mainWin.setFullScreen(false);
       mainWin.setBounds({
-        width: WINDOW_CONFIG.DEFAULT_WIDTH,
-        height: WINDOW_CONFIG.DEFAULT_HEIGHT,
+        width: 1280,
+        height: 720,
       });
       mainWin.center();
       break;
@@ -114,8 +107,8 @@ function recreateWindow(frame) {
 function createWindow(opts = {}) {
   const frame = opts.frame !== undefined ? opts.frame : (savedMode === 'windowed');
   const bounds = opts.bounds || {
-    width: WINDOW_CONFIG.DEFAULT_WIDTH,
-    height: WINDOW_CONFIG.DEFAULT_HEIGHT,
+    width: 1280,
+    height: 720,
   };
 
   // Load icon with fallback
@@ -135,10 +128,10 @@ function createWindow(opts = {}) {
     height: bounds.height,
     x: bounds.x,
     y: bounds.y,
-    minWidth: WINDOW_CONFIG.MIN_WIDTH,
-    minHeight: WINDOW_CONFIG.MIN_HEIGHT,
-    title: WINDOW_CONFIG.TITLE,
-    backgroundColor: WINDOW_CONFIG.BG_COLOR,
+    minWidth: 800,
+    minHeight: 500,
+    title: 'Les Aiguilles Blanches',
+    backgroundColor: '#1a2a3e',
     frame,
     show: false,
     icon,
@@ -160,8 +153,11 @@ function createWindow(opts = {}) {
     }
   });
 
-  // Load the built game from dist/
-  win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+  // Load the built game — dev: ../dist/, packaged: resources/dist/
+  const distPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'dist', 'index.html')
+    : path.join(__dirname, '..', 'dist', 'index.html');
+  win.loadFile(distPath);
 
   // F11 toggles fullscreen transiently — doesn't change saved display mode
   let f11Ready = true;
@@ -178,7 +174,7 @@ function createWindow(opts = {}) {
     f11Timer = setTimeout(() => {
       f11Ready = true;
       f11Timer = null;
-    }, F11_DEBOUNCE_MS);
+    }, 300);
   });
 
   // Clean up timer on window close

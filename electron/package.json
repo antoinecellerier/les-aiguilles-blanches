@@ -16,8 +16,14 @@
     "files": [
       "main.cjs",
       "preload.cjs",
-      "icon.png",
-      "../dist/**/*"
+      "icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist",
+        "to": "dist",
+        "filter": ["**/*"]
+      }
     ],
     "directories": {
       "output": "../electron-dist"
