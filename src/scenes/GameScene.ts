@@ -1538,7 +1538,11 @@ export default class GameScene extends Phaser.Scene {
         const d = img.depth;
         // Only cull objects at terrain/forest/tree depths (not UI, overlays, player)
         if (d <= DEPTHS.MARKERS) {
-          img.visible = img.x > left && img.x < right && img.y > top && img.y < bottom;
+          // Use display bounds so large DynamicTexture backgrounds aren't culled by center point
+          const hw = img.displayWidth * img.originX;
+          const hh = img.displayHeight * img.originY;
+          img.visible = img.x + hw > left && img.x - hw < right &&
+                        img.y + hh > top && img.y - hh < bottom;
         }
       }
     }
@@ -1660,6 +1664,12 @@ export default class GameScene extends Phaser.Scene {
     const origDiag = Math.sqrt(this.originalScreenWidth ** 2 + this.originalScreenHeight ** 2);
     const newDiag = Math.sqrt(width ** 2 + height ** 2);
     const zoom = Math.max(0.5, Math.min(newDiag / origDiag, 1.5));
+
+    // Resize screen-space overlays before camera branch
+    this.weatherSystem.handleFrostResize();
+
+    // Force culling recalc after camera changes
+    this.lastCullBounds = { x: 0, y: 0, w: 0, h: 0 };
     
     // If world fits in viewport at this zoom, use static camera
     if (worldWidth * zoom <= width && worldHeight * zoom <= height) {
@@ -1670,6 +1680,8 @@ export default class GameScene extends Phaser.Scene {
       const offsetY = Math.max(BALANCE.CAMERA_MIN_OFFSET_Y, (height - worldHeight * zoom) / 2);
       // Convert screen-space offset to camera-local (divide by zoom)
       this.cameras.main.setScroll(-offsetX / zoom, -offsetY / zoom);
+      // Night overlay needs zoom to compute draw-space coverage
+      this.weatherSystem.handleNightResize();
       return;
     }
     
@@ -1684,8 +1696,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.groomer) {
       this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
     }
-
-    this.weatherSystem.handleFrostResize();
+    this.weatherSystem.handleNightResize();
   }
 
   /** Camera follow offset to keep groomer above touch controls (world-space) */

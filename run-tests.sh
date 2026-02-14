@@ -161,49 +161,13 @@ fi
 if [ "$SKIP_E2E" = false ]; then
     # Start dev server if not already running
     DEV_PORT="${PORT:-3000}"
-    DEV_SERVER_PID=""
-    if curl -s http://localhost:$DEV_PORT > /dev/null 2>&1; then
-        echo "Dev server already running on port $DEV_PORT"
-    else
-        # Kill any stale (non-functional) process on the port
-        if lsof -ti:$DEV_PORT > /dev/null 2>&1; then
-            echo "Killing stale process on port $DEV_PORT..."
-            kill $(lsof -ti:$DEV_PORT) 2>/dev/null || true
-            sleep 1
-        fi
-
+    if ! curl -s http://localhost:$DEV_PORT > /dev/null 2>&1; then
         echo ""
         echo "=== Starting dev server ==="
-        PORT=$DEV_PORT npm run dev &
-        DEV_SERVER_PID=$!
-
-        # Wait for server to be ready (with timeout)
-        SERVER_READY=false
-        for i in {1..30}; do
-            if curl -s http://localhost:$DEV_PORT > /dev/null 2>&1; then
-                echo "Dev server ready (PID: $DEV_SERVER_PID)"
-                SERVER_READY=true
-                break
-            fi
-            sleep 1
-        done
-
-        if [ "$SERVER_READY" = false ]; then
-            echo "ERROR: Dev server failed to start within 30 seconds!"
-            kill $DEV_SERVER_PID 2>/dev/null || true
-            exit 1
-        fi
+        ./dev.sh
+    else
+        echo "Dev server already running on port $DEV_PORT"
     fi
-
-    # Cleanup function — only kill server if we started it
-    cleanup() {
-        if [ -n "$DEV_SERVER_PID" ]; then
-            echo "Stopping dev server (PID: $DEV_SERVER_PID)"
-            kill $DEV_SERVER_PID 2>/dev/null || true
-            wait $DEV_SERVER_PID 2>/dev/null || true
-        fi
-    }
-    trap cleanup EXIT
 
     echo ""
     echo "=== Running E2E tests (Playwright) ==="

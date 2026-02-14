@@ -443,7 +443,7 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 2. **Graphics → texture baking** — Graphics objects replay their command buffer every frame on Canvas. Static decorations (trees, rocks, cliffs, animal tracks) are pre-generated as textures in BootScene via `generateTexture()`. L9 Graphics went from 1,588 to ~97 (-94%)
 3. **Night overlay DynamicTexture** — Headlight cone drawn directly to canvas context each frame instead of 7,416 Graphics commands. L7 FPS 32→60
 4. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
-5. **Camera culling** — `cullSnowTiles()` hides objects outside viewport (+ 2-tile margin). Only checked when camera moves a full tile. ~1,200 objects hidden per frame on L9
+5. **Camera culling** — `cullOffscreen()` hides objects outside viewport (+ 2-tile margin) using display-bounds checks (`x ± displayWidth*originX`). Only rechecked when camera moves a full tile. ~1,200 objects hidden per frame on L9. `lastCullBounds` is reset in `handleResize()` to force immediate recull after viewport changes
 6. **Extended background sizing** — Use `screen × 1.3` — enough for URL bar/viewport jitter without creating excessive objects
 7. **HUD resize debounce** — 300ms + 10px threshold prevents rapid scene restarts from mobile resize events
 
@@ -1104,6 +1104,7 @@ This section documents Phaser 3 patterns audited and verified in this codebase. 
 - `main.ts` installs a `ResizeObserver` + `orientationchange` listener that calls `game.scale.resize()` to compensate for events Phaser misses (Firefox dev tools, some mobile orientation changes). This is debounced at 150ms.
 - `window.resizeGame()` is also exposed for test automation (Playwright viewport changes don't trigger real browser resize events)
 - Scenes handle resize via `this.scale.on('resize')` with a `requestAnimationFrame` guard to prevent restart-during-create loops
+- **Night overlay resize timing** — `handleNightResize()` must be called AFTER `setZoom()` because `overlayFullScreen()` reads `cam.zoom`. The overlay is repositioned every frame via `prepareNightFrame()` which maps world coords to canvas pixels using zoom-scaled draw-space offsets. `handleFrostResize()` is independent of zoom and can be called before the camera branch.
 
 ### Shutdown & Event Cleanup
 

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Accessibility, type Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
-import { worldToOverlay } from '../utils/cameraCoords';
+import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
 
 export class WeatherSystem {
   private scene: Phaser.Scene;
@@ -117,6 +117,10 @@ export class WeatherSystem {
     const w = cam.width;
     const h = cam.height;
 
+    if (this.nightOverlay) {
+      this.nightOverlay.destroy();
+      this.nightOverlay = null;
+    }
     if (this.scene.textures.exists(this.nightTexKey)) {
       this.scene.textures.remove(this.nightTexKey);
     }
@@ -128,29 +132,24 @@ export class WeatherSystem {
     this.nightOverlay.setScrollFactor(0);
   }
 
-  updateNightOverlay(groomer: Phaser.Physics.Arcade.Sprite): void {
-    if (!this.nightCtx || !this.nightOverlay || !groomer) return;
-
+  /** Position overlay to cover full screen and map world coords to canvas pixels. */
+  private prepareNightFrame(
+    worldX: number, worldY: number
+  ): { ctx: CanvasRenderingContext2D; w: number; h: number; zoom: number; screenX: number; screenY: number } | null {
+    if (!this.nightCtx || !this.nightOverlay) return null;
     const cam = this.scene.cameras.main;
     const ctx = this.nightCtx;
     const w = cam.width;
     const h = cam.height;
+    const zoom = cam.zoom || 1;
 
-    const { x: screenX, y: screenY } = worldToOverlay(cam, groomer.x, groomer.y);
+    const ofs = overlayFullScreen(cam);
+    this.nightOverlay.setPosition(ofs.x + ofs.width / 2, ofs.y + ofs.height / 2);
+    this.nightOverlay.setDisplaySize(ofs.width, ofs.height);
 
-    this.updateFacing(groomer, 10);
-
-    const radiusFront = this.tileSize * BALANCE.HEADLIGHT_FRONT_TILES;
-    const radiusBack = this.tileSize * BALANCE.HEADLIGHT_REAR_TILES;
-    const spreadAngle = BALANCE.HEADLIGHT_SPREAD;
-
-    const groomerRadius = this.tileSize * 0.5;
-    const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
-
-    const frontX = screenX + Math.cos(angle) * groomerRadius;
-    const frontY = screenY + Math.sin(angle) * groomerRadius;
-    const rearX = screenX - Math.cos(angle) * groomerRadius;
-    const rearY = screenY - Math.sin(angle) * groomerRadius;
+    const drawPos = worldToOverlay(cam, worldX, worldY);
+    const screenX = (drawPos.x - ofs.x) * zoom;
+    const screenY = (drawPos.y - ofs.y) * zoom;
 
     // Fill darkness
     ctx.clearRect(0, 0, w, h);
@@ -158,6 +157,29 @@ export class WeatherSystem {
     ctx.globalAlpha = BALANCE.NIGHT_DARKNESS_ALPHA;
     ctx.fillStyle = '#000022';
     ctx.fillRect(0, 0, w, h);
+
+    return { ctx, w, h, zoom, screenX, screenY };
+  }
+
+  updateNightOverlay(groomer: Phaser.Physics.Arcade.Sprite): void {
+    if (!groomer) return;
+    const frame = this.prepareNightFrame(groomer.x, groomer.y);
+    if (!frame) return;
+    const { ctx, zoom, screenX, screenY } = frame;
+
+    this.updateFacing(groomer, 10);
+
+    const radiusFront = this.tileSize * BALANCE.HEADLIGHT_FRONT_TILES * zoom;
+    const radiusBack = this.tileSize * BALANCE.HEADLIGHT_REAR_TILES * zoom;
+    const spreadAngle = BALANCE.HEADLIGHT_SPREAD;
+
+    const groomerRadius = this.tileSize * 0.5 * zoom;
+    const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
+
+    const frontX = screenX + Math.cos(angle) * groomerRadius;
+    const frontY = screenY + Math.sin(angle) * groomerRadius;
+    const rearX = screenX - Math.cos(angle) * groomerRadius;
+    const rearY = screenY - Math.sin(angle) * groomerRadius;
 
     // Draw light circles on top (same approach as original Phaser Graphics)
     const steps = BALANCE.HEADLIGHT_STEPS;
@@ -180,33 +202,21 @@ export class WeatherSystem {
   }
 
   updateHeadlamp(skier: Phaser.Physics.Arcade.Sprite): void {
-    if (!this.nightCtx || !this.nightOverlay || !skier) return;
-
-    const cam = this.scene.cameras.main;
-    const ctx = this.nightCtx;
-    const w = cam.width;
-    const h = cam.height;
-
-    const { x: screenX, y: screenY } = worldToOverlay(cam, skier.x, skier.y);
+    if (!skier) return;
+    const frame = this.prepareNightFrame(skier.x, skier.y);
+    if (!frame) return;
+    const { ctx, zoom, screenX, screenY } = frame;
 
     this.updateFacing(skier, 5);
 
-    const radiusFront = this.tileSize * BALANCE.HEADLAMP_FRONT_TILES;
+    const radiusFront = this.tileSize * BALANCE.HEADLAMP_FRONT_TILES * zoom;
     const spreadAngle = BALANCE.HEADLAMP_SPREAD;
     const angle = Math.atan2(this.headlightDirection.y, this.headlightDirection.x);
 
-    const zoom = cam.zoom || 1;
     const headOffset = 10 * skier.scaleY * zoom;
     const forwardOffset = this.tileSize * 0.6 * zoom;
     const headX = screenX + Math.cos(angle) * forwardOffset;
     const headY = screenY - headOffset + Math.sin(angle) * forwardOffset;
-
-    // Fill darkness
-    ctx.clearRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = BALANCE.NIGHT_DARKNESS_ALPHA;
-    ctx.fillStyle = '#000022';
-    ctx.fillRect(0, 0, w, h);
 
     // Draw light circles on top
     ctx.fillStyle = '#ffffff';
@@ -220,7 +230,7 @@ export class WeatherSystem {
 
     // Ambient glow around skier
     ctx.fillStyle = '#ddeeff';
-    const glowRadius = this.tileSize * 1.2;
+    const glowRadius = this.tileSize * 1.2 * zoom;
     for (let i = 3; i >= 0; i--) {
       const alpha = 0.04 * (4 - i) / 4;
       ctx.globalAlpha = alpha;
@@ -332,6 +342,12 @@ export class WeatherSystem {
       this.rebuildFrostTexture();
       this.frostOverlay!.setAlpha(alpha);
     }
+  }
+
+  /** Rebuild night overlay DynamicTexture on window resize. */
+  handleNightResize(): void {
+    if (!this.nightOverlay) return;
+    this.createNightOverlay();
   }
 
   applyAccessibilitySettings(): void {

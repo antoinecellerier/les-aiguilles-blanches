@@ -28,6 +28,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Night overlay & culling resize fix** — Fixed night overlay not covering full viewport after resize/orientation change, and terrain DynamicTextures disappearing due to center-point culling. Night fix: extracted `prepareNightFrame()` for zoom-aware coordinate mapping; `handleNightResize()` called after `setZoom()`. Culling fix: bounds-based visibility checks in `cullOffscreen()`. Simplified `run-tests.sh` to use `./dev.sh`.
+
 - ✅ **Crisp pixel art scaling** — Per-texture nearest-neighbor scaling for all sprites and DynamicTextures. Ski run HUD zoom-independent rendering. Firefox workaround: `pixelArt:true` causes black screen, so NEAREST set per-texture instead.
 
 - ✅ **Canvas performance optimization** — Systematic profiling and optimization of Canvas renderer performance. L9 storm Firefox: 24 FPS → 68 FPS. Key techniques: DynamicTexture consolidation (trees, rocks, snow tiles, backgrounds, night overlay), Graphics→texture baking (trees, rocks, cliffs, animal tracks), camera culling. Final profile: 69% native pixel copy (irreducible), 0.2% JavaScript, 10% vsync idle. See ARCHITECTURE.md "Performance Considerations" for full analysis and profiling guide.
