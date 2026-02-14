@@ -20,6 +20,8 @@ dist/
 electron-dist/
 electron/node_modules/
 electron/package-lock.json
+electron/build/
+electron/icons/
 
 # Test artifacts
 tests/screenshots/

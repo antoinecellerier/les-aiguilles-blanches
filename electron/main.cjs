@@ -188,7 +188,61 @@ function createWindow(opts = {}) {
 
 app.setName('Les Aiguilles Blanches');
 
-app.whenReady().then(() => createWindow());
+// Install .desktop file and icon for Wayland/GNOME taskbar integration.
+// Uses xdg-utils (pre-installed on all freedesktop.org-compliant desktops).
+// Idempotent — safe to run on every launch; overwrites stale entries.
+function installDesktopIntegration() {
+  if (process.platform !== 'linux' || !app.isPackaged) return;
+  const { execFileSync } = require('child_process');
+  try {
+    const appImagePath = process.env.APPIMAGE || process.execPath;
+
+    // Install pre-generated icons at all sizes
+    const iconsDir = path.join(__dirname, 'icons');
+    if (!fs.existsSync(iconsDir)) return;
+    const sizes = [16, 32, 48, 64, 128, 256, 512];
+    const tmpIcons = [];
+
+    for (const size of sizes) {
+      const src = path.join(iconsDir, `${size}.png`);
+      if (!fs.existsSync(src)) continue;
+      const tmpPath = path.join(app.getPath('temp'), `les-aiguilles-blanches-${size}.png`);
+      fs.copyFileSync(src, tmpPath);
+      tmpIcons.push(tmpPath);
+      execFileSync('xdg-icon-resource', [
+        'install', '--noupdate', '--novendor', '--size', String(size), tmpPath, 'les-aiguilles-blanches'
+      ]);
+    }
+    execFileSync('xdg-icon-resource', ['forceupdate']);
+
+    // Create and install .desktop file via xdg-desktop-menu
+    const tmpDesktop = path.join(app.getPath('temp'), 'les-aiguilles-blanches.desktop');
+    fs.writeFileSync(tmpDesktop, `[Desktop Entry]
+Name=Les Aiguilles Blanches
+Exec="${appImagePath}" --no-sandbox %U
+Terminal=false
+Type=Application
+Icon=les-aiguilles-blanches
+StartupWMClass=Les Aiguilles Blanches
+Categories=Game;
+Comment=Snow groomer simulation
+`);
+    execFileSync('xdg-desktop-menu', ['install', '--novendor', tmpDesktop]);
+
+    // Clean up temp files
+    for (const tmp of tmpIcons) {
+      try { fs.unlinkSync(tmp); } catch (_) {}
+    }
+    try { fs.unlinkSync(tmpDesktop); } catch (_) {}
+  } catch (err) {
+    console.warn(`Desktop integration failed: ${err.message}`);
+  }
+}
+
+app.whenReady().then(() => {
+  installDesktopIntegration();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (!isRecreating) app.quit();

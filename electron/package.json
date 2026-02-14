@@ -16,7 +16,8 @@
     "files": [
       "main.cjs",
       "preload.cjs",
-      "icon.png"
+      "icon.png",
+      "icons/**/*.png"
     ],
     "extraResources": [
       {
@@ -33,7 +34,7 @@
         "AppImage"
       ],
       "category": "Game",
-      "icon": "icon.png"
+      "icon": "build/icons"
     },
     "win": {
       "target": [

@@ -7,7 +7,8 @@
 #   ./build-desktop.sh --pack   # Build game + package as distributable
 
 set -euo pipefail
-cd "$(dirname "$0")"
+PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$PROJECT_ROOT"
 
 # 1. Build the web game
 echo "=== Building game ==="
@@ -19,7 +20,11 @@ if [ ! -d electron/node_modules ]; then
   cd electron && npm install && cd ..
 fi
 
-# 3. Run or package
+# 3. Generate app icon (creates icon.png + build/icons/ for electron-builder)
+echo "=== Generating app icon ==="
+cd electron && node generate-icon.cjs && cd ..
+
+# 4. Run or package
 if [ "${1:-}" = "--pack" ]; then
   echo "=== Packaging desktop build ==="
   cd electron && npm run build:linux
