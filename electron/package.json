@@ -32,7 +32,8 @@
       "target": [
         "AppImage"
       ],
-      "category": "Game"
+      "category": "Game",
+      "icon": "icon.png"
     },
     "win": {
       "target": [

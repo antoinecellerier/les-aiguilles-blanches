@@ -7,7 +7,7 @@ const { createCanvas } = require('canvas');
 const fs = require('fs');
 const path = require('path');
 
-const SIZE = 256;
+const SIZE = 512;
 const canvas = createCanvas(SIZE, SIZE);
 const ctx = canvas.getContext('2d');
 
