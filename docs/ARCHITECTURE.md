@@ -869,6 +869,42 @@ const config = {
 - `input` configuration  
 - `backgroundColor`
 
+### HiDPI / DPR-Aware Rendering (Not Viable)
+
+We investigated making the Canvas renderer DPR-aware for crisp rendering on HiDPI displays
+and browser zoom > 100%. **Conclusion: not viable with Canvas 2D renderer due to performance cost.**
+
+**Approaches tried and why they fail:**
+
+1. **CSS `image-rendering: pixelated/crisp-edges`** — Black screen on Firefox Canvas renderer.
+
+2. **`Scale.NONE` + `zoom: 1/dpr`** — Game coordinates become physical pixels instead of CSS pixels.
+   All layout code (text positioning, camera bounds, touch controls) assumes CSS-pixel coordinates.
+   Would require multiplying every coordinate constant by DPR throughout the codebase.
+
+3. **Per-frame canvas inflation via `PRE_RENDER_CLEAR`** — Setting `canvas.width = cssW * dpr` each
+   frame with `ctx.scale(dpr, dpr)`. Fails because Phaser's `batchSprite` uses `ctx.setTransform()`
+   (absolute, not relative) which wipes the DPR scale. Game renders in a tiny corner of the canvas.
+
+4. **Canvas width/height property interceptors + `ctx.setTransform` monkey-patch** — Intercept
+   `canvas.width` setter to inflate backing store by DPR (getter returns CSS value for Phaser math).
+   Patch `ctx.setTransform(a,b,c,d,e,f)` to multiply entire matrix by DPR, prepending a uniform scale.
+   `ctx.transform()` NOT patched (it's multiplicative, compounds correctly with DPR-scaled base).
+   **This approach works correctly** — rendering is crisp, coordinates stay in CSS pixels, input works.
+   **But the performance cost is prohibitive**: at DPR 1.76 the canvas has 3.1× more pixels, and
+   `drawImage` (used by `batchSprite` for every sprite) bottlenecks on native pixel copy (memcpy).
+   Firefox profiler showed 34% CPU in `__memcpy_avx_unaligned_erms` under `drawImage`. At DPR 3
+   (the cap), it would be 9× more pixels — unplayable.
+
+**Why this is a Canvas 2D limitation:** WebGL has native DPR support via `gl.viewport()` with no
+per-sprite cost — the GPU handles pixel scaling in hardware. But WebGL causes black screens in this
+game (confirmed), so Canvas 2D is required. Canvas 2D has no equivalent; every `drawImage` call
+copies pixels at the backing store resolution.
+
+**Recommendation:** Accept native-resolution rendering. The slight blur at high browser zoom (240%+)
+is acceptable. If crisp HiDPI rendering becomes critical, the fix is migrating to WebGL (which
+requires debugging the black screen issue — likely related to texture generation patterns).
+
 ## Scene Lifecycle Management
 
 ### Scene Transitions (Critical)
