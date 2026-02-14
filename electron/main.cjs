@@ -22,7 +22,7 @@ function readSavedMode() {
       console.warn(`Failed to read display config: ${err.message}`);
     }
   }
-  return 'borderless';
+  return 'windowed';
 }
 
 function saveModeToFile(mode) {

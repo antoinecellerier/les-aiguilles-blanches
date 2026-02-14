@@ -1,10 +1,10 @@
 /**
- * electron-builder afterPack hook — remove unnecessary files to reduce AppImage size.
+ * electron-builder afterPack hook — remove unnecessary files to reduce package size.
  *
  * Runs after the app is packed but before the installer is built.
  * Removes:
  * - Source maps from game dist (~15MB)
- * - Vulkan/SwiftShader libs (game uses Canvas 2D, not WebGL) (~11MB)
+ * - Vulkan/SwiftShader (software Vulkan fallback, not needed for Canvas 2D)
  */
 const fs = require('fs');
 const path = require('path');
@@ -19,23 +19,30 @@ exports.default = async function (context) {
     for (const file of fs.readdirSync(distDir)) {
       if (file.endsWith('.map')) {
         const fp = path.join(distDir, file);
-        const size = fs.statSync(fp).size;
+        saved += fs.statSync(fp).size;
         fs.unlinkSync(fp);
-        saved += size;
       }
     }
   }
 
   // Remove Vulkan SwiftShader (software Vulkan fallback, not needed for Canvas 2D)
-  const gpuFiles = ['libvk_swiftshader.so', 'vk_swiftshader_icd.json'];
-  for (const name of gpuFiles) {
-    const fp = path.join(appOutDir, name);
-    if (fs.existsSync(fp)) {
-      const size = fs.statSync(fp).size;
-      fs.unlinkSync(fp);
-      saved += size;
+  // Use recursive search to handle platform-specific paths (e.g. macOS .app bundle)
+  function removeRecursive(dir, patterns) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fp = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        removeRecursive(fp, patterns);
+      } else if (patterns.some(p => entry.name === p)) {
+        saved += fs.statSync(fp).size;
+        fs.unlinkSync(fp);
+      }
     }
   }
+  removeRecursive(appOutDir, [
+    'libvk_swiftshader.so', 'libvk_swiftshader.dylib',
+    'vk_swiftshader.dll', 'vk_swiftshader_icd.json'
+  ]);
 
   console.log(`  • afterPack: removed ${(saved / 1024 / 1024).toFixed(1)}MB of unnecessary files`);
 };

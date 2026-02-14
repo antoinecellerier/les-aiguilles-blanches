@@ -40,15 +40,17 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ],
-      "icon": "../assets/icon.png"
+      "icon": "icon.png"
     },
     "mac": {
       "target": [
-        "dmg"
+        "zip"
       ],
-      "category": "public.app-category.games"
+      "category": "public.app-category.games",
+      "icon": "icon.png"
     }
   },
   "devDependencies": {
