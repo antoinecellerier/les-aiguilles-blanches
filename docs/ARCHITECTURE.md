@@ -1466,6 +1466,36 @@ const fontSize = Math.round(12 * this.uiScale) + 'px';
 const padding = Math.round(12 * this.uiScale);
 ```
 
+## Electron Desktop Wrapper
+
+Optional desktop packaging via `electron/`. Keeps Electron deps out of the main project — separate `package.json` with its own `node_modules/`.
+
+### Build Commands
+
+```bash
+./build-desktop.sh              # Build game + launch in Electron
+./build-desktop.sh --pack       # Package for Linux (AppImage)
+./build-desktop.sh --pack-win   # Package for Windows (installer + portable exe)
+./build-desktop.sh --pack-mac   # Package for macOS (unsigned zip)
+./build-desktop.sh --pack-all   # Package for all platforms
+```
+
+### Key Files
+
+- `main.cjs` — Electron main process: window creation, display mode management (windowed/fullscreen/borderless), F11 toggle, xdg desktop integration (Linux/Wayland), external link handling
+- `preload.cjs` — contextBridge API exposing `electronAPI` (quit, fullscreen, display mode). Must inline all values — preload sandbox forbids `require()` of other files
+- `afterPack.cjs` — Post-build hook: strips Vulkan SwiftShader and source maps (~5MB per platform)
+- `generate-icon.cjs` — Renders pixel-art groomer icon natively at 7 sizes (16–512px) with progressive detail reduction. Outputs to `icons/` (bundled in asar) and `build/icons/` (for electron-builder)
+
+### Architecture Decisions
+
+- **Display mode persistence**: Saved to JSON in `app.getPath('userData')` (not localStorage) so it can be read synchronously before window creation — avoids startup flicker. F11 toggles are transient and don't overwrite the saved preference.
+- **Window recreation**: `frame` property can't be changed at runtime. Switching windowed↔borderless requires destroying and recreating the BrowserWindow. `isRecreating` flag prevents `window-all-closed` from quitting during recreation.
+- **Wayland icon**: `BrowserWindow({ icon })` only works on X11. On Wayland, the taskbar icon comes from the `.desktop` file matched via `StartupWMClass`. Runtime `xdg-icon-resource`/`xdg-desktop-menu` install handles this on first launch (idempotent).
+- **PipeWire audio**: Stream name and icon are hardcoded to "Chromium" in Chromium's `pulse_util.cc`. No workaround until [electron/electron#49270](https://github.com/electron/electron/pull/49270) merges.
+- **Cross-compilation**: Windows builds work from Linux via Wine. macOS zip builds work but can't be code-signed (requires macOS).
+- **Size optimization**: `electronLanguages` strips 40 unused Chromium locales. `afterPack.cjs` removes Vulkan SwiftShader and source maps. ~99MB AppImage (floor is the Chromium binary).
+
 ## Future Architecture Considerations
 
 1. **Save/Load**: Serialize gameState to localStorage

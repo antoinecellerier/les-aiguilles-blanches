@@ -37,15 +37,7 @@ This game is an experiment in building a complete, polished game almost entirely
 npm run clean        # Remove all build artifacts and caches
 ```
 
-### 🖥️ Desktop Build (Optional)
-
-```bash
-./build-desktop.sh              # Build game + launch in Electron
-./build-desktop.sh --pack       # Package for Linux (AppImage)
-./build-desktop.sh --pack-win   # Package for Windows (installer + portable)
-./build-desktop.sh --pack-mac   # Package for macOS (zip)
-./build-desktop.sh --pack-all   # Package for all platforms
-```
+An optional [desktop build](docs/ARCHITECTURE.md#electron-desktop-wrapper) is available via Electron.
 
 ## 🧪 Testing
 
