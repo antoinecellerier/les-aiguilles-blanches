@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeImage, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -162,6 +162,20 @@ function createWindow(opts = {}) {
     ? path.join(process.resourcesPath, 'dist', 'index.html')
     : path.join(__dirname, '..', 'dist', 'index.html');
   win.loadFile(distPath);
+
+  // Open external links (e.g. GitHub) in the system browser
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith('file://')) {
+      event.preventDefault();
+      shell.openExternal(url);
+    }
+  });
 
   // F11 toggles fullscreen transiently — doesn't change saved display mode
   let f11Ready = true;
