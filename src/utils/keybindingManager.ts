@@ -126,7 +126,15 @@ export class KeybindingManager {
 
     const actionId = this.rebindingAction as keyof KeyBindings;
     this.bindings[actionId] = keyCode;
-    if (keyChar.length === 1) {
+    // Determine display name: prefer special key names (SPACE, SHIFT, etc.)
+    const specialKeys: Record<number, string> = {
+      38: '↑', 40: '↓', 37: '←', 39: '→',
+      32: 'SPACE', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT',
+      13: 'ENTER', 9: 'TAB', 27: 'ESC', 8: '⌫', 46: 'DEL',
+    };
+    if (specialKeys[keyCode]) {
+      this.displayNames[keyCode] = specialKeys[keyCode];
+    } else if (keyChar.length === 1) {
       this.displayNames[keyCode] = keyChar.toUpperCase();
     } else {
       this.displayNames[keyCode] = keyChar;
