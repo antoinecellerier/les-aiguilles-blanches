@@ -254,6 +254,7 @@ export class PisteRenderer {
         }
       }
     } else {
+      const hasHalfpipe = level.specialFeatures?.includes('halfpipe');
       for (let y = 0; y < level.height; y += 4) {
         if (y >= level.height - 2) continue;
 
@@ -262,7 +263,10 @@ export class PisteRenderer {
         const leftEdge = (path.centerX - path.width / 2) * tileSize;
         const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
-        if (leftEdge > tileSize && !isAccessZone(yPos, 'left')) {
+        // Halfpipe levels: no lateral walls inside the pipe (rows 3..height-3)
+        const inPipe = hasHalfpipe && y >= 3 && y < level.height - 3;
+
+        if (leftEdge > tileSize && !isAccessZone(yPos, 'left') && !inPipe) {
           const leftWall = this.scene.add.rectangle(
             leftEdge / 2, yPos + segmentHeight / 2, leftEdge, segmentHeight, 0x000000, 0
           );
@@ -270,7 +274,7 @@ export class PisteRenderer {
           boundaryWalls.add(leftWall);
         }
 
-        if (rightEdge < worldWidth - tileSize && !isAccessZone(yPos, 'right')) {
+        if (rightEdge < worldWidth - tileSize && !isAccessZone(yPos, 'right') && !inPipe) {
           const rightWall = this.scene.add.rectangle(
             rightEdge + (worldWidth - rightEdge) / 2, yPos + segmentHeight / 2,
             worldWidth - rightEdge, segmentHeight, 0x000000, 0
