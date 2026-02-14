@@ -30,6 +30,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Ski run trick scoring** — Tricks award points by type (kicker 100, rail 150, halfpipe 200) with speed and variety multipliers. Consecutive unique tricks build a combo; repeating the same trick resets it. Total score, trick count, and best combo shown on the level complete screen for park levels.
+
 - ✅ **Y-depth sorting & collision refinement** — Groomer, obstacles, and all pole types use `yDepth()` for per-frame depth sorting. Tree trunk hitboxes shrunk (canopy passes behind). Groomer physics body rotates with movement direction. Cliff fall-detection zone aligned to visual cliff rocks via shared `getBounds()` with per-row variation. Steep zone detection uses per-row piste-aware bounds with 2-tile inward margin. Cliff danger poles extracted from baked texture into separate y-sorted objects. Removed unused `dangerZones` from GameScene (only SkiRunScene uses them). Debug overlay setting added (Settings → Accessibility) showing all collision zones, hitboxes, and depth markers in both game modes.
 
 - ✅ **Piste contrast & readability** — Darkened off-piste tile textures, lightened service road tiles, and raised minimum tile size to 14px for better piste visibility on all levels (especially night). Texture-level approach: no runtime overlays needed.

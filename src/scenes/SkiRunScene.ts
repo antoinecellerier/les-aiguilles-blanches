@@ -92,6 +92,13 @@ export default class SkiRunScene extends Phaser.Scene {
   private hazardSystem: HazardSystem | null = null;
   private slalomSystem = new SlalomGateSystem();
   private gateText: Phaser.GameObjects.Text | null = null;
+
+  // Trick scoring
+  private trickCount = 0;
+  private trickScore = 0;
+  private trickCombo = 0;
+  private bestCombo = 0;
+  private lastTrickName = '';
   private trackGraphics!: Phaser.GameObjects.Graphics;
   private lastTrackPos: { x: number; y: number } | null = null;
   private isAirborne = false;
@@ -113,6 +120,11 @@ export default class SkiRunScene extends Phaser.Scene {
     this.slalomSystem = new SlalomGateSystem();
     this.gateText = null;
     this.isAirborne = false;
+    this.trickCount = 0;
+    this.trickScore = 0;
+    this.trickCombo = 0;
+    this.bestCombo = 0;
+    this.lastTrickName = '';
     // Resolve mode: use passed value, or resolve random here
     if (data.mode) {
       this.resolvedMode = data.mode;
@@ -789,10 +801,28 @@ export default class SkiRunScene extends Phaser.Scene {
       this.skiSounds.playTrickLaunch();
     }
 
-    // Popup text — show trick name
+    // Trick scoring
+    const basePoints = type === 'halfpipe' ? BALANCE.TRICK_BASE_HALFPIPE
+      : type === 'rail' ? BALANCE.TRICK_BASE_RAIL : BALANCE.TRICK_BASE_KICKER;
+    const speedMult = 1.0 + Math.max(0, this.currentSpeed - BALANCE.SKI_GRAVITY_SPEED)
+      / (BALANCE.SKI_MAX_SPEED - BALANCE.SKI_GRAVITY_SPEED);
+    if (trickName !== this.lastTrickName) {
+      this.trickCombo++;
+    } else {
+      this.trickCombo = 1;
+    }
+    this.lastTrickName = trickName;
+    const varietyMult = 1.0 + (this.trickCombo - 1) * BALANCE.TRICK_VARIETY_BONUS;
+    const points = Math.round(basePoints * speedMult * varietyMult);
+    this.trickScore += points;
+    this.trickCount++;
+    if (this.trickCombo > this.bestCombo) this.bestCombo = this.trickCombo;
+
+    // Popup text — show trick name + points
     const isBoard = this.baseTexture.includes('snowboard');
     const icon = isBoard ? '🏂' : '🎿';
-    const popup = this.add.text(this.skier.x, this.skier.y - 30, `${icon} ${trickName}!`, {
+    const comboText = this.trickCombo > 1 ? ` ${this.trickCombo}×` : '';
+    const popup = this.add.text(this.skier.x, this.skier.y - 30, `${icon} ${trickName}! +${points}${comboText}`, {
       fontFamily: THEME.fonts.family,
       fontSize: '18px',
       fontStyle: 'bold',
@@ -1074,6 +1104,9 @@ export default class SkiRunScene extends Phaser.Scene {
         skiMode: this.resolvedMode,
         skiGatesHit: this.slalomSystem.totalGates > 0 ? this.slalomSystem.gatesHit : undefined,
         skiGatesTotal: this.slalomSystem.totalGates > 0 ? this.slalomSystem.totalGates : undefined,
+        skiTrickScore: this.trickCount > 0 ? this.trickScore : undefined,
+        skiTrickCount: this.trickCount > 0 ? this.trickCount : undefined,
+        skiBestCombo: this.trickCount > 0 ? this.bestCombo : undefined,
       });
     });
   }

@@ -259,6 +259,12 @@ export const BALANCE = {
   SKI_CLIFF_JUMP_KMH: 30,      // Min km/h to clear a cliff with a jump
   SKI_CLIFF_JUMP_AIR: 900,      // Air time (ms) for cliff jump
   SKI_CLIFF_JUMP_SCALE: 1.8,    // Skier scale at peak of cliff jump
+
+  // Trick scoring (ski run)
+  TRICK_BASE_KICKER: 100,
+  TRICK_BASE_RAIL: 150,
+  TRICK_BASE_HALFPIPE: 200,
+  TRICK_VARIETY_BONUS: 0.25,     // Multiplier increase per consecutive unique trick
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

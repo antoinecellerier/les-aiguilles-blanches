@@ -34,6 +34,9 @@ const cs: Record<string, string> = {
   reducedMotion: "Omezený pohyb",
   showFps: "Show FPS",
   showDebug: "Debug Overlay",
+  skiStyle: "Style",
+  skiTricks: "Tricks",
+  skiBestCombo: "Best combo",
   colorblindMode: "Barvoslepost",
   none: "Žádné",
   deuteranopia: "Deutan.",
@@ -273,7 +276,7 @@ const cs: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14. února 2026",
-  changelog_20260214: "👁️ Lepší kontrast sjezdovek\n📱 Automatické planýrování při navijáku (dotyk)\n⛷️ Ikona tlačítka skoku",
+  changelog_20260214: "🎪 Trick scoring & combos\n👁️ Lepší kontrast sjezdovek\n📱 Automatické planýrování při navijáku (dotyk)\n⛷️ Ikona tlačítka skoku",
   changelog_20260213_date: "13. února 2026",
   changelog_20260213: "🚩 Slalomové brány\n🏔️ Skoky na lyžích\n⚡ Vylepšený výkon\n🎹 Nokturní klavírní hudba\n🔊 Hlasitost motoru nastavitelná",
   changelog_20260212_date: "12. února 2026",

@@ -38,6 +38,9 @@ const es: Record<string, string> = {
   reducedMotion: "Menos Movimiento",
   showFps: "Show FPS",
   showDebug: "Debug Overlay",
+  skiStyle: "Style",
+  skiTricks: "Tricks",
+  skiBestCombo: "Best combo",
   colorblindMode: "Daltonismo",
   none: "Ninguno",
   deuteranopia: "Deuteran.",
@@ -224,7 +227,7 @@ const es: Record<string, string> = {
   
   // Changelog
   changelog_20260214_date: "14 de febrero de 2026",
-  changelog_20260214: "👁️ Mejor contraste de pistas\n📱 Preparación automática con cabrestante táctil\n⛷️ Icono del botón de salto",
+  changelog_20260214: "🎪 Trick scoring & combos\n👁️ Mejor contraste de pistas\n📱 Preparación automática con cabrestante táctil\n⛷️ Icono del botón de salto",
   changelog_20260213_date: "13 de febrero de 2026",
   changelog_20260213: "🚩 Puertas de eslalon\n🏔️ Saltos de esquí\n⚡ Rendimiento mejorado\n🎹 Música nocturna de piano\n🔊 Volumen del motor ajustable",
   changelog_20260212_date: "12 de febrero de 2026",

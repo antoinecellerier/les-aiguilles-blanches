@@ -37,6 +37,9 @@ interface LevelCompleteData {
   skiMode?: string;
   skiGatesHit?: number;
   skiGatesTotal?: number;
+  skiTrickScore?: number;
+  skiTrickCount?: number;
+  skiBestCombo?: number;
 }
 
 export default class LevelCompleteScene extends Phaser.Scene {
@@ -56,6 +59,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private totalPaths = 0;
   private skiGatesHit = 0;
   private skiGatesTotal = 0;
+  private skiTrickScore = 0;
+  private skiTrickCount = 0;
+  private skiBestCombo = 0;
   
   // Keyboard/gamepad navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -90,6 +96,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.totalPaths = data.totalPaths ?? 0;
     this.skiGatesHit = data.skiGatesHit ?? 0;
     this.skiGatesTotal = data.skiGatesTotal ?? 0;
+    this.skiTrickScore = data.skiTrickScore ?? 0;
+    this.skiTrickCount = data.skiTrickCount ?? 0;
+    this.skiBestCombo = data.skiBestCombo ?? 0;
     
     // Reset navigation state
     this.menuButtons = [];
@@ -263,6 +272,17 @@ export default class LevelCompleteScene extends Phaser.Scene {
         statsLines.push('');
         const gatePrefix = this.skiGatesHit === this.skiGatesTotal ? '✓ ' : '';
         statsLines.push(`${gatePrefix}${t('skiRunGates') || 'Gates'}: ${this.skiGatesHit}/${this.skiGatesTotal}`);
+      }
+
+      // Trick score results
+      if (this.won && this.skiTrickCount > 0) {
+        statsLines.push('');
+        const scoreStr = this.skiTrickScore.toLocaleString();
+        statsLines.push(`${t('skiStyle') || 'Style'}: ${scoreStr} pts`);
+        statsLines.push(`${t('skiTricks') || 'Tricks'}: ${this.skiTrickCount}`);
+        if (this.skiBestCombo > 1) {
+          statsLines.push(`${t('skiBestCombo') || 'Best combo'}: ${this.skiBestCombo}×`);
+        }
       }
 
       const statsText = this.add.text(cx, cursorY, statsLines.join('\n'), {

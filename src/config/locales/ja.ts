@@ -34,6 +34,9 @@ const ja: Record<string, string> = {
   reducedMotion: "モーション軽減",
   showFps: "Show FPS",
   showDebug: "Debug Overlay",
+  skiStyle: "Style",
+  skiTricks: "Tricks",
+  skiBestCombo: "Best combo",
   colorblindMode: "色覚補助",
   none: "なし",
   deuteranopia: "2型",
@@ -273,7 +276,7 @@ const ja: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "2026年2月14日",
-  changelog_20260214: "👁️ ゲレンデのコントラスト改善\n📱 ウインチ時の自動整地（タッチ）\n⛷️ スキージャンプボタンアイコン",
+  changelog_20260214: "🎪 Trick scoring & combos\n👁️ ゲレンデのコントラスト改善\n📱 ウインチ時の自動整地（タッチ）\n⛷️ スキージャンプボタンアイコン",
   changelog_20260213_date: "2026年2月13日",
   changelog_20260213: "🚩 スラロームゲート\n🏔️ スキージャンプ\n⚡ パフォーマンス改善\n🎹 ノクターンピアノ音楽\n🔊 エンジン音量調整",
   changelog_20260212_date: "2026年2月12日",

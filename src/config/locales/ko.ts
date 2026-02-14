@@ -34,6 +34,9 @@ const ko: Record<string, string> = {
   reducedMotion: "모션 감소",
   showFps: "Show FPS",
   showDebug: "Debug Overlay",
+  skiStyle: "Style",
+  skiTricks: "Tricks",
+  skiBestCombo: "Best combo",
   colorblindMode: "색맹 보정",
   none: "없음",
   deuteranopia: "2형",
@@ -273,7 +276,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "2026년 2월 14일",
-  changelog_20260214: "👁️ 슬로프 대비 개선\n📱 윈치 시 자동 정지 (터치)\n⛷️ 스키 점프 버튼 아이콘",
+  changelog_20260214: "🎪 Trick scoring & combos\n👁️ 슬로프 대비 개선\n📱 윈치 시 자동 정지 (터치)\n⛷️ 스키 점프 버튼 아이콘",
   changelog_20260213_date: "2026년 2월 13일",
   changelog_20260213: "🚩 슬라럼 게이트\n🏔️ 스키 점프\n⚡ 성능 향상\n🎹 녹턴 피아노 음악\n🔊 엔진 볼륨 조절",
   changelog_20260212_date: "2026년 2월 12일",

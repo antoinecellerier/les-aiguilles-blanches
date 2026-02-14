@@ -34,6 +34,9 @@ const sv: Record<string, string> = {
   reducedMotion: "Reducerad rörelse",
   showFps: "Show FPS",
   showDebug: "Debug Overlay",
+  skiStyle: "Style",
+  skiTricks: "Tricks",
+  skiBestCombo: "Best combo",
   colorblindMode: "Färgblindhet",
   none: "Ingen",
   deuteranopia: "Deutan.",
@@ -274,7 +277,7 @@ const sv: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14 februari 2026",
-  changelog_20260214: "👁️ Bättre pistkontrast\n📱 Auto-planering vid vinsch (touch)\n⛷️ Skihoppsknapp med ikon",
+  changelog_20260214: "🎪 Trick scoring & combos\n👁️ Bättre pistkontrast\n📱 Auto-planering vid vinsch (touch)\n⛷️ Skihoppsknapp med ikon",
   changelog_20260213_date: "13 februari 2026",
   changelog_20260213: "🚩 Slalomportar\n🏔️ Skidhopp\n⚡ Förbättrad prestanda\n🎹 Nocturn pianomusik\n🔊 Motorvolym justerbar",
   changelog_20260212_date: "12 februari 2026",

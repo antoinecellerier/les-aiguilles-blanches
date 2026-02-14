@@ -419,6 +419,7 @@ On levels with terrain park features (L3, L6), the ski run includes interactive 
 - **Rail grind tricks** — pass over a rail to grind with sparks. 4 random tricks: Boardslide (yellow sparks), 50-50 (cyan), Lipslide (orange-red), Tailslide (green). Each has a distinct rotation angle and spark color.
 - **Halfpipe tricks** — on L6, carve into a halfpipe wall to launch bigger air. 5 pipe-specific tricks: McTwist, Crippler, 900, Alley-oop, Stalefish. Higher amplitude and longer airtime than kicker tricks.
 - All tricks show the trick name in a popup and give a 1.3× speed boost.
+- **Trick scoring** — Each trick awards base points: kicker (100), rail (150), halfpipe (200). A speed multiplier (1.0–2.0×) rewards faster tricks. Consecutive unique tricks build a variety combo (+0.25× per unique trick); repeating the same trick resets the combo. Total score, trick count, and best combo are shown on the level complete screen.
 - **Progressive turning** — initial turns barely slow you down; only sustained carving bleeds speed (drag ramps 10%→100% over 0.4s).
 - Works identically for both skier and snowboarder modes.
 

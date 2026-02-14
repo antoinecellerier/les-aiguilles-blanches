@@ -34,6 +34,9 @@ const tr: Record<string, string> = {
   reducedMotion: "Azaltılmış Hareket",
   showFps: "Show FPS",
   showDebug: "Debug Overlay",
+  skiStyle: "Style",
+  skiTricks: "Tricks",
+  skiBestCombo: "Best combo",
   colorblindMode: "Renk Körlüğü",
   none: "Yok",
   deuteranopia: "Deutan.",
@@ -273,7 +276,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14 Şubat 2026",
-  changelog_20260214: "👁️ Daha iyi pist kontrastı\n📱 Vinçte otomatik düzeltme (dokunmatik)\n⛷️ Kayak atlama düğmesi simgesi",
+  changelog_20260214: "🎪 Trick scoring & combos\n👁️ Daha iyi pist kontrastı\n📱 Vinçte otomatik düzeltme (dokunmatik)\n⛷️ Kayak atlama düğmesi simgesi",
   changelog_20260213_date: "13 Şubat 2026",
   changelog_20260213: "🚩 Slalom kapıları\n🏔️ Kayak atlayışları\n⚡ Geliştirilmiş performans\n🎹 Nokturne piyano müziği\n🔊 Motor sesi ayarlanabilir",
   changelog_20260212_date: "12 Şubat 2026",
