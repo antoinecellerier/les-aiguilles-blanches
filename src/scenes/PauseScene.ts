@@ -56,12 +56,13 @@ export default class PauseScene extends Phaser.Scene {
     const scaleY = height / 768;
     const scaleFactor = Math.max(0.55, Math.min(1.5, Math.min(scaleX, scaleY)));
 
-    const panelWidth = Math.min(Math.round(300 * scaleFactor), width - 20);
     const fontSize = Math.max(14, Math.round(18 * scaleFactor));
     const titleFontSize = Math.max(18, Math.round(28 * scaleFactor));
     const buttonPadY = Math.max(Math.round(8 * scaleFactor), Math.ceil((minTouchTarget - fontSize) / 2));
-    const buttonSpacing = Math.max(6, Math.round(12 * scaleFactor));
+    const buttonSpacing = Math.max(6, Math.round(10 * scaleFactor));
     const buttonH = fontSize + buttonPadY * 2;
+    const panelPad = Math.round(20 * scaleFactor);
+    const titleGap = Math.round(16 * scaleFactor);
 
     const buttonDefs = this.skiMode
       ? [
@@ -81,7 +82,10 @@ export default class PauseScene extends Phaser.Scene {
     ];
 
     const buttonCount = buttonDefs.length;
-    const panelHeight = Math.min(Math.round(titleFontSize + 30 * scaleFactor + (buttonH + buttonSpacing) * buttonCount + 20 * scaleFactor), height - 20);
+    const contentHeight = titleFontSize + titleGap + (buttonH + buttonSpacing) * buttonCount - buttonSpacing;
+    const panelHeight = Math.min(contentHeight + panelPad * 2, height - 20);
+    const buttonWidth = Math.round(220 * scaleFactor);
+    const panelWidth = Math.min(buttonWidth + panelPad * 2, width - 20);
 
     // Dim overlay
     this.add.rectangle(width / 2, height / 2, width, height, THEME.colors.overlayDim, THEME.opacity.overlay);
@@ -92,25 +96,27 @@ export default class PauseScene extends Phaser.Scene {
     // Title
     const tStyle = titleStyle();
     tStyle.fontSize = titleFontSize + 'px';
-    this.add.text(width / 2, height / 2 - panelHeight / 2 + Math.round(20 * scaleFactor), t('pauseTitle') || 'Paused', tStyle)
-      .setOrigin(0.5);
+    this.add.text(width / 2, height / 2 - panelHeight / 2 + panelPad, t('pauseTitle') || 'Paused', tStyle)
+      .setOrigin(0.5, 0);
 
-    // Buttons
+    // Buttons — uniform width, centered text
     const btnStyle = buttonStyle();
     btnStyle.fontSize = fontSize + 'px';
-    btnStyle.padding = { x: Math.round(40 * scaleFactor), y: buttonPadY };
+    btnStyle.padding = { x: 0, y: buttonPadY };
+    btnStyle.fixedWidth = buttonWidth;
+    btnStyle.align = 'center';
 
     this.menuButtons = [];
     this.buttonCallbacks = [];
     this.buttonIsCTA = [];
 
-    const firstButtonY = height / 2 - panelHeight / 2 + titleFontSize + Math.round(40 * scaleFactor);
+    const firstButtonY = height / 2 - panelHeight / 2 + panelPad + titleFontSize + titleGap;
 
     buttonDefs.forEach((btn, i) => {
       const style = { ...btnStyle };
       if (btn.isCTA) style.backgroundColor = THEME.colors.buttonCTAHex;
       const button = this.add.text(width / 2, firstButtonY + i * (buttonH + buttonSpacing), t(btn.text) || btn.text, style)
-        .setOrigin(0.5)
+        .setOrigin(0.5, 0)
         .setInteractive({ useHandCursor: true })
         .on('pointerover', () => this.buttonNav.select(i))
         .on('pointerout', () => this.buttonNav.refreshStyles())
