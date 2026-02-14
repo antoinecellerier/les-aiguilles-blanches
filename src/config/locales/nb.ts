@@ -256,7 +256,7 @@ const nb: Record<string, string> = {
 
   // Taunts - Avalanche
   tauntAvalanche1: "Fjellet tilgir sjelden. Det tilga ikke.",
-  tauntAvalanche2: "Meteorologisk institutt sa faregrad 4. Leste du det?",
+  tauntAvalanche2: "Météo France sa faregrad 4. Leste du det?",
   tauntAvalanche3: "Løypepatrullen finner maskinen til våren. Kanskje.",
   tauntAvalanche4: "Marie hører radiovarselet. Hun vet allerede at det er deg.",
   tauntAvalanche5: "Skredteamet hadde sikret sektoren. Du avsikret den.",
