@@ -101,7 +101,13 @@ export default class DialogueScene extends Phaser.Scene {
     return this.getDialogueShowY() + 20;
   }
 
-  /** Resize the dialogue box to fit longer text */
+  /** Reposition dialogue when touch controls appear/change. */
+  private onTouchControlsChanged(): void {
+    if (this.isShowing && this.container) {
+      this.container.setY(this.getDialogueShowY());
+    }
+  }
+
   private resizeDialogueBox(newHeight: number): void {
     if (!this.bg) return;
     const oldH = this.currentBoxHeight;
@@ -159,7 +165,8 @@ export default class DialogueScene extends Phaser.Scene {
     });
     this.resizeManager.register();
 
-    // Fullscreen hit zone for clicking anywhere to dismiss (initially disabled)
+    // Reposition dialogue when touch controls appear mid-game (Firefox desktop)
+    this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsChanged, this);
     // Exclude top-right corner (200x200) where HUD buttons are located
     
     // Create hit zone that covers most of screen except top-right button area
@@ -632,6 +639,7 @@ export default class DialogueScene extends Phaser.Scene {
 
   shutdown(): void {
     this.resizeManager?.destroy();
+    this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsChanged, this);
     this.input.keyboard?.removeAllListeners();
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();

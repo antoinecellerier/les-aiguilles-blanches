@@ -493,6 +493,8 @@ export default class HUDScene extends Phaser.Scene {
       onTouchAvailable(() => {
         if (this.touchControlsContainer) {
           this.touchControlsContainer.setVisible(true);
+          // Re-emit so DialogueScene repositions above controls
+          this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.touchControlsTopEdge);
         }
       });
     }
@@ -620,7 +622,10 @@ export default class HUDScene extends Phaser.Scene {
     if (startHidden) {
       this.touchControlsContainer.setVisible(false);
       onTouchAvailable(() => {
-        if (this.touchControlsContainer) this.touchControlsContainer.setVisible(true);
+        if (this.touchControlsContainer) {
+          this.touchControlsContainer.setVisible(true);
+          this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.touchControlsTopEdge);
+        }
       });
     }
 
