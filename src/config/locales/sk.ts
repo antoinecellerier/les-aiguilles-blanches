@@ -33,11 +33,11 @@ const sk: Record<string, string> = {
   highContrast: "Vysoký kontrast",
   reducedMotion: "Obmedzený pohyb",
   showFps: "Zobraziť FPS",
-  showDebug: "Debug Overlay",
-  skiStyle: "Style",
-  skiTricks: "Tricks",
-  skiBestCombo: "Best combo",
-  quitGame: "Quit Game",
+  showDebug: "Ladenie",
+  skiStyle: "Štýl",
+  skiTricks: "Triky",
+  skiBestCombo: "Najlepšie kombo",
+  quitGame: "Ukončiť hru",
   display: "Zobrazenie",
   displayWindowed: "Okno",
   displayFullscreen: "Celá obrazovka",
@@ -136,7 +136,7 @@ const sk: Record<string, string> = {
   // Taunts - Fuel empty
   tauntFuel1: "Ukazovateľ bol na červenej 10 minút. Na čo ste sa pozerali?",
   tauntFuel2: "Émilie napísala 'NATANKOVAŤ' veľkými písmenami na tabuľu.",
-  tauntFuel3: "Aj nafta má svoje limity. Vy zrejme tiež.",
+  tauntFuel3: "Aj nafta má svoje limity. Ty zrejme tiež.",
   tauntFuel4: "Jean-Pierre vzdychá. Posiela Thierryho s kanistrom.",
   tauntFuel5: "Slnko vychádza. Zjazdovka nie je upravená. Lyžiari prichádzajú.",
 
@@ -144,7 +144,7 @@ const sk: Record<string, string> = {
   tauntTime1: "Prvý vlek za 3... 2... 1... Nestihli ste.",
   tauntTime2: "Lyžiari objavujú vašu zjazdovku. Hrboľatá. Ľadová. Nádhera.",
   tauntTime3: "Jean-Pierre sa pozerá na hodinky, potom na vás, potom na hodinky.",
-  tauntTime4: "FIS sa pýta, prečo je slalom na polievke.",
+  tauntTime4: "FIS sa pýta, prečo je slalom na kaši.",
   tauntTime5: "Počujete inštruktorov, ako klientom vysvetľujú, prečo to 'nie je ich chyba'.",
 
   // UNUSED paused: "Pozastavené",
@@ -235,7 +235,7 @@ const sk: Record<string, string> = {
   riskLevelHigh: "VYSOKÉ",
   avalancheWarning: "⚠️ NEBEZPEČENSTVO! Snehová pokrývka je nestabilná! Opustite zónu!",
   avalancheTrigger: "🏔️💨 LAVÍNA SPUSTENÁ! Žiadny únik!",
-  steepWarning: "⚠️ STRMÝ SVAH! Použite naviják (SHIFT) alebo skĺznete!",
+  steepWarning: "⚠️ STRMÝ SVAH! Použite naviják ({winchKey}) alebo skĺznete!",
   steepWarningNoWinch: "⚠️ STRMÝ SVAH! Spomaľte a použite servisné cesty na obídenie!",
   tumble: "🔄 PREVRÁTENIE! Fréza sa prevrátila na svahu!",
 
@@ -262,7 +262,7 @@ const sk: Record<string, string> = {
   tauntAvalanche5: "Lavínový tím zabezpečil ten sektor. Vy ste ho odbezpečili.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
-  tauntSkiWipeout1: "Klasický výpredaj. Výbava všade, dôstojnosť nikde.",
+  tauntSkiWipeout1: "Klasický pád. Výstroj všade, dôstojnosť nikde.",
   tauntSkiWipeout2: "Útesu bolo jedno, akú máš techniku.",
   tauntSkiWipeout3: "Horská služba sa už smeje. Videli všetko.",
   tauntSkiWipeout4: "To sa stane, keď lyžuješ na vlastnej zjazdovke.",
@@ -270,10 +270,10 @@ const sk: Record<string, string> = {
 
   jeanPierreIntro: "Dobrá práca v tutoriáli. Teraz to bude naostro — zelená zjazdovka, s časom a palivom na starosti.",
   level_chamoisIntro: "Ahoj, som Émilie — JP vás posiela na modrú. Ukážte, že zvládnete viac než len samety na zelenej.",
-  level_airZoneIntro: "Snowpark potrebuje starostlivosť — jazdci na nás počítajú. Presnosť je kľúč!",
-  level_aigleIntro: "L'Aigle je vážna vec. Sledujte palivo. Po servisných cestách sa vrátite hore — hľadajte oranžovo-čierne stĺpiky.",
-  level_glacierIntro: "Le Glacier je strmý. Pripravil som kotvy. Stlačte {winchKey} pri stĺpiku pre pripojenie navijáku — udrží vás.",
-  level_glacierIntroTouch: "Le Glacier je strmý. Pripravil som kotvy. Ťuknite na tlačidlo navijáku pri stĺpiku — udrží vás.",
+  level_airZoneIntro: "Snowpark je MÔJ rajón — pripravíme im niečo šialené! Každý modul musí sedieť, jazdci na nás počítajú.",
+  level_aigleIntro: "L'Aigle je vážna vec. Sledujte palivo. Po servisných cestách sa vrátite hore — hľadajte žlto-čierne stĺpiky.",
+  level_glacierIntro: "Ahoj, ja som Thierry — šéf bezpečnosti. Le Glacier je strmý. Skontroloval som každú kotvu. Stlač {winchKey} pri stĺpiku pre pripojenie navijáku — a prosím ťa, nepúšťaj.",
+  level_glacierIntroTouch: "Ahoj, ja som Thierry — šéf bezpečnosti. Le Glacier je strmý. Skontroloval som každú kotvu. Ťukni na tlačidlo navijáku pri stĺpiku — a prosím ťa, nepúšťaj.",
   level_tubeIntro: "Zajtra je contest na Tube! Chcem čisté steny, ostrý okraj a nula hrboľov.",
   level_verticaleIntro: "Nočná akcia na La Verticale: strmý svah, nebezpečné okraje. Naviják je povinný — použite 3 ukotvenia a držte sa osi.",
   level_colDangereuxIntro: "Vysoké lavínové riziko na priesmyku — pracujeme podľa protokolu lavínového zabezpečenia. Držte sa od zaťažených zón a rešpektujte hranice.",

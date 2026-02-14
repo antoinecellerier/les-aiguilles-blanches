@@ -37,11 +37,11 @@ const de: Record<string, string> = {
   highContrast: "Hoher Kontrast",
   reducedMotion: "Weniger Bewegung",
   showFps: "FPS anzeigen",
-  showDebug: "Debug Overlay",
-  skiStyle: "Style",
+  showDebug: "Debug-Infos",
+  skiStyle: "Stil",
   skiTricks: "Tricks",
-  skiBestCombo: "Best combo",
-  quitGame: "Quit Game",
+  skiBestCombo: "Beste Kombo",
+  quitGame: "Spiel verlassen",
   display: "Anzeige",
   displayWindowed: "Fenster",
   displayFullscreen: "Vollbild",
@@ -118,7 +118,7 @@ const de: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} oder Winden-Taste bei einem Ankerpfosten halten",
   
   // Winch
-  winchSnapped: "💥 Kabel gerissen!",
+  winchSnapped: "💥 Seil gerissen!",
   winchAttached: "🔗 Winde befestigt! Halte {winchKey} für Unterstützung.",
   winchActive: "WINDE",
   // UNUSED winchHint: "Drücke {winchKey} bei einem nummerierten Ankerpfosten für die Winde",
@@ -209,23 +209,23 @@ const de: Record<string, string> = {
   level_coupeDesAiguillesTask: "Alle Pisten für den Wettkampf vorbereiten",
   
   // Hazards
-  cliffFall: "⚠️ ACHTUNG! Sie sind in die Schlucht gefallen! Mission gescheitert.",
+  cliffFall: "⚠️ ACHTUNG! Du bist in die Schlucht gestürzt! Mission gescheitert.",
   fuelEmpty: "⛽ LEER! Kein Tropfen Diesel mehr...",
   // UNUSED avalancheZone: "LAWINENZONE",
   riskLevelHigh: "HOCH",
   avalancheWarning: "⚠️ GEFAHR! Instabile Schneedecke! Verlasse die Zone!",
   avalancheTrigger: "🏔️💨 LAWINE AUSGELÖST! Keine Flucht möglich!",
-  steepWarning: "⚠️ STEILER HANG! Benutze die Winde (SHIFT) oder du rutschst ab!",
+  steepWarning: "⚠️ STEILER HANG! Benutze die Winde ({winchKey}) oder du rutschst ab!",
   steepWarningNoWinch: "⚠️ STEILER HANG! Langsamer fahren und die Zufahrtswege nutzen!",
   tumble: "🔄 ÜBERSCHLAG! Der Pistenbully ist umgekippt!",
   
   // Dialogues
   jeanPierreIntro: "Gut gemacht im Tutorial, Kleiner. Jetzt wird's ernst — die Grüne, mit Timer und Kraftstoff.",
   level_chamoisIntro: "Hey, ich bin Émilie — JP schickt dich auf die Blaue. Zeig, dass du mehr kannst als nur grüne Pisten zu bügeln.",
-  level_airZoneIntro: "Der Snowpark braucht Liebe — die Rider zählen auf uns. Präzision!",
+  level_airZoneIntro: "Der Snowpark ist MEIN Revier — wir bauen denen was Krasses auf! Jedes Modul muss perfekt sitzen, die Rider zählen auf uns.",
   level_aigleIntro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Ziehwege führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",
-  level_glacierIntro: "Le Glacier ist steil. Ich habe die Anker vorbereitet. Drücke {winchKey} neben einem Pfosten, um die Winde einzuhaken — damit rutscht du nicht ab.",
-  level_glacierIntroTouch: "Le Glacier ist steil. Ich habe die Anker vorbereitet. Tippe auf den Winden-Button neben einem Pfosten — damit rutscht du nicht ab.",
+  level_glacierIntro: "Hey, ich bin Thierry — Sicherheitsbeauftragter. Le Glacier ist steil. Ich hab jeden Anker geprüft. Drücke {winchKey} neben einem Pfosten, um die Winde einzuhaken — und bitte, lass nicht los.",
+  level_glacierIntroTouch: "Hey, ich bin Thierry — Sicherheitsbeauftragter. Le Glacier ist steil. Ich hab jeden Anker geprüft. Tippe auf den Winden-Button neben einem Pfosten — und bitte, lass nicht los.",
   level_tubeIntro: "Morgen ist Contest am Tube! Saubere Wände, scharfe Kante, keine Buckel.",
   level_verticaleIntro: "Nachteinsatz auf La Verticale: steiler Hang, gefährliche Ränder. Winde ist Pflicht — nutze die 3 Verankerungen und bleib in der Spur.",
   level_colDangereuxIntro: "Hohes Lawinenrisiko am Col — wir arbeiten nach Lawinensicherheitsprotokoll aktiv. Bleib aus den belasteten Zonen und halte die Grenzen ein.",
@@ -276,7 +276,7 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   tauntTime1: "Erster Sessellift in 3... 2... 1... Verpasst.",
   tauntTime2: "Skifahrer entdecken deine Piste. Buckelig. Vereist. Toll.",
   tauntTime3: "Jean-Pierre schaut auf seine Uhr, dann auf dich, dann auf seine Uhr.",
-  tauntTime4: "Die FIS fragt, warum der Slalom auf Suppe stattfindet.",
+  tauntTime4: "Die FIS fragt, warum der Slalom im Sulz stattfindet.",
   tauntTime5: "Du hörst Skilehrer den Gästen erklären, dass es 'nicht ihre Schuld' ist.",
   // Taunts - Tumble
   tauntTumble1: "Die Winde ist nicht zur Dekoration da.",
@@ -300,7 +300,7 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   tauntAvalanche5: "Das Lawinenteam hatte den Sektor gesichert. Du hast ihn ent-sichert.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
-  tauntSkiWipeout1: "Klassischer Ausverkauf. Ausrüstung überall, Würde nirgends.",
+  tauntSkiWipeout1: "Klassischer Abflug. Ausrüstung überall, Würde nirgends.",
   tauntSkiWipeout2: "Der Abhang hat sich nicht für deine Skitechnik interessiert.",
   tauntSkiWipeout3: "Die Pistenrettung lacht schon. Die haben alles gesehen.",
   tauntSkiWipeout4: "Das passiert, wenn man seine eigene Piste fährt.",

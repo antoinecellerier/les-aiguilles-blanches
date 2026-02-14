@@ -33,11 +33,11 @@ const sv: Record<string, string> = {
   highContrast: "Hög kontrast",
   reducedMotion: "Reducerad rörelse",
   showFps: "Visa FPS",
-  showDebug: "Debug Overlay",
-  skiStyle: "Style",
-  skiTricks: "Tricks",
-  skiBestCombo: "Best combo",
-  quitGame: "Quit Game",
+  showDebug: "Felsökningsinfo",
+  skiStyle: "Stil",
+  skiTricks: "Trick",
+  skiBestCombo: "Bästa kombo",
+  quitGame: "Avsluta spelet",
   display: "Visning",
   displayWindowed: "Fönster",
   displayFullscreen: "Helskärm",
@@ -52,7 +52,7 @@ const sv: Record<string, string> = {
   moveDown: "Ner",
   moveLeft: "Vänster",
   moveRight: "Höger",
-  groom: "Preparera",
+  groom: "Pista",
   winch: "Vinsch",
   pause: "Paus",
   keyboard: "Tangentbord",
@@ -118,7 +118,7 @@ const sv: Record<string, string> = {
   howToPlayWinchHybrid: "{winchKey} eller håll vinschknappen nära en förankring",
 
   // Winch
-  winchSnapped: "💥 Kabeln brast!",
+  winchSnapped: "💥 Vajern brast!",
   winchAttached: "🔗 Vinsch fäst! Håll {winchKey} för assistans.",
   winchActive: "VINSCH",
   // UNUSED winchHint: "Tryck {winchKey} nära en numrerad förankringsstolpe för vinsch",
@@ -144,7 +144,7 @@ const sv: Record<string, string> = {
   tauntTime1: "Första stolliften om 3... 2... 1... Missat.",
   tauntTime2: "Skidåkarna upptäcker din pist. Guppig. Isig. Magnifikt.",
   tauntTime3: "Jean-Pierre tittar på klockan, sen på dig, sen klockan.",
-  tauntTime4: "FIS undrar varför slalomen ligger i soppa.",
+  tauntTime4: "FIS undrar varför slalomen ligger i slask.",
   tauntTime5: "Du hör skidlärarna förklara för kunderna varför det 'inte är deras fel'.",
 
   // UNUSED paused: "Pausat",
@@ -235,7 +235,7 @@ const sv: Record<string, string> = {
   riskLevelHigh: "HÖG",
   avalancheWarning: "⚠️ FARA! Snötäcket är instabilt! Lämna zonen!",
   avalancheTrigger: "🏔️💨 LAVIN UTLÖST! Ingen flykt möjlig!",
-  steepWarning: "⚠️ BRANT BACKE! Använd vinschen (SHIFT) eller du glider!",
+  steepWarning: "⚠️ BRANT BACKE! Använd vinschen ({winchKey}) eller du glider!",
   steepWarningNoWinch: "⚠️ BRANT BACKE! Sakta ner och använd servicevägarna för att ta dig runt!",
   tumble: "🔄 VOLTNING! Pistmaskinen välte på sluttningen!",
 
@@ -256,13 +256,13 @@ const sv: Record<string, string> = {
 
   // Taunts - Avalanche
   tauntAvalanche1: "Berget förlåter sällan. Det förlät inte.",
-  tauntAvalanche2: "SMHI sa risknivå 4. Läste du det?",
+  tauntAvalanche2: "Météo France sa risknivå 4. Läste du det?",
   tauntAvalanche3: "Pistpatrullen hittar maskinen till våren. Kanske.",
   tauntAvalanche4: "Marie hör radiovarningen. Hon vet redan att det är du.",
   tauntAvalanche5: "Lavinteamet hade säkrat sektorn. Du avsäkrade den.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
-  tauntSkiWipeout1: "Klassisk utförsäljning. Utrustning överallt, värdighet ingenstans.",
+  tauntSkiWipeout1: "Klassisk vurpa. Utrustning överallt, värdighet ingenstans.",
   tauntSkiWipeout2: "Stupet brydde sig inte om din skidteknik.",
   tauntSkiWipeout3: "Pistpatrullen skrattar redan. De såg allt.",
   tauntSkiWipeout4: "Det händer när man åker sin egen pist.",
@@ -271,10 +271,10 @@ const sv: Record<string, string> = {
   // Dialogues
   jeanPierreIntro: "Bra jobbat med handledningen. Nu är det på riktigt — gröna pisten, med tidur och bränsle att hålla koll på.",
   level_chamoisIntro: "Hej, jag är Émilie — JP skickar dig till blå pisten. Visa att du kan mer än att dra sammet på gröna.",
-  level_airZoneIntro: "Snowparken behöver kärlek — åkarna räknar med oss. Precision!",
+  level_airZoneIntro: "Snowparken är MITT område — vi bygger nåt sjukt åt dem! Varje modul måste sitta perfekt, åkarna räknar med oss.",
   level_aigleIntro: "L'Aigle är på allvar. Håll koll på bränslet. Servicevägarna leder dig uppåt — leta efter de gula och svarta stolparna.",
-  level_glacierIntro: "Le Glacier är brant. Jag har satt upp förankringarna. Tryck {winchKey} vid en stolpe för att fästa vinschen — den hindrar dig från att glida.",
-  level_glacierIntroTouch: "Le Glacier är brant. Jag har satt upp förankringarna. Tryck på vinschknappen vid en stolpe för att fästa — den hindrar dig från att glida.",
+  level_glacierIntro: "Hej, jag är Thierry — säkerhetsansvarig. Le Glacier är brant. Jag har kontrollerat varje förankring. Tryck {winchKey} vid en stolpe för att fästa vinschen — och snälla, släpp inte.",
+  level_glacierIntroTouch: "Hej, jag är Thierry — säkerhetsansvarig. Le Glacier är brant. Jag har kontrollerat varje förankring. Tryck på vinschknappen vid en stolpe — och snälla, släpp inte.",
   level_tubeIntro: "Imorgon är det contest i Tuben! Rena väggar, vass kant och inga bucklor.",
   level_verticaleIntro: "Nattuppdrag på La Verticale: brant sluttning, farliga kanter. Vinschen är obligatorisk — använd de 3 förankringarna och håll linjen.",
   level_colDangereuxIntro: "Hög lavinrisk på passet — vi kör Lavinsäkerhetsprotokoll aktivt. Håll dig borta från belastade områden och respektera gränserna.",
