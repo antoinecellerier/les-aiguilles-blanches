@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, GAME_CONFIG, LEVELS, Accessibility, Level } from '../setup';
-import { BALANCE, DEPTHS, FOOD_ITEMS, selectFoodBuff, getFrostRate, getFrostSpeedMultiplier } from '../config/gameConfig';
+import { BALANCE, DEPTHS, FOOD_ITEMS, selectFoodBuff, getFrostRate, getFrostSpeedMultiplier, yDepth } from '../config/gameConfig';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { getString, setString } from '../utils/storage';
@@ -107,6 +107,7 @@ export default class GameScene extends Phaser.Scene {
   private lastTimeWarnTime = 0;
   private staminaDepletedPlayed = false;
   private dialogueDucked = false;
+  private debugGfx?: Phaser.GameObjects.Graphics;
 
   // Tutorial
   private tutorialStep = 0;
@@ -121,7 +122,6 @@ export default class GameScene extends Phaser.Scene {
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
   private interactables!: Phaser.Physics.Arcade.StaticGroup;
   private boundaryWalls!: Phaser.Physics.Arcade.StaticGroup;
-  private dangerZones!: Phaser.Physics.Arcade.StaticGroup;
   private snowGrid: SnowCell[][] = [];
   private pisteDynTex!: Phaser.Textures.DynamicTexture;
   private groomedCount = 0;
@@ -351,9 +351,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.pisteRenderer = new PisteRenderer(this, this.geometry);
 
-    const { boundaryWalls, dangerZones } = this.pisteRenderer.createBoundaryColliders(this.level, this.tileSize);
+    const { boundaryWalls } = this.pisteRenderer.createBoundaryColliders(this.level, this.tileSize);
     this.boundaryWalls = boundaryWalls;
-    this.dangerZones = dangerZones;
 
     this.pisteRenderer.createExtendedBackground(
       screenWidth, screenHeight, worldWidth, worldHeight,
@@ -374,6 +373,22 @@ export default class GameScene extends Phaser.Scene {
     this.obstacleBuilder.create(this.level, this.tileSize, this.obstacles, this.interactables,
       [{ x: spawnX, y: spawnY, radius: this.tileSize * 3 }]);
     this.buildingRects = this.obstacleBuilder.buildingRects;
+
+    // Shrink tree hitboxes to trunk area so groomer can pass behind canopy.
+    // Must call updateFromGameObject() first to align body with display scale,
+    // then set trunk dimensions in display-scaled coords.
+    const scale = this.tileSize / 16;
+    for (const sprite of this.obstacles.getChildren()) {
+      const s = sprite as Phaser.Physics.Arcade.Sprite;
+      const body = s.body as Phaser.Physics.Arcade.StaticBody;
+      body.updateFromGameObject();
+      if (s.texture.key === 'tree' || s.texture.key === 'tree_large') {
+        const trunkW = 20 * scale;
+        const trunkH = 10 * scale;
+        body.setSize(trunkW, trunkH);
+        body.setOffset((s.displayWidth - trunkW) / 2, s.displayHeight - trunkH);
+      }
+    }
 
     // Park features (kickers, rails, halfpipe)
     this.parkFeatures.destroy();
@@ -429,6 +444,8 @@ export default class GameScene extends Phaser.Scene {
   private setupLevelSystems(): void {
     if (this.level.hasWinch) {
       this.winchSystem.createAnchors(this.level, this.tileSize);
+      // Anchor poles are solid obstacles for the groomer too
+      WinchSystem.createAnchorColliders(this, this.geometry, this.level, this.tileSize, this.obstacles);
     }
 
     if (this.level.hazards && this.level.hazards.includes('avalanche')) {
@@ -646,10 +663,10 @@ export default class GameScene extends Phaser.Scene {
     this.groomer.setCollideWorldBounds(true);
     this.groomer.setDrag(BALANCE.GROOMER_DRAG);
     this.groomer.setScale(this.tileSize / 16);
-    this.groomer.setDepth(DEPTHS.PLAYER); // Above night overlay
-    // Shrink physics body to cab width (~67%) so tracks overhang without colliding
+    this.groomer.setDepth(yDepth(this.groomer.y));
+    // Full-width physics body — includes tiller extension (36px texture width)
     const groomerBody = this.groomer.body as Phaser.Physics.Arcade.Body;
-    groomerBody.setSize(24, 48, true);
+    groomerBody.setSize(36, 48, true);
 
     this.physics.add.collider(this.groomer, this.obstacles, () => this.onObstacleHit());
     this.physics.add.collider(this.groomer, this.boundaryWalls, () => this.onObstacleHit());
@@ -839,6 +856,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.scene.isPaused() || this.isGameOver || this.isTransitioning) return;
 
     this.handleMovement();
+    this.groomer.setDepth(yDepth(this.groomer.y));
     this.handleGrooming();
     if (this.level.hasWinch) {
       const isWinchPressed = this.winchKey.isDown || this.touchInput.winch ||
@@ -901,6 +919,131 @@ export default class GameScene extends Phaser.Scene {
 
     // Emit game state for HUD
     this.game.events.emit(GAME_EVENTS.GAME_STATE, this.buildGameStatePayload());
+
+    // Debug overlay: hitboxes, depth markers, cliff zones (toggle in Settings)
+    const showDebug = getString(STORAGE_KEYS.SHOW_DEBUG) === 'true';
+    if (showDebug) {
+      if (!this.debugGfx) {
+        this.debugGfx = this.add.graphics();
+        this.debugGfx.setDepth(999);
+      }
+      this.debugGfx.clear();
+    // Groomer hitbox (cyan) and base-Y line (red)
+    const gb = this.groomer.body as Phaser.Physics.Arcade.Body;
+    this.debugGfx.lineStyle(1, 0x00ffff, 0.8);
+    this.debugGfx.strokeRect(gb.x, gb.y, gb.width, gb.height);
+    const groomerBaseY = this.groomer.y;
+    this.debugGfx.lineStyle(2, 0xff0000, 1);
+    this.debugGfx.lineBetween(gb.x, groomerBaseY, gb.x + gb.width, groomerBaseY);
+    // Obstacle hitboxes (green) and base-Y (yellow)
+    for (const sprite of this.obstacles.getChildren()) {
+      const s = sprite as Phaser.Physics.Arcade.Sprite;
+      const ob = s.body as Phaser.Physics.Arcade.StaticBody;
+      this.debugGfx.lineStyle(1, 0x00ff00, 0.8);
+      this.debugGfx.strokeRect(ob.x, ob.y, ob.width, ob.height);
+      this.debugGfx.lineStyle(2, 0xffff00, 1);
+      this.debugGfx.lineBetween(ob.x - 4, s.y, ob.x + ob.width + 4, s.y);
+    }
+    // Steep zone outlines (semi-transparent orange, per-row piste-aware)
+    const steepStep = this.tileSize;
+    for (const zone of this.geometry.steepZoneRects) {
+      for (let y = zone.startY; y < zone.endY; y += steepStep) {
+        const { leftX, rightX } = zone.getBounds(y);
+        if (leftX >= rightX) continue;
+        const h = Math.min(steepStep, zone.endY - y);
+        this.debugGfx.fillStyle(0xff8800, 0.12);
+        this.debugGfx.fillRect(leftX, y, rightX - leftX, h);
+        this.debugGfx.lineStyle(1, 0xff8800, 0.6);
+        this.debugGfx.lineBetween(leftX, y, leftX, y + h);
+        this.debugGfx.lineBetween(rightX, y, rightX, y + h);
+      }
+    }
+    // Boundary walls (semi-transparent blue)
+    for (const child of this.boundaryWalls.getChildren()) {
+      const r = child as Phaser.GameObjects.Rectangle;
+      const b = (r.body as Phaser.Physics.Arcade.StaticBody);
+      this.debugGfx.fillStyle(0x0044ff, 0.10);
+      this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
+      this.debugGfx.lineStyle(1, 0x0044ff, 0.4);
+      this.debugGfx.strokeRect(b.x, b.y, b.width, b.height);
+    }
+    // Park features (semi-transparent pink)
+    if (this.parkFeatures.featureGroup) {
+      for (const child of this.parkFeatures.featureGroup.getChildren()) {
+        const s = child as Phaser.Physics.Arcade.Sprite;
+        const b = s.body as Phaser.Physics.Arcade.StaticBody;
+        if (b) {
+          this.debugGfx.fillStyle(0xff44aa, 0.15);
+          this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
+          this.debugGfx.lineStyle(1, 0xff44aa, 0.7);
+          this.debugGfx.strokeRect(b.x, b.y, b.width, b.height);
+        }
+      }
+    }
+    // Avalanche zones (yellow-orange polygon outline + physics body)
+    for (const zone of this.hazardSystem.zones) {
+      const b = zone.body as Phaser.Physics.Arcade.StaticBody;
+      if (b) {
+        this.debugGfx.lineStyle(1, 0xffaa00, 0.5);
+        this.debugGfx.strokeRect(b.x, b.y, b.width, b.height);
+      }
+      if (zone.zonePoints && zone.zonePoints.length > 1) {
+        this.debugGfx.lineStyle(2, 0xffaa00, 0.8);
+        this.debugGfx.beginPath();
+        this.debugGfx.moveTo(zone.zonePoints[0].x, zone.zonePoints[0].y);
+        for (let i = 1; i < zone.zonePoints.length; i++) {
+          this.debugGfx.lineTo(zone.zonePoints[i].x, zone.zonePoints[i].y);
+        }
+        this.debugGfx.closePath();
+        this.debugGfx.strokePath();
+      }
+    }
+    // Cliff zone outlines (semi-transparent red fill)
+    if (this.geometry.cliffSegments && this.geometry.cliffSegments.length > 0) {
+      for (const cliff of this.geometry.cliffSegments) {
+        const step = 4;
+        for (let y = cliff.startY; y <= cliff.endY; y += step) {
+          const { cliffStart, cliffEnd } = cliff.getBounds(y);
+          const h = Math.min(step, cliff.endY - y);
+          this.debugGfx.fillStyle(0xff0000, 0.18);
+          this.debugGfx.fillRect(cliffStart, y, cliffEnd - cliffStart, h);
+          this.debugGfx.lineStyle(1, 0xff0000, 0.5);
+          this.debugGfx.lineBetween(cliffStart, y, cliffStart, y + h);
+          this.debugGfx.lineBetween(cliffEnd, y, cliffEnd, y + h);
+        }
+      }
+    }
+    // Cliff fall detection points
+    if (this.geometry.cliffSegments && this.geometry.cliffSegments.length > 0) {
+      const dscale = this.tileSize / 16;
+      const rot = this.groomer.rotation;
+      const rightX = Math.cos(rot);
+      const rightY = Math.sin(rot);
+      const cx = this.groomer.x;
+      const cy = this.groomer.y;
+      const halfWid = BALANCE.GROOMER_HALF_WIDTH * dscale * 0.5;
+      const lx = cx - rightX * halfWid, ly = cy - rightY * halfWid;
+      const rx = cx + rightX * halfWid, ry = cy + rightY * halfWid;
+      const sz = 4;
+      // Center (white cross)
+      this.debugGfx.lineStyle(2, 0xffffff, 1);
+      this.debugGfx.lineBetween(cx - sz, cy, cx + sz, cy);
+      this.debugGfx.lineBetween(cx, cy - sz, cx, cy + sz);
+      // Left point (orange)
+      const lCliff = this.geometry.isOnCliff(lx, ly);
+      this.debugGfx.lineStyle(2, lCliff ? 0xff0000 : 0xff8800, 1);
+      this.debugGfx.lineBetween(lx - sz, ly, lx + sz, ly);
+      this.debugGfx.lineBetween(lx, ly - sz, lx, ly + sz);
+      // Right point (orange)
+      const rCliff = this.geometry.isOnCliff(rx, ry);
+      this.debugGfx.lineStyle(2, rCliff ? 0xff0000 : 0xff8800, 1);
+      this.debugGfx.lineBetween(rx - sz, ry, rx + sz, ry);
+      this.debugGfx.lineBetween(rx, ry - sz, rx, ry + sz);
+    }
+    } else if (this.debugGfx) {
+      this.debugGfx.destroy();
+      this.debugGfx = undefined;
+    }
   }
 
   private checkSteepness(): void {
@@ -919,35 +1062,38 @@ export default class GameScene extends Phaser.Scene {
     }
 
     for (const zone of this.geometry.steepZoneRects) {
-      if (groomerY >= zone.startY && groomerY <= zone.endY &&
-        groomerX >= zone.leftX && groomerX <= zone.rightX) {
+      if (groomerY >= zone.startY && groomerY <= zone.endY) {
+        const { leftX, rightX } = zone.getBounds(groomerY);
+        if (groomerX >= leftX && groomerX <= rightX) {
+          // Winch only prevents slide/tumble when cable is taut (groomer below anchor)
+          if (!this.winchSystem.isTaut(groomerY)) {
+            if (zone.slope >= BALANCE.TUMBLE_SLOPE_THRESHOLD) {
+              this.triggerTumble(zone.slope);
+              return;
+            }
+            else if (zone.slope >= BALANCE.SLIDE_SLOPE_THRESHOLD) {
+              const slideSpeed = (zone.slope - BALANCE.SLIDE_GRAVITY_OFFSET) * BALANCE.SLIDE_GRAVITY_MULTIPLIER;
+              this.groomer.setVelocityY((this.groomer.body as Phaser.Physics.Arcade.Body).velocity.y + slideSpeed);
 
-        // Winch only prevents slide/tumble when cable is taut (groomer below anchor)
-        if (!this.winchSystem.isTaut(groomerY)) {
-          if (zone.slope >= BALANCE.TUMBLE_SLOPE_THRESHOLD) {
-            this.triggerTumble(zone.slope);
-            return;
-          }
-          else if (zone.slope >= BALANCE.SLIDE_SLOPE_THRESHOLD) {
-            const slideSpeed = (zone.slope - BALANCE.SLIDE_GRAVITY_OFFSET) * BALANCE.SLIDE_GRAVITY_MULTIPLIER;
-            this.groomer.setVelocityY((this.groomer.body as Phaser.Physics.Arcade.Body).velocity.y + slideSpeed);
-
-            if (!this.steepWarningShown) {
-              this.steepWarningShown = true;
-              this.showDialogue('steepWarning');
+              if (!this.steepWarningShown) {
+                this.steepWarningShown = true;
+                this.showDialogue('steepWarning');
+              }
             }
           }
+          return;
         }
-        return;
       }
     }
   }
 
   private getSlopeAtPosition(x: number, y: number): number {
     for (const zone of this.geometry.steepZoneRects) {
-      if (y >= zone.startY && y <= zone.endY &&
-        x >= zone.leftX && x <= zone.rightX) {
-        return zone.slope;
+      if (y >= zone.startY && y <= zone.endY) {
+        const { leftX, rightX } = zone.getBounds(y);
+        if (x >= leftX && x <= rightX) {
+          return zone.slope;
+        }
       }
     }
     return 0;
@@ -1097,6 +1243,13 @@ export default class GameScene extends Phaser.Scene {
 
     if (vx !== 0 || vy !== 0) {
       this.groomer.rotation = Math.atan2(vy, vx) + Math.PI / 2;
+      // Swap body dimensions to approximate rotation (Arcade bodies don't rotate)
+      const rot = this.groomer.rotation;
+      const abssin = Math.abs(Math.sin(rot));
+      // Interpolate between upright (36×48) and sideways (48×36)
+      const bw = 36 + (48 - 36) * abssin;
+      const bh = 48 + (36 - 48) * abssin;
+      (this.groomer.body as Phaser.Physics.Arcade.Body).setSize(bw, bh, true);
       this.hasMoved = true;
       this.updateGroomingQuality();
     }

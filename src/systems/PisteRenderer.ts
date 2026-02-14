@@ -1,6 +1,8 @@
 import { BALANCE, DEPTHS, DIFFICULTY_MARKERS, yDepth } from '../config/gameConfig';
 import type { Level } from '../config/levels';
 import type { LevelGeometry, CliffSegment } from './LevelGeometry';
+import { getString } from '../utils/storage';
+import { STORAGE_KEYS } from '../config/storageKeys';
 
 /**
  * Handles all piste visual rendering: boundaries, markers, cliffs, trees,
@@ -362,13 +364,6 @@ export class PisteRenderer {
     };
 
     forEachTile((x, y) => expandBB(x, y, tileSize + 1, tileSize + 1));
-    // Warning poles extend above their y position
-    for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
-      const pisteEdge = getX(y);
-      const poleOffset = offset * 0.3;
-      const poleX = side === 'left' ? pisteEdge - poleOffset : pisteEdge + poleOffset;
-      expandBB(poleX - 3.5, y - 28, 7, 28);
-    }
     // Snow patches
     const snowSpacing = isStorm ? tileSize : tileSize * 2;
     const snowThreshold = isStorm ? 0.35 : 0.65;
@@ -440,21 +435,28 @@ export class PisteRenderer {
       }
     }
   
-    // Warning poles
+    // Cliff danger poles — created as separate y-sorted Graphics (not baked into cliff texture)
     for (let y = startY + tileSize * 2; y < endY - tileSize; y += tileSize * 4) {
       const pisteEdge = getX(y);
       const poleOffset = offset * 0.3;
       const poleX = side === 'left' ? pisteEdge - poleOffset : pisteEdge + poleOffset;
+      const pg = this.scene.add.graphics();
+      pg.setDepth(yDepth(y - 14));
       const poleHeight = 28;
       const poleWidth = 5;
-      
-      g.fillStyle(0x000000, 1);
-      g.fillRect(poleX - ox - poleWidth / 2, y - oy - poleHeight, poleWidth, poleHeight);
-      
+
+      pg.fillStyle(0x000000, 1);
+      pg.fillRect(poleX - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
+
       const stripeH = poleHeight / 5;
       for (let j = 0; j < 5; j++) {
-        g.fillStyle(j % 2 === 0 ? 0xffcc00 : 0x111111, 1);
-        g.fillRect(poleX - ox - poleWidth / 2 - 1, y - oy - poleHeight + j * stripeH, poleWidth + 2, stripeH);
+        pg.fillStyle(j % 2 === 0 ? 0xffcc00 : 0x111111, 1);
+        pg.fillRect(poleX - poleWidth / 2 - 1, y - poleHeight + j * stripeH, poleWidth + 2, stripeH);
+      }
+      // Debug: depth reference line (magenta) — toggled in Settings
+      if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
+        pg.lineStyle(2, 0xff00ff, 1);
+        pg.lineBetween(poleX - 10, y - 14, poleX + 10, y - 14);
       }
     }
 
@@ -534,7 +536,7 @@ export class PisteRenderer {
 
   private createMarkerPole(x: number, y: number, color: number, _symbol: string, side: string): void {
     const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.MARKERS);
+    g.setDepth(yDepth(y - 14));
     const poleHeight = 28;
     const poleWidth = 5;
     const orangeTopHeight = Math.floor(poleHeight * 0.15);
@@ -551,6 +553,11 @@ export class PisteRenderer {
 
     g.fillStyle(0x222222, 1);
     g.fillRect(x - poleWidth / 2 - 1, y - 3, poleWidth + 2, 6);
+    // Debug: depth reference line (magenta) — toggled in Settings
+    if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
+      g.lineStyle(2, 0xff00ff, 1);
+      g.lineBetween(x - 10, y - 14, x + 10, y - 14);
+    }
   }
 
   private getDifficultySymbol(level: Level): string {
@@ -655,7 +662,7 @@ export class PisteRenderer {
       const leftEdge = (path.centerX - path.width / 2) * tileSize;
       const rightEdge = (path.centerX + path.width / 2) * tileSize;
 
-      // Warning triangle on left piste border for tumble-danger zones (NF S52-102)
+      // Steep zone warning pole on piste border for tumble-danger zones (NF S52-102)
       if (zone.slope >= BALANCE.TUMBLE_SLOPE_THRESHOLD) {
         const startYIndex = Math.floor(zone.startY * level.height);
         const edgePath = this.geometry.pistePath[startYIndex] || path;
@@ -671,14 +678,14 @@ export class PisteRenderer {
           }
         }
         const mg = this.scene.add.graphics();
-        mg.setDepth(DEPTHS.MARKERS);
+        mg.setDepth(yDepth(markerY - 14));
         const poleHeight = 28;
         const poleWidth = 5;
         const triSize = 12;
         const triMid = markerY - poleHeight;
         const triTop = triMid - triSize * 0.8;
         const triBase = triMid + triSize * 0.8;
-        // Pole shaft (yellow/black danger pole per NF S52-102)
+        // Pole shaft (yellow/black steep zone warning pole per NF S52-102)
         mg.fillStyle(0xddaa00, 1);
         mg.fillRect(markerX - poleWidth / 2, markerY - poleHeight, poleWidth, poleHeight);
         // Ground base
@@ -705,14 +712,36 @@ export class PisteRenderer {
         mg.fillStyle(0x000000, 1);
         mg.fillRect(markerX - 1, exclY, 2, 6);
         mg.fillRect(markerX - 1, exclY + 8, 2, 2);
+        // Debug: depth reference line (magenta) — toggled in Settings
+        if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
+          mg.lineStyle(2, 0xff00ff, 1);
+          mg.lineBetween(markerX - 10, markerY - 14, markerX + 10, markerY - 14);
+        }
       }
+
+      // Per-row bounds following piste path, with inward margin for leniency
+      const margin = tileSize * 2;
+      const geometry = this.geometry;
+      const levelHeight = level.height;
+      const getBounds = (y: number): { leftX: number; rightX: number } => {
+        // Y margin: return empty bounds near edges
+        if (y < startY + margin || y > endY - margin) {
+          return { leftX: 0, rightX: 0 };
+        }
+        const rowIndex = Math.floor(y / tileSize);
+        const p = geometry.pistePath[Math.min(rowIndex, levelHeight - 1)] || path;
+        const lx = (p.centerX - p.width / 2) * tileSize + margin;
+        const rx = (p.centerX + p.width / 2) * tileSize - margin;
+        return { leftX: lx, rightX: rx };
+      };
 
       this.geometry.steepZoneRects.push({
         startY: startY,
         endY: endY,
         leftX: leftEdge,
         rightX: rightEdge,
-        slope: zone.slope
+        slope: zone.slope,
+        getBounds,
       });
     });
   }
@@ -799,7 +828,7 @@ export class PisteRenderer {
 
   private createServiceRoadPole(x: number, y: number): void {
     const g = this.scene.add.graphics();
-    g.setDepth(DEPTHS.MARKERS);
+    g.setDepth(yDepth(y - 14));
 
     const poleHeight = 28;
     const poleWidth = 5;
@@ -813,5 +842,10 @@ export class PisteRenderer {
 
     g.fillStyle(0x222222, 1);
     g.fillRect(x - poleWidth / 2 - 1, y - 3, poleWidth + 2, 6);
+    // Debug: depth reference line (magenta) — toggled in Settings
+    if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
+      g.lineStyle(2, 0xff00ff, 1);
+      g.lineBetween(x - 10, y - 14, x + 10, y - 14);
+    }
   }
 }

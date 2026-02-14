@@ -7,6 +7,7 @@ import { getGroomedTiles } from '../utils/skiRunState';
 import { LevelGeometry } from '../systems/LevelGeometry';
 import { PisteRenderer } from '../systems/PisteRenderer';
 import { ObstacleBuilder } from '../systems/ObstacleBuilder';
+import { WinchSystem } from '../systems/WinchSystem';
 import { ParkFeatureSystem } from '../systems/ParkFeatureSystem';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { THEME } from '../config/theme';
@@ -77,6 +78,9 @@ export default class SkiRunScene extends Phaser.Scene {
   private weatherSystem: WeatherSystem | null = null;
   private nightUpdateHandler?: () => void;
   private lastTrickTime = 0;
+  private boundaryWalls!: Phaser.Physics.Arcade.StaticGroup;
+  private dangerZones!: Phaser.Physics.Arcade.StaticGroup;
+  private debugGfx?: Phaser.GameObjects.Graphics;
   private trickActive = false;
   private trickShadow: Phaser.GameObjects.Graphics | null = null;
   private trickShadowUpdater: (() => void) | null = null;
@@ -150,6 +154,8 @@ export default class SkiRunScene extends Phaser.Scene {
     // Piste renderer (boundaries, markers, cliffs, trees)
     const pisteRenderer = new PisteRenderer(this, this.geometry);
     const { boundaryWalls, dangerZones } = pisteRenderer.createBoundaryColliders(this.level, tileSize);
+    this.boundaryWalls = boundaryWalls;
+    this.dangerZones = dangerZones;
     pisteRenderer.createPisteBoundaries(this.level, tileSize, worldWidth);
 
     // Obstacles (reuse same system)
@@ -157,6 +163,12 @@ export default class SkiRunScene extends Phaser.Scene {
     const interactables = this.physics.add.staticGroup();
     const obstacleBuilder = new ObstacleBuilder(this, this.geometry);
     obstacleBuilder.create(this.level, tileSize, this.obstacles, interactables);
+
+    // Winch anchor poles are permanent fixtures — show them during ski runs too
+    if (this.level.hasWinch) {
+      WinchSystem.createAnchorVisuals(this, this.geometry, this.level, tileSize);
+      WinchSystem.createAnchorColliders(this, this.geometry, this.level, tileSize, this.obstacles);
+    }
 
     // Shrink obstacle hitboxes to trunk/core for skiing (full sprite includes foliage/snow)
     const scale = tileSize / 16;
@@ -474,7 +486,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.skier.setVelocity(this.smoothedLateral, vy);
 
     // Y-sort depth so skier renders behind trees when above them
-    this.skier.setDepth(yDepth(this.skier.y));
+    this.skier.setDepth(yDepth(this.skier.y + this.skier.displayHeight / 2));
 
     // Directional sprite — skip during trick animation
     if (!this.trickActive) {
@@ -504,6 +516,81 @@ export default class SkiRunScene extends Phaser.Scene {
       if (gateResult === 'hit') this.skiSounds.playGatePass();
       else if (gateResult === 'miss') this.skiSounds.playGateMiss();
       this.gateText?.setText(`${t('skiRunGates') || 'Gates'}: ${this.slalomSystem.gatesHit}/${this.slalomSystem.totalGates}`);
+    }
+
+    // Debug overlay (toggle in Settings)
+    const showDebug = getString(STORAGE_KEYS.SHOW_DEBUG) === 'true';
+    if (showDebug) {
+      if (!this.debugGfx) {
+        this.debugGfx = this.add.graphics();
+        this.debugGfx.setDepth(999);
+      }
+      this.debugGfx.clear();
+      // Skier hitbox (cyan) and depth-Y (red)
+      const sb = this.skier.body as Phaser.Physics.Arcade.Body;
+      this.debugGfx.lineStyle(1, 0x00ffff, 0.8);
+      this.debugGfx.strokeRect(sb.x, sb.y, sb.width, sb.height);
+      this.debugGfx.lineStyle(2, 0xff0000, 1);
+      const skierBaseY = this.skier.y + this.skier.displayHeight / 2;
+      this.debugGfx.lineBetween(sb.x, skierBaseY, sb.x + sb.width, skierBaseY);
+      // Obstacle hitboxes (green)
+      for (const sprite of this.obstacles.getChildren()) {
+        const s = sprite as Phaser.Physics.Arcade.Sprite;
+        const ob = s.body as Phaser.Physics.Arcade.StaticBody;
+        this.debugGfx.lineStyle(1, 0x00ff00, 0.8);
+        this.debugGfx.strokeRect(ob.x, ob.y, ob.width, ob.height);
+      }
+      // Boundary walls (blue)
+      for (const child of this.boundaryWalls.getChildren()) {
+        const b = (child as Phaser.GameObjects.Rectangle).body as Phaser.Physics.Arcade.StaticBody;
+        this.debugGfx.fillStyle(0x0044ff, 0.10);
+        this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
+      }
+      // Danger zones (purple)
+      for (const child of this.dangerZones.getChildren()) {
+        const b = (child as Phaser.GameObjects.Rectangle).body as Phaser.Physics.Arcade.StaticBody;
+        this.debugGfx.fillStyle(0x8800ff, 0.12);
+        this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
+      }
+      // Park features (pink)
+      if (this.parkFeatures.featureGroup) {
+        for (const child of this.parkFeatures.featureGroup.getChildren()) {
+          const b = (child as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.StaticBody;
+          if (b) {
+            this.debugGfx.fillStyle(0xff44aa, 0.15);
+            this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
+            this.debugGfx.lineStyle(1, 0xff44aa, 0.7);
+            this.debugGfx.strokeRect(b.x, b.y, b.width, b.height);
+          }
+        }
+      }
+      // Halfpipe walls (teal)
+      if (this.parkFeatures.pipeWallGroup) {
+        for (const child of this.parkFeatures.pipeWallGroup.getChildren()) {
+          const b = (child as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.StaticBody;
+          if (b) {
+            this.debugGfx.fillStyle(0x00cccc, 0.15);
+            this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
+            this.debugGfx.lineStyle(1, 0x00cccc, 0.7);
+            this.debugGfx.strokeRect(b.x, b.y, b.width, b.height);
+          }
+        }
+      }
+      // Cliff zones (red)
+      if (this.geometry.cliffSegments && this.geometry.cliffSegments.length > 0) {
+        for (const cliff of this.geometry.cliffSegments) {
+          const step = 4;
+          for (let y = cliff.startY; y <= cliff.endY; y += step) {
+            const { cliffStart, cliffEnd } = cliff.getBounds(y);
+            const h = Math.min(step, cliff.endY - y);
+            this.debugGfx.fillStyle(0xff0000, 0.18);
+            this.debugGfx.fillRect(cliffStart, y, cliffEnd - cliffStart, h);
+          }
+        }
+      }
+    } else if (this.debugGfx) {
+      this.debugGfx.destroy();
+      this.debugGfx = undefined;
     }
 
     // Check if reached bottom

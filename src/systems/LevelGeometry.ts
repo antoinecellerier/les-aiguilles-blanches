@@ -11,6 +11,8 @@ export interface SteepZoneRect {
   leftX: number;
   rightX: number;
   slope: number;
+  /** Per-row piste-aware bounds with inward margin for leniency. */
+  getBounds: (y: number) => { leftX: number; rightX: number };
 }
 
 export interface AccessPathRect {
@@ -36,6 +38,8 @@ export interface CliffSegment {
   offset: number;
   extent: number;
   getX: (y: number) => number;
+  /** Per-row cliff bounds matching visual rendering (includes rowVariation). */
+  getBounds: (y: number) => { cliffStart: number; cliffEnd: number };
 }
 
 export interface AccessPathCurve {
@@ -100,16 +104,8 @@ export class LevelGeometry {
     if (!this.cliffSegments || this.cliffSegments.length === 0) return false;
     for (const cliff of this.cliffSegments) {
       if (y < cliff.startY || y > cliff.endY) continue;
-      const pisteEdge = cliff.getX(y);
-      if (cliff.side === 'left') {
-        const cliffEnd = pisteEdge - cliff.offset;
-        const cliffStart = cliffEnd - cliff.extent;
-        if (x >= cliffStart && x <= cliffEnd) return true;
-      } else {
-        const cliffStart = pisteEdge + cliff.offset;
-        const cliffEnd = cliffStart + cliff.extent;
-        if (x >= cliffStart && x <= cliffEnd) return true;
-      }
+      const { cliffStart, cliffEnd } = cliff.getBounds(y);
+      if (x >= cliffStart && x <= cliffEnd) return true;
     }
     return false;
   }
@@ -310,7 +306,28 @@ export class LevelGeometry {
       return prev.x + (next.x - prev.x) * t;
     };
 
-    this.cliffSegments.push({ side, startY, endY, offset, extent, getX });
+    // Matches the rowVariation logic in PisteRenderer.drawContinuousCliff
+    // Uses same rand formula as PisteRenderer: sin(startY * 0.01 + i * 127.1)
+    const visualRand = (i: number) => {
+      const n = Math.sin(startY * 0.01 + i * 127.1) * 43758.5453;
+      return n - Math.floor(n);
+    };
+    const getBounds = (y: number): { cliffStart: number; cliffEnd: number } => {
+      const tileY = Math.floor(y / tileSize) * tileSize;
+      const pisteEdge = getX(tileY);
+      const rowVariation = Math.abs(visualRand(tileY * 0.3 + 55) - 0.5) * tileSize;
+      if (side === 'left') {
+        const cliffEnd = pisteEdge - offset - rowVariation * 0.3;
+        const cliffStart = cliffEnd - extent - rowVariation;
+        return { cliffStart, cliffEnd };
+      } else {
+        const cliffStart = pisteEdge + offset + rowVariation * 0.3;
+        const cliffEnd = cliffStart + extent + rowVariation;
+        return { cliffStart, cliffEnd };
+      }
+    };
+
+    this.cliffSegments.push({ side, startY, endY, offset, extent, getX, getBounds });
   }
 
   private calculateAccessPathGeometry(level: Level, tileSize: number): void {

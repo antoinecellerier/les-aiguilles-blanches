@@ -5,6 +5,8 @@ import { Accessibility } from '../setup';
 import { t } from '../setup';
 import type { Level } from '../config/levels';
 import type { LevelGeometry } from './LevelGeometry';
+import { getString } from '../utils/storage';
+import { STORAGE_KEYS } from '../config/storageKeys';
 
 export interface WinchAnchor {
   x: number;
@@ -64,7 +66,7 @@ export class WinchSystem {
 
   private createAnchorPost(x: number, y: number, number: number): void {
     const g = this.scene.add.graphics();
-    g.setDepth(yDepth(y));
+    g.setDepth(yDepth(y - 8));
 
     // Base plate
     g.fillStyle(THEME.colors.anchorBase, 1);
@@ -92,6 +94,11 @@ export class WinchSystem {
     }).setOrigin(0.5).setDepth(DEPTHS.GROUND_LABELS);
 
     this.anchors.push({ x, y: y - 22, baseY: y + 8, number });
+    // Debug: depth reference line (magenta) — toggled in Settings
+    if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
+      g.lineStyle(2, 0xff00ff, 1);
+      g.lineBetween(x - 10, y - 8, x + 10, y - 8);
+    }
   }
 
   getNearestAnchor(groomerX: number, groomerY: number, tileSize: number): WinchAnchor | null {
@@ -202,5 +209,67 @@ export class WinchSystem {
     this.anchor = null;
     this.useCount = 0;
     this.cableGraphics = null;
+  }
+
+  /** Render anchor pole visuals only (no gameplay data). */
+  static createAnchorVisuals(
+    scene: Phaser.Scene, geometry: LevelGeometry, level: Level, tileSize: number
+  ): void {
+    const anchorDefs = level.winchAnchors || [];
+    if (anchorDefs.length === 0) return;
+
+    anchorDefs.forEach((def, i) => {
+      const yIndex = Math.min(Math.floor(def.y * level.height), geometry.pistePath.length - 1);
+      const path = geometry.pistePath[yIndex] || { centerX: level.width / 2 };
+      const x = path.centerX * tileSize;
+      const y = yIndex * tileSize;
+
+      const g = scene.add.graphics();
+      g.setDepth(yDepth(y - 8));
+
+      g.fillStyle(THEME.colors.anchorBase, 1);
+      g.fillRect(x - 10, y + 5, 20, 8);
+      g.fillStyle(THEME.colors.signPole, 1);
+      g.fillRect(x - 4, y - 20, 8, 28);
+      g.fillStyle(THEME.colors.metalLight, 1);
+      g.fillRect(x - 6, y - 28, 12, 3);
+      g.fillRect(x - 6, y - 22, 12, 3);
+      g.fillRect(x - 6, y - 28, 3, 9);
+      g.fillRect(x + 3, y - 28, 3, 9);
+      g.fillStyle(THEME.colors.signPlate, 1);
+      g.fillRect(x - 8, y + 14, 16, 10);
+      g.fillStyle(THEME.colors.black, 1);
+      scene.add.text(x, y + 19, '' + (i + 1), {
+        fontFamily: 'Courier New, monospace',
+        fontSize: '8px',
+        color: '#000000',
+      }).setOrigin(0.5).setDepth(DEPTHS.GROUND_LABELS);
+    });
+  }
+
+  /** Add collision bodies for anchor poles to an obstacles group. */
+  static createAnchorColliders(
+    scene: Phaser.Scene, geometry: LevelGeometry, level: Level, tileSize: number,
+    obstacles: Phaser.Physics.Arcade.StaticGroup
+  ): void {
+    const anchorDefs = level.winchAnchors || [];
+    const scale = tileSize / 16;
+    anchorDefs.forEach((def) => {
+      const yIndex = Math.min(Math.floor(def.y * level.height), geometry.pistePath.length - 1);
+      const path = geometry.pistePath[yIndex] || { centerX: level.width / 2 };
+      const x = path.centerX * tileSize;
+      const y = yIndex * tileSize;
+
+      const hitbox = obstacles.create(x, y + 8, 'rock') as Phaser.Physics.Arcade.Sprite;
+      hitbox.setVisible(false).setDepth(-999);
+      const body = hitbox.body as Phaser.Physics.Arcade.StaticBody;
+      body.setSize(8 * scale, 8 * scale);
+      body.setOffset(
+        (hitbox.displayWidth - 8 * scale) / 2,
+        (hitbox.displayHeight - 8 * scale) / 2
+      );
+      hitbox.setPosition(x, y + 8);
+      body.updateFromGameObject();
+    });
   }
 }

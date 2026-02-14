@@ -249,18 +249,20 @@ class TestAccessPaths:
 
         overlaps = game_page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
-            if (!gs?.geometry?.accessPathRects || !gs?.dangerZones) return null;
+            if (!gs?.geometry?.accessPathRects || !gs?.geometry?.cliffSegments) return null;
             let count = 0;
-            gs.dangerZones.getChildren().forEach(w => {
-                const wl = w.x - w.width / 2, wr = w.x + w.width / 2;
-                const wt = w.y - w.height / 2, wb = w.y + w.height / 2;
-                for (const r of gs.geometry.accessPathRects) {
-                    if (wl < r.rightX && wr > r.leftX && wt < r.endY && wb > r.startY) {
-                        count++;
-                        break;
+            for (const r of gs.geometry.accessPathRects) {
+                for (const cliff of gs.geometry.cliffSegments) {
+                    if (r.startY < cliff.endY && r.endY > cliff.startY) {
+                        // Check X overlap at midpoint
+                        const midY = (Math.max(r.startY, cliff.startY) + Math.min(r.endY, cliff.endY)) / 2;
+                        const bounds = cliff.getBounds(midY);
+                        if (r.leftX < bounds.cliffEnd && r.rightX > bounds.cliffStart) {
+                            count++;
+                        }
                     }
                 }
-            });
+            }
             return count;
         }""")
 

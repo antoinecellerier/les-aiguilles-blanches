@@ -1223,6 +1223,28 @@ graphics.fillRect(rect.x, rect.y, rect.width, rect.height);
 - Use `console.error`/`console.warn` for messages that must appear in production
 - Never use `console.log` for user-visible feedback — use the localization system instead
 
+### Debug Overlay
+
+Settings → Accessibility → Debug Overlay (`STORAGE_KEYS.SHOW_DEBUG`) renders per-frame collision/zone visualization on both GameScene and SkiRunScene. Default: off.
+
+| Color | Element |
+|-------|---------|
+| Cyan | Groomer/skier physics body outline |
+| Red line | Groomer depth-Y reference |
+| Green | Obstacle hitboxes (trees, rocks, buildings) |
+| Yellow | Obstacle depth-Y reference |
+| Magenta | Pole depth-Y reference (all pole types) |
+| Orange fill | Steep zone active bounds (per-row piste-aware, with 2-tile margin) |
+| Blue fill | Boundary wall colliders |
+| Purple fill | Danger zone colliders (SkiRunScene only) |
+| Pink | Park feature hitboxes (kickers, rails) |
+| Teal | Halfpipe wall hitboxes |
+| Yellow-orange | Avalanche zone polygon + physics body |
+| Red fill | Cliff fall-detection zone (matches visual cliff rocks) |
+| White/orange cross | Groomer cliff detection points (center + left/right side) |
+
+Pole magenta lines are drawn once at level creation (on the Graphics object). All other overlays are redrawn per frame by `debugGfx`.
+
 ## Service Road System
 
 Steep piste levels require service roads for groomer access to winch anchors.
@@ -1301,8 +1323,11 @@ interface CliffSegment {
   offset: number;          // Distance from piste edge (1.5-3 tiles)
   extent: number;          // Width of cliff area (3-5 tiles)
   getX: (y: number) => number;  // Piste edge position interpolator
+  getBounds: (y: number) => { cliffStart: number; cliffEnd: number };  // Per-row cliff bounds matching visual
 }
 ```
+
+The `getBounds()` function returns per-row cliff boundaries that include the same `rowVariation` used by the visual renderer, ensuring the fall-detection zone exactly matches the visible rock tiles. Both use the same deterministic `visualRand` seeded with `startY`.
 
 ### Implementation Flow
 
@@ -1318,12 +1343,12 @@ interface CliffSegment {
    - Stores in `this.cliffSegments`
 
 3. **createBoundaryColliders()** - Uses cliffSegments for physics
-   - Creates danger zones matching visual cliff bounds exactly
-   - No invisible death zones
+   - Creates boundary walls and danger zones (danger zones used by SkiRunScene for skier wipeouts; GameScene uses `checkCliffFall()` geometry instead)
+   - Cliff danger poles extracted as separate y-sorted Graphics objects (not baked into cliff texture)
 
 4. **createCliffEdgeVisuals()** - Uses same cliffSegments for rendering
    - Organic edges (per-row variation, edge tile skipping)
-   - Warning poles at danger zone boundary
+   - Cliff danger poles at boundary with yellow/black striping, y-depth sorted
 
 ### Critical Implementation Detail: Closure Bug
 

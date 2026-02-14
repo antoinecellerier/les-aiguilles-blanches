@@ -33,6 +33,7 @@ const nb: Record<string, string> = {
   highContrast: "Høy kontrast",
   reducedMotion: "Redusert bevegelse",
   showFps: "Show FPS",
+  showDebug: "Debug Overlay",
   colorblindMode: "Fargeblindhet",
   none: "Ingen",
   deuteranopia: "Deutan.",

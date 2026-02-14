@@ -210,8 +210,8 @@ export class ObstacleBuilder {
 
   private createChalet(x: number, y: number, tileSize: number, isStorm?: boolean): void {
     const g = this.scene.add.graphics();
-    g.setDepth(yDepth(y));
     const size = tileSize * 2;
+    g.setDepth(yDepth(y + size * 0.25));
 
     this.addFootprint(x, y - size * 0.4 + size * 0.325, size, size * 0.65);
 

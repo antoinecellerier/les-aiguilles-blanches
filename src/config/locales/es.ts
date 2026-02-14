@@ -37,6 +37,7 @@ const es: Record<string, string> = {
   highContrast: "Alto Contraste",
   reducedMotion: "Menos Movimiento",
   showFps: "Show FPS",
+  showDebug: "Debug Overlay",
   colorblindMode: "Daltonismo",
   none: "Ninguno",
   deuteranopia: "Deuteran.",

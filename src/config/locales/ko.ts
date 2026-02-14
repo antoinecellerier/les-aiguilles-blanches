@@ -33,6 +33,7 @@ const ko: Record<string, string> = {
   highContrast: "고대비",
   reducedMotion: "모션 감소",
   showFps: "Show FPS",
+  showDebug: "Debug Overlay",
   colorblindMode: "색맹 보정",
   none: "없음",
   deuteranopia: "2형",

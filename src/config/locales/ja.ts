@@ -33,6 +33,7 @@ const ja: Record<string, string> = {
   highContrast: "ハイコントラスト",
   reducedMotion: "モーション軽減",
   showFps: "Show FPS",
+  showDebug: "Debug Overlay",
   colorblindMode: "色覚補助",
   none: "なし",
   deuteranopia: "2型",

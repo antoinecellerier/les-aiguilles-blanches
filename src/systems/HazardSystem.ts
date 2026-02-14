@@ -36,6 +36,10 @@ export class HazardSystem {
     return this.avalancheTriggered;
   }
 
+  get zones(): readonly AvalancheZone[] {
+    return this.avalancheZones;
+  }
+
   reset(): void {
     this.avalancheTriggered = false;
     this.avalancheZones = [];

@@ -407,6 +407,12 @@ export default class SettingsScene extends Phaser.Scene {
         setString(STORAGE_KEYS.SHOW_FPS, val ? 'true' : 'false');
       }), { align: 'left' });
 
+    // Debug overlay toggle (hitboxes, depth markers, cliff zones)
+    panel.add(this.createToggleRow(t('showDebug') || 'Debug Overlay',
+      getString(STORAGE_KEYS.SHOW_DEBUG) === 'true', (val) => {
+        setString(STORAGE_KEYS.SHOW_DEBUG, val ? 'true' : 'false');
+      }), { align: 'left' });
+
     sizer.add(panel, { align: 'left', padding: { top: 4 } });
   }
 

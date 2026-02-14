@@ -30,6 +30,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Y-depth sorting & collision refinement** — Groomer, obstacles, and all pole types use `yDepth()` for per-frame depth sorting. Tree trunk hitboxes shrunk (canopy passes behind). Groomer physics body rotates with movement direction. Cliff fall-detection zone aligned to visual cliff rocks via shared `getBounds()` with per-row variation. Steep zone detection uses per-row piste-aware bounds with 2-tile inward margin. Cliff danger poles extracted from baked texture into separate y-sorted objects. Removed unused `dangerZones` from GameScene (only SkiRunScene uses them). Debug overlay setting added (Settings → Accessibility) showing all collision zones, hitboxes, and depth markers in both game modes.
+
 - ✅ **Piste contrast & readability** — Darkened off-piste tile textures, lightened service road tiles, and raised minimum tile size to 14px for better piste visibility on all levels (especially night). Texture-level approach: no runtime overlays needed.
 
 - ✅ **Resize + touch controls regression fixes** — Camera static→follow transition when touch controls reduce effective viewport height on portrait devices (L7). Groomer stays above controls after resize. Dialogue repositions above controls (tween race fix). 9 regression tests in `test_resize_touch.py`. Smart test selection expanded to all 78 source files with three validation layers (unknown tests, unmapped sources, scene drift detection).
@@ -146,9 +148,11 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ### Test Coverage Gaps
 
 - Nintendo B-button back navigation flaky under parallel test execution
+- Y-depth sorting and collision hitbox changes lack dedicated E2E regression tests
 
 ### Deferred Refactors
 
+- Halfpipe should not have lateral boundary walls — players need to enter/exit from the sides
 - GameScene further decomposition: GroomingSystem, InputManager candidates. LevelGeometry, PisteRenderer, WinchSystem, ObstacleBuilder done. Remaining methods (movement, resources, game flow, camera) are tightly coupled to GameScene state — further extraction would increase complexity.
 - Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring ~7 lines, track aging ~10 lines, same-species repulsion ~9 lines). Both files use the same patterns but different coordinate systems (side-view vs top-down), making extraction non-trivial.
 - MenuScene (1134 lines): terrain renderer, overlay manager, wildlife controller extracted; dead code removed, device detection deduplicated. Remaining UI layout/buttons/footer is inherently scene-specific.

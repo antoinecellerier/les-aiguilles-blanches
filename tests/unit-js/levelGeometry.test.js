@@ -110,6 +110,7 @@ describe('LevelGeometry', () => {
         side: 'left', startY: 5, endY: 15,
         offset: 2, extent: 3,
         getX: () => 10,
+        getBounds: () => ({ cliffStart: 5, cliffEnd: 8 }),
       }];
       // Cliff zone: cliffEnd = 10 - 2 = 8, cliffStart = 8 - 3 = 5
       expect(geo.isOnCliff(6, 10)).toBe(true);   // inside [5, 8]
@@ -124,6 +125,7 @@ describe('LevelGeometry', () => {
         side: 'right', startY: 5, endY: 15,
         offset: 2, extent: 3,
         getX: () => 10,
+        getBounds: () => ({ cliffStart: 12, cliffEnd: 15 }),
       }];
       // Cliff zone: cliffStart = 10 + 2 = 12, cliffEnd = 12 + 3 = 15
       expect(geo.isOnCliff(13, 10)).toBe(true);   // inside [12, 15]
@@ -138,6 +140,7 @@ describe('LevelGeometry', () => {
         side: 'left', startY: 5, endY: 15,
         offset: 2, extent: 3,
         getX: () => 10,
+        getBounds: () => ({ cliffStart: 5, cliffEnd: 8 }),
       }];
       expect(geo.isOnCliff(6, 4)).toBe(false);   // above
       expect(geo.isOnCliff(6, 16)).toBe(false);  // below
@@ -156,6 +159,7 @@ describe('LevelGeometry', () => {
         side: 'left', startY: 100, endY: 300,
         offset: 32, extent: 48,
         getX: () => 200,
+        getBounds: () => ({ cliffStart: 120, cliffEnd: 168 }),
       }];
       const rects = geo.getCliffAvoidRects(16);
       expect(rects).toHaveLength(1);
@@ -172,6 +176,7 @@ describe('LevelGeometry', () => {
         side: 'right', startY: 50, endY: 250,
         offset: 20, extent: 60,
         getX: () => 400,
+        getBounds: () => ({ cliffStart: 420, cliffEnd: 480 }),
       }];
       const rects = geo.getCliffAvoidRects(16);
       expect(rects).toHaveLength(1);
