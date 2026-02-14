@@ -26,6 +26,7 @@ export const STORAGE_KEYS = {
   SHOW_FPS: 'snowGroomer_showFps',
   SHOW_DEBUG: 'snowGroomer_showDebug',
   STEEP_WARNING_SEEN: 'snowGroomer_steepWarningSeen',
+  MARIE_INTRO_SEEN: 'snowGroomer_marieIntroSeen',
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

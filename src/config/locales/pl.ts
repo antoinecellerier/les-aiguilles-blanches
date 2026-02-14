@@ -262,17 +262,18 @@ const pl: Record<string, string> = {
   tauntSkiWipeout5: "Nawet kozice skrzywiły się na ten lądowanie.",
 
   jeanPierreIntro: "Dobrze ci poszło na szkoleniu. Teraz jest na poważnie — zielona trasa, z czasem i paliwem do ogarnięcia.",
-  level_chamoisIntro: "Dobra robota wczoraj! JP wysyła cię na niebieską. Pokaż, że umiesz więcej niż kłaść aksamit na zielonej.",
-  level_airZoneIntro: "Hej! Tu Émilie. Snowpark potrzebuje uwagi — riderzy na nas liczą. Precyzja jest kluczem!",
+  level_chamoisIntro: "Hej, jestem Émilie — JP wysyła cię na niebieską. Pokaż, że umiesz więcej niż kłaść aksamit na zielonej.",
+  level_airZoneIntro: "Snowpark potrzebuje uwagi — riderzy na nas liczą. Precyzja jest kluczem!",
   level_aigleIntro: "L'Aigle to poważna sprawa. Pilnuj paliwa. Drogi serwisowe pozwalają wrócić — szukaj pomarańczowo-czarnych słupków.",
-  level_glacierIntro: "Le Glacier jest stromy. Thierry przygotował kotwy. Naciśnij {winchKey} przy słupku aby podłączyć wciągarkę — utrzyma cię.",
-  level_glacierIntroTouch: "Le Glacier jest stromy. Thierry przygotował kotwy. Dotknij przycisku wciągarki przy słupku — utrzyma cię.",
+  level_glacierIntro: "Le Glacier jest stromy. Przygotowałem kotwy. Naciśnij {winchKey} przy słupku aby podłączyć wciągarkę — utrzyma cię.",
+  level_glacierIntroTouch: "Le Glacier jest stromy. Przygotowałem kotwy. Dotknij przycisku wciągarki przy słupku — utrzyma cię.",
   level_tubeIntro: "Jutro contest na Tube! Czyste ściany, ostra krawędź i zero garbów.",
   level_verticaleIntro: "Nocna akcja na La Verticale: strome zbocze, niebezpieczne krawędzie. Wciągarka obowiązkowa — użyj 3 kotwic i trzymaj się osi.",
-  level_colDangereuxIntro: "Wysokie ryzyko lawinowe na przełęczy — działamy w protokole PIDA. Trzymaj się z dala od obciążonych stref i szanuj granice.",
+  level_colDangereuxIntro: "Wysokie ryzyko lawinowe na przełęczy — działamy w protokole bezpieczeństwa lawinowego. Trzymaj się z dala od obciążonych stref i szanuj granice.",
   level_tempeteIntro: "Burza minęła. Weź vin chaud — to potrwa!",
   level_coupeDesAiguillesIntro: "To jest ta wielka noc. FIS kontroluje jutro. Każda trasa musi być idealna — pokaż, czego się nauczyłeś.",
   marieWelcome: "Przyjdź się ogrzać do Chez Marie. Dobra tartiflette!",
+  marieIntro: "Cześć! Jestem Marie, prowadzę restaurację na górze trasy. Wpadaj kiedy chcesz — ciepły posiłek czyni cuda!",
 
   // Changelog
   changelog_20260214_date: "14 lutego 2026",

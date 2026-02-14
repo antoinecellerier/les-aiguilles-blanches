@@ -262,17 +262,18 @@ const tr: Record<string, string> = {
   tauntSkiWipeout5: "Dağ keçileri bile o inişe yüzlerini buruşturdu.",
 
   jeanPierreIntro: "Eğitimde iyi iş çıkardın. Şimdi gerçek başlıyor — yeşil pist, süre ve yakıt yönetimiyle.",
-  level_chamoisIntro: "Dün iyi iş çıkardın! JP seni mavi piste gönderiyor. Sadece yeşilde kadife döşemekten fazlasını yapabildiğini göster.",
-  level_airZoneIntro: "Selam! Ben Émilie. Snowpark'ın bakıma ihtiyacı var — sporcular bize güveniyor. Hassasiyet önemli!",
+  level_chamoisIntro: "Selam, ben Émilie — JP seni mavi piste gönderiyor. Sadece yeşilde kadife döşemekten fazlasını yapabildiğini göster.",
+  level_airZoneIntro: "Snowpark'ın bakıma ihtiyacı var — sporcular bize güveniyor. Hassasiyet önemli!",
   level_aigleIntro: "L'Aigle ciddi iş. Yakıta dikkat et. Servis yollarıyla geri çıkabilirsin — turuncu-siyah direkleri ara.",
-  level_glacierIntro: "Le Glacier dik. Thierry ankrajları hazırladı. Vinç bağlamak için direğin yanında {winchKey} basın — sizi tutar.",
-  level_glacierIntroTouch: "Le Glacier dik. Thierry ankrajları hazırladı. Direğin yanında vinç düğmesine dokunun — sizi tutar.",
+  level_glacierIntro: "Le Glacier dik. Ankrajları ben hazırladım. Vinç bağlamak için direğin yanında {winchKey} basın — sizi tutar.",
+  level_glacierIntroTouch: "Le Glacier dik. Ankrajları ben hazırladım. Direğin yanında vinç düğmesine dokunun — sizi tutar.",
   level_tubeIntro: "Yarın Tube'da yarışma! Temiz duvarlar, keskin dudak ve sıfır çıkıntı istiyorum.",
   level_verticaleIntro: "La Verticale'de gece operasyonu: dik yamaç, tehlikeli kenarlar. Vinç zorunlu — 3 ankrajı kullan ve hattan sapma.",
-  level_colDangereuxIntro: "Geçitte yüksek çığ riski — PIDA protokolündeyiz. Yüklü alanlardan uzak dur ve sınırlara uy.",
+  level_colDangereuxIntro: "Geçitte yüksek çığ riski — Çığ güvenlik protokolü aktif. Yüklü alanlardan uzak dur ve sınırlara uy.",
   level_tempeteIntro: "Fırtına geçti. Bir vin chaud al — bu biraz sürecek!",
   level_coupeDesAiguillesIntro: "Bu büyük gece. FIS yarın kontrol ediyor. Her pist mükemmel olmalı — öğrendiklerini göster.",
   marieWelcome: "Chez Marie'de ısınmaya gelin. Güzel bir tartiflette!",
+  marieIntro: "Merhaba! Ben Marie, pistin üstündeki restoranı işletiyorum. İstediğin zaman uğra — sıcak yemek burada mucize yapar!",
 
   // Changelog
   changelog_20260214_date: "14 Şubat 2026",

@@ -263,17 +263,18 @@ const fi: Record<string, string> = {
 
   // Dialogues
   jeanPierreIntro: "Hyvin tehty tutoriaalissa. Nyt on totta — vihreä rinne, ajastimella ja polttoaineella.",
-  level_chamoisIntro: "Hyvin tehty eilen! JP lähettää sinut siniselle. Näytä, että osaat muutakin kuin samettia vihreällä.",
-  level_airZoneIntro: "Hei! Täällä Émilie. Snowpark kaipaa huomiota — laskijat luottavat meihin. Tarkkuutta!",
+  level_chamoisIntro: "Hei, olen Émilie — JP lähettää sinut siniselle. Näytä, että osaat muutakin kuin samettia vihreällä.",
+  level_airZoneIntro: "Snowpark kaipaa huomiota — laskijat luottavat meihin. Tarkkuutta!",
   level_aigleIntro: "L'Aigle on vakavaa. Tarkkaile polttoainetta. Huoltotiet vievät takaisin ylös — etsi kelta-mustaisia tolppia.",
-  level_glacierIntro: "Le Glacier on jyrkkä. Thierry asensi ankkurit. Paina {winchKey} tolpan lähellä kiinnittääksesi vinssin — se estää liukumisen.",
-  level_glacierIntroTouch: "Le Glacier on jyrkkä. Thierry asensi ankkurit. Paina vinssinappia tolpan lähellä kiinnittääksesi — se estää liukumisen.",
+  level_glacierIntro: "Le Glacier on jyrkkä. Asensin ankkurit. Paina {winchKey} tolpan lähellä kiinnittääksesi vinssin — se estää liukumisen.",
+  level_glacierIntroTouch: "Le Glacier on jyrkkä. Asensin ankkurit. Paina vinssinappia tolpan lähellä kiinnittääksesi — se estää liukumisen.",
   level_tubeIntro: "Huomenna on kilpailu Tubessa! Puhtaat seinät, terävä reuna ja nolla kohoumaa.",
   level_verticaleIntro: "Yöoperaatio La Verticalella: jyrkkä rinne, vaaralliset reunat. Vinssi on pakollinen — käytä 3 ankkuria ja pysy linjassa.",
-  level_colDangereuxIntro: "Korkea lumivyöryriski solassa — noudatamme PIDA-protokollaa. Pysy pois kuormitetuilta alueilta ja kunnioita rajoja.",
+  level_colDangereuxIntro: "Korkea lumivyöryriski solassa — noudatamme lumivyöryturvaprotokollaa. Pysy pois kuormitetuilta alueilta ja kunnioita rajoja.",
   level_tempeteIntro: "Myrsky on ohi. Ota vin chaud — tässä kestää!",
   level_coupeDesAiguillesIntro: "Tämä on se suuri ilta. FIS tarkastaa huomenna. Jokaisen rinteen pitää olla täydellinen — näytä mitä olet oppinut.",
   marieWelcome: "Tule lämmittelemään Chez Marie'hen. Hyvää tartiflette'a!",
+  marieIntro: "Hei! Olen Marie, pyöritän ravintolaa rinteen yläpäässä. Piipahtele milloin vain — lämmin ateria tekee ihmeitä!",
 
   // Changelog
   changelog_20260214_date: "14. helmikuuta 2026",

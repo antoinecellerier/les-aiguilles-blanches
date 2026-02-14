@@ -262,17 +262,18 @@ const en: Record<string, string> = {
   tauntSkiWipeout5: "Even the bouquetins winced at that landing.",
   
   jeanPierreIntro: "Good work on the tutorial, kid. Now it's for real — the Green Piste, with a timer and fuel to manage.",
-  level_chamoisIntro: "Nice work yesterday! JP's putting you on the blue. Come on — show you can do more than lay corduroy on the green.",
-  level_airZoneIntro: "Hey! It's Émilie. The snowpark needs some love — riders are counting on us. Precision is key!",
+  level_chamoisIntro: "Hey, I'm Émilie — JP's putting you on the blue. Come on, show you can do more than lay corduroy on the green.",
+  level_airZoneIntro: "The snowpark needs some love — riders are counting on us. Precision is key!",
   level_aigleIntro: "L'Aigle is serious. Watch your fuel. Access paths let you drive back up — look for the amber and black striped poles.",
-  level_glacierIntro: "Le Glacier is steep. Thierry set up the anchors. Press {winchKey} near a post to attach the winch — it'll keep you from sliding.",
-  level_glacierIntroTouch: "Le Glacier is steep. Thierry set up the anchors. Tap the winch button near a post to attach — it'll keep you from sliding.",
+  level_glacierIntro: "Le Glacier is steep. I set up the anchors. Press {winchKey} near a post to attach the winch — it'll keep you from sliding.",
+  level_glacierIntroTouch: "Le Glacier is steep. I set up the anchors. Tap the winch button near a post to attach — it'll keep you from sliding.",
   level_tubeIntro: "Tomorrow's the contest at The Tube! I want clean walls, a sharp lip, and zero bumps.",
   level_verticaleIntro: "Night op on La Verticale: steep slope, dangerous edges. Winch is mandatory — use the 3 anchors and stay on line.",
-  level_colDangereuxIntro: "High avalanche risk on the Col — we're on PIDA protocol. Stay out of loaded areas and respect the boundaries.",
+  level_colDangereuxIntro: "High avalanche risk on the Col — avalanche safety protocol is active. Stay out of loaded areas and respect the boundaries.",
   level_tempeteIntro: "Storm's passed. Grab a vin chaud — this'll take a while!",
   level_coupeDesAiguillesIntro: "This is the big night. FIS inspects tomorrow. Every piste must be perfect — show me what you've learned.",
   marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
+  marieIntro: "Hey there! I'm Marie — I run the restaurant up top. Stop by anytime, a hot meal does wonders out here!",
   
   // Changelog
   changelog_20260214_date: "February 14, 2026",

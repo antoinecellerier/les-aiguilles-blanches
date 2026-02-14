@@ -301,8 +301,8 @@ export const LEVELS: Level[] = [
     pisteShape: 'gentle_curve',
     pisteWidth: 0.4,
     steepZones: [
-      { startY: 0.25, endY: 0.45, slope: 35 },
-      { startY: 0.6, endY: 0.75, slope: 40 },
+      { startY: 0.25, endY: 0.45, slope: 40 },
+      { startY: 0.6, endY: 0.75, slope: 30 },
     ],
     accessPaths: [
       { startY: 0.2, endY: 0.5, side: 'left' },

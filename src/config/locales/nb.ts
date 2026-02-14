@@ -263,17 +263,18 @@ const nb: Record<string, string> = {
 
   // Dialogues
   jeanPierreIntro: "Bra jobbet med opplæringen. Nå er det alvor — grønn løype, med klokke og drivstoff å passe på.",
-  level_chamoisIntro: "Bra jobbet i går! JP sender deg til den blå løypa. Vis at du kan mer enn å legge fløyel på grønne.",
-  level_airZoneIntro: "Hei! Det er Émilie. Snowparken trenger kjærlighet — riderne regner med oss. Presisjon!",
+  level_chamoisIntro: "Hei, jeg er Émilie — JP sender deg til den blå løypa. Vis at du kan mer enn å legge fløyel på grønne.",
+  level_airZoneIntro: "Snowparken trenger kjærlighet — riderne regner med oss. Presisjon!",
   level_aigleIntro: "L'Aigle er alvor. Hold øye med drivstoffet. Serviceveiene lar deg kjøre opp igjen — se etter de gule og svarte stolpene.",
-  level_glacierIntro: "Le Glacier er bratt. Thierry har satt opp forankringene. Trykk {winchKey} ved en stolpe for å feste vinsjen — den hindrer deg fra å skli.",
-  level_glacierIntroTouch: "Le Glacier er bratt. Thierry har satt opp forankringene. Trykk på vinsjknappen ved en stolpe for å feste — den hindrer deg fra å skli.",
+  level_glacierIntro: "Le Glacier er bratt. Jeg har satt opp forankringene. Trykk {winchKey} ved en stolpe for å feste vinsjen — den hindrer deg fra å skli.",
+  level_glacierIntroTouch: "Le Glacier er bratt. Jeg har satt opp forankringene. Trykk på vinsjknappen ved en stolpe for å feste — den hindrer deg fra å skli.",
   level_tubeIntro: "I morgen er det contest i Tuben! Rene vegger, skarp kant og ingen kuler.",
   level_verticaleIntro: "Nattoppdrag på La Verticale: bratt bakke, farlige kanter. Vinsj er påbudt — bruk de 3 forankringene og hold linjen.",
-  level_colDangereuxIntro: "Høy skredfare på passet — vi kjører PIDA-protokoll. Hold deg unna belastede områder og respekter grensene.",
+  level_colDangereuxIntro: "Høy skredfare på passet — vi kjører Skredsikringsprotokoll aktivt. Hold deg unna belastede områder og respekter grensene.",
   level_tempeteIntro: "Stormen har passert. Ta en vin chaud — dette tar en stund!",
   level_coupeDesAiguillesIntro: "Det er den store kvelden. FIS inspiserer i morgen. Hver løype må være perfekt — vis meg hva du har lært.",
   marieWelcome: "Kom og varm deg Chez Marie. En god tartiflette!",
+  marieIntro: "Hei! Jeg er Marie, jeg driver restauranten oppe ved løypa. Stikk innom når du vil — et varmt måltid gjør underverker!",
 
   // Changelog
   changelog_20260214_date: "14. februar 2026",

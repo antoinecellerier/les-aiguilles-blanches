@@ -263,17 +263,18 @@ const sv: Record<string, string> = {
 
   // Dialogues
   jeanPierreIntro: "Bra jobbat med handledningen. Nu är det på riktigt — gröna pisten, med tidur och bränsle att hålla koll på.",
-  level_chamoisIntro: "Bra jobbat igår! JP skickar dig till blå pisten. Visa att du kan mer än att dra sammet på gröna.",
-  level_airZoneIntro: "Hej! Det är Émilie. Snowparken behöver kärlek — åkarna räknar med oss. Precision!",
+  level_chamoisIntro: "Hej, jag är Émilie — JP skickar dig till blå pisten. Visa att du kan mer än att dra sammet på gröna.",
+  level_airZoneIntro: "Snowparken behöver kärlek — åkarna räknar med oss. Precision!",
   level_aigleIntro: "L'Aigle är på allvar. Håll koll på bränslet. Servicevägarna leder dig uppåt — leta efter de gula och svarta stolparna.",
-  level_glacierIntro: "Le Glacier är brant. Thierry har satt upp förankringarna. Tryck {winchKey} vid en stolpe för att fästa vinschen — den hindrar dig från att glida.",
-  level_glacierIntroTouch: "Le Glacier är brant. Thierry har satt upp förankringarna. Tryck på vinschknappen vid en stolpe för att fästa — den hindrar dig från att glida.",
+  level_glacierIntro: "Le Glacier är brant. Jag har satt upp förankringarna. Tryck {winchKey} vid en stolpe för att fästa vinschen — den hindrar dig från att glida.",
+  level_glacierIntroTouch: "Le Glacier är brant. Jag har satt upp förankringarna. Tryck på vinschknappen vid en stolpe för att fästa — den hindrar dig från att glida.",
   level_tubeIntro: "Imorgon är det contest i Tuben! Rena väggar, vass kant och inga bucklor.",
   level_verticaleIntro: "Nattuppdrag på La Verticale: brant sluttning, farliga kanter. Vinschen är obligatorisk — använd de 3 förankringarna och håll linjen.",
-  level_colDangereuxIntro: "Hög lavinrisk på passet — vi kör PIDA-protokoll. Håll dig borta från belastade områden och respektera gränserna.",
+  level_colDangereuxIntro: "Hög lavinrisk på passet — vi kör Lavinsäkerhetsprotokoll aktivt. Håll dig borta från belastade områden och respektera gränserna.",
   level_tempeteIntro: "Stormen har passerat. Ta en vin chaud — det här tar ett tag!",
   level_coupeDesAiguillesIntro: "Det är den stora kvällen. FIS inspekterar imorgon. Varje pist måste vara perfekt — visa mig vad du lärt dig.",
   marieWelcome: "Kom och värm dig Chez Marie. En god tartiflette!",
+  marieIntro: "Hej! Jag är Marie, jag driver restaurangen uppe vid pisten. Kom förbi när du vill — en varm måltid gör underverk!",
 
   // Changelog
   changelog_20260214_date: "14 februari 2026",

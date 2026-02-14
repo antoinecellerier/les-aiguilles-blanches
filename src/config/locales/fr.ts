@@ -268,17 +268,18 @@ const fr: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "T'as bien bossé sur le tutoriel, petit. Maintenant c'est du vrai — la Verte, avec du chrono et du carburant.",
-  level_chamoisIntro: "Bien joué hier ! JP te met sur la bleue. Allez, montre que tu sais faire autre chose que du velours sur la verte.",
-  level_airZoneIntro: "Salut ! C'est Émilie. Le snowpark a besoin d'amour — les riders comptent sur nous. Précision !",
+  level_chamoisIntro: "Salut, moi c'est Émilie — JP te met sur la bleue. Allez, montre que tu sais faire autre chose que du velours sur la verte.",
+  level_airZoneIntro: "Le snowpark a besoin d'amour — les riders comptent sur nous. Précision !",
   level_aigleIntro: "L'Aigle, c'est du sérieux. Surveille ton carburant. Les chemins de dameuse permettent de remonter la piste — repère les piquets jaunes et noirs.",
-  level_glacierIntro: "Le Glacier, c'est raide. Thierry t'a préparé les ancrages. Appuie sur {winchKey} à côté d'un poteau pour accrocher le treuil — ça t'évitera de glisser.",
-  level_glacierIntroTouch: "Le Glacier, c'est raide. Thierry t'a préparé les ancrages. Appuie sur le bouton treuil à côté d'un poteau pour t'accrocher — ça t'évitera de glisser.",
+  level_glacierIntro: "Le Glacier, c'est raide. Je t'ai préparé les ancrages. Appuie sur {winchKey} à côté d'un poteau pour accrocher le treuil — ça t'évitera de glisser.",
+  level_glacierIntroTouch: "Le Glacier, c'est raide. Je t'ai préparé les ancrages. Appuie sur le bouton treuil à côté d'un poteau pour t'accrocher — ça t'évitera de glisser.",
   level_tubeIntro: "Demain c'est le contest au Tube ! Je veux des parois propres, une lèvre nette, et zéro bourrelet.",
   level_verticaleIntro: "Nuit sur La Verticale : pente raide, bords dangereux. Treuil obligatoire — accroche-toi aux 3 ancrages et reste dans l'axe.",
-  level_colDangereuxIntro: "Risque avalanche élevé sur le Col, on est en protocole PIDA. Reste hors des zones chargées et respecte les limites.",
+  level_colDangereuxIntro: "Risque avalanche élevé sur le Col — protocole sécurité avalanche activé. Reste hors des zones chargées et respecte les limites.",
   level_tempeteIntro: "La tempête est passée. Prends un vin chaud, ça va être long !",
   level_coupeDesAiguillesIntro: "C'est le grand soir. La FIS inspecte demain. Toutes les pistes doivent être parfaites — montre-moi ce que t'as appris.",
   marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
+  marieIntro: "Salut ! Moi c'est Marie, je tiens le restaurant en haut de la piste. Passe quand tu veux — un bon plat chaud, ça recharge les batteries !",
   
   // Changelog
   changelog_20260214_date: "14 février 2026",

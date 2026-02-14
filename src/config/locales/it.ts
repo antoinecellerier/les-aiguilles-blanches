@@ -214,17 +214,18 @@ const it: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "Bravo per il tutorial, ragazzo. Ora si fa sul serio — la Verde, con cronometro e carburante da gestire.",
-  level_chamoisIntro: "Ben fatto ieri! JP ti manda sulla blu. Dai, dimostra che sai fare di più che velluto sulla verde.",
-  level_airZoneIntro: "Ciao! Sono Émilie. Lo snowpark ha bisogno di cure — i rider contano su di noi. Precisione!",
+  level_chamoisIntro: "Ciao, sono Émilie — JP ti manda sulla blu. Dai, dimostra che sai fare di più che velluto sulla verde.",
+  level_airZoneIntro: "Lo snowpark ha bisogno di cure — i rider contano su di noi. Precisione!",
   level_aigleIntro: "L'Aigle è roba seria. Occhio al carburante. I tracciati battipista permettono di risalire — cerca i pali a strisce gialle e nere.",
-  level_glacierIntro: "Le Glacier è ripido. Thierry ha preparato gli ancoraggi. Premi {winchKey} vicino a un paletto per agganciare il verricello — eviterai di scivolare.",
-  level_glacierIntroTouch: "Le Glacier è ripido. Thierry ha preparato gli ancoraggi. Tocca il pulsante verricello vicino a un paletto per agganciarti — eviterai di scivolare.",
+  level_glacierIntro: "Le Glacier è ripido. Ho preparato gli ancoraggi. Premi {winchKey} vicino a un paletto per agganciare il verricello — eviterai di scivolare.",
+  level_glacierIntroTouch: "Le Glacier è ripido. Ho preparato gli ancoraggi. Tocca il pulsante verricello vicino a un paletto per agganciarti — eviterai di scivolare.",
   level_tubeIntro: "Domani c'è il contest al Tube! Voglio pareti pulite, labbro netto e zero gobbe.",
   level_verticaleIntro: "Notte su La Verticale: pendio ripido, bordi pericolosi. Verricello obbligatorio — agganciati ai 3 ancoraggi e resta in asse.",
-  level_colDangereuxIntro: "Rischio valanga alto sul Col — siamo in protocollo PIDA. Stai fuori dalle zone cariche e rispetta i limiti.",
+  level_colDangereuxIntro: "Rischio valanga alto sul Col — siamo in protocollo sicurezza valanghe attivo. Stai fuori dalle zone cariche e rispetta i limiti.",
   level_tempeteIntro: "La tempesta è passata. Prendi un vin brulé, sarà lunga!",
   level_coupeDesAiguillesIntro: "È la grande notte. La FIS ispeziona domani. Ogni pista deve essere perfetta — mostrami cosa hai imparato.",
   marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
+  marieIntro: "Ciao! Sono Marie, gestisco il ristorante in cima. Passa quando vuoi — un piatto caldo fa miracoli quassù!",
   
   // Changelog
   changelog_20260214_date: "14 febbraio 2026",

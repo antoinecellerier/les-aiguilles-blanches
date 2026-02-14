@@ -214,17 +214,18 @@ const es: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "Buen trabajo en el tutorial, chaval. Ahora va en serio — la Verde, con cronómetro y combustible que gestionar.",
-  level_chamoisIntro: "¡Bien hecho ayer! JP te pone en la azul. Venga, demuestra que sabes hacer algo más que terciopelo en la verde.",
-  level_airZoneIntro: "¡Hola! Soy Émilie. El snowpark necesita cariño — los riders cuentan con nosotros. ¡Precisión!",
+  level_chamoisIntro: "¡Hola, soy Émilie! JP te pone en la azul. Venga, demuestra que sabes hacer algo más que terciopelo en la verde.",
+  level_airZoneIntro: "¡El snowpark necesita cariño — los riders cuentan con nosotros. ¡Precisión!",
   level_aigleIntro: "L'Aigle es serio. Vigila el combustible. Los caminos de pisapistas permiten subir — busca los postes con rayas amarillas y negras.",
-  level_glacierIntro: "Le Glacier es empinado. Thierry preparó los anclajes. Pulsa {winchKey} junto a un poste para enganchar el cabrestante — evitarás resbalar.",
-  level_glacierIntroTouch: "Le Glacier es empinado. Thierry preparó los anclajes. Toca el botón de cabrestante junto a un poste para engancharte — evitarás resbalar.",
+  level_glacierIntro: "Le Glacier es empinado. He preparado los anclajes. Pulsa {winchKey} junto a un poste para enganchar el cabrestante — evitarás resbalar.",
+  level_glacierIntroTouch: "Le Glacier es empinado. He preparado los anclajes. Toca el botón de cabrestante junto a un poste para engancharte — evitarás resbalar.",
   level_tubeIntro: "¡Mañana es el contest en el Tube! Quiero paredes limpias, labio afilado y cero baches.",
   level_verticaleIntro: "Noche en La Verticale: pendiente fuerte, bordes peligrosos. Cabrestante obligatorio — usa los 3 anclajes y mantente en línea.",
-  level_colDangereuxIntro: "Alto riesgo de avalancha en el Col — estamos en protocolo PIDA. Evita las zonas sobrecargadas y respeta los límites.",
+  level_colDangereuxIntro: "Alto riesgo de avalancha en el Col — estamos en protocolo de seguridad de avalanchas activo. Evita las zonas sobrecargadas y respeta los límites.",
   level_tempeteIntro: "La tormenta ha pasado. ¡Toma un vino caliente, va a ser largo!",
   level_coupeDesAiguillesIntro: "Es la gran noche. La FIS inspecciona mañana. Cada pista debe ser perfecta — muéstrame lo que has aprendido.",
   marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
+  marieIntro: "¡Hola! Soy Marie, llevo el restaurante de arriba. Pasa cuando quieras — ¡una comida caliente hace milagros aquí!",
   
   // Changelog
   changelog_20260214_date: "14 de febrero de 2026",

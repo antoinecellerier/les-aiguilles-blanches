@@ -1538,6 +1538,10 @@ export default class GameScene extends Phaser.Scene {
           this.engineSounds.playRestaurant();
         }
         Accessibility.announce(t('marieWelcome'));
+        if (!getString(STORAGE_KEYS.MARIE_INTRO_SEEN)) {
+          setString(STORAGE_KEYS.MARIE_INTRO_SEEN, '1');
+          this.showDialogue('marieIntro', 'Marie');
+        }
         this.showInteractionFeedback(feedbackX, feedbackY, food.icon + ' ' + dish + '!', food.color, 32, true);
       } else if (this.stamina < 100) {
         // Already have a buff — just top up stamina

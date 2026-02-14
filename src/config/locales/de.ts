@@ -214,17 +214,18 @@ const de: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "Gut gemacht im Tutorial, Kleiner. Jetzt wird's ernst — die Grüne, mit Timer und Kraftstoff.",
-  level_chamoisIntro: "Gut gemacht gestern! JP schickt dich auf die Blaue. Zeig, dass du mehr kannst als nur grüne Pisten zu bügeln.",
-  level_airZoneIntro: "Hey! Hier ist Émilie. Der Snowpark braucht Liebe — die Rider zählen auf uns. Präzision!",
+  level_chamoisIntro: "Hey, ich bin Émilie — JP schickt dich auf die Blaue. Zeig, dass du mehr kannst als nur grüne Pisten zu bügeln.",
+  level_airZoneIntro: "Der Snowpark braucht Liebe — die Rider zählen auf uns. Präzision!",
   level_aigleIntro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Ziehwege führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",
-  level_glacierIntro: "Le Glacier ist steil. Thierry hat die Anker vorbereitet. Drücke {winchKey} neben einem Pfosten, um die Winde einzuhaken — damit rutscht du nicht ab.",
-  level_glacierIntroTouch: "Le Glacier ist steil. Thierry hat die Anker vorbereitet. Tippe auf den Winden-Button neben einem Pfosten — damit rutscht du nicht ab.",
+  level_glacierIntro: "Le Glacier ist steil. Ich habe die Anker vorbereitet. Drücke {winchKey} neben einem Pfosten, um die Winde einzuhaken — damit rutscht du nicht ab.",
+  level_glacierIntroTouch: "Le Glacier ist steil. Ich habe die Anker vorbereitet. Tippe auf den Winden-Button neben einem Pfosten — damit rutscht du nicht ab.",
   level_tubeIntro: "Morgen ist Contest am Tube! Saubere Wände, scharfe Kante, keine Buckel.",
   level_verticaleIntro: "Nachteinsatz auf La Verticale: steiler Hang, gefährliche Ränder. Winde ist Pflicht — nutze die 3 Verankerungen und bleib in der Spur.",
-  level_colDangereuxIntro: "Hohes Lawinenrisiko am Col — wir arbeiten nach PIDA-Protokoll. Bleib aus den belasteten Zonen und halte die Grenzen ein.",
+  level_colDangereuxIntro: "Hohes Lawinenrisiko am Col — wir arbeiten nach Lawinensicherheitsprotokoll aktiv. Bleib aus den belasteten Zonen und halte die Grenzen ein.",
   level_tempeteIntro: "Der Sturm ist vorbei. Nimm einen Vin chaud, das wird lang!",
   level_coupeDesAiguillesIntro: "Das ist die große Nacht. Die FIS inspiziert morgen. Jede Piste muss perfekt sein — zeig mir, was du gelernt hast.",
   marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
+  marieIntro: "Hallo! Ich bin Marie, ich betreibe das Restaurant oben an der Piste. Komm vorbei, wann du willst — ein heißes Essen wirkt Wunder!",
   
   // Changelog
   changelog_20260214_date: "14. Februar 2026",

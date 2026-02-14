@@ -262,17 +262,18 @@ const sk: Record<string, string> = {
   tauntSkiWipeout5: "Aj kamzíky sa pri tom dopade zaškierili.",
 
   jeanPierreIntro: "Dobrá práca v tutoriáli. Teraz to bude naostro — zelená zjazdovka, s časom a palivom na starosti.",
-  level_chamoisIntro: "Dobrá práca včera! JP vás posiela na modrú. Ukážte, že zvládnete viac než len samety na zelenej.",
-  level_airZoneIntro: "Ahoj! To je Émilie. Snowpark potrebuje starostlivosť — jazdci na nás počítajú. Presnosť je kľúč!",
+  level_chamoisIntro: "Ahoj, som Émilie — JP vás posiela na modrú. Ukážte, že zvládnete viac než len samety na zelenej.",
+  level_airZoneIntro: "Snowpark potrebuje starostlivosť — jazdci na nás počítajú. Presnosť je kľúč!",
   level_aigleIntro: "L'Aigle je vážna vec. Sledujte palivo. Po servisných cestách sa vrátite hore — hľadajte oranžovo-čierne stĺpiky.",
-  level_glacierIntro: "Le Glacier je strmý. Thierry pripravil kotvy. Stlačte {winchKey} pri stĺpiku pre pripojenie navijáku — udrží vás.",
-  level_glacierIntroTouch: "Le Glacier je strmý. Thierry pripravil kotvy. Ťuknite na tlačidlo navijáku pri stĺpiku — udrží vás.",
+  level_glacierIntro: "Le Glacier je strmý. Pripravil som kotvy. Stlačte {winchKey} pri stĺpiku pre pripojenie navijáku — udrží vás.",
+  level_glacierIntroTouch: "Le Glacier je strmý. Pripravil som kotvy. Ťuknite na tlačidlo navijáku pri stĺpiku — udrží vás.",
   level_tubeIntro: "Zajtra je contest na Tube! Chcem čisté steny, ostrý okraj a nula hrboľov.",
   level_verticaleIntro: "Nočná akcia na La Verticale: strmý svah, nebezpečné okraje. Naviják je povinný — použite 3 ukotvenia a držte sa osi.",
-  level_colDangereuxIntro: "Vysoké lavínové riziko na priesmyku — pracujeme podľa protokolu PIDA. Držte sa od zaťažených zón a rešpektujte hranice.",
+  level_colDangereuxIntro: "Vysoké lavínové riziko na priesmyku — pracujeme podľa protokolu lavínového zabezpečenia. Držte sa od zaťažených zón a rešpektujte hranice.",
   level_tempeteIntro: "Búrka prešla. Dajte si vin chaud — bude to chvíľu trvať!",
   level_coupeDesAiguillesIntro: "Toto je veľká noc. FIS kontroluje zajtra. Každá zjazdovka musí byť perfektná — ukážte, čo ste sa naučili.",
   marieWelcome: "Príďte sa ohriať k Chez Marie. Dobrá tartiflette!",
+  marieIntro: "Ahoj! Som Marie, vediem reštauráciu hore pri zjazdovke. Stavte sa kedy chcete — teplé jedlo tu robí zázraky!",
 
   // Changelog
   changelog_20260214_date: "14. februára 2026",

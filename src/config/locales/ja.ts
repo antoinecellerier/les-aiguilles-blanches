@@ -262,17 +262,18 @@ const ja: Record<string, string> = {
   tauntSkiWipeout5: "アイベックスでさえ、あの着地には顔をしかめた。",
 
   jeanPierreIntro: "チュートリアルはよくやった。ここからが本番だ — 初級コース、タイマーと燃料管理ありだ。",
-  level_chamoisIntro: "昨日はよくやった！JPが中級コースに行かせる。初級コースだけじゃないところを見せろ。",
-  level_airZoneIntro: "やあ！Émilieよ。スノーパークの整備が必要 — ライダーが期待してるわ。精密作業よ！",
+  level_chamoisIntro: "やあ、Émilieよ — JPが中級コースに行かせるって。初級だけじゃないところを見せて。",
+  level_airZoneIntro: "スノーパークの整備が必要 — ライダーが期待してるわ。精密作業よ！",
   level_aigleIntro: "L'Aigleは本格的だ。燃料に注意。作業道で登り返せる — オレンジと黒のポールを探せ。",
-  level_glacierIntro: "Le Glacierは急斜面だ。Thierryがアンカーを設置した。ポストの近くで{winchKey}を押してウインチを接続 — 滑り止めになる。",
-  level_glacierIntroTouch: "Le Glacierは急斜面だ。Thierryがアンカーを設置した。ポストの近くでウインチボタンをタップして接続 — 滑り止めになる。",
+  level_glacierIntro: "Le Glacierは急斜面だ。アンカーは俺が設置した。ポストの近くで{winchKey}を押してウインチを接続 — 滑り止めになる。",
+  level_glacierIntroTouch: "Le Glacierは急斜面だ。俺がアンカーを設置した。ポストの近くでウインチボタンをタップして接続 — 滑り止めになる。",
   level_tubeIntro: "明日はTubeでコンテストだ！壁はきれいに、リップはシャープに、凸凹ゼロで頼む。",
   level_verticaleIntro: "La Verticaleで夜間作業：急斜面、危険な縁。ウインチ必須 — 3つのアンカーを使い、軸からずれるな。",
-  level_colDangereuxIntro: "Colの雪崩リスクが高い — PIDAプロトコル発動中。荷重エリアに入るな、境界を守れ。",
+  level_colDangereuxIntro: "Colの雪崩リスクが高い — 雪崩安全プロトコル発動中。荷重エリアに入るな、境界を守れ。",
   level_tempeteIntro: "暴風雪が去った。ホットワインを飲んで — 時間がかかるぞ！",
   level_coupeDesAiguillesIntro: "今夜が勝負だ。明日FISの検査がある。全コース完璧にしろ — 学んだことを見せてくれ。",
   marieWelcome: "マリーの店で温まっていきなさい。美味しいタルティフレットがあるわよ！",
+  marieIntro: "こんにちは！マリーよ、ゲレンデ上のレストランをやってるの。いつでも寄ってね — 温かい食事は最高の充電よ！",
 
   // Changelog
   changelog_20260214_date: "2026年2月14日",
