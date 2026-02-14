@@ -90,7 +90,8 @@ export default class DialogueScene extends Phaser.Scene {
     if (hudScene?.getTouchControlsTopEdge) {
       const touchTop = hudScene.getTouchControlsTopEdge();
       // Position dialogue so its bottom edge (Y + boxHeight/2) is above touch controls
-      return touchTop - this.currentBoxHeight / 2;
+      const y = touchTop - this.currentBoxHeight / 2;
+      return y;
     }
     
     return defaultY;
@@ -104,6 +105,8 @@ export default class DialogueScene extends Phaser.Scene {
   /** Reposition dialogue when touch controls appear/change. */
   private onTouchControlsChanged(): void {
     if (this.isShowing && this.container) {
+      // Kill show tween so it doesn't override the repositioned Y
+      this.tweens.killTweensOf(this.container);
       this.container.setY(this.getDialogueShowY());
     }
   }

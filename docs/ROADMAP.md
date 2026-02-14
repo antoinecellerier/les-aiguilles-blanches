@@ -28,6 +28,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Resize + touch controls regression fixes** — Camera static→follow transition when touch controls reduce effective viewport height on portrait devices (L7). Groomer stays above controls after resize. Dialogue repositions above controls (tween race fix). 9 regression tests in `test_resize_touch.py`. Smart test selection expanded to all 78 source files with three validation layers (unknown tests, unmapped sources, scene drift detection).
+
 - ✅ **Night overlay & culling resize fix** — Fixed night overlay not covering full viewport after resize/orientation change, and terrain DynamicTextures disappearing due to center-point culling. Night fix: extracted `prepareNightFrame()` for zoom-aware coordinate mapping; `handleNightResize()` called after `setZoom()`. Culling fix: bounds-based visibility checks in `cullOffscreen()`. Simplified `run-tests.sh` to use `./dev.sh`.
 
 - ✅ **Crisp pixel art scaling** — Per-texture nearest-neighbor scaling for all sprites and DynamicTextures. Ski run HUD zoom-independent rendering. Firefox workaround: `pixelArt:true` causes black screen, so NEAREST set per-texture instead.

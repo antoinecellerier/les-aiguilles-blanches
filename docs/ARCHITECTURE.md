@@ -1031,7 +1031,15 @@ Always clean up listeners in `shutdown()` with `this.game.events.off(GAME_EVENTS
 GameScene constructs the `GAME_STATE` payload via `buildGameStatePayload()` — a single method used by both the per-frame emit in `update()` and the final emit in `gameOver()`. HUDScene uses the bonus stats to evaluate bonus objectives in real-time inside the visor, with irreversible failure tracking for `no_tumble` and `speed_run`.
 #### Touch Controls Camera Offset
 
-On narrow/portrait devices (aspect < 1.2), virtual touch controls overlap the play area. HUDScene emits `TOUCH_CONTROLS_TOP` with the top edge of the controls in screen pixels. GameScene uses this to apply a negative `followOffset.y` so the groomer renders above the controls. Camera bounds are extended downward by `|followOffset.y|` via `updateCameraBoundsForOffset()` to prevent clamping at the world bottom edge.
+On narrow/portrait devices (aspect ≤ 1.2), virtual touch controls overlap the play area. HUDScene emits `TOUCH_CONTROLS_TOP` with the top edge of the controls in screen pixels. GameScene caches this as `touchControlsHeight` (viewport-independent) and calls `recalcTouchFollowOffset()` to adjust the camera:
+
+1. **Follow camera (large world)**: Applies a negative `followOffset.y` so the groomer renders above the controls. Camera bounds are extended downward by `|followOffset.y|` via `updateCameraBoundsForOffset()`.
+2. **Static camera, world fits**: Re-centers the world in the effective area (`screenH - touchControlsHeight`) without enforcing `CAMERA_MIN_OFFSET_Y` (which would push the world into the controls).
+3. **Static → follow transition**: When the world barely fits above controls (slack < `CAMERA_MIN_OFFSET_Y`), switches to follow mode with groomer tracking offset. This ensures the groomer stays visible on tall levels (e.g. L7 La Verticale) in portrait.
+
+`handleResize()` uses `effectiveHeight` (accounting for touch controls) for the static vs follow decision. `recalcTouchFollowOffset()` is called both from `onTouchControlsTop()` (when HUD emits) and from `handleResize()` (when viewport changes before HUD restarts).
+
+**Dialogue positioning**: DialogueScene listens for `TOUCH_CONTROLS_TOP` and repositions above controls via `onTouchControlsChanged()`. The handler kills any running show tween before setting Y to prevent the tween from overriding the repositioned value.
 
 ### GameScene System Extraction
 

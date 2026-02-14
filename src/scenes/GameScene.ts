@@ -1671,13 +1671,18 @@ export default class GameScene extends Phaser.Scene {
     // Force culling recalc after camera changes
     this.lastCullBounds = { x: 0, y: 0, w: 0, h: 0 };
     
-    // If world fits in viewport at this zoom, use static camera
-    if (worldWidth * zoom <= width && worldHeight * zoom <= height) {
+    // If world fits in viewport at this zoom, use static camera —
+    // but account for touch controls reducing visible area in portrait.
+    const aspect = width / height;
+    const touchActive = this.touchControlsHeight > 0 && aspect <= BALANCE.TOUCH_CONTROLS_WIDE_ASPECT_THRESHOLD;
+    const effectiveHeight = touchActive ? height - this.touchControlsHeight : height;
+    if (worldWidth * zoom <= width && worldHeight * zoom + BALANCE.CAMERA_MIN_OFFSET_Y <= effectiveHeight) {
       this.cameras.main.setZoom(zoom);
       this.cameras.main.stopFollow();
       this.cameras.main.removeBounds();
       const offsetX = Math.max(0, (width - worldWidth * zoom) / 2);
-      const offsetY = Math.max(BALANCE.CAMERA_MIN_OFFSET_Y, (height - worldHeight * zoom) / 2);
+      const minOffsetY = touchActive ? 0 : BALANCE.CAMERA_MIN_OFFSET_Y;
+      const offsetY = Math.max(minOffsetY, (effectiveHeight - worldHeight * zoom) / 2);
       // Convert screen-space offset to camera-local (divide by zoom)
       this.cameras.main.setScroll(-offsetX / zoom, -offsetY / zoom);
       // Night overlay needs zoom to compute draw-space coverage
@@ -1690,9 +1695,9 @@ export default class GameScene extends Phaser.Scene {
     
     if (this.groomer) {
       this.cameras.main.startFollow(this.groomer, true, BALANCE.CAMERA_LERP, BALANCE.CAMERA_LERP);
-      this.cameras.main.setFollowOffset(0, this.touchFollowOffsetY);
     }
-    this.updateCameraBoundsForOffset();
+    // Recalculate touch offset for new zoom/screen size before applying
+    this.recalcTouchFollowOffset();
     if (this.groomer) {
       this.cameras.main.centerOn(this.groomer.x, this.groomer.y);
     }
@@ -1701,6 +1706,8 @@ export default class GameScene extends Phaser.Scene {
 
   /** Camera follow offset to keep groomer above touch controls (world-space) */
   private touchFollowOffsetY = 0;
+  /** Height of touch controls area (screen px from bottom), cached for recalc on resize. */
+  private touchControlsHeight = 0;
 
   /** Update camera bounds to include extra room for the touch follow offset */
   private updateCameraBoundsForOffset(): void {
@@ -1726,15 +1733,53 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private onTouchControlsTop(topEdge: number): void {
+    const screenH = this.scale.height;
+    this.touchControlsHeight = screenH - topEdge;
+    this.recalcTouchFollowOffset();
+  }
+
+  /** Recalculate camera follow offset for touch controls using cached height. */
+  private recalcTouchFollowOffset(): void {
     const cam = this.cameras.main;
-    if (!cam) return;
-    
-    // Only apply offset if camera is following
-    if (!(cam as any)._follow) return;
-    
+    if (!cam || !this.touchControlsHeight) {
+      return;
+    }
+
     const screenW = this.scale.width;
     const screenH = this.scale.height;
     const aspect = screenW / screenH;
+
+    // Static camera (no follow) — check if world fits in visible area above controls
+    if (!(cam as any)._follow) {
+      if (!this.level) return;
+      const worldWidth = this.level.width * this.tileSize;
+      const worldHeight = this.level.height * this.tileSize;
+      const zoom = cam.zoom || 1;
+      const touchNarrow = aspect <= BALANCE.TOUCH_CONTROLS_WIDE_ASPECT_THRESHOLD;
+      const effectiveHeight = touchNarrow ? screenH - this.touchControlsHeight : screenH;
+
+      // Switch to follow if world barely fits — need at least MIN_OFFSET_Y margin
+      const slack = effectiveHeight - worldHeight * zoom;
+      if (slack < BALANCE.CAMERA_MIN_OFFSET_Y) {
+        // World doesn't fit above controls — switch to follow mode
+        if (this.groomer) {
+          cam.startFollow(this.groomer, true, BALANCE.CAMERA_LERP, BALANCE.CAMERA_LERP);
+          this.touchFollowOffsetY = -(this.touchControlsHeight / 2) / zoom;
+          cam.setFollowOffset(0, this.touchFollowOffsetY);
+          this.updateCameraBoundsForOffset();
+          cam.centerOn(this.groomer.x, this.groomer.y);
+        }
+        return;
+      }
+
+      // World fits — re-center in visible area
+      const offsetX = Math.max(0, (screenW - worldWidth * zoom) / 2);
+      // When touch controls reduce visible area, don't enforce min offset — it would push world into controls
+      const minOffsetY = touchNarrow ? 0 : BALANCE.CAMERA_MIN_OFFSET_Y;
+      const offsetY = Math.max(minOffsetY, (effectiveHeight - worldHeight * zoom) / 2);
+      cam.setScroll(-offsetX / zoom, -offsetY / zoom);
+      return;
+    }
 
     // On wide aspect ratios (tablets, landscape), the joystick and buttons
     // sit in the bottom corners and don't overlap the centered play area.
@@ -1746,9 +1791,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     // Narrow/portrait: shift camera so groomer clears the touch controls
-    const controlsHeight = screenH - topEdge;
     const zoom = cam.zoom || 1;
-    this.touchFollowOffsetY = -(controlsHeight / 2) / zoom;
+    this.touchFollowOffsetY = -(this.touchControlsHeight / 2) / zoom;
     cam.setFollowOffset(0, this.touchFollowOffsetY);
     this.updateCameraBoundsForOffset();
   }
