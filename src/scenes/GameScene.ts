@@ -1500,6 +1500,9 @@ export default class GameScene extends Phaser.Scene {
 
   private updateTimer(): void {
     if (this.level.timeLimit <= 0) return;
+    // Pause timer while dialogue is showing (e.g. intro)
+    const dlg = this.scene.get('DialogueScene') as DialogueScene;
+    if (dlg?.isDialogueShowing()) return;
     if (this.timeRemaining > 0) {
       this.timeRemaining--;
       // Urgent ticks when time is running low (last 15% of time limit)
