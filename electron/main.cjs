@@ -2,6 +2,10 @@ const { app, BrowserWindow, ipcMain, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
+// PipeWire/PulseAudio stream name and icon are hardcoded to "Chromium" in
+// Chromium's pulse_util.cc. No workaround exists until Electron merges
+// https://github.com/electron/electron/pull/49270
+
 const iconPath = path.join(__dirname, 'icon.png');
 
 // Persist display mode to a file so we can read it before window creation

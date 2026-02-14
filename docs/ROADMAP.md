@@ -141,6 +141,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ ~~**La Verticale (L8) night piste visibility**~~ — Darkened off-piste tile textures for contrast on all levels (accessibility). Raised minimum tile size from 12→14px (`BALANCE.MIN_TILE_SIZE`). Lightened service road tiles to sit between piste and off-piste brightness.
 
+### Audio Issues
+
+- **PipeWire/PulseAudio stream shows "Chromium"** — Electron/Chromium hardcodes the PulseAudio `application.name` and `application.icon_name` in `pulse_util.cc`. No workaround exists. Tracking [electron/electron#49270](https://github.com/electron/electron/pull/49270).
+
 ### Input Issues
 
 - ✅ ~~**Handheld touch: winch + groom unreachable**~~ — Auto-groom while winching on touch controls. Keyboard/gamepad retain independent groom/winch control.
