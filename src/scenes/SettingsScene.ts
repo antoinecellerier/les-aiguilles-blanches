@@ -832,7 +832,8 @@ export default class SettingsScene extends Phaser.Scene {
     const bg = this.rexUI.add.roundRectangle(0, 0, 10, 10, 4, SECTION_PANEL_BG)
       .setStrokeStyle(3, THEME.colors.border);
     panel.addBackground(bg);
-    panel.add(this.createText(title, this.fontSize * 1.05, THEME.colors.info, true), { align: 'left' });
+    const headerText = this.createText(title, this.fontSize * 1.05, THEME.colors.info, true);
+    panel.add(headerText, { align: 'left' });
     // Gold accent divider under header
     const divider = this.add.rectangle(0, 0, this.contentWidth * 0.6, 1, 0xffd700).setAlpha(0.35);
     panel.add(divider, { align: 'left' });
@@ -842,19 +843,54 @@ export default class SettingsScene extends Phaser.Scene {
   /** Lightweight sub-section header: bold label + thin divider line */
   private createSubHeader(title: string): any {
     const row = this.rexUI.add.sizer({ orientation: 'vertical', space: { item: 2 } });
-    row.add(this.createText(title, this.smallFont, THEME.colors.textSecondary, true), { align: 'left' });
+    const subText = this.createText(title, this.smallFont, THEME.colors.textSecondary, true);
+    row.add(subText, { align: 'left' });
     const line = this.add.rectangle(0, 0, this.contentWidth * 0.4, 1, 0x667788).setAlpha(0.5);
     row.add(line, { align: 'left' });
     return row;
   }
 
+  /** Regex to detect emoji characters in text. */
+  private static readonly EMOJI_RE = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u;
+
   private createText(text: string, fontSize: number, color: string, bold = false): Phaser.GameObjects.Text {
-    return this.add.text(0, 0, text, {
+    const txt = this.add.text(0, 0, text, {
       fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
       fontStyle: bold ? 'bold' : 'normal',
       color: color,
     });
+    if (SettingsScene.EMOJI_RE.test(text)) {
+      const pad = this.measureEmojiPad(fontSize, bold);
+      if (pad > 0) txt.setPadding({ top: pad });
+    }
+    return txt;
+  }
+
+  /** Measure extra top padding needed for emojis that extend above the font ascent. */
+  private static emojiPadCache = new Map<string, number>();
+  private measureEmojiPad(fontSize: number, bold: boolean): number {
+    const key = `${fontSize}:${bold}`;
+    const cached = SettingsScene.emojiPadCache.get(key);
+    if (cached !== undefined) return cached;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 0;
+    const style = `${bold ? 'bold ' : ''}${fontSize}px ${THEME.fonts.family}`;
+    ctx.font = style;
+
+    // Measure a reference letter vs representative emojis
+    const ref = ctx.measureText('M');
+    const refAscent = ref.actualBoundingBoxAscent ?? 0;
+    let maxAscent = refAscent;
+    for (const ch of ['🌐', '♿', '🔊', '🎮', '⚙️', '🎿', '✋', '🔍', '⌨️', '🖥️', '⭐']) {
+      const m = ctx.measureText(ch);
+      if ((m.actualBoundingBoxAscent ?? 0) > maxAscent) maxAscent = m.actualBoundingBoxAscent;
+    }
+    const pad = Math.ceil(Math.max(0, maxAscent - refAscent));
+    SettingsScene.emojiPadCache.set(key, pad);
+    return pad;
   }
 
   private createTouchButton(text: string, fontSize: number, color: string, bgColor: string): Phaser.GameObjects.Text {
