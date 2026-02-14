@@ -170,7 +170,7 @@ export class HazardSystem {
 
       const zoneVisual = this.scene.add.graphics();
       zoneVisual.setDepth(DEPTHS.CLIFFS + 0.5);
-      this.drawZonePolygon(zoneVisual, points, 0xFFEEDD, 0.08);
+      this.drawZonePolygon(zoneVisual, points, THEME.colors.avalancheZone, 0.08);
 
       // Place sign above the topmost vertex
       const topY = Math.min(...points.map(p => p.y));
@@ -189,7 +189,7 @@ export class HazardSystem {
       if (topPoints.length >= 2) {
         const ropeGraphics = this.scene.add.graphics();
         ropeGraphics.setDepth(DEPTHS.MARKERS);
-        ropeGraphics.lineStyle(2, 0x000000, 0.6);
+        ropeGraphics.lineStyle(2, THEME.colors.black, 0.6);
         ropeGraphics.beginPath();
         ropeGraphics.moveTo(topPoints[0].x, topPoints[0].y + 5);
         for (let p = 1; p < topPoints.length; p++) {
@@ -212,8 +212,7 @@ export class HazardSystem {
 
       const zone = this.scene.add.rectangle(
         zoneX, zoneY, zoneWidth, zoneHeight,
-        0x000000, 0
-      ) as AvalancheZone;
+        0x000000, 0      ) as AvalancheZone;
       this.scene.physics.add.existing(zone, true);
       zone.avalancheRisk = 0;
       zone.zoneVisual = zoneVisual;
@@ -255,7 +254,7 @@ export class HazardSystem {
     zone.avalancheRisk += BALANCE.AVALANCHE_RISK_PER_FRAME * this.riskMultiplier;
 
     const riskAlpha = 0.05 + zone.avalancheRisk * 0.4;
-    this.drawZonePolygon(zone.zoneVisual, zone.zonePoints, 0xFF2200, Math.min(0.5, riskAlpha));
+    this.drawZonePolygon(zone.zoneVisual, zone.zonePoints, THEME.colors.avalancheDanger, Math.min(0.5, riskAlpha));
 
     if (isGrooming()) {
       zone.avalancheRisk += BALANCE.AVALANCHE_RISK_GROOMING * this.riskMultiplier;
@@ -300,7 +299,7 @@ export class HazardSystem {
       alpha: { start: 1, end: 0.7 },
       quantity: 50,
       frequency: 20,
-      tint: 0xFFFFFF
+      tint: THEME.colors.snowflake
     });
     avalancheParticles.setDepth(DEPTHS.WEATHER + 1);
 
@@ -345,8 +344,7 @@ export class HazardSystem {
     const hs = signSize / 2;
 
     // Diamond shape built from two overlapping rotated rectangles
-    g.fillStyle(0xFFCC00, 1);
-    // Top-left half
+    g.fillStyle(THEME.colors.signYellow, 1);
     g.fillRect(x - hs, y - 2, hs, 4);
     g.fillRect(x - 2, y - hs, 4, hs);
     // Bottom-right half
@@ -355,16 +353,16 @@ export class HazardSystem {
     // Fill center
     g.fillRect(x - hs + 2, y - hs + 2, signSize - 4, signSize - 4);
     // Border
-    g.lineStyle(1, 0x000000, 1);
+    g.lineStyle(1, THEME.colors.black, 1);
     g.strokeRect(x - hs + 1, y - hs + 1, signSize - 2, signSize - 2);
 
     // Avalanche symbol — exclamation mark (rectangles only)
-    g.fillStyle(0x000000, 1);
+    g.fillStyle(THEME.colors.black, 1);
     g.fillRect(x - 1, y - 4, 2, 6);
     g.fillRect(x - 1, y + 3, 2, 2);
 
     // Post — use rock palette brown
-    g.fillStyle(0x4a423a, 1);
+    g.fillStyle(THEME.colors.avalancheRock, 1);
     g.fillRect(x - 2, y + signSize / 2, 4, 12);
   }
 
@@ -373,16 +371,16 @@ export class HazardSystem {
     g.setDepth(DEPTHS.MARKERS);
 
     // Pole — rock palette brown
-    g.fillStyle(0x4a423a, 1);
+    g.fillStyle(THEME.colors.avalancheRock, 1);
     g.fillRect(x - 2, y, 4, 25);
 
     // Flag — yellow per standard avalanche flag colors
     const flagWidth = 12;
     const flagHeight = 8;
-    g.fillStyle(0xFFCC00, 1);
+    g.fillStyle(THEME.colors.signYellow, 1);
     g.fillRect(x + 2, y + 2, flagWidth, flagHeight);
     // Dark stripe on flag for detail
-    g.fillStyle(0x000000, 0.4);
+    g.fillStyle(THEME.colors.black, 0.4);
     g.fillRect(x + 2, y + 2 + flagHeight - 2, flagWidth, 2);
   }
 
@@ -391,12 +389,12 @@ export class HazardSystem {
     g.setDepth(DEPTHS.SIGNAGE);
     const boxSize = 14;
 
-    g.fillStyle(0xFFFFFF, 0.9);
+    g.fillStyle(THEME.colors.snowflake, 0.9);
     g.fillRect(x - boxSize / 2, y - boxSize / 2, boxSize, boxSize + 10);
-    g.lineStyle(1, 0x000000, 0.8);
+    g.lineStyle(1, THEME.colors.black, 0.8);
     g.strokeRect(x - boxSize / 2, y - boxSize / 2, boxSize, boxSize + 10);
 
-    g.fillStyle(0xFF6600, 1);
+    g.fillStyle(THEME.colors.hazardFire, 1);
     g.fillRect(x - boxSize / 2 + 2, y - boxSize / 2 + 2, boxSize - 4, boxSize - 4);
 
     this.scene.add.text(x, y, '4', {

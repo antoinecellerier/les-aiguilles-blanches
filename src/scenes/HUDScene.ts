@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { t, LEVELS, type Level, type BonusObjective } from '../setup';
+import { getBonusLabel, evaluateBonusObjective, type BonusEvalState } from '../utils/bonusObjectives';
 import { THEME } from '../config/theme';
 import { DEPTHS, BALANCE } from '../config/gameConfig';
 import { GAME_EVENTS, type GameStateEvent } from '../types/GameSceneInterface';
@@ -380,7 +381,7 @@ export default class HUDScene extends Phaser.Scene {
       const availWidth = width - padding * 2;
       const colWidth = Math.floor(availWidth / this.bonusObjectives.length);
       this.bonusObjectives.forEach((obj, i) => {
-        const label = this.getBonusLabel(obj);
+        const label = getBonusLabel(obj);
         const txt = visorText(padding + i * colWidth, row3Y, '★ ' + label, fontSmall);
         this.bonusTexts.push(txt);
       });
@@ -1110,21 +1111,6 @@ export default class HUDScene extends Phaser.Scene {
     this.scene.restart({ level: this.level });
   }
 
-  private getBonusLabel(obj: BonusObjective): string {
-    switch (obj.type) {
-      case 'fuel_efficiency': return (t('bonusFuel') || 'Fuel') + ' ≤' + obj.target + '%';
-      case 'flawless': return t('bonusFlawless') || 'First try';
-      case 'speed_run': {
-        const m = Math.floor(obj.target / 60);
-        const s = obj.target % 60;
-        return (t('bonusSpeed') || 'Time') + ' ≤' + m + ':' + s.toString().padStart(2, '0');
-      }
-      case 'winch_mastery': return (t('bonusWinch') || 'Winch') + ' ×' + obj.target;
-      case 'exploration': return (t('bonusExplore') || 'Roads') + ' ×' + obj.target;
-      default: return '';
-    }
-  }
-
   private updateBonusObjectives(): void {
     if (this.bonusTexts.length === 0) return;
     const s = this.gameState;
@@ -1133,39 +1119,43 @@ export default class HUDScene extends Phaser.Scene {
       ? timeLimit - (this.timerText?.active ? this.parseTimer() : 0)
       : 0;
 
+    const evalState: BonusEvalState = {
+      fuelUsed: s.fuelUsed,
+      restartCount: s.restartCount,
+      timeUsed,
+      winchUseCount: s.winchUseCount,
+      pathsVisited: s.pathsVisited,
+      totalPaths: s.totalPaths,
+      groomQuality: 0,
+    };
+
     this.bonusObjectives.forEach((obj, i) => {
       const txt = this.bonusTexts[i];
       if (!txt?.active) return;
 
-      let met = false;
+      const met = evaluateBonusObjective(obj, evalState);
       let suffix = '';
 
       switch (obj.type) {
         case 'fuel_efficiency':
-          met = s.fuelUsed <= obj.target;
           suffix = ' ' + s.fuelUsed + '%';
-          // Fuel can still go down — not irreversibly failed
           break;
         case 'flawless':
-          met = s.restartCount === 0;
           // Already determined at level start — can't change mid-level
           if (s.restartCount > 0) this.bonusFailed[i] = true;
           break;
         case 'speed_run':
-          met = timeUsed <= obj.target;
           if (timeUsed > obj.target) this.bonusFailed[i] = true;
           break;
         case 'winch_mastery':
-          met = s.winchUseCount >= obj.target;
           suffix = ' ' + s.winchUseCount + '/' + obj.target;
           break;
         case 'exploration':
-          met = s.pathsVisited >= obj.target;
           suffix = ' ' + s.pathsVisited + '/' + obj.target;
           break;
       }
 
-      const label = '★ ' + this.getBonusLabel(obj);
+      const label = '★ ' + getBonusLabel(obj);
       const prevText = txt.text;
       if (met) {
         txt.setText(label + ' ✓');

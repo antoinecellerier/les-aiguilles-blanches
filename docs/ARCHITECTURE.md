@@ -46,7 +46,7 @@ snow-groomer/
 │   │   ├── levels.ts       # Level definitions
 │   │   ├── localization.ts # i18n translations (uses {placeholder} syntax)
 │   │   ├── storageKeys.ts  # Centralized localStorage key constants
-│   │   └── theme.ts        # UI colors, fonts, button styles
+│   │   └── theme.ts        # UI colors, fonts, button styles, world-element colors
 │   ├── systems/
 │   │   ├── WeatherSystem.ts  # Night overlay, headlights, weather particles
 │   │   ├── HazardSystem.ts   # Avalanche zones, risk handling
@@ -73,6 +73,7 @@ snow-groomer/
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
+│   │   ├── bonusObjectives.ts # Shared bonus objective evaluation and label formatting
 │   │   ├── animalSprites.ts  # Procedural pixel art for alpine wildlife (6 species + perched/flying variants)
 │   │   ├── animalTracks.ts   # Shared track/footprint drawing for menu & game scenes
 │   │   ├── characterPortraits.ts # Procedural 12×12 pixel art portraits

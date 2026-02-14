@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DEPTHS, yDepth } from '../config/gameConfig';
+import { THEME } from '../config/theme';
 import { Accessibility } from '../setup';
 import type { Level } from '../config/levels';
 import type { LevelGeometry } from './LevelGeometry';
@@ -100,7 +101,7 @@ export class ObstacleBuilder {
       if (isStorm) {
         const s = tileSize / 16;
         const sg = this.scene.add.graphics().setDepth(yDepth(y) + 0.0001);
-        sg.fillStyle(0xf0f5f8, 1);
+        sg.fillStyle(THEME.colors.snowCap, 1);
         if (type === 'rocks') {
           sg.fillRect(x - 10 * s, y - 6 * s, 20 * s, 3 * s);
         } else {
@@ -124,7 +125,7 @@ export class ObstacleBuilder {
     if (isStorm) {
       const s = tileSize / 16;
       const rg = this.scene.add.graphics().setDepth(yDepth(restaurant.y) + 0.0001);
-      rg.fillStyle(0xf0f5f8, 1);
+      rg.fillStyle(THEME.colors.snowCap, 1);
       // Snow on restaurant roof
       rg.fillRect(restaurant.x - 28 * s, restaurant.y - 25 * s, 56 * s, 3 * s);
     }
@@ -144,7 +145,7 @@ export class ObstacleBuilder {
     if (isStorm) {
       const s = tileSize / 16;
       const fg = this.scene.add.graphics().setDepth(yDepth(fuelStation.y) + 0.0001);
-      fg.fillStyle(0xf0f5f8, 1);
+      fg.fillStyle(THEME.colors.snowCap, 1);
       // Snow on fuel pump top
       fg.fillRect(fuelStation.x - 16 * s, fuelStation.y - 20 * s, 28 * s, 3 * s);
     }
@@ -215,15 +216,15 @@ export class ObstacleBuilder {
     this.addFootprint(x, y - size * 0.4 + size * 0.325, size, size * 0.65);
 
     // Chalet body (wooden)
-    g.fillStyle(0x8B4513, 1);
+    g.fillStyle(THEME.colors.woodBrown, 1);
     g.fillRect(x - size / 2, y - size * 0.4, size, size * 0.6);
 
     // Stone foundation
-    g.fillStyle(0x666666, 1);
+    g.fillStyle(THEME.colors.metalGrey, 1);
     g.fillRect(x - size / 2 - 2, y + size * 0.15, size + 4, size * 0.1);
 
     // Roof (dark wood with snow)
-    g.fillStyle(0x4a3728, 1);
+    g.fillStyle(THEME.colors.woodDark, 1);
     g.beginPath();
     g.moveTo(x - size * 0.7, y - size * 0.35);
     g.lineTo(x, y - size * 0.8);
@@ -232,7 +233,7 @@ export class ObstacleBuilder {
     g.fillPath();
 
     // Snow on roof
-    g.fillStyle(0xFFFFFF, 0.9);
+    g.fillStyle(THEME.colors.snowflake, 0.9);
     g.beginPath();
     g.moveTo(x - size * 0.65, y - size * 0.4);
     g.lineTo(x, y - size * 0.75);
@@ -245,26 +246,26 @@ export class ObstacleBuilder {
 
     // Storm: extra snow buildup on roof and chimney
     if (isStorm) {
-      g.fillStyle(0xf0f5f8, 1);
+      g.fillStyle(THEME.colors.snowCap, 1);
       g.fillRect(x - size * 0.55, y - size * 0.42, size * 1.1, size * 0.06);
       g.fillRect(x + size * 0.24, y - size * 0.75, size * 0.14, size * 0.04);
     }
 
     // Windows
-    g.fillStyle(0x87CEEB, 1);
+    g.fillStyle(THEME.colors.skyBlue, 1);
     g.fillRect(x - size * 0.3, y - size * 0.25, size * 0.2, size * 0.2);
     g.fillRect(x + size * 0.1, y - size * 0.25, size * 0.2, size * 0.2);
 
     // Door
-    g.fillStyle(0x4a3728, 1);
+    g.fillStyle(THEME.colors.woodDark, 1);
     g.fillRect(x - size * 0.1, y - size * 0.05, size * 0.2, size * 0.25);
 
     // Chimney with smoke
-    g.fillStyle(0x555555, 1);
+    g.fillStyle(THEME.colors.metalGrey, 1);
     g.fillRect(x + size * 0.25, y - size * 0.7, size * 0.12, size * 0.2);
 
     if (!Accessibility.settings.reducedMotion) {
-      g.fillStyle(0xCCCCCC, 0.6);
+      g.fillStyle(THEME.colors.metalLight, 0.6);
       g.fillCircle(x + size * 0.31, y - size * 0.8, 3);
       g.fillCircle(x + size * 0.28, y - size * 0.9, 2);
     }

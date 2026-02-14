@@ -57,6 +57,28 @@ export const THEME = {
     disabled: '#666666',
     toggleActive: '#1a5a1a',
     toggleActiveText: '#00FF00',
+
+    // World element colors
+    snowCap: 0xf0f5f8,            // Snow-covered surfaces
+    woodBrown: 0x8B4513,           // Wooden poles, beams
+    woodDark: 0x4a3728,            // Dark wood accents
+    metalGrey: 0x666666,           // Metal hardware
+    metalLight: 0xCCCCCC,          // Light metal, hooks
+    cableGrey: 0x666666,           // Winch cable
+    signYellow: 0xFFCC00,          // Warning signs
+    signPlate: 0xffff00,           // Number plates
+    signPole: 0xFFAA00,            // Sign poles
+    anchorBase: 0x888888,          // Winch anchor base
+    avalancheZone: 0xFFEEDD,       // Avalanche zone fill
+    avalancheDanger: 0xFF2200,     // Active avalanche danger
+    avalancheRock: 0x4a423a,       // Debris/rock fill
+    skyBlue: 0x87CEEB,             // Sky reflections
+    black: 0x000000,               // Outlines, text on signs
+    snowfall: 0xCCDDFF,            // Heavy snow tint
+    snowflake: 0xFFFFFF,           // Light snow/blizzard tint
+    hailTint: 0xAABBFF,            // Hail particle tint
+    frostOverlay: 0xc8e8ff,        // Frost vignette
+    hazardFire: 0xFF6600,          // Warning triangle exclamation
   },
 
   // Font configuration

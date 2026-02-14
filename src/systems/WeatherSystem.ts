@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Accessibility, type Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { THEME } from '../config/theme';
 import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
 
 export class WeatherSystem {
@@ -50,7 +51,7 @@ export class WeatherSystem {
         scale: { start: 0.4, end: 0.1 },
         alpha: { start: 1, end: 0.3 },
         lifespan: 3000,
-        tint: 0xCCDDFF
+        tint: THEME.colors.snowfall
       },
       light_snow: {
         quantity: 3,
@@ -60,7 +61,7 @@ export class WeatherSystem {
         scale: { start: 0.25, end: 0.1 },
         alpha: { start: 0.9, end: 0.4 },
         lifespan: 5000,
-        tint: 0xFFFFFF
+        tint: THEME.colors.snowflake
       },
       default: {
         quantity: 2,
@@ -70,7 +71,7 @@ export class WeatherSystem {
         scale: { start: 0.2, end: 0.08 },
         alpha: { start: 0.7, end: 0.2 },
         lifespan: 6000,
-        tint: 0xFFFFFF
+        tint: THEME.colors.snowflake
       }
     };
 
@@ -104,7 +105,7 @@ export class WeatherSystem {
         alpha: { start: 0.6, end: 0 },
         quantity: 2,
         frequency: 80,
-        tint: 0xAABBFF,
+        tint: THEME.colors.hailTint,
         blendMode: 'ADD'
       });
       this.windStreaks.setScrollFactor(0);
@@ -290,7 +291,7 @@ export class WeatherSystem {
 
     // Draw frost vignette into an off-screen Graphics, then snapshot to texture
     const gfx = this.scene.make.graphics({ x: 0, y: 0 } as any, false);
-    const frostColor = 0xc8e8ff;
+    const frostColor = THEME.colors.frostOverlay;
 
     // Full-screen wash — visible even at low frost levels
     gfx.fillStyle(frostColor, 0.35);

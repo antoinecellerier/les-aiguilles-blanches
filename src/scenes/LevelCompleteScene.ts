@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { t, Accessibility, LEVELS, type Level, type BonusObjective, type BonusObjectiveType } from '../setup';
+import { t, Accessibility, LEVELS, type Level, type BonusObjective } from '../setup';
+import { evaluateAllBonusObjectives, getBonusLabel, type BonusEvalState } from '../utils/bonusObjectives';
 import { THEME } from '../config/theme';
 import { BALANCE } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
@@ -530,42 +531,25 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const level = LEVELS[this.levelIndex] as Level;
     if (!level.bonusObjectives || level.bonusObjectives.length === 0) return [];
 
-    return level.bonusObjectives.map(obj => {
-      let met = false;
-      let label = '';
+    const state: BonusEvalState = {
+      fuelUsed: this.fuelUsed,
+      restartCount: this.restartCount,
+      timeUsed: this.timeUsed,
+      winchUseCount: this.winchUseCount,
+      pathsVisited: this.pathsVisited,
+      totalPaths: this.totalPaths,
+      groomQuality: this.groomQuality,
+    };
 
-      switch (obj.type) {
-        case 'fuel_efficiency':
-          met = this.fuelUsed <= obj.target;
-          label = t('bonusFuel') + ' ≤' + obj.target + '%';
-          break;
-        case 'flawless':
-          met = this.restartCount === 0;
-          label = t('bonusFlawless');
-          break;
-        case 'speed_run':
-          met = this.timeUsed <= obj.target;
-          label = t('bonusSpeed') + ' ≤' + this.formatTime(obj.target);
-          break;
-        case 'winch_mastery':
-          met = this.winchUseCount >= obj.target;
-          label = t('bonusWinch') + ' ×' + obj.target;
-          break;
-        case 'exploration':
-          met = this.pathsVisited >= obj.target;
-          label = t('bonusExplore') + ' ' + this.pathsVisited + '/' + this.totalPaths;
-          break;
+    return evaluateAllBonusObjectives(level.bonusObjectives, state).map(r => {
+      // Append progress info to labels that show current values
+      let label = r.label;
+      switch (r.objective.type) {
+        case 'exploration': label += ' ' + this.pathsVisited + '/' + this.totalPaths; break;
         case 'precision_grooming':
-          met = this.groomQuality >= obj.target;
-          label = t('bonusPrecision') + ' ' + this.groomQuality + '%';
-          break;
-        case 'pipe_mastery':
-          met = this.groomQuality >= obj.target;
-          label = t('bonusPipeMastery') + ' ' + this.groomQuality + '%';
-          break;
+        case 'pipe_mastery': label += ' ' + this.groomQuality + '%'; break;
       }
-
-      return { objective: obj, met, label };
+      return { ...r, label };
     });
   }
 

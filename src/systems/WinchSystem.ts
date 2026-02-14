@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { DEPTHS, yDepth, BALANCE } from '../config/gameConfig';
+import { THEME } from '../config/theme';
 import { Accessibility } from '../setup';
 import { t } from '../setup';
 import type { Level } from '../config/levels';
@@ -66,24 +67,24 @@ export class WinchSystem {
     g.setDepth(yDepth(y));
 
     // Base plate
-    g.fillStyle(0x888888, 1);
+    g.fillStyle(THEME.colors.anchorBase, 1);
     g.fillRect(x - 10, y + 5, 20, 8);
 
     // Vertical pole
-    g.fillStyle(0xFFAA00, 1);
+    g.fillStyle(THEME.colors.signPole, 1);
     g.fillRect(x - 4, y - 20, 8, 28);
 
     // Cable hook ring (rectangle, no circles)
-    g.fillStyle(0xCCCCCC, 1);
+    g.fillStyle(THEME.colors.metalLight, 1);
     g.fillRect(x - 6, y - 28, 12, 3);
     g.fillRect(x - 6, y - 22, 12, 3);
     g.fillRect(x - 6, y - 28, 3, 9);
     g.fillRect(x + 3, y - 28, 3, 9);
 
     // Yellow number plate with black text
-    g.fillStyle(0xffff00, 1);
+    g.fillStyle(THEME.colors.signPlate, 1);
     g.fillRect(x - 8, y + 14, 16, 10);
-    g.fillStyle(0x000000, 1);
+    g.fillStyle(THEME.colors.black, 1);
     this.scene.add.text(x, y + 19, '' + number, {
       fontFamily: 'Courier New, monospace',
       fontSize: '8px',
@@ -156,7 +157,7 @@ export class WinchSystem {
         const sag = Math.max(30, dist * 0.3);
         const midY = Math.max(anchorY, cableGroomerY) + sag;
         
-        this.cableGraphics.lineStyle(2, 0x666666, 0.7);
+        this.cableGraphics.lineStyle(2, THEME.colors.cableGrey, 0.7);
         this.cableGraphics.beginPath();
         this.cableGraphics.moveTo(anchorX, anchorY);
         const segments = 12;

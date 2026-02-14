@@ -116,6 +116,7 @@ if [ "$SMART_MODE" = true ]; then
                 src/utils/keybindingManager.ts) SMART_E2E_FILES+=("tests/e2e/test_key_hints.py") ;;
                 src/utils/renderThrottle.ts) SMART_E2E_FILES+=("tests/e2e/test_performance.py") ;;
                 src/utils/animalSprites.ts|src/utils/animalTracks.ts|src/utils/foxBehavior.ts) SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
+                src/utils/bonusObjectives.ts) SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
                 # Files that don't need E2E mapping (type defs, env shims, infra-only)
                 src/types/*|src/vite-env.d.ts|src/setup.ts|src/main.ts|src/config/theme.ts|src/utils/updateCheck.ts) ;;
                 src/*.ts)
