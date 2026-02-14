@@ -131,10 +131,50 @@ For each fix:
 
 ### Phase 6: Verification
 
-1. Run TypeScript compilation (`npx tsc --noEmit`) — localization strings are typed
-2. Run test suite (`./run-tests.sh --browser chromium`) — some tests check for specific strings
-3. Visual check — open the game and navigate through affected screens
-4. Verify all 14 languages have matching keys (no missing translations)
+LLM review catches semantic issues (wrong meaning, weak voice, bad idioms) but consistently misses mechanical patterns like formal register across 300-line files. Always run **both** LLM review and grep validation.
+
+#### 6a. Mechanical grep validation (run these exact commands)
+
+```bash
+cd src/config/locales
+
+# Formal register — must return zero non-UNUSED lines
+grep -n 'vous\|Vous\|votre' fr.ts | grep -v UNUSED
+grep -n 'jste\|ejte\|ujte\|ějte' cs.ts | grep -v UNUSED
+grep -n 'ste \|ajte\|ujte' sk.ts | grep -v UNUSED
+grep -n 'ınız\|iniz\|unuz\|ünüz\|sınız\|siniz' tr.ts | grep -v UNUSED
+
+# Untranslated English UI keys — must return zero
+for f in fr de it es sv nb fi cs pl sk ja ko tr; do
+  grep -P '"(Quit Game|Best combo|Debug Overlay)"' ${f}.ts | grep -v UNUSED
+done
+
+# Wrong marker colors — must return zero
+grep -rn 'orange\|オレンジ\|주황\|turuncu\|pomarańcz\|oranž' *.ts | grep -v UNUSED | grep -i intro
+
+# Local weather agency — must return zero
+grep -rn 'SMHI\|気象庁\|기상청\|Ilmatieteenlaitos\|Meteorologisk' *.ts | grep -v UNUSED
+
+# Placeholder parity — counts must match en.ts
+for key in winchKey groomKey keys; do
+  en=$(grep -c "{$key}" en.ts)
+  for f in fr de it es sv nb fi cs pl sk ja ko tr; do
+    n=$(grep -c "{$key}" ${f}.ts)
+    [ "$n" != "$en" ] && echo "MISMATCH: $f {$key} $n vs EN $en"
+  done
+done
+```
+
+Any grep hit (excluding known false positives like DE "Sie" meaning "she") must be fixed before proceeding.
+
+#### 6b. Automated tests
+
+1. Run `npx vitest run tests/unit-js/localization.test.js` — key parity, changelog structure
+2. Run TypeScript compilation (`npx tsc --noEmit`) — type checking
+
+#### 6c. Cross-model review (for large changes)
+
+For reviews touching 5+ locales, get semantic confirmation from at least one other model (gemini-3-pro-preview or gpt-5.1-codex) — idiom quality, voice consistency, terminology accuracy. Grep validation does not need cross-model confirmation.
 
 ## Content style guide
 
@@ -142,7 +182,7 @@ For each fix:
 
 | Context | Tone | Example |
 |---------|------|---------|
-| Tutorial | Warm, clear, encouraging | "Utilisez les flèches pour vous déplacer sur la piste" |
+| Tutorial | Warm, clear, encouraging | "Utilise les flèches pour te déplacer sur la piste" |
 | Success | Celebratory, proud | "Magnifique ! La piste est parfaite pour les skieurs" |
 | Failure (mild) | Sympathetic, humorous | "Même les meilleurs se prennent une gamelle parfois" |
 | Failure (dramatic) | Theatrical, never mean | "400 000€ de chenillette dans le ravin... l'assurance va adorer" |

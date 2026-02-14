@@ -145,7 +145,7 @@ const sk: Record<string, string> = {
   tauntTime2: "Lyžiari objavujú tvoju zjazdovku. Hrboľatá. Ľadová. Nádhera.",
   tauntTime3: "Jean-Pierre sa pozerá na hodinky, potom na teba, potom na hodinky.",
   tauntTime4: "FIS sa pýta, prečo je slalom na kaši.",
-  tauntTime5: "Počujete inštruktorov, ako klientom vysvetľujú, prečo to 'nie je ich chyba'.",
+  tauntTime5: "Počuješ inštruktorov, ako klientom vysvetľujú, prečo to 'nie je ich chyba'.",
 
   // UNUSED paused: "Pozastavené",
   resume: "Pokračovať",
