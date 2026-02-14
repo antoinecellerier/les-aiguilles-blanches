@@ -272,6 +272,8 @@ const fi: Record<string, string> = {
   marieWelcome: "Tule lämmittelemään Chez Marie'hen. Hyvää tartiflette'a!",
 
   // Changelog
+  changelog_20260214_date: "14. helmikuuta 2026",
+  changelog_20260214: "👁️ Parempi rinnekontrasti\n📱 Automaattinen tasaus vinssissä (kosketus)\n⛷️ Mäkihyppypainikkeen kuvake",
   changelog_20260213_date: "13. helmikuuta 2026",
   changelog_20260213: "🚩 Pujotteluportit\n🏔️ Mäkihypyt\n⚡ Suorituskyky parannettu\n🎹 Nokturni-pianomusiikki\n🔊 Moottorin äänenvoimakkuus säädettävä",
   changelog_20260212_date: "12. helmikuuta 2026",

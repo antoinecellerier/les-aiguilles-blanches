@@ -272,6 +272,8 @@ const nb: Record<string, string> = {
   marieWelcome: "Kom og varm deg Chez Marie. En god tartiflette!",
 
   // Changelog
+  changelog_20260214_date: "14. februar 2026",
+  changelog_20260214: "👁️ Bedre pistekontrast\n📱 Auto-preparering ved vinsj (touch)\n⛷️ Skihoppknapp med ikon",
   changelog_20260213_date: "13. februar 2026",
   changelog_20260213: "🚩 Slalomporter\n🏔️ Skihopp\n⚡ Forbedret ytelse\n🎹 Nocturne-pianomusikk\n🔊 Motorvolum justerbar",
   changelog_20260212_date: "12. februar 2026",

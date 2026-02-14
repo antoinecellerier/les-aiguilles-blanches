@@ -271,6 +271,8 @@ const pl: Record<string, string> = {
   marieWelcome: "Przyjdź się ogrzać do Chez Marie. Dobra tartiflette!",
 
   // Changelog
+  changelog_20260214_date: "14 lutego 2026",
+  changelog_20260214: "👁️ Lepszy kontrast tras\n📱 Automatyczne wyrównywanie przy wciągarce (dotyk)\n⛷️ Ikona przycisku skoku",
   changelog_20260213_date: "13 lutego 2026",
   changelog_20260213: "🚩 Bramki slalomowe\n🏔️ Skoki narciarskie\n⚡ Lepsza wydajność\n🎹 Nokturnowa muzyka fortepianowa\n🔊 Głośność silnika regulowana",
   changelog_20260212_date: "12 lutego 2026",

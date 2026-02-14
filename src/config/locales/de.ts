@@ -222,6 +222,8 @@ const de: Record<string, string> = {
   marieWelcome: "Komm dich aufwärmen bei Marie. Eine leckere Tartiflette!",
   
   // Changelog
+  changelog_20260214_date: "14. Februar 2026",
+  changelog_20260214: "👁️ Besserer Pistenkontrast\n📱 Auto-Planierung bei Seilwinde (Touch)\n⛷️ Skisprung-Taste mit Symbol",
   changelog_20260213_date: "13. Februar 2026",
   changelog_20260213: "🚩 Slalomtore\n🏔️ Skisprünge\n⚡ Verbesserte Leistung\n🎹 Nocturne-Klaviermusik\n🔊 Motorlautstärke einstellbar",
   changelog_20260212_date: "12. Februar 2026",

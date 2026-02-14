@@ -271,6 +271,8 @@ const en: Record<string, string> = {
   marieWelcome: "Come warm up at Chez Marie. A good tartiflette!",
   
   // Changelog
+  changelog_20260214_date: "February 14, 2026",
+  changelog_20260214: "👁️ Better piste contrast\n📱 Touch auto-groom on winch\n⛷️ Ski jump button icon",
   changelog_20260213_date: "February 13, 2026",
   changelog_20260213: "🚩 Slalom gates\n🏔️ Ski jumps\n⚡ Smoother performance\n🎹 Nocturne piano music\n🔊 Engine volume control",
   changelog_20260212_date: "February 12, 2026",

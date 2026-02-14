@@ -271,6 +271,8 @@ const ja: Record<string, string> = {
   marieWelcome: "Chez Marieで温まっていきなさい。美味しいtartifletteがあるわよ！",
 
   // Changelog
+  changelog_20260214_date: "2026年2月14日",
+  changelog_20260214: "👁️ ゲレンデのコントラスト改善\n📱 ウインチ時の自動整地（タッチ）\n⛷️ スキージャンプボタンアイコン",
   changelog_20260213_date: "2026年2月13日",
   changelog_20260213: "🚩 スラロームゲート\n🏔️ スキージャンプ\n⚡ パフォーマンス改善\n🎹 ノクターンピアノ音楽\n🔊 エンジン音量調整",
   changelog_20260212_date: "2026年2月12日",

@@ -276,6 +276,8 @@ const fr: Record<string, string> = {
   marieWelcome: "Viens te réchauffer Chez Marie. Une bonne tartiflette !",
   
   // Changelog
+  changelog_20260214_date: "14 février 2026",
+  changelog_20260214: "👁️ Meilleur contraste des pistes\n📱 Damage auto au treuil tactile\n⛷️ Icône du bouton saut à ski",
   changelog_20260213_date: "13 février 2026",
   changelog_20260213: "🚩 Portes de slalom\n🏔️ Sauts à ski\n⚡ Performances améliorées\n🎹 Musique nocturne au piano\n🔊 Volume moteur réglable",
   changelog_20260212_date: "12 février 2026",

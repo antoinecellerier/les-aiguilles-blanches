@@ -317,7 +317,7 @@ export default class GameScene extends Phaser.Scene {
 
     const tilesByWidth = Math.floor(availableWidth / this.level.width);
     const tilesByHeight = Math.floor(availableHeight / this.level.height);
-    this.tileSize = Math.max(12, Math.min(tilesByWidth, tilesByHeight, 28));
+    this.tileSize = Math.max(BALANCE.MIN_TILE_SIZE, Math.min(tilesByWidth, tilesByHeight, 28));
     this.originalScreenWidth = screenWidth;
     this.originalScreenHeight = screenHeight;
 

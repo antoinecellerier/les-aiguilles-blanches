@@ -30,6 +30,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Piste contrast & readability** — Darkened off-piste tile textures, lightened service road tiles, and raised minimum tile size to 14px for better piste visibility on all levels (especially night). Texture-level approach: no runtime overlays needed.
+
 - ✅ **Resize + touch controls regression fixes** — Camera static→follow transition when touch controls reduce effective viewport height on portrait devices (L7). Groomer stays above controls after resize. Dialogue repositions above controls (tween race fix). 9 regression tests in `test_resize_touch.py`. Smart test selection expanded to all 78 source files with three validation layers (unknown tests, unmapped sources, scene drift detection).
 
 - ✅ **Night overlay & culling resize fix** — Fixed night overlay not covering full viewport after resize/orientation change, and terrain DynamicTextures disappearing due to center-point culling. Night fix: extracted `prepareNightFrame()` for zoom-aware coordinate mapping; `handleNightResize()` called after `setZoom()`. Culling fix: bounds-based visibility checks in `cullOffscreen()`. Simplified `run-tests.sh` to use `./dev.sh`.
@@ -121,7 +123,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Visual Issues
 
-- **La Verticale (L8) night piste visibility** — Ungroomed piste tiles are hard to distinguish from off-piste under the night overlay at small zoom levels. Consider increasing contrast between groomed/ungroomed/off-piste textures during night, or adding subtle border markers to piste edges.
+- ✅ ~~**La Verticale (L8) night piste visibility**~~ — Darkened off-piste tile textures for contrast on all levels (accessibility). Raised minimum tile size from 12→14px (`BALANCE.MIN_TILE_SIZE`). Lightened service road tiles to sit between piste and off-piste brightness.
 
 ### Input Issues
 

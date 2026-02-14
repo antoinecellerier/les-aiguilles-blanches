@@ -32,7 +32,7 @@ The game uses a **retro pixel-art style** inspired by the 1991 Windows game SkiF
 |---------|------------|---------------|-------|
 | Groomed piste | `0xffffff` (white) | `0xe8f0f8` (lines) | Horizontal grooming lines every 3px |
 | Ungroomed piste | `0xe8eff3` (off-white) | `0xc8d4d8` (shadows) | Irregular shadow patches |
-| Off-piste powder | `0xe8f0f4` (bright) | `0xf0f6fa` (mounds), `0xd8e4ec` (shadows) | Winter wonderland feel |
+| Off-piste powder | `0xdce6ec` (darker) | `0xe4ecf0` (mounds), `0xccd8e2` (shadows) | Darker than piste for contrast |
 | Ice | `0xb8e0f0` (blue-tint) | - | Hazardous surface |
 | Deep snow | `0xd0e0e8` (gray-blue) | - | Slower movement |
 | Steep slide (25°) | `0xd0dee6` (warm gray-blue) | `0xc0ced6` | Gentle slope warning |
@@ -292,10 +292,10 @@ Ungroomed: Off-white base + irregular shadow patches
 │           ▪▪   │
 └────────────────┘
 
-Off-piste: Bright base + mound highlights + subtle shadows
+Off-piste: Darker base for contrast + mound highlights + subtle shadows
 ┌────────────────┐
-│ ░░░    ░░░░    │  ← mound (f0f6fa, brighter)
-│      ▪▪        │  ← shadow (d8e4ec)
+│ ░░░    ░░░░    │  ← mound (e4ecf0, lighter)
+│      ▪▪        │  ← shadow (ccd8e2)
 │   ░░░░░░  ░░░  │
 │ ▪▪       ░░    │
 └────────────────┘
@@ -331,7 +331,7 @@ Cliffs use tile-sized (16×16) rock cells with layered detail:
 ### Service Roads
 
 Switchback paths through off-piste forest, allowing groomer to travel between piste sections:
-- **Surface**: `snow_packed` tile (`0xd8e4e8` base) — distinct from groomed piste (white) and off-piste
+- **Surface**: `snow_packed` tile (`0xe6eef3` base) — close to piste brightness, distinct from off-piste
 - **Poles**: Amber-yellow/black stripes, matching piste marker size (28×5px)
   - Amber: `0xFFAA00` (distinct from red `0xFF0000` piste markers)
   - Black: `0x111111`

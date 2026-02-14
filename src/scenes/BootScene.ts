@@ -213,19 +213,19 @@ export default class BootScene extends Phaser.Scene {
     snowGraphics.generateTexture('snow_ungroomed', 16, 16);
     snowGraphics.destroy();
 
-    // Off-piste snow (rough, untouched powder snow - winter wonderland style)
+    // Off-piste snow — slightly darker than piste tiles for contrast (accessibility)
     const offPisteGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
-    offPisteGraphics.fillStyle(0xe8f0f4);  // Bright white base
+    offPisteGraphics.fillStyle(0xdce6ec);  // Darker base than piste snow
     offPisteGraphics.fillRect(0, 0, 16, 16);
-    // Irregular snow mounds (slightly off-white for texture)
-    offPisteGraphics.fillStyle(0xf0f6fa);
+    // Irregular snow mounds
+    offPisteGraphics.fillStyle(0xe4ecf0);
     offPisteGraphics.fillRect(1, 1, 4, 3);
     offPisteGraphics.fillRect(8, 2, 5, 4);
     offPisteGraphics.fillRect(3, 7, 6, 4);
     offPisteGraphics.fillRect(11, 9, 4, 5);
     offPisteGraphics.fillRect(0, 12, 3, 3);
-    // Subtle shadows/depth (light blue-gray)
-    offPisteGraphics.fillStyle(0xd8e4ec);
+    // Subtle shadows/depth
+    offPisteGraphics.fillStyle(0xccd8e2);
     offPisteGraphics.fillRect(5, 3, 2, 2);
     offPisteGraphics.fillRect(13, 5, 2, 3);
     offPisteGraphics.fillRect(9, 11, 2, 2);
@@ -316,18 +316,18 @@ export default class BootScene extends Phaser.Scene {
     groomedRoughGraphics.generateTexture('snow_groomed_rough', 16, 16);
     groomedRoughGraphics.destroy();
 
-    // Packed snow (service roads — compacted by vehicle traffic, between off-piste and groomed)
+    // Packed snow (service roads — compacted by vehicle traffic, smoother than off-piste)
     const packedGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
-    packedGraphics.fillStyle(0xd8e4e8);  // Slightly blue-gray base
+    packedGraphics.fillStyle(0xe6eef3);  // Close to piste — compacted smooth snow
     packedGraphics.fillRect(0, 0, 16, 16);
     // Irregular tire/track marks
-    packedGraphics.fillStyle(0xc8d4d8);
+    packedGraphics.fillStyle(0xd8e4ea);
     packedGraphics.fillRect(2, 1, 3, 2);
     packedGraphics.fillRect(10, 4, 4, 2);
     packedGraphics.fillRect(1, 8, 5, 2);
     packedGraphics.fillRect(9, 11, 3, 3);
     // Lighter patches (exposed compressed snow)
-    packedGraphics.fillStyle(0xe0eaf0);
+    packedGraphics.fillStyle(0xeef4f8);
     packedGraphics.fillRect(6, 2, 3, 2);
     packedGraphics.fillRect(0, 5, 2, 2);
     packedGraphics.fillRect(12, 8, 3, 2);
