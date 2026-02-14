@@ -132,12 +132,35 @@ export class OverlayManager {
       scene.input.keyboard?.off('keydown-ESC', closeOverlay);
       scene.input.keyboard?.off('keydown-ENTER', closeOverlay);
       scene.input.keyboard?.off('keydown-SPACE', closeOverlay);
+      scene.input.keyboard?.off('keydown-UP', scrollUp);
+      scene.input.keyboard?.off('keydown-DOWN', scrollDown);
+      scene.events.off('update', gamepadScroll);
       overlay.destroy();
       bgPanel.destroy();
       titleText.destroy();
       scrollPanel.destroy();
       backBtn.destroy();
     };
+
+    // Keyboard / gamepad scrolling
+    const scrollStep = 0.05;
+    const scrollUp = () => { scrollPanel.setT(Math.max(0, scrollPanel.t - scrollStep)); };
+    const scrollDown = () => { scrollPanel.setT(Math.min(1, scrollPanel.t + scrollStep)); };
+    scene.input.keyboard?.on('keydown-UP', scrollUp);
+    scene.input.keyboard?.on('keydown-DOWN', scrollDown);
+
+    let gpNavCooldown = 0;
+    const gamepadScroll = (_time: number, delta: number) => {
+      if (!scene.input.gamepad || scene.input.gamepad.total === 0) return;
+      const pad = scene.input.gamepad.getPad(0);
+      if (!pad) return;
+      gpNavCooldown = Math.max(0, gpNavCooldown - delta);
+      if (gpNavCooldown > 0) return;
+      const stickY = pad.leftStick?.y ?? 0;
+      if (pad.up || stickY < -0.5) { scrollUp(); gpNavCooldown = 120; }
+      else if (pad.down || stickY > 0.5) { scrollDown(); gpNavCooldown = 120; }
+    };
+    scene.events.on('update', gamepadScroll);
     this.closeCallback = closeOverlay;
     scene.input.keyboard?.on('keydown-ESC', closeOverlay);
     scene.input.keyboard?.on('keydown-ENTER', closeOverlay);
