@@ -1,0 +1,49 @@
+{
+  "name": "les-aiguilles-blanches",
+  "version": "1.0.0",
+  "description": "Les Aiguilles Blanches — Snow groomer simulation (desktop build)",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder --linux --win"
+  },
+  "build": {
+    "appId": "com.lesaiguillesblanches.game",
+    "productName": "Les Aiguilles Blanches",
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "icon.png",
+      "../dist/**/*"
+    ],
+    "directories": {
+      "output": "../electron-dist"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Game"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "../assets/icon.png"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.games"
+    }
+  },
+  "devDependencies": {
+    "canvas": "^3.2.1",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}

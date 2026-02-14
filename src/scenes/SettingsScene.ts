@@ -18,6 +18,7 @@ import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { getSavedProgress } from '../utils/gameProgress';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { GamepadDiagnosticPanel } from '../systems/GamepadDiagnostic';
+import { isDesktopApp, setDisplayMode } from '../types/electron';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -304,6 +305,9 @@ export default class SettingsScene extends Phaser.Scene {
     this.addAccessibilitySection(contentSizer);
     this.addAudioSection(contentSizer);
     this.addGameplaySection(contentSizer);
+    if (isDesktopApp()) {
+      this.addDisplaySection(contentSizer);
+    }
     
     // Always add controls section (scrollable now handles overflow)
     this.addControlsSection(contentSizer);
@@ -350,6 +354,9 @@ export default class SettingsScene extends Phaser.Scene {
     this.addAccessibilitySection(leftCol);
     this.addAudioSection(leftCol);
     this.addGameplaySection(leftCol);
+    if (isDesktopApp()) {
+      this.addDisplaySection(leftCol);
+    }
     
     // Right column: Controls
     const rightCol = this.rexUI.add.sizer({
@@ -474,6 +481,87 @@ export default class SettingsScene extends Phaser.Scene {
     });
 
     // Measure if label + all buttons fit on one line
+    const totalWidth = modeLabel.width + modeButtons.reduce((sum, b) => sum + b.width + spacing, 0);
+    const fitsInline = totalWidth <= this.contentWidth;
+
+    let modeContainer: any;
+    if (fitsInline) {
+      modeContainer = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      modeContainer.add(modeLabel);
+      modeButtons.forEach(btn => modeContainer.add(btn));
+    } else {
+      modeContainer = this.rexUI.add.sizer({ orientation: 'y', space: { item: 2 } });
+      modeContainer.add(modeLabel, { align: 'left' });
+      const btnRow = this.rexUI.add.fixWidthSizer({ width: this.contentWidth, space: { item: spacing, line: 2 } });
+      modeButtons.forEach(btn => btnRow.add(btn));
+      modeContainer.add(btnRow, { align: 'left' });
+    }
+
+    const currentIdx = modes.findIndex(m => m.id === currentMode);
+    const groupIndex = { value: Math.max(0, currentIdx) };
+    this.focus.items.push({
+      element: modeContainer,
+      buttons: modeButtons,
+      groupIndex: groupIndex.value,
+      activate: () => { playClick(); setMode(modes[groupIndex.value].id); },
+      left: () => {
+        groupIndex.value = (groupIndex.value - 1 + modes.length) % modes.length;
+        playClick();
+        setMode(modes[groupIndex.value].id);
+      },
+      right: () => {
+        groupIndex.value = (groupIndex.value + 1) % modes.length;
+        playClick();
+        setMode(modes[groupIndex.value].id);
+      },
+    });
+
+    panel.add(modeContainer, { align: 'left' });
+    sizer.add(panel, { align: 'left', padding: { top: 4 } });
+  }
+
+  private addDisplaySection(sizer: any): void {
+    const panel = this.createSectionPanel('🖥️ ' + (t('display') || 'Display'), 6);
+
+    const currentMode = getString(STORAGE_KEYS.DISPLAY_MODE) || 'borderless';
+    const spacing = Math.round(this.fontSize * 0.5);
+
+    const modes = [
+      { id: 'borderless', label: t('displayBorderless') || 'Borderless' },
+      { id: 'fullscreen', label: t('displayFullscreen') || 'Fullscreen' },
+      { id: 'windowed', label: t('displayWindowed') || 'Windowed' },
+    ];
+
+    const paddingY = Math.max(2, (this.minTouchTarget - this.smallFont) / 4);
+    const modeButtons: Phaser.GameObjects.Text[] = [];
+
+    const setMode = (modeId: string) => {
+      setString(STORAGE_KEYS.DISPLAY_MODE, modeId);
+      modeButtons.forEach((btn, i) => {
+        const active = modes[i].id === modeId;
+        btn.setColor(active ? THEME.colors.textDark : THEME.colors.textPrimary);
+        btn.setBackgroundColor(active ? THEME.colors.info : '#555555');
+      });
+      this.mainSizer?.layout();
+      setDisplayMode(modeId as 'windowed' | 'fullscreen' | 'borderless');
+    };
+
+    modes.forEach(mode => {
+      const isActive = currentMode === mode.id;
+      const btn = this.add.text(0, 0, mode.label, {
+        fontFamily: THEME.fonts.family,
+        fontSize: this.smallFont + 'px',
+        color: isActive ? THEME.colors.textDark : THEME.colors.textPrimary,
+        backgroundColor: isActive ? THEME.colors.info : '#555555',
+        padding: { x: Math.round(paddingY * 2), y: paddingY },
+      }).setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => { playClick(); setMode(mode.id); });
+      modeButtons.push(btn);
+    });
+
+    const modeLabel = this.createText(
+      (t('display') || 'Display') + ':', this.smallFont, THEME.colors.textSecondary
+    );
     const totalWidth = modeLabel.width + modeButtons.reduce((sum, b) => sum + b.width + spacing, 0);
     const fitsInline = totalWidth <= this.contentWidth;
 

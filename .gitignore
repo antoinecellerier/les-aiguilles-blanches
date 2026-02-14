@@ -17,6 +17,9 @@ node_modules/
 
 # Build output
 dist/
+electron-dist/
+electron/node_modules/
+electron/package-lock.json
 
 # Test artifacts
 tests/screenshots/

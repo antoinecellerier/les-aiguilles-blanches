@@ -1,11 +1,16 @@
 import { t } from '../setup';
 import { THEME } from '../config/theme';
+import { isDesktopApp } from '../types/electron';
 
 /**
  * Toggle fullscreen mode. On rejection (e.g. Firefox gamepad gesture),
  * shows a hint toast directing the user to the F keyboard shortcut.
  */
 export function toggleFullscreen(scene: Phaser.Scene): void {
+  if (isDesktopApp()) {
+    window.electronAPI!.toggleFullscreen();
+    return;
+  }
   if (document.fullscreenElement) {
     document.exitFullscreen();
   } else {
@@ -13,6 +18,20 @@ export function toggleFullscreen(scene: Phaser.Scene): void {
       showFullscreenHint(scene);
     });
   }
+}
+
+/** Check if currently fullscreen (works in both browser and Electron). */
+export function isFullscreen(): boolean {
+  if (isDesktopApp()) {
+    return window.electronAPI!.isFullscreen();
+  }
+  return !!document.fullscreenElement;
+}
+
+/** Check if fullscreen is supported (always true in Electron). */
+export function fullscreenEnabled(): boolean {
+  if (isDesktopApp()) return true;
+  return document.fullscreenEnabled;
 }
 
 function showFullscreenHint(scene: Phaser.Scene): void {

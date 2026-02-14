@@ -10,7 +10,7 @@ import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad'
 import { ResizeManager } from '../utils/resizeManager';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString } from '../utils/storage';
-import { toggleFullscreen } from '../utils/fullscreen';
+import { toggleFullscreen, isFullscreen, fullscreenEnabled } from '../utils/fullscreen';
 import { Accessibility } from '../utils/accessibility';
 import { isRenderThrottled } from '../utils/renderThrottle';
 
@@ -422,7 +422,7 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Touch-specific buttons (created AFTER touch controls so they render on top)
-    const isFullscreen = !!document.fullscreenElement;
+    const isFS = isFullscreen();
     
     // Larger font for touch buttons on mobile (minimum 24px for easy tapping)
     const touchBtnSize = mobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
@@ -450,13 +450,13 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Fullscreen button (touch devices or when in fullscreen)
-    if ((hasTouch || isFullscreen) && document.fullscreenEnabled) {
-      const fsLabel = isFullscreen ? 'X' : '[]';
+    if ((hasTouch || isFS) && fullscreenEnabled()) {
+      const fsLabel = isFS ? 'X' : '[]';
       const fsBtn = this.add.text(width - padding, nextButtonY, fsLabel, {
         fontFamily: THEME.fonts.family,
         fontSize: touchBtnSize,
         fontStyle: 'bold',
-        color: isFullscreen ? '#FF6666' : '#FFFFFF',
+        color: isFS ? '#FF6666' : '#FFFFFF',
       }).setOrigin(1, 0).setScrollFactor(0).setDepth(DEPTHS.PLAYER);
       const fsW = Math.max(minHitSize, fsBtn.width + touchBtnPad * 2);
       const fsH = Math.max(minHitSize, fsBtn.height + touchBtnPad);

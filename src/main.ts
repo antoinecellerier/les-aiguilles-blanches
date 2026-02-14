@@ -10,6 +10,7 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import './setup';
 import { STORAGE_KEYS } from './config/storageKeys';
 import { getString } from './utils/storage';
+import { isDesktopApp } from './types/electron';
 
 // Scene transition registry (must be before scene imports to avoid circular deps)
 import { registerGameScenes } from './utils/sceneTransitions';
@@ -173,7 +174,9 @@ window.addEventListener('load', () => {
           if (codes.includes(e.keyCode)) return;
         } catch { /* use default bindings — F is not bound */ }
       }
-      if (document.fullscreenElement) {
+      if (isDesktopApp()) {
+        window.electronAPI!.toggleFullscreen();
+      } else if (document.fullscreenElement) {
         document.exitFullscreen();
       } else if (document.fullscreenEnabled) {
         document.documentElement.requestFullscreen().catch(() => {});

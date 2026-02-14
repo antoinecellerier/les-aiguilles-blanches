@@ -36,6 +36,13 @@ This game is an experiment in building a complete, polished game almost entirely
 ./dev.sh             # Start dev server (reuses existing if running)
 ```
 
+### 🖥️ Desktop Build (Optional)
+
+```bash
+./build-desktop.sh          # Build game + launch in Electron
+./build-desktop.sh --pack   # Package as distributable (AppImage/exe/dmg)
+```
+
 ## 🧪 Testing
 
 ```bash

@@ -10,6 +10,7 @@ import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
+import { isDesktopApp, quitDesktopApp } from '../types/electron';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -61,7 +62,25 @@ export default class PauseScene extends Phaser.Scene {
     const buttonPadY = Math.max(Math.round(8 * scaleFactor), Math.ceil((minTouchTarget - fontSize) / 2));
     const buttonSpacing = Math.max(6, Math.round(12 * scaleFactor));
     const buttonH = fontSize + buttonPadY * 2;
-    const buttonCount = this.skiMode ? 5 : 4;
+
+    const buttonDefs = this.skiMode
+      ? [
+          { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
+          { text: 'restart', callback: () => this.restartSkiRun(), isCTA: false },
+          { text: 'skipRun', callback: () => this.skipSkiRun(), isCTA: false },
+          { text: 'settings', callback: () => this.openSettings(), isCTA: false },
+          { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
+          ...(isDesktopApp() ? [{ text: 'quitGame', callback: () => quitDesktopApp(), isCTA: false }] : []),
+        ]
+      : [
+          { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
+          { text: 'restart', callback: () => this.restartLevel(), isCTA: false },
+          { text: 'settings', callback: () => this.openSettings(), isCTA: false },
+          { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
+          ...(isDesktopApp() ? [{ text: 'quitGame', callback: () => quitDesktopApp(), isCTA: false }] : []),
+    ];
+
+    const buttonCount = buttonDefs.length;
     const panelHeight = Math.min(Math.round(titleFontSize + 30 * scaleFactor + (buttonH + buttonSpacing) * buttonCount + 20 * scaleFactor), height - 20);
 
     // Dim overlay
@@ -80,21 +99,6 @@ export default class PauseScene extends Phaser.Scene {
     const btnStyle = buttonStyle();
     btnStyle.fontSize = fontSize + 'px';
     btnStyle.padding = { x: Math.round(40 * scaleFactor), y: buttonPadY };
-
-    const buttonDefs = this.skiMode
-      ? [
-          { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
-          { text: 'restart', callback: () => this.restartSkiRun(), isCTA: false },
-          { text: 'skipRun', callback: () => this.skipSkiRun(), isCTA: false },
-          { text: 'settings', callback: () => this.openSettings(), isCTA: false },
-          { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
-        ]
-      : [
-          { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
-          { text: 'restart', callback: () => this.restartLevel(), isCTA: false },
-          { text: 'settings', callback: () => this.openSettings(), isCTA: false },
-          { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
-    ];
 
     this.menuButtons = [];
     this.buttonCallbacks = [];

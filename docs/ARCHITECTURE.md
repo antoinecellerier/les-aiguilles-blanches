@@ -34,10 +34,17 @@ snow-groomer/
 ├── tsconfig.json           # TypeScript config
 ├── publish.sh              # Build script for deployment
 ├── publish-remote.sh       # Build and deploy to remote server via scp
+├── build-desktop.sh        # Build game + launch/package Electron desktop app
 ├── dev.sh                  # Ensure dev server is running (starts or reuses)
 ├── setup.sh                # Download dependencies, set up dev environment
 ├── run-tests.sh            # Run Playwright tests (headless, parallel, both browsers)
 ├── test-update-check.sh    # Test version update check banner locally
+├── electron/               # Optional desktop wrapper (Electron)
+│   ├── main.cjs            # Electron main process — window management, display modes, IPC
+│   ├── preload.cjs         # contextBridge API (quit, fullscreen, display mode)
+│   ├── package.json        # Separate deps (electron, electron-builder)
+│   ├── generate-icon.cjs   # Generates app icon from game art
+│   └── icon.png            # Generated 256×256 app icon
 ├── src/
 │   ├── main.ts             # Phaser init, game creation
 │   ├── setup.ts            # Window globals initialization
@@ -94,13 +101,13 @@ snow-groomer/
 │   │   ├── skiSprites.ts     # Procedural pixel art for skier & snowboarder (20×28px, 8 variants each)
 │   │   ├── storage.ts       # Type-safe localStorage helpers (getJSON/setJSON/getString/setString)
 │   │   ├── touchDetect.ts    # Touch detection with Firefox desktop fallback
-│   │   ├── fullscreen.ts     # Toggle fullscreen with hint toast on rejection
+│   │   ├── fullscreen.ts     # Fullscreen toggle/query abstraction (browser + Electron IPC)
 │   │   └── updateCheck.ts    # Checks for newer deployed version via version.json
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
 │   │   ├── LevelSelectScene.ts # Level select / replay (browse + star ratings)
-│   │   ├── SettingsScene.ts # Language, a11y, gameplay prefs, controls, keyboard layout
+│   │   ├── SettingsScene.ts # Language, a11y, gameplay prefs, display mode (desktop), controls, keyboard layout
 │   │   ├── GameScene.ts    # Main gameplay
 │   │   ├── HUDScene.ts     # UI overlay (parallel to GameScene)
 │   │   ├── DialogueScene.ts # Character dialogue overlay

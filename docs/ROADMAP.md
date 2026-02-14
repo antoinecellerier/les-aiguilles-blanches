@@ -24,12 +24,15 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package
+- ✅ ~~Electron desktop wrapper~~ — Optional Electron packaging with frameless window, F11 fullscreen toggle, display mode settings (windowed/fullscreen/borderless), app icon, and Quit Game button. Separate `electron/` directory keeps Electron deps out of main project.
 - [ ] Ski/snowboard reward run (v2) — Freestyle elements on park levels, per-level modifications, best time tracking
 - ✅ ~~Ski mode: remember grooming state~~ — Persists groomed tiles to localStorage on level win; ski mode from level select loads the last successful grooming instead of a synthetic pattern
 - ✅ ~~Ski mode touch controls — Jump/brake buttons should match the same layout as groom/winch buttons in grooming mode~~ — Diagonal layout matching grooming mode, pixel art chevron icon for JMP button.
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Electron desktop wrapper** — Optional desktop build via `./build-desktop.sh`. Frameless borderless window with F11 fullscreen toggle (debounced). Three display modes (windowed/fullscreen/borderless) configurable in Settings, persisted to Electron userData JSON for flicker-free startup. Window recreated on frame change (windowed↔borderless). In-game fullscreen button/F key route through Electron IPC. Quit Game button in pause and main menus. Custom app icon generated from in-game groomer sprite. Separate `electron/` directory with own `package.json` keeps ~200MB Electron deps out of main project.
 
 - ✅ **Ski run trick scoring** — Tricks award points by type (kicker 100, rail 150, halfpipe 200) with speed and variety multipliers. Consecutive unique tricks build a combo; repeating the same trick resets it. Total score, trick count, and best combo shown on the level complete screen for park levels.
 

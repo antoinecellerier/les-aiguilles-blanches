@@ -28,6 +28,7 @@ export const STORAGE_KEYS = {
   STEEP_WARNING_SEEN: 'snowGroomer_steepWarningSeen',
   MARIE_INTRO_SEEN: 'snowGroomer_marieIntroSeen',
   GROOMED_TILES: 'snowGroomer_groomedTiles_', // append level index
+  DISPLAY_MODE: 'snowGroomer_displayMode', // 'windowed' | 'fullscreen' | 'borderless'
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

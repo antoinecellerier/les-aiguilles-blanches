@@ -17,7 +17,8 @@ import { hasTouch as detectTouch, onTouchAvailable, isMobile } from '../utils/to
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { OverlayManager } from '../utils/overlayManager';
-import { toggleFullscreen } from '../utils/fullscreen';
+import { toggleFullscreen, isFullscreen as checkFullscreen, fullscreenEnabled } from '../utils/fullscreen';
+import { isDesktopApp, quitDesktopApp } from '../types/electron';
 import { LEVELS } from '../config/levels';
 
 /**
@@ -286,13 +287,16 @@ export default class MenuScene extends Phaser.Scene {
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
     buttonDefs.push({ text: 'changelog', callback: () => this.showChangelog(), primary: false });
     buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
-    if (document.fullscreenEnabled) {
-      const isFullscreen = !!document.fullscreenElement;
+    if (fullscreenEnabled()) {
+      const isFS = checkFullscreen();
       buttonDefs.push({ 
-        text: isFullscreen ? 'exitFullscreen' : 'fullscreen', 
+        text: isFS ? 'exitFullscreen' : 'fullscreen', 
         callback: () => toggleFullscreen(this), 
         primary: false 
       });
+    }
+    if (isDesktopApp()) {
+      buttonDefs.push({ text: 'quitGame', callback: () => quitDesktopApp(), primary: false });
     }
 
     const menuStartY = subtitleBottom + 15 * scaleFactor;
