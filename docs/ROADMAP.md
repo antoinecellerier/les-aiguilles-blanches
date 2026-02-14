@@ -24,6 +24,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package
 - [ ] Ski/snowboard reward run (v2) — Freestyle elements on park levels, per-level modifications, best time tracking
+- [ ] Ski mode: remember grooming state — Direct level select to ski mode should load the last successful grooming coverage (persisted in localStorage) instead of a blank piste
+- [ ] Ski mode touch controls — Jump/brake buttons should match the same layout as groom/winch buttons in grooming mode
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
@@ -116,6 +118,14 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ---
 
 ## Technical Debt / Known Issues
+
+### Visual Issues
+
+- **La Verticale (L8) night piste visibility** — Ungroomed piste tiles are hard to distinguish from off-piste under the night overlay at small zoom levels. Consider increasing contrast between groomed/ungroomed/off-piste textures during night, or adding subtle border markers to piste edges.
+
+### Input Issues
+
+- **Handheld touch: winch + groom unreachable** — On a phone held in both hands, the winch and groom buttons are both on the right side, making it physically impossible to press both simultaneously with thumbs. Consider moving one button to the left side, or auto-grooming while winching.
 
 ### Patterns to Watch
 
