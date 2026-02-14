@@ -253,13 +253,18 @@ export default class LevelCompleteScene extends Phaser.Scene {
     // --- Stats panel (skip for ski crashes — grooming stats aren't relevant) ---
     const isSkiCrash = (this.failReason === 'ski_wipeout' || (this.failReason === 'avalanche' && this.skiMode));
     if (!isSkiCrash) {
-      const statsLines: string[] = [
-        t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%',
-        t('timeUsed') + ': ' + this.formatTime(this.timeUsed),
-      ];
+      const statsLines: string[] = [];
+
+      // Grooming stats only shown for grooming completions (not ski runs)
+      if (!this.skiMode) {
+        statsLines.push(t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%');
+        statsLines.push(t('timeUsed') + ': ' + this.formatTime(this.timeUsed));
+      } else {
+        statsLines.push(t('timeUsed') + ': ' + this.formatTime(this.timeUsed));
+      }
 
       let bonusResults: { objective: BonusObjective; met: boolean; label: string }[] = [];
-      if (this.won) {
+      if (this.won && !this.skiMode) {
         bonusResults = this.evaluateBonusObjectives();
         if (bonusResults.length > 0) {
           statsLines.push('');
