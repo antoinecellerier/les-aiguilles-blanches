@@ -37,6 +37,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Piste contrast & readability** — Darkened off-piste tile textures, lightened service road tiles, and raised minimum tile size to 14px for better piste visibility on all levels (especially night). Texture-level approach: no runtime overlays needed.
 
+- ✅ **Dialogue content review & locale fixes** — Rewrote 5 level intros (L1/L2/L6/L7/L8) across 14 locales for voice consistency (Jean-Pierre/Émilie/Thierry). Added `steepWarningNoWinch` for non-winch levels (L4 fix). Localized `showFps`. Fixed JA/KO untranslated food terms, DE Glühwein→vin chaud, IT "Riscia!"→"Ancora sci!", EN "Cat tracks"→"Access paths". Dead key cleanup: removed `uiScale`, commented 20 unused keys. Dev-mode `t()` throws on missing locale keys; `{ probe: true }` for existence checks.
+
 - ✅ **Resize + touch controls regression fixes** — Camera static→follow transition when touch controls reduce effective viewport height on portrait devices (L7). Groomer stays above controls after resize. Dialogue repositions above controls (tween race fix). 9 regression tests in `test_resize_touch.py`. Smart test selection expanded to all 78 source files with three validation layers (unknown tests, unmapped sources, scene drift detection).
 
 - ✅ **Night overlay & culling resize fix** — Fixed night overlay not covering full viewport after resize/orientation change, and terrain DynamicTextures disappearing due to center-point culling. Night fix: extracted `prepareNightFrame()` for zoom-aware coordinate mapping; `handleNightResize()` called after `setZoom()`. Culling fix: bounds-based visibility checks in `cullOffscreen()`. Simplified `run-tests.sh` to use `./dev.sh`.

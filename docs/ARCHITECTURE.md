@@ -221,6 +221,8 @@ text = text.replace('{keys}', getMovementKeysString());
 text = text.replace('{groomKey}', getGroomKeyName());
 ```
 
+**Dev-mode validation**: `t(key)` throws an `Error` in dev mode (`import.meta.env.DEV`) when a key is missing from all locales. This surfaces bad keys during E2E tests. Use `t(key, { probe: true })` when intentionally checking if a key exists (e.g., `showDialogue()` probes for `key + 'Touch'` / `key + 'Gamepad'` variants).
+
 **Testing**: Unit tests in `tests/unit-js/localization.test.js` ensure all languages have all keys from FR (primary locale). Test fails if any translation is missing.
 
 ### 5. Accessibility Architecture

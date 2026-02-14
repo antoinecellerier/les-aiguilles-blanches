@@ -25,6 +25,7 @@ export const STORAGE_KEYS = {
   SKI_MODE: 'snowGroomer_skiMode',
   SHOW_FPS: 'snowGroomer_showFps',
   SHOW_DEBUG: 'snowGroomer_showDebug',
+  STEEP_WARNING_SEEN: 'snowGroomer_steepWarningSeen',
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

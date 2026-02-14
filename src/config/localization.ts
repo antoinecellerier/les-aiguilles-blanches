@@ -50,8 +50,12 @@ export function getLanguage(): SupportedLanguage {
     return currentLang;
 }
 
-export function t(key: string): string {
-    return TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS['en']?.[key] || key;
+export function t(key: string, { probe }: { probe?: boolean } = {}): string {
+    const value = TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS['en']?.[key];
+    if (!value && !probe && import.meta.env.DEV) {
+        throw new Error(`Missing locale key: "${key}" (lang=${currentLang})`);
+    }
+    return value || key;
 }
 
 export function detectLanguage(): SupportedLanguage {

@@ -195,7 +195,7 @@ export default class GameScene extends Phaser.Scene {
     this.isTumbling = false;
     this.isStunned = false;
     this.isFallingOffCliff = false;
-    this.steepWarningShown = false;
+    this.steepWarningShown = !!getString(STORAGE_KEYS.STEEP_WARNING_SEEN);
 
     // Load movement sensitivity from settings
     const savedSensitivity = getString(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
@@ -1077,7 +1077,8 @@ export default class GameScene extends Phaser.Scene {
 
               if (!this.steepWarningShown) {
                 this.steepWarningShown = true;
-                this.showDialogue('steepWarning');
+                setString(STORAGE_KEYS.STEEP_WARNING_SEEN, '1');
+                this.showDialogue(this.level.hasWinch ? 'steepWarning' : 'steepWarningNoWinch');
               }
             }
           }
@@ -1760,15 +1761,13 @@ export default class GameScene extends Phaser.Scene {
     let dialogueKey = key;
     
     if (hasGamepad) {
-      // Check if gamepad-specific version exists
       const gamepadKey = key + 'Gamepad';
-      if (t(gamepadKey) !== gamepadKey) {
+      if (t(gamepadKey, { probe: true }) !== gamepadKey) {
         dialogueKey = gamepadKey;
       }
     } else if (isTouchOnly) {
-      // Check if touch-specific version exists
       const touchKey = key + 'Touch';
-      if (t(touchKey) !== touchKey) {
+      if (t(touchKey, { probe: true }) !== touchKey) {
         dialogueKey = touchKey;
       }
     }
