@@ -34,6 +34,7 @@ This game is an experiment in building a complete, polished game almost entirely
 ```bash
 ./setup.sh           # Install dependencies + Playwright browsers
 ./dev.sh             # Start dev server (reuses existing if running)
+npm run clean        # Remove all build artifacts and caches
 ```
 
 ### 🖥️ Desktop Build (Optional)
