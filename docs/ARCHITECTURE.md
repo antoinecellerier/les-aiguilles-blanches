@@ -40,11 +40,12 @@ snow-groomer/
 ├── run-tests.sh            # Run Playwright tests (headless, parallel, both browsers)
 ├── test-update-check.sh    # Test version update check banner locally
 ├── electron/               # Optional desktop wrapper (Electron)
-│   ├── main.cjs            # Electron main process — window management, display modes, IPC
+│   ├── main.cjs            # Electron main process — window management, display modes, IPC, xdg integration
 │   ├── preload.cjs         # contextBridge API (quit, fullscreen, display mode)
-│   ├── package.json        # Separate deps (electron, electron-builder)
-│   ├── generate-icon.cjs   # Generates app icon from game art
-│   └── icon.png            # Generated 256×256 app icon
+│   ├── package.json        # Separate deps, electron-builder config (Linux/Win/Mac targets)
+│   ├── generate-icon.cjs   # Generates app icon at all sizes natively (16–512px)
+│   ├── afterPack.cjs       # Post-build cleanup (strips Vulkan SwiftShader, source maps)
+│   └── icon.png            # Generated 512×512 app icon
 ├── src/
 │   ├── main.ts             # Phaser init, game creation
 │   ├── setup.ts            # Window globals initialization
