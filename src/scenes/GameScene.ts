@@ -1469,10 +1469,16 @@ export default class GameScene extends Phaser.Scene {
       this.staminaDepletedPlayed = false;
     }
 
-    for (const buff in this.buffs) {
-      this.buffs[buff] -= dt * 1000;
-      if (this.buffs[buff] <= 0) {
-        delete this.buffs[buff];
+    // Pause buff timers and frost during dialogue so nothing ticks while reading
+    const dlg = this.scene.get('DialogueScene') as DialogueScene;
+    const dialogueActive = dlg?.isDialogueShowing() ?? false;
+
+    if (!dialogueActive) {
+      for (const buff in this.buffs) {
+        this.buffs[buff] -= dt * 1000;
+        if (this.buffs[buff] <= 0) {
+          delete this.buffs[buff];
+        }
       }
     }
 
@@ -1480,8 +1486,8 @@ export default class GameScene extends Phaser.Scene {
       this.stamina = Math.min(100, this.stamina + BALANCE.STAMINA_REGEN_RATE);
     }
 
-    // Frost accumulation — warmth buff pauses it
-    if (this.frostRate > 0 && !this.buffs.warmth) {
+    // Frost accumulation — warmth buff pauses it; dialogue pauses it
+    if (this.frostRate > 0 && !this.buffs.warmth && !dialogueActive) {
       this.frostLevel = Math.min(100, this.frostLevel + (this.frostRate / 60) * dt);
     }
 
