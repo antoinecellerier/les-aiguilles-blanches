@@ -444,7 +444,7 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 3. **Night overlay DynamicTexture** — Headlight cone drawn directly to canvas context each frame instead of 7,416 Graphics commands. L7 FPS 32→60
 4. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
 5. **Camera culling** — `cullOffscreen()` hides objects outside viewport (+ 2-tile margin) using display-bounds checks (`x ± displayWidth*originX`). Only rechecked when camera moves a full tile. ~1,200 objects hidden per frame on L9. `lastCullBounds` is reset in `handleResize()` to force immediate recull after viewport changes
-6. **Extended background sizing** — Use `screen × 1.3` — enough for URL bar/viewport jitter without creating excessive objects
+6. **Extended background sizing** — Use `max(screenWidth, screenHeight) × 1.3` for both dimensions, ensuring coverage in any orientation without recreating the DynamicTexture on resize
 7. **HUD resize debounce** — 300ms + 10px threshold prevents rapid scene restarts from mobile resize events
 
 ### Canvas Renderer Constraints

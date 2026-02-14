@@ -36,8 +36,10 @@ export class PisteRenderer {
     worldOffsetX: number, worldOffsetY: number,
     level: Level, tileSize: number
   ): void {
-    const bgWidth = screenWidth * 1.3;
-    const bgHeight = screenHeight * 1.3;
+    // Use max dimension for both axes so background covers any orientation
+    const maxScreen = Math.max(screenWidth, screenHeight);
+    const bgWidth = maxScreen * 1.3;
+    const bgHeight = maxScreen * 1.3;
     const extraLeft = Math.max(worldOffsetX, (bgWidth - worldWidth) / 2);
     const extraTop = Math.max(worldOffsetY, (bgHeight - worldHeight) / 2);
     const extraRight = Math.max(0, bgWidth - worldWidth - extraLeft);
