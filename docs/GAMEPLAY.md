@@ -298,24 +298,24 @@ Objectives turn green (✓) when met and red (✗) on irreversible failure (e.g.
 ## 🎭 Characters
 
 ### Jean-Pierre 👨‍🔧
-*Head Groomer*
+*Head Groomer* — First appears: **L1 (Les Marmottes)**
 
-Your mentor and the resort's most experienced operator. He's gruff but fair, and knows every contour of the mountain. Listen to his advice!
+Your mentor and the resort's most experienced operator. He's gruff but fair, and knows every contour of the mountain. Introduces himself after the tutorial and sets you up on the green piste.
 
 ### Marie 👩‍🍳
-*Restaurant Owner*
+*Restaurant Owner* — First appears: **First restaurant visit** (any level)
 
-Runs "Chez Marie" at mid-station. Her tartiflette is legendary, and she always has a kind word for the night crew.
+Runs "Chez Marie" at mid-station. Her tartiflette is legendary, and she always has a kind word for the night crew. Introduces herself the first time you visit her restaurant — after that, she serves food silently.
 
 ### Thierry 🧑‍⚕️
-*Ski Patrol Chief*
+*Ski Patrol Chief* — First appears: **L5 (Le Glacier)**
 
-Coordinates safety across the resort. When he says an area is dangerous, believe him. He'll brief you before hazardous missions.
+Coordinates safety across the resort. When he says an area is dangerous, believe him. Introduces the winch mechanic on Le Glacier and briefs you before hazardous missions.
 
 ### Émilie 📋
-*Event Organizer*
+*Event Organizer* — First appears: **L2 (Les Chamois)**
 
-Manages competitions and festivals. When she needs the park perfect for tomorrow's event, the pressure is on!
+Manages competitions and festivals. Introduces herself on your first blue piste and pushes you to prove yourself. When she needs the park perfect for tomorrow's event, the pressure is on!
 
 ## 🎪 Special Events
 

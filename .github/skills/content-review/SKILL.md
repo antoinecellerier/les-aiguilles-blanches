@@ -21,7 +21,10 @@ Use explore agents to gather all content from these sources:
 Evaluate content across these dimensions, launching parallel explore agents:
 
 1. **Voice & tone consistency**
-   - Characters should have distinct voices: Jean-Pierre (gruff mentor), Thierry (cautious/technical), Marie (warm café owner), Émilie (encouraging colleague)
+   - Characters should have distinct voices: Jean-Pierre (gruff mentor, uses "petit"), Thierry (cautious/technical), Marie (warm café owner), Émilie (competitive/modern)
+   - Characters must introduce themselves on first appearance (L2 Émilie, L5 Thierry, first restaurant Marie) — portrait shows the name, but dialogue should include a natural self-intro
+   - Characters must NOT introduce themselves on subsequent appearances — no "It's Émilie" if she already spoke in a prior level
+   - Characters must speak in first person when they are the `introSpeaker` — never refer to themselves in third person
    - Failure taunts should vary between humorous, dramatic, and sympathetic — never cruel or repetitive
    - Tutorial text should be clear and encouraging for beginners
    - Professional ski operations vocabulary where appropriate (damage, chenillette, canon à neige)
@@ -42,16 +45,26 @@ Evaluate content across these dimensions, launching parallel explore agents:
 4. **Narrative coherence**
    - Difficulty progression should be reflected in dialogue tone (encouraging → challenging → intense)
    - Character appearances should match the level context (Marie at lower pistes, Thierry at hazardous levels)
+   - Dialogue must match level mechanics — don't tell players to use equipment they don't have (e.g., winch on `hasWinch: false` levels)
+   - One-shot dialogues (steep warning, Marie intro) persist via localStorage — verify they only trigger once, not per-level
    - Lore references should be consistent across levels (no contradictions in backstory)
+   - Avoid opaque acronyms or jargon that players won't know (e.g., "PIDA protocol" → "avalanche safety protocol")
    - Bonus objectives should feel achievable and well-described
+   - Players traverse levels bottom-to-top — zone encounter order matters. Higher `startY` = lower on map = encountered FIRST. Verify that tutorial/warning text appears on the gentler zone before the deadly one.
 
 5. **Clarity & UX writing**
    - Button labels should be unambiguous and action-oriented
    - Error/warning messages should tell the player what happened AND what to do
    - Tutorial hints should be concise — players should understand in <3 seconds
    - Accessibility labels should be descriptive and screen-reader friendly
+   - Check for hardcoded English strings in non-locale `.ts` files (e.g., `onStatus('Saved!')` instead of `t('saved')`) — all player-visible text must go through `t()`
 
-6. **Changelog conciseness**
+6. **Dead key hygiene**
+   - After changes, search for `// UNUSED` keys in locale files that may now be used (grep source code for the key name as a quoted string)
+   - When commenting out keys, verify they aren't dynamically constructed (e.g., `showDialogue()` probes `key + 'Touch'` / `key + 'Gamepad'` variants)
+   - `t()` in dev mode throws on missing keys — E2E tests will catch any removed key that's still referenced
+
+7. **Changelog conciseness**
    - Each date entry should have 3–5 items max — highlight what players will notice
    - Lead with new content (levels, wildlife, characters), not technical fixes
    - Consolidate all bug fixes into a single catch-all line (e.g. "🔧 Corrections tactiles et accessibilité")
