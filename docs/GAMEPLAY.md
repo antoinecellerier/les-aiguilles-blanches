@@ -114,6 +114,7 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
   - ❄️ **Groom**: Rake icon (3-prong tiller graphic)
   - 🔗 **Winch**: Anchor icon (stylized anchor shape)
   - Both buttons: Circular, beveled retro style, highlight on press
+- **Auto-groom while winching**: On touch, holding the winch button automatically grooms — since both buttons are on the right side, only one thumb can reach them. Keyboard and gamepad users can control groom and winch independently.
 - **Multitouch**: Move and groom simultaneously (up to 3 active pointers)
 - **Top-right buttons** (stacked vertically, semi-transparent pill backgrounds):
   - ⏭ **Skip**: `>>` on narrow screens, `>> Skip` on wider mobile (repositioned left on ≤360px)

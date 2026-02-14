@@ -125,7 +125,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Input Issues
 
-- **Handheld touch: winch + groom unreachable** — On a phone held in both hands, the winch and groom buttons are both on the right side, making it physically impossible to press both simultaneously with thumbs. Consider moving one button to the left side, or auto-grooming while winching.
+- ✅ ~~**Handheld touch: winch + groom unreachable**~~ — Auto-groom while winching on touch controls. Keyboard/gamepad retain independent groom/winch control.
 
 ### Patterns to Watch
 

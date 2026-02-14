@@ -1162,7 +1162,10 @@ export default class GameScene extends Phaser.Scene {
 
     // Use configurable groom button (default: south/A)
     const gamepadGroom = this.gamepad !== null && isGamepadButtonPressed(this.gamepad, this.gamepadBindings.groom);
-    this.isGrooming = this.groomKey.isDown || gamepadGroom || touchGroom;
+    // Touch: auto-groom while winching — on phones, left thumb steers (joystick)
+    // and right thumb can only reach one action button, so winch implies groom.
+    // Keyboard/gamepad retain independent groom+winch for finer control.
+    this.isGrooming = this.groomKey.isDown || gamepadGroom || touchGroom || this.touchInput.winch;
 
     if (this.isGrooming && this.fuel > 0) {
       this.groomAtPosition(this.groomer.x, this.groomer.y);
