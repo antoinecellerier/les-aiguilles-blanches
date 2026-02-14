@@ -106,3 +106,4 @@ For each changed source file, ask: "Does this change affect any documentation?" 
 - Keep ROADMAP.md as the single source of truth for work status
 - Keep changelog entries in ALL 14 languages
 - Keep copilot-instructions.md lean — it's injected into every prompt
+- **Keep docs as few, long files** — Copilot CLI loads docs by file path; fewer files = fewer tool calls = faster context. Files up to ~3,000 lines are fine. Don't split a doc unless it exceeds ~5,000 lines. Related information in the same file helps the agent see connections it would miss across separate files.
