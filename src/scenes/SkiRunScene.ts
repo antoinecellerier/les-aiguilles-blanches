@@ -1159,6 +1159,7 @@ export default class SkiRunScene extends Phaser.Scene {
     if (!this.scene.manager) return;
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
     this.gamepadBindings = loadGamepadBindings();
+    this.reloadKeyBindings();
     this.skiSounds.resume();
     this.ambienceSounds.resume(this.level.weather, this.level.isNight);
     this.scene.resume();
@@ -1208,6 +1209,24 @@ export default class SkiRunScene extends Phaser.Scene {
       }
       return result;
     } catch { return defaults; }
+  }
+
+  private reloadKeyBindings(): void {
+    if (!this.input.keyboard) return;
+    const bindings = this.loadKeyBindings();
+    for (const key of Object.values(this.wasd)) {
+      this.input.keyboard.removeKey(key, true);
+    }
+    if (this.brakeKey) this.input.keyboard.removeKey(this.brakeKey, true);
+    if (this.jumpKey) this.input.keyboard.removeKey(this.jumpKey, true);
+    this.wasd = {
+      up: this.input.keyboard.addKey(bindings.up),
+      down: this.input.keyboard.addKey(bindings.down),
+      left: this.input.keyboard.addKey(bindings.left),
+      right: this.input.keyboard.addKey(bindings.right),
+    };
+    this.brakeKey = this.input.keyboard.addKey(bindings.winch);
+    this.jumpKey = this.input.keyboard.addKey(bindings.groom);
   }
 
   /** Generate default grooming when starting ski run without prior grooming. */

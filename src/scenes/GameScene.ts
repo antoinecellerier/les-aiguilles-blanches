@@ -838,6 +838,22 @@ export default class GameScene extends Phaser.Scene {
     return defaults;
   }
 
+  private reloadKeyBindings(): void {
+    if (!this.input.keyboard) return;
+    const bindings = this.loadKeyBindings();
+    // Remove old keys and re-add with new bindings
+    for (const key of [this.wasd.up, this.wasd.down, this.wasd.left, this.wasd.right, this.groomKey, this.winchKey]) {
+      this.input.keyboard.removeKey(key, true);
+    }
+    this.wasd = {
+      up: this.input.keyboard.addKey(bindings.up),
+      down: this.input.keyboard.addKey(bindings.down),
+      left: this.input.keyboard.addKey(bindings.left),
+      right: this.input.keyboard.addKey(bindings.right),
+    };
+    this.groomKey = this.input.keyboard.addKey(bindings.groom);
+    this.winchKey = this.input.keyboard.addKey(bindings.winch);
+  }
   private gamepadStartPressed = false;
   
   update(_time: number, delta: number): void {
@@ -1804,6 +1820,7 @@ export default class GameScene extends Phaser.Scene {
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
     // Reload bindings and sensitivity in case they were changed in Settings
     this.gamepadBindings = loadGamepadBindings();
+    this.reloadKeyBindings();
     const saved = getString(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     const val = saved ? parseFloat(saved) : BALANCE.SENSITIVITY_DEFAULT;
     this.movementSensitivity = (isNaN(val) || val < BALANCE.SENSITIVITY_MIN || val > BALANCE.SENSITIVITY_MAX) ? BALANCE.SENSITIVITY_DEFAULT : val;
