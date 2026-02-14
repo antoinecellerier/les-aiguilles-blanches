@@ -265,6 +265,7 @@ export const BALANCE = {
   TRICK_BASE_RAIL: 150,
   TRICK_BASE_HALFPIPE: 200,
   TRICK_VARIETY_BONUS: 0.25,     // Multiplier increase per consecutive unique trick
+  SKI_HALFPIPE_REBOUND: 180,     // Lateral impulse (px/s) toward center on halfpipe trick landing
 } as const;
 
 export type DifficultyType = 'tutorial' | 'green' | 'blue' | 'red' | 'black' | 'park';

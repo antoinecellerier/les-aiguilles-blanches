@@ -82,6 +82,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private dangerZones!: Phaser.Physics.Arcade.StaticGroup;
   private debugGfx?: Phaser.GameObjects.Graphics;
   private trickActive = false;
+  private pipeTrickActive = false; // halfpipe trick — apply rebound on landing
   private trickShadow: Phaser.GameObjects.Graphics | null = null;
   private trickShadowUpdater: (() => void) | null = null;
   private turnHoldTime = 0; // seconds of continuous lateral input
@@ -120,6 +121,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.slalomSystem = new SlalomGateSystem();
     this.gateText = null;
     this.isAirborne = false;
+    this.pipeTrickActive = false;
     this.trickCount = 0;
     this.trickScore = 0;
     this.trickCombo = 0;
@@ -394,8 +396,8 @@ export default class SkiRunScene extends Phaser.Scene {
     this.terrainBlend += (rawTerrainMult - this.terrainBlend) * Math.min(1, blendRate * dt);
     const terrainMultiplier = this.terrainBlend;
 
-    // Draw ski/snowboard tracks on ungroomed / off-piste snow
-    if (!onGroomed && this.currentSpeed > 5) {
+    // Draw ski/snowboard tracks on ungroomed / off-piste snow (not while airborne)
+    if (!onGroomed && this.currentSpeed > 5 && !this.isAirborne && !this.trickActive) {
       const sx = this.skier.x;
       const sy = this.skier.y;
       const minDist = this.tileSize * 0.5;
@@ -493,8 +495,13 @@ export default class SkiRunScene extends Phaser.Scene {
     const speedRatio = Math.min(this.currentSpeed / BALANCE.SKI_GRAVITY_SPEED, 1.5);
     const targetVx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;
     // Smooth lateral velocity — lerp toward target for carved turns, not instant zigzags
+    // During tricks, suppress lateral input (ballistic arc — no air control)
     const lerpRate = 2.0; // higher = more responsive, lower = smoother
-    this.smoothedLateral += (targetVx - this.smoothedLateral) * Math.min(1, lerpRate * dt);
+    if (this.trickActive) {
+      this.smoothedLateral += (0 - this.smoothedLateral) * Math.min(1, lerpRate * dt);
+    } else {
+      this.smoothedLateral += (targetVx - this.smoothedLateral) * Math.min(1, lerpRate * dt);
+    }
     this.skier.setVelocity(this.smoothedLateral, vy);
 
     // Y-sort depth so skier renders behind trees when above them
@@ -787,6 +794,12 @@ export default class SkiRunScene extends Phaser.Scene {
     // Speed boost
     this.currentSpeed *= 1.3;
 
+    // Halfpipe wall redirects lateral speed into vertical — zero out lateral drift
+    if (type === 'halfpipe') {
+      this.smoothedLateral = 0;
+      this.pipeTrickActive = true;
+    }
+
     const baseScale = this.tileSize / 16;
 
     let trickName: string;
@@ -964,6 +977,18 @@ export default class SkiRunScene extends Phaser.Scene {
           ease: 'Bounce.easeOut',
           onComplete: () => {
             this.trickActive = false;
+            // Halfpipe rebound — landing pushes skier toward pipe center
+            if (this.pipeTrickActive) {
+              this.pipeTrickActive = false;
+              const tileY = Math.floor(this.skier.y / this.tileSize);
+              const path = this.geometry.pistePath[tileY];
+              if (path) {
+                const centerPx = path.centerX * this.tileSize;
+                const dir = this.skier.x < centerPx ? 1 : -1;
+                const speedRatio = Math.min(this.currentSpeed / BALANCE.SKI_GRAVITY_SPEED, 1.5);
+                this.smoothedLateral = dir * BALANCE.SKI_HALFPIPE_REBOUND * speedRatio;
+              }
+            }
             this.cleanupTrickShadow();
             this.skiSounds.playTrickLand();
           },
@@ -1137,7 +1162,7 @@ export default class SkiRunScene extends Phaser.Scene {
   /** Generate default grooming when starting ski run without prior grooming. */
   private generateDefaultGrooming(): Set<string> {
     const tiles = new Set<string>();
-    const targetRatio = this.level.targetCoverage / 100;
+    const targetRatio = this.level.specialFeatures?.includes('halfpipe') ? 1.0 : this.level.targetCoverage / 100;
     for (let y = 3; y < this.level.height - 2; y++) {
       const path = this.geometry.pistePath[y];
       if (!path) continue;
@@ -1178,6 +1203,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.gateText = null;
     this.cleanupTrickShadow();
     this.trickActive = false;
+    this.pipeTrickActive = false;
     this.isAirborne = false;
     if (this.skier?.active) this.tweens.killTweensOf(this.skier);
     // Don't stop HUDScene here — resetGameScenes handles all scene cleanup.
