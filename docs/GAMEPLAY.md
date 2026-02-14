@@ -390,6 +390,9 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 | A/D or ←/→ | Steer left/right |
 | Left stick | Steer (gamepad) |
 | Touch lower half | Drag left/right |
+| S or ↓ | Tuck (crouch for speed) |
+| D-pad down | Tuck (gamepad) |
+| Touch TUK button | Tuck (touch) |
 | Shift / LB | Brake (snow plow) |
 | Touch top quarter | Brake |
 | Space / X (gamepad) | Jump |
@@ -400,7 +403,8 @@ Same lateral controls as grooming — left/right to steer. Movement downhill is 
 
 - **Slope-aware speed** — steeper sections accelerate faster, flat sections decelerate
 - **Groomed snow = fast**, ungroomed snow = friction slowdown
-- **Carving** — turning bleeds speed (sharper turns = more drag)
+- **Carving** — turning bleeds speed (sharper turns = more drag). Keyboard/D-pad steering ramps up over ~0.2s so quick taps feel like gentle corrections; gamepad analog stick bypasses the ramp.
+- **Tuck** — hold the down key to crouch into a tuck position: +20% speed, 40% steering response, minimal carve drag and heading penalty. Great for straight sections; risky in tight turns. Crouched sprites for both skier and snowboarder.
 - **Braking** — hold the winch key for a snow plow stop
 - **Obstacles** cause a brief speed bump (cooldown prevents chain-stuns)
 - **Cliff danger zones** — wipeout! Brief freeze then respawn at last safe position

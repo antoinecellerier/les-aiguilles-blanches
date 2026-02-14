@@ -278,7 +278,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "2026년 2월 14일",
-  changelog_20260214: "🎪 Trick scoring & combos\n👁️ 슬로프 대비 개선\n📱 윈치 시 자동 정지 (터치)\n⛷️ 스키 점프 버튼 아이콘",
+  changelog_20260214: "🎪 트릭 점수 & 콤보\n👁️ 슬로프 대비 개선\n📱 윈치 시 자동 정지 (터치)\n⛷️ 스키 점프 버튼 아이콘\n🏂 터크 자세",
   changelog_20260213_date: "2026년 2월 13일",
   changelog_20260213: "🚩 슬라럼 게이트\n🏔️ 스키 점프\n⚡ 성능 향상\n🎹 녹턴 피아노 음악\n🔊 엔진 볼륨 조절",
   changelog_20260212_date: "2026년 2월 12일",

@@ -230,7 +230,7 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260214_date: "14 febbraio 2026",
-  changelog_20260214: "🎪 Trick scoring & combos\n👁️ Miglior contrasto delle piste\n📱 Preparazione automatica con verricello (touch)\n⛷️ Icona del pulsante salto sci",
+  changelog_20260214: "🎪 Tricks e combo\n👁️ Miglior contrasto delle piste\n📱 Preparazione automatica con verricello (touch)\n⛷️ Icona del pulsante salto sci\n🏂 Posizione di ricerca",
   changelog_20260213_date: "13 febbraio 2026",
   changelog_20260213: "🚩 Porte di slalom\n🏔️ Salti con gli sci\n⚡ Prestazioni migliorate\n🎹 Musica notturna al pianoforte\n🔊 Volume motore regolabile",
   changelog_20260212_date: "12 febbraio 2026",

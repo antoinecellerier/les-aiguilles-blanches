@@ -279,7 +279,7 @@ const sv: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14 februari 2026",
-  changelog_20260214: "🎪 Trick scoring & combos\n👁️ Bättre pistkontrast\n📱 Auto-planering vid vinsch (touch)\n⛷️ Skihoppsknapp med ikon",
+  changelog_20260214: "🎪 Tricks & kombos\n👁️ Bättre pistkontrast\n📱 Auto-planering vid vinsch (touch)\n⛷️ Skihoppsknapp med ikon\n🏂 Hukposition",
   changelog_20260213_date: "13 februari 2026",
   changelog_20260213: "🚩 Slalomportar\n🏔️ Skidhopp\n⚡ Förbättrad prestanda\n🎹 Nocturn pianomusik\n🔊 Motorvolym justerbar",
   changelog_20260212_date: "12 februari 2026",
