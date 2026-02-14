@@ -680,7 +680,7 @@ export default class HUDScene extends Phaser.Scene {
 
     this.touchControlsContainer.add(joystickZone);
 
-    // Brake button (bottom-right) — maps to touchWinch (same key binding as winch)
+    // Brake button — same position as GRM in grooming mode
     const actionX = Math.round(width - padding - btnSize);
     const actionY = Math.round(height - padding - btnSize);
     this.createTouchButton(
@@ -690,9 +690,9 @@ export default class HUDScene extends Phaser.Scene {
       0x7a1a1a, true
     );
 
-    // Jump button (above brake) — maps to touchGroom
+    // Jump button — same position as WCH in grooming mode (diagonal layout)
     this.createTouchButton(
-      Math.round(actionX - btnSize - padding / 2), Math.round(actionY - btnSize * 1.2 - padding * 0.6),
+      actionX, Math.round(actionY - btnSize - padding / 2),
       Math.round(btnSize * 1.2), 'JMP', alpha,
       () => { this.touchGroom = true; },
       () => { this.touchGroom = false; },
@@ -937,6 +937,20 @@ export default class HUDScene extends Phaser.Scene {
       g.fillStyle(color);
       g.fillRect(cx - px * 3, cy - px * 2, px * 6, px);
       g.fillRect(cx - px * 3, cy + px, px * 6, px);
+    } else if (label === 'JMP') {
+      // Jump icon: upward chevron arrow
+      const color = 0xddddff;
+      g.fillStyle(color);
+      // Left arm of chevron
+      g.fillRect(cx - px * 3, cy + px, px, px);
+      g.fillRect(cx - px * 2, cy, px, px);
+      g.fillRect(cx - px * 1, cy - px, px, px);
+      // Center peak
+      g.fillRect(cx - px * 0.5, cy - px * 2, px, px);
+      // Right arm of chevron
+      g.fillRect(cx + px * 0, cy - px, px, px);
+      g.fillRect(cx + px * 1, cy, px, px);
+      g.fillRect(cx + px * 2, cy + px, px, px);
     } else {
       return null;
     }

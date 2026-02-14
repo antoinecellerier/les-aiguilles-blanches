@@ -25,7 +25,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Publish as standalone game package
 - [ ] Ski/snowboard reward run (v2) — Freestyle elements on park levels, per-level modifications, best time tracking
 - [ ] Ski mode: remember grooming state — Direct level select to ski mode should load the last successful grooming coverage (persisted in localStorage) instead of a blank piste
-- [ ] Ski mode touch controls — Jump/brake buttons should match the same layout as groom/winch buttons in grooming mode
+- ✅ ~~Ski mode touch controls — Jump/brake buttons should match the same layout as groom/winch buttons in grooming mode~~ — Diagonal layout matching grooming mode, pixel art chevron icon for JMP button.
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
