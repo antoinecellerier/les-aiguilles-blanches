@@ -37,21 +37,28 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
 - **Unit tests**: Uses Vitest's `--changed` flag which traces the import graph automatically — zero maintenance.
 - **E2E tests**: File-level selection based on which source files changed:
   - Any `src/` change → always runs `test_navigation.py` (catch-all integration suite)
-  - `src/scenes/GameScene.ts` → also runs `test_gameplay.py`, `test_level_mechanics.py`
-  - `src/scenes/DialogueScene.ts` → also runs `test_dialogue_speakers.py`, `test_dialogue.py`
+  - `src/scenes/GameScene.ts` → also runs `test_gameplay.py`, `test_level_mechanics.py`, `test_resize_touch.py`
+  - `src/scenes/DialogueScene.ts` → also runs `test_dialogue_speakers.py`, `test_dialogue.py`, `test_resize_touch.py`
   - `src/scenes/PauseScene.ts` → also runs `test_pause_menu.py`
   - `src/scenes/LevelCompleteScene.ts` or `CreditsScene.ts` → also runs `test_level_complete.py`
   - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`, `test_volume_indicator.py`
   - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
   - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
   - `src/scenes/SkiRunScene.ts`, `src/systems/ParkFeatureSystem.ts`, `src/utils/skiSprites.ts`, `src/utils/skiRunState.ts` → also runs `test_ski_run.py`
-  - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`
+  - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`, `test_resize_touch.py`
   - `src/utils/keyboardLayout.ts` → also runs `test_key_hints.py`
   - `src/config/levels.ts`, `src/systems/*` → also runs `test_level_mechanics.py`
+  - `src/utils/resizeManager.ts`, `src/utils/cameraCoords.ts`, `src/config/gameConfig.ts` → also runs `test_resize_touch.py`
+  - `src/utils/accessibility.ts` → also runs `test_accessibility.py`, `test_accessibility_full.py`
+  - `src/systems/AudioSystem.ts`, `src/systems/*Sounds.ts`, `src/systems/MusicSystem.ts` → also runs `test_volume_indicator.py`
   - `tests/e2e/conftest.py` changed → runs all E2E tests
   - No `src/` or test changes → skips E2E entirely
 
-This is maintenance-free for source files: new source files are covered by the `test_navigation.py` catch-all, and unit test selection uses Vitest's built-in module graph. If a new E2E test file is added to `tests/e2e/`, `--smart` will fail with an error until its source→test mapping is added to `run-tests.sh`.
+All 78 source files have explicit mappings. Three validation layers enforce this:
+
+1. **Unknown test files** (ERROR) — New `test_*.py` files must be added to `KNOWN_E2E_FILES`.
+2. **Unmapped source files** (ERROR) — Changed `src/*.ts` files must have a case branch (or be in the no-mapping exclusion list for type defs, env shims, etc.).
+3. **Scene reference drift** (WARNING) — Scans `getScene('FooScene')` calls in all test files and warns if a test references a scene not in its mapping. An `INCIDENTAL_REFS` array ignores known setup-only references (e.g. `test_accessibility.py` references GameScene only via `skip_to_level()`).
 
 ## Test Helpers
 
@@ -176,6 +183,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_dialogue_speakers.py` | Speaker assignment, character portraits per level |
 | `test_gamepad.py` | Controller detection, button mapping, Nintendo/PlayStation |
 | `test_touch_controls.py` | Touch input, orientation changes, resize |
+| `test_resize_touch.py` | Static→follow camera transition, groomer/dialogue above touch controls, zoom stability |
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
 | `test_volume_indicator.py` | Volume icon, mute toggle, hover slider, overlay |
 | `test_level_select.py` | Level select navigation, star ratings, ski/groom buttons |
