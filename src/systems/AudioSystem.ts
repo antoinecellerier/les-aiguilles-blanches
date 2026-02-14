@@ -50,6 +50,9 @@ export class AudioSystem {
   private game: Phaser.Game | null = null;
   private onReadyCallbacks: Array<() => void> = [];
   private visibilityHandler: (() => void) | null = null;
+  private blurHandler: (() => void) | null = null;
+  private focusHandler: (() => void) | null = null;
+  private backgroundAudio = false; // when true, audio continues when window loses focus
 
   private constructor() {
     this.volumes = this.loadVolumes();
@@ -146,34 +149,58 @@ export class AudioSystem {
     document.addEventListener('touchstart', resume, { once: false });
   }
 
-  /** Suspend audio when tab is hidden, resume when visible */
+  /** Suspend audio when tab is hidden or window loses focus, resume when visible/focused */
   private setupVisibilityHandling(): void {
-    // Remove previous listener if any (guards against duplicate registration)
+    // Remove previous listeners if any (guards against duplicate registration)
     if (this.visibilityHandler) {
       document.removeEventListener('visibilitychange', this.visibilityHandler);
     }
-    this.visibilityHandler = () => {
-      if (!this.ctx) return;
-      if (document.hidden) {
+    if (this.blurHandler) window.removeEventListener('blur', this.blurHandler);
+    if (this.focusHandler) window.removeEventListener('focus', this.focusHandler);
+
+    const suspendAudio = () => {
+      if (!this.ctx || this.backgroundAudio) return;
+      if (this.ctx.state === 'running') {
         this.ctx.suspend().catch(() => {});
-      } else if (this.resumed) {
-        // Mute before resuming to avoid a burst of stale audio
-        if (this.masterGain) {
-          this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
-        }
-        this.ctx.resume().then(() => {
-          // Fade master back in over 200ms
-          if (this.masterGain && this.ctx) {
-            const vol = this.muted ? 0 : this.volumes.master;
-            this.masterGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.06);
-          }
-        }).catch(() => {});
       }
     };
+
+    const resumeAudio = () => {
+      if (!this.ctx || !this.resumed) return;
+      // Only resume if window is both visible and focused
+      if (document.hidden) return;
+      if (this.ctx.state !== 'suspended') return;
+      // Mute before resuming to avoid a burst of stale audio
+      if (this.masterGain) {
+        this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
+      }
+      this.ctx.resume().then(() => {
+        // Fade master back in over 200ms
+        if (this.masterGain && this.ctx) {
+          const vol = this.muted ? 0 : this.volumes.master;
+          this.masterGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.06);
+        }
+      }).catch(() => {});
+    };
+
+    this.visibilityHandler = () => {
+      if (document.hidden) suspendAudio();
+      else resumeAudio();
+    };
+    this.blurHandler = suspendAudio;
+    this.focusHandler = resumeAudio;
+
     document.addEventListener('visibilitychange', this.visibilityHandler);
+    window.addEventListener('blur', this.blurHandler);
+    window.addEventListener('focus', this.focusHandler);
   }
 
   // --- Volume control ---
+
+  /** Enable/disable background audio (desktop only — skips suspend on visibility hide) */
+  setBackgroundAudio(enabled: boolean): void {
+    this.backgroundAudio = enabled;
+  }
 
   private loadVolumes(): Record<VolumeChannel, number> {
     const vols = {} as Record<VolumeChannel, number>;
@@ -265,6 +292,14 @@ export class AudioSystem {
       if (AudioSystem.instance.visibilityHandler) {
         document.removeEventListener('visibilitychange', AudioSystem.instance.visibilityHandler);
         AudioSystem.instance.visibilityHandler = null;
+      }
+      if (AudioSystem.instance.blurHandler) {
+        window.removeEventListener('blur', AudioSystem.instance.blurHandler);
+        AudioSystem.instance.blurHandler = null;
+      }
+      if (AudioSystem.instance.focusHandler) {
+        window.removeEventListener('focus', AudioSystem.instance.focusHandler);
+        AudioSystem.instance.focusHandler = null;
       }
       if (AudioSystem.instance.ctx) {
         AudioSystem.instance.ctx.close().catch(() => {});

@@ -11,6 +11,7 @@ export interface ElectronAPI {
   toggleFullscreen: () => void;
   isFullscreen: () => boolean;
   setDisplayMode: (mode: DisplayMode) => void;
+  setBackgroundAudio: (enabled: boolean) => void;
 }
 
 declare global {
@@ -35,5 +36,12 @@ export function quitDesktopApp(): void {
 export function setDisplayMode(mode: DisplayMode): void {
   if (isDesktopApp()) {
     window.electronAPI!.setDisplayMode(mode);
+  }
+}
+
+/** Enable or disable background audio (Electron only) */
+export function setBackgroundAudio(enabled: boolean): void {
+  if (isDesktopApp()) {
+    window.electronAPI!.setBackgroundAudio(enabled);
   }
 }

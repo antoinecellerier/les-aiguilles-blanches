@@ -87,6 +87,7 @@ const fi: Record<string, string> = {
   ambienceVolume: "Tunnelma",
   mute: "Mykistä",
 
+  backgroundAudio: "Taustaääni",
   // Gameplay
   bonus: "Bonus",
   skiMode: "Laskettelutila",

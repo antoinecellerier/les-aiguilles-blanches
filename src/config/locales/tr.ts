@@ -87,6 +87,7 @@ const tr: Record<string, string> = {
   ambienceVolume: "Ortam",
   mute: "Sessiz",
 
+  backgroundAudio: "Arka plan sesi",
   // Gameplay
   bonus: "Bonus",
   skiMode: "İniş modu",

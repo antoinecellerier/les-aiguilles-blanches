@@ -87,6 +87,7 @@ const ko: Record<string, string> = {
   ambienceVolume: "환경음",
   mute: "음소거",
 
+  backgroundAudio: "백그라운드 오디오",
   // Gameplay
   bonus: "보너스",
   skiMode: "활강 모드",

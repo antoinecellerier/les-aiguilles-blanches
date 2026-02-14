@@ -29,6 +29,7 @@ export const STORAGE_KEYS = {
   MARIE_INTRO_SEEN: 'snowGroomer_marieIntroSeen',
   GROOMED_TILES: 'snowGroomer_groomedTiles_', // append level index
   DISPLAY_MODE: 'snowGroomer_displayMode', // 'windowed' | 'fullscreen' | 'borderless'
+  BACKGROUND_AUDIO: 'snowGroomer_backgroundAudio', // 'true' | 'false' (desktop only)
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

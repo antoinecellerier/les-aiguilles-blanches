@@ -87,6 +87,7 @@ const sk: Record<string, string> = {
   ambienceVolume: "Prostredie",
   mute: "Stlmiť",
 
+  backgroundAudio: "Zvuk na pozadí",
   // Gameplay
   bonus: "Bonus",
   skiMode: "Režim zjazdu",

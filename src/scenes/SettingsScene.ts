@@ -18,7 +18,7 @@ import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { getSavedProgress } from '../utils/gameProgress';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { GamepadDiagnosticPanel } from '../systems/GamepadDiagnostic';
-import { isDesktopApp, setDisplayMode } from '../types/electron';
+import { isDesktopApp, setDisplayMode, setBackgroundAudio } from '../types/electron';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -434,6 +434,18 @@ export default class SettingsScene extends Phaser.Scene {
     panel.add(this.createVolumeSlider('ambience', t('ambienceVolume') || 'Ambience'), { align: 'left' });
     // Spacer to compensate for slider Graphics underreporting height
     panel.add(this.add.rectangle(0, 0, 1, 20, 0x000000, 0));
+
+    // Background audio toggle (desktop only)
+    if (isDesktopApp()) {
+      const bgAudioDefault = getString(STORAGE_KEYS.BACKGROUND_AUDIO) !== 'false';
+      panel.add(this.createToggleRow(t('backgroundAudio') || 'Background Audio',
+        bgAudioDefault, (val) => {
+          setString(STORAGE_KEYS.BACKGROUND_AUDIO, val ? 'true' : 'false');
+          setBackgroundAudio(val);
+          AudioSystem.getInstance().setBackgroundAudio(val);
+        }), { align: 'left' });
+    }
+
     sizer.add(panel, { align: 'left' });
   }
 

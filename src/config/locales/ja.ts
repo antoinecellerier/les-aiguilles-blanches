@@ -87,6 +87,7 @@ const ja: Record<string, string> = {
   ambienceVolume: "環境音",
   mute: "ミュート",
 
+  backgroundAudio: "バックグラウンドオーディオ",
   // Gameplay
   bonus: "ボーナス",
   skiMode: "滑走モード",

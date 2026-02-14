@@ -41,6 +41,7 @@ let mainWin = null;
 let fullscreenTarget = false;
 let savedMode = readSavedMode(); // user's preference from settings
 let isRecreating = false;
+let backgroundAudioEnabled = true; // default: audio continues when unfocused
 
 // Fullscreen IPC — transient toggle, doesn't change saved preference
 ipcMain.on('toggle-fullscreen', () => {
@@ -60,6 +61,14 @@ ipcMain.on('is-fullscreen', (event) => {
 // Display mode IPC — used by settings, persists preference
 ipcMain.on('set-display-mode', (_event, mode) => {
   applyDisplayMode(mode);
+});
+
+// Background audio IPC — controls whether audio continues when window loses focus
+ipcMain.on('set-background-throttling', (_event, enabled) => {
+  backgroundAudioEnabled = enabled;
+  if (mainWin) {
+    mainWin.webContents.setBackgroundThrottling(!enabled);
+  }
 });
 
 function applyDisplayMode(mode) {
@@ -162,6 +171,9 @@ function createWindow(opts = {}) {
     ? path.join(process.resourcesPath, 'dist', 'index.html')
     : path.join(__dirname, '..', 'dist', 'index.html');
   win.loadFile(distPath);
+
+  // Apply background audio setting (persisted across window recreations)
+  win.webContents.setBackgroundThrottling(!backgroundAudioEnabled);
 
   // Open external links (e.g. GitHub) in the system browser
   win.webContents.setWindowOpenHandler(({ url }) => {

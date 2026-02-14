@@ -45,10 +45,15 @@ case "${1:-}" in
     echo "=== Packaging for all platforms ==="
     cd electron && npx electron-builder --linux --win --mac
     ;;
-  *)
+  "")
     echo "=== Launching Electron ==="
     cd electron && npx electron . --class=LesAiguillesBlanches
     exit 0
+    ;;
+  *)
+    echo "Error: unknown option '$1'" >&2
+    echo "Usage: $0 [--pack | --pack-win | --pack-mac | --pack-all]" >&2
+    exit 1
     ;;
 esac
 echo ""

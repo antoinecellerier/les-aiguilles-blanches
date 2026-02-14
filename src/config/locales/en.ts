@@ -87,6 +87,7 @@ const en: Record<string, string> = {
   ambienceVolume: "Ambience",
   mute: "Mute",
 
+  backgroundAudio: "Background Audio",
   // Bonus
   bonus: "Bonus",
   skiMode: "Descent Mode",

@@ -41,7 +41,7 @@ snow-groomer/
 ├── test-update-check.sh    # Test version update check banner locally
 ├── electron/               # Optional desktop wrapper (Electron)
 │   ├── main.cjs            # Electron main process — window management, display modes, IPC, xdg integration
-│   ├── preload.cjs         # contextBridge API (quit, fullscreen, display mode)
+│   ├── preload.cjs         # contextBridge API (quit, fullscreen, display mode, background audio)
 │   ├── package.json        # Separate deps, electron-builder config (Linux/Win/Mac targets)
 │   ├── generate-icon.cjs   # Generates app icon at all sizes natively (16–512px)
 │   ├── afterPack.cjs       # Post-build cleanup (strips Vulkan SwiftShader, source maps)
@@ -1483,7 +1483,7 @@ Optional desktop packaging via `electron/`. Keeps Electron deps out of the main 
 ### Key Files
 
 - `main.cjs` — Electron main process: window creation, display mode management (windowed/fullscreen/borderless), F11 toggle, xdg desktop integration (Linux/Wayland), external link handling
-- `preload.cjs` — contextBridge API exposing `electronAPI` (quit, fullscreen, display mode). Must inline all values — preload sandbox forbids `require()` of other files
+- `preload.cjs` — contextBridge API exposing `electronAPI` (quit, fullscreen, display mode, background audio). Must inline all values — preload sandbox forbids `require()` of other files
 - `afterPack.cjs` — Post-build hook: strips Vulkan SwiftShader and source maps (~5MB per platform)
 - `generate-icon.cjs` — Renders pixel-art groomer icon natively at 7 sizes (16–512px) with progressive detail reduction. Outputs to `icons/` (bundled in asar) and `build/icons/` (for electron-builder)
 
@@ -1492,6 +1492,7 @@ Optional desktop packaging via `electron/`. Keeps Electron deps out of the main 
 - **Display mode persistence**: Saved to JSON in `app.getPath('userData')` (not localStorage) so it can be read synchronously before window creation — avoids startup flicker. F11 toggles are transient and don't overwrite the saved preference.
 - **Window recreation**: `frame` property can't be changed at runtime. Switching windowed↔borderless requires destroying and recreating the BrowserWindow. `isRecreating` flag prevents `window-all-closed` from quitting during recreation.
 - **Wayland icon**: `BrowserWindow({ icon })` only works on X11. On Wayland, the taskbar icon comes from the `.desktop` file matched via `StartupWMClass`. Runtime `xdg-icon-resource`/`xdg-desktop-menu` install handles this on first launch (idempotent).
+- **Background audio**: Setting in Audio section (desktop only, default: on). Uses `AudioContext.suspend()`/`resume()` on `window` blur/focus events for instant mute. `setBackgroundThrottling` as complementary CPU optimization. State tracked in main process to survive window recreation.
 - **PipeWire audio**: Stream name and icon are hardcoded to "Chromium" in Chromium's `pulse_util.cc`. No workaround until [electron/electron#49270](https://github.com/electron/electron/pull/49270) merges.
 - **Cross-compilation**: Windows builds work from Linux via Wine. macOS zip builds work but can't be code-signed (requires macOS).
 - **Size optimization**: `electronLanguages` strips 40 unused Chromium locales. `afterPack.cjs` removes Vulkan SwiftShader and source maps. ~99MB AppImage (floor is the Chromium binary).

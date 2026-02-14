@@ -87,6 +87,7 @@ const nb: Record<string, string> = {
   ambienceVolume: "Atmosfære",
   mute: "Demp",
 
+  backgroundAudio: "Bakgrunnslyd",
   // Gameplay
   bonus: "Bonus",
   skiMode: "Utforkjøring",

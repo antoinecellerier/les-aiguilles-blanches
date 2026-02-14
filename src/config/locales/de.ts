@@ -91,6 +91,7 @@ const de: Record<string, string> = {
   ambienceVolume: "Ambiente",
   mute: "Stumm",
 
+  backgroundAudio: "Hintergrundaudio",
   // Gameplay
   bonus: "Bonus",
   skiMode: "Abfahrtsmodus",

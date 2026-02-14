@@ -121,6 +121,15 @@ window.addEventListener('load', () => {
   // Initialize audio system
   AudioSystem.getInstance().init(window.game);
 
+  // Sync background audio setting with Electron (default: on)
+  if (isDesktopApp()) {
+    const bgAudioOn = getString(STORAGE_KEYS.BACKGROUND_AUDIO) !== 'false';
+    AudioSystem.getInstance().setBackgroundAudio(bgAudioOn);
+    if (!bgAudioOn) {
+      window.electronAPI!.setBackgroundAudio(false);
+    }
+  }
+
   // Attach canvas touch detection for Firefox desktop touchscreens
   if (window.game.canvas) {
     attachCanvasTouchDetect(window.game.canvas);

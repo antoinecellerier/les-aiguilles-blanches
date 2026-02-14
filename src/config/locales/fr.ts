@@ -90,6 +90,7 @@ const fr: Record<string, string> = {
   ambienceVolume: "Ambiance",
   mute: "Muet",
 
+  backgroundAudio: "Audio en arrière-plan",
   // Bonus
   bonus: "Bonus",
   skiMode: "Mode de descente",
