@@ -55,4 +55,8 @@ export const GAME_EVENTS = {
   MUTE_CHANGED: 'muteChanged',
   /** DialogueScene → GameScene: all dialogues dismissed via ESC/B (not advanced) */
   DIALOGUE_DISMISSED: 'dialogueDismissed',
+  /** HazardSystem → GameScene: show a dialogue by key */
+  SHOW_DIALOGUE: 'showDialogue',
+  /** HazardSystem → GameScene: trigger game over (won: boolean, reason: string) */
+  HAZARD_GAME_OVER: 'hazardGameOver',
 } as const;

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, type Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { THEME } from '../config/theme';
+import { GAME_EVENTS } from '../types/GameSceneInterface';
 
 export interface AvalancheZone extends Phaser.GameObjects.Rectangle {
   avalancheRisk: number;
@@ -19,6 +20,10 @@ export class HazardSystem {
 
   /** Optional sound callback: 1 = warning1, 2 = warning2, 3 = trigger */
   onAvalancheSound: ((level: number) => void) | null = null;
+
+  /** Query callbacks — set by owning scene before createAvalancheZones() */
+  isGameOver: () => boolean = () => false;
+  isGrooming: () => boolean = () => false;
 
   /** Multiplier for risk accumulation rate (default 1.0, higher = faster trigger). */
   riskMultiplier = 1.0;
@@ -47,10 +52,6 @@ export class HazardSystem {
     level: Level,
     tileSize: number,
     groomer: Phaser.Physics.Arcade.Sprite,
-    isGameOver: () => boolean,
-    isGrooming: () => boolean,
-    showDialogue: (key: string) => void,
-    gameOver: (won: boolean, reason: string) => void,
     avoidRects?: { startY: number; endY: number; leftX: number; rightX: number }[],
     avoidPoints?: { x: number; y: number }[],
     pistePath?: { centerX: number; width: number }[]
@@ -225,7 +226,7 @@ export class HazardSystem {
       groomer,
       avalancheGroup,
       ((_groomer: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile, zoneObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile) => {
-        this.handleAvalancheZone(groomer, zoneObj as Phaser.GameObjects.GameObject, isGameOver, isGrooming, showDialogue, level, tileSize, gameOver);
+        this.handleAvalancheZone(groomer, zoneObj as Phaser.GameObjects.GameObject, level, tileSize);
       }) as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
       undefined,
       this
@@ -237,14 +238,10 @@ export class HazardSystem {
   private handleAvalancheZone(
     groomer: Phaser.Physics.Arcade.Sprite,
     zoneObj: Phaser.GameObjects.GameObject,
-    isGameOver: () => boolean,
-    isGrooming: () => boolean,
-    showDialogue: (key: string) => void,
     level: Level,
-    tileSize: number,
-    gameOver: (won: boolean, reason: string) => void
+    tileSize: number
   ): void {
-    if (isGameOver() || this.avalancheTriggered) return;
+    if (this.isGameOver() || this.avalancheTriggered) return;
 
     const zone = zoneObj as AvalancheZone;
 
@@ -256,7 +253,7 @@ export class HazardSystem {
     const riskAlpha = 0.05 + zone.avalancheRisk * 0.4;
     this.drawZonePolygon(zone.zoneVisual, zone.zonePoints, THEME.colors.avalancheDanger, Math.min(0.5, riskAlpha));
 
-    if (isGrooming()) {
+    if (this.isGrooming()) {
       zone.avalancheRisk += BALANCE.AVALANCHE_RISK_GROOMING * this.riskMultiplier;
     }
 
@@ -269,19 +266,17 @@ export class HazardSystem {
       zone.warning2Fired = true;
       this.scene.cameras.main.shake(BALANCE.SHAKE_WARNING_2.duration, BALANCE.SHAKE_WARNING_2.intensity);
       this.onAvalancheSound?.(2);
-      showDialogue('avalancheWarning');
+      this.scene.game.events.emit(GAME_EVENTS.SHOW_DIALOGUE, 'avalancheWarning');
     }
 
     if (zone.avalancheRisk >= 1) {
-      this.triggerAvalanche(level, tileSize, showDialogue, gameOver);
+      this.triggerAvalanche(level, tileSize);
     }
   }
 
   private triggerAvalanche(
     level: Level,
-    tileSize: number,
-    showDialogue: (key: string) => void,
-    gameOver: (won: boolean, reason: string) => void
+    tileSize: number
   ): void {
     if (this.avalancheTriggered) return;
     this.avalancheTriggered = true;
@@ -303,11 +298,11 @@ export class HazardSystem {
     });
     avalancheParticles.setDepth(DEPTHS.WEATHER + 1);
 
-    showDialogue('avalancheTrigger');
+    this.scene.game.events.emit(GAME_EVENTS.SHOW_DIALOGUE, 'avalancheTrigger');
 
     this.avalancheTimer = this.scene.time.delayedCall(BALANCE.AVALANCHE_WIPEOUT_DELAY, () => {
       avalancheParticles.destroy();
-      gameOver(false, 'avalanche');
+      this.scene.game.events.emit(GAME_EVENTS.HAZARD_GAME_OVER, false, 'avalanche');
     });
   }
 

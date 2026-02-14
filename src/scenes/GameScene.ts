@@ -172,6 +172,8 @@ export default class GameScene extends Phaser.Scene {
   private boundResumeHandler = () => { this.resumeGame(); };
   private boundSkipHandler = (nextLevel: number) => { this.transitionToLevel(nextLevel); };
   private boundSkiRunHandler = () => { this.startSkiRun(); };
+  private boundShowDialogueHandler = (key: string) => { this.showDialogue(key); };
+  private boundHazardGameOverHandler = (won: boolean, reason: string) => { this.gameOver(won, reason); };
 
 
   constructor() {
@@ -435,14 +437,12 @@ export default class GameScene extends Phaser.Scene {
         else if (level === 2) this.engineSounds.playAvalancheWarning2();
         else if (level === 3) this.engineSounds.playAvalancheTrigger();
       };
+      this.hazardSystem.isGameOver = () => this.isGameOver;
+      this.hazardSystem.isGrooming = () => this.isGrooming;
       this.hazardSystem.createAvalancheZones(
         this.level,
         this.tileSize,
         this.groomer,
-        () => this.isGameOver,
-        () => this.isGrooming,
-        (key: string) => this.showDialogue(key),
-        (won: boolean, reason: string) => this.gameOver(won, reason),
         this.geometry.getCliffAvoidRects(this.tileSize),
         this.winchSystem.anchors?.map(a => ({ x: a.x, y: a.baseY })),
         this.geometry.pistePath
@@ -461,6 +461,8 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
     this.game.events.on(GAME_EVENTS.START_SKI_RUN, this.boundSkiRunHandler);
+    this.game.events.on(GAME_EVENTS.SHOW_DIALOGUE, this.boundShowDialogueHandler);
+    this.game.events.on(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
     this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
     
     
@@ -1963,6 +1965,8 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
     this.game.events.off(GAME_EVENTS.START_SKI_RUN, this.boundSkiRunHandler);
+    this.game.events.off(GAME_EVENTS.SHOW_DIALOGUE, this.boundShowDialogueHandler);
+    this.game.events.off(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
     this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
     this.game.events.off(GAME_EVENTS.DIALOGUE_DISMISSED);
 

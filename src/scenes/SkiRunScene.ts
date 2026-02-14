@@ -60,6 +60,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private boundTouchHandler = (data: TouchInputEvent) => { this.touchInput = data; };
   private boundPauseHandler = () => { this.pauseGame(); };
   private boundResumeHandler = () => { this.resumeGame(); };
+  private boundHazardGameOverHandler = () => { this.onWipeout('avalanche'); };
 
   // HUD elements
   private speedText!: Phaser.GameObjects.Text;
@@ -256,14 +257,12 @@ export default class SkiRunScene extends Phaser.Scene {
         else if (level === 2) this.skiSounds.playAvalancheWarning2();
         else if (level === 3) this.skiSounds.playAvalancheTrigger();
       };
+      this.hazardSystem.isGameOver = () => this.isCrashed || this.isFinished;
+      this.hazardSystem.isGrooming = () => false;
       this.hazardSystem.createAvalancheZones(
         this.level,
         tileSize,
         this.skier,
-        () => this.isCrashed || this.isFinished,
-        () => false, // skier is never grooming
-        () => {}, // no dialogue in ski runs
-        () => this.onWipeout('avalanche'),
         this.geometry.getCliffAvoidRects(tileSize),
         [],
         this.geometry.pistePath
@@ -304,6 +303,7 @@ export default class SkiRunScene extends Phaser.Scene {
     // Pause/resume
     this.game.events.on(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
+    this.game.events.on(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
 
     this.events.once('shutdown', this.shutdown, this);
   }
@@ -1066,6 +1066,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
     this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
+    this.game.events.off(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
   }
