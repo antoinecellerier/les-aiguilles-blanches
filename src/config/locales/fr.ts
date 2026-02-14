@@ -290,7 +290,7 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260214_date: "14 février 2026",
-  changelog_20260214: "🎪 Tricks et combos\n👁️ Meilleur contraste des pistes\n📱 Damage auto au treuil tactile\n⛷️ Icône du bouton saut à ski\n🏂 Position de recherche de vitesse",
+  changelog_20260214: "🎪 Tricks et combos\n🏂 Schuss et physique du halfpipe\n👁️ Meilleur contraste des pistes\n📱 Damage auto au treuil (tactile)\n♿ Mode contraste élevé",
   changelog_20260213_date: "13 février 2026",
   changelog_20260213: "🚩 Portes de slalom\n🏔️ Sauts à ski\n⚡ Performances améliorées\n🎹 Musique nocturne au piano\n🔊 Volume moteur réglable",
   changelog_20260212_date: "12 février 2026",

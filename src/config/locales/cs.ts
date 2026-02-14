@@ -284,7 +284,7 @@ const cs: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14. února 2026",
-  changelog_20260214: "🎪 Bodování triků & komba\n👁️ Lepší kontrast sjezdovek\n📱 Automatické planýrování při navijáku (dotyk)\n⛷️ Ikona tlačítka skoku\n🏂 Pozice schoulení",
+  changelog_20260214: "🎪 Bodování triků & komba\n🏂 Sjezdový postoj & fyzika halfpipe\n👁️ Lepší kontrast sjezdovek\n📱 Automatická úprava navijákem (dotyk)\n♿ Režim vysokého kontrastu",
   changelog_20260213_date: "13. února 2026",
   changelog_20260213: "🚩 Slalomové brány\n🏔️ Skoky na lyžích\n⚡ Vylepšený výkon\n🎹 Nokturní klavírní hudba\n🔊 Hlasitost motoru nastavitelná",
   changelog_20260212_date: "12. února 2026",

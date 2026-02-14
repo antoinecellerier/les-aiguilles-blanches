@@ -285,7 +285,7 @@ const nb: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14. februar 2026",
-  changelog_20260214: "🎪 Tricks & komboer\n👁️ Bedre pistekontrast\n📱 Auto-preparering ved vinsj (touch)\n⛷️ Skihoppknapp med ikon\n🏂 Hukstilling",
+  changelog_20260214: "🎪 Tricks & komboer\n🏂 Eggposisjon & halfpipe-fysikk\n👁️ Bedre pistekontrast\n📱 Auto-preparering ved vinsj (touch)\n♿ Høykontrastmodus",
   changelog_20260213_date: "13. februar 2026",
   changelog_20260213: "🚩 Slalomporter\n🏔️ Skihopp\n⚡ Forbedret ytelse\n🎹 Nocturne-pianomusikk\n🔊 Motorvolum justerbar",
   changelog_20260212_date: "12. februar 2026",

@@ -285,7 +285,7 @@ const fi: Record<string, string> = {
 
   // Changelog
   changelog_20260214_date: "14. helmikuuta 2026",
-  changelog_20260214: "🎪 Temppupisteet & kombot\n👁️ Parempi rinnekontrasti\n📱 Automaattinen tasaus vinssissä (kosketus)\n⛷️ Mäkihyppypainikkeen kuvake\n🏂 Kyykkyasento",
+  changelog_20260214: "🎪 Temppupisteet & kombot\n🏂 Muna-asento & halfpipe-fysiikka\n👁️ Parempi rinnekontrasti\n📱 Automaattinen kunnostus vinssillä (kosketus)\n♿ Korkean kontrastin tila",
   changelog_20260213_date: "13. helmikuuta 2026",
   changelog_20260213: "🚩 Pujotteluportit\n🏔️ Mäkihypyt\n⚡ Suorituskyky parannettu\n🎹 Nokturni-pianomusiikki\n🔊 Moottorin äänenvoimakkuus säädettävä",
   changelog_20260212_date: "12. helmikuuta 2026",

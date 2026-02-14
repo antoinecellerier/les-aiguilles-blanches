@@ -236,7 +236,7 @@ const es: Record<string, string> = {
   
   // Changelog
   changelog_20260214_date: "14 de febrero de 2026",
-  changelog_20260214: "🎪 Puntuación de trucos y combos\n👁️ Mejor contraste de pistas\n📱 Preparación automática con cabrestante táctil\n⛷️ Icono del botón de salto\n🏂 Posición de velocidad",
+  changelog_20260214: "🎪 Puntuación de trucos y combos\n🏂 Posición de huevo y física del halfpipe\n👁️ Mejor contraste de pistas\n📱 Preparación auto con cabrestante (táctil)\n♿ Modo alto contraste",
   changelog_20260213_date: "13 de febrero de 2026",
   changelog_20260213: "🚩 Puertas de eslalon\n🏔️ Saltos de esquí\n⚡ Rendimiento mejorado\n🎹 Música nocturna de piano\n🔊 Volumen del motor ajustable",
   changelog_20260212_date: "12 de febrero de 2026",
