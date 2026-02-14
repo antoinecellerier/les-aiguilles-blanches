@@ -23,12 +23,14 @@
       {
         "from": "../dist",
         "to": "dist",
-        "filter": ["**/*"]
+        "filter": ["**/*", "!**/*.map"]
       }
     ],
     "directories": {
       "output": "../electron-dist"
     },
+    "afterPack": "./afterPack.cjs",
+    "electronLanguages": ["cs", "de", "en-US", "en-GB", "es", "fi", "fr", "it", "ja", "ko", "nb", "pl", "sk", "sv", "tr"],
     "linux": {
       "target": [
         "AppImage"
