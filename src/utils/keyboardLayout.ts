@@ -4,7 +4,7 @@
 
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from './gamepad';
 import { STORAGE_KEYS } from '../config/storageKeys';
-import { getString, setString, getJSON } from './storage';
+import { getString, setString, getJSON, setJSON } from './storage';
 import { t } from '../config/localization';
 
 export type KeyboardLayout = 'qwerty' | 'azerty' | 'qwertz';
@@ -26,11 +26,13 @@ const LAYOUT_NAMES: Record<KeyboardLayout, { up: string; down: string; left: str
 /**
  * Detect keyboard layout using the Keyboard API or key event analysis
  */
-export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
+export async function detectKeyboardLayout(force = false): Promise<KeyboardLayout> {
   // Check if already detected and stored
-  const stored = getString(STORAGE_KEYS.KEYBOARD_LAYOUT);
-  if (stored && isValidLayout(stored)) {
-    return stored as KeyboardLayout;
+  if (!force) {
+    const stored = getString(STORAGE_KEYS.KEYBOARD_LAYOUT);
+    if (stored && isValidLayout(stored)) {
+      return stored as KeyboardLayout;
+    }
   }
 
   // Try Keyboard Layout Map API (Chrome/Edge, requires secure context)
@@ -38,18 +40,29 @@ export async function detectKeyboardLayout(): Promise<KeyboardLayout> {
     try {
       const layoutMap = await navigator.keyboard.getLayoutMap();
       
-      // Check what character is on the physical 'KeyQ' position
+      // Read characters at physical WASD positions
       const qKey = layoutMap.get('KeyQ');
       const wKey = layoutMap.get('KeyW');
+      const aKey = layoutMap.get('KeyA');
+      const sKey = layoutMap.get('KeyS');
+      const dKey = layoutMap.get('KeyD');
       
+      // Classify into named layout for the layout selector UI
       let detected: KeyboardLayout = 'qwerty';
-      
       if (qKey === 'a' || qKey === 'A') {
-        // AZERTY: Q position has A
         detected = 'azerty';
       } else if (wKey === 'z' || wKey === 'Z') {
-        // QWERTZ: W position has Z  
         detected = 'qwertz';
+      }
+      
+      // Store the actual keyCodes for the physical WASD positions
+      // so any layout (Dvorak, Colemak, etc.) gets correct movement keys
+      if (wKey && aKey && sKey && dKey) {
+        const up = wKey.toUpperCase().charCodeAt(0);
+        const left = aKey.toUpperCase().charCodeAt(0);
+        const down = sKey.toUpperCase().charCodeAt(0);
+        const right = dKey.toUpperCase().charCodeAt(0);
+        setJSON(STORAGE_KEYS.DETECTED_MOVEMENT_KEYS, { up, down, left, right });
       }
       
       setString(STORAGE_KEYS.KEYBOARD_LAYOUT, detected);
@@ -100,11 +113,12 @@ function isValidLayout(layout: string): boolean {
 }
 
 /**
- * Get default key bindings for the current layout
+ * Get default key bindings for the current layout.
+ * Prefers API-detected keyCodes (works for any layout), falls back to named layout.
  */
 export function getLayoutDefaults(): { up: number; down: number; left: number; right: number; groom: number; winch: number } {
-  const layout = getKeyboardLayout();
-  const keys = LAYOUT_DEFAULTS[layout];
+  const detected = getJSON<{ up: number; down: number; left: number; right: number }>(STORAGE_KEYS.DETECTED_MOVEMENT_KEYS, null as any);
+  const keys = detected ?? LAYOUT_DEFAULTS[getKeyboardLayout()];
   return {
     ...keys,
     groom: 32,   // Space

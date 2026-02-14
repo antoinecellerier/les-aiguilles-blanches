@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   ACCESSIBILITY: 'snowGroomer_accessibility',
   KEYBOARD_LAYOUT: 'snowGroomer_keyboardLayout',
   LAYOUT_DETECTED: 'snowGroomer_layoutDetected',
+  DETECTED_MOVEMENT_KEYS: 'snowGroomer_detectedMovementKeys',
   BINDINGS: 'snowGroomer_bindings',
   BINDINGS_VERSION: 'snowGroomer_bindingsVersion',
   DISPLAY_NAMES: 'snowGroomer_displayNames',

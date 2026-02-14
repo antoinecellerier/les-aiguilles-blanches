@@ -1,7 +1,7 @@
-import { getLayoutDefaults, setKeyboardLayout, type KeyboardLayout } from './keyboardLayout';
+import { getLayoutDefaults, setKeyboardLayout, detectKeyboardLayout, type KeyboardLayout } from './keyboardLayout';
 import { isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDefaultGamepadBindings, getButtonName, getConnectedControllerType, captureGamepadButtons, type GamepadBindings } from './gamepad';
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
-import { getString, setString } from './storage';
+import { getString, setString, removeKey } from './storage';
 import { playClick, playCancel } from '../systems/UISounds';
 import { t } from '../config/localization';
 
@@ -222,6 +222,9 @@ export class KeybindingManager {
   // ── Reset ──────────────────────────────────────────────────────
 
   reset(): void {
+    // Clear stored layout and detected keys so detection re-probes the browser API
+    removeKey(STORAGE_KEYS.DETECTED_MOVEMENT_KEYS);
+    removeKey(STORAGE_KEYS.LAYOUT_DETECTED);
     setKeyboardLayout('qwerty');
     this.bindings = getLayoutDefaults();
     this.displayNames = {};
@@ -229,7 +232,13 @@ export class KeybindingManager {
     this.gamepadBindings = getDefaultGamepadBindings();
     saveGamepadBindings(this.gamepadBindings);
     this.onStatus(t('controlsReset'));
-    this.scene.time.delayedCall(800, () => this.onRestart());
+    // Re-detect layout asynchronously, then apply detected defaults
+    detectKeyboardLayout(true).then(() => {
+      this.bindings = getLayoutDefaults();
+      this.displayNames = {};
+      this.save();
+      this.onRestart();
+    });
   }
 
   setLayout(layout: KeyboardLayout): void {
