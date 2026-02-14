@@ -347,3 +347,26 @@ class TestZoomStability:
         assert abs(z2 - z1) < 0.01, (
             f"Zoom should round-trip: initial={z1:.4f}, after={z2:.4f}"
         )
+
+    def test_zoom_not_inflated_after_mobile_to_desktop(self, touch_page: Page):
+        """Regression: resizing from mobile to desktop must not leave zoom > 1.0.
+
+        When starting on a small mobile viewport, tileSize is computed for that
+        screen. Resizing to a larger desktop viewport should show more world
+        (zoom ≤ 1.0), not the same world at oversized pixels (zoom > 1.0).
+        """
+        skip_to_level(touch_page, 7)
+        dismiss_dialogues(touch_page)
+        touch_page.wait_for_timeout(500)
+
+        # Resize to a large desktop viewport
+        desktop = {"width": 980, "height": 1080}
+        _trigger_resize(touch_page, desktop)
+        _wait_for_hud_restart(touch_page)
+
+        zoom = touch_page.evaluate(
+            "() => window.game.scene.getScene('GameScene').cameras.main.zoom"
+        )
+        assert zoom <= 1.01, (
+            f"After mobile→desktop resize, zoom should be ≤ 1.0 (got {zoom:.3f})"
+        )

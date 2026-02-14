@@ -1661,9 +1661,10 @@ export default class GameScene extends Phaser.Scene {
 
     // Scale so world appears similarly sized regardless of orientation.
     // Use diagonal ratio — orientation-independent measure of viewport size.
+    // Cap at 1.0: larger viewports show more world, not bigger pixels.
     const origDiag = Math.sqrt(this.originalScreenWidth ** 2 + this.originalScreenHeight ** 2);
     const newDiag = Math.sqrt(width ** 2 + height ** 2);
-    const zoom = Math.max(0.5, Math.min(newDiag / origDiag, 1.5));
+    const zoom = Math.max(0.5, Math.min(newDiag / origDiag, 1.0));
 
     // Resize screen-space overlays before camera branch
     this.weatherSystem.handleFrostResize();
