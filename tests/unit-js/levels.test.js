@@ -182,8 +182,12 @@ describe('computeTimeLimit', () => {
 
     it('matches LEVELS auto-applied values', () => {
         LEVELS.forEach((level, i) => {
-            const computed = computeTimeLimit(level);
-            expect(level.timeLimit, `Level ${i} timeLimit mismatch`).toBe(computed);
+            if (level.timeLimitOverride) {
+                expect(level.timeLimit, `Level ${i} timeLimit override`).toBe(level.timeLimitOverride);
+            } else {
+                const computed = computeTimeLimit(level);
+                expect(level.timeLimit, `Level ${i} timeLimit mismatch`).toBe(computed);
+            }
         });
     });
 });

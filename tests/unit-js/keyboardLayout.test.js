@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   getKeyboardLayout, setKeyboardLayout,
   getLayoutDefaults, getMovementKeyNames, getMovementKeysString,
-  getGroomKeyName, getWinchKeyName,
+  getGroomKeyName, getWinchKeyName, t,
 } from './config-wrappers/index.js';
 
 describe('keyboardLayout', () => {
@@ -122,16 +122,18 @@ describe('keyboardLayout', () => {
   });
 
   describe('getGroomKeyName', () => {
-    it('includes SPACE in the name', () => {
+    it('includes localized SPACE in the name', () => {
       const name = getGroomKeyName();
-      expect(name.toUpperCase()).toContain('SPACE');
+      const localizedSpace = t('key_space');
+      expect(name.toUpperCase()).toContain(localizedSpace.toUpperCase());
     });
   });
 
   describe('getWinchKeyName', () => {
-    it('includes SHIFT in the name', () => {
+    it('includes localized SHIFT in the name', () => {
       const name = getWinchKeyName();
-      expect(name.toUpperCase()).toContain('SHIFT');
+      const localizedShift = t('key_shift');
+      expect(name.toUpperCase()).toContain(localizedShift.toUpperCase());
     });
   });
 });
