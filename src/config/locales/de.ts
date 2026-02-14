@@ -305,6 +305,15 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   tauntSkiWipeout3: "Die Pistenrettung lacht schon. Die haben alles gesehen.",
   tauntSkiWipeout4: "Das passiert, wenn man seine eigene Piste fährt.",
   tauntSkiWipeout5: "Selbst die Steinböcke haben bei der Landung zusammengezuckt.",
+  // Key names
+  key_space: "LEER",
+  key_shift: "UMSCHALT",
+  key_ctrl: "STRG",
+  key_alt: "ALT",
+  key_enter: "EINGABE",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "ENTF"
 };
 
 export default de;

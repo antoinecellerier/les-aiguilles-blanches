@@ -306,7 +306,16 @@ changelog_20260211: "⛷️ Zjazd na nartach po preparacji\n🎯 Jakość prepar
   changelog_20260204_date: "4 lutego 2026",
   changelog_20260204: "🎮 Obsługa gamepada\n📱 Sterowanie dotykowe\n💪 Kondycja\n💾 Zapis postępu\n♿ Dostępność",
   changelog_20260203_date: "3 lutego 2026",
-  changelog_20260203: "🚜 Premiera: 9 poziomów, samouczek\n❄️ Ratrakowanie, paliwo, lawiny\n🏆 Napisy i progresja"
+  changelog_20260203: "🚜 Premiera: 9 poziomów, samouczek\n❄️ Ratrakowanie, paliwo, lawiny\n🏆 Napisy i progresja",
+  // Key names
+  key_space: "SPACJA",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default pl;

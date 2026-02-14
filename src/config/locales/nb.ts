@@ -307,7 +307,16 @@ changelog_20260211: "⛷️ Skikjøring etter preparering\n🎯 Prepareringskval
   changelog_20260204_date: "4. februar 2026",
   changelog_20260204: "🎮 Gamepad-støtte\n📱 Berøringskontroller\n💪 Utholdenhet\n💾 Lagre fremgang\n♿ Tilgjengelighet",
   changelog_20260203_date: "3. februar 2026",
-  changelog_20260203: "🚜 Lansering: 9 nivåer, opplæring\n❄️ Preparering, drivstoff, skred\n🏆 Takk og progresjon"
+  changelog_20260203: "🚜 Lansering: 9 nivåer, opplæring\n❄️ Preparering, drivstoff, skred\n🏆 Takk og progresjon",
+  // Key names
+  key_space: "MELLOMROM",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "SLETT"
 };
 
 export default nb;

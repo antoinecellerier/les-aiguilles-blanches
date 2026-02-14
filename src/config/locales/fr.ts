@@ -312,7 +312,16 @@ changelog_20260211: "⛷️ Descente à ski après le damage\n🎯 Qualité de d
   changelog_20260204_date: "4 février 2026",
   changelog_20260204: "🎮 Support manette\n📱 Contrôles tactiles\n💪 Endurance\n💾 Sauvegarde\n♿ Accessibilité",
   changelog_20260203_date: "3 février 2026",
-  changelog_20260203: "🚜 Lancement : 9 niveaux, tutoriel\n❄️ Damage, carburant, avalanches\n🏆 Crédits et progression"
+  changelog_20260203: "🚜 Lancement : 9 niveaux, tutoriel\n❄️ Damage, carburant, avalanches\n🏆 Crédits et progression",
+  // Key names
+  key_space: "ESPACE",
+  key_shift: "MAJ",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTRÉE",
+  key_tab: "TAB",
+  key_esc: "ÉCHAP",
+  key_del: "SUPPR"
 };
 
 export default fr;

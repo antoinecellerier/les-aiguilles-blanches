@@ -306,7 +306,16 @@ changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\
   changelog_20260204_date: "4. února 2026",
   changelog_20260204: "🎮 Podpora gamepadu\n📱 Dotykové ovládání\n💪 Výdrž\n💾 Uložení postupu\n♿ Přístupnost",
   changelog_20260203_date: "3. února 2026",
-  changelog_20260203: "🚜 Spuštění: 9 úrovní, výuka\n❄️ Úprava, palivo, laviny\n🏆 Titulky a postup"
+  changelog_20260203: "🚜 Spuštění: 9 úrovní, výuka\n❄️ Úprava, palivo, laviny\n🏆 Titulky a postup",
+  // Key names
+  key_space: "MEZERNÍK",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default cs;

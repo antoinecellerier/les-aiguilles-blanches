@@ -5,6 +5,7 @@
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from './gamepad';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString, setString, getJSON } from './storage';
+import { t } from '../config/localization';
 
 export type KeyboardLayout = 'qwerty' | 'azerty' | 'qwertz';
 
@@ -142,18 +143,25 @@ export function getMovementKeysString(): string {
 }
 
 /** Look up a single key's display name from saved bindings. */
-function getSavedKeyName(bindingKey: string, fallback: string): string {
+function getSavedKeyName(bindingKey: string, fallbackKey: string): string {
   const names = getJSON<Record<string, string>>(STORAGE_KEYS.DISPLAY_NAMES, {});
   const bindings = getJSON<Record<string, number>>(STORAGE_KEYS.BINDINGS, {});
   const code = bindings[bindingKey];
-  return (code != null && names[code]) ? names[code].toUpperCase() : fallback;
+  if (code != null && names[code]) return names[code].toUpperCase();
+  // Special keys: resolve via locale (e.g. 'key_space' → 'ESPACE')
+  const localeKeys: Record<number, string> = {
+    32: 'key_space', 16: 'key_shift', 17: 'key_ctrl', 18: 'key_alt',
+    13: 'key_enter', 9: 'key_tab', 27: 'key_esc', 46: 'key_del',
+  };
+  if (code != null && localeKeys[code]) return t(localeKeys[code]);
+  return fallbackKey;
 }
 
 /**
  * Get the display name for the groom key (default: SPACE)
  */
 export function getGroomKeyName(): string {
-  const keyName = getSavedKeyName('groom', 'SPACE');
+  const keyName = getSavedKeyName('groom', t('key_space'));
   const gamepads = navigator.getGamepads?.() || [];
   const hasGamepad = Array.from(gamepads).some(gp => gp !== null);
   if (!hasGamepad) return keyName;
@@ -165,7 +173,7 @@ export function getGroomKeyName(): string {
  * Get the display name for the winch key (default: SHIFT)
  */
 export function getWinchKeyName(): string {
-  const keyName = getSavedKeyName('winch', 'SHIFT');
+  const keyName = getSavedKeyName('winch', t('key_shift'));
   const gamepads = navigator.getGamepads?.() || [];
   const hasGamepad = Array.from(gamepads).some(gp => gp !== null);
   if (!hasGamepad) return keyName;

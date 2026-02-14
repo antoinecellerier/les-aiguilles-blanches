@@ -307,7 +307,16 @@ changelog_20260211: "⛷️ Skidåkning efter preparering\n🎯 Prepareringskval
   changelog_20260204_date: "4 februari 2026",
   changelog_20260204: "🎮 Gamepad-stöd\n📱 Pekskärmskontroller\n💪 Uthållighet\n💾 Spara framsteg\n♿ Tillgänglighet",
   changelog_20260203_date: "3 februari 2026",
-  changelog_20260203: "🚜 Lansering: 9 nivåer, handledning\n❄️ Preparering, bränsle, laviner\n🏆 Tack och progression"
+  changelog_20260203: "🚜 Lansering: 9 nivåer, handledning\n❄️ Preparering, bränsle, laviner\n🏆 Tack och progression",
+  // Key names
+  key_space: "BLANKSTEG",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default sv;

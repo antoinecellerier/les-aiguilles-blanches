@@ -305,6 +305,15 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   tauntSkiWipeout3: "Il soccorso piste sta già ridendo. Hanno visto tutto.",
   tauntSkiWipeout4: "Ecco cosa succede a sciare sulla propria pista.",
   tauntSkiWipeout5: "Anche gli stambecchi hanno fatto una smorfia per quell'atterraggio.",
+  // Key names
+  key_space: "SPAZIO",
+  key_shift: "MAIUSC",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "INVIO",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "CANC"
 };
 
 export default it;

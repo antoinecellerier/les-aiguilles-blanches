@@ -307,7 +307,16 @@ changelog_20260211: "⛷️ Laskettelulasku tamppauksen jälkeen\n🎯 Tamppauks
   changelog_20260204_date: "4. helmikuuta 2026",
   changelog_20260204: "🎮 Peliohjaintuki\n📱 Kosketusohjaus\n💪 Kestävyys\n💾 Tallenna edistyminen\n♿ Esteettömyys",
   changelog_20260203_date: "3. helmikuuta 2026",
-  changelog_20260203: "🚜 Julkaisu: 9 tasoa, opastus\n❄️ Tamppaus, polttoaine, lumivyöryt\n🏆 Kiitokset ja eteneminen"
+  changelog_20260203: "🚜 Julkaisu: 9 tasoa, opastus\n❄️ Tamppaus, polttoaine, lumivyöryt\n🏆 Kiitokset ja eteneminen",
+  // Key names
+  key_space: "VÄLILYÖNTI",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default fi;

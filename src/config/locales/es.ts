@@ -305,6 +305,15 @@ changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calida
   tauntSkiWipeout3: "Los socorristas ya se ríen. Lo vieron todo.",
   tauntSkiWipeout4: "Eso pasa por esquiar una pista que TÚ preparaste.",
   tauntSkiWipeout5: "Hasta los íbices hicieron una mueca con ese aterrizaje.",
+  // Key names
+  key_space: "ESPACIO",
+  key_shift: "MAYÚS",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "INTRO",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "SUPR"
 };
 
 export default es;

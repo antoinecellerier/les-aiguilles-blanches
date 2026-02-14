@@ -306,7 +306,16 @@ changelog_20260211: "⛷️ Hazırlama sonrası kayak inişi\n🎯 Hazırlama ka
   changelog_20260204_date: "4 Şubat 2026",
   changelog_20260204: "🎮 Gamepad desteği\n📱 Dokunmatik kontrol\n💪 Dayanıklılık\n💾 İlerleme kaydetme\n♿ Erişilebilirlik",
   changelog_20260203_date: "3 Şubat 2026",
-  changelog_20260203: "🚜 Lansman: 9 bölüm, öğretici\n❄️ Pist bakımı, yakıt, çığlar\n🏆 Jenerik ve ilerleme"
+  changelog_20260203: "🚜 Lansman: 9 bölüm, öğretici\n❄️ Pist bakımı, yakıt, çığlar\n🏆 Jenerik ve ilerleme",
+  // Key names
+  key_space: "BOŞLUK",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "SİL"
 };
 
 export default tr;

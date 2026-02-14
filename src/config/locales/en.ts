@@ -306,7 +306,16 @@ changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔�
   changelog_20260204_date: "February 4, 2026",
   changelog_20260204: "🎮 Gamepad support\n📱 Touch controls\n💪 Stamina\n💾 Save progress\n♿ Accessibility",
   changelog_20260203_date: "February 3, 2026",
-  changelog_20260203: "🚜 Launch: 9 levels, tutorial\n❄️ Grooming, fuel, avalanches\n🏆 Credits and progression"
+  changelog_20260203: "🚜 Launch: 9 levels, tutorial\n❄️ Grooming, fuel, avalanches\n🏆 Credits and progression",
+  // Key names
+  key_space: "SPACE",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default en;

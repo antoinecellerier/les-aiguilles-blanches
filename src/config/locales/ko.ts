@@ -306,7 +306,16 @@ changelog_20260211: "⛷️ 정비 후 스키 활강\n🎯 정비 품질\n🏔�
   changelog_20260204_date: "2026년 2월 4일",
   changelog_20260204: "🎮 게임패드 지원\n📱 터치 조작\n💪 스태미나\n💾 저장 기능\n♿ 접근성",
   changelog_20260203_date: "2026년 2월 3일",
-  changelog_20260203: "🚜 출시: 9개 스테이지, 튜토리얼\n❄️ 정설, 연료, 눈사태\n🏆 크레딧과 진행"
+  changelog_20260203: "🚜 출시: 9개 스테이지, 튜토리얼\n❄️ 정설, 연료, 눈사태\n🏆 크레딧과 진행",
+  // Key names
+  key_space: "스페이스",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default ko;

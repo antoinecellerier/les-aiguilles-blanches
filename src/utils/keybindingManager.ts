@@ -92,14 +92,19 @@ export class KeybindingManager {
 
   getKeyName(keyCode: number): string {
     if (!keyCode) return '?';
-    if (this.displayNames[keyCode]) return this.displayNames[keyCode];
 
-    const specialKeys: Record<number, string> = {
-      38: '↑', 40: '↓', 37: '←', 39: '→',
-      32: 'SPACE', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT',
-      13: 'ENTER', 9: 'TAB', 27: 'ESC', 8: '⌫', 46: 'DEL',
+    // Localized special key names (resolved live so language changes take effect)
+    const localeKeys: Record<number, string> = {
+      32: 'key_space', 16: 'key_shift', 17: 'key_ctrl', 18: 'key_alt',
+      13: 'key_enter', 9: 'key_tab', 27: 'key_esc', 46: 'key_del',
     };
-    if (specialKeys[keyCode]) return specialKeys[keyCode];
+    const symbolKeys: Record<number, string> = {
+      38: '↑', 40: '↓', 37: '←', 39: '→', 8: '⌫',
+    };
+    if (symbolKeys[keyCode]) return symbolKeys[keyCode];
+    if (localeKeys[keyCode]) return t(localeKeys[keyCode]);
+
+    if (this.displayNames[keyCode]) return this.displayNames[keyCode];
     if (keyCode >= 65 && keyCode <= 90) return String.fromCharCode(keyCode);
     if (keyCode >= 48 && keyCode <= 57) return String.fromCharCode(keyCode);
     return keyCode.toString();
@@ -126,14 +131,11 @@ export class KeybindingManager {
 
     const actionId = this.rebindingAction as keyof KeyBindings;
     this.bindings[actionId] = keyCode;
-    // Determine display name: prefer special key names (SPACE, SHIFT, etc.)
-    const specialKeys: Record<number, string> = {
-      38: '↑', 40: '↓', 37: '←', 39: '→',
-      32: 'SPACE', 16: 'SHIFT', 17: 'CTRL', 18: 'ALT',
-      13: 'ENTER', 9: 'TAB', 27: 'ESC', 8: '⌫', 46: 'DEL',
-    };
-    if (specialKeys[keyCode]) {
-      this.displayNames[keyCode] = specialKeys[keyCode];
+    // Special keys (SPACE, SHIFT, etc.) are resolved live via t() in getKeyName,
+    // so don't persist a display name for them — only store names for regular keys.
+    const specialKeyCodes = new Set([38, 40, 37, 39, 32, 16, 17, 18, 13, 9, 27, 8, 46]);
+    if (specialKeyCodes.has(keyCode)) {
+      delete this.displayNames[keyCode];
     } else if (keyChar.length === 1) {
       this.displayNames[keyCode] = keyChar.toUpperCase();
     } else {

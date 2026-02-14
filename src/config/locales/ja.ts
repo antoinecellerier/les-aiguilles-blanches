@@ -306,7 +306,16 @@ changelog_20260211: "⛷️ 整備後のスキー滑走\n🎯 整備品質\n🏔
   changelog_20260204_date: "2026年2月4日",
   changelog_20260204: "🎮 ゲームパッド対応\n📱 タッチ操作\n💪 スタミナ\n💾 セーブ機能\n♿ アクセシビリティ",
   changelog_20260203_date: "2026年2月3日",
-  changelog_20260203: "🚜 リリース：9ステージ、チュートリアル\n❄️ 圧雪、燃料、雪崩\n🏆 クレジットと進行"
+  changelog_20260203: "🚜 リリース：9ステージ、チュートリアル\n❄️ 圧雪、燃料、雪崩\n🏆 クレジットと進行",
+  // Key names
+  key_space: "スペース",
+  key_shift: "SHIFT",
+  key_ctrl: "CTRL",
+  key_alt: "ALT",
+  key_enter: "ENTER",
+  key_tab: "TAB",
+  key_esc: "ESC",
+  key_del: "DEL"
 };
 
 export default ja;
