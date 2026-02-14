@@ -34,7 +34,7 @@ const pl: Record<string, string> = {
   reducedMotion: "Ograniczony ruch",
   showFps: "Pokaż FPS",
   showDebug: "Nakładka debugowania",
-  skiStyle: "Style",
+  skiStyle: "Styl",
   skiTricks: "Triki",
   skiBestCombo: "Najlepsze combo",
   quitGame: "Wyjdź z gry",

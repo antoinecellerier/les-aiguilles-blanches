@@ -107,14 +107,14 @@ const fr: Record<string, string> = {
   
   // How to Play hints
   howToPlayMove: "{keys} ou Flèches pour se déplacer",
-  howToPlayMoveTouch: "Utilisez le D-pad virtuel",
+  howToPlayMoveTouch: "Utilise le D-pad virtuel",
   howToPlayMoveGamepad: "Stick ou D-pad pour se déplacer",
   howToPlayMoveHybrid: "{keys}/Flèches ou D-pad tactile",
   howToPlayGroom: "{groomKey} pour damer la neige",
   howToPlayGroomTouch: "Maintenir le bouton de damage",
   howToPlayGroomGamepad: "pour damer la neige",
   howToPlayGroomHybrid: "{groomKey} ou maintenir le bouton de damage",
-  howToPlayFuel: "Surveillez carburant et endurance !",
+  howToPlayFuel: "Surveille carburant et endurance !",
   howToPlayWinch: "{winchKey} près d'un poste pour le treuil",
   howToPlayWinchTouch: "Maintenir le bouton treuil près d'un poste",
   howToPlayWinchGamepad: "près d'un poste pour le treuil",
@@ -186,7 +186,7 @@ const fr: Record<string, string> = {
   gameComplete: "Jeu terminé !",
   viewCredits: "Voir les crédits",
   creditsTitle: "Félicitations !",
-  creditsSubtitle: "Vous avez maîtrisé Les Aiguilles Blanches",
+  creditsSubtitle: "Tu as maîtrisé Les Aiguilles Blanches",
   playAgain: "Rejouer",
   skipCredits: "Appuyez sur une touche pour passer",
   
@@ -234,14 +234,14 @@ const fr: Record<string, string> = {
   level_coupeDesAiguillesTask: "Préparez toutes les pistes pour la compétition",
   
   // Hazards
-  cliffFall: "⚠️ ATTENTION ! Vous êtes tombé dans le ravin ! Mission échouée.",
+  cliffFall: "⚠️ ATTENTION ! Tu es tombé dans le ravin ! Mission échouée.",
   fuelEmpty: "⛽ PANNE SÈCHE ! Plus une goutte de diesel...",
   // UNUSED avalancheZone: "ZONE AVALANCHE",
   riskLevelHigh: "FORT",
   avalancheWarning: "⚠️ DANGER ! Le manteau neigeux est instable ! Sortez de la zone !",
   avalancheTrigger: "🏔️💨 AVALANCHE DÉCLENCHÉE ! Évacuation impossible !",
-  steepWarning: "⚠️ PENTE RAIDE ! Utilisez le treuil ({winchKey}) ou vous allez glisser !",
-  steepWarningNoWinch: "⚠️ PENTE RAIDE ! Ralentissez et utilisez les chemins de service pour contourner !",
+  steepWarning: "⚠️ PENTE RAIDE ! Utilise le treuil ({winchKey}) ou tu vas glisser !",
+  steepWarningNoWinch: "⚠️ PENTE RAIDE ! Ralentis et utilise les chemins de service pour contourner !",
   tumble: "🔄 TONNEAU ! La dameuse a basculé sur la pente !",
   
   // Taunts - Tumble/Rollover (emphasize winch lesson, expensive damage)
