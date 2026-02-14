@@ -3,6 +3,7 @@ import { isGamepadButtonPressed, loadGamepadBindings, saveGamepadBindings, getDe
 import { STORAGE_KEYS, BINDINGS_VERSION } from '../config/storageKeys';
 import { getString, setString } from './storage';
 import { playClick, playCancel } from '../systems/UISounds';
+import { t } from '../config/localization';
 
 export interface KeyBindings {
   up: number;
@@ -112,7 +113,7 @@ export class KeybindingManager {
     this.rebindButtons[actionId] = btn;
     btn.setText('...');
     btn.setStyle({ backgroundColor: '#5a5a2d' });
-    this.onStatus('Press a key...');
+    this.onStatus(t('pressKey'));
     this.onLayout();
   }
 
@@ -138,7 +139,7 @@ export class KeybindingManager {
 
     this.rebindingAction = null;
     playClick();
-    this.onStatus('Saved!');
+    this.onStatus(t('saved'));
     this.onLayout();
     this.scene.time.delayedCall(800, () => this.onRestart());
   }
@@ -159,7 +160,7 @@ export class KeybindingManager {
   startGamepadRebind(actionId: string, btn: { setText: (t: string) => void; setStyle: (s: any) => void }): void {
     if (this.rebindingGamepadAction || this.rebindingAction) return;
     if (!this.scene.input.gamepad || this.scene.input.gamepad.total === 0) {
-      this.onStatus('No gamepad connected');
+      this.onStatus(t('noGamepad'));
       return;
     }
     this.rebindingGamepadAction = actionId;
@@ -167,7 +168,7 @@ export class KeybindingManager {
     this.gamepadRebindSnapshot = captureGamepadButtons(this.scene, Array.from({ length: 16 }, (_, i) => i));
     btn.setText('...');
     btn.setStyle({ backgroundColor: '#5a5a2d' });
-    this.onStatus('Press a gamepad button...');
+    this.onStatus(t('pressGamepadButton'));
     this.onLayout();
   }
 
@@ -203,7 +204,7 @@ export class KeybindingManager {
 
     this.rebindingGamepadAction = null;
     playClick();
-    this.onStatus('Saved!');
+    this.onStatus(t('saved'));
     this.onLayout();
     this.scene.time.delayedCall(800, () => this.onRestart());
   }
@@ -217,7 +218,7 @@ export class KeybindingManager {
     this.save();
     this.gamepadBindings = getDefaultGamepadBindings();
     saveGamepadBindings(this.gamepadBindings);
-    this.onStatus('Controls reset!');
+    this.onStatus(t('controlsReset'));
     this.scene.time.delayedCall(800, () => this.onRestart());
   }
 

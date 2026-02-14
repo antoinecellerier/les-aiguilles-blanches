@@ -308,10 +308,6 @@ export default class SettingsScene extends Phaser.Scene {
     // Always add controls section (scrollable now handles overflow)
     this.addControlsSection(contentSizer);
 
-    // Status text
-    this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
-    contentSizer.add(this.statusText, { align: 'center' });
-
     this.wrapInScrollPanel(contentSizer, padding, topOffset, sizerWidth, availableHeight);
   }
 
@@ -363,10 +359,6 @@ export default class SettingsScene extends Phaser.Scene {
     });
     
     this.addControlsSection(rightCol);
-
-    // Status text in right column
-    this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
-    rightCol.add(this.statusText, { align: 'center' });
 
     rowSizer.add(leftCol, { align: 'top', expand: true, proportion: 1 });
     rowSizer.add(rightCol, { align: 'top', expand: true, proportion: 1 });
@@ -631,6 +623,10 @@ export default class SettingsScene extends Phaser.Scene {
       element: resetBtn,
       activate: () => this.keys.reset(),
     });
+
+    // Status text — right after reset button so feedback appears nearby
+    this.statusText = this.createText('', this.fontSize, THEME.colors.accent);
+    panel.add(this.statusText, { align: 'left' });
 
     // Movement sensitivity — applies to all input methods
     panel.add(this.createSensitivitySlider(), { align: 'left' });
