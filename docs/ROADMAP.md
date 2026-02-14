@@ -11,6 +11,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Next Up
 
 - [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels
+- [ ] Reload keyboard bindings on resume — Keyboard rebinds in Settings via pause menu require level restart; gamepad bindings already reload on resume but Phaser Key objects need remove+re-add
 
 ## Future (Backlog)
 

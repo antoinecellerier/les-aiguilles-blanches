@@ -1799,7 +1799,8 @@ export default class GameScene extends Phaser.Scene {
   resumeGame(): void {
     if (!this.scene.manager) return;
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
-    // Reload sensitivity in case it was changed in Settings
+    // Reload bindings and sensitivity in case they were changed in Settings
+    this.gamepadBindings = loadGamepadBindings();
     const saved = getString(STORAGE_KEYS.MOVEMENT_SENSITIVITY);
     const val = saved ? parseFloat(saved) : BALANCE.SENSITIVITY_DEFAULT;
     this.movementSensitivity = (isNaN(val) || val < BALANCE.SENSITIVITY_MIN || val > BALANCE.SENSITIVITY_MAX) ? BALANCE.SENSITIVITY_DEFAULT : val;

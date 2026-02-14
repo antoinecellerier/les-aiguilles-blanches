@@ -62,6 +62,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private boundPauseHandler = () => { this.pauseGame(); };
   private boundResumeHandler = () => { this.resumeGame(); };
   private boundHazardGameOverHandler = () => { this.onWipeout('avalanche'); };
+  private gamepadStartPressed = false;
 
   // HUD elements
   private speedText!: Phaser.GameObjects.Text;
@@ -309,7 +310,10 @@ export default class SkiRunScene extends Phaser.Scene {
       this.brakeKey = this.input.keyboard.addKey(bindings.winch);
       this.jumpKey = this.input.keyboard.addKey(bindings.groom);
     }
-    captureGamepadButtons(this, [14, 15, this.gamepadBindings.winch, this.gamepadBindings.groom]);
+    captureGamepadButtons(this, [14, 15, this.gamepadBindings.winch, this.gamepadBindings.groom, this.gamepadBindings.pause]);
+    // Capture initial Start button state to prevent phantom press on scene entry
+    const pad = this.input.gamepad?.getPad(0);
+    if (pad) this.gamepadStartPressed = isGamepadButtonPressed(pad, this.gamepadBindings.pause);
 
     // Launch HUDScene in ski mode for touch controls (joystick + brake)
     this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
@@ -342,6 +346,18 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Crash — waiting for transition to fail screen
     if (this.isCrashed) return;
+
+    // Check gamepad Start button for pause (with debounce)
+    {
+      const gpad = this.input.gamepad?.getPad(0);
+      if (gpad) {
+        const startPressed = isGamepadButtonPressed(gpad, this.gamepadBindings.pause);
+        if (startPressed && !this.gamepadStartPressed) {
+          this.pauseGame();
+        }
+        this.gamepadStartPressed = startPressed;
+      }
+    }
 
     this.elapsedTime += dt;
 
@@ -1142,6 +1158,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private resumeGame(): void {
     if (!this.scene.manager) return;
     if (!this.scene.isActive() && !this.scene.isPaused()) return;
+    this.gamepadBindings = loadGamepadBindings();
     this.skiSounds.resume();
     this.ambienceSounds.resume(this.level.weather, this.level.isNight);
     this.scene.resume();
