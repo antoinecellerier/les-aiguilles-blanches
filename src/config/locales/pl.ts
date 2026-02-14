@@ -266,7 +266,7 @@ const pl: Record<string, string> = {
   tauntSkiWipeout2: "Urwisko nie interesowało się twoją techniką.",
   tauntSkiWipeout3: "GOPR już się śmieje. Widzieli wszystko.",
   tauntSkiWipeout4: "Tak bywa, gdy jeździ się po własnym stoku.",
-  tauntSkiWipeout5: "Nawet kozice skrzywiły się na ten lądowanie.",
+  tauntSkiWipeout5: "Nawet kozice skrzywiły się na to lądowanie.",
 
   jeanPierreIntro: "Dobrze ci poszło na szkoleniu. Teraz jest na poważnie — zielona trasa, z czasem i paliwem do ogarnięcia.",
   level_chamoisIntro: "Hej, jestem Émilie — JP wysyła cię na niebieską. Pokaż, że umiesz więcej niż kłaść aksamit na zielonej.",

@@ -128,22 +128,22 @@ const cs: Record<string, string> = {
 
   // Taunts - Cliff falls
   tauntCliff1: "9 tun do rokle. Pojišťovna bude nadšená.",
-  tauntCliff2: "Jean-Pierre říkal 'ne moc blízko k okraji!' Pamatujete?",
+  tauntCliff2: "Jean-Pierre říkal 'ne moc blízko k okraji!' Pamatuješ?",
   tauntCliff3: "Horská služba sjíždí s lany. Zase.",
   tauntCliff4: "Marie ruší tvoji rezervaci na raclette na dnešní večer.",
   tauntCliff5: "Thierry už počítá náklady na opravu...",
 
   // Taunts - Fuel empty
-  tauntFuel1: "Ukazatel byl na červené 10 minut. Na co jste se díval?",
+  tauntFuel1: "Ukazatel byl na červené 10 minut. Na co ses díval?",
   tauntFuel2: "Émilie napsala 'NATANKOVAT' velkými písmeny na tabuli.",
   tauntFuel3: "I nafta má své limity. Ty zřejmě taky.",
   tauntFuel4: "Jean-Pierre vzdychá. Posílá Thierryho s kanystrem.",
   tauntFuel5: "Slunce vychází. Sjezdovka není upravená. Lyžaři přijíždějí.",
 
   // Taunts - Time limit
-  tauntTime1: "První lanovka za 3... 2... 1... Nestihli jste.",
-  tauntTime2: "Lyžaři objeví vaši sjezdovku. Hrbolatá. Ledová. Nádhera.",
-  tauntTime3: "Jean-Pierre se dívá na hodinky, pak na vás, pak na hodinky.",
+  tauntTime1: "První lanovka za 3... 2... 1... Nestihl jsi.",
+  tauntTime2: "Lyžaři objeví tvoji sjezdovku. Hrbolatá. Ledová. Nádhera.",
+  tauntTime3: "Jean-Pierre se dívá na hodinky, pak na tebe, pak na hodinky.",
   tauntTime4: "FIS se ptá, proč je slalom na břečce.",
   tauntTime5: "Slyšíte instruktory, jak klientům vysvětlují, proč to 'není jejich chyba'.",
 
@@ -182,17 +182,17 @@ const cs: Record<string, string> = {
   gameComplete: "Hra dokončena!",
   viewCredits: "Zobrazit titulky",
   creditsTitle: "Gratulujeme!",
-  creditsSubtitle: "Ovládli jste Les Aiguilles Blanches",
+  creditsSubtitle: "Ovládl jsi Les Aiguilles Blanches",
   playAgain: "Hrát znovu",
   skipCredits: "Stiskněte klávesu pro přeskočení",
 
   // Tutorial
   tutorialName: "Výukový program - První kroky",
   tutorialTask: "Naučte se základy úpravy",
-  tutorialIntro: "Vítejte v Les Aiguilles Blanches!",
+  tutorialIntro: "Vítej v Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Přeskakuji výuku… Klepněte pro přehrání.",
   skipTutorialGamepad: "⏭️ Přeskakuji výuku… Stiskněte tlačítko pro přehrání.",
-  tutorialWelcome: "🏔️ Vítejte, nováčku! Jsem Jean-Pierre, hlavní rolbař. Naučím vás řemeslo.",
+  tutorialWelcome: "🏔️ Vítej, nováčku! Jsem Jean-Pierre, hlavní rolbař. Naučím tě řemeslo.",
   tutorialControls: "🎮 Pro pohyb rolby použijte {keys} nebo šipky ↑↓←→.",
   tutorialControlsTouch: "🎮 Pro pohyb rolby použijte D-pad ◀▲▼▶ vlevo.",
   tutorialControlsGamepad: "🎮 Pro pohyb rolby použijte levou páčku nebo D-pad.",
@@ -205,7 +205,7 @@ const cs: Record<string, string> = {
   tutorialHUD: "📈 Sledujte panel nahoře: červená je palivo, zelená výdrž, bílá pokrytí. Čas běží!",
   tutorialGoal: "🎯 Musíte upravit alespoň 40% sjezdovky před otevřením. Lyžaři přijíždějí!",
   // UNUSED tutorialFuel: "⛽ Pozor — jízda spotřebovává palivo. Na misích stavte u čerpací stanice.",
-  tutorialComplete: "🏆 Výborně! Ovládli jste základy. Připraveni na první misi na zelené sjezdovce?",
+  tutorialComplete: "🏆 Výborně! Ovládl jsi základy. Připraven na první misi na zelené sjezdovce?",
 
   level_marmottesName: "Zelená sjezdovka - Les Marmottes",
   level_marmottesTask: "Upravte sjezdovku pro začátečníky",
@@ -229,7 +229,7 @@ const cs: Record<string, string> = {
   level_coupeDesAiguillesTask: "Připravte všechny sjezdovky na závody",
 
   // Hazards
-  cliffFall: "⚠️ POZOR! Spadli jste z útesu! Mise selhala.",
+  cliffFall: "⚠️ POZOR! Spadl jsi z útesu! Mise selhala.",
   fuelEmpty: "⛽ BEZ PALIVA! Ani kapka nafty...",
   // UNUSED avalancheZone: "LAVINOVÁ ZÓNA",
   riskLevelHigh: "VYSOKÉ",
@@ -242,7 +242,7 @@ const cs: Record<string, string> = {
   // Taunts - Tumble
   tauntTumble1: "Naviják není na ozdobu. Je pro svahy jako je tento.",
   tauntTumble2: "Thierry zírá na škodu. Neříká nic. To je horší.",
-  tauntTumble3: "Jean-Pierre vám ukázal, jak kotvit. Spal jsi?",
+  tauntTumble3: "Jean-Pierre ti ukázal, jak kotvit. Spal jsi?",
   tauntTumble4: "PistenBully stojí 400 000 €. Teda, stál.",
   tauntTumble5: "Svah vypadal zvládnutelně? Rolba nesouhlasila.",
   featureDestroyedKicker: 'Přejel jsi parkový prvek! Kicker je zničený.',
@@ -256,10 +256,10 @@ const cs: Record<string, string> = {
 
   // Taunts - Avalanche
   tauntAvalanche1: "Hora málokdy odpouští. Tentokrát neodpustila.",
-  tauntAvalanche2: "Météo France hlásilo stupeň rizika 4. Četl jste to?",
+  tauntAvalanche2: "Météo France hlásilo stupeň rizika 4. Četl jsi to?",
   tauntAvalanche3: "Horská služba najde rolbu na jaře. Možná.",
-  tauntAvalanche4: "Marie slyší poplach v rádiu. Už ví, že jste to vy.",
-  tauntAvalanche5: "Lavinový tým zabezpečil ten sektor. Vy jste ho odjistil.",
+  tauntAvalanche4: "Marie slyší poplach v rádiu. Už ví, že jsi to ty.",
+  tauntAvalanche5: "Lavinový tým zabezpečil ten sektor. Ty jsi ho odjistil.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klasický pád. Výbava všude, důstojnost nikde.",
@@ -269,7 +269,7 @@ const cs: Record<string, string> = {
   tauntSkiWipeout5: "I kamzíci se při tom dopadu ušklíbli.",
 
   jeanPierreIntro: "Dobrá práce v tutoriálu. Teď to bude doopravdy — zelená sjezdovka, s časem a palivem k hlídání.",
-  level_chamoisIntro: "Ahoj, jsem Émilie — JP vás posílá na modrou. Ukažte, že umíte víc než jen samety na zelené.",
+  level_chamoisIntro: "Ahoj, jsem Émilie — JP tě posílá na modrou. Ukaž, že umíš víc než jen samety na zelené.",
   level_airZoneIntro: "Snowpark je MŮJ rajón — připravíme jim něco šílenýho! Každý modul musí sedět, jezdci na nás počítají.",
   level_aigleIntro: "L'Aigle je vážná věc. Hlídejte palivo. Po servisních cestách se vrátíte nahoru — hledejte žluto-černé sloupky.",
   level_glacierIntro: "Ahoj, já jsem Thierry — šéf bezpečnosti. Le Glacier je strmý. Zkontroloval jsem každou kotvu. Stiskni {winchKey} u sloupku pro připojení navijáku — a prosím tě, nepouštěj.",
@@ -278,7 +278,7 @@ const cs: Record<string, string> = {
   level_verticaleIntro: "Noční akce na La Verticale: strmý svah, nebezpečné okraje. Naviják je povinný — použijte 3 kotvení a držte se osy.",
   level_colDangereuxIntro: "Vysoké lavinové riziko na průsmyku — jedeme v protokolu lavinového zabezpečení. Držte se od zatížených zón a respektujte hranice.",
   level_tempeteIntro: "Bouře přešla. Dejte si vin chaud — bude to chvíli trvat!",
-  level_coupeDesAiguillesIntro: "Tohle je velká noc. FIS kontroluje zítra. Každá sjezdovka musí být perfektní — ukažte, co jste se naučil.",
+  level_coupeDesAiguillesIntro: "Tohle je velká noc. FIS kontroluje zítra. Každá sjezdovka musí být perfektní — ukaž, co jsi se naučil.",
   marieWelcome: "Přijďte se ohřát k Chez Marie. Dobrá tartiflette!",
   marieIntro: "Ahoj! Jsem Marie, vedu restauraci nahoře u sjezdovky. Stavte se kdy chcete — teplé jídlo tu dělá zázraky!",
 

@@ -74,7 +74,7 @@ const es: Record<string, string> = {
   // UNUSED gamepadSupported: "Gamepad OK",
   touch: "Táctil",
   // UNUSED touchSupported: "Táctil OK",
-  noGamepadConnected: "Ningún gamepad conectado",
+  noGamepadConnected: "Ningún mando conectado",
   gamepadDiagnostic: "Test de mando",
   connectGamepadDiag: "Conecta un mando para probar",
   gamepadDiagButtons: "Botones",

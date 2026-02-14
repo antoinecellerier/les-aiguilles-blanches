@@ -101,7 +101,7 @@ const it: Record<string, string> = {
   skiIt: "Sciare!",
   rideIt: "Snowboard!",
   skiAgain: "Ancora sci!",
-  rideAgain: "Ridi di nuovo!",
+  rideAgain: "Ancora snowboard!",
   skiRunSpeed: "Velocità",
   skiRunTime: "Tempo",
   skiRunGates: "Porte",

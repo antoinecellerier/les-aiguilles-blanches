@@ -39,8 +39,12 @@ Evaluate content across these dimensions, launching parallel explore agents:
    - French is the source language — check that it reads naturally with proper register
    - Translations should be idiomatic, not literal — each language should feel native
    - Technical ski/grooming terms should use correct local terminology per language (German: Pistenraupe; Italian: gatto delle nevi; Spanish: máquina pisapistas)
-   - Humor and wordplay should be adapted, not translated literally
-   - Check for missing translations, placeholder text, or English left in non-English languages
+   - The `groom` button label must use each language's specific grooming verb (FR=Damer, DE=Präparieren, IT=Battere, ES=Pisar, SV=Pista, FI=Tamppaa, JA=圧雪, KO=정설), not generic "prepare/maintain"
+   - Humor and wordplay should be adapted, not translated literally (e.g., "yard sale" → local wipeout idiom, "soup" for slush → local ski slush term)
+   - Check for missing translations, placeholder text, or English left in non-English languages — scan ALL keys, especially short UI labels (skiStyle, skiTricks, skiBestCombo, quitGame, showDebug)
+   - **Register consistency**: the game uses informal address throughout (FR=tu, DE=du, CS=ty, SK=ty, etc.). Scan ALL taunts, tutorials, dialogues, hazard warnings, and credits for formal forms (FR=vous, DE=Sie, CS=vy/jste, SK=vy/ste). Every line must use informal register.
+   - **Immersion**: the game is set in Savoie, France. Keep French references like Météo France, ESF, PIDA — do not replace with local equivalents (SMHI, 気象庁, etc.)
+   - **Factual consistency across locales**: colors (jaune=yellow, not orange), currency conversions, proper nouns must match the FR source exactly
 
 4. **Narrative coherence**
    - Difficulty progression should be reflected in dialogue tone (encouraging → challenging → intense)

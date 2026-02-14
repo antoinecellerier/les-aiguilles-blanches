@@ -70,7 +70,7 @@ const sv: Record<string, string> = {
   // UNUSED gamepadSupported: "Gamepad OK",
   touch: "Pekskärm",
   // UNUSED touchSupported: "Pekskärm OK",
-  noGamepadConnected: "Ingen gamepad ansluten",
+  noGamepadConnected: "Ingen handkontroll ansluten",
   gamepadDiagnostic: "Kontrolltest",
   connectGamepadDiag: "Anslut en kontroll för att testa",
   gamepadDiagButtons: "Knappar",
