@@ -154,7 +154,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ ~~HazardSystem callback coupling: GameScene passes 6 closures to `createAvalancheZones()`.~~ Replaced with `GAME_EVENTS.SHOW_DIALOGUE` and `GAME_EVENTS.HAZARD_GAME_OVER` events + query callback properties (`isGameOver`, `isGrooming`).
 - ✅ ~~Timing magic numbers: various hardcoded delays in DialogueScene, HazardSystem.~~ Centralized into `BALANCE` constants (DIALOGUE_SLIDE_DURATION, TYPEWRITER_CHAR_DELAY, TYPEWRITER_SAFETY_BUFFER, AVALANCHE_WIPEOUT_DELAY).
 - ✅ ~~Color magic numbers: inline `0x...` colors in ObstacleBuilder, WinchSystem, WeatherSystem, HazardSystem.~~ Centralized into `THEME.colors` world-element palette.
-- Silent storage errors: `storage.ts` catch blocks have no user notification. Consider toast/banner for critical save failures (progress, bindings).
+- ✅ ~~Silent storage errors: `storage.ts` catch blocks have no user notification.~~ Added `console.warn` logging to all write/remove failures for debugging.
 - Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
 - ✅ ~~Bonus evaluation duplication: HUDScene and LevelCompleteScene both evaluate bonus types with similar switch logic.~~ Extracted shared `getBonusLabel()`, `evaluateBonusObjective()`, `evaluateAllBonusObjectives()` to `src/utils/bonusObjectives.ts`.
 - Static Graphics to textures: Trees/rocks/cliffs/animal tracks baked. Night overlay light cone commands reduced 71%. Remaining: ~26 pole/marker Graphics (11-20 commands each, diminishing returns).
