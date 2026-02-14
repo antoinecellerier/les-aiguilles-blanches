@@ -205,7 +205,7 @@ The game's difficulty naturally increases as you progress:
 *"Competition tomorrow!"*
 
 - **Difficulty**: Park (Precision)
-- **Objective**: Groom 80% coverage
+- **Objective**: Groom 95% coverage
 - **Time**: 1:00
 - **Skills**: Direction-aware halfpipe grooming
 - **Park Features**: Halfpipe walls (3-tile banks on each side)

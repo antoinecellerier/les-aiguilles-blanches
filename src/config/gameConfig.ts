@@ -124,7 +124,7 @@ export const BALANCE = {
   GROOMER_DRAG: 200,
   WINCH_FORCE: 0.3,
   WINCH_MIN_DISTANCE: 50,
-  WINCH_MAX_CABLE: 25,  // Max cable length in tiles before snap
+  WINCH_MAX_CABLE: 30,  // Max cable length in tiles before snap
   WINCH_SNAP_STAMINA_COST: 20,
   WINCH_SNAP_STUN_MS: 800,
 

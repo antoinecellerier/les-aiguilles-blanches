@@ -316,7 +316,7 @@ const gameState = {
 
 #### Time Limit Auto-Calculation
 
-`computeTimeLimit()` in `levels.ts` derives time limits from level geometry:
+`computeTimeLimit()` in `levels.ts` derives time limits from level geometry. Individual levels can set `timeLimitOverride` to bypass the formula.
 
 ```
 timeLimit = ceil( (tilesToGroom / groomRate) × navOverhead × difficultyScale + pathTime + winchOverhead )
@@ -324,7 +324,7 @@ timeLimit = ceil( (tilesToGroom / groomRate) × navOverhead × difficultyScale +
 
 - **groomRate** = `GROOMER_SPEED / TILE_SIZE × GROOM_WIDTH / TILE_SIZE` ≈ 14 tiles²/s
 - **navOverhead** = 0.3 (empirically calibrated so skilled play uses ~40-60% of time)
-- **difficultyScale**: green=1.3, blue=1.0, park=1.4, red=0.9, black=0.75
+- **difficultyScale**: green=1.3, blue=1.0, park=1.5, red=0.9, black=0.75
 - **pathTime** = 10s per access path
 - **winchOverhead** = 15s for winch levels
 - **Minimum floor** of 60s per level

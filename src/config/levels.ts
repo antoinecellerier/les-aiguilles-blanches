@@ -76,6 +76,8 @@ export interface Level {
   accessPaths?: AccessPath[];
   bonusObjectives?: BonusObjective[];
   wildlife?: WildlifeSpawn[];
+  /** Override computed time limit (seconds). When set, computeTimeLimit is ignored. */
+  timeLimitOverride?: number;
 }
 
 /**
@@ -245,6 +247,7 @@ export const LEVELS: Level[] = [
       { type: 'bird', count: 6 },
       { type: 'bunny', count: 2 },
     ],
+    timeLimitOverride: 80,
   },
   {
     id: 4,
@@ -328,7 +331,7 @@ export const LEVELS: Level[] = [
     taskKey: 'level_tubeTask',
     difficulty: 'park',
     timeLimit: 360,
-    targetCoverage: 80,
+    targetCoverage: 95,
     width: 20,
     height: 60,
     hasWinch: false,
@@ -507,7 +510,7 @@ export const LEVELS: Level[] = [
 
 // Apply computed time limits and speed_run targets to all levels
 for (const level of LEVELS) {
-  level.timeLimit = computeTimeLimit(level);
+  level.timeLimit = level.timeLimitOverride ?? computeTimeLimit(level);
   // Auto-set speed_run bonus target to 60% of time limit
   if (level.bonusObjectives) {
     for (const obj of level.bonusObjectives) {
