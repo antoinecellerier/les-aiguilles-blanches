@@ -436,3 +436,102 @@ export function createSnowboarderBrakeTexture(scene: Phaser.Scene): void {
   g.generateTexture('snowboarder_brake', 20, 28);
   g.destroy();
 }
+
+// ─── Skier tuck (speed crouch) ──────────────────────────────────────
+// Crouched low for aerodynamics — shorter torso, knees bent, poles tucked back.
+
+export function createSkierTuckTexture(scene: Phaser.Scene): void {
+  const g = scene.make.graphics({ x: 0, y: 0 } as any, false);
+
+  // Skis — straight, close together
+  g.fillStyle(C.ski);
+  g.fillRect(6, 22, 2, 6);
+  g.fillRect(12, 22, 2, 6);
+
+  // Poles — tucked backward under arms
+  g.fillStyle(C.pole);
+  g.fillRect(2, 14, 1, 10);
+  g.fillRect(17, 14, 1, 10);
+
+  // Boots
+  g.fillStyle(C.boot);
+  g.fillRect(5, 20, 4, 4);
+  g.fillRect(11, 20, 4, 4);
+
+  // Legs (bent, shorter)
+  g.fillStyle(C.skiDark);
+  g.fillRect(5, 17, 4, 4);
+  g.fillRect(11, 17, 4, 4);
+
+  // Torso — compressed, crouched low
+  g.fillStyle(C.skiTeal);
+  g.fillRect(4, 11, 12, 7);
+  g.fillStyle(C.skiMagenta);
+  g.fillRect(4, 11, 3, 7);
+  g.fillRect(13, 11, 3, 7);
+
+  // Arms tucked in tight
+  g.fillStyle(C.skiDark);
+  g.fillRect(3, 13, 2, 4);
+  g.fillRect(15, 13, 2, 4);
+
+  // Bonnet — forward lean
+  g.fillStyle(C.bonnet);
+  g.fillRect(6, 6, 8, 5);
+  g.fillStyle(C.bonnetBand);
+  g.fillRect(6, 9, 8, 2);
+  g.fillStyle(C.pompom);
+  g.fillRect(8, 4, 4, 3);
+  g.fillStyle(C.goggles);
+  g.fillRect(7, 8, 6, 2);
+
+  g.generateTexture('skier_tuck', 20, 28);
+  g.destroy();
+}
+
+// ─── Snowboarder tuck (speed crouch) ────────────────────────────────
+// Low crouch on the board — arms tucked, body compressed.
+
+export function createSnowboarderTuckTexture(scene: Phaser.Scene): void {
+  const g = scene.make.graphics({ x: 0, y: 0 } as any, false);
+
+  // Board — vertical, nose downhill
+  g.fillStyle(C.board);
+  g.fillRect(8, 16, 4, 12);
+  g.fillStyle(C.boardEdge);
+  g.fillRect(8, 16, 4, 2);
+  g.fillRect(8, 26, 4, 2);
+
+  // Boots
+  g.fillStyle(C.boot);
+  g.fillRect(6, 19, 3, 3);
+  g.fillRect(11, 19, 3, 3);
+
+  // Legs (crouched)
+  g.fillStyle(C.boardDark);
+  g.fillRect(6, 16, 3, 4);
+  g.fillRect(11, 16, 3, 4);
+
+  // Torso — compressed low
+  g.fillStyle(C.boardPink);
+  g.fillRect(5, 9, 10, 8);
+  g.fillStyle(C.boardBlue);
+  g.fillRect(5, 9, 3, 8);
+  g.fillRect(12, 9, 3, 8);
+
+  // Arms tucked in
+  g.fillStyle(C.boardDark);
+  g.fillRect(3, 11, 3, 3);
+  g.fillRect(14, 11, 3, 3);
+
+  // Orange beanie — forward lean
+  g.fillStyle(C.boardBeanie);
+  g.fillRect(6, 4, 8, 5);
+  g.fillStyle(C.boardBand);
+  g.fillRect(6, 7, 8, 2);
+  g.fillStyle(C.goggles);
+  g.fillRect(7, 6, 6, 2);
+
+  g.generateTexture('snowboarder_tuck', 20, 28);
+  g.destroy();
+}

@@ -87,6 +87,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private trickShadowUpdater: (() => void) | null = null;
   private turnHoldTime = 0; // seconds of continuous lateral input
   private smoothedLateral = 0; // lerped lateral velocity for smooth carving
+  private smoothedInput = 0;   // ramped lateral input (keyboard feels analog)
   private resolvedMode = 'ski'; // resolved from 'random' once per run
   private skiSounds = new SkiRunSounds();
   private ambienceSounds = new AmbienceSounds();
@@ -346,6 +347,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Lateral input
     let lateralInput = 0;
+    let isAnalog = false;
     if (this.cursors?.left?.isDown || this.wasd?.left?.isDown) lateralInput = -1;
     if (this.cursors?.right?.isDown || this.wasd?.right?.isDown) lateralInput = 1;
 
@@ -353,20 +355,44 @@ export default class SkiRunScene extends Phaser.Scene {
     const pad = this.input.gamepad?.getPad(0);
     if (pad) {
       const lx = pad.leftStick?.x ?? 0;
-      if (Math.abs(lx) > BALANCE.GAMEPAD_DEADZONE) lateralInput = lx;
+      if (Math.abs(lx) > BALANCE.GAMEPAD_DEADZONE) { lateralInput = lx; isAnalog = true; }
       // D-pad left/right (standard mapping buttons 14/15)
-      if (isGamepadButtonPressed(pad, 14)) lateralInput = -1;
-      if (isGamepadButtonPressed(pad, 15)) lateralInput = 1;
+      if (isGamepadButtonPressed(pad, 14)) { lateralInput = -1; isAnalog = false; }
+      if (isGamepadButtonPressed(pad, 15)) { lateralInput = 1; isAnalog = false; }
     }
 
     // Touch (via HUDScene TOUCH_INPUT event)
     if (this.touchInput.left) lateralInput = -1;
     if (this.touchInput.right) lateralInput = 1;
 
+    // Ramp binary inputs so keyboard taps feel analog (quick tap = gentle turn)
+    if (!isAnalog) {
+      const rampRate = 5.0; // reaches full input in ~0.2s
+      const target = lateralInput;
+      if (Math.abs(target) > 0.1) {
+        this.smoothedInput += (target - this.smoothedInput) * Math.min(1, rampRate * dt);
+      } else {
+        // Decay quickly when released
+        this.smoothedInput *= Math.max(0, 1 - rampRate * 2 * dt);
+      }
+      lateralInput = this.smoothedInput;
+    } else {
+      this.smoothedInput = lateralInput;
+    }
+
     // Brake input (winch key / gamepad LB / touch brake mapped to winch)
     let braking = this.brakeKey?.isDown ?? false;
     if (pad && isGamepadButtonPressed(pad, this.gamepadBindings.winch)) braking = true;
     if (this.touchInput.winch) braking = true;
+
+    // Tuck input (down key / D-pad down / touch down) — crouch for speed, reduced steering
+    let tucking = this.cursors?.down?.isDown || this.wasd?.down?.isDown || false;
+    if (pad) {
+      const ly = pad.leftStick?.y ?? 0;
+      if (ly > BALANCE.GAMEPAD_DEADZONE) tucking = true;
+      if (isGamepadButtonPressed(pad, 13)) tucking = true;
+    }
+    if (this.touchInput.down) tucking = true;
 
     // Jump input (groom key / gamepad groom button / touch groom)
     if (!this.isAirborne && !this.trickActive && !this.isCrashed) {
@@ -450,11 +476,14 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Speed calculation — heading-aware gravity
     // When facing sideways (high lateral input), gravity pull is reduced
-    const headingFactor = 1 - BALANCE.SKI_HEADING_FACTOR * Math.abs(lateralInput);
+    // Tucking minimizes heading penalty (committed to the fall line)
+    const headingPenalty = tucking ? BALANCE.SKI_HEADING_FACTOR * 0.2 : BALANCE.SKI_HEADING_FACTOR;
+    const headingFactor = 1 - headingPenalty * Math.abs(lateralInput);
     const isBumped = this.game.getTime() < this.bumpSlowdownUntil;
     const bumpMult = isBumped ? BALANCE.SKI_BUMP_SLOWDOWN : 1.0;
-    const targetSpeed = BALANCE.SKI_GRAVITY_SPEED * terrainMultiplier * slopeMult * bumpMult * headingFactor;
-    const maxSpeed = BALANCE.SKI_MAX_SPEED * terrainMultiplier * slopeMult * bumpMult;
+    const tuckMult = tucking ? BALANCE.SKI_TUCK_SPEED_MULT : 1.0;
+    const targetSpeed = BALANCE.SKI_GRAVITY_SPEED * terrainMultiplier * slopeMult * bumpMult * headingFactor * tuckMult;
+    const maxSpeed = BALANCE.SKI_MAX_SPEED * terrainMultiplier * slopeMult * bumpMult * tuckMult;
 
     // Progressive acceleration — slow buildup, slope-aware
     if (braking) {
@@ -480,8 +509,10 @@ export default class SkiRunScene extends Phaser.Scene {
     const dragRamp = 0.1 + 0.9 * (this.turnHoldTime / BALANCE.SKI_TURN_RAMP_TIME);
 
     // Carving friction — turning bleeds speed proportional to lateral input and hold time
+    // Tucking minimizes carve drag (low crouch = less edge pressure)
     if (Math.abs(lateralInput) > 0.1) {
-      this.currentSpeed *= (1 - BALANCE.SKI_CARVE_DRAG * dragRamp * Math.abs(lateralInput) * dt);
+      const carveDrag = tucking ? BALANCE.SKI_CARVE_DRAG * 0.1 : BALANCE.SKI_CARVE_DRAG;
+      this.currentSpeed *= (1 - carveDrag * dragRamp * Math.abs(lateralInput) * dt);
     }
 
     // Halfpipe wall pump — riding down the wall transition boosts speed
@@ -493,7 +524,8 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     const vy = this.currentSpeed;
     const speedRatio = Math.min(this.currentSpeed / BALANCE.SKI_GRAVITY_SPEED, 1.5);
-    const targetVx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp;
+    const steerMult = tucking ? BALANCE.SKI_TUCK_STEER_MULT : 1.0;
+    const targetVx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp * steerMult;
     // Smooth lateral velocity — lerp toward target for carved turns, not instant zigzags
     // During tricks, suppress lateral input (ballistic arc — no air control)
     const lerpRate = 2.0; // higher = more responsive, lower = smoother
@@ -512,6 +544,8 @@ export default class SkiRunScene extends Phaser.Scene {
       const deadzone: number = BALANCE.SKI_SPRITE_DEADZONE;
       if (braking) {
         this.skier.setTexture(this.baseTexture + '_brake');
+      } else if (tucking) {
+        this.skier.setTexture(this.baseTexture + '_tuck');
       } else if (lateralInput < -deadzone) {
         this.skier.setTexture(this.baseTexture + '_left');
       } else if (lateralInput > deadzone) {

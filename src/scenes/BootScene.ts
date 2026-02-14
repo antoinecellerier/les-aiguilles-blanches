@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Accessibility, setLanguage, detectLanguage } from '../setup';
 import { detectKeyboardLayout } from '../utils/keyboardLayout';
-import { createSkierTexture, createSkierLeftTexture, createSkierRightTexture, createSkierBrakeTexture, createSnowboarderTexture, createSnowboarderLeftTexture, createSnowboarderRightTexture, createSnowboarderBrakeTexture } from '../utils/skiSprites';
+import { createSkierTexture, createSkierLeftTexture, createSkierRightTexture, createSkierBrakeTexture, createSkierTuckTexture, createSnowboarderTexture, createSnowboarderLeftTexture, createSnowboarderRightTexture, createSnowboarderBrakeTexture, createSnowboarderTuckTexture } from '../utils/skiSprites';
 
 /**
  * Les Aiguilles Blanches - Boot Scene
@@ -138,10 +138,12 @@ export default class BootScene extends Phaser.Scene {
     createSkierLeftTexture(this);
     createSkierRightTexture(this);
     createSkierBrakeTexture(this);
+    createSkierTuckTexture(this);
     createSnowboarderTexture(this);
     createSnowboarderLeftTexture(this);
     createSnowboarderRightTexture(this);
     createSnowboarderBrakeTexture(this);
+    createSnowboarderTuckTexture(this);
 
     // Tree sprite
     const treeGraphics = this.make.graphics({ x: 0, y: 0 } as any, false);
@@ -465,8 +467,8 @@ export default class BootScene extends Phaser.Scene {
       'park_kicker', 'park_rail',
       'slalom_pole_red', 'slalom_pole_blue',
       // Skier/snowboarder sprites
-      'skier', 'skier_left', 'skier_right', 'skier_brake',
-      'snowboarder', 'snowboarder_left', 'snowboarder_right', 'snowboarder_brake',
+      'skier', 'skier_left', 'skier_right', 'skier_brake', 'skier_tuck',
+      'snowboarder', 'snowboarder_left', 'snowboarder_right', 'snowboarder_brake', 'snowboarder_tuck',
     ];
     for (const key of spriteKeys) {
       const tex = this.textures.get(key);
