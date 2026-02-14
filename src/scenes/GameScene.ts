@@ -2034,6 +2034,8 @@ export default class GameScene extends Phaser.Scene {
         }
       }
       setGroomedTiles(tiles);
+      // Persist to localStorage so ski mode from level select can use it
+      setString(STORAGE_KEYS.GROOMED_TILES + this.levelIndex, JSON.stringify([...tiles]));
     }
 
     const timeUsed = this.level.timeLimit - this.timeRemaining;

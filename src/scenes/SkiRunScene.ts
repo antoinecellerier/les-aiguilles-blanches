@@ -155,7 +155,17 @@ export default class SkiRunScene extends Phaser.Scene {
     // Generate geometry
     this.geometry.generate(this.level, tileSize);
 
-    // If no grooming data (e.g. starting from level select), generate default grooming
+    // If no grooming data (e.g. starting from level select), try localStorage
+    if (this.groomedTiles.size === 0) {
+      const saved = getString(STORAGE_KEYS.GROOMED_TILES + this.levelIndex);
+      if (saved) {
+        try {
+          const arr = JSON.parse(saved) as string[];
+          this.groomedTiles = new Set(arr);
+        } catch { /* fall through to default */ }
+      }
+    }
+    // Still empty — generate default grooming pattern
     if (this.groomedTiles.size === 0) {
       this.groomedTiles = this.generateDefaultGrooming();
     }

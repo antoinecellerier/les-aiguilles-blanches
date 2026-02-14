@@ -27,6 +27,7 @@ export const STORAGE_KEYS = {
   SHOW_DEBUG: 'snowGroomer_showDebug',
   STEEP_WARNING_SEEN: 'snowGroomer_steepWarningSeen',
   MARIE_INTRO_SEEN: 'snowGroomer_marieIntroSeen',
+  GROOMED_TILES: 'snowGroomer_groomedTiles_', // append level index
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */
