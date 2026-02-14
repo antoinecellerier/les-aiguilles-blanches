@@ -305,7 +305,7 @@ export class HazardSystem {
 
     showDialogue('avalancheTrigger');
 
-    this.avalancheTimer = this.scene.time.delayedCall(2000, () => {
+    this.avalancheTimer = this.scene.time.delayedCall(BALANCE.AVALANCHE_WIPEOUT_DELAY, () => {
       avalancheParticles.destroy();
       gameOver(false, 'avalanche');
     });

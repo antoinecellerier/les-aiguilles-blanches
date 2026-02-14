@@ -152,7 +152,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - MenuScene (1134 lines): terrain renderer, overlay manager, wildlife controller extracted; dead code removed, device detection deduplicated. Remaining UI layout/buttons/footer is inherently scene-specific.
 - SettingsScene (1263 lines): focus navigator, keybinding manager extracted; scroll panel setup consolidated, magic numbers extracted, binding row methods merged. Remaining UI factories are tightly coupled to scene state — extraction deferred as net-negative.
 - HazardSystem callback coupling: GameScene passes 6 closures to `createAvalancheZones()`. Replace with event emitter pattern via `game.events`.
-- Timing magic numbers: various hardcoded delays (300/500/800/2000ms) in DialogueScene, SettingsScene, HazardSystem. Centralize incrementally into BALANCE.
+- ✅ ~~Timing magic numbers: various hardcoded delays in DialogueScene, HazardSystem.~~ Centralized into `BALANCE` constants (DIALOGUE_SLIDE_DURATION, TYPEWRITER_CHAR_DELAY, TYPEWRITER_SAFETY_BUFFER, AVALANCHE_WIPEOUT_DELAY).
 - ✅ ~~Color magic numbers: inline `0x...` colors in ObstacleBuilder, WinchSystem, WeatherSystem, HazardSystem.~~ Centralized into `THEME.colors` world-element palette.
 - Silent storage errors: `storage.ts` catch blocks have no user notification. Consider toast/banner for critical save failures (progress, bindings).
 - Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.

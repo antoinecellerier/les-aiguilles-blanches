@@ -4,6 +4,7 @@ import { drawPortrait } from '../utils/characterPortraits';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
+import { BALANCE } from '../config/gameConfig';
 import { ResizeManager } from '../utils/resizeManager';
 import { playVoiceBlip } from '../systems/VoiceSounds';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
@@ -511,7 +512,7 @@ export default class DialogueScene extends Phaser.Scene {
     
     if (targetLength > 0) {
       this.typewriterTimer = this.time.addEvent({
-        delay: 25,
+        delay: BALANCE.TYPEWRITER_CHAR_DELAY,
         repeat: targetLength - 1,
         callback: () => {
           this.typewriterIndex++;
@@ -528,7 +529,7 @@ export default class DialogueScene extends Phaser.Scene {
       });
       
       // Safety timeout: force-complete if timer doesn't finish in time
-      const safetyMs = targetLength * 25 + 2000;
+      const safetyMs = targetLength * BALANCE.TYPEWRITER_CHAR_DELAY + BALANCE.TYPEWRITER_SAFETY_BUFFER;
       this.typewriterSafetyTimer = this.time.delayedCall(safetyMs, () => {
         if (this.isTyping) {
           this.completeTypewriter();
@@ -550,7 +551,7 @@ export default class DialogueScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.container,
       y: this.getDialogueShowY(),
-      duration: 200,
+      duration: BALANCE.DIALOGUE_SLIDE_DURATION,
       ease: 'Power2',
     });
   }
@@ -614,7 +615,7 @@ export default class DialogueScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.container,
       y: this.cameras.main.height + 20,
-      duration: 200,
+      duration: BALANCE.DIALOGUE_SLIDE_DURATION,
       ease: 'Power2',
       onComplete: () => {
         // Only hide if we're still in hidden state (not re-shown during tween)
