@@ -494,17 +494,53 @@ DynamicTexture consolidation is a net win when replacing **many small Images** (
 
 **Rule of thumb:** Only consolidate into a DynamicTexture when eliminating ≥10 `drawImage` calls. A `Rectangle` is just a `fillRect` with no source bitmap — it's always cheaper than a DynamicTexture of equivalent screen area. For backgrounds composed of a few solid-color bands, keep them as Rectangles.
 
+#### TileSprite → DynamicTexture Regression
+
+⚠️ The GameScene TileSprite→DynamicTexture replacement (`f59221d`) **doubled Firefox CPU** (70→140%, p<0.005) while having no significant effect on Chromium. This was validated with A/B testing (headed mode, 5 runs per commit, psutil process-tree CPU, Welch's t-test α=0.05):
+
+| GameScene optimization | Chromium (% CPU) | Firefox (% CPU) | FF significant? |
+|------------------------|------------------|-----------------|-----------------|
+| Baseline (pre-opt) | 792.1 ±8.6 | 70.5 ±3.4 | — |
+| Camera culling | 830.0 ±72.3 (+38, n.s.) | 66.6 ±1.0 (-3.9) | **yes (p≈0.03)** |
+| Snow tiles → DT | 790.9 ±14.0 (-1, n.s.) | 71.9 ±1.5 (+1.4) | no |
+| Access road → DT | 801.1 ±12.4 (+9, n.s.) | 70.7 ±1.8 (+0.2) | no |
+| Night overlay → DT | 802.1 ±12.8 (+10, n.s.) | 71.6 ±0.8 (+1.1) | no |
+| **TileSprite → DT** | 784.8 ±16.3 (-7, n.s.) | **139.7 ±7.1 (+69)** | **yes (p<0.005)** 🔴 |
+| Trees/rocks baked | 791.5 ±21.4 (-1, n.s.) | 138.8 ±20.2 (+68) | **yes (p<0.005)** 🔴 |
+| Current HEAD | 769.7 ±15.3 (-22, sig) | 152.6 ±12.7 (+82) | **yes (p<0.005)** 🔴 |
+
+The only statistically significant improvement is camera culling on Firefox (-3.9%). The DynamicTexture replacements for small tile groups (snow, access road, night overlay) are within noise. The TileSprite→DT replacement is a clear regression on Firefox. Reverting `f59221d` is the recommended fix — TileSprite may re-tile every frame, but Firefox handles it more efficiently than a large DynamicTexture `drawImage` per frame.
+
+### A/B Performance Testing Methodology
+
+Cross-browser CPU benchmarking using psutil process-tree sampling:
+
+1. **Headed Playwright** — launch with `headless=False` to include GPU/compositor cost
+2. **psutil tree CPU** — sum `cpu_times().user + .system` across the browser PID and all child processes via `psutil.Process(pid).children(recursive=True)`
+3. **Browser PID** — `browser._impl_obj._connection._transport._proc.pid`
+4. **5-second warmup** — let the scene fully initialize before measuring
+5. **10-second measurement window** — sample CPU before/after, compute `(cpu_delta / wall_time) * 100`
+6. **5 runs per commit per browser** — compute mean, stddev, 95% CI (t-crit=2.776 for n=5)
+7. **Welch's t-test** — two-sample, α=0.05, for pairwise significance vs baseline
+8. **Git checkout per commit** — fresh vite server restart between commits
+
+Scripts: `~/.copilot/session-state/.../files/cpu_ab_test_v4.py` (menu), `cpu_gamescene_test.py` (game)
+
+Note: Chromium reports >100% CPU because psutil sums across all processes (GPU, renderer, utility). Firefox has fewer processes so reports single-core percentages.
+
 ### Performance Journey (L9 Storm, Firefox)
 
-| Milestone | FPS | Change |
-|-----------|-----|--------|
-| Baseline (before optimization) | 24 | — |
-| Tree/rock/cliff Graphics → textures | ~35 | +46% |
-| Camera culling for off-screen objects | ~40 | +14% |
-| Snow tiles → DynamicTexture | ~45 | +13% |
-| Night overlay → DynamicTexture (L7 mainly) | +10 on L7 | — |
-| TileSprite → DynamicTexture | 50-60 | +22% |
-| Tree/rock consolidation into DynamicTextures | **68** | +19% |
+⚠️ FPS measurements below were from Playwright probes (JS-side only). A/B CPU testing (see above) revealed that TileSprite→DT **doubled** Firefox CPU despite improving JS-measured FPS. The FPS improvement was likely from reduced JS overhead but at the cost of increased native `drawImage` memcpy.
+
+| Milestone | FPS (JS) | Change | FF CPU impact |
+|-----------|----------|--------|---------------|
+| Baseline (before optimization) | 24 | — | — |
+| Tree/rock/cliff Graphics → textures | ~35 | +46% | ✅ beneficial |
+| Camera culling for off-screen objects | ~40 | +14% | ✅ -3.9% (sig) |
+| Snow tiles → DynamicTexture | ~45 | +13% | ⚪ neutral |
+| Night overlay → DynamicTexture (L7 mainly) | +10 on L7 | — | ⚪ neutral |
+| TileSprite → DynamicTexture | 50-60 | +22% | 🔴 +69% (sig) |
+| Tree/rock consolidation into DynamicTextures | **68** | +19% | ⚪ neutral (cumulative still 🔴) |
 
 ### Profiling Guide
 
