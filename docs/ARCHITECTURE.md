@@ -691,20 +691,22 @@ Tested frost at 70% (forced) and night overlay independently across L7/L9/L10:
 | **L7 no night overlay** | 32 | 141±6% | **+8 FPS from removing night DT** |
 | **L9 storm+frost=70** (all on) | 29 | 135±11% | Storm + frost, no night |
 | **L9 storm+frost=0** (no frost) | 33 | 132±10% | **+4 FPS from removing frost at 70%** |
-| L10 night+frost=70 (all on) | 46* | 200±5% | *Highly variable (31–58), unreliable |
-| L10 no night, no frost | 23* | 128±11% | *L10 data too noisy for conclusions |
+| **L10 night+frost=70** (all on) | **19** | 140±11% | Heaviest: night + frost + weather |
+| **L10 night, no frost** | **22** | 145±5% | **+3.3 FPS from removing frost** |
+| **L10 no night, frost=70** | **23** | 141±12% | **+4.0 FPS from removing night DT** |
+| **L10 no night, no frost** | **27** | 146±9% | **+8.3 FPS from removing both** |
 
 **Additional findings:**
 
-6. **Frost at 70% costs ~4 FPS on L9** (29→33) — not free when alpha is high. The earlier test at frost=0 showed no cost because `setAlpha(0)` skips the blit. At 70% alpha, the full-screen Image compositing adds a measurable per-frame cost.
+6. **Frost at 70% costs ~3-4 FPS** — L9 storm: 29→33 (+4 FPS), L10 night: 19→22 (+3.3 FPS). The earlier test at frost=0 showed no cost because `setAlpha(0)` skips the blit. At 70% alpha, the full-screen Image compositing adds a measurable per-frame cost.
 
-7. **Frost overlay is invisible on night levels** — the light icy blue vignette (`0xc8e8ff` at 35% opacity) is completely swallowed by the night overlay's dark fill. On L10 (which has both night + frost), players pay the FPS cost of frost without any visual benefit.
+7. **Frost overlay is invisible on night levels** — the light icy blue vignette (`0xc8e8ff` at 35% opacity) is completely swallowed by the night overlay's dark fill. On L10 (which has both night + frost), players pay 3 FPS for an invisible effect.
 
-8. **Night overlay removal is consistent** — L7 gains +8 FPS (24→32), L8 gains +6.5 FPS (25→31). The full-screen DynamicTexture per-frame blit costs 6-8 FPS on Firefox regardless of level.
+8. **Night overlay removal is consistent** — L7: +8 FPS (24→32), L8: +6.5 FPS (25→31), L10: +4 FPS (19→23 with frost, 22→27 without). The full-screen DynamicTexture per-frame blit costs 4-8 FPS on Firefox.
 
-9. **L10 measurements are unreliable** — extreme variance (19-59 FPS across runs) suggests the groomer reaches different map positions, hitting variable object density. L7/L9 data is cleaner.
+9. **Combined: removing both night + frost on L10 gains +8.3 FPS** (19→27, +44%). The effects are additive — each full-screen overlay blit adds independent compositing cost.
 
-**Frost on night levels — optimization opportunity:** Since the frost vignette is invisible behind the night overlay, it should be disabled on night levels (or the night effect should incorporate frost visually). This would recover ~4 FPS on L10 for free.
+**Frost on night levels — optimization opportunity:** Since the frost vignette is invisible behind the night overlay, it should be disabled on night levels (or the night effect should incorporate frost visually). This would recover ~3 FPS on L10 for free.
 
 ### Profiling Guide
 
