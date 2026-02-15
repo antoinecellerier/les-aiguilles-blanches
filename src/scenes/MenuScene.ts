@@ -304,10 +304,6 @@ export default class MenuScene extends Phaser.Scene {
     const menuAvailableH = menuEndY - menuStartY;
     const minButtonHeight = buttonSize + buttonPadding * 2;
     const minSpacing = minButtonHeight + (isPortrait ? 4 : 10);
-    if (buttonDefs.length * minSpacing > menuAvailableH) {
-      const fsIdx = buttonDefs.findIndex(b => b.text === 'fullscreen' || b.text === 'exitFullscreen');
-      if (fsIdx !== -1) buttonDefs.splice(fsIdx, 1);
-    }
     const buttonSpacing = Math.max(minSpacing, Math.min(Math.round(46 * scaleFactor), Math.round(menuAvailableH / (buttonDefs.length + 0.5))));
     const totalMenuH = buttonDefs.length * buttonSpacing;
     const needsScroll = totalMenuH > menuAvailableH;
