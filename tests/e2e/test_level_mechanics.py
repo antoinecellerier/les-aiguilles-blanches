@@ -314,14 +314,14 @@ class TestWildlife:
         assert counts['active'] > 0, "Wildlife should be active initially"
 
     def test_wildlife_on_menu_screen(self, game_page: Page):
-        """Menu screen should have wildlife decorations."""
+        """Menu screen should have wildlife decorations (baked to Image textures)."""
         wait_for_scene(game_page, 'MenuScene')
 
-        has_graphics = game_page.evaluate("""() => {
+        has_wildlife = game_page.evaluate("""() => {
             const menu = window.game.scene.getScene('MenuScene');
             if (!menu) return false;
-            const graphics = menu.children.list.filter(c => c.type === 'Graphics');
-            return graphics.length > 10;
+            const images = menu.children.list.filter(c => c.type === 'Image');
+            return images.length > 10;
         }""")
 
-        assert has_graphics, "Menu should have wildlife graphics objects"
+        assert has_wildlife, "Menu should have wildlife image objects"

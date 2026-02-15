@@ -11,6 +11,15 @@ export function createMenuTerrain(scene: Phaser.Scene, width: number, height: nu
   createSnowGround(scene, width, height, snowLineY, footerHeight);
   createTrees(scene, width, snowLineY, scaleFactor, isStorm);
   if (!skipGroomer) createGroomer(scene, width, snowLineY, scaleFactor, isStorm);
+
+  // Clean up baked textures when scene shuts down to avoid key collisions on restart
+  scene.events.once('shutdown', () => {
+    const keys = ['_menu_ground_lines', '_menu_groomer'];
+    for (let i = 0; i < 9; i++) keys.push(`_menu_tree_${i}`);
+    for (const key of keys) {
+      if (scene.textures.exists(key)) scene.textures.remove(key);
+    }
+  });
 }
 
 function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weather?: { isNight: boolean; weather: string }): void {
@@ -31,10 +40,20 @@ function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weathe
 
 function createSnowGround(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number): void {
   scene.add.rectangle(width / 2, snowLineY, width, height - snowLineY, 0xffffff).setOrigin(0.5, 0).setDepth(3);
-  const g = scene.add.graphics().setDepth(3);
-  g.fillStyle(0xf0f6fa, 1);
-  for (let ly = snowLineY + 8; ly < height - footerHeight; ly += 10) {
-    g.fillRect(0, ly, width, 1);
+  // Bake shadow lines into a texture to avoid per-frame Graphics command replay
+  const groundH = height - snowLineY - footerHeight;
+  if (groundH > 0) {
+    const g = scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
+    g.fillStyle(0xf0f6fa, 1);
+    for (let ly = 8; ly < groundH; ly += 10) {
+      g.fillRect(0, ly, width, 1);
+    }
+    const key = '_menu_ground_lines';
+    g.generateTexture(key, width, groundH);
+    g.destroy();
+    const tex = scene.textures.get(key);
+    if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
+    scene.add.image(width / 2, snowLineY, key).setOrigin(0.5, 0).setDepth(3);
   }
   scene.add.rectangle(width / 2, snowLineY, width, 3, 0xd8e4e8).setOrigin(0.5, 0).setDepth(3);
 }
@@ -81,29 +100,39 @@ function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, bas
 
 function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
-  // Clustered, varied positions — not evenly spaced
   const treePositions = [
     40 * sx, 100 * sx, 130 * sx, 220 * sx, 310 * sx,
     width - 40 * sx, width - 110 * sx, width - 170 * sx, width - 260 * sx,
   ];
-  for (const tx of treePositions) {
+  for (let ti = 0; ti < treePositions.length; ti++) {
+    const tx = treePositions[ti];
     const s = (0.7 + Math.random() * 0.7) * scaleFactor;
-    // Y-based depth: trunk base at snowLineY + 10*s
     const treeBaseY = snowLineY + 10 * s;
-    const g = scene.add.graphics().setDepth(5 + treeBaseY * 0.001);
+    // Draw tree at origin, bake to texture, place as Image
+    const treeW = Math.ceil(26 * s) + 2;
+    const treeH = Math.ceil(34 * s) + 2;
+    const cx = treeW / 2;
+    const g = scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
     g.fillStyle(0x228b22);
-    g.fillRect(tx - 5 * s, snowLineY - 24 * s, 10 * s, 8 * s);
-    g.fillRect(tx - 9 * s, snowLineY - 16 * s, 18 * s, 8 * s);
-    g.fillRect(tx - 13 * s, snowLineY - 8 * s, 26 * s, 10 * s);
-    // Storm: snow on each foliage tier
+    g.fillRect(cx - 5 * s, treeH - 10 * s - 24 * s, 10 * s, 8 * s);
+    g.fillRect(cx - 9 * s, treeH - 10 * s - 16 * s, 18 * s, 8 * s);
+    g.fillRect(cx - 13 * s, treeH - 10 * s - 8 * s, 26 * s, 10 * s);
     if (isStorm) {
       g.fillStyle(0xf0f5f8);
-      g.fillRect(tx - 5 * s, snowLineY - 24 * s, 10 * s, 3 * s);
-      g.fillRect(tx - 9 * s, snowLineY - 16 * s, 18 * s, 3 * s);
-      g.fillRect(tx - 13 * s, snowLineY - 8 * s, 26 * s, 3 * s);
+      g.fillRect(cx - 5 * s, treeH - 10 * s - 24 * s, 10 * s, 3 * s);
+      g.fillRect(cx - 9 * s, treeH - 10 * s - 16 * s, 18 * s, 3 * s);
+      g.fillRect(cx - 13 * s, treeH - 10 * s - 8 * s, 26 * s, 3 * s);
     }
     g.fillStyle(0x8b4513);
-    g.fillRect(tx - 3 * s, snowLineY, 6 * s, 10 * s);
+    g.fillRect(cx - 3 * s, treeH - 10 * s, 6 * s, 10 * s);
+    const key = `_menu_tree_${ti}`;
+    g.generateTexture(key, treeW, treeH);
+    g.destroy();
+    const tex = scene.textures.get(key);
+    if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
+    scene.add.image(tx, snowLineY + 10 * s, key)
+      .setOrigin(0.5, 1)
+      .setDepth(5 + treeBaseY * 0.001);
   }
 }
 
@@ -112,61 +141,69 @@ function createGroomer(scene: Phaser.Scene, width: number, snowLineY: number, sc
   const isLandscape = width > snowLineY * 1.5;
   const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
   const s = 2.0 * scaleFactor;
-  const g = scene.add.graphics().setDepth(5 + snowLineY * 0.001);
-  // Side-view groomer sitting on snow — wide and low
-  const groundY = snowLineY;
-  // Tracks (bottom) — wide horizontal treads
+  // Draw groomer at origin, bake to texture
+  // Bounding box: from blade left (-27*s) to finisher right (37*s), from exhaust top (-38*s) to tracks bottom (0)
+  const leftEdge = 27 * s;
+  const texW = Math.ceil((27 + 37) * s) + 2;
+  const texH = Math.ceil(38 * s) + 2;
+  const ox = leftEdge; // origin X offset within texture
+  const oy = texH;     // origin Y = groundY in texture (bottom)
+  const g = scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
+  // Tracks
   g.fillStyle(0x333333);
-  g.fillRect(gx - 24 * s, groundY - 8 * s, 48 * s, 8 * s);
-  // Track detail — lighter tread lines
+  g.fillRect(ox - 24 * s, oy - 8 * s, 48 * s, 8 * s);
   g.fillStyle(0x444444);
   for (let tx = -22; tx < 24; tx += 6) {
-    g.fillRect(gx + tx * s, groundY - 7 * s, 3 * s, 6 * s);
+    g.fillRect(ox + tx * s, oy - 7 * s, 3 * s, 6 * s);
   }
-  // Body — red, sits on tracks
+  // Body
   g.fillStyle(0xcc2200);
-  g.fillRect(gx - 18 * s, groundY - 22 * s, 36 * s, 14 * s);
-  // Cabin / window frame — on top of body, slightly back
+  g.fillRect(ox - 18 * s, oy - 22 * s, 36 * s, 14 * s);
+  // Cabin
   g.fillStyle(0x1e90ff);
-  g.fillRect(gx - 8 * s, groundY - 32 * s, 20 * s, 11 * s);
-  // Window glass
+  g.fillRect(ox - 8 * s, oy - 32 * s, 20 * s, 11 * s);
   g.fillStyle(0x87ceeb);
-  g.fillRect(gx - 5 * s, groundY - 30 * s, 14 * s, 7 * s);
-  // Cabin roof
+  g.fillRect(ox - 5 * s, oy - 30 * s, 14 * s, 7 * s);
   g.fillStyle(0xaa1a00);
-  g.fillRect(gx - 10 * s, groundY - 34 * s, 24 * s, 3 * s);
-  // Front blade — extends forward from body
+  g.fillRect(ox - 10 * s, oy - 34 * s, 24 * s, 3 * s);
+  // Blade
   g.fillStyle(0x888888);
-  g.fillRect(gx - 26 * s, groundY - 14 * s, 10 * s, 10 * s);
+  g.fillRect(ox - 26 * s, oy - 14 * s, 10 * s, 10 * s);
   g.fillStyle(0xaaaaaa);
-  g.fillRect(gx - 27 * s, groundY - 16 * s, 4 * s, 12 * s);
-  // Exhaust pipe
+  g.fillRect(ox - 27 * s, oy - 16 * s, 4 * s, 12 * s);
+  // Exhaust
   g.fillStyle(0x555555);
-  g.fillRect(gx + 10 * s, groundY - 38 * s, 3 * s, 8 * s);
-  // Rear tiller — behind the tracks
-  // Tiller arm connecting to body
+  g.fillRect(ox + 10 * s, oy - 38 * s, 3 * s, 8 * s);
+  // Tiller
   g.fillStyle(0x777777);
-  g.fillRect(gx + 22 * s, groundY - 12 * s, 8 * s, 3 * s);
-  // Tiller drum with teeth
+  g.fillRect(ox + 22 * s, oy - 12 * s, 8 * s, 3 * s);
   g.fillStyle(0x555555);
-  g.fillRect(gx + 28 * s, groundY - 14 * s, 6 * s, 8 * s);
+  g.fillRect(ox + 28 * s, oy - 14 * s, 6 * s, 8 * s);
   g.fillStyle(0x666666);
   for (let ty = -13; ty < -6; ty += 3) {
-    g.fillRect(gx + 29 * s, groundY + ty * s, 4 * s, 2 * s);
+    g.fillRect(ox + 29 * s, oy + ty * s, 4 * s, 2 * s);
   }
-  // Finisher comb trailing behind
+  // Finisher comb
   g.fillStyle(0x888888);
-  g.fillRect(gx + 34 * s, groundY - 6 * s, 3 * s, 6 * s);
-  // Comb teeth (horizontal lines = corduroy pattern)
+  g.fillRect(ox + 34 * s, oy - 6 * s, 3 * s, 6 * s);
   g.fillStyle(0x999999);
   for (let ty = -5; ty < 0; ty += 2) {
-    g.fillRect(gx + 34 * s, groundY + ty * s, 3 * s, 1 * s);
+    g.fillRect(ox + 34 * s, oy + ty * s, 3 * s, 1 * s);
   }
-  // Storm: snow accumulation on roof, body, and blade
+  // Storm accumulation
   if (isStorm) {
     g.fillStyle(0xf0f5f8);
-    g.fillRect(gx - 10 * s, groundY - 37 * s, 24 * s, 3 * s);  // roof top
-    g.fillRect(gx - 18 * s, groundY - 23 * s, 36 * s, 2 * s);  // body top
-    g.fillRect(gx - 27 * s, groundY - 17 * s, 10 * s, 2 * s);  // blade top
+    g.fillRect(ox - 10 * s, oy - 37 * s, 24 * s, 3 * s);
+    g.fillRect(ox - 18 * s, oy - 23 * s, 36 * s, 2 * s);
+    g.fillRect(ox - 27 * s, oy - 17 * s, 10 * s, 2 * s);
   }
+  const key = '_menu_groomer';
+  g.generateTexture(key, texW, texH);
+  g.destroy();
+  const tex = scene.textures.get(key);
+  if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
+  // Place image so that the origin maps to gx, snowLineY (ground level)
+  scene.add.image(gx - leftEdge + texW / 2, snowLineY - texH, key)
+    .setOrigin(0.5, 0)
+    .setDepth(5 + snowLineY * 0.001);
 }

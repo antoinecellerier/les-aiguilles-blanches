@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
 import { drawAnimal, drawBirdPerched, drawBirdSideFlying, ANIMAL_GRID } from '../utils/animalSprites';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
-import { drawTrackShape } from '../utils/animalTracks';
 import { playAnimalCall } from './WildlifeSounds';
 import type { AnimalType } from '../utils/animalSprites';
 
 interface MenuAnimal {
-  graphics: Phaser.GameObjects.Graphics;
+  sprite: Phaser.GameObjects.Image;
   x: number; y: number;
   homeX: number; homeY: number;
   vx: number; vy: number;
@@ -36,7 +35,7 @@ export class MenuWildlifeController {
   private snowflakes: { rect: Phaser.GameObjects.Rectangle; speed: number; wobbleOffset: number }[] = [];
   private menuAnimals: MenuAnimal[] = [];
   private perchSpots: { x: number; y: number }[] = [];
-  private menuTracks: { graphics: Phaser.GameObjects.Graphics; age: number }[] = [];
+  private menuTracks: { image: Phaser.GameObjects.Image; age: number }[] = [];
   private readonly MENU_TRACK_LIFETIME = 12000;
   private readonly MENU_MAX_TRACKS = 40;
 
@@ -44,6 +43,7 @@ export class MenuWildlifeController {
   snowBottomY = 0;
   menuZone = { left: 0, right: 0, top: 0, bottom: 0 };
   private weatherConfig = { isNight: false, weather: 'clear' };
+  private generatedTexKeys: string[] = [];
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -51,6 +51,7 @@ export class MenuWildlifeController {
 
   create(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }): void {
     this.weatherConfig = weather || { isNight: false, weather: 'clear' };
+    this.generateAnimalTextures(scaleFactor);
     this.createMenuWildlife(width, height, snowLineY, footerHeight, scaleFactor);
     this.createSnowParticles(width, snowLineY);
   }
@@ -64,14 +65,62 @@ export class MenuWildlifeController {
 
   destroy(): void {
     for (const a of this.menuAnimals) {
-      if (a.burrowMask) a.graphics.clearMask(true);
+      if (a.burrowMask) a.sprite.clearMask(true);
       if (a.burrowMaskShape) a.burrowMaskShape.destroy();
       if (a.sleepZzz) a.sleepZzz.forEach(z => z.destroy());
-      a.graphics.destroy();
+      a.sprite.destroy();
     }
     this.menuAnimals.length = 0;
-    for (const t of this.menuTracks) t.graphics.destroy();
+    for (const t of this.menuTracks) t.image.destroy();
     this.menuTracks.length = 0;
+    for (const key of this.generatedTexKeys) {
+      if (this.scene.textures.exists(key)) this.scene.textures.remove(key);
+    }
+    this.generatedTexKeys.length = 0;
+  }
+
+  /** Pre-bake animal sprites into textures so they render as cheap Images. */
+  private generateAnimalTextures(scaleFactor: number): void {
+    const s = Math.max(2, 3 * scaleFactor);
+    const NEAREST = Phaser.ScaleModes.NEAREST;
+    const species: { name: string; type: AnimalType; grid: { w: number; h: number } }[] = [
+      { name: 'marmot', type: 'marmot', grid: ANIMAL_GRID.marmot },
+      { name: 'chamois', type: 'chamois', grid: ANIMAL_GRID.chamois },
+      { name: 'bunny', type: 'bunny', grid: ANIMAL_GRID.bunny },
+      { name: 'fox', type: 'fox', grid: ANIMAL_GRID.fox },
+      { name: 'bouquetin', type: 'bouquetin', grid: ANIMAL_GRID.bouquetin },
+    ];
+    for (const sp of species) {
+      const key = `menu_${sp.name}`;
+      if (this.scene.textures.exists(key)) continue;
+      const w = sp.grid.w * s + 2;
+      const h = sp.grid.h * s + 2;
+      const g = this.scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
+      drawAnimal(g, sp.type, w / 2, h / 2, s);
+      g.generateTexture(key, w, h);
+      g.destroy();
+      const tex = this.scene.textures.get(key);
+      if (tex?.source?.[0]) tex.source[0].scaleMode = NEAREST;
+      this.generatedTexKeys.push(key);
+    }
+    // Bird textures: flying and perched variants
+    const birdScale = Math.max(1.5, 2 * scaleFactor);
+    for (const [suffix, drawFn, grid] of [
+      ['flying', drawBirdSideFlying, ANIMAL_GRID.bird_flying],
+      ['perched', drawBirdPerched, ANIMAL_GRID.bird_perched],
+    ] as const) {
+      const key = `menu_bird_${suffix}`;
+      if (this.scene.textures.exists(key)) continue;
+      const w = grid.w * birdScale + 2;
+      const h = grid.h * birdScale + 2;
+      const g = this.scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
+      drawFn(g, w / 2, h / 2, birdScale);
+      g.generateTexture(key, w, h);
+      g.destroy();
+      const tex = this.scene.textures.get(key);
+      if (tex?.source?.[0]) tex.source[0].scaleMode = NEAREST;
+      this.generatedTexKeys.push(key);
+    }
   }
 
   private updateSnowflakes(time: number, delta: number): void {
@@ -98,7 +147,7 @@ export class MenuWildlifeController {
       // Sleeping animals: gentle breathing bob, no wandering
       if (a.state === 'sleeping') {
         const bob = Math.sin(time / 800 + a.homeX) * 0.5;
-        a.graphics.setPosition(a.x, a.y + bob);
+        a.sprite.setPosition(a.x, a.y + bob);
         continue;
       }
       // Find closest pointer to this animal
@@ -127,8 +176,7 @@ export class MenuWildlifeController {
       const fleeAngle = Math.atan2(pdy, pdx);
       if (a.state === 'perched' || a.state === 'landing') {
         a.state = 'flying';
-        a.graphics.clear();
-        drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
+        a.sprite.setTexture('menu_bird_flying');
         const now = Date.now();
         if (!a.lastFleeSound || now - a.lastFleeSound > 1000) {
           a.lastFleeSound = now;
@@ -137,8 +185,8 @@ export class MenuWildlifeController {
       }
       a.vx = Math.cos(fleeAngle) * 60;
       a.vy = Math.sin(fleeAngle) * 30 - 10;
-      if (a.vx > 0.5) a.graphics.setScale(1, 1);
-      else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+      if (a.vx > 0.5) a.sprite.setScale(1, 1);
+      else if (a.vx < -0.5) a.sprite.setScale(-1, 1);
       a.wanderTimer = 2000 + Math.random() * 3000;
     }
 
@@ -146,18 +194,17 @@ export class MenuWildlifeController {
       // Perched: sit still with tiny bob, take off after timer
       a.wanderTimer -= delta;
       const bob = Math.sin(time / 400 + a.homeX) * 0.3;
-      a.graphics.setPosition(a.x, a.y + bob);
-      a.graphics.setRotation(0);
+      a.sprite.setPosition(a.x, a.y + bob);
+      a.sprite.setRotation(0);
       if (a.wanderTimer <= 0) {
         a.state = 'flying';
-        a.graphics.clear();
-        drawBirdSideFlying(a.graphics, 0, 0, a.spriteH || 2);
+        a.sprite.setTexture('menu_bird_flying');
         const takeoffAngle = (Math.random() - 0.5) * Math.PI * 0.8;
         const takeoffSpeed = 8 + Math.random() * 6;
         a.vx = Math.cos(takeoffAngle) * takeoffSpeed;
         a.vy = -2 - Math.random() * 3;
-        if (a.vx > 0.5) a.graphics.setScale(1, 1);
-        else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+        if (a.vx > 0.5) a.sprite.setScale(1, 1);
+        else if (a.vx < -0.5) a.sprite.setScale(-1, 1);
         a.wanderTimer = 2000 + Math.random() * 3000;
       }
     } else if (a.state === 'landing' && a.perchTarget) {
@@ -170,27 +217,26 @@ export class MenuWildlifeController {
         a.y = a.perchTarget.y - 4;
         a.state = 'perched';
         a.vx = 0; a.vy = 0;
-        a.graphics.setRotation(0);
-        a.graphics.setScale(1, 1);
-        a.graphics.clear();
-        drawBirdPerched(a.graphics, 0, 0, a.spriteH || 2);
+        a.sprite.setRotation(0);
+        a.sprite.setScale(1, 1);
+        a.sprite.setTexture('menu_bird_perched');
         a.wanderTimer = 3000 + Math.random() * 5000;
       } else {
         a.vx += (ldx / ldist * 50 - a.vx) * dt * 2;
         a.vy += (ldy / ldist * 50 - a.vy) * dt * 2;
-        if (a.vx > 0.5) a.graphics.setScale(1, 1);
-        else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+        if (a.vx > 0.5) a.sprite.setScale(1, 1);
+        else if (a.vx < -0.5) a.sprite.setScale(-1, 1);
         a.x += a.vx * dt;
         a.y += a.vy * dt;
         a.wanderTimer -= delta;
         if (a.wanderTimer <= 0) {
           a.state = 'flying';
           a.vx = 8; a.vy = -2;
-          a.graphics.setScale(1, 1);
+          a.sprite.setScale(1, 1);
           a.wanderTimer = 3000 + Math.random() * 3000;
         }
       }
-      a.graphics.setPosition(a.x, a.y);
+      a.sprite.setPosition(a.x, a.y);
     } else {
       // Flying: alpine chough soaring
       a.wanderTimer -= delta;
@@ -242,8 +288,8 @@ export class MenuWildlifeController {
         a.vy = Math.sin(newHeading) * curSpeed;
         a.x += a.vx * dt;
         a.y += a.vy * dt;
-        if (a.vx > 0.5) a.graphics.setScale(1, 1);
-        else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
+        if (a.vx > 0.5) a.sprite.setScale(1, 1);
+        else if (a.vx < -0.5) a.sprite.setScale(-1, 1);
         const skyMin = this.snowLineY * 0.08;
         const skyMax = this.snowLineY * 0.55;
         if (a.y < skyMin) a.vy += 20 * dt;
@@ -251,7 +297,7 @@ export class MenuWildlifeController {
         if (a.x > width + 30) { a.x = -30; }
         else if (a.x < -30) { a.x = width + 30; }
       }
-      a.graphics.setPosition(a.x, a.y);
+      a.sprite.setPosition(a.x, a.y);
     }
   }
 
@@ -278,14 +324,14 @@ export class MenuWildlifeController {
         a.wanderTimer -= delta;
         a.hopPhase = 0;
         const graze = Math.sin(time / 400 + a.homeX) * 0.3;
-        a.graphics.setPosition(a.x, a.y + graze);
-        a.graphics.setDepth(1 + a.y * 0.001);
+        a.sprite.setPosition(a.x, a.y + graze);
+        a.sprite.setDepth(1 + a.y * 0.001);
         if (a.wanderTimer <= 0) {
           a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
           a.wanderTimer = scared ? 200 : (800 + Math.random() * 2000);
           const next = a.climbPath[a.climbIndex];
-          if (next.x > a.x) a.graphics.setScale(1, 1);
-          else if (next.x < a.x) a.graphics.setScale(-1, 1);
+          if (next.x > a.x) a.sprite.setScale(1, 1);
+          else if (next.x < a.x) a.sprite.setScale(-1, 1);
         }
       } else {
         // Hop toward waypoint: fast burst with vertical arc
@@ -295,8 +341,8 @@ export class MenuWildlifeController {
         a.x += (cdx / cdist) * hopSpeed * dt;
         a.y += (cdy / cdist) * hopSpeed * dt;
         if (a.y > this.snowLineY - 2) a.y = this.snowLineY - 2;
-        a.graphics.setPosition(a.x, a.y + hopArc);
-        a.graphics.setDepth(1 + a.y * 0.001);
+        a.sprite.setPosition(a.x, a.y + hopArc);
+        a.sprite.setDepth(1 + a.y * 0.001);
       }
     }
   }
@@ -310,16 +356,16 @@ export class MenuWildlifeController {
       const progress = Math.min(1, Math.max(0, 1 - (a.hideTimer || 0) / dur));
       if (progress < 0.2) {
         const t = progress / 0.2;
-        a.graphics.setPosition(a.x, a.homeY + t * sH);
+        a.sprite.setPosition(a.x, a.homeY + t * sH);
       } else if (progress > 0.8) {
         const t = (progress - 0.8) / 0.2;
-        a.graphics.setPosition(a.x, a.homeY + (1 - t) * sH);
+        a.sprite.setPosition(a.x, a.homeY + (1 - t) * sH);
       } else {
-        a.graphics.setPosition(a.x, a.homeY + sH);
+        a.sprite.setPosition(a.x, a.homeY + sH);
       }
       if ((a.hideTimer || 0) <= 0) {
         a.state = undefined;
-        a.graphics.setPosition(a.x, a.y);
+        a.sprite.setPosition(a.x, a.y);
         a.wanderTimer = 1000 + Math.random() * 2000;
       }
       return; // skip normal updates while hiding
@@ -349,8 +395,8 @@ export class MenuWildlifeController {
         a.vy = Math.sin(fleeAngle) * 25;
         a.wanderTimer = 500;
       }
-      if (a.vx > 0) a.graphics.setScale(1, 1);
-      else a.graphics.setScale(-1, 1);
+      if (a.vx > 0) a.sprite.setScale(1, 1);
+      else a.sprite.setScale(-1, 1);
     } else {
       a.wanderTimer -= delta;
     }
@@ -376,9 +422,9 @@ export class MenuWildlifeController {
     if (a.y > this.snowBottomY) { a.y = this.snowBottomY; a.vy = -Math.abs(a.vy) * 0.5; }
     const homePull = a.species === 'marmot' ? 0.5 : 0.08;
     if (Math.abs(a.y - a.homeY) > 30) a.vy += (a.homeY - a.y) * homePull * dt;
-    if (a.vx > 0.5) a.graphics.setScale(1, 1);
-    else if (a.vx < -0.5) a.graphics.setScale(-1, 1);
-    a.graphics.setDepth(5 + (a.y + (a.feetOffsetY || 0)) * 0.001);
+    if (a.vx > 0.5) a.sprite.setScale(1, 1);
+    else if (a.vx < -0.5) a.sprite.setScale(-1, 1);
+    a.sprite.setDepth(5 + (a.y + (a.feetOffsetY || 0)) * 0.001);
 
     // Update burrow mask to follow marmot position
     if (a.burrowMaskShape) {
@@ -444,37 +490,37 @@ export class MenuWildlifeController {
       if (Math.abs(a.vx) > 5) {
         a.hopPhase = (a.hopPhase || 0) + dt * 10;
         const hop = -Math.abs(Math.sin(a.hopPhase)) * 3;
-        a.graphics.setPosition(a.x, a.y + hop);
+        a.sprite.setPosition(a.x, a.y + hop);
       } else {
         const twitch = Math.sin(time / 200 + a.homeX) * 0.3;
-        a.graphics.setPosition(a.x, a.y + twitch);
+        a.sprite.setPosition(a.x, a.y + twitch);
       }
     } else if (a.species === 'chamois') {
       if (Math.abs(a.vx) > 3) {
         const stride = Math.sin(time / 250 + a.homeX) * 0.8;
-        a.graphics.setPosition(a.x, a.y + stride);
+        a.sprite.setPosition(a.x, a.y + stride);
       } else {
         const alert = Math.sin(time / 800 + a.homeX) * 0.4;
-        a.graphics.setPosition(a.x, a.y + alert);
+        a.sprite.setPosition(a.x, a.y + alert);
       }
     } else if (a.species === 'fox') {
       if (Math.abs(a.vx) > FOX.LUNGE_ANIM_THRESHOLD) {
         const leap = -Math.abs(Math.sin(time / 100 + a.homeX)) * 3;
-        a.graphics.setPosition(a.x, a.y + leap);
+        a.sprite.setPosition(a.x, a.y + leap);
       } else if (Math.abs(a.vx) > 3) {
         const trot = Math.sin(time / 200 + a.homeX) * 0.5;
-        a.graphics.setPosition(a.x, a.y + trot);
+        a.sprite.setPosition(a.x, a.y + trot);
       } else {
         const sniff = Math.sin(time / 400 + a.homeX) * 0.6;
-        a.graphics.setPosition(a.x + sniff * 0.4, a.y);
+        a.sprite.setPosition(a.x + sniff * 0.4, a.y);
       }
     } else {
       if (Math.abs(a.vx) > 2) {
         const waddle = Math.sin(time / 150 + a.homeX) * 0.6;
-        a.graphics.setPosition(a.x + waddle * 0.3, a.y);
+        a.sprite.setPosition(a.x + waddle * 0.3, a.y);
       } else {
         const sentinel = Math.sin(time / 600 + a.homeX) * 0.5;
-        a.graphics.setPosition(a.x, a.y + sentinel);
+        a.sprite.setPosition(a.x, a.y + sentinel);
       }
     }
   }
@@ -547,10 +593,10 @@ export class MenuWildlifeController {
       t.age += delta;
       const fade = 1 - t.age / this.MENU_TRACK_LIFETIME;
       if (fade <= 0) {
-        t.graphics.destroy();
+        t.image.destroy();
         this.menuTracks.splice(i, 1);
       } else {
-        t.graphics.setAlpha(fade * 0.5);
+        t.image.setAlpha(fade * 0.5);
       }
     }
   }
@@ -558,16 +604,12 @@ export class MenuWildlifeController {
   private placeMenuTrack(x: number, y: number, species: string, vx: number, vy: number): void {
     if (this.menuTracks.length >= this.MENU_MAX_TRACKS) {
       const oldest = this.menuTracks.shift();
-      if (oldest) oldest.graphics.destroy();
+      if (oldest) oldest.image.destroy();
     }
-    const g = this.scene.add.graphics().setDepth(3.5);
-    const s = 2;
+    const key = `track_${species}`;
     const angle = Math.atan2(vy, vx);
-    drawTrackShape(g, species, s);
-    g.setPosition(x, y);
-    g.setRotation(angle);
-    g.setAlpha(0.5);
-    this.menuTracks.push({ graphics: g, age: 0 });
+    const img = this.scene.add.image(x, y, key).setDepth(3.5).setRotation(angle).setAlpha(0.5);
+    this.menuTracks.push({ image: img, age: 0 });
   }
 
   private createMenuWildlife(width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number): void {
@@ -589,11 +631,11 @@ export class MenuWildlifeController {
       return grid ? (grid.h / 2) * s : 0;
     };
 
-    const addGroundAnimal = (g: Phaser.GameObjects.Graphics, x: number, y: number, rangeX: number, species: string) => {
+    const addGroundAnimal = (img: Phaser.GameObjects.Image, x: number, y: number, rangeX: number, species: string) => {
       const fo = feetOffset(species);
-      g.setDepth(5 + (y + fo) * 0.001);
+      img.setDepth(5 + (y + fo) * 0.001);
       this.menuAnimals.push({
-        graphics: g, x, y, homeX: x, homeY: y,
+        sprite: img, x, y, homeX: x, homeY: y,
         vx: 0, vy: 0, wanderTimer: Math.random() * 3000,
         type: 'ground', species,
         boundLeft: x - rangeX, boundRight: x + rangeX,
@@ -634,8 +676,7 @@ export class MenuWildlifeController {
     const marmotZone = Math.random() < 0.5 ? rightZone : leftZone;
     const marmotClusterX = randInZone(marmotZone);
     for (let i = 0; i < marmotCount; i++) {
-      const mg = this.scene.add.graphics();
-      drawAnimal(mg, 'marmot', 0, 0, s);
+      const mg = this.scene.add.image(0, 0, 'menu_marmot');
       const mx = marmotClusterX + (i - marmotCount / 2) * 18 * scaleFactor + (Math.random() - 0.5) * 10;
       const my = snowTop + Math.random() * (snowBottom - snowTop);
       mg.setPosition(mx, my).setDepth(5 + (my + feetOffset('marmot')) * 0.001);
@@ -649,7 +690,7 @@ export class MenuWildlifeController {
       mg.setMask(burrowMask);
       const slideDistance = 4 * s + 4; // full sprite height + margin
       const animal: MenuAnimal = {
-        graphics: mg, x: mx, y: my, homeX: mx, homeY: my,
+        sprite: mg, x: mx, y: my, homeX: mx, homeY: my,
         vx: 0, vy: 0, wanderTimer: Math.random() * 3000,
         type: 'ground' as const, species: 'marmot',
         boundLeft: mx - 20 * sx, boundRight: mx + 20 * sx,
@@ -669,8 +710,7 @@ export class MenuWildlifeController {
     const chamoisClusterX = isStorm ? shelterTreeX : randInZone(chamoisZone);
     let chamoisClusterY = isStorm ? shelterY : snowTop + Math.random() * (snowBottom - snowTop);
     for (let i = 0; i < chamoisCount; i++) {
-      const cg = this.scene.add.graphics();
-      drawAnimal(cg, 'chamois', 0, 0, s);
+      const cg = this.scene.add.image(0, 0, 'menu_chamois');
       const cx = chamoisClusterX + (i - chamoisCount / 2) * 25 * scaleFactor + (Math.random() - 0.5) * 15;
       const cy = i === 0 ? chamoisClusterY : snowTop + Math.random() * (snowBottom - snowTop);
       if (i === 0) chamoisClusterY = cy;
@@ -687,28 +727,26 @@ export class MenuWildlifeController {
     // During storms, huddles next to chamois under tree shelter
     {
       const bunnyZone = isStorm ? chamoisZone : (Math.random() < 0.5 ? leftZone : rightZone);
-      const bunnyG = this.scene.add.graphics();
-      drawAnimal(bunnyG, 'bunny', 0, 0, s);
+      const bunnyImg = this.scene.add.image(0, 0, 'menu_bunny');
       const bunnyX = isStorm
         ? shelterTreeX + 12 * scaleFactor
         : randInZone(bunnyZone);
       const bunnyY = isStorm
         ? shelterY + 3
         : snowTop + Math.random() * (snowBottom - snowTop);
-      bunnyG.setPosition(bunnyX, bunnyY).setDepth(5 + bunnyY * 0.001);
-      addGroundAnimal(bunnyG, bunnyX, bunnyY, isStorm ? 15 : width * 0.45, 'bunny');
+      bunnyImg.setPosition(bunnyX, bunnyY).setDepth(5 + bunnyY * 0.001);
+      addGroundAnimal(bunnyImg, bunnyX, bunnyY, isStorm ? 15 : width * 0.45, 'bunny');
     }
 
     // Fox: nocturnal — more common at night (~60%), rare by day (~30%), absent in storms
     const foxChance = isStorm ? 0 : isNight ? 0.6 : 0.3;
     if (Math.random() < foxChance) {
       const foxZone = Math.random() < 0.5 ? leftZone : rightZone;
-      const foxG = this.scene.add.graphics();
-      drawAnimal(foxG, 'fox', 0, 0, s);
+      const foxImg = this.scene.add.image(0, 0, 'menu_fox');
       const foxX = randInZone(foxZone);
       const foxY = snowTop + Math.random() * (snowBottom - snowTop);
-      foxG.setPosition(foxX, foxY).setDepth(5 + foxY * 0.001);
-      addGroundAnimal(foxG, foxX, foxY, width * 0.4, 'fox');
+      foxImg.setPosition(foxX, foxY).setDepth(5 + foxY * 0.001);
+      addGroundAnimal(foxImg, foxX, foxY, width * 0.4, 'fox');
     }
 
     // Bouquetin and birds
@@ -725,8 +763,7 @@ export class MenuWildlifeController {
     const climbBase = snowLineY - 4;
     const climbPeak = snowLineY - climbMtnPeakH * 0.85;
     for (let ib = 0; ib < 2; ib++) {
-      const ibexG = this.scene.add.graphics().setDepth(1.5);
-      drawAnimal(ibexG, 'bouquetin', 0, 0, s);
+      const ibexImg = this.scene.add.image(0, 0, 'menu_bouquetin').setDepth(1.5);
       const climbPath: { x: number; y: number }[] = [];
       const climbSteps = 8;
       const flankOffset = 0.12 + ib * 0.12;
@@ -741,9 +778,9 @@ export class MenuWildlifeController {
       }
       const startIdx = ib * 2;
       const startPt = climbPath[startIdx % climbPath.length];
-      ibexG.setPosition(startPt.x, startPt.y);
+      ibexImg.setPosition(startPt.x, startPt.y);
       this.menuAnimals.push({
-        graphics: ibexG, x: startPt.x, y: startPt.y,
+        sprite: ibexImg, x: startPt.x, y: startPt.y,
         homeX: startPt.x, homeY: startPt.y,
         vx: 0, vy: 0, wanderTimer: ib * 1500,
         type: 'climber',
@@ -762,30 +799,29 @@ export class MenuWildlifeController {
     // At night, all birds start perched (roosting)
     const perchedCount = isNight ? birdCount : 1 + Math.floor(Math.random() * 2);
     for (let i = 0; i < birdCount; i++) {
-      const birdG = this.scene.add.graphics().setDepth(11);
-
       const startPerched = i < perchedCount;
       let bx: number, by: number;
       let state: 'flying' | 'perched' | 'sleeping';
+      let texKey: string;
 
       if (startPerched) {
         const perch = allPerches[i % allPerches.length];
         bx = perch.x;
         by = perch.y - 4;
         state = isNight ? 'sleeping' : 'perched';
-        drawBirdPerched(birdG, 0, 0, birdScale);
+        texKey = 'menu_bird_perched';
       } else {
         bx = Math.random() * width;
         by = snowLineY * (0.1 + Math.random() * 0.4);
         state = 'flying';
-        drawBirdSideFlying(birdG, 0, 0, birdScale);
+        texKey = 'menu_bird_flying';
       }
 
+      const birdImg = this.scene.add.image(bx, by, texKey).setDepth(11);
       const initAngle = (Math.random() - 0.5) * Math.PI * 0.8;
       const initSpeed = 6 + Math.random() * 10;
-      birdG.setPosition(bx, by);
       this.menuAnimals.push({
-        graphics: birdG, x: bx, y: by, homeX: bx, homeY: by,
+        sprite: birdImg, x: bx, y: by, homeX: bx, homeY: by,
         vx: state === 'flying' ? Math.cos(initAngle) * initSpeed : 0,
         vy: state === 'flying' ? Math.sin(initAngle) * initSpeed * 0.5 : 0,
         wanderTimer: state === 'flying' ? 1500 + Math.random() * 2000 : 3000 + Math.random() * 5000,
