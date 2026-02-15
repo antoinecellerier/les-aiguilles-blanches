@@ -1712,11 +1712,12 @@ export default class GameScene extends Phaser.Scene {
         const d = img.depth;
         // Only cull objects at terrain/forest/tree depths (not UI, overlays, player)
         if (d <= DEPTHS.MARKERS) {
-          // Use display bounds so large DynamicTexture backgrounds aren't culled by center point
-          const hw = img.displayWidth * img.originX;
-          const hh = img.displayHeight * img.originY;
-          img.visible = img.x + hw > left && img.x - hw < right &&
-                        img.y + hh > top && img.y - hh < bottom;
+          // Use display bounds for correct culling regardless of origin
+          const lx = img.x - img.displayWidth * img.originX;
+          const rx = img.x + img.displayWidth * (1 - img.originX);
+          const ty = img.y - img.displayHeight * img.originY;
+          const by = img.y + img.displayHeight * (1 - img.originY);
+          img.visible = rx > left && lx < right && by > top && ty < bottom;
         }
       }
     }
