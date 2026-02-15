@@ -577,6 +577,11 @@ export default class SkiRunScene extends Phaser.Scene {
     }
     this.skier.setVelocity(this.smoothedLateral, vy);
 
+    // Adaptive camera lerp: faster speeds need tighter follow to keep skier on screen
+    const speedFrac = Math.min(this.currentSpeed / BALANCE.SKI_MAX_SPEED, 1);
+    const camLerp = BALANCE.CAMERA_LERP + speedFrac * (1 - BALANCE.CAMERA_LERP);
+    this.cameras.main.setLerp(camLerp, camLerp);
+
     // Y-sort depth so skier renders behind trees when above them
     this.skier.setDepth(yDepth(this.skier.y + this.skier.displayHeight / 2));
 
