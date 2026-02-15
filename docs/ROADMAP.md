@@ -32,7 +32,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
-- ✅ **Menu scene Graphics→Image baking** — Baked all menu wildlife sprites, animal tracks, trees, groomer, and ground lines from per-frame Graphics command replay to pre-baked Image textures. Graphics objects: 60→4, command buffer: 6,268→192 (97% reduction), P95 frame time: 1.0→0.5ms. MenuWildlifeController generates per-species textures on create and cleans up on destroy; bird state transitions use setTexture() instead of clear()+redraw. MenuTerrainRenderer bakes scenery textures with shutdown cleanup.
+- ✅ **Menu scene Graphics→Image baking** — Baked all menu wildlife sprites, animal tracks, trees, groomer, and ground lines from per-frame Graphics command replay to pre-baked Image textures. Graphics objects: 60→4, command buffer: 6,268→192 (97% reduction), P95 frame time: 1.0→0.5ms. MenuWildlifeController generates per-species textures on create and cleans up on destroy; bird state transitions use setTexture() instead of clear()+redraw. MenuTerrainRenderer bakes scenery textures with shutdown cleanup. Stepped mountains baked to 7 small textures (140 Rectangles → 7 Images). DynamicTexture consolidation of sky/ground attempted and reverted — full-screen DynamicTexture caused 35% memcpy cost on Firefox (15% → 40% CPU) because large backing canvas triggers expensive pixel copy vs cheap fillRect for Rectangles.
 
 - ✅ **Balance tweaks** — Snowpark (Air Zone) timer override to 80s, Halfpipe (Le Tube) target coverage raised to 95%, winch max cable length increased to 30 tiles.
 

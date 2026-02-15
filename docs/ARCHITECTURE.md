@@ -450,7 +450,7 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 
 ### Optimization Techniques (in order of impact)
 
-1. **DynamicTexture consolidation** — Paint many small objects onto a single DynamicTexture at level start. One `drawImage` call replaces hundreds. Used for: off-piste background (tiled pattern via `createPattern('repeat')`), piste snow tiles, access road tiles, background trees/rocks, piste-edge trees. L9 went from 876 Images to 65 (-93%)
+1. **DynamicTexture consolidation** — Paint many small objects onto a single DynamicTexture at level start. One `drawImage` call replaces hundreds. Used for: off-piste background (tiled pattern via `createPattern('repeat')`), piste snow tiles, access road tiles, background trees/rocks, piste-edge trees. L9 went from 876 Images to 65 (-93%). **Caveat:** Only beneficial when consolidating many small textures into one. Consolidating a few large Rectangles (which are cheap `fillRect` calls) into a full-screen DynamicTexture is a net negative on Firefox — the `drawImage` call on a large backing canvas triggers expensive `memcpy` (35% CPU) that far exceeds the cost of individual `fillRect` calls. See "DynamicTexture size tradeoff" below
 2. **Graphics → texture baking** — Graphics objects replay their command buffer every frame on Canvas. Static decorations (trees, rocks, cliffs, animal tracks) are pre-generated as textures in BootScene via `generateTexture()`. L9 Graphics went from 1,588 to ~97 (-94%). Menu scenes apply the same pattern: MenuTerrainRenderer bakes trees/groomer/ground lines, MenuWildlifeController bakes animal sprites and uses pre-baked track textures from BootScene. Bird state changes use `setTexture()` instead of `clear()`+`drawBird()`. Textures are cleaned up on scene shutdown to avoid key collisions on re-entry
 3. **Night overlay DynamicTexture** — Headlight cone drawn directly to canvas context each frame instead of 7,416 Graphics commands. L7 FPS 32→60
 4. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
@@ -466,6 +466,15 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 - **TileSprite is expensive** — re-tiles every frame (~35% CPU for world-sized backgrounds). Replace with DynamicTexture + `createPattern('repeat')`
 - **Display list iteration** — Phaser iterates ALL game objects for depth sort and `willRender()` every frame. Reducing object count has outsized impact vs reducing per-object pixel size
 - **DynamicTexture `.update()` is unnecessary on Canvas** — the Canvas renderer reads the source canvas directly, so painting to the context is immediately reflected
+
+#### DynamicTexture Size Tradeoff
+
+DynamicTexture consolidation is a net win when replacing **many small Images** (hundreds of `drawImage` calls → one), but a net **loss** when replacing **a few cheap primitives** (Rectangles) with one large DynamicTexture. Firefox profiling confirmed this on menu scenes:
+
+- **Before (Rectangles + baked mountain Images)**: 3 sky Rectangles rendered as `fillRect` (no backing canvas, no memcpy) + 7 mountain Images (small textures). ~15% CPU idle.
+- **After (full-screen DynamicTexture)**: Sky + far mountains painted onto a 1024×631 DynamicTexture. Firefox spent 35% of samples in `__memcpy_avx_unaligned_erms` under `CanvasRenderingContext2D.drawImage` — the large backing canvas triggers a full-resolution pixel copy every frame. ~40% CPU idle.
+
+**Rule of thumb:** Only consolidate into a DynamicTexture when eliminating ≥10 `drawImage` calls. A `Rectangle` is just a `fillRect` with no source bitmap — it's always cheaper than a DynamicTexture of equivalent screen area. For backgrounds composed of a few solid-color bands, keep them as Rectangles.
 
 ### Performance Journey (L9 Storm, Firefox)
 
