@@ -17,6 +17,7 @@ import { playLevelWin } from '../systems/UISounds';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { BINDINGS_VERSION } from '../config/storageKeys';
 import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
+import { cullOffscreenImages, emptyCullBounds, type CullBounds } from '../utils/cullImages';
 import { overlayFullScreen } from '../utils/cameraCoords';
 import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 import { SkiRunSounds } from '../systems/SkiRunSounds';
@@ -40,6 +41,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private level!: Level;
   private levelIndex = 0;
   private tileSize = 0;
+  private lastCullBounds: CullBounds = emptyCullBounds();
 
   // Player
   private skier!: Phaser.Physics.Arcade.Sprite;
@@ -609,6 +611,9 @@ export default class SkiRunScene extends Phaser.Scene {
       else if (gateResult === 'miss') this.skiSounds.playGateMiss();
       this.gateText?.setText(`${t('skiRunGates') || 'Gates'}: ${this.slalomSystem.gatesHit}/${this.slalomSystem.totalGates}`);
     }
+
+    // Cull off-screen static Images (trees, rocks, cliff textures)
+    this.lastCullBounds = cullOffscreenImages(this, this.tileSize * 3, this.tileSize, this.lastCullBounds);
 
     // Debug overlay (toggle in Settings)
     const showDebug = getString(STORAGE_KEYS.SHOW_DEBUG) === 'true';

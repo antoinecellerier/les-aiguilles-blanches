@@ -23,6 +23,7 @@ import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
 import { setGroomedTiles } from '../utils/skiRunState';
 import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
+import { cullOffscreenImages, emptyCullBounds, type CullBounds } from '../utils/cullImages';
 import DialogueScene from './DialogueScene';
 
 /** Normalize angle difference to [-π, π] range */
@@ -131,7 +132,7 @@ export default class GameScene extends Phaser.Scene {
   private groomableTiles = 0;
   private totalTiles = 0;
   private groomQualitySum = 0; // sum of quality values for groomed tiles
-  private lastCullBounds = { x: 0, y: 0, w: 0, h: 0 };
+  private lastCullBounds: CullBounds = emptyCullBounds();
 
   // Grooming quality tracking
   private rotationHistory: number[] = [];
@@ -1688,39 +1689,7 @@ export default class GameScene extends Phaser.Scene {
 
   /** Hide objects outside camera view to reduce Canvas draw calls. */
   private cullOffscreen(): void {
-    const cam = this.cameras.main;
-    const margin = this.tileSize * 3; // Slightly larger margin for trees (taller than 1 tile)
-    const left = cam.worldView.x - margin;
-    const right = cam.worldView.right + margin;
-    const top = cam.worldView.y - margin;
-    const bottom = cam.worldView.bottom + margin;
-
-    // Only recalculate when camera moves enough (1 tile)
-    const b = this.lastCullBounds;
-    if (Math.abs(left - b.x) < this.tileSize && Math.abs(top - b.y) < this.tileSize &&
-        Math.abs(right - b.x - b.w) < this.tileSize && Math.abs(bottom - b.y - b.h) < this.tileSize) {
-      return;
-    }
-    this.lastCullBounds = { x: left, y: top, w: right - left, h: bottom - top };
-
-    // Cull all static Images (trees, rocks, tracks) by world position
-    const children = this.children.list;
-    for (let i = 0; i < children.length; i++) {
-      const c = children[i];
-      if (c.type === 'Image' && (c as Phaser.GameObjects.Image).scrollFactorX === 1) {
-        const img = c as Phaser.GameObjects.Image;
-        const d = img.depth;
-        // Only cull objects at terrain/forest/tree depths (not UI, overlays, player)
-        if (d <= DEPTHS.MARKERS) {
-          // Use display bounds for correct culling regardless of origin
-          const lx = img.x - img.displayWidth * img.originX;
-          const rx = img.x + img.displayWidth * (1 - img.originX);
-          const ty = img.y - img.displayHeight * img.originY;
-          const by = img.y + img.displayHeight * (1 - img.originY);
-          img.visible = rx > left && lx < right && by > top && ty < bottom;
-        }
-      }
-    }
+    this.lastCullBounds = cullOffscreenImages(this, this.tileSize * 3, this.tileSize, this.lastCullBounds);
   }
 
   private triggerVictory(): void {
@@ -1845,7 +1814,7 @@ export default class GameScene extends Phaser.Scene {
     this.weatherSystem.handleFrostResize();
 
     // Force culling recalc after camera changes
-    this.lastCullBounds = { x: 0, y: 0, w: 0, h: 0 };
+    this.lastCullBounds = emptyCullBounds();
     
     // If world fits in viewport at this zoom, use static camera —
     // but account for touch controls reducing visible area in portrait.
