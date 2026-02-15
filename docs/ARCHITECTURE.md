@@ -509,7 +509,7 @@ DynamicTexture consolidation is a net win when replacing **many small Images** (
 | Trees/rocks baked | 791.5 ±21.4 (-1, n.s.) | 138.8 ±20.2 (+68) | **yes (p<0.005)** 🔴 |
 | Current HEAD | 769.7 ±15.3 (-22, sig) | 152.6 ±12.7 (+82) | **yes (p<0.005)** 🔴 |
 
-The only statistically significant improvement is camera culling on Firefox (-3.9%). The DynamicTexture replacements for small tile groups (snow, access road, night overlay) are within noise. The TileSprite→DT replacement is a clear regression on Firefox. Reverting `f59221d` is the recommended fix — TileSprite may re-tile every frame, but Firefox handles it more efficiently than a large DynamicTexture `drawImage` per frame.
+The only statistically significant improvement is camera culling on Firefox (-3.9%). The DynamicTexture replacements for small tile groups (snow, access road, night overlay) are within noise. The TileSprite→DT replacement is a clear regression on Firefox. **Both TileSprite→DT (`f59221d`) and tree/rock DT consolidation (`eb913a3`) have been reverted** — backgrounds now use TileSprite again and trees/rocks are individual Image objects.
 
 #### Multi-Level CPU Benchmarks (L1 / L8 Night+Frost / L10 Storm+Frost)
 
@@ -578,15 +578,15 @@ Note: Chromium reports >100% CPU because psutil sums across all processes (GPU, 
 
 ⚠️ FPS measurements below were from Playwright probes (JS-side only). A/B CPU testing (see above) revealed that TileSprite→DT **doubled** Firefox CPU despite improving JS-measured FPS. The FPS improvement was likely from reduced JS overhead but at the cost of increased native `drawImage` memcpy.
 
-| Milestone | FPS (JS) | Change | FF CPU impact |
-|-----------|----------|--------|---------------|
-| Baseline (before optimization) | 24 | — | — |
-| Tree/rock/cliff Graphics → textures | ~35 | +46% | ✅ beneficial |
-| Camera culling for off-screen objects | ~40 | +14% | ✅ -3.9% (sig) |
-| Snow tiles → DynamicTexture | ~45 | +13% | ⚪ neutral |
-| Night overlay → DynamicTexture (L7 mainly) | +10 on L7 | — | ⚪ neutral |
-| TileSprite → DynamicTexture | 50-60 | +22% | 🔴 +69% (sig) |
-| Tree/rock consolidation into DynamicTextures | **68** | +19% | ⚪ neutral (cumulative still 🔴) |
+| Milestone | FPS (JS) | Change | FF CPU impact | Status |
+|-----------|----------|--------|---------------|--------|
+| Baseline (before optimization) | 24 | — | — | |
+| Tree/rock/cliff Graphics → textures | ~35 | +46% | ✅ beneficial | ✅ kept |
+| Camera culling for off-screen objects | ~40 | +14% | ✅ -3.9% (sig) | ✅ kept |
+| Snow tiles → DynamicTexture | ~45 | +13% | ⚪ neutral | ✅ kept |
+| Night overlay → DynamicTexture (L7 mainly) | +10 on L7 | — | ⚪ neutral | ✅ kept |
+| TileSprite → DynamicTexture | 50-60 | +22% | 🔴 +69% (sig) | ❌ reverted |
+| Tree/rock consolidation into DynamicTextures | **68** | +19% | ⚪ neutral (cumulative still 🔴) | ❌ reverted |
 
 ### Profiling Guide
 

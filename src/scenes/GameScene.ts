@@ -589,29 +589,10 @@ export default class GameScene extends Phaser.Scene {
 
     this.groomableTiles = 0;
 
-    // Pre-rendered off-piste background — paint tile pattern once onto a DynamicTexture
+    // Single TileSprite for off-piste background — tiles the snow texture across the world
     const bgW = this.level.width * tileSize;
     const bgH = this.level.height * tileSize;
-    const offPisteKey = '__offpiste_bg';
-    if (this.textures.exists(offPisteKey)) this.textures.remove(offPisteKey);
-    const offPisteDt = this.textures.addDynamicTexture(offPisteKey, bgW, bgH)!;
-    const offCtx = offPisteDt.context!;
-    const offFrame = this.textures.getFrame('snow_offpiste');
-    const offSrc = offFrame.source.image as HTMLImageElement | HTMLCanvasElement;
-    const offCd = offFrame.canvasData as { x: number; y: number; width: number; height: number };
-    const pat = offCtx.createPattern(offSrc, 'repeat');
-    if (pat) {
-      offCtx.fillStyle = pat;
-      offCtx.fillRect(0, 0, bgW, bgH);
-    } else {
-      // Fallback: tile manually
-      for (let ty = 0; ty < bgH; ty += offCd.height) {
-        for (let tx = 0; tx < bgW; tx += offCd.width) {
-          offCtx.drawImage(offSrc, offCd.x, offCd.y, offCd.width, offCd.height, tx, ty, offCd.width, offCd.height);
-        }
-      }
-    }
-    const offPisteBg = this.add.image(bgW / 2, bgH / 2, offPisteKey);
+    const offPisteBg = this.add.tileSprite(bgW / 2, bgH / 2, bgW, bgH, 'snow_offpiste');
     offPisteBg.setDepth(DEPTHS.TERRAIN);
 
     // DynamicTexture for piste tiles — paints all snow as a single texture

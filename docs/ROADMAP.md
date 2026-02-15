@@ -58,7 +58,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Crisp pixel art scaling** — Per-texture nearest-neighbor scaling for all sprites and DynamicTextures. Ski run HUD zoom-independent rendering. Firefox workaround: `pixelArt:true` causes black screen, so NEAREST set per-texture instead.
 
-- ✅ **Canvas performance optimization** — Systematic profiling and optimization of Canvas renderer performance. L9 storm Firefox: 24 FPS → 68 FPS. Key techniques: DynamicTexture consolidation (trees, rocks, snow tiles, backgrounds, night overlay), Graphics→texture baking (trees, rocks, cliffs, animal tracks), camera culling. Final profile: 69% native pixel copy (irreducible), 0.2% JavaScript, 10% vsync idle. See ARCHITECTURE.md "Performance Considerations" for full analysis and profiling guide.
+- ✅ **Canvas performance optimization** — Systematic profiling and optimization of Canvas renderer performance. L9 storm Firefox: 24→~45 FPS (kept optimizations only). Key techniques: Graphics→texture baking (trees, rocks, cliffs, animal tracks), camera culling, snow tiles→DynamicTexture, night overlay→DynamicTexture. TileSprite→DT and tree/rock DT consolidation were reverted after A/B CPU testing showed they doubled Firefox CPU (+69%, p<0.005) despite improving JS-measured FPS. See ARCHITECTURE.md for full A/B data and profiling guide.
 
 - ✅ **Engine volume control** — Separate volume slider for continuous motor sounds (engine idle, snow crunch, grooming blade). New `engine` audio channel in AudioSystem. Default 50%. Winch and one-shot SFX remain on the SFX channel.
 

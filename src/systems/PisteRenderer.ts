@@ -47,43 +47,21 @@ export class PisteRenderer {
     const extraRight = Math.max(0, bgWidth - worldWidth - extraLeft);
     const extraBottom = Math.max(0, bgHeight - worldHeight - extraTop);
 
-    // Pre-rendered off-piste extended background — paint tile pattern once
+    // Single TileSprite for the extended snow background (replaces thousands of tiles)
     const totalW = worldWidth + extraLeft + extraRight;
     const totalH = worldHeight + extraTop + extraBottom;
-    const extW = totalW + tileSize * 2;
-    const extH = totalH + tileSize * 2;
-    const extKey = '__offpiste_ext_bg';
-    if (this.scene.textures.exists(extKey)) this.scene.textures.remove(extKey);
-    const extDt = this.scene.textures.addDynamicTexture(extKey, extW, extH)!;
-    extDt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
-    const extCtx = extDt.context!;
-    extCtx.imageSmoothingEnabled = false;
-    const extFrame = this.scene.textures.getFrame('snow_offpiste');
-    const extSrc = extFrame.source.image as HTMLImageElement | HTMLCanvasElement;
-    const extCd = extFrame.canvasData as { x: number; y: number; width: number; height: number };
-    const extPat = extCtx.createPattern(extSrc, 'repeat');
-    if (extPat) {
-      extCtx.fillStyle = extPat;
-      extCtx.fillRect(0, 0, extW, extH);
-    } else {
-      for (let ty = 0; ty < extH; ty += extCd.height) {
-        for (let tx = 0; tx < extW; tx += extCd.width) {
-          extCtx.drawImage(extSrc, extCd.x, extCd.y, extCd.width, extCd.height, tx, ty, extCd.width, extCd.height);
-        }
-      }
-    }
-    // World-to-DynamicTexture coordinate offset: the Image is centered in the scene,
-    // so DynamicTexture pixel (0,0) maps to world (-extraLeft - tileSize, -extraTop - tileSize)
-    const dtOffX = extraLeft + tileSize;
-    const dtOffY = extraTop + tileSize;
+    const bg = this.scene.add.tileSprite(
+      worldWidth / 2 + (extraRight - extraLeft) / 2,
+      worldHeight / 2 + (extraBottom - extraTop) / 2,
+      totalW + tileSize * 2, totalH + tileSize * 2,
+      'snow_offpiste'
+    );
+    bg.setDepth(DEPTHS.BG_FOREST_TILES);
 
     const treeSpacing = tileSize * 3; // Sparser padding trees for performance
     const margin = tileSize;
     const isStorm = level.weather === 'storm';
-    const treeSizes = [8, 10, 12, 14];
-    const rockSizes = [6, 10, 14];
 
-    // Bake background trees directly onto the DynamicTexture
     for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing) {
       for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing) {
         const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
@@ -92,19 +70,11 @@ export class PisteRenderer {
           const offsetY = (Math.random() - 0.5) * treeSpacing * 0.8;
           const tx = x + offsetX, ty = y + offsetY;
           if (this.geometry.isOnAccessPath(tx, ty)) continue;
-          const size = treeSizes[Math.floor(Math.random() * treeSizes.length)];
-          const key = isStorm ? `tree_${size}_storm` : `tree_${size}`;
-          const frame = this.scene.textures.getFrame(key);
-          const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
-          const cd = frame.canvasData as { x: number; y: number; width: number; height: number };
-          // Origin 0.5, 1 — draw centered horizontally, anchored at bottom
-          extCtx.drawImage(src, cd.x, cd.y, cd.width, cd.height,
-            tx + dtOffX - cd.width / 2, ty + dtOffY - cd.height, cd.width, cd.height);
+          this.createTree(tx, ty, DEPTHS.BG_FOREST_ROCKS, isStorm);
         }
       }
     }
 
-    // Bake background rocks onto the DynamicTexture
     for (let x = -extraLeft + margin; x < worldWidth + extraRight - margin; x += treeSpacing * 2) {
       for (let y = -extraTop + margin; y < worldHeight + extraBottom - margin; y += treeSpacing * 2) {
         const isOutside = x < 0 || x >= worldWidth || y < 0 || y >= worldHeight;
@@ -113,23 +83,10 @@ export class PisteRenderer {
           const offsetY = (Math.random() - 0.5) * treeSpacing;
           const tx = x + offsetX, ty = y + offsetY;
           if (this.geometry.isOnAccessPath(tx, ty)) continue;
-          const size = rockSizes[Math.floor(Math.random() * rockSizes.length)];
-          const frame = this.scene.textures.getFrame(`rock_${size}`);
-          const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
-          const cd = frame.canvasData as { x: number; y: number; width: number; height: number };
-          // Origin 0.5, 0.5 — draw centered
-          extCtx.drawImage(src, cd.x, cd.y, cd.width, cd.height,
-            tx + dtOffX - cd.width / 2, ty + dtOffY - cd.height / 2, cd.width, cd.height);
+          this.createRock(tx, ty);
         }
       }
     }
-
-    const bg = this.scene.add.image(
-      worldWidth / 2 + (extraRight - extraLeft) / 2,
-      worldHeight / 2 + (extraBottom - extraTop) / 2,
-      extKey
-    );
-    bg.setDepth(DEPTHS.BG_FOREST_TILES);
   }
 
   /**
@@ -584,17 +541,6 @@ export class PisteRenderer {
 
   private createForestBoundaries(level: Level, tileSize: number, worldWidth: number): void {
     const isStorm = level.weather === 'storm';
-    const worldHeight = level.height * tileSize;
-    const treeSizes = [8, 10, 12, 14];
-
-    // Bake all piste-edge trees into a single DynamicTexture
-    const dtKey = '__world_trees';
-    if (this.scene.textures.exists(dtKey)) this.scene.textures.remove(dtKey);
-    const dt = this.scene.textures.addDynamicTexture(dtKey, worldWidth, worldHeight)!;
-    dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
-    const ctx = dt.context!;
-    ctx.imageSmoothingEnabled = false;
-
     for (let yi = 3; yi < level.height - 2; yi += 2) {
       const path = this.geometry.pistePath[yi];
       if (!path) continue;
@@ -609,7 +555,7 @@ export class PisteRenderer {
         if (this.geometry.isOnAccessPath(treeX, treeY)) continue;
         if (this.geometry.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
-          this.stampTree(ctx, treeX, treeY, isStorm, treeSizes);
+          this.createTree(treeX, treeY, undefined, isStorm);
         }
       }
 
@@ -619,27 +565,10 @@ export class PisteRenderer {
         if (this.geometry.isOnAccessPath(treeX, treeY)) continue;
         if (this.geometry.isOnCliff(treeX, treeY)) continue;
         if (Math.random() > 0.4) {
-          this.stampTree(ctx, treeX, treeY, isStorm, treeSizes);
+          this.createTree(treeX, treeY, undefined, isStorm);
         }
       }
     }
-
-    const img = this.scene.add.image(worldWidth / 2, worldHeight / 2, dtKey);
-    img.setDepth(DEPTHS.PARK_FEATURES + 0.1); // Between park features and y-sorted obstacles
-  }
-
-  /** Paint a single tree onto a canvas context (origin 0.5, 1). */
-  private stampTree(
-    ctx: CanvasRenderingContext2D, x: number, y: number,
-    isStorm: boolean, sizes: number[]
-  ): void {
-    const size = sizes[Math.floor(Math.random() * sizes.length)];
-    const key = isStorm ? `tree_${size}_storm` : `tree_${size}`;
-    const frame = this.scene.textures.getFrame(key);
-    const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
-    const cd = frame.canvasData as { x: number; y: number; width: number; height: number };
-    ctx.drawImage(src, cd.x, cd.y, cd.width, cd.height,
-      x - cd.width / 2, y - cd.height, cd.width, cd.height);
   }
 
   private createTree(x: number, y: number, depth?: number, isStorm?: boolean): void {
@@ -649,6 +578,14 @@ export class PisteRenderer {
     const img = this.scene.add.image(x, y, key);
     img.setOrigin(0.5, 1); // anchor at trunk base
     img.setDepth(depth ?? yDepth(y));
+  }
+
+  private createRock(x: number, y: number): void {
+    const sizes = [6, 10, 14]; // must match BootScene rock textures
+    const size = sizes[Math.floor(Math.random() * sizes.length)];
+    const img = this.scene.add.image(x, y, `rock_${size}`);
+    img.setOrigin(0.5, 0.5);
+    img.setDepth(DEPTHS.BG_FOREST_ROCKS);
   }
 
   private createSteepZoneIndicators(level: Level, tileSize: number): void {
