@@ -131,6 +131,7 @@ export default class HUDScene extends Phaser.Scene {
     // Ski mode: only touch controls (joystick + brake), no grooming HUD
     if (this.mode === 'ski') {
       this.createSkiModeTouchControls(mobile);
+      this.createPauseFullscreenButtons(mobile);
       return;
     }
 
@@ -425,11 +426,26 @@ export default class HUDScene extends Phaser.Scene {
     }
 
     // Touch-specific buttons (created AFTER touch controls so they render on top)
+    this.createPauseFullscreenButtons(mobile, nextButtonY);
+  }
+
+  private createPauseFullscreenButtons(mobile: boolean, startY?: number): void {
+    const width = this.cameras.main.width;
+    const phaserTouch = this.sys.game.device.input.touch;
+    const browserTouch = detectTouch();
+    const hasTouch = phaserTouch || browserTouch;
     const isFS = isFullscreen();
-    
-    // Larger font for touch buttons on mobile (minimum 24px for easy tapping)
+
+    const padding = Math.round(10 * this.uiScale);
+    const touchBtnPad = Math.round(6 * this.uiScale);
+    const minHitSize = 44;
+    const fontMed = Math.max(14, Math.round(16 * this.uiScale)) + 'px';
     const touchBtnSize = mobile ? Math.max(24, Math.round(20 * this.uiScale)) + 'px' : fontMed;
-    
+    // Default startY: below the ski-mode visor (same layout as SkiRunScene.createHUD)
+    // Add half the min hit size so the touch background clears the visor bottom edge
+    let nextButtonY = startY
+      ?? (padding + Math.round(26 * this.uiScale) + Math.round(18 * this.uiScale) + Math.round(minHitSize / 2) + Math.round(4 * this.uiScale));
+
     // Pause/Menu button (touch devices)
     if (hasTouch) {
       const pauseBtn = this.add.text(width - padding, nextButtonY, '||', {
