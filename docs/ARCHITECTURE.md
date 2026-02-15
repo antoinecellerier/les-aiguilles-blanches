@@ -710,6 +710,24 @@ Tested frost at 70% (forced) and night overlay independently across L7/L9/L10:
 
 **Frost on night levels — ✅ resolved:** Frost vignette is now skipped on night levels, recovering ~3 FPS on L10.
 
+#### Night Texture Optimization Results (Firefox A/B)
+
+Same-session, back-to-back A/B comparison. Old code uses full-screen DynamicTexture for night darkness + headlights; new code uses pre-darkened `_night` textures + 256×256 headlight-only DT. 10s × 5 runs per level.
+
+| Level | Old FPS | New FPS | Delta | Improvement |
+|-------|---------|---------|-------|-------------|
+| L2 day (control) | 57.2 | 57.9 | +0.7 | +1% (noise) |
+| **L8 night** | **34.4** | **39.8** | **+5.4** | **+16%** |
+| **L10 night** | **27.0** | **33.0** | **+6.0** | **+22%** |
+
+CPU usage also dropped: L8 215%→206%, L10 235%→216%.
+
+**Key takeaways:**
+1. Day levels unaffected (control stable) — confirms gains are from night system changes only
+2. Night levels gain +5-6 FPS by eliminating the full-screen DT blit
+3. The 256×256 headlight DT still has *some* cost vs no DT at all (previous "no overlay" measured 31 FPS on L8 vs new 40 FPS — the smaller DT is much cheaper but not free)
+4. Combined with frost skip, L10 went from 19 FPS (original) → 33 FPS (+74% total improvement across all optimizations)
+
 ### Profiling Guide
 
 To re-profile if performance regresses:
