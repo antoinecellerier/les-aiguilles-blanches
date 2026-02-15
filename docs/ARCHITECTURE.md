@@ -463,9 +463,23 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 - **`setTint()` does NOT work** — use pre-generated texture variants via `setTexture()` instead
 - **Graphics objects are expensive** — they re-render from their command list every frame. Always prefer `generateTexture()` for static content
 - **`Graphics.clear()` + redraw per frame** — use only for dynamic content (night overlay headlights, winch cable)
-- **TileSprite is expensive** — re-tiles every frame (~35% CPU for world-sized backgrounds). Replace with DynamicTexture + `createPattern('repeat')`
+- **TileSprite re-tiles every frame** but is still cheaper than a world-sized DynamicTexture on Firefox (see TileSprite→DT regression below)
 - **Display list iteration** — Phaser iterates ALL game objects for depth sort and `willRender()` every frame. Reducing object count has outsized impact vs reducing per-object pixel size
 - **DynamicTexture `.update()` is unnecessary on Canvas** — the Canvas renderer reads the source canvas directly, so painting to the context is immediately reflected
+
+#### Why Not WebGL?
+
+The game uses `Phaser.CANVAS` because WebGL is both incompatible and slower:
+
+1. **GameScene crashes on WebGL** — `stampPisteTile`, night overlay, and access road painting use `DynamicTexture.context` (Canvas 2D API), which returns `null` under WebGL. Fixing this would require rewriting all DynamicTexture painting to use WebGL-compatible Phaser APIs.
+2. **WebGL uses more CPU than Canvas** — A/B tested on Chromium (headed, 5 runs, Welch's t-test):
+
+| Scene | Canvas (% CPU) | WebGL (% CPU) | Δ | Significant? |
+|-------|---------------|---------------|---|---|
+| Menu (idle) | 721 ±8 | 800 ±11 | **+79 (+11%)** | **yes (p<0.005)** |
+| GameScene | 779–869 | crashes | — | — |
+
+WebGL's GPU-native `drawImage` and DPR scaling advantages don't help here — the game's draw calls are lightweight (small textures, simple quads), so WebGL's per-draw-call overhead (state changes, shader programs, buffer uploads) exceeds Canvas 2D's simpler `drawImage` path.
 
 #### Rectangle vs Image Tradeoff (fillRect vs drawImage)
 
@@ -945,7 +959,7 @@ Firefox reports Xbox LT/RT as axes (indices 4, 5) instead of buttons (6, 7). Use
 
 Firefox requires simplified Phaser configuration to render correctly. Key findings:
 
-1. **Use Canvas renderer**: `type: Phaser.CANVAS` ensures consistent rendering
+1. **Use Canvas renderer**: `type: Phaser.CANVAS` — WebGL crashes GameScene (Canvas 2D API deps) and uses 11% more CPU even where it works (see "Why Not WebGL?")
 2. **Avoid scale options**: `scale.mode` and `scale.autoCenter` can cause black screen
 3. **Avoid `pixelArt: true`**: Causes black screen on Firefox Canvas. Use per-texture `source[0].scaleMode = Phaser.ScaleModes.NEAREST` instead (see BootScene, PisteRenderer)
 4. **Avoid callbacks**: `preBoot` and `postBoot` callbacks break rendering
@@ -1017,13 +1031,10 @@ and browser zoom > 100%. **Conclusion: not viable with Canvas 2D renderer due to
    (the cap), it would be 9× more pixels — unplayable.
 
 **Why this is a Canvas 2D limitation:** WebGL has native DPR support via `gl.viewport()` with no
-per-sprite cost — the GPU handles pixel scaling in hardware. But WebGL causes black screens in this
-game (confirmed), so Canvas 2D is required. Canvas 2D has no equivalent; every `drawImage` call
-copies pixels at the backing store resolution.
+per-sprite cost — the GPU handles pixel scaling in hardware. However, WebGL is not viable for this game: it crashes GameScene (Canvas 2D API dependencies in DynamicTexture painting) and benchmarks 11% higher CPU than Canvas on Chromium even for simple scenes (see "Why Not WebGL?" above).
 
 **Recommendation:** Accept native-resolution rendering. The slight blur at high browser zoom (240%+)
-is acceptable. If crisp HiDPI rendering becomes critical, the fix is migrating to WebGL (which
-requires debugging the black screen issue — likely related to texture generation patterns).
+is acceptable. WebGL migration is not recommended — the performance penalty and extensive refactoring outweigh the HiDPI benefit.
 
 ## Scene Lifecycle Management
 
