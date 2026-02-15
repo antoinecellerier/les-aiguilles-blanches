@@ -656,6 +656,56 @@ Previous JS-measured FPS data with updated CPU/rAF correlation data:
 | Tree/rock consolidation into DynamicTextures | ~29 | 159% (+6) | ❌ reverted |
 | Current HEAD (with reverts) | ~36 | 152% (-1) | ✅ final |
 
+#### Night Effect Isolation Benchmark (Firefox L8)
+
+Isolated each night-specific effect by disabling it at runtime and measuring rAF FPS + CPU:
+
+| Variant | rAF FPS | ΔFPS | CPU % | Insight |
+|---------|---------|------|-------|---------|
+| Full night (baseline) | 25 | — | 140±11% | All effects on |
+| No headlights (darkness only, no arc() calls) | 25 | −0.3 | 134±14% | **Headlight arcs are free** |
+| No frost overlay | 25 | +0.0 | 139±8% | Frost is free (static texture, alpha only) |
+| No weather particles | 24 | −0.8 | 136±9% | Particles are negligible |
+| **No night overlay** (darkness + headlights removed) | **31** | **+6.5** | 140±13% | **DT blit is the bottleneck** |
+| Clear day (L2 reference) | 52 | +27.0 | 134±5% | 2× faster without night |
+
+**Key findings:**
+
+1. **The 360 headlight `arc()` calls are essentially free** — removing them gained 0 FPS. The per-frame cost is the full-screen DynamicTexture blit itself (`clearRect` + `fillRect` + compositing), not the drawing operations. Same Firefox `memcpy` pattern as the TileSprite→DT regression.
+
+2. **Frost overlay is free** — static texture with per-frame `setAlpha()` only. No optimization needed. (Note: tested at frost level 0, start of level — cost at high frost levels TBD.)
+
+3. **Weather particles are negligible** — Phaser's particle system is efficient.
+
+4. **Eliminating the night overlay gains ~6.5 FPS** (25→31), a 26% improvement. The remaining gap to clear day (31→52) is from level geometry differences (L8 has more objects than L2).
+
+5. **Optimization approach**: Replace the per-frame DynamicTexture overlay with CSS `brightness()` filter on the canvas element (same pattern as accessibility high-contrast and colorblind filters). Headlights can be rendered as additive-blended sprites on top. This eliminates the full-screen DT redraw entirely.
+
+#### Frost + Night Cross-Level Benchmark (Firefox)
+
+Tested frost at 70% (forced) and night overlay independently across L7/L9/L10:
+
+| Variant | rAF FPS | CPU % | Notes |
+|---------|---------|-------|-------|
+| **L7 night only** (no frost native) | 24 | 136±12% | Night overlay active |
+| **L7 no night overlay** | 32 | 141±6% | **+8 FPS from removing night DT** |
+| **L9 storm+frost=70** (all on) | 29 | 135±11% | Storm + frost, no night |
+| **L9 storm+frost=0** (no frost) | 33 | 132±10% | **+4 FPS from removing frost at 70%** |
+| L10 night+frost=70 (all on) | 46* | 200±5% | *Highly variable (31–58), unreliable |
+| L10 no night, no frost | 23* | 128±11% | *L10 data too noisy for conclusions |
+
+**Additional findings:**
+
+6. **Frost at 70% costs ~4 FPS on L9** (29→33) — not free when alpha is high. The earlier test at frost=0 showed no cost because `setAlpha(0)` skips the blit. At 70% alpha, the full-screen Image compositing adds a measurable per-frame cost.
+
+7. **Frost overlay is invisible on night levels** — the light icy blue vignette (`0xc8e8ff` at 35% opacity) is completely swallowed by the night overlay's dark fill. On L10 (which has both night + frost), players pay the FPS cost of frost without any visual benefit.
+
+8. **Night overlay removal is consistent** — L7 gains +8 FPS (24→32), L8 gains +6.5 FPS (25→31). The full-screen DynamicTexture per-frame blit costs 6-8 FPS on Firefox regardless of level.
+
+9. **L10 measurements are unreliable** — extreme variance (19-59 FPS across runs) suggests the groomer reaches different map positions, hitting variable object density. L7/L9 data is cleaner.
+
+**Frost on night levels — optimization opportunity:** Since the frost vignette is invisible behind the night overlay, it should be disabled on night levels (or the night effect should incorporate frost visually). This would recover ~4 FPS on L10 for free.
+
 ### Profiling Guide
 
 To re-profile if performance regresses:
