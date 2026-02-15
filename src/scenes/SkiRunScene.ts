@@ -189,6 +189,10 @@ export default class SkiRunScene extends Phaser.Scene {
     const interactables = this.physics.add.staticGroup();
     const obstacleBuilder = new ObstacleBuilder(this, this.geometry);
     obstacleBuilder.create(this.level, tileSize, this.obstacles, interactables);
+    // Buildings (fuel pump, restaurant) are solid obstacles during ski runs
+    for (const child of interactables.getChildren()) {
+      this.obstacles.add(child);
+    }
 
     // Winch anchor poles are permanent fixtures — show them during ski runs too
     if (this.level.hasWinch) {
@@ -210,6 +214,10 @@ export default class SkiRunScene extends Phaser.Scene {
         // Rock: shrink to core (60% of display size)
         body.setSize(s.displayWidth * 0.6, s.displayHeight * 0.6);
         body.setOffset(s.displayWidth * 0.2, s.displayHeight * 0.2);
+      } else if (s.texture.key === 'fuel' || s.texture.key === 'restaurant') {
+        // Buildings: use bottom half so skiers can pass behind
+        body.setSize(s.displayWidth * 0.7, s.displayHeight * 0.4);
+        body.setOffset(s.displayWidth * 0.15, s.displayHeight * 0.6);
       }
     }
 
@@ -833,6 +841,11 @@ export default class SkiRunScene extends Phaser.Scene {
   /** Boundary wall hit — in halfpipe, launch a trick instead of bumping */
   private onBoundaryHit(): void {
     if (this.isAirborne) return;
+    // Near the bottom — finish the run instead of crashing
+    if (this.skier.y >= (this.level.height - BALANCE.SKI_FINISH_BUFFER - 1) * this.tileSize) {
+      this.finishRun();
+      return;
+    }
     if (this.parkFeatures.hasHalfpipe && !this.trickActive) {
       const tileY = Math.floor(this.skier.y / this.tileSize);
       // Only in the walled section (not entry/exit margins)
