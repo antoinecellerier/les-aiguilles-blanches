@@ -2,86 +2,122 @@ import Phaser from 'phaser';
 
 /**
  * Renders the static menu background: sky gradient, mountains, snow ground, trees, and groomer.
- * Pure rendering — no state, no updates. Created once per scene lifecycle.
+ * Sky + far mountains are consolidated into a single DynamicTexture (depth 0).
+ * Ground + shadow lines are consolidated into a single DynamicTexture (depth 3).
+ * Near mountains (depth 2), trees, and groomer (depth 5+) remain separate Images
+ * so that bouquetins and ground animals can interleave with them.
  */
 export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }, skipGroomer = false): void {
   const isStorm = weather?.weather === 'storm';
-  mtnIndex = 0;
-  createSky(scene, width, snowLineY, weather);
-  createMountains(scene, width, snowLineY, scaleFactor, isStorm);
+  // Remove stale textures from prior scene lifecycle before recreating
+  removeMenuTextures(scene);
+  createSkyAndFarMountains(scene, width, snowLineY, scaleFactor, isStorm, weather);
+  createNearMountains(scene, width, snowLineY, scaleFactor, isStorm);
   createSnowGround(scene, width, height, snowLineY, footerHeight);
   createTrees(scene, width, snowLineY, scaleFactor, isStorm);
   if (!skipGroomer) createGroomer(scene, width, snowLineY, scaleFactor, isStorm);
 
-  // Clean up baked textures when scene shuts down to avoid key collisions on restart
-  const mtnCount = mtnIndex;
-  scene.events.once('shutdown', () => {
-    const keys = ['_menu_ground_lines', '_menu_groomer'];
-    for (let i = 0; i < 9; i++) keys.push(`_menu_tree_${i}`);
-    for (let i = 0; i < mtnCount; i++) keys.push(`_menu_mtn_${i}`);
-    for (const key of keys) {
-      if (scene.textures.exists(key)) scene.textures.remove(key);
-    }
-  });
+  scene.events.once('shutdown', () => removeMenuTextures(scene));
 }
 
-function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weather?: { isNight: boolean; weather: string }): void {
+const MENU_TEX_KEYS = ['_menu_bg_sky', '_menu_bg_ground', '_menu_groomer', '_menu_near_mtn_0', '_menu_near_mtn_1'];
+for (let i = 0; i < 9; i++) MENU_TEX_KEYS.push(`_menu_tree_${i}`);
+
+function removeMenuTextures(scene: Phaser.Scene): void {
+  for (const key of MENU_TEX_KEYS) {
+    if (scene.textures.exists(key)) scene.textures.remove(key);
+  }
+}
+
+function colorToCSS(c: number, a = 1): string {
+  return `rgba(${(c >> 16) & 0xff},${(c >> 8) & 0xff},${c & 0xff},${a})`;
+}
+
+/** Paint sky gradient + far mountains onto a single DynamicTexture at depth 0. */
+function createSkyAndFarMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean, weather?: { isNight: boolean; weather: string }): void {
+  const key = '_menu_bg_sky';
+  const mtnScale = snowLineY / 600;
+  // Far mountains extend below snowLineY by 2 steps
+  const overshoot = 2 * 16;
+  const dtH = snowLineY + overshoot;
+
+  const dt = scene.textures.addDynamicTexture(key, width, dtH);
+  if (!dt) return;
+  dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
+  const ctx = dt.context!;
+  ctx.imageSmoothingEnabled = false;
+
+  // Sky bands
   const skyBand1 = snowLineY * 0.4;
   const skyBand2 = snowLineY * 0.25;
-  const isStorm = weather?.weather === 'storm';
   const isNight = weather?.isNight;
-  // Storm: grey-white overcast; Night: deep blue; Default: sunny blue gradient
   const colors = isStorm
     ? [0x707478, 0x808488, 0x909498]
     : isNight
       ? [0x0a1628, 0x142240, 0x1e3050]
       : [0x5bb8e8, 0x87ceeb, 0xa8ddf0];
-  scene.add.rectangle(width / 2, 0, width, skyBand1, colors[0]).setOrigin(0.5, 0);
-  scene.add.rectangle(width / 2, skyBand1, width, skyBand2, colors[1]).setOrigin(0.5, 0);
-  scene.add.rectangle(width / 2, skyBand1 + skyBand2, width, snowLineY - skyBand1 - skyBand2, colors[2]).setOrigin(0.5, 0);
-}
+  ctx.fillStyle = colorToCSS(colors[0]);
+  ctx.fillRect(0, 0, width, skyBand1);
+  ctx.fillStyle = colorToCSS(colors[1]);
+  ctx.fillRect(0, skyBand1, width, skyBand2);
+  ctx.fillStyle = colorToCSS(colors[2]);
+  ctx.fillRect(0, skyBand1 + skyBand2, width, snowLineY - skyBand1 - skyBand2);
 
-function createSnowGround(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number): void {
-  scene.add.rectangle(width / 2, snowLineY, width, height - snowLineY, 0xffffff).setOrigin(0.5, 0).setDepth(3);
-  // Bake shadow lines into a texture to avoid per-frame Graphics command replay
-  const groundH = height - snowLineY - footerHeight;
-  if (groundH > 0) {
-    const g = scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
-    g.fillStyle(0xf0f6fa, 1);
-    for (let ly = 8; ly < groundH; ly += 10) {
-      g.fillRect(0, ly, width, 1);
-    }
-    const key = '_menu_ground_lines';
-    g.generateTexture(key, width, groundH);
-    g.destroy();
-    const tex = scene.textures.get(key);
-    if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
-    scene.add.image(width / 2, snowLineY, key).setOrigin(0.5, 0).setDepth(3);
-  }
-  scene.add.rectangle(width / 2, snowLineY, width, 3, 0xd8e4e8).setOrigin(0.5, 0).setDepth(3);
-}
-
-function createMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
+  // Far mountains painted directly onto the texture
   const sx = width / 1024;
-  const mtnScale = snowLineY / 600;
-  // Far mountains — dark rock, tall (depth 1)
-  drawSteppedMountain(scene, 80 * sx, snowLineY, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
-  drawSteppedMountain(scene, 350 * sx, snowLineY, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
-  drawSteppedMountain(scene, 512 * sx, snowLineY, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
-  drawSteppedMountain(scene, 600 * sx, snowLineY, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
-  drawSteppedMountain(scene, 900 * sx, snowLineY, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
+  const farMtns: [number, number, number, number, number, boolean][] = [
+    [80 * sx, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true],
+    [350 * sx, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true],
+    [512 * sx, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true],
+    [600 * sx, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true],
+    [900 * sx, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true],
+  ];
+  for (const [cx, baseWidth, peakHeight, bodyColor, highlightColor, snowCap] of farMtns) {
+    paintMountain(ctx, cx, snowLineY, baseWidth, peakHeight, bodyColor, highlightColor, snowCap, isStorm);
+  }
 
-  // Near mountains — lighter, shorter, partial overlap (depth 2)
-  drawSteppedMountain(scene, 200 * sx, snowLineY, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
-  drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
+  scene.add.image(width / 2, 0, key).setOrigin(0.5, 0).setDepth(0);
 }
 
-let mtnIndex = 0;
-
-function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean): void {
+/** Paint a stepped mountain directly onto a Canvas 2D context. */
+function paintMountain(ctx: CanvasRenderingContext2D, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, isStorm: boolean): void {
   const stepH = 16;
   const steps = Math.ceil(peakHeight / stepH);
-  // Texture spans from 2 steps below baseY to the peak
+  for (let i = -2; i < steps; i++) {
+    const t = Math.max(0, i) / steps;
+    const w = baseWidth * (1 - t * 0.85);
+    ctx.fillStyle = colorToCSS(i % 3 === 0 ? highlightColor : bodyColor);
+    ctx.fillRect(cx - w / 2, baseY - i * stepH, w, stepH);
+  }
+  const hasSnowCap = snowCap || isStorm;
+  if (hasSnowCap && peakHeight > 100) {
+    const baseCap = Math.max(2, Math.min(4, Math.floor(steps * 0.12)));
+    const capSteps = isStorm ? Math.min(steps - 1, baseCap * 2) : baseCap;
+    ctx.fillStyle = colorToCSS(0xf0f5f8);
+    for (let i = 0; i < capSteps; i++) {
+      const t = (steps - capSteps + i) / steps;
+      const w = baseWidth * (1 - t * 0.85);
+      ctx.fillRect(cx - w / 2, baseY - (steps - capSteps + i) * stepH, w, stepH);
+    }
+  }
+}
+
+/** Near mountains remain as separate baked Images at depth 2 (bouquetins interleave). */
+function createNearMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
+  const sx = width / 1024;
+  const mtnScale = snowLineY / 600;
+  const nearMtns: [number, number, number, number, number, number, boolean][] = [
+    [200 * sx, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, 0, false],
+    [750 * sx, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, 1, false],
+  ];
+  for (const [cx, baseWidth, peakHeight, bodyColor, highlightColor, idx, snowCap] of nearMtns) {
+    drawSteppedMountain(scene, cx, snowLineY, baseWidth, peakHeight, bodyColor, highlightColor, snowCap, 2, isStorm, idx as number);
+  }
+}
+
+function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean, idx: number): void {
+  const stepH = 16;
+  const steps = Math.ceil(peakHeight / stepH);
   const texH = (steps + 2) * stepH;
   const texW = Math.ceil(baseWidth) + 2;
   const texCx = texW / 2;
@@ -91,7 +127,6 @@ function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, bas
     const t = Math.max(0, i) / steps;
     const w = baseWidth * (1 - t * 0.85);
     const color = i % 3 === 0 ? highlightColor : bodyColor;
-    // Draw relative to texture: bottom at texH, step i at texH - (i+2)*stepH
     const ry = texH - (i + 2) * stepH;
     g.fillStyle(color, 1);
     g.fillRect(texCx - w / 2, ry, w, stepH);
@@ -108,13 +143,41 @@ function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, bas
       g.fillRect(texCx - w / 2, ry, w, stepH);
     }
   }
-  const key = `_menu_mtn_${mtnIndex++}`;
+  const key = `_menu_near_mtn_${idx}`;
   g.generateTexture(key, texW, texH);
   g.destroy();
   const tex = scene.textures.get(key);
   if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
-  // Place so that bottom of texture aligns with baseY + 2*stepH (the overlap zone)
   scene.add.image(cx, baseY + 2 * stepH, key).setOrigin(0.5, 1).setDepth(depth);
+}
+
+/** Consolidate snow ground + shadow lines + snowline border into one DynamicTexture at depth 3. */
+function createSnowGround(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number): void {
+  const groundH = height - snowLineY;
+  if (groundH <= 0) return;
+  const key = '_menu_bg_ground';
+  const dt = scene.textures.addDynamicTexture(key, width, groundH);
+  if (!dt) return;
+  dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
+  const ctx = dt.context!;
+  ctx.imageSmoothingEnabled = false;
+
+  // White snow fill
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, groundH);
+  // Shadow lines
+  const linesH = groundH - footerHeight;
+  if (linesH > 0) {
+    ctx.fillStyle = colorToCSS(0xf0f6fa);
+    for (let ly = 8; ly < linesH; ly += 10) {
+      ctx.fillRect(0, ly, width, 1);
+    }
+  }
+  // Snowline border
+  ctx.fillStyle = colorToCSS(0xd8e4e8);
+  ctx.fillRect(0, 0, width, 3);
+
+  scene.add.image(width / 2, snowLineY, key).setOrigin(0.5, 0).setDepth(3);
 }
 
 function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
