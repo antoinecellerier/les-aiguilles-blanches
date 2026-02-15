@@ -466,6 +466,7 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 - **TileSprite is expensive** — re-tiles every frame (~35% CPU for world-sized backgrounds). Replace with DynamicTexture + `createPattern('repeat')`
 - **Display list iteration** — Phaser iterates ALL game objects for depth sort and `willRender()` every frame. Reducing object count has outsized impact vs reducing per-object pixel size
 - **DynamicTexture `.update()` is unnecessary on Canvas** — the Canvas renderer reads the source canvas directly, so painting to the context is immediately reflected
+- **Baked mountain gap lines** — When individual Rectangles are baked into a single texture via `generateTexture()`, the sub-pixel gaps between adjacent rects disappear. Restore visual depth by drawing 1px lines between steps colored by what's behind: sky blue (alpha 0.3) where exposed to sky, or the occluding mountain's rock color (alpha 0.1) where another mountain is behind. Uses world-space occlusion testing across all mountain definitions.
 
 #### DynamicTexture Size Tradeoff
 
