@@ -125,10 +125,12 @@ export default class HUDScene extends Phaser.Scene {
     }
     this.uiScale = baseScale;
 
+    // Clean up game.events listeners on shutdown (must run for ALL modes)
+    this.events.once('shutdown', this.shutdown, this);
+
     // Ski mode: only touch controls (joystick + brake), no grooming HUD
     if (this.mode === 'ski') {
       this.createSkiModeTouchControls(mobile);
-      this.events.once('shutdown', this.shutdown, this);
       return;
     }
 

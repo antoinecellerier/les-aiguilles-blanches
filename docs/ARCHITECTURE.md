@@ -1236,7 +1236,22 @@ private handleResize(): void {
 
 All scenes should implement `shutdown()` for proper cleanup. **Critical**: remove `game.events` listeners BEFORE destroying children — otherwise global events can fire on destroyed objects between the two calls, crashing Phaser's entire update loop.
 
+**Register shutdown BEFORE any early-return branches** — `this.events.once('shutdown', this.shutdown, this)` must run for ALL code paths. If it's inside a conditional branch (e.g. `if (mode === 'ski') { ...; return; }`), the main path never registers cleanup and `game.events` listeners leak (+N per level transition).
+
 ```javascript
+create() {
+    // Register shutdown cleanup FIRST, before any conditional returns
+    this.events.once('shutdown', this.shutdown, this);
+
+    if (this.mode === 'special') {
+      this.setupSpecialMode();
+      return; // shutdown listener already registered above
+    }
+
+    // Normal setup...
+    this.game.events.on(GAME_EVENTS.MY_EVENT, this.handler, this);
+}
+
 shutdown() {
     // 1. Remove global event listeners FIRST
     this.game.events.off(GAME_EVENTS.MY_EVENT, this.handler, this);
