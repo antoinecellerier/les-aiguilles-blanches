@@ -466,7 +466,24 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 - **TileSprite is expensive** — re-tiles every frame (~35% CPU for world-sized backgrounds). Replace with DynamicTexture + `createPattern('repeat')`
 - **Display list iteration** — Phaser iterates ALL game objects for depth sort and `willRender()` every frame. Reducing object count has outsized impact vs reducing per-object pixel size
 - **DynamicTexture `.update()` is unnecessary on Canvas** — the Canvas renderer reads the source canvas directly, so painting to the context is immediately reflected
-- **Baked mountain gap lines** — When individual Rectangles are baked into a single texture via `generateTexture()`, the sub-pixel gaps between adjacent rects disappear. Restore visual depth by drawing 1px lines between steps colored by what's behind: sky blue (alpha 0.3) where exposed to sky, or the occluding mountain's rock color (alpha 0.1) where another mountain is behind. Uses world-space occlusion testing across all mountain definitions.
+
+#### Rectangle vs Image Tradeoff (fillRect vs drawImage)
+
+Firefox and Chromium have opposite performance profiles for Rectangles vs baked Images:
+
+- **Rectangles** use `fillRect` — no backing canvas, no memcpy, nearly free per call on Firefox
+- **Images** (from `generateTexture()`) use `drawImage` — per-call overhead even for small textures
+
+A/B testing (headed, 5 runs, Welch's t-test α=0.05) on menu stepped mountains (140 Rectangles → 7 Images):
+
+| Version | Chromium | Firefox |
+|---------|----------|---------|
+| Rectangles (baseline) | 865.8% ±72.9 | 47.2% ±4.1 |
+| Baked Images | 720.6% ±11.9 (-145, **p<0.005**) | 52.1% ±0.7 (+4.8, **p≈0.03**) |
+
+Chromium benefits from fewer display objects (multi-process overhead), but Firefox regresses because `fillRect` is cheaper than `drawImage` for its Canvas implementation. **Keep mountains as Rectangles** for cross-browser neutrality.
+
+**Rule of thumb:** Only bake to `generateTexture()` when replacing Graphics objects (which replay command buffers every frame). Rectangles are already optimal — they're just `fillRect` calls with no backing bitmap.
 
 #### DynamicTexture Size Tradeoff
 

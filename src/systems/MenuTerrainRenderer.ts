@@ -6,7 +6,6 @@ import Phaser from 'phaser';
  */
 export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }, skipGroomer = false): void {
   const isStorm = weather?.weather === 'storm';
-  mtnIndex = 0;
   createSky(scene, width, snowLineY, weather);
   createMountains(scene, width, snowLineY, scaleFactor, isStorm);
   createSnowGround(scene, width, height, snowLineY, footerHeight);
@@ -14,11 +13,9 @@ export function createMenuTerrain(scene: Phaser.Scene, width: number, height: nu
   if (!skipGroomer) createGroomer(scene, width, snowLineY, scaleFactor, isStorm);
 
   // Clean up baked textures when scene shuts down to avoid key collisions on restart
-  const mtnCount = mtnIndex;
   scene.events.once('shutdown', () => {
     const keys = ['_menu_ground_lines', '_menu_groomer'];
     for (let i = 0; i < 9; i++) keys.push(`_menu_tree_${i}`);
-    for (let i = 0; i < mtnCount; i++) keys.push(`_menu_mtn_${i}`);
     for (const key of keys) {
       if (scene.textures.exists(key)) scene.textures.remove(key);
     }
@@ -64,167 +61,41 @@ function createSnowGround(scene: Phaser.Scene, width: number, height: number, sn
 function createMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
   const mtnScale = snowLineY / 600;
-  // Define all mountains: [cx, baseWidth, peakHeight, bodyColor, highlightColor, snowCap, depth]
-  const mtns: { cx: number; baseY: number; baseWidth: number; peakHeight: number; bodyColor: number; highlightColor: number; snowCap: boolean; depth: number }[] = [
-    // Far mountains (depth 1)
-    { cx: 80 * sx, baseY: snowLineY, baseWidth: 180 * mtnScale, peakHeight: 220 * mtnScale, bodyColor: 0x4a423a, highlightColor: 0x6a5e52, snowCap: true, depth: 1 },
-    { cx: 350 * sx, baseY: snowLineY, baseWidth: 200 * mtnScale, peakHeight: 320 * mtnScale, bodyColor: 0x2d2822, highlightColor: 0x4a423a, snowCap: true, depth: 1 },
-    { cx: 512 * sx, baseY: snowLineY, baseWidth: 240 * mtnScale, peakHeight: 300 * mtnScale, bodyColor: 0x4a423a, highlightColor: 0x6a5e52, snowCap: true, depth: 1 },
-    { cx: 600 * sx, baseY: snowLineY, baseWidth: 220 * mtnScale, peakHeight: 380 * mtnScale, bodyColor: 0x4a423a, highlightColor: 0x6a5e52, snowCap: true, depth: 1 },
-    { cx: 900 * sx, baseY: snowLineY, baseWidth: 190 * mtnScale, peakHeight: 260 * mtnScale, bodyColor: 0x2d2822, highlightColor: 0x4a423a, snowCap: true, depth: 1 },
-    // Near mountains (depth 2)
-    { cx: 200 * sx, baseY: snowLineY, baseWidth: 240 * mtnScale, peakHeight: 160 * mtnScale, bodyColor: 0x6a5e52, highlightColor: 0x8a7e6a, snowCap: false, depth: 2 },
-    { cx: 750 * sx, baseY: snowLineY, baseWidth: 260 * mtnScale, peakHeight: 180 * mtnScale, bodyColor: 0x6a5e52, highlightColor: 0x8a7e6a, snowCap: false, depth: 2 },
-  ];
+  // Far mountains — dark rock, tall (depth 1)
+  drawSteppedMountain(scene, 80 * sx, snowLineY, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
+  drawSteppedMountain(scene, 350 * sx, snowLineY, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
+  drawSteppedMountain(scene, 512 * sx, snowLineY, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
+  drawSteppedMountain(scene, 600 * sx, snowLineY, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
+  drawSteppedMountain(scene, 900 * sx, snowLineY, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
 
-  // For each mountain, compute world-space coverage for occlusion testing.
-  // A mountain covers [cx - w/2, cx + w/2] at each world y, where w depends on step.
+  // Near mountains — lighter, shorter, partial overlap (depth 2)
+  drawSteppedMountain(scene, 200 * sx, snowLineY, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
+  drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
+}
+
+function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean): void {
   const stepH = 16;
-  for (let mi = 0; mi < mtns.length; mi++) {
-    const m = mtns[mi];
-    drawSteppedMountain(scene, m, isStorm, mtns, mi, stepH);
-  }
-}
-
-let mtnIndex = 0;
-
-interface MtnDef {
-  cx: number; baseY: number; baseWidth: number; peakHeight: number;
-  bodyColor: number; highlightColor: number; snowCap: boolean; depth: number;
-}
-
-/** Get the world-space half-width of a mountain at a given world y */
-function mtnHalfWidthAtY(m: MtnDef, worldY: number, stepH: number): number {
-  const steps = Math.ceil(m.peakHeight / stepH);
-  const i = (m.baseY - worldY) / stepH;
-  if (i < -2 || i >= steps) return 0;
-  const t = Math.max(0, i) / steps;
-  return (m.baseWidth * (1 - t * 0.85)) / 2;
-}
-
-function drawSteppedMountain(scene: Phaser.Scene, m: MtnDef, isStorm: boolean, allMtns: MtnDef[], myIndex: number, stepH: number): void {
-  const steps = Math.ceil(m.peakHeight / stepH);
-  const texH = (steps + 2) * stepH;
-  const texW = Math.ceil(m.baseWidth) + 2;
-  const texCx = texW / 2;
-
-  const g = scene.make.graphics({ x: 0, y: 0 } as Phaser.Types.GameObjects.Graphics.Options, false);
-  // Draw body steps
+  const steps = Math.ceil(peakHeight / stepH);
+  // Start 2 steps below baseY to overlap with snow ground (no gap)
   for (let i = -2; i < steps; i++) {
     const t = Math.max(0, i) / steps;
-    const w = m.baseWidth * (1 - t * 0.85);
-    const color = i % 3 === 0 ? m.highlightColor : m.bodyColor;
-    const ry = texH - (i + 3) * stepH;
-    g.fillStyle(color, 1);
-    g.fillRect(texCx - w / 2, ry, w, stepH);
+    const w = baseWidth * (1 - t * 0.85);
+    const y = baseY - i * stepH;
+    const color = i % 3 === 0 ? highlightColor : bodyColor;
+    scene.add.rectangle(cx, y, w, stepH, color).setOrigin(0.5, 1).setDepth(depth);
   }
-  // Snow cap setup — compute range before drawing gap lines to avoid overlap
-  const hasSnowCap = m.snowCap || isStorm;
-  let capStartStep = steps; // step index where caps begin (default: none)
-  let capSteps = 0;
-  if (hasSnowCap && m.peakHeight > 100) {
+  // Snow caps: storms double the cap depth and add caps to all mountains
+  const hasSnowCap = snowCap || isStorm;
+  if (hasSnowCap && peakHeight > 100) {
     const baseCap = Math.max(2, Math.min(4, Math.floor(steps * 0.12)));
-    capSteps = isStorm ? Math.min(steps - 1, baseCap * 2) : baseCap;
-    capStartStep = steps - capSteps;
-  }
-  // 1px gap lines between steps — skip rows that fall in the snow cap region
-  for (let i = 0; i < steps - 1; i++) {
-    if (i >= capStartStep) continue;
-    const t = i / steps;
-    const w = m.baseWidth * (1 - t * 0.85);
-    const worldY = m.baseY - i * stepH;
-    const myLeft = m.cx - w / 2;
-    const myRight = m.cx + w / 2;
-    const ry = texH - (i + 3) * stepH;
-    const colored = getGapSegments(myLeft, myRight, worldY, m.depth, allMtns, myIndex, stepH);
-    for (const seg of colored) {
-      g.fillStyle(seg.color, seg.alpha);
-      const texLeft = texCx + (seg.left - m.cx);
-      g.fillRect(texLeft, ry, seg.right - seg.left, 1);
-    }
-  }
-  // Snow caps
-  if (capSteps > 0) {
-    g.fillStyle(0xf0f5f8, 1);
+    const capSteps = isStorm ? Math.min(steps - 1, baseCap * 2) : baseCap;
     for (let i = 0; i < capSteps; i++) {
-      const t = (capStartStep + i) / steps;
-      const w = m.baseWidth * (1 - t * 0.85);
-      const ry = texH - (capStartStep + i + 3) * stepH;
-      g.fillRect(texCx - w / 2, ry, w, stepH);
-    }
-    // Dark outlines between cap layers
-    for (let i = 1; i < capSteps; i++) {
-      const t = (capStartStep + i) / steps;
-      const w = m.baseWidth * (1 - t * 0.85);
-      const ry = texH - (capStartStep + i + 3) * stepH;
-      g.fillStyle(m.bodyColor, 0.2);
-      g.fillRect(texCx - w / 2, ry + stepH - 1, w, 1);
+      const t = (steps - capSteps + i) / steps;
+      const w = baseWidth * (1 - t * 0.85);
+      const y = baseY - (steps - capSteps + i) * stepH;
+      scene.add.rectangle(cx, y, w, stepH, 0xf0f5f8).setOrigin(0.5, 1).setDepth(depth);
     }
   }
-  const key = `_menu_mtn_${mtnIndex++}`;
-  g.generateTexture(key, texW, texH);
-  g.destroy();
-  const tex = scene.textures.get(key);
-  if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
-  scene.add.image(m.cx, m.baseY + 2 * stepH, key).setOrigin(0.5, 1).setDepth(m.depth);
-}
-
-interface GapSegment { left: number; right: number; color: number; alpha: number }
-
-/** Get colored gap segments across a step line. Each segment is colored by what's
- *  behind: sky blue for exposed sky, or the behind-mountain's rock color. */
-function getGapSegments(left: number, right: number, worldY: number, myDepth: number, allMtns: MtnDef[], myIndex: number, stepH: number): GapSegment[] {
-  // Collect behind-mountains (lower depth, or same depth drawn earlier)
-  const behind: { left: number; right: number; color: number; depth: number }[] = [];
-  for (let oi = 0; oi < allMtns.length; oi++) {
-    if (oi === myIndex) continue;
-    const o = allMtns[oi];
-    if (o.depth < myDepth || (o.depth === myDepth && oi < myIndex)) {
-      const hw = mtnHalfWidthAtY(o, worldY, stepH);
-      if (hw > 0) {
-        const oI = Math.floor((o.baseY - worldY) / stepH);
-        const oColor = oI % 3 === 0 ? o.highlightColor : o.bodyColor;
-        behind.push({ left: o.cx - hw, right: o.cx + hw, color: oColor, depth: o.depth });
-      }
-    }
-  }
-
-  const skyColor = 0x8ab4d0;
-  const skyAlpha = 0.3;
-  const mtnAlpha = 0.1;
-
-  if (behind.length === 0) return [{ left, right, color: skyColor, alpha: skyAlpha }];
-
-  // Collect cut points and split [left, right] into sub-segments
-  const cuts = new Set<number>();
-  cuts.add(left);
-  cuts.add(right);
-  for (const b of behind) {
-    if (b.left > left && b.left < right) cuts.add(b.left);
-    if (b.right > left && b.right < right) cuts.add(b.right);
-  }
-  const sorted = [...cuts].sort((a, b) => a - b);
-
-  const result: GapSegment[] = [];
-  for (let ci = 0; ci < sorted.length - 1; ci++) {
-    const sl = sorted[ci];
-    const sr = sorted[ci + 1];
-    if (sr - sl < 1) continue;
-    const mid = (sl + sr) / 2;
-    // Find the frontmost (highest depth) behind-mountain at this x
-    let bestColor = skyColor;
-    let bestAlpha = skyAlpha;
-    let bestDepth = -1;
-    for (const b of behind) {
-      if (b.left <= mid && b.right >= mid && b.depth > bestDepth) {
-        bestDepth = b.depth;
-        bestColor = b.color;
-        bestAlpha = mtnAlpha;
-      }
-    }
-    result.push({ left: sl, right: sr, color: bestColor, alpha: bestAlpha });
-  }
-  return result;
 }
 
 function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
