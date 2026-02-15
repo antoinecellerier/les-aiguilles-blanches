@@ -22,6 +22,7 @@ import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
 import { setGroomedTiles } from '../utils/skiRunState';
+import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
 import DialogueScene from './DialogueScene';
 
 /** Normalize angle difference to [-π, π] range */
@@ -94,6 +95,8 @@ export default class GameScene extends Phaser.Scene {
   private buffs: Buffs = {};
   private frostLevel = 0;
   private frostRate = 0;
+  private nightSfx = '';  // '_night' on night levels, '' otherwise
+  private nc: ColorTransform = dayColors;
 
   // Stats tracking for bonus objectives
   private fuelUsed = 0;
@@ -207,6 +210,8 @@ export default class GameScene extends Phaser.Scene {
     // Frost rate based on level weather (only on late-game levels)
     this.frostLevel = 0;
     this.frostRate = getFrostRate(this.levelIndex, !!this.level.isNight, this.level.weather || 'clear');
+    this.nightSfx = this.level.isNight ? NIGHT_SUFFIX : '';
+    this.nc = this.level.isNight ? nightColors : dayColors;
   }
 
   create(): void {
@@ -349,7 +354,7 @@ export default class GameScene extends Phaser.Scene {
     this.fallLineAlignment = 1.0;
     this.createSnowGrid();
 
-    this.pisteRenderer = new PisteRenderer(this, this.geometry);
+    this.pisteRenderer = new PisteRenderer(this, this.geometry, this.nightSfx);
 
     const { boundaryWalls } = this.pisteRenderer.createBoundaryColliders(this.level, this.tileSize);
     this.boundaryWalls = boundaryWalls;
@@ -364,7 +369,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.obstacles = this.physics.add.staticGroup();
     this.interactables = this.physics.add.staticGroup();
-    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry);
+    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry, this.nightSfx, this.nc);
     // Compute spawn position to create exclusion zone for obstacles
     const spawnYIndex = Math.min(this.level.height - 8, Math.floor(this.level.height * 0.9));
     const spawnPath = this.geometry.pistePath[spawnYIndex] || { centerX: this.level.width / 2 };
@@ -382,7 +387,7 @@ export default class GameScene extends Phaser.Scene {
       const s = sprite as Phaser.Physics.Arcade.Sprite;
       const body = s.body as Phaser.Physics.Arcade.StaticBody;
       body.updateFromGameObject();
-      if (s.texture.key === 'tree' || s.texture.key === 'tree_large') {
+      if (s.texture.key.startsWith('tree')) {
         const trunkW = 20 * scale;
         const trunkH = 10 * scale;
         body.setSize(trunkW, trunkH);
@@ -426,10 +431,10 @@ export default class GameScene extends Phaser.Scene {
     this.tumbleCount = 0;
     this.accessPathsVisited = new Set<number>();
 
-    this.winchSystem = new WinchSystem(this, this.geometry);
+    this.winchSystem = new WinchSystem(this, this.geometry, this.nc);
     this.weatherSystem = new WeatherSystem(this, this.tileSize);
-    this.hazardSystem = new HazardSystem(this);
-    this.wildlifeSystem = new WildlifeSystem(this, this.tileSize);
+    this.hazardSystem = new HazardSystem(this, this.nc);
+    this.wildlifeSystem = new WildlifeSystem(this, this.tileSize, this.nc, this.nightSfx);
 
     this.tutorialStep = 0;
     this.tutorialTriggered = {};
@@ -541,7 +546,7 @@ export default class GameScene extends Phaser.Scene {
       this.weatherSystem.createWeatherEffects(this.level);
     }
 
-    if (this.frostRate > 0) {
+    if (this.frostRate > 0 && !this.level.isNight) {
       this.weatherSystem.createFrostOverlay();
     }
 
@@ -592,7 +597,7 @@ export default class GameScene extends Phaser.Scene {
     // Single TileSprite for off-piste background — tiles the snow texture across the world
     const bgW = this.level.width * tileSize;
     const bgH = this.level.height * tileSize;
-    const offPisteBg = this.add.tileSprite(bgW / 2, bgH / 2, bgW, bgH, 'snow_offpiste');
+    const offPisteBg = this.add.tileSprite(bgW / 2, bgH / 2, bgW, bgH, 'snow_offpiste' + this.nightSfx);
     offPisteBg.setDepth(DEPTHS.TERRAIN);
 
     // DynamicTexture for piste tiles — paints all snow as a single texture
@@ -612,7 +617,7 @@ export default class GameScene extends Phaser.Scene {
             quality: 0,
           };
           this.groomableTiles++;
-          this.stampPisteTile('snow_ungroomed', x, y);
+          this.stampPisteTile('snow_ungroomed' + this.nightSfx, x, y);
         } else {
           this.snowGrid[y][x] = {
             groomed: true,
@@ -639,7 +644,7 @@ export default class GameScene extends Phaser.Scene {
     const startX = bottomPath.centerX * this.tileSize;
     const startY = bottomYIndex * this.tileSize;
 
-    const groomerTexture = this.level.weather === 'storm' ? 'groomer_storm' : 'groomer';
+    const groomerTexture = (this.level.weather === 'storm' ? 'groomer_storm' : 'groomer') + this.nightSfx;
     this.groomer = this.physics.add.sprite(startX, startY, groomerTexture);
     this.groomer.setCollideWorldBounds(true);
     this.groomer.setDrag(BALANCE.GROOMER_DRAG);
@@ -884,8 +889,8 @@ export default class GameScene extends Phaser.Scene {
       this.weatherSystem.updateNightOverlay(this.groomer);
     }
 
-    // Update frost vignette
-    if (this.frostRate > 0) {
+    // Update frost vignette (skipped on night levels — invisible behind darkening)
+    if (this.frostRate > 0 && !this.level.isNight) {
       this.weatherSystem.updateFrostOverlay(this.frostLevel);
     }
 
@@ -1118,7 +1123,7 @@ export default class GameScene extends Phaser.Scene {
     for (const zone of this.geometry.steepZoneRects) {
       const bucket = this.getSteepTextureBucket(zone.slope);
       if (bucket === 0) continue;
-      const texKey = `snow_steep_${bucket}`;
+      const texKey = `snow_steep_${bucket}${this.nightSfx}`;
       if (!this.textures.exists(texKey)) continue;
       const yStart = Math.max(0, Math.floor(zone.startY / ts));
       const yEnd = Math.min(this.level.height - 1, Math.floor(zone.endY / ts));
@@ -1373,12 +1378,12 @@ export default class GameScene extends Phaser.Scene {
             let texKey: string;
             let alpha = 1;
             if (this.weatherSystem.isHighContrast) {
-              texKey = bucket > 0 ? `snow_groomed_steep_${bucket}` : 'snow_groomed';
+              texKey = bucket > 0 ? `snow_groomed_steep_${bucket}${this.nightSfx}` : 'snow_groomed' + this.nightSfx;
             } else if (bucket > 0) {
-              texKey = `snow_groomed_steep_${bucket}`;
+              texKey = `snow_groomed_steep_${bucket}${this.nightSfx}`;
               alpha = 0.7 + 0.3 * cell.quality;
             } else {
-              texKey = getGroomedTexture(cell.quality);
+              texKey = getGroomedTexture(cell.quality) + this.nightSfx;
             }
             this.stampPisteTile(texKey, tx, ty, alpha);
           }
@@ -2104,7 +2109,7 @@ export default class GameScene extends Phaser.Scene {
         const { x } = rowTiles[i];
         const cell = this.snowGrid[y][x];
         cell.groomed = true;
-        this.stampPisteTile('snow_groomed', x, y);
+        this.stampPisteTile('snow_groomed' + this.nightSfx, x, y);
         this.groomedCount++;
       }
     }

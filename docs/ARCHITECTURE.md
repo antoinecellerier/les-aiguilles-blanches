@@ -95,6 +95,7 @@ snow-groomer/
 │   │   ├── keybindingManager.ts # Keyboard/gamepad binding load, save, rebind, reset
 │   │   ├── overlayManager.ts # Modal overlay dialogs (simple + scrollable) with keyboard dismiss
 │   │   ├── cameraCoords.ts  # World↔overlay coordinate conversions for scrollFactor(0) objects
+│   │   ├── nightPalette.ts   # Night color transform, texture key lists, nightColor(), NIGHT_SUFFIX
 │   │   ├── renderThrottle.ts # Passive FPS monitor with rolling average and throttle state detection
 │   │   ├── resizeManager.ts # Debounced resize-restart handler for scenes
 │   │   ├── sceneTransitions.ts # Centralized scene cleanup and transitions
@@ -452,11 +453,12 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 
 1. **DynamicTexture consolidation** — Paint many small objects onto a single DynamicTexture at level start. One `drawImage` call replaces hundreds. Used for: off-piste background (tiled pattern via `createPattern('repeat')`), piste snow tiles, access road tiles, background trees/rocks, piste-edge trees. L9 went from 876 Images to 65 (-93%). **Caveat:** Only beneficial when consolidating many small textures into one. Consolidating a few large Rectangles (which are cheap `fillRect` calls) into a full-screen DynamicTexture is a net negative on Firefox — the `drawImage` call on a large backing canvas triggers expensive `memcpy` (35% CPU) that far exceeds the cost of individual `fillRect` calls. See "DynamicTexture size tradeoff" below
 2. **Graphics → texture baking** — Graphics objects replay their command buffer every frame on Canvas. Static decorations (trees, rocks, cliffs, animal tracks) are pre-generated as textures in BootScene via `generateTexture()`. L9 Graphics went from 1,588 to ~97 (-94%). Menu scenes apply the same pattern: MenuTerrainRenderer bakes trees/groomer/ground lines, MenuWildlifeController bakes animal sprites and uses pre-baked track textures from BootScene. Bird state changes use `setTexture()` instead of `clear()`+`drawBird()`. Textures are cleaned up on scene shutdown to avoid key collisions on re-entry
-3. **Night overlay DynamicTexture** — Headlight cone drawn directly to canvas context each frame instead of 7,416 Graphics commands. L7 FPS 32→60
-4. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
-5. **Camera culling** — `cullOffscreen()` hides objects outside viewport (+ 2-tile margin) using display-bounds checks (`x ± displayWidth*originX`). Only rechecked when camera moves a full tile. ~1,200 objects hidden per frame on L9. `lastCullBounds` is reset in `handleResize()` to force immediate recull after viewport changes
-6. **Extended background sizing** — Use `max(screenWidth, screenHeight) × 1.3` for both dimensions, ensuring coverage in any orientation without recreating the DynamicTexture on resize
-7. **HUD resize debounce** — 300ms + 10px threshold prevents rapid scene restarts from mobile resize events
+3. **Night texture pre-generation** — Pre-generates `_night` variant textures at boot via canvas `multiply` composite (darkened + blue-shifted, `BALANCE.NIGHT_BRIGHTNESS` 0.3, `BALANCE.NIGHT_BLUE_SHIFT` 0.15). All systems resolve textures with `nightSfx` suffix (`'_night'` or `''`) and transform Graphics colors via `nc: ColorTransform` (identity for day, `nightColor` for night). Headlight is a small 256×256 DynamicTexture positioned in world coords on the groomer — replaces the old full-screen DT that cost 6-8 FPS on Firefox per frame
+4. **Frost vignette skip on night levels** — Frost vignette is invisible behind night darkening; skipped on night levels to save ~3 FPS
+5. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
+6. **Camera culling** — `cullOffscreen()` hides objects outside viewport (+ 2-tile margin) using display-bounds checks (`x ± displayWidth*originX`). Only rechecked when camera moves a full tile. ~1,200 objects hidden per frame on L9. `lastCullBounds` is reset in `handleResize()` to force immediate recull after viewport changes
+7. **Extended background sizing** — Use `max(screenWidth, screenHeight) × 1.3` for both dimensions, ensuring coverage in any orientation without recreating the DynamicTexture on resize
+8. **HUD resize debounce** — 300ms + 10px threshold prevents rapid scene restarts from mobile resize events
 
 ### Canvas Renderer Constraints
 
@@ -679,7 +681,7 @@ Isolated each night-specific effect by disabling it at runtime and measuring rAF
 
 4. **Eliminating the night overlay gains ~6.5 FPS** (25→31), a 26% improvement. The remaining gap to clear day (31→52) is from level geometry differences (L8 has more objects than L2).
 
-5. **Optimization approach**: Replace the per-frame DynamicTexture overlay with CSS `brightness()` filter on the canvas element (same pattern as accessibility high-contrast and colorblind filters). Headlights can be rendered as additive-blended sprites on top. This eliminates the full-screen DT redraw entirely.
+5. **Optimization approach**: ✅ Replaced with pre-generated `_night` variant textures (canvas `multiply` composite at boot) and a small 256×256 headlight DT in world coords. Eliminates the full-screen DT redraw entirely. See "Night texture pre-generation" in Optimization Techniques.
 
 #### Frost + Night Cross-Level Benchmark (Firefox)
 
@@ -706,7 +708,7 @@ Tested frost at 70% (forced) and night overlay independently across L7/L9/L10:
 
 9. **Combined: removing both night + frost on L10 gains +8.3 FPS** (19→27, +44%). The effects are additive — each full-screen overlay blit adds independent compositing cost.
 
-**Frost on night levels — optimization opportunity:** Since the frost vignette is invisible behind the night overlay, it should be disabled on night levels (or the night effect should incorporate frost visually). This would recover ~3 FPS on L10 for free.
+**Frost on night levels — ✅ resolved:** Frost vignette is now skipped on night levels, recovering ~3 FPS on L10.
 
 ### Profiling Guide
 
@@ -721,6 +723,7 @@ To re-profile if performance regresses:
    - `__syscall_cancel_arch` > 5% means CPU has headroom (vsync wait)
    - `TileSpriteCanvasRenderer` appearing means a TileSprite was reintroduced — replace it
    - `GraphicsCanvasRenderer` > 5% means un-baked Graphics objects — use `generateTexture()`
+   - Full-screen DynamicTexture per-frame blit costs 6-8 FPS on Firefox Canvas (`memcpy` bottleneck) — avoid camera-sized DTs
    - JavaScript > 2% means game logic needs optimization
 5. Check the Categories panel: DOM should be ~100%, JavaScript < 1%
 
@@ -1078,7 +1081,7 @@ For crisp retro pixel art without `pixelArt: true` (which breaks Firefox):
 
 1. **Generated textures**: After `generateTexture()`, set `textures.get(key).source[0].scaleMode = Phaser.ScaleModes.NEAREST`
 2. **DynamicTextures**: After `addDynamicTexture()`, set `dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST` AND `dt.context.imageSmoothingEnabled = false`
-3. **Exception**: Night overlay DynamicTexture keeps default smoothing (light cone gradient)
+3. **Exception**: Night headlight DynamicTexture (256×256) keeps default smoothing (light glow gradient)
 
 Working Firefox configuration:
 ```javascript
@@ -1722,6 +1725,34 @@ Optional desktop packaging via `electron/`. Keeps Electron deps out of the main 
 - **PipeWire audio**: Stream name and icon are hardcoded to "Chromium" in Chromium's `pulse_util.cc`. No workaround until [electron/electron#49270](https://github.com/electron/electron/pull/49270) merges.
 - **Cross-compilation**: Windows builds work from Linux via Wine. macOS zip builds work but can't be code-signed (requires macOS).
 - **Size optimization**: `electronLanguages` strips 40 unused Chromium locales. `afterPack.cjs` removes Vulkan SwiftShader and source maps. ~99MB AppImage (floor is the Chromium binary).
+
+## Night Texture System
+
+Night levels use pre-generated darkened textures instead of a per-frame full-screen DynamicTexture overlay (which cost 6-8 FPS on Firefox due to `memcpy` bottleneck).
+
+### Architecture (`src/utils/nightPalette.ts`)
+
+- **`nightColor(color: number): number`** — Converts a daytime `0xRRGGBB` to its night equivalent: darkens by `BALANCE.NIGHT_BRIGHTNESS` (0.3) and shifts blue channel by `BALANCE.NIGHT_BLUE_SHIFT` (0.15)
+- **`ColorTransform` type** — `(color: number) => number`. Identity (`dayColors`) for day levels, `nightColors` for night levels
+- **`NIGHT_TEXTURE_KEYS`** — List of snow texture keys that get `_night` variants (ungroomed, offpiste, groomed, packed, steep zones)
+- **`nightKey(key)`** — Appends `NIGHT_SUFFIX` (`'_night'`) to a texture key
+- **`NIGHT_SUFFIX`** — String constant `'_night'`
+
+### Texture Generation (BootScene)
+
+Night variant textures are generated at boot by drawing the day texture onto a new canvas, then overlaying a solid night color via `globalCompositeOperation = 'multiply'`. This produces darkened + blue-shifted textures that require zero per-frame cost.
+
+### Runtime Pattern
+
+All systems that draw textured content or colored shapes accept two parameters:
+1. **`nightSfx: string`** — `'_night'` on night levels, `''` on day. Appended to texture keys for `setTexture()` calls
+2. **`nc: ColorTransform`** — Applied to all `fillStyle` / `lineStyle` hex colors in Graphics calls
+
+This avoids any runtime overlay compositing. The only per-frame night cost is a small 256×256 DynamicTexture for the headlight glow, positioned in world coordinates on the groomer.
+
+### FPS Meter (rAF Counting)
+
+The HUD FPS counter uses `requestAnimationFrame` counting instead of `game.loop.delta` averaging. This measures actual rendered frames rather than Phaser loop ticks, which can diverge when the browser drops frames. The rAF callback counts frames over 500ms windows and updates the display text.
 
 ## Future Architecture Considerations
 

@@ -35,6 +35,7 @@ export class SlalomGateSystem {
     level: Level,
     geometry: LevelGeometry,
     tileSize: number,
+    nightSfx = '',
   ): void {
     if (!level.slalomGates) return;
     this.scene = scene;
@@ -58,7 +59,7 @@ export class SlalomGateSystem {
       const halfW = (width / 2) * tileSize;
 
       const color = i % 2 === 0 ? 'red' : 'blue';
-      const texKey = color === 'red' ? 'slalom_red' : 'slalom_blue';
+      const texKey = (color === 'red' ? 'slalom_red' : 'slalom_blue') + nightSfx;
       const worldY = tileY * tileSize;
 
       const leftPole = scene.add.image(centerX - halfW, worldY, texKey).setOrigin(0.5, 1).setDepth(DEPTHS.MARKERS);

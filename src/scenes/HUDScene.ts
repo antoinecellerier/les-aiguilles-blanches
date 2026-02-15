@@ -61,11 +61,12 @@ export default class HUDScene extends Phaser.Scene {
   private bonusTexts: Phaser.GameObjects.Text[] = [];
   private bonusObjectives: BonusObjective[] = [];
 
-  // FPS counter
+  // FPS counter (rAF-based for actual rendered frame rate)
   private fpsText: Phaser.GameObjects.Text | null = null;
   private showFps = false;
-  private fpsUpdateTimer = 0;
-  private fpsFrameTimes: number[] = []; // rolling window of recent frame deltas
+  private rafId = 0;
+  private rafFrameCount = 0;
+  private rafLastTime = 0;
   private bonusFailed: boolean[] = []; // irreversible failure tracking
 
 
@@ -396,7 +397,7 @@ export default class HUDScene extends Phaser.Scene {
     this.fpsText = this.add.text(width - padding, fpsY, '', {
       fontFamily: 'monospace', fontSize: fpsFontSize, color: '#88ff88',
     }).setOrigin(1, 1).setScrollFactor(0).setAlpha(0.7).setVisible(this.showFps);
-    this.fpsUpdateTimer = 0;
+    this.startRafCounter();
 
     this.game.events.on(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.on(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
@@ -1087,21 +1088,7 @@ export default class HUDScene extends Phaser.Scene {
 
     this.emitTouchState();
 
-    // FPS counter — rolling 30-frame average, updated every ~500ms
-    if (this.showFps && this.fpsText?.active) {
-      this.fpsFrameTimes.push(this.game.loop.delta);
-      if (this.fpsFrameTimes.length > 30) this.fpsFrameTimes.shift();
-      this.fpsUpdateTimer += this.game.loop.delta;
-      if (this.fpsUpdateTimer >= 500) {
-        this.fpsUpdateTimer = 0;
-        const avgDelta = this.fpsFrameTimes.reduce((a, b) => a + b, 0) / this.fpsFrameTimes.length;
-        const fps = Math.round(1000 / avgDelta);
-        const targetFps = this.game.loop.targetFps || 60;
-        const simPct = Math.min(100, Math.round((fps / targetFps) * 100));
-        const throttleFlag = isRenderThrottled() ? ' ⏬' : '';
-        this.fpsText.setText('L' + this.gameState.levelIndex + ' · ' + fps + ' FPS · ' + simPct + '%' + throttleFlag);
-      }
-    }
+    // FPS counter — rAF-based, text updated by startRafCounter callback
 
     // Gamepad Select/Back button (button 8) for level skip
     if (this.input.gamepad && this.input.gamepad.total > 0) {
@@ -1209,11 +1196,37 @@ export default class HUDScene extends Phaser.Scene {
   private resizing = false;
   private resizeManager!: ResizeManager;
 
+  /** rAF-based FPS counter — counts actual rendered frames, not Phaser loop ticks */
+  private startRafCounter(): void {
+    if (!this.showFps) return;
+    this.rafFrameCount = 0;
+    this.rafLastTime = performance.now();
+    const tick = () => {
+      this.rafFrameCount++;
+      const now = performance.now();
+      const elapsed = now - this.rafLastTime;
+      if (elapsed >= 500 && this.fpsText?.active) {
+        const fps = Math.round(this.rafFrameCount * 1000 / elapsed);
+        const targetFps = this.game.loop.targetFps || 60;
+        const simPct = Math.min(100, Math.round((fps / targetFps) * 100));
+        const throttleFlag = isRenderThrottled() ? ' ⏬' : '';
+        this.fpsText.setText('L' + this.gameState.levelIndex + ' · ' + fps + ' FPS · ' + simPct + '%' + throttleFlag);
+        this.rafFrameCount = 0;
+        this.rafLastTime = now;
+      }
+      this.rafId = requestAnimationFrame(tick);
+    };
+    this.rafId = requestAnimationFrame(tick);
+  }
+
   shutdown(): void {
     // Remove global event listeners FIRST to prevent callbacks on destroyed objects
     this.game.events.off(GAME_EVENTS.GAME_STATE, this.handleGameState, this);
     this.game.events.off(GAME_EVENTS.TIMER_UPDATE, this.updateTimer, this);
     this.game.events.off(GAME_EVENTS.ACCESSIBILITY_CHANGED, this.handleAccessibilityChanged, this);
+
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    this.rafId = 0;
 
     this.resizeManager?.destroy();
     this.input.keyboard?.removeAllListeners();
@@ -1236,8 +1249,6 @@ export default class HUDScene extends Phaser.Scene {
 
     this.timerText = null;
     this.fpsText = null;
-    this.fpsUpdateTimer = 0;
-    this.fpsFrameTimes = [];
     this.actionButtons = [];
   }
 }

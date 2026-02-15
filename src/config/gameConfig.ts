@@ -181,6 +181,8 @@ export const BALANCE = {
   HEADLIGHT_REAR_TILES: 4,
   HEADLIGHT_SPREAD: Math.PI * 0.6,
   NIGHT_DARKNESS_ALPHA: 0.7,
+  NIGHT_BRIGHTNESS: 0.3,         // night texture brightness multiplier
+  NIGHT_BLUE_SHIFT: 0.15,        // blue channel boost for night feel
   HEADLIGHT_STEPS: 4,
   HEADLIGHT_DIST_STEPS: 5,
   HEADLIGHT_ARC_STEPS: 8,

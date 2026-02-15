@@ -7,6 +7,7 @@ import type { Level } from '../config/levels';
 import type { LevelGeometry } from './LevelGeometry';
 import { getString } from '../utils/storage';
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { type ColorTransform, dayColors } from '../utils/nightPalette';
 
 export interface WinchAnchor {
   x: number;
@@ -22,6 +23,7 @@ export interface WinchAnchor {
 export class WinchSystem {
   private scene: Phaser.Scene;
   private geometry: LevelGeometry;
+  private nc: ColorTransform;
 
   anchors: WinchAnchor[] = [];
   private cableGraphics: Phaser.GameObjects.Graphics | null = null;
@@ -30,9 +32,10 @@ export class WinchSystem {
   anchor: WinchAnchor | null = null;
   useCount = 0;
 
-  constructor(scene: Phaser.Scene, geometry: LevelGeometry) {
+  constructor(scene: Phaser.Scene, geometry: LevelGeometry, nc: ColorTransform = dayColors) {
     this.scene = scene;
     this.geometry = geometry;
+    this.nc = nc;
   }
 
   /** Whether the cable is taut (groomer is below the anchor). */
@@ -69,24 +72,24 @@ export class WinchSystem {
     g.setDepth(yDepth(y - 8));
 
     // Base plate
-    g.fillStyle(THEME.colors.anchorBase, 1);
+    g.fillStyle(this.nc(THEME.colors.anchorBase), 1);
     g.fillRect(x - 10, y + 5, 20, 8);
 
     // Vertical pole
-    g.fillStyle(THEME.colors.signPole, 1);
+    g.fillStyle(this.nc(THEME.colors.signPole), 1);
     g.fillRect(x - 4, y - 20, 8, 28);
 
     // Cable hook ring (rectangle, no circles)
-    g.fillStyle(THEME.colors.metalLight, 1);
+    g.fillStyle(this.nc(THEME.colors.metalLight), 1);
     g.fillRect(x - 6, y - 28, 12, 3);
     g.fillRect(x - 6, y - 22, 12, 3);
     g.fillRect(x - 6, y - 28, 3, 9);
     g.fillRect(x + 3, y - 28, 3, 9);
 
     // Yellow number plate with black text
-    g.fillStyle(THEME.colors.signPlate, 1);
+    g.fillStyle(this.nc(THEME.colors.signPlate), 1);
     g.fillRect(x - 8, y + 14, 16, 10);
-    g.fillStyle(THEME.colors.black, 1);
+    g.fillStyle(this.nc(THEME.colors.black), 1);
     this.scene.add.text(x, y + 19, '' + number, {
       fontFamily: 'Courier New, monospace',
       fontSize: '8px',
@@ -213,7 +216,8 @@ export class WinchSystem {
 
   /** Render anchor pole visuals only (no gameplay data). */
   static createAnchorVisuals(
-    scene: Phaser.Scene, geometry: LevelGeometry, level: Level, tileSize: number
+    scene: Phaser.Scene, geometry: LevelGeometry, level: Level, tileSize: number,
+    nc: ColorTransform = dayColors
   ): void {
     const anchorDefs = level.winchAnchors || [];
     if (anchorDefs.length === 0) return;
@@ -227,18 +231,18 @@ export class WinchSystem {
       const g = scene.add.graphics();
       g.setDepth(yDepth(y - 8));
 
-      g.fillStyle(THEME.colors.anchorBase, 1);
+      g.fillStyle(nc(THEME.colors.anchorBase), 1);
       g.fillRect(x - 10, y + 5, 20, 8);
-      g.fillStyle(THEME.colors.signPole, 1);
+      g.fillStyle(nc(THEME.colors.signPole), 1);
       g.fillRect(x - 4, y - 20, 8, 28);
-      g.fillStyle(THEME.colors.metalLight, 1);
+      g.fillStyle(nc(THEME.colors.metalLight), 1);
       g.fillRect(x - 6, y - 28, 12, 3);
       g.fillRect(x - 6, y - 22, 12, 3);
       g.fillRect(x - 6, y - 28, 3, 9);
       g.fillRect(x + 3, y - 28, 3, 9);
-      g.fillStyle(THEME.colors.signPlate, 1);
+      g.fillStyle(nc(THEME.colors.signPlate), 1);
       g.fillRect(x - 8, y + 14, 16, 10);
-      g.fillStyle(THEME.colors.black, 1);
+      g.fillStyle(nc(THEME.colors.black), 1);
       scene.add.text(x, y + 19, '' + (i + 1), {
         fontFamily: 'Courier New, monospace',
         fontSize: '8px',

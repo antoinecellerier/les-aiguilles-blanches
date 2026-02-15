@@ -3,6 +3,7 @@ import { t, type Level } from '../setup';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { THEME } from '../config/theme';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
+import { type ColorTransform, dayColors } from '../utils/nightPalette';
 
 export interface AvalancheZone extends Phaser.GameObjects.Rectangle {
   avalancheRisk: number;
@@ -17,6 +18,7 @@ export class HazardSystem {
   private avalancheZones: AvalancheZone[] = [];
   private avalancheTriggered = false;
   private avalancheTimer?: Phaser.Time.TimerEvent;
+  private nc: ColorTransform;
 
   /** Optional sound callback: 1 = warning1, 2 = warning2, 3 = trigger */
   onAvalancheSound: ((level: number) => void) | null = null;
@@ -28,8 +30,9 @@ export class HazardSystem {
   /** Multiplier for risk accumulation rate (default 1.0, higher = faster trigger). */
   riskMultiplier = 1.0;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, nc: ColorTransform = dayColors) {
     this.scene = scene;
+    this.nc = nc;
   }
 
   get isTriggered(): boolean {
@@ -343,7 +346,7 @@ export class HazardSystem {
     const hs = signSize / 2;
 
     // Diamond shape built from two overlapping rotated rectangles
-    g.fillStyle(THEME.colors.signYellow, 1);
+    g.fillStyle(this.nc(THEME.colors.signYellow), 1);
     g.fillRect(x - hs, y - 2, hs, 4);
     g.fillRect(x - 2, y - hs, 4, hs);
     // Bottom-right half
@@ -352,16 +355,16 @@ export class HazardSystem {
     // Fill center
     g.fillRect(x - hs + 2, y - hs + 2, signSize - 4, signSize - 4);
     // Border
-    g.lineStyle(1, THEME.colors.black, 1);
+    g.lineStyle(1, this.nc(THEME.colors.black), 1);
     g.strokeRect(x - hs + 1, y - hs + 1, signSize - 2, signSize - 2);
 
     // Avalanche symbol — exclamation mark (rectangles only)
-    g.fillStyle(THEME.colors.black, 1);
+    g.fillStyle(this.nc(THEME.colors.black), 1);
     g.fillRect(x - 1, y - 4, 2, 6);
     g.fillRect(x - 1, y + 3, 2, 2);
 
     // Post — use rock palette brown
-    g.fillStyle(THEME.colors.avalancheRock, 1);
+    g.fillStyle(this.nc(THEME.colors.avalancheRock), 1);
     g.fillRect(x - 2, y + signSize / 2, 4, 12);
   }
 
@@ -370,16 +373,16 @@ export class HazardSystem {
     g.setDepth(DEPTHS.MARKERS);
 
     // Pole — rock palette brown
-    g.fillStyle(THEME.colors.avalancheRock, 1);
+    g.fillStyle(this.nc(THEME.colors.avalancheRock), 1);
     g.fillRect(x - 2, y, 4, 25);
 
     // Flag — yellow per standard avalanche flag colors
     const flagWidth = 12;
     const flagHeight = 8;
-    g.fillStyle(THEME.colors.signYellow, 1);
+    g.fillStyle(this.nc(THEME.colors.signYellow), 1);
     g.fillRect(x + 2, y + 2, flagWidth, flagHeight);
     // Dark stripe on flag for detail
-    g.fillStyle(THEME.colors.black, 0.4);
+    g.fillStyle(this.nc(THEME.colors.black), 0.4);
     g.fillRect(x + 2, y + 2 + flagHeight - 2, flagWidth, 2);
   }
 
@@ -388,12 +391,12 @@ export class HazardSystem {
     g.setDepth(DEPTHS.SIGNAGE);
     const boxSize = 14;
 
-    g.fillStyle(THEME.colors.snowflake, 0.9);
+    g.fillStyle(this.nc(THEME.colors.snowflake), 0.9);
     g.fillRect(x - boxSize / 2, y - boxSize / 2, boxSize, boxSize + 10);
-    g.lineStyle(1, THEME.colors.black, 0.8);
+    g.lineStyle(1, this.nc(THEME.colors.black), 0.8);
     g.strokeRect(x - boxSize / 2, y - boxSize / 2, boxSize, boxSize + 10);
 
-    g.fillStyle(THEME.colors.hazardFire, 1);
+    g.fillStyle(this.nc(THEME.colors.hazardFire), 1);
     g.fillRect(x - boxSize / 2 + 2, y - boxSize / 2 + 2, boxSize - 4, boxSize - 4);
 
     this.scene.add.text(x, y, '4', {

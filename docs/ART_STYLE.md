@@ -430,10 +430,16 @@ Pause/fullscreen buttons use pill-shaped backgrounds (black, alpha 0.55) for con
 
 ### Night Rendering
 
-- Dark overlay: `0x000022` at 70% opacity
-- Headlights: Layered circles with decreasing opacity
-- Front lights: 108° spread, 5 tile range, warm white (`0xffffee`)
+Night levels use pre-generated `_night` variant textures instead of a runtime overlay:
+
+- **Texture generation**: Day textures darkened at boot via canvas `multiply` composite
+- **Brightness**: `BALANCE.NIGHT_BRIGHTNESS` = 0.3 (30% of original RGB)
+- **Blue shift**: `BALANCE.NIGHT_BLUE_SHIFT` = 0.15 (adds 15% blue channel)
+- **Color transform**: Graphics fill colors use `nightColor()` from `nightPalette.ts`
+- **Headlight glow**: Small 256×256 DynamicTexture in world coords on groomer, warm white (`0xffffee`)
+- Front lights: 108° spread, 5 tile range
 - Rear lights: 5 tile range, slightly warm tint (`0xffddcc`)
+- **Frost vignette**: Skipped on night levels (invisible behind darkening)
 
 ## Adding New Visual Elements
 

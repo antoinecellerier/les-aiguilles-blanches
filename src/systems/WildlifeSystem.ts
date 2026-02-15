@@ -3,6 +3,7 @@ import { BALANCE, DEPTHS, yDepth } from '../config/gameConfig';
 import type { WildlifeSpawn } from '../config/levels';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
 import { drawAnimal, ANIMAL_GRID, type AnimalType } from '../utils/animalSprites';
+import { type ColorTransform, dayColors } from '../utils/nightPalette';
 
 /** Per-species behavior constants */
 const SPECIES = {
@@ -71,10 +72,14 @@ export class WildlifeSystem {
   private worldH = 0;
   private isOnCliff: ((x: number, y: number) => boolean) | null = null;
   private buildings: ObstacleRect[] = [];
+  private nc: ColorTransform;
+  private nightSfx: string;
 
-  constructor(scene: Phaser.Scene, tileSize: number) {
+  constructor(scene: Phaser.Scene, tileSize: number, nc: ColorTransform = dayColors, nightSfx = '') {
     this.scene = scene;
     this.tileSize = tileSize;
+    this.nc = nc;
+    this.nightSfx = nightSfx;
   }
 
   /** Register cliff check and building footprints so animals avoid them */
@@ -228,7 +233,7 @@ export class WildlifeSystem {
       g.setDepth(yDepth(y));
     }
 
-    drawAnimal(g, type, 0, 0, scale);
+    drawAnimal(g, type, 0, 0, scale, this.nc);
     g.setPosition(x, y);
 
     const spec = SPECIES[type];
@@ -478,7 +483,7 @@ export class WildlifeSystem {
       if (oldest) oldest.image.destroy();
     }
 
-    const key = `track_${animal.type}`;
+    const key = `track_${animal.type}${this.nightSfx}`;
     const angle = Math.atan2(animal.vy, animal.vx);
 
     const img = this.scene.add.image(animal.x, animal.y, key);

@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { Accessibility, setLanguage, detectLanguage } from '../setup';
 import { detectKeyboardLayout } from '../utils/keyboardLayout';
 import { createSkierTexture, createSkierLeftTexture, createSkierRightTexture, createSkierBrakeTexture, createSkierTuckTexture, createSnowboarderTexture, createSnowboarderLeftTexture, createSnowboarderRightTexture, createSnowboarderBrakeTexture, createSnowboarderTuckTexture } from '../utils/skiSprites';
+import { BALANCE } from '../config/gameConfig';
+import { NIGHT_SUFFIX, NIGHT_TEXTURE_KEYS } from '../utils/nightPalette';
 
 /**
  * Les Aiguilles Blanches - Boot Scene
@@ -473,6 +475,63 @@ export default class BootScene extends Phaser.Scene {
     for (const key of spriteKeys) {
       const tex = this.textures.get(key);
       if (tex?.source?.[0]) tex.source[0].scaleMode = NEAREST;
+    }
+
+    // Generate night-tinted variants of terrain/object textures.
+    // Uses canvas 'multiply' composite to darken + blue-shift without per-frame cost.
+    this.generateNightTextures(NEAREST, treeSizes, rockSizes, trackSpecies);
+  }
+
+  private generateNightTextures(NEAREST: number, treeSizes: number[], rockSizes: number[], trackSpecies: string[]): void {
+    const nightKeys = [
+      ...NIGHT_TEXTURE_KEYS,
+      ...treeSizes.flatMap((s: number) => [`tree_${s}`, `tree_${s}_storm`]),
+      ...rockSizes.map((s: number) => `rock_${s}`),
+      ...trackSpecies.map((s: string) => `track_${s}`),
+      'tree', 'rock', 'groomer', 'groomer_storm', 'restaurant', 'fuel',
+      'slalom_red', 'slalom_blue',
+      'skier', 'skier_left', 'skier_right', 'skier_brake', 'skier_tuck',
+      'snowboarder', 'snowboarder_left', 'snowboarder_right', 'snowboarder_brake', 'snowboarder_tuck',
+    ];
+
+    const br = BALANCE.NIGHT_BRIGHTNESS;
+    const blueShift = BALANCE.NIGHT_BLUE_SHIFT;
+    // Pre-compute tint color: RGB channels at brightness level, blue boosted
+    const tintR = Math.round(br * 255);
+    const tintG = Math.round(br * 255);
+    const tintB = Math.min(255, Math.round((br + blueShift) * 255));
+    const tintHex = `rgb(${tintR},${tintG},${tintB})`;
+
+    for (const key of nightKeys) {
+      const srcTex = this.textures.get(key);
+      if (!srcTex || !srcTex.source?.[0]) continue;
+      const src = srcTex.source[0];
+      const w = src.width;
+      const h = src.height;
+      if (w === 0 || h === 0) continue;
+
+      const nKey = key + NIGHT_SUFFIX;
+      if (this.textures.exists(nKey)) this.textures.remove(nKey);
+
+      // Create an off-screen canvas and apply multiply darkening
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d')!;
+      ctx.imageSmoothingEnabled = false;
+
+      // Draw original texture
+      ctx.drawImage(src.image as HTMLImageElement | HTMLCanvasElement, 0, 0);
+      // Multiply blend: darkens each pixel by tint color
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = tintHex;
+      ctx.fillRect(0, 0, w, h);
+      // Restore alpha from original (multiply affects alpha too)
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.drawImage(src.image as HTMLImageElement | HTMLCanvasElement, 0, 0);
+
+      const nightTex = this.textures.addCanvas(nKey, canvas);
+      if (nightTex?.source?.[0]) nightTex.source[0].scaleMode = NEAREST;
     }
   }
 }

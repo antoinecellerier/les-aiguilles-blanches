@@ -8,6 +8,8 @@
  * Facing direction is controlled by the caller via Graphics.setScale(-1, 1) for flip.
  */
 
+import { type ColorTransform, dayColors } from './nightPalette';
+
 export type AnimalType = 'bouquetin' | 'chamois' | 'marmot' | 'bunny' | 'bird' | 'fox';
 
 // Grid dimensions per species (width × height in grid cells)
@@ -81,20 +83,21 @@ export function drawAnimal(
   x: number,
   y: number,
   scale: number,
+  nc: ColorTransform = dayColors,
 ): void {
   switch (type) {
-    case 'bouquetin': drawBouquetin(g, x, y, scale); break;
-    case 'chamois':   drawChamois(g, x, y, scale);   break;
-    case 'marmot':    drawMarmot(g, x, y, scale);     break;
-    case 'bunny':     drawBunny(g, x, y, scale);      break;
-    case 'bird':      drawBird(g, x, y, scale);       break;
-    case 'fox':       drawFox(g, x, y, scale);        break;
+    case 'bouquetin': drawBouquetin(g, x, y, scale, nc); break;
+    case 'chamois':   drawChamois(g, x, y, scale, nc);   break;
+    case 'marmot':    drawMarmot(g, x, y, scale, nc);     break;
+    case 'bunny':     drawBunny(g, x, y, scale, nc);      break;
+    case 'bird':      drawBird(g, x, y, scale, nc);       break;
+    case 'fox':       drawFox(g, x, y, scale, nc);        break;
   }
 }
 
 // Helper: draw filled grid pixels (same pattern as characterPortraits.ts)
-function px(g: Phaser.GameObjects.Graphics, ox: number, oy: number, s: number, cells: number[][], color: number): void {
-  g.fillStyle(color, 1);
+function px(g: Phaser.GameObjects.Graphics, ox: number, oy: number, s: number, cells: number[][], color: number, nc: ColorTransform): void {
+  g.fillStyle(nc(color), 1);
   for (const [gx, gy] of cells) {
     g.fillRect(ox + gx * s, oy + gy * s, s, s);
   }
@@ -103,7 +106,7 @@ function px(g: Phaser.GameObjects.Graphics, ox: number, oy: number, s: number, c
 // ── Bouquetin (Alpine ibex) ────────────────────────────────────────
 // 10×8 grid, top-down facing right
 // Large body, curved horns extending forward
-function drawBouquetin(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawBouquetin(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.bouquetin;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -111,7 +114,7 @@ function drawBouquetin(g: Phaser.GameObjects.Graphics, x: number, y: number, s: 
   // Horns (large, curving back)
   px(g, ox, oy, s, [
     [7, 1], [6, 0], [5, 0], // Curve back
-  ], C.ibexHorn);
+  ], C.ibexHorn, nc);
 
   // Body (large oval-ish shape)
   px(g, ox, oy, s, [
@@ -120,22 +123,22 @@ function drawBouquetin(g: Phaser.GameObjects.Graphics, x: number, y: number, s: 
     [1, 3],                                                  // Tail
     [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4],         // Core
     [3, 5], [4, 5], [5, 5], [6, 5],                          // Lower body
-  ], C.ibexBody);
+  ], C.ibexBody, nc);
 
   // Belly highlight
   px(g, ox, oy, s, [
     [4, 4], [5, 4],
     [4, 5], [5, 5],
-  ], C.ibexBelly);
+  ], C.ibexBelly, nc);
 
   // Head
   px(g, ox, oy, s, [
     [7, 2], [8, 2],
     [8, 3],
-  ], C.ibexBody);
+  ], C.ibexBody, nc);
 
   // Eye
-  px(g, ox, oy, s, [[8, 2]], C.ibexEye);
+  px(g, ox, oy, s, [[8, 2]], C.ibexEye, nc);
 
   // Legs (4 stubby legs visible in top-down)
   px(g, ox, oy, s, [
@@ -143,13 +146,13 @@ function drawBouquetin(g: Phaser.GameObjects.Graphics, x: number, y: number, s: 
     [2, 2],              // Front left
     [6, 6], [7, 6],      // Rear right
     [7, 5],              // Front right
-  ], C.ibexLeg);
+  ], C.ibexLeg, nc);
 }
 
 // ── Chamois ────────────────────────────────────────────────────────
 // 7×6 grid, top-down facing right
 // Slender body, short upright horns
-function drawChamois(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawChamois(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.chamois;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -157,7 +160,7 @@ function drawChamois(g: Phaser.GameObjects.Graphics, x: number, y: number, s: nu
   // Horns (short, upright hooks)
   px(g, ox, oy, s, [
     [5, 0], [6, 0],
-  ], C.chamoisHorn);
+  ], C.chamoisHorn, nc);
 
   // Body
   px(g, ox, oy, s, [
@@ -165,23 +168,23 @@ function drawChamois(g: Phaser.GameObjects.Graphics, x: number, y: number, s: nu
     [1, 2], [2, 2], [3, 2], [4, 2], [5, 2],    // Mid
     [1, 3], [2, 3], [3, 3], [4, 3], [5, 3],    // Core
     [2, 4], [3, 4], [4, 4],                     // Lower
-  ], C.chamoisBody);
+  ], C.chamoisBody, nc);
 
   // Belly
   px(g, ox, oy, s, [
     [3, 3], [4, 3],
-  ], C.chamoisBelly);
+  ], C.chamoisBelly, nc);
 
   // Head
   px(g, ox, oy, s, [
     [6, 1],
-  ], C.chamoisBody);
+  ], C.chamoisBody, nc);
 
   // Face mask (light stripe)
-  px(g, ox, oy, s, [[5, 1]], C.chamoisBelly);
+  px(g, ox, oy, s, [[5, 1]], C.chamoisBelly, nc);
 
   // Eye
-  px(g, ox, oy, s, [[6, 1]], C.chamoisEye);
+  px(g, ox, oy, s, [[6, 1]], C.chamoisEye, nc);
 
   // Legs
   px(g, ox, oy, s, [
@@ -189,13 +192,13 @@ function drawChamois(g: Phaser.GameObjects.Graphics, x: number, y: number, s: nu
     [1, 1],              // Front left
     [4, 5],              // Rear right
     [5, 4],              // Front right
-  ], C.chamoisLeg);
+  ], C.chamoisLeg, nc);
 }
 
 // ── Marmot ─────────────────────────────────────────────────────────
 // 5×4 grid, top-down facing right
 // Round body, small and compact
-function drawMarmot(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawMarmot(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.marmot;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -206,27 +209,27 @@ function drawMarmot(g: Phaser.GameObjects.Graphics, x: number, y: number, s: num
     [0, 1], [1, 1], [2, 1], [3, 1],  // Mid
     [0, 2], [1, 2], [2, 2], [3, 2],  // Core
     [1, 3], [2, 3],                   // Bottom
-  ], C.marmotBody);
+  ], C.marmotBody, nc);
 
   // Belly
   px(g, ox, oy, s, [
     [2, 1], [2, 2],
-  ], C.marmotBelly);
+  ], C.marmotBelly, nc);
 
   // Head
   px(g, ox, oy, s, [
     [4, 0], [4, 1],
-  ], C.marmotBody);
+  ], C.marmotBody, nc);
 
   // Eye and nose
-  px(g, ox, oy, s, [[4, 0]], C.marmotEye);
-  px(g, ox, oy, s, [[4, 1]], C.marmotNose);
+  px(g, ox, oy, s, [[4, 0]], C.marmotEye, nc);
+  px(g, ox, oy, s, [[4, 1]], C.marmotNose, nc);
 }
 
 // ── Snow bunny (Lièvre variable) ───────────────────────────────────
 // 6×5 grid, top-down facing right
 // White body with long ears, nearly invisible on snow
-function drawBunny(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawBunny(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.bunny;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -236,48 +239,48 @@ function drawBunny(g: Phaser.GameObjects.Graphics, x: number, y: number, s: numb
     [2, 0],                                    // Ear tips shadow
     [0, 2],                                    // Tail shadow
     [1, 4], [2, 4], [3, 4],                    // Bottom shadow
-  ], C.bunnyShadow);
+  ], C.bunnyShadow, nc);
 
   // Body
   px(g, ox, oy, s, [
     [2, 1], [3, 1],                            // Upper body
     [1, 2], [2, 2], [3, 2], [4, 2],            // Core
     [1, 3], [2, 3], [3, 3], [4, 3],            // Lower body
-  ], C.bunnyBody);
+  ], C.bunnyBody, nc);
 
   // Ears (long, upright with black tips)
   px(g, ox, oy, s, [
     [4, 0], [5, 0],          // Ear outers
     [4, 1],                  // Ear base
-  ], C.bunnyBody);
+  ], C.bunnyBody, nc);
 
   // Ear tips (black for winter coat)
-  px(g, ox, oy, s, [[4, 0]], 0x000000);
+  px(g, ox, oy, s, [[4, 0]], 0x000000, nc);
 
   // Ear inner (pink)
   px(g, ox, oy, s, [
     [5, 0],
-  ], C.bunnyInner);
+  ], C.bunnyInner, nc);
 
   // Head
   px(g, ox, oy, s, [
     [5, 1], [5, 2],
-  ], C.bunnyBody);
+  ], C.bunnyBody, nc);
 
   // Eye
-  px(g, ox, oy, s, [[5, 1]], C.bunnyEye);
+  px(g, ox, oy, s, [[5, 1]], C.bunnyEye, nc);
 
   // Nose
-  px(g, ox, oy, s, [[5, 2]], C.bunnyNose);
+  px(g, ox, oy, s, [[5, 2]], C.bunnyNose, nc);
 
   // Tail (cotton puff)
-  px(g, ox, oy, s, [[0, 3]], C.bunnyBody);
+  px(g, ox, oy, s, [[0, 3]], C.bunnyBody, nc);
 }
 
 // ── Bird (Chocard à bec jaune / Alpine chough) ─────────────────────
 // 4×3 grid, top-down facing right
 // Tiny black silhouette with yellow beak, drawn in flight pose
-function drawBird(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawBird(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.bird;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -287,49 +290,50 @@ function drawBird(g: Phaser.GameObjects.Graphics, x: number, y: number, s: numbe
     [0, 0], [1, 0],            // Left wingtip
     [1, 1], [2, 1],            // Body
     [0, 2], [1, 2],            // Right wingtip
-  ], C.birdBody);
+  ], C.birdBody, nc);
 
   // Beak
-  px(g, ox, oy, s, [[3, 1]], C.birdBeak);
+  px(g, ox, oy, s, [[3, 1]], C.birdBeak, nc);
 
   // Eye
-  px(g, ox, oy, s, [[2, 1]], C.birdEye);
+  px(g, ox, oy, s, [[2, 1]], C.birdEye, nc);
 }
 
 // ── Bird side-view flying (for menu/profile view) ───────────────────
 // 6×3 grid, side view soaring with wings raised
-function drawBirdFlying(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawBirdFlying(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.bird_flying;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
 
   // Wing (raised above body — soaring profile)
-  px(g, ox, oy, s, [[1, 0], [2, 0], [3, 0]], C.birdBody);
+  px(g, ox, oy, s, [[1, 0], [2, 0], [3, 0]], C.birdBody, nc);
 
   // Body (tail to head)
-  px(g, ox, oy, s, [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1]], C.birdBody);
+  px(g, ox, oy, s, [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1]], C.birdBody, nc);
 
   // Beak
-  px(g, ox, oy, s, [[5, 1]], C.birdBeak);
+  px(g, ox, oy, s, [[5, 1]], C.birdBeak, nc);
 
   // Eye (on head pixel)
-  px(g, ox, oy, s, [[4, 1]], C.birdEye);
+  px(g, ox, oy, s, [[4, 1]], C.birdEye, nc);
 
   // Tucked legs
-  px(g, ox, oy, s, [[2, 2]], C.birdLeg);
+  px(g, ox, oy, s, [[2, 2]], C.birdLeg, nc);
 }
 
 /** Draw a side-view flying bird (soaring profile). Exported for menu use. */
 export function drawBirdSideFlying(
   g: Phaser.GameObjects.Graphics,
   x: number, y: number, scale: number,
+  nc: ColorTransform = dayColors,
 ): void {
-  drawBirdFlying(g, x, y, scale);
+  drawBirdFlying(g, x, y, scale, nc);
 }
 
 // ── Bird perched (wings folded, side view) ──────────────────────────
 // 2×3 grid, compact upright sitting pose
-function drawBirdPerched_(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawBirdPerched_(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.bird_perched;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -339,27 +343,28 @@ function drawBirdPerched_(g: Phaser.GameObjects.Graphics, x: number, y: number, 
     [0, 0], [1, 0],   // Head
     [0, 1], [1, 1],   // Body
     [0, 2],            // Tail
-  ], C.birdBody);
+  ], C.birdBody, nc);
 
   // Beak
-  px(g, ox, oy, s, [[1, 0]], C.birdBeak);
+  px(g, ox, oy, s, [[1, 0]], C.birdBeak, nc);
 
   // Legs (Alpine chough red legs)
-  px(g, ox, oy, s, [[1, 2]], C.birdLeg);
+  px(g, ox, oy, s, [[1, 2]], C.birdLeg, nc);
 }
 
 /** Draw a perched bird (wings folded). Exported for menu/game use. */
 export function drawBirdPerched(
   g: Phaser.GameObjects.Graphics,
   x: number, y: number, scale: number,
+  nc: ColorTransform = dayColors,
 ): void {
-  drawBirdPerched_(g, x, y, scale);
+  drawBirdPerched_(g, x, y, scale, nc);
 }
 
 // ── Fox (Renard roux) ──────────────────────────────────────────────
 // 8×5 grid, top-down facing right
 // Slender orange body, bushy tail with white tip, dark paws
-function drawFox(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number): void {
+function drawFox(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number, nc: ColorTransform): void {
   const grid = ANIMAL_GRID.fox;
   const ox = x - (grid.w / 2) * s;
   const oy = y - (grid.h / 2) * s;
@@ -368,40 +373,40 @@ function drawFox(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number
   px(g, ox, oy, s, [
     [0, 1], [0, 2], [0, 3],
     [1, 2],
-  ], C.foxTail);
+  ], C.foxTail, nc);
 
   // Tail tip (white)
-  px(g, ox, oy, s, [[0, 2]], C.foxTailTip);
+  px(g, ox, oy, s, [[0, 2]], C.foxTailTip, nc);
 
   // Body
   px(g, ox, oy, s, [
     [3, 1], [4, 1],                         // Upper body
     [2, 2], [3, 2], [4, 2], [5, 2],         // Core
     [3, 3], [4, 3],                         // Lower body
-  ], C.foxBody);
+  ], C.foxBody, nc);
 
   // Belly
   px(g, ox, oy, s, [
     [3, 2], [4, 2],
-  ], C.foxBelly);
+  ], C.foxBelly, nc);
 
   // Head (pointed snout)
   px(g, ox, oy, s, [
     [5, 1], [6, 1],
     [5, 2], [6, 2], [7, 2],
     [5, 3], [6, 3],
-  ], C.foxBody);
+  ], C.foxBody, nc);
 
   // Ears (dark tips)
   px(g, ox, oy, s, [
     [6, 0], [7, 0],
-  ], C.foxEar);
+  ], C.foxEar, nc);
 
   // Eye
-  px(g, ox, oy, s, [[6, 1]], C.foxEye);
+  px(g, ox, oy, s, [[6, 1]], C.foxEye, nc);
 
   // Nose
-  px(g, ox, oy, s, [[7, 2]], C.foxNose);
+  px(g, ox, oy, s, [[7, 2]], C.foxNose, nc);
 
   // Legs (dark paws)
   px(g, ox, oy, s, [
@@ -409,5 +414,5 @@ function drawFox(g: Phaser.GameObjects.Graphics, x: number, y: number, s: number
     [2, 1],         // Front left
     [4, 4],         // Rear right
     [5, 4],         // Front right
-  ], C.foxLeg);
+  ], C.foxLeg, nc);
 }

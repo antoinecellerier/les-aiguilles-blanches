@@ -4,6 +4,9 @@ import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { THEME } from '../config/theme';
 import { worldToOverlay, overlayFullScreen } from '../utils/cameraCoords';
 
+/** Size of the headlight glow DynamicTexture (px). Small = cheap blit. */
+const HEADLIGHT_DT_SIZE = 256;
+
 export class WeatherSystem {
   private scene: Phaser.Scene;
   private nightOverlay: Phaser.GameObjects.Image | null = null;
@@ -18,6 +21,8 @@ export class WeatherSystem {
   private windStreaks: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
   private highContrastMode = false;
   private tileSize: number;
+  /** True when using night-colored textures (no full-screen overlay) */
+  private useNightTextures = false;
 
   constructor(scene: Phaser.Scene, tileSize: number) {
     this.scene = scene;
@@ -114,9 +119,9 @@ export class WeatherSystem {
   }
 
   createNightOverlay(): void {
-    const cam = this.scene.cameras.main;
-    const w = cam.width;
-    const h = cam.height;
+    // With night-colored textures, we only need a small DT for headlight glow
+    this.useNightTextures = true;
+    const size = HEADLIGHT_DT_SIZE;
 
     if (this.nightOverlay) {
       this.nightOverlay.destroy();
@@ -125,12 +130,14 @@ export class WeatherSystem {
     if (this.scene.textures.exists(this.nightTexKey)) {
       this.scene.textures.remove(this.nightTexKey);
     }
-    this.nightDynTex = this.scene.textures.addDynamicTexture(this.nightTexKey, w, h)!;
+    this.nightDynTex = this.scene.textures.addDynamicTexture(this.nightTexKey, size, size)!;
+    this.nightDynTex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
     this.nightCtx = this.nightDynTex.context!;
+    this.nightCtx.imageSmoothingEnabled = false;
 
-    this.nightOverlay = this.scene.add.image(w / 2, h / 2, this.nightTexKey);
+    this.nightOverlay = this.scene.add.image(0, 0, this.nightTexKey);
     this.nightOverlay.setDepth(DEPTHS.NIGHT_OVERLAY);
-    this.nightOverlay.setScrollFactor(0);
+    // No setScrollFactor(0) — follows world coordinates, positioned on groomer
   }
 
   /** Position overlay to cover full screen and map world coords to canvas pixels. */
@@ -138,28 +145,23 @@ export class WeatherSystem {
     worldX: number, worldY: number
   ): { ctx: CanvasRenderingContext2D; w: number; h: number; zoom: number; screenX: number; screenY: number } | null {
     if (!this.nightCtx || !this.nightOverlay) return null;
-    const cam = this.scene.cameras.main;
     const ctx = this.nightCtx;
-    const w = cam.width;
-    const h = cam.height;
-    const zoom = cam.zoom || 1;
+    const size = HEADLIGHT_DT_SIZE;
+    const zoom = this.scene.cameras.main.zoom || 1;
 
-    const ofs = overlayFullScreen(cam);
-    this.nightOverlay.setPosition(ofs.x + ofs.width / 2, ofs.y + ofs.height / 2);
-    this.nightOverlay.setDisplaySize(ofs.width, ofs.height);
+    // Position overlay centered on the character in world space
+    const displaySize = size / zoom;
+    this.nightOverlay.setPosition(worldX, worldY);
+    this.nightOverlay.setDisplaySize(displaySize, displaySize);
 
-    const drawPos = worldToOverlay(cam, worldX, worldY);
-    const screenX = (drawPos.x - ofs.x) * zoom;
-    const screenY = (drawPos.y - ofs.y) * zoom;
+    // Clear and fill with transparency — headlight glow only
+    ctx.clearRect(0, 0, size, size);
 
-    // Fill darkness
-    ctx.clearRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = BALANCE.NIGHT_DARKNESS_ALPHA;
-    ctx.fillStyle = '#000022';
-    ctx.fillRect(0, 0, w, h);
+    // Center of the small DT = character position
+    const screenX = size / 2;
+    const screenY = size / 2;
 
-    return { ctx, w, h, zoom, screenX, screenY };
+    return { ctx, w: size, h: size, zoom, screenX, screenY };
   }
 
   updateNightOverlay(groomer: Phaser.Physics.Arcade.Sprite): void {
@@ -182,7 +184,7 @@ export class WeatherSystem {
     const rearX = screenX - Math.cos(angle) * groomerRadius;
     const rearY = screenY - Math.sin(angle) * groomerRadius;
 
-    // Draw light circles on top (same approach as original Phaser Graphics)
+    // Draw headlight glow circles (brightening on dark world)
     const steps = BALANCE.HEADLIGHT_STEPS;
     for (let i = steps - 1; i >= 0; i--) {
       const t = (i + 1) / steps;
@@ -345,10 +347,9 @@ export class WeatherSystem {
     }
   }
 
-  /** Rebuild night overlay DynamicTexture on window resize. */
+  /** Night overlay uses fixed-size DT — no resize needed. */
   handleNightResize(): void {
-    if (!this.nightOverlay) return;
-    this.createNightOverlay();
+    // Small headlight DT is fixed size, no rebuild needed
   }
 
   applyAccessibilitySettings(): void {

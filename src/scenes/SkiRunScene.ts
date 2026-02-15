@@ -16,6 +16,7 @@ import { isGamepadButtonPressed, captureGamepadButtons, loadGamepadBindings, typ
 import { playLevelWin } from '../systems/UISounds';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { BINDINGS_VERSION } from '../config/storageKeys';
+import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
 import { overlayFullScreen } from '../utils/cameraCoords';
 import { GAME_EVENTS, type TouchInputEvent } from '../types/GameSceneInterface';
 import { SkiRunSounds } from '../systems/SkiRunSounds';
@@ -90,6 +91,8 @@ export default class SkiRunScene extends Phaser.Scene {
   private smoothedLateral = 0; // lerped lateral velocity for smooth carving
   private smoothedInput = 0;   // ramped lateral input (keyboard feels analog)
   private resolvedMode = 'ski'; // resolved from 'random' once per run
+  private nightSfx = '';  // '_night' on night levels
+  private nc: ColorTransform = dayColors;
   private skiSounds = new SkiRunSounds();
   private ambienceSounds = new AmbienceSounds();
   private hazardSystem: HazardSystem | null = null;
@@ -114,6 +117,8 @@ export default class SkiRunScene extends Phaser.Scene {
   init(data: SkiRunData): void {
     this.levelIndex = data.level ?? 0;
     this.level = LEVELS[this.levelIndex];
+    this.nightSfx = this.level.isNight ? NIGHT_SUFFIX : '';
+    this.nc = this.level.isNight ? nightColors : dayColors;
     this.isFinished = false;
     this.isCrashed = false;
     this.elapsedTime = 0;
@@ -178,7 +183,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.lastTrackPos = null;
 
     // Piste renderer (boundaries, markers, cliffs, trees)
-    const pisteRenderer = new PisteRenderer(this, this.geometry);
+    const pisteRenderer = new PisteRenderer(this, this.geometry, this.nightSfx);
     const { boundaryWalls, dangerZones } = pisteRenderer.createBoundaryColliders(this.level, tileSize);
     this.boundaryWalls = boundaryWalls;
     this.dangerZones = dangerZones;
@@ -187,7 +192,7 @@ export default class SkiRunScene extends Phaser.Scene {
     // Obstacles (reuse same system)
     this.obstacles = this.physics.add.staticGroup();
     const interactables = this.physics.add.staticGroup();
-    const obstacleBuilder = new ObstacleBuilder(this, this.geometry);
+    const obstacleBuilder = new ObstacleBuilder(this, this.geometry, this.nightSfx, this.nc);
     obstacleBuilder.create(this.level, tileSize, this.obstacles, interactables);
     // Buildings (fuel pump, restaurant) are solid obstacles during ski runs
     for (const child of interactables.getChildren()) {
@@ -196,7 +201,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Winch anchor poles are permanent fixtures — show them during ski runs too
     if (this.level.hasWinch) {
-      WinchSystem.createAnchorVisuals(this, this.geometry, this.level, tileSize);
+      WinchSystem.createAnchorVisuals(this, this.geometry, this.level, tileSize, this.nc);
       WinchSystem.createAnchorColliders(this, this.geometry, this.level, tileSize, this.obstacles);
     }
 
@@ -240,7 +245,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Slalom gates
     if (this.level.slalomGates) {
-      this.slalomSystem.create(this, this.level, this.geometry, tileSize);
+      this.slalomSystem.create(this, this.level, this.geometry, tileSize, this.nightSfx);
     }
 
     // Weather (visual only)
@@ -296,7 +301,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Avalanche zones — skier can trigger avalanches on hazardous levels
     if (this.level.hazards?.includes('avalanche')) {
-      this.hazardSystem = new HazardSystem(this);
+      this.hazardSystem = new HazardSystem(this, this.nc);
       this.hazardSystem.riskMultiplier = BALANCE.SKI_AVALANCHE_RISK_MULTIPLIER;
       this.hazardSystem.onAvalancheSound = (level: number) => {
         if (level === 1) this.skiSounds.playAvalancheWarning1();
@@ -577,15 +582,15 @@ export default class SkiRunScene extends Phaser.Scene {
     if (!this.trickActive) {
       const deadzone: number = BALANCE.SKI_SPRITE_DEADZONE;
       if (braking) {
-        this.skier.setTexture(this.baseTexture + '_brake');
+        this.skier.setTexture(this.baseTexture + '_brake' + this.nightSfx);
       } else if (tucking) {
-        this.skier.setTexture(this.baseTexture + '_tuck');
+        this.skier.setTexture(this.baseTexture + '_tuck' + this.nightSfx);
       } else if (lateralInput < -deadzone) {
-        this.skier.setTexture(this.baseTexture + '_left');
+        this.skier.setTexture(this.baseTexture + '_left' + this.nightSfx);
       } else if (lateralInput > deadzone) {
-        this.skier.setTexture(this.baseTexture + '_right');
+        this.skier.setTexture(this.baseTexture + '_right' + this.nightSfx);
       } else {
-        this.skier.setTexture(this.baseTexture);
+        this.skier.setTexture(this.baseTexture + this.nightSfx);
       }
     }
 
@@ -696,7 +701,8 @@ export default class SkiRunScene extends Phaser.Scene {
         const wasGroomed = isGroomable && this.groomedTiles.has(`${x},${y}`);
         this.groomedGrid[y][x] = wasGroomed;
 
-        const texture = wasGroomed ? 'snow_groomed' : (isGroomable ? 'snow_ungroomed' : 'snow_offpiste');
+        const sfx = this.nightSfx;
+        const texture = wasGroomed ? ('snow_groomed' + sfx) : (isGroomable ? ('snow_ungroomed' + sfx) : ('snow_offpiste' + sfx));
         const tile = this.add.image(
           x * tileSize + tileSize / 2,
           y * tileSize + tileSize / 2,
@@ -732,7 +738,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     this.baseTexture = this.resolvedMode === 'snowboard' ? 'snowboarder' : 'skier';
 
-    this.skier = this.physics.add.sprite(startX, startY, this.baseTexture);
+    this.skier = this.physics.add.sprite(startX, startY, this.baseTexture + this.nightSfx);
     this.skier.setCollideWorldBounds(true);
     this.skier.setDrag(BALANCE.SKI_DRAG);
     const scale = tileSize / 16;

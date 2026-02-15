@@ -3,6 +3,7 @@ import type { Level } from '../config/levels';
 import type { LevelGeometry, CliffSegment } from './LevelGeometry';
 import { getString } from '../utils/storage';
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { nightColor } from '../utils/nightPalette';
 
 /**
  * Handles all piste visual rendering: boundaries, markers, cliffs, trees,
@@ -14,6 +15,7 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 export class PisteRenderer {
   private scene: Phaser.Scene;
   private geometry: LevelGeometry;
+  private nightSfx = '';  // '_night' on night levels
 
   // Natural alpine rock colors - increased contrast
   private readonly CLIFF_COLORS = {
@@ -27,9 +29,15 @@ export class PisteRenderer {
     snowShadow: 0xd8e0e8,
   };
 
-  constructor(scene: Phaser.Scene, geometry: LevelGeometry) {
+  constructor(scene: Phaser.Scene, geometry: LevelGeometry, nightSfx = '') {
     this.scene = scene;
     this.geometry = geometry;
+    this.nightSfx = nightSfx;
+  }
+
+  /** Apply night color transform if on a night level */
+  private nc(color: number): number {
+    return this.nightSfx ? nightColor(color) : color;
   }
 
   createExtendedBackground(
@@ -54,7 +62,7 @@ export class PisteRenderer {
       worldWidth / 2 + (extraRight - extraLeft) / 2,
       worldHeight / 2 + (extraBottom - extraTop) / 2,
       totalW + tileSize * 2, totalH + tileSize * 2,
-      'snow_offpiste'
+      'snow_offpiste' + this.nightSfx
     );
     bg.setDepth(DEPTHS.BG_FOREST_TILES);
 
@@ -352,12 +360,12 @@ export class PisteRenderer {
     // Rock tiles (second pass — uses same iteration as bounding box)
     forEachTile((x, y) => {
         
-        g.fillStyle(this.CLIFF_COLORS.midRock, 1);
+        g.fillStyle(this.nc(this.CLIFF_COLORS.midRock), 1);
         g.fillRect(x - ox, y - oy, tileSize + 1, tileSize + 1);
         
         const seed = x * 0.1 + y * 0.07;
         
-        g.fillStyle(this.CLIFF_COLORS.lightRock, 1);
+        g.fillStyle(this.nc(this.CLIFF_COLORS.lightRock), 1);
         g.fillRect(x - ox + detailSize, y - oy + detailSize, detailLarge, detailSize);
         if (rand(seed + 1) > 0.4) {
           g.fillRect(x - ox + tileSize * 0.5, y - oy + detailSize * 2, detailLarge + detailSize, detailLarge);
@@ -366,7 +374,7 @@ export class PisteRenderer {
           g.fillRect(x - ox + detailSize * 2, y - oy + tileSize * 0.5, detailLarge, detailLarge);
         }
         
-        g.fillStyle(this.CLIFF_COLORS.darkRock, 1);
+        g.fillStyle(this.nc(this.CLIFF_COLORS.darkRock), 1);
         if (rand(seed + 3) > 0.3) {
           g.fillRect(x - ox + tileSize * 0.3, y - oy + detailSize, detailSize, detailSize);
         }
@@ -388,7 +396,7 @@ export class PisteRenderer {
         ? Math.max(tileSize, pisteEdge - snowDist)
         : Math.min(worldWidth - tileSize, pisteEdge + snowDist);
       
-      g.fillStyle(this.CLIFF_COLORS.snow, 1);
+      g.fillStyle(this.nc(this.CLIFF_COLORS.snow), 1);
       const patchW = isStorm ? detailLarge * 3 : detailLarge * 2;
       g.fillRect(snowX - ox, y - oy, patchW, detailSize);
       if (rand(y + 202) > 0.5) {
@@ -406,12 +414,12 @@ export class PisteRenderer {
       const poleHeight = 28;
       const poleWidth = 5;
 
-      pg.fillStyle(0x000000, 1);
+      pg.fillStyle(this.nc(0x000000), 1);
       pg.fillRect(poleX - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
 
       const stripeH = poleHeight / 5;
       for (let j = 0; j < 5; j++) {
-        pg.fillStyle(j % 2 === 0 ? 0xffcc00 : 0x111111, 1);
+        pg.fillStyle(this.nc(j % 2 === 0 ? 0xffcc00 : 0x111111), 1);
         pg.fillRect(poleX - poleWidth / 2 - 1, y - poleHeight + j * stripeH, poleWidth + 2, stripeH);
       }
       // Debug: depth reference line (magenta) — toggled in Settings
@@ -503,16 +511,16 @@ export class PisteRenderer {
     const orangeTopHeight = Math.floor(poleHeight * 0.15);
 
     if (side === 'left') {
-      g.fillStyle(color, 1);
+      g.fillStyle(this.nc(color), 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight + orangeTopHeight, poleWidth, poleHeight - orangeTopHeight);
-      g.fillStyle(0xFF6600, 1);
+      g.fillStyle(this.nc(0xFF6600), 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, orangeTopHeight);
     } else {
-      g.fillStyle(color, 1);
+      g.fillStyle(this.nc(color), 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight, poleWidth, poleHeight);
     }
 
-    g.fillStyle(0x222222, 1);
+    g.fillStyle(this.nc(0x222222), 1);
     g.fillRect(x - poleWidth / 2 - 1, y - 3, poleWidth + 2, 6);
     // Debug: depth reference line (magenta) — toggled in Settings
     if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
@@ -574,7 +582,7 @@ export class PisteRenderer {
   private createTree(x: number, y: number, depth?: number, isStorm?: boolean): void {
     const sizes = [8, 10, 12, 14]; // must match BootScene tree textures
     const size = sizes[Math.floor(Math.random() * sizes.length)];
-    const key = isStorm ? `tree_${size}_storm` : `tree_${size}`;
+    const key = (isStorm ? `tree_${size}_storm` : `tree_${size}`) + this.nightSfx;
     const img = this.scene.add.image(x, y, key);
     img.setOrigin(0.5, 1); // anchor at trunk base
     img.setDepth(depth ?? yDepth(y));
@@ -583,7 +591,7 @@ export class PisteRenderer {
   private createRock(x: number, y: number): void {
     const sizes = [6, 10, 14]; // must match BootScene rock textures
     const size = sizes[Math.floor(Math.random() * sizes.length)];
-    const img = this.scene.add.image(x, y, `rock_${size}`);
+    const img = this.scene.add.image(x, y, `rock_${size}${this.nightSfx}`);
     img.setOrigin(0.5, 0.5);
     img.setDepth(DEPTHS.BG_FOREST_ROCKS);
   }
@@ -627,13 +635,13 @@ export class PisteRenderer {
         const triTop = triMid - triSize * 0.8;
         const triBase = triMid + triSize * 0.8;
         // Pole shaft (yellow/black steep zone warning pole per NF S52-102)
-        mg.fillStyle(0xddaa00, 1);
+        mg.fillStyle(this.nc(0xddaa00), 1);
         mg.fillRect(markerX - poleWidth / 2, markerY - poleHeight, poleWidth, poleHeight);
         // Ground base
-        mg.fillStyle(0x222222, 1);
+        mg.fillStyle(this.nc(0x222222), 1);
         mg.fillRect(markerX - poleWidth / 2 - 1, markerY - 3, poleWidth + 2, 6);
         // Yellow warning triangle
-        mg.fillStyle(0xffcc00, 1);
+        mg.fillStyle(this.nc(0xffcc00), 1);
         mg.beginPath();
         mg.moveTo(markerX, triTop);
         mg.lineTo(markerX - triSize, triBase);
@@ -700,7 +708,7 @@ export class PisteRenderer {
     dt.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
     const ctx = dt.context!;
     ctx.imageSmoothingEnabled = false;
-    const frame = this.scene.textures.getFrame('snow_packed');
+    const frame = this.scene.textures.getFrame('snow_packed' + this.nightSfx);
     const src = frame.source.image as HTMLImageElement | HTMLCanvasElement;
     const cd = frame.canvasData as { x: number; y: number; width: number; height: number };
 
@@ -777,11 +785,11 @@ export class PisteRenderer {
 
     for (let i = 0; i < poleHeight; i += stripeHeight) {
       const isAmber = (Math.floor(i / stripeHeight) % 2 === 0);
-      g.fillStyle(isAmber ? 0xFFAA00 : 0x111111, 1);
+      g.fillStyle(this.nc(isAmber ? 0xFFAA00 : 0x111111), 1);
       g.fillRect(x - poleWidth / 2, y - poleHeight + i, poleWidth, stripeHeight);
     }
 
-    g.fillStyle(0x222222, 1);
+    g.fillStyle(this.nc(0x222222), 1);
     g.fillRect(x - poleWidth / 2 - 1, y - 3, poleWidth + 2, 6);
     // Debug: depth reference line (magenta) — toggled in Settings
     if (getString(STORAGE_KEYS.SHOW_DEBUG) === 'true') {
