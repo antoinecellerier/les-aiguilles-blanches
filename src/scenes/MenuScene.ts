@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { t, Accessibility, TRANSLATIONS, getLanguage as getCurrentLanguage } from '../setup';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
-import { setString } from '../utils/storage';
+import { setString, getString } from '../utils/storage';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
@@ -265,13 +265,14 @@ export default class MenuScene extends Phaser.Scene {
 
   private createMenuButtons(width: number, height: number, snowLineY: number, scaleFactor: number, isPortrait: boolean, buttonSize: number, buttonPadding: number, footerHeight: number, safeAreaBottom: number, subtitleBottom: number, isStorm?: boolean): void {
     const savedProgress = getSavedProgress();
-    const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0;
+    const hasProgress = savedProgress !== null && savedProgress.currentLevel > 0
+      && savedProgress.currentLevel < LEVELS.length;
     const hasCompletedLevels = savedProgress?.levelStats != null &&
       Object.values(savedProgress.levelStats).some(s => s.completed);
 
     const buttonDefs: Array<{ text: string; callback: () => void; primary: boolean }> = [];
     if (hasProgress) {
-      buttonDefs.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel), primary: true });
+      buttonDefs.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel, savedProgress.lastScene), primary: true });
     }
     if (!hasProgress && !hasCompletedLevels) {
       buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
@@ -1033,10 +1034,16 @@ export default class MenuScene extends Phaser.Scene {
 
 
 
-  private startGame(level: number = 0): void {
+  private startGame(level: number = 0, lastScene?: 'GameScene' | 'SkiRunScene'): void {
     const game = this.game;
     this.scene.stop('MenuScene');
-    resetGameScenes(game, 'GameScene', { level });
+    if (lastScene === 'SkiRunScene') {
+      let mode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
+      if (mode === 'random') mode = Math.random() < 0.5 ? 'ski' : 'snowboard';
+      resetGameScenes(game, 'SkiRunScene', { level, mode });
+    } else {
+      resetGameScenes(game, 'GameScene', { level });
+    }
   }
 
   private showLevelSelect(): void {

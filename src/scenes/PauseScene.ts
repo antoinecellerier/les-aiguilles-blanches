@@ -6,6 +6,7 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { playClick } from '../systems/UISounds';
 import { resetGameScenes } from '../utils/sceneTransitions';
+import { saveProgress } from '../utils/gameProgress';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad';
@@ -224,6 +225,7 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private quitToMenu(): void {
+    saveProgress(this.levelIndex, this.skiMode ? 'SkiRunScene' : 'GameScene');
     resetGameScenes(this.game, 'MenuScene');
   }
 

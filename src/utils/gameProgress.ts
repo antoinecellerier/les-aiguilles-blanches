@@ -15,6 +15,7 @@ export interface LevelStats {
 
 interface GameProgress {
   currentLevel: number;
+  lastScene?: 'GameScene' | 'SkiRunScene';
   levelStats?: Record<number, LevelStats>;
   savedAt: string;
 }
@@ -33,10 +34,11 @@ export function getSavedProgress(): GameProgress | null {
   return progress;
 }
 
-export function saveProgress(level: number): void {
+export function saveProgress(level: number, lastScene?: 'GameScene' | 'SkiRunScene'): void {
   const existing = getSavedProgress();
   const progress: GameProgress = {
     currentLevel: level,
+    lastScene: lastScene ?? existing?.lastScene,
     levelStats: existing?.levelStats ?? {},
     savedAt: new Date().toISOString(),
   };
@@ -58,6 +60,8 @@ export function markLevelCompleted(level: number, stars: number, time: number, b
   if (level >= progress.currentLevel) {
     progress.currentLevel = level + 1;
   }
+  // Reset lastScene — next level starts in groomer mode
+  delete progress.lastScene;
   progress.savedAt = new Date().toISOString();
   setJSON(STORAGE_KEYS.PROGRESS, progress);
 }
