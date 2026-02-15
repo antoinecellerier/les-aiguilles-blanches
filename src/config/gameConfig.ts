@@ -221,7 +221,7 @@ export const BALANCE = {
   SKI_BUMP_SLOWDOWN: 0.4,       // Speed multiplier on obstacle hit
   SKI_BUMP_DURATION: 500,        // ms of slowdown after bump
   SKI_FATAL_CRASH_KMH: 40,      // Obstacle collision above this speed is fatal
-  SKI_CELEBRATION_DELAY: 1500,   // ms to show celebration before transition
+  SKI_CELEBRATION_DELAY: 400,    // ms to show celebration before transition
   SKI_ACCELERATION: 80,          // px/s² speed ramp-up rate (slow progressive build)
   SKI_MIN_ZOOM: 0.5,            // Minimum camera zoom for ski run
   SKI_BUMP_SHAKE: { duration: 150, intensity: 0.003 },
