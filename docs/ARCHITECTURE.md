@@ -1615,7 +1615,7 @@ The `getBounds()` function returns per-row cliff boundaries that include the sam
    - Stores in `this.cliffSegments`
 
 3. **createBoundaryColliders()** - Uses cliffSegments for physics
-   - Creates boundary walls and danger zones (danger zones used by SkiRunScene for skier wipeouts; GameScene uses `checkCliffFall()` geometry instead)
+   - Creates boundary walls (forest walls beyond cliffs). Cliff wipeouts use per-frame `LevelGeometry.isOnCliff()` in both GameScene and SkiRunScene
    - Cliff danger poles extracted as separate y-sorted Graphics objects (not baked into cliff texture)
 
 4. **createCliffEdgeVisuals()** - Uses same cliffSegments for rendering

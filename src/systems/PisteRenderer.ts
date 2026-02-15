@@ -10,7 +10,7 @@ import { nightColor } from '../utils/nightPalette';
  * access paths, steep zone indicators, and extended background.
  * 
  * Pure rendering system — creates Phaser GameObjects but owns no gameplay state.
- * Physics groups (boundaryWalls, dangerZones) are returned to GameScene for collision setup.
+ * Physics groups (boundaryWalls) are returned to the scene for collision setup.
  */
 export class PisteRenderer {
   private scene: Phaser.Scene;
@@ -98,15 +98,14 @@ export class PisteRenderer {
   }
 
   /**
-   * Create boundary colliders and danger zones.
-   * Returns physics groups for GameScene to use in collision setup.
+   * Create boundary colliders for off-piste areas.
+   * Cliff wipeouts are handled per-frame via LevelGeometry.isOnCliff().
    */
   createBoundaryColliders(
     level: Level, tileSize: number
-  ): { boundaryWalls: Phaser.Physics.Arcade.StaticGroup; dangerZones: Phaser.Physics.Arcade.StaticGroup } {
+  ): { boundaryWalls: Phaser.Physics.Arcade.StaticGroup } {
     const scene = this.scene as Phaser.Scene & { physics: Phaser.Physics.Arcade.ArcadePhysics };
     const boundaryWalls = scene.physics.add.staticGroup();
-    const dangerZones = scene.physics.add.staticGroup();
 
     const worldWidth = level.width * tileSize;
     const worldHeight = level.height * tileSize;
@@ -146,17 +145,7 @@ export class PisteRenderer {
           const inAccessZone = isAccessZone(y, cliff.side);
           
           if (cliff.side === 'left') {
-            // Danger zone spans from piste edge to far side of cliff
-            // Always created — cliffs are dangerous even near access paths
             const cliffStart = Math.max(0, pisteEdge - cliff.offset - cliff.extent);
-            const dangerWidth = pisteEdge - cliffStart;
-            if (dangerWidth > 0) {
-              const wall = this.scene.add.rectangle(
-                cliffStart + dangerWidth / 2, y + height / 2, dangerWidth, height, 0x000000, 0
-              );
-              scene.physics.add.existing(wall, true);
-              dangerZones.add(wall);
-            }
             if (!inAccessZone && cliffStart > tileSize) {
               const forestWall = this.scene.add.rectangle(
                 cliffStart / 2, y + height / 2, cliffStart, height, 0x000000, 0
@@ -165,16 +154,7 @@ export class PisteRenderer {
               boundaryWalls.add(forestWall);
             }
           } else {
-            // Danger zone spans from piste edge to far side of cliff
             const cliffEnd = Math.min(worldWidth, pisteEdge + cliff.offset + cliff.extent);
-            const dangerWidth = cliffEnd - pisteEdge;
-            if (dangerWidth > 0) {
-              const wall = this.scene.add.rectangle(
-                pisteEdge + dangerWidth / 2, y + height / 2, dangerWidth, height, 0x000000, 0
-              );
-              scene.physics.add.existing(wall, true);
-              dangerZones.add(wall);
-            }
             if (!inAccessZone && cliffEnd < worldWidth - tileSize) {
               const forestWidth = worldWidth - cliffEnd;
               const forestWall = this.scene.add.rectangle(
@@ -266,7 +246,7 @@ export class PisteRenderer {
       this.createCliffEdgeVisuals(level, tileSize);
     }
 
-    return { boundaryWalls, dangerZones };
+    return { boundaryWalls };
   }
 
   private createCliffEdgeVisuals(level: Level, tileSize: number): void {

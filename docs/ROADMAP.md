@@ -48,7 +48,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Halfpipe physics & gamepad fixes** — Wall rebound, no air control, no airborne tracks in halfpipe. Gamepad Start button now pauses ski mode (with debounce). Both scenes reload gamepad/keyboard bindings from storage on resume so rebinds in Settings take effect immediately.
 
-- ✅ **Y-depth sorting & collision refinement** — Groomer, obstacles, and all pole types use `yDepth()` for per-frame depth sorting. Tree trunk hitboxes shrunk (canopy passes behind). Groomer physics body rotates with movement direction. Cliff fall-detection zone aligned to visual cliff rocks via shared `getBounds()` with per-row variation. Steep zone detection uses per-row piste-aware bounds with 2-tile inward margin. Cliff danger poles extracted from baked texture into separate y-sorted objects. Removed unused `dangerZones` from GameScene (only SkiRunScene uses them). Debug overlay setting added (Settings → Accessibility) showing all collision zones, hitboxes, and depth markers in both game modes.
+- ✅ **Y-depth sorting & collision refinement** — Groomer, obstacles, and all pole types use `yDepth()` for per-frame depth sorting. Tree trunk hitboxes shrunk (canopy passes behind). Groomer physics body rotates with movement direction. Cliff fall-detection zone aligned to visual cliff rocks via shared `getBounds()` with per-row variation. Steep zone detection uses per-row piste-aware bounds with 2-tile inward margin. Cliff danger poles extracted from baked texture into separate y-sorted objects. Removed `dangerZones` rectangle hitboxes from both scenes — cliff detection uses per-frame `isOnCliff()` geometry. Debug overlay setting added (Settings → Accessibility) showing all collision zones, hitboxes, and depth markers in both game modes.
 
 - ✅ **Piste contrast & readability** — Darkened off-piste tile textures, lightened service road tiles, and raised minimum tile size to 14px for better piste visibility on all levels (especially night). Texture-level approach: no runtime overlays needed.
 
@@ -66,7 +66,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Engine volume control** — Separate volume slider for continuous motor sounds (engine idle, snow crunch, grooming blade). New `engine` audio channel in AudioSystem. Default 50%. Winch and one-shot SFX remain on the SFX channel.
 
-- ✅ **Ski jumps** — Groom key triggers speed-dependent jump during ski runs. Cliff jumps clear danger zones at 30+ km/h. Airborne skiers skip all ground-level collisions. Touch JMP button for mobile. Win screen shows celebrating skier/snowboarder. Park features render below player. 3 E2E tests.
+- ✅ **Ski jumps** — Groom key triggers speed-dependent jump during ski runs. Cliff jumps clear cliff zones at 30+ km/h. Airborne skiers skip all ground-level collisions. Touch JMP button for mobile. Win screen shows celebrating skier/snowboarder. Park features render below player. 3 E2E tests.
 
 - ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (12 tight). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. 3 E2E tests.
 

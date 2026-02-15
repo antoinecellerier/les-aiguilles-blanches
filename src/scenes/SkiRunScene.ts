@@ -83,7 +83,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private nightUpdateHandler?: () => void;
   private lastTrickTime = 0;
   private boundaryWalls!: Phaser.Physics.Arcade.StaticGroup;
-  private dangerZones!: Phaser.Physics.Arcade.StaticGroup;
+
   private debugGfx?: Phaser.GameObjects.Graphics;
   private trickActive = false;
   private pipeTrickActive = false; // halfpipe trick — apply rebound on landing
@@ -186,9 +186,8 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Piste renderer (boundaries, markers, cliffs, trees)
     const pisteRenderer = new PisteRenderer(this, this.geometry, this.nightSfx);
-    const { boundaryWalls, dangerZones } = pisteRenderer.createBoundaryColliders(this.level, tileSize);
+    const { boundaryWalls } = pisteRenderer.createBoundaryColliders(this.level, tileSize);
     this.boundaryWalls = boundaryWalls;
-    this.dangerZones = dangerZones;
     pisteRenderer.createPisteBoundaries(this.level, tileSize, worldWidth);
 
     // Obstacles (reuse same system)
@@ -297,9 +296,6 @@ export default class SkiRunScene extends Phaser.Scene {
         this.onFeatureTrick('halfpipe');
       });
     }
-    this.physics.add.overlap(this.skier, dangerZones, () => {
-      if (!this.isAirborne) this.onWipeout();
-    });
 
     // Avalanche zones — skier can trigger avalanches on hazardous levels
     if (this.level.hazards?.includes('avalanche')) {
@@ -620,6 +616,11 @@ export default class SkiRunScene extends Phaser.Scene {
     // Cull off-screen static Images (trees, rocks, cliff textures)
     this.lastCullBounds = cullOffscreenImages(this, this.tileSize * 3, this.tileSize, this.lastCullBounds);
 
+    // Cliff wipeout — per-frame geometric check (same as GameScene)
+    if (!this.isAirborne && !this.isCrashed && this.geometry.isOnCliff(this.skier.x, this.skier.y)) {
+      this.onWipeout();
+    }
+
     // Debug overlay (toggle in Settings)
     const showDebug = getString(STORAGE_KEYS.SHOW_DEBUG) === 'true';
     if (showDebug) {
@@ -646,12 +647,6 @@ export default class SkiRunScene extends Phaser.Scene {
       for (const child of this.boundaryWalls.getChildren()) {
         const b = (child as Phaser.GameObjects.Rectangle).body as Phaser.Physics.Arcade.StaticBody;
         this.debugGfx.fillStyle(0x0044ff, 0.10);
-        this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
-      }
-      // Danger zones (purple)
-      for (const child of this.dangerZones.getChildren()) {
-        const b = (child as Phaser.GameObjects.Rectangle).body as Phaser.Physics.Arcade.StaticBody;
-        this.debugGfx.fillStyle(0x8800ff, 0.12);
         this.debugGfx.fillRect(b.x, b.y, b.width, b.height);
       }
       // Park features (pink)
