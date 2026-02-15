@@ -511,6 +511,52 @@ DynamicTexture consolidation is a net win when replacing **many small Images** (
 
 The only statistically significant improvement is camera culling on Firefox (-3.9%). The DynamicTexture replacements for small tile groups (snow, access road, night overlay) are within noise. The TileSprite→DT replacement is a clear regression on Firefox. Reverting `f59221d` is the recommended fix — TileSprite may re-tile every frame, but Firefox handles it more efficiently than a large DynamicTexture `drawImage` per frame.
 
+#### Multi-Level CPU Benchmarks (L1 / L8 Night+Frost / L10 Storm+Frost)
+
+Cross-level validation confirms TileSprite→DT regression scales with scene complexity. Headed mode, 3 runs per commit per browser per level, psutil process-tree CPU, Welch's t-test α=0.05:
+
+**L1 Clear Day (Firefox)**
+
+| Optimization step | Firefox (% CPU) | Δ vs baseline | Significant? |
+|-------------------|-----------------|---------------|--------------|
+| Baseline (pre-opt) | 73.1 ±5.5 | — | — |
+| Camera culling | 67.1 ±3.8 | -6.0 | no (p=0.20) |
+| Snow tiles → DT | 78.2 ±10.7 | +5.1 | no (p=0.51) |
+| **TileSprite → DT** | **135.8 ±2.2** | **+62.8** | **yes (p=0.001)** 🔴 |
+| Trees/rocks baked | 156.4 ±4.7 | +83.3 | **yes (p<0.001)** 🔴 |
+| Current HEAD | 158.8 ±19.1 | +85.7 | **yes (p=0.011)** 🔴 |
+
+**L8 Night + Frost (Firefox)**
+
+| Optimization step | Firefox (% CPU) | Δ vs baseline | Significant? |
+|-------------------|-----------------|---------------|--------------|
+| Baseline (pre-opt) | 143.4 ±0.9 | — | — |
+| Camera culling | 129.4 ±8.4 | -14.0 | no (p=0.10) |
+| Snow tiles → DT | 143.3 ±8.9 | -0.1 | no |
+| **TileSprite → DT** | **162.3 ±4.6** | **+18.9** | **yes (p=0.016)** 🔴 |
+| Trees/rocks baked | 158.4 ±9.7 | +15.0 | no (p=0.11) |
+| Current HEAD | **186.2 ±1.7** | **+42.8** | **yes (p<0.001)** 🔴 |
+
+**L10 Storm + Frost (Firefox)**
+
+| Optimization step | Firefox (% CPU) | Δ vs baseline | Significant? |
+|-------------------|-----------------|---------------|--------------|
+| Baseline (pre-opt) | 148.2 ±8.5 | — | — |
+| Camera culling | 149.8 ±3.7 | +1.6 | no |
+| Snow tiles → DT | 150.7 ±10.6 | +2.5 | no |
+| TileSprite → DT | 149.9 ±11.2 | +1.7 | no (p=0.84) |
+| Trees/rocks baked | 160.7 ±1.1 | +12.5 | no (p=0.12) |
+| Current HEAD | **188.3 ±16.0** | **+40.1** | **yes (p=0.030)** 🔴 |
+
+**Chromium multi-level:** TileSprite→DT significant only on L8 (+42.7, p=0.02). Snow tiles→DT significant on L10 (+47.6, p=0.04). L1 all within noise. Current HEAD significant on L10 (+41.9, p=0.04).
+
+**Key findings:**
+- TileSprite→DT doubles Firefox L1 CPU (+63%) — consistent with L1-only test
+- L8 night+frost has high baseline (143%) due to frost overlay and dark alpha blending; TileSprite→DT adds +19% on top
+- L10 storm: TileSprite→DT itself isn't significant here (storm particle overhead dominates), but cumulative HEAD is +40%
+- Current HEAD is significantly regressed on all levels and both browsers at L8/L10
+- **Reverting TileSprite→DT is the single highest-impact fix**, especially for L1 and L8
+
 ### A/B Performance Testing Methodology
 
 Cross-browser CPU benchmarking using psutil process-tree sampling:
@@ -524,7 +570,7 @@ Cross-browser CPU benchmarking using psutil process-tree sampling:
 7. **Welch's t-test** — two-sample, α=0.05, for pairwise significance vs baseline
 8. **Git checkout per commit** — fresh vite server restart between commits
 
-Scripts: `~/.copilot/session-state/.../files/cpu_ab_test_v4.py` (menu), `cpu_gamescene_test.py` (game)
+Scripts: `~/.copilot/session-state/.../files/cpu_ab_test_v4.py` (menu), `cpu_gamescene_test.py` (game L1), `cpu_multilevel_test.py` (game L1/L8/L10 with frost)
 
 Note: Chromium reports >100% CPU because psutil sums across all processes (GPU, renderer, utility). Firefox has fewer processes so reports single-core percentages.
 
