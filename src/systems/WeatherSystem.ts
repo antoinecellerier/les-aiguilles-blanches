@@ -15,7 +15,6 @@ export class WeatherSystem {
   private nightDynTex: Phaser.Textures.DynamicTexture | null = null;
   private frostOverlay: Phaser.GameObjects.Image | null = null;
   private frostTexKey = '__frost_vignette';
-  private frostTexSize = { w: 0, h: 0 };
   private headlightDirection: { x: number; y: number } = { x: 0, y: -1 };
   private weatherParticles: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
   private windStreaks: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
@@ -277,73 +276,72 @@ export class WeatherSystem {
     ctx.globalAlpha = 1;
   }
 
+  /** Fixed frost texture size — small texture stretched to screen saves ~50x drawImage cost. */
+  private static readonly FROST_TEX_SIZE = 128;
+
   createFrostOverlay(): void {
     this.rebuildFrostTexture();
   }
 
-  /** Build (or rebuild) the frost vignette texture at current screen size. */
+  /** Build the frost vignette at a fixed small resolution, stretched to screen on display. */
   private rebuildFrostTexture(): void {
     const cam = this.scene.cameras.main;
-    const w = cam.width;
-    const h = cam.height;
+    const screenW = cam.width;
+    const screenH = cam.height;
 
-    // Skip if size hasn't changed (avoids expensive generateTexture on pause/resume)
-    if (w === this.frostTexSize.w && h === this.frostTexSize.h && this.frostOverlay) return;
-    this.frostTexSize = { w, h };
+    // Only rebuild if overlay doesn't exist yet (texture is resolution-independent)
+    if (this.frostOverlay) {
+      this.frostOverlay.setDisplaySize(screenW, screenH);
+      this.frostOverlay.setPosition(screenW / 2, screenH / 2);
+      return;
+    }
 
-    // Draw frost vignette into an off-screen Graphics, then snapshot to texture
+    const S = WeatherSystem.FROST_TEX_SIZE;
     const gfx = this.scene.make.graphics({ x: 0, y: 0 } as any, false);
     const frostColor = THEME.colors.frostOverlay;
 
-    // Full-screen wash — visible even at low frost levels
+    // Full wash — visible even at low frost levels
     gfx.fillStyle(frostColor, 0.35);
-    gfx.fillRect(0, 0, w, h);
+    gfx.fillRect(0, 0, S, S);
 
     // Thick edge bands creating a vignette from edges toward center
-    const maxInset = Math.min(w, h) * 0.35;
+    const maxInset = S * 0.35;
     const steps = 8;
     for (let i = 0; i < steps; i++) {
       const t = (i + 1) / steps;
       const d = maxInset * t;
       const alpha = (1 - t * 0.6) * 0.6;
       gfx.fillStyle(frostColor, alpha);
-      gfx.fillRect(0, 0, w, d);             // Top
-      gfx.fillRect(0, h - d, w, d);         // Bottom
-      gfx.fillRect(0, 0, d, h);             // Left
-      gfx.fillRect(w - d, 0, d, h);         // Right
+      gfx.fillRect(0, 0, S, d);             // Top
+      gfx.fillRect(0, S - d, S, d);         // Bottom
+      gfx.fillRect(0, 0, d, S);             // Left
+      gfx.fillRect(S - d, 0, d, S);         // Right
     }
 
-    // Convert to a static texture (single bitmap — zero per-frame cost)
     if (this.scene.textures.exists(this.frostTexKey)) {
       this.scene.textures.remove(this.frostTexKey);
     }
-    gfx.generateTexture(this.frostTexKey, w, h);
+    gfx.generateTexture(this.frostTexKey, S, S);
     gfx.destroy();
 
-    // Create or update the Image
-    if (this.frostOverlay) {
-      this.frostOverlay.setTexture(this.frostTexKey);
-      this.frostOverlay.setDisplaySize(w, h);
-    } else {
-      this.frostOverlay = this.scene.add.image(w / 2, h / 2, this.frostTexKey);
-      this.frostOverlay.setDepth(DEPTHS.FROST_OVERLAY);
-      this.frostOverlay.setScrollFactor(0);
-      this.frostOverlay.setAlpha(0);
-    }
+    this.frostOverlay = this.scene.add.image(screenW / 2, screenH / 2, this.frostTexKey);
+    this.frostOverlay.setDisplaySize(screenW, screenH);
+    this.frostOverlay.setDepth(DEPTHS.FROST_OVERLAY);
+    this.frostOverlay.setScrollFactor(0);
+    this.frostOverlay.setAlpha(0);
   }
 
   updateFrostOverlay(frostLevel: number): void {
     if (!this.frostOverlay) return;
-    // Just update alpha — the texture is static, so Canvas blits one bitmap
     this.frostOverlay.setAlpha(frostLevel / 100);
   }
 
-  /** Rebuild frost texture on window resize so it covers the new viewport. */
+  /** Resize frost overlay to cover new viewport. Texture stays at fixed size. */
   handleFrostResize(): void {
     if (this.frostOverlay) {
-      const alpha = this.frostOverlay.alpha;
-      this.rebuildFrostTexture();
-      this.frostOverlay!.setAlpha(alpha);
+      const cam = this.scene.cameras.main;
+      this.frostOverlay.setDisplaySize(cam.width, cam.height);
+      this.frostOverlay.setPosition(cam.width / 2, cam.height / 2);
     }
   }
 
@@ -364,7 +362,6 @@ export class WeatherSystem {
     this.nightCtx = null;
     this.nightDynTex = null;
     this.frostOverlay = null;
-    this.frostTexSize = { w: 0, h: 0 };
     this.headlightDirection = { x: 0, y: -1 };
   }
 }

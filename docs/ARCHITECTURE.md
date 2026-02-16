@@ -455,7 +455,7 @@ Bottom-up self-time: `Commit` 28.5%, `drawImage` 19.7%, canvas state ops (`save`
 2. **Graphics → texture baking** — Graphics objects replay their command buffer every frame on Canvas. Static decorations (trees, rocks, cliffs, animal tracks) are pre-generated as textures in BootScene via `generateTexture()`. L9 Graphics went from 1,588 to ~97 (-94%). Menu scenes apply the same pattern: MenuTerrainRenderer bakes trees/groomer/ground lines, MenuWildlifeController bakes animal sprites and uses pre-baked track textures from BootScene. Bird state changes use `setTexture()` instead of `clear()`+`drawBird()`. Textures are cleaned up on scene shutdown to avoid key collisions on re-entry
 3. **Night texture pre-generation** — Pre-generates `_night` variant textures at boot via canvas `multiply` composite (darkened + blue-shifted, `BALANCE.NIGHT_BRIGHTNESS` 0.3, `BALANCE.NIGHT_BLUE_SHIFT` 0.15). All systems resolve textures with `nightSfx` suffix (`'_night'` or `''`) and transform Graphics colors via `nc: ColorTransform` (identity for day, `nightColor` for night). Headlight is a small 256×256 DynamicTexture positioned in world coords on the groomer — replaces the old full-screen DT that cost 6-8 FPS on Firefox per frame
 4. **Frost vignette skip on night levels** — Frost vignette is invisible behind night darkening; skipped on night levels to save ~3 FPS
-5. **Frost vignette pre-render** — Baked once via `generateTexture()`, displayed as Image with alpha-only updates. Avoids per-frame `Graphics.clear()` + redraw
+5. **Frost vignette small texture** — Baked once at 128×128 via `generateTexture()`, displayed stretched to screen via `setDisplaySize()`. Phaser skips `drawImage` entirely at alpha=0 (renderFlags). No rebuild on resize — just reposition. CSS `box-shadow: inset` alternative was tested but cost -5.4 FPS (worse) on Chromium; full-size texture was equivalent in FPS but used ~50× more memory
 6. **Camera culling** — `cullOffscreenImages()` (`src/utils/cullImages.ts`) hides world-space Images outside viewport (+ margin) using origin-aware display-bounds checks. Only rechecked when camera moves a full tile (hysteresis). Used by both GameScene and SkiRunScene. ~770 of 1,220 images (63%) culled in SkiRunScene, ~1,200 in GameScene L9. `lastCullBounds` is reset in `handleResize()` to force immediate recull after viewport changes
 7. **Extended background sizing** — Use `max(screenWidth, screenHeight) × 1.3` for both dimensions, ensuring coverage in any orientation without recreating the DynamicTexture on resize
 8. **HUD resize debounce** — 300ms + 10px threshold prevents rapid scene restarts from mobile resize events
@@ -709,6 +709,23 @@ Tested frost at 70% (forced) and night overlay independently across L7/L9/L10:
 9. **Combined: removing both night + frost on L10 gains +8.3 FPS** (19→27, +44%). The effects are additive — each full-screen overlay blit adds independent compositing cost.
 
 **Frost on night levels — ✅ resolved:** Frost vignette is now skipped on night levels, recovering ~3 FPS on L10.
+
+#### Frost Overlay Alternative Approaches (Chromium A/B)
+
+Tested alternatives to the full-size baked Image frost overlay on L9 storm at 70% frost. Interleaved runs, 4 samples each.
+
+| Approach | FPS | Δ vs baseline | Notes |
+|----------|-----|---------------|-------|
+| **Full-size Image** (1024×768 texture) | 37.8 ± 0.3 | baseline | Baked via `generateTexture()`, resize rebuilds |
+| **128×128 Image** (stretched to screen) | 37.3 ± 1.0 | -0.5 (n.s.) | Same FPS, ~50× less memory, no resize rebuild |
+| **CSS box-shadow: inset** (DOM overlay) | 32.2 ± 0.8 | **-5.4** | Browser compositor more expensive than Canvas drawImage |
+| **Frost OFF** (alpha=0, same scene) | 37.6 ± 0.6 | -0.0 (n.s.) | Phaser skips drawImage at alpha=0 (renderFlags) |
+
+**Findings:**
+- Phaser's `renderFlags` optimization means alpha=0 images are **free** — no drawImage call
+- At alpha>0, Canvas `drawImage` cost scales with **destination** pixels, not source. 128×128 → 1024×768 stretch costs the same as native 1024×768
+- CSS `box-shadow: inset` triggers browser repaint compositing every frame, which is **slower** than Canvas drawImage on Chromium
+- The 128×128 approach was adopted: simpler code (no resize rebuild needed), less memory, identical FPS
 
 #### Night Texture Optimization Results (Firefox A/B)
 

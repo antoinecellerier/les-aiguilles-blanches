@@ -34,6 +34,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **HUDScene event listener leak fix** — `game.events` listeners (`gameState`, `timerUpdate`, `accessibilityChanged`) leaked +3 per level transition because `events.once('shutdown', this.shutdown, this)` was only registered inside the `if (mode === 'ski')` branch. Moved registration before the branch so it runs for all modes.
 
+- ✅ **Frost overlay small texture** — Frost vignette texture reduced from full-screen (1024×768) to 128×128, stretched via `setDisplaySize()`. Same FPS (drawImage cost scales with destination, not source), ~50× less memory, no resize rebuild. CSS `box-shadow` alternative benchmarked but was -5.4 FPS worse.
+
 - ✅ **Night texture performance optimization** — Replaced full-screen per-frame DynamicTexture night overlay (6-8 FPS cost on Firefox) with pre-generated `_night` variant textures via canvas `multiply` composite. Headlight reduced to 256×256 world-space DT. Frost vignette skipped on night levels (invisible behind darkening, saves ~3 FPS). FPS meter switched to `requestAnimationFrame` counting for accurate frame rate.
 
 - ✅ **Menu scene Graphics→Image baking** — Baked menu wildlife sprites, animal tracks, trees, groomer, and ground lines from per-frame Graphics command replay to pre-baked Image textures. Graphics objects: 60→4, command buffer: 6,268→192 (97% reduction). Mountains kept as Rectangles (fillRect is cheaper than drawImage on Firefox — A/B tested: baking mountains regressed Firefox by +5% CPU while improving Chromium by -145%; cross-browser neutral is better). DynamicTexture consolidation of sky/ground also attempted and reverted — full-screen DT caused 35% memcpy cost on Firefox.
