@@ -727,6 +727,18 @@ Tested alternatives to the full-size baked Image frost overlay on L9 storm at 70
 - CSS `box-shadow: inset` triggers browser repaint compositing every frame, which is **slower** than Canvas drawImage on Chromium
 - The 128×128 approach was adopted: simpler code (no resize rebuild needed), less memory, identical FPS
 
+#### MIN_TILE_SIZE 14 vs 16 Benchmark (Chromium, L10 night/storm)
+
+Interleaved A/B, 5 runs each, 10s measurement window.
+
+| Tile size | FPS | Visible images | Total images |
+|-----------|-----|----------------|-------------|
+| 14 (current) | 41.7 ± 1.5 | ~379 | ~622 |
+| 16 | 43.3 ± 0.8 | ~275 | ~517 |
+| **Δ** | **+1.6 (+3.9%)** | **-27%** | **-17%** |
+
+t=2.11 (p≈0.07, not significant). Consistent directional gain but within noise. Tile=16 reduces visible objects by 27% but only yields ~1.6 FPS. Not adopted — the visual tradeoff (more zoomed-in, fewer tiles visible) isn't worth the marginal gain.
+
 #### Night Texture Optimization Results (Firefox A/B)
 
 Same-session, back-to-back A/B comparison. Old code uses full-screen DynamicTexture for night darkness + headlights; new code uses pre-darkened `_night` textures + 256×256 headlight-only DT. 10s × 5 runs per level.
