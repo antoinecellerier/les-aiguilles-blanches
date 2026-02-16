@@ -455,3 +455,32 @@ Choose between Random, Ski, or Snowboard in **Settings → Bonus → Descent Mod
 ---
 
 *Bonne chance et bonne glisse!* 🎿
+
+## 🗂️ Resort Contracts (Procedural Mode)
+
+Unlocked after completing all 10 campaign levels. Generates fresh pistes from a shareable seed code.
+
+### Playlists
+
+- **Daily Shift** — Same mountain for everyone (date-seeded). Compare runs with friends.
+- **Random Contract** — New seed each run, shown as a shareable 4-6 character code.
+
+### Difficulty Ranks
+
+| Rank | Terrain | Features |
+|------|---------|----------|
+| 🟢 Green | Wide, gentle slopes | Basic grooming, 30% park chance |
+| 🔵 Blue | Curved, narrower | Tighter time, 30% slalom chance |
+| 🔴 Red | Winding, steep zones | Winch, access paths, 50% slalom |
+| ⚫ Black | Serpentine, narrow | Night/storm, avalanche, 70% slalom |
+
+### Park Contracts
+
+Some contracts generate terrain parks instead of regular pistes:
+- **Kickers + Rails** or **Halfpipe** (random)
+- Coverage target ~95%, no steep zones or avalanche
+- Ski mode includes freestyle trick scoring
+
+### Ski Mode
+
+After grooming a contract, "Ski it!" lets you descend on your own work. Regular contracts may include slalom gates; park contracts include freestyle tricks.

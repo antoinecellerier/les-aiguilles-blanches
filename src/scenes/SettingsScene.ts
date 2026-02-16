@@ -14,9 +14,8 @@ import { FocusNavigator, type FocusItem } from '../utils/focusNavigator';
 import { KeybindingManager, type KeyBindings } from '../utils/keybindingManager';
 import { AudioSystem, type VolumeChannel } from '../systems/AudioSystem';
 import { playClick, playCancel, playToggle, playPreview, playSensitivityBlip } from '../systems/UISounds';
-import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
+import { createMenuBackdrop, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { getSavedProgress } from '../utils/gameProgress';
-import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { GamepadDiagnosticPanel } from '../systems/GamepadDiagnostic';
 import { isDesktopApp, setDisplayMode, setBackgroundAudio } from '../types/electron';
 
@@ -68,7 +67,7 @@ export default class SettingsScene extends Phaser.Scene {
   private pendingFocusIndex = -1;
   private gamepadNav: ReturnType<typeof createGamepadMenuNav> | null = null;
   private gpHorizCooldown = 0;
-  private wildlife: MenuWildlifeController | null = null;
+  private backdrop: MenuBackdrop | null = null;
   private diagnosticPanel: GamepadDiagnosticPanel | null = null;
 
   constructor() {
@@ -87,24 +86,18 @@ export default class SettingsScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
 
     // Alpine backdrop — reuse MenuScene terrain renderer
-    const snowLineY = height * 0.75;
-    const scaleFactor = Math.min(width / 1024, height / 768);
     const progress = getSavedProgress();
     const currentLevel = progress ? LEVELS[progress.currentLevel] : null;
     const levelWeather = currentLevel
       ? { isNight: currentLevel.isNight, weather: currentLevel.weather }
       : undefined;
-    createMenuTerrain(this, width, height, snowLineY, 0, scaleFactor, levelWeather);
-
-    // Animated wildlife on the snow (behind overlay)
-    this.wildlife = new MenuWildlifeController(this);
-    this.wildlife.snowLineY = snowLineY;
-    this.wildlife.create(width, height, snowLineY, 0, scaleFactor, levelWeather);
-    this.wildlife.menuZone = { left: 0, right: width, top: snowLineY, bottom: height };
-
-    // Darken overlay so UI text stays readable over the terrain
-    this.add.rectangle(width / 2, height / 2, width, height, THEME.colors.darkBg)
-      .setAlpha(0.92).setDepth(DEPTHS.MENU_OVERLAY);
+    this.backdrop = createMenuBackdrop(this, {
+      weather: levelWeather,
+      snowLinePct: 0.75,
+      overlayAlpha: 0.92,
+      overlayDepth: DEPTHS.MENU_OVERLAY,
+    });
+    this.backdrop.wildlife.menuZone = { left: 0, right: width, top: this.backdrop.snowLineY, bottom: height };
 
     this.keys = new KeybindingManager(this);
     this.keys.accentColor = THEME.colors.accent;
@@ -223,7 +216,7 @@ export default class SettingsScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     this.gamepadNav?.update(delta);
     this.keys.checkGamepadRebind();
-    this.wildlife?.update(_time, delta);
+    this.backdrop?.wildlife?.update(_time, delta);
 
     // Gamepad left/right for group cycling & slider (separate from vertical nav)
     this.gpHorizCooldown = Math.max(0, this.gpHorizCooldown - delta);
@@ -1400,8 +1393,8 @@ export default class SettingsScene extends Phaser.Scene {
   shutdown(): void {
     this.diagnosticPanel?.destroy();
     this.diagnosticPanel = null;
-    this.wildlife?.destroy();
-    this.wildlife = null;
+    this.backdrop?.wildlife?.destroy();
+    this.backdrop = null;
     this.input.keyboard?.removeAllListeners();
     this.input.removeAllListeners();
     this.scale.off('resize', this.handleResize, this);

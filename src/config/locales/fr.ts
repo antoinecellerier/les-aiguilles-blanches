@@ -321,7 +321,24 @@ changelog_20260211: "⛷️ Descente à ski après le damage\n🎯 Qualité de d
   key_enter: "ENTRÉE",
   key_tab: "TAB",
   key_esc: "ÉCHAP",
-  key_del: "SUPPR"
+  key_del: "SUPPR",
+  contracts: "Sorties du jour",
+  contracts_dailyShift: "Service du jour",
+  contracts_randomContract: "Sortie aléatoire",
+  contracts_rank: "Difficulté",
+  contracts_seed: "Code",
+  contracts_start: "Lancer le contrat",
+  contracts_locked: "Terminez tous les niveaux pour débloquer",
+  contract_levelName: "Contrat",
+  contract_levelTask: "Damez la piste jusqu'à l'objectif de couverture",
+  contracts_briefing: "Briefing",
+  contracts_target: "Objectif",
+  contracts_timeLimit: "Temps",
+  contracts_weather_clear: "Ciel dégagé",
+  contracts_weather_light_snow: "Neige légère",
+  contracts_weather_storm: "Tempête",
+  contracts_night: "Service de nuit",
+  contracts_day: "Service de jour"
 };
 
 export default fr;

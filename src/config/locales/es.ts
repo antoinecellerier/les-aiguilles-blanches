@@ -313,7 +313,24 @@ changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calida
   key_enter: "INTRO",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "SUPR"
+  key_del: "SUPR",
+  contracts: "Salidas diarias",
+  contracts_dailyShift: "Turno diario",
+  contracts_randomContract: "Salida aleatoria",
+  contracts_rank: "Rango",
+  contracts_seed: "Semilla",
+  contracts_start: "Iniciar contrato",
+  contracts_locked: "Completa todos los niveles para desbloquear",
+  contract_levelName: "Contrato",
+  contract_levelTask: "Prepara la pista hasta la cobertura objetivo",
+  contracts_briefing: "Informe",
+  contracts_target: "Objetivo",
+  contracts_timeLimit: "Tiempo",
+  contracts_weather_clear: "Cielo despejado",
+  contracts_weather_light_snow: "Nevada ligera",
+  contracts_weather_storm: "Condiciones de tormenta",
+  contracts_night: "Turno de noche",
+  contracts_day: "Turno de día"
 };
 
 export default es;

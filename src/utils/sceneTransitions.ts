@@ -9,6 +9,7 @@
  */
 import Phaser from 'phaser';
 import { resetSettleFrames } from './renderThrottle';
+import { clearContractSession } from '../systems/ContractSession';
 
 /** Registry of scene constructors, populated once at boot by main.ts. */
 // Stored on window to survive Vite HMR module instance splits in dev mode
@@ -82,6 +83,11 @@ export function resetGameScenes(
       } catch (e) {
         console.warn(`[resetGameScenes] re-add error for ${key}:`, e);
       }
+    }
+
+    // Clear contract session when leaving gameplay for a menu
+    if (target === 'MenuScene' || target === 'ContractsScene') {
+      clearContractSession();
     }
 
     // Start target

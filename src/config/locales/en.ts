@@ -315,7 +315,24 @@ changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔�
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "Daily Runs",
+  contracts_dailyShift: "Daily Shift",
+  contracts_randomContract: "Random Run",
+  contracts_rank: "Rank",
+  contracts_seed: "Seed",
+  contracts_start: "Start Contract",
+  contracts_locked: "Complete all levels to unlock",
+  contract_levelName: "Contract",
+  contract_levelTask: "Groom the piste to target coverage",
+  contracts_briefing: "Briefing",
+  contracts_target: "Target",
+  contracts_timeLimit: "Time",
+  contracts_weather_clear: "Clear skies",
+  contracts_weather_light_snow: "Light snowfall",
+  contracts_weather_storm: "Storm conditions",
+  contracts_night: "Night shift",
+  contracts_day: "Day shift"
 };
 
 export default en;

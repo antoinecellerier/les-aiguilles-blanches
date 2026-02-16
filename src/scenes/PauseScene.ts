@@ -137,6 +137,7 @@ export default class PauseScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
     this.input.keyboard?.on('keydown-ENTER', () => { if (this.inputReady) this.buttonNav.activate(); });
+    this.input.keyboard?.on('keydown-SPACE', () => { if (this.inputReady) this.buttonNav.activate(); });
     this.input.keyboard?.on('keydown-ESC', () => { if (this.inputReady) this.resumeGame(); });
 
     // Initialize gamepad navigation

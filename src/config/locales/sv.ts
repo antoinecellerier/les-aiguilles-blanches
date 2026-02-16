@@ -316,7 +316,24 @@ changelog_20260211: "⛷️ Skidåkning efter preparering\n🎯 Prepareringskval
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "Dagens körningar",
+  contracts_dailyShift: "Dagskift",
+  contracts_randomContract: "Slumpmässig körning",
+  contracts_rank: "Rankning",
+  contracts_seed: "Frö",
+  contracts_start: "Starta kontrakt",
+  contracts_locked: "Slutför alla nivåer för att låsa upp",
+  contract_levelName: "Kontrakt",
+  contract_levelTask: "Preparera pisten till måltäckning",
+  contracts_briefing: "Uppdrag",
+  contracts_target: "Mål",
+  contracts_timeLimit: "Tid",
+  contracts_weather_clear: "Klart väder",
+  contracts_weather_light_snow: "Lätt snöfall",
+  contracts_weather_storm: "Stormförhållanden",
+  contracts_night: "Nattskift",
+  contracts_day: "Dagskift"
 };
 
 export default sv;

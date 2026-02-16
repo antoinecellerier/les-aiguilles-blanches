@@ -315,7 +315,24 @@ changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "Denní jízdy",
+  contracts_dailyShift: "Denní směna",
+  contracts_randomContract: "Náhodná jízda",
+  contracts_rank: "Hodnocení",
+  contracts_seed: "Seed",
+  contracts_start: "Zahájit kontrakt",
+  contracts_locked: "Dokončete všechny úrovně pro odemknutí",
+  contract_levelName: "Kontrakt",
+  contract_levelTask: "Upravte sjezdovku na cílové pokrytí",
+  contracts_briefing: "Zadání",
+  contracts_target: "Cíl",
+  contracts_timeLimit: "Čas",
+  contracts_weather_clear: "Jasná obloha",
+  contracts_weather_light_snow: "Mírné sněžení",
+  contracts_weather_storm: "Bouřkové podmínky",
+  contracts_night: "Noční směna",
+  contracts_day: "Denní směna"
 };
 
 export default cs;

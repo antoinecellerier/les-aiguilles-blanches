@@ -31,6 +31,7 @@ export const STORAGE_KEYS = {
   GROOMED_TILES: 'snowGroomer_groomedTiles_', // append level index
   DISPLAY_MODE: 'snowGroomer_displayMode', // 'windowed' | 'fullscreen' | 'borderless'
   BACKGROUND_AUDIO: 'snowGroomer_backgroundAudio', // 'true' | 'false' (desktop only)
+  DAILY_RUN_DATE: 'snowGroomer_dailyRunDate', // YYYY-MM-DD of last completed daily run
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

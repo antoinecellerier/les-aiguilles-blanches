@@ -316,7 +316,24 @@ changelog_20260211: "⛷️ Laskettelulasku tamppauksen jälkeen\n🎯 Tamppauks
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "Päivän ajot",
+  contracts_dailyShift: "Päivävuoro",
+  contracts_randomContract: "Satunnainen ajo",
+  contracts_rank: "Sijoitus",
+  contracts_seed: "Siemen",
+  contracts_start: "Aloita sopimus",
+  contracts_locked: "Läpäise kaikki tasot avataksesi",
+  contract_levelName: "Sopimus",
+  contract_levelTask: "Kunnostakaa rinne tavoitepeittoon",
+  contracts_briefing: "Toimeksianto",
+  contracts_target: "Tavoite",
+  contracts_timeLimit: "Aika",
+  contracts_weather_clear: "Selkeä sää",
+  contracts_weather_light_snow: "Heikko lumisade",
+  contracts_weather_storm: "Myrskyolosuhteet",
+  contracts_night: "Yövuoro",
+  contracts_day: "Päivävuoro"
 };
 
 export default fi;

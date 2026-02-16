@@ -1,4 +1,91 @@
 import Phaser from 'phaser';
+import { DEPTHS } from '../config/gameConfig';
+import { THEME } from '../config/theme';
+import { MenuWildlifeController } from './MenuWildlifeController';
+import { playClick } from './UISounds';
+import { t } from '../setup';
+
+export interface MenuBackdropOptions {
+  weather?: { isNight: boolean; weather: string };
+  skipGroomer?: boolean;
+  /** Darken overlay alpha (0 = no overlay). Default 0.88 */
+  overlayAlpha?: number;
+  /** Depth for the dark overlay. Default MENU_BACKDROP */
+  overlayDepth?: number;
+  /** Snow line as fraction of height. Default: 0.78 landscape, 0.82 portrait */
+  snowLinePct?: number;
+}
+
+export interface MenuBackdrop {
+  wildlife: MenuWildlifeController;
+  snowLineY: number;
+  scaleFactor: number;
+}
+
+/**
+ * One-call setup for the standard menu background: sky, mountains, snow,
+ * trees, wildlife, and dark readability overlay. Returns the wildlife
+ * controller (caller must forward update/destroy).
+ */
+export function createMenuBackdrop(scene: Phaser.Scene, opts: MenuBackdropOptions = {}): MenuBackdrop {
+  const { width, height } = scene.cameras.main;
+  const scaleFactor = Math.min(width / 800, height / 600);
+  const isPortrait = height > width;
+  const snowLinePct = opts.snowLinePct ?? (isPortrait ? 0.82 : 0.78);
+  const snowLineY = Math.round(height * snowLinePct);
+
+  createMenuTerrain(scene, width, height, snowLineY, 0, scaleFactor, opts.weather, opts.skipGroomer);
+
+  const wildlife = new MenuWildlifeController(scene);
+  wildlife.snowLineY = snowLineY;
+
+  const alpha = opts.overlayAlpha ?? 0.88;
+  if (alpha > 0) {
+    wildlife.behindBackdrop = true;
+  }
+
+  wildlife.create(width, height, snowLineY, 0, scaleFactor, opts.weather);
+
+  if (alpha > 0) {
+    const depth = opts.overlayDepth ?? DEPTHS.MENU_BACKDROP;
+    scene.add.rectangle(width / 2, height / 2, width, height, THEME.colors.darkBg)
+      .setAlpha(alpha).setDepth(depth);
+  }
+
+  return { wildlife, snowLineY, scaleFactor };
+}
+
+export interface MenuHeader {
+  title: Phaser.GameObjects.Text;
+  backBtn: Phaser.GameObjects.Text;
+}
+
+/**
+ * Standard sub-menu header: centered title + top-left "← Menu" back button.
+ * Both are placed at height*0.06 with MENU_UI depth.
+ */
+export function createMenuHeader(scene: Phaser.Scene, titleKey: string, onBack: () => void, scaleFactor: number): MenuHeader {
+  const { width, height } = scene.cameras.main;
+  const titleSize = Math.max(16, Math.round(28 * scaleFactor));
+  const title = scene.add.text(width / 2, Math.round(height * 0.06), t(titleKey), {
+    fontFamily: THEME.fonts.family,
+    fontSize: `${titleSize}px`,
+    fontStyle: 'bold',
+    color: THEME.colors.accent,
+  }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_UI);
+
+  const btnFontSize = Math.max(10, Math.round(13 * scaleFactor));
+  const backBtn = scene.add.text(Math.round(width * 0.05), Math.round(height * 0.06), '← ' + (t('menu') || 'Menu'), {
+    fontFamily: THEME.fonts.family,
+    fontSize: `${btnFontSize}px`,
+    color: THEME.colors.textPrimary,
+    backgroundColor: THEME.colors.buttonPrimaryHex,
+    padding: { x: 10, y: 6 },
+  }).setOrigin(0, 0).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
+  backBtn.on('pointerdown', () => { playClick(); onBack(); });
+
+  return { title, backBtn };
+}
 
 /**
  * Renders the static menu background: sky gradient, mountains, snow ground, trees, and groomer.
@@ -39,7 +126,7 @@ function createSky(scene: Phaser.Scene, width: number, snowLineY: number, weathe
 }
 
 function createSnowGround(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number): void {
-  scene.add.rectangle(width / 2, snowLineY, width, height - snowLineY, 0xffffff).setOrigin(0.5, 0).setDepth(3);
+  scene.add.rectangle(width / 2, snowLineY, width, height - snowLineY, 0xffffff).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SNOW);
   // Bake shadow lines into a texture to avoid per-frame Graphics command replay
   const groundH = height - snowLineY - footerHeight;
   if (groundH > 0) {
@@ -53,24 +140,24 @@ function createSnowGround(scene: Phaser.Scene, width: number, height: number, sn
     g.destroy();
     const tex = scene.textures.get(key);
     if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
-    scene.add.image(width / 2, snowLineY, key).setOrigin(0.5, 0).setDepth(3);
+    scene.add.image(width / 2, snowLineY, key).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SNOW);
   }
-  scene.add.rectangle(width / 2, snowLineY, width, 3, 0xd8e4e8).setOrigin(0.5, 0).setDepth(3);
+  scene.add.rectangle(width / 2, snowLineY, width, 3, 0xd8e4e8).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SNOW);
 }
 
 function createMountains(scene: Phaser.Scene, width: number, snowLineY: number, scaleFactor: number, isStorm: boolean): void {
   const sx = width / 1024;
   const mtnScale = snowLineY / 600;
-  // Far mountains — dark rock, tall (depth 1)
-  drawSteppedMountain(scene, 80 * sx, snowLineY, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
-  drawSteppedMountain(scene, 350 * sx, snowLineY, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
-  drawSteppedMountain(scene, 512 * sx, snowLineY, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
-  drawSteppedMountain(scene, 600 * sx, snowLineY, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true, 1, isStorm);
-  drawSteppedMountain(scene, 900 * sx, snowLineY, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true, 1, isStorm);
+  // Far mountains — dark rock, tall
+  drawSteppedMountain(scene, 80 * sx, snowLineY, 180 * mtnScale, 220 * mtnScale, 0x4a423a, 0x6a5e52, true, DEPTHS.MENU_MOUNTAINS_FAR, isStorm);
+  drawSteppedMountain(scene, 350 * sx, snowLineY, 200 * mtnScale, 320 * mtnScale, 0x2d2822, 0x4a423a, true, DEPTHS.MENU_MOUNTAINS_FAR, isStorm);
+  drawSteppedMountain(scene, 512 * sx, snowLineY, 240 * mtnScale, 300 * mtnScale, 0x4a423a, 0x6a5e52, true, DEPTHS.MENU_MOUNTAINS_FAR, isStorm);
+  drawSteppedMountain(scene, 600 * sx, snowLineY, 220 * mtnScale, 380 * mtnScale, 0x4a423a, 0x6a5e52, true, DEPTHS.MENU_MOUNTAINS_FAR, isStorm);
+  drawSteppedMountain(scene, 900 * sx, snowLineY, 190 * mtnScale, 260 * mtnScale, 0x2d2822, 0x4a423a, true, DEPTHS.MENU_MOUNTAINS_FAR, isStorm);
 
-  // Near mountains — lighter, shorter, partial overlap (depth 2)
-  drawSteppedMountain(scene, 200 * sx, snowLineY, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
-  drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, 2, isStorm);
+  // Near mountains — lighter, shorter, partial overlap
+  drawSteppedMountain(scene, 200 * sx, snowLineY, 240 * mtnScale, 160 * mtnScale, 0x6a5e52, 0x8a7e6a, false, DEPTHS.MENU_MOUNTAINS_NEAR, isStorm);
+  drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, DEPTHS.MENU_MOUNTAINS_NEAR, isStorm);
 }
 
 function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean): void {
@@ -132,7 +219,7 @@ function createTrees(scene: Phaser.Scene, width: number, snowLineY: number, scal
     if (tex?.source?.[0]) tex.source[0].scaleMode = Phaser.ScaleModes.NEAREST;
     scene.add.image(tx, snowLineY + 10 * s, key)
       .setOrigin(0.5, 1)
-      .setDepth(5 + treeBaseY * 0.001);
+      .setDepth(DEPTHS.MENU_TREES + treeBaseY * 0.001);
   }
 }
 
@@ -205,5 +292,5 @@ function createGroomer(scene: Phaser.Scene, width: number, snowLineY: number, sc
   // Place image so that the origin maps to gx, snowLineY (ground level)
   scene.add.image(gx - leftEdge + texW / 2, snowLineY - texH, key)
     .setOrigin(0.5, 0)
-    .setDepth(5 + snowLineY * 0.001);
+    .setDepth(DEPTHS.MENU_TREES + snowLineY * 0.001);
 }

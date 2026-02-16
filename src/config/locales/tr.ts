@@ -315,7 +315,24 @@ changelog_20260211: "⛷️ Hazırlama sonrası kayak inişi\n🎯 Hazırlama ka
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "SİL"
+  key_del: "SİL",
+  contracts: "Günlük Sürüşler",
+  contracts_dailyShift: "Günlük Vardiya",
+  contracts_randomContract: "Rastgele Sürüş",
+  contracts_rank: "Sıralama",
+  contracts_seed: "Tohum",
+  contracts_start: "Sözleşmeyi Başlat",
+  contracts_locked: "Kilidini açmak için tüm seviyeleri tamamlayın",
+  contract_levelName: "Sözleşme",
+  contract_levelTask: "Pisti hedef kaplama oranına kadar hazırlayın",
+  contracts_briefing: "Brifing",
+  contracts_target: "Hedef",
+  contracts_timeLimit: "Süre",
+  contracts_weather_clear: "Açık hava",
+  contracts_weather_light_snow: "Hafif kar yağışı",
+  contracts_weather_storm: "Fırtına koşulları",
+  contracts_night: "Gece vardiyası",
+  contracts_day: "Gündüz vardiyası"
 };
 
 export default tr;

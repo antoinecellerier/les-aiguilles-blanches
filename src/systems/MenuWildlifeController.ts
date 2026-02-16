@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DEPTHS } from '../config/gameConfig';
 import { drawAnimal, drawBirdPerched, drawBirdSideFlying, ANIMAL_GRID } from '../utils/animalSprites';
 import { FOX, foxHuntDecision } from '../utils/foxBehavior';
 import { playAnimalCall } from './WildlifeSounds';
@@ -42,6 +43,8 @@ export class MenuWildlifeController {
   snowLineY = 0;
   snowBottomY = 0;
   menuZone = { left: 0, right: 0, top: 0, bottom: 0 };
+  /** When true, birds render behind the dark backdrop overlay (sub-menu scenes) */
+  behindBackdrop = false;
   private weatherConfig = { isNight: false, weather: 'clear' };
   private generatedTexKeys: string[] = [];
 
@@ -817,7 +820,8 @@ export class MenuWildlifeController {
         texKey = 'menu_bird_flying';
       }
 
-      const birdImg = this.scene.add.image(bx, by, texKey).setDepth(11);
+      const birdDepth = this.behindBackdrop ? DEPTHS.MENU_TREES + by * 0.001 : 11;
+      const birdImg = this.scene.add.image(bx, by, texKey).setDepth(birdDepth);
       const initAngle = (Math.random() - 0.5) * Math.PI * 0.8;
       const initSpeed = 6 + Math.random() * 10;
       this.menuAnimals.push({
@@ -856,12 +860,13 @@ export class MenuWildlifeController {
     const zTexts: Phaser.GameObjects.Text[] = [];
     const sizes = [8, 10, 13];
     for (let i = 0; i < 3; i++) {
+      const zDepth = this.behindBackdrop ? DEPTHS.MENU_TREES + y * 0.001 : 12;
       const z = this.scene.add.text(x + 6, y - 8, 'z', {
         fontFamily: 'monospace',
         fontSize: sizes[i] + 'px',
         fontStyle: 'italic',
         color: '#aaccff',
-      }).setOrigin(0.5).setAlpha(0).setDepth(12);
+      }).setOrigin(0.5).setAlpha(0).setDepth(zDepth);
       // Stagger via custom data
       z.setData('phase', i * 0.33); // 0, 0.33, 0.66 — staggered start
       zTexts.push(z);

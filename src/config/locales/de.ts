@@ -313,7 +313,24 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   key_enter: "EINGABE",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "ENTF"
+  key_del: "ENTF",
+  contracts: "Tägliche Einsätze",
+  contracts_dailyShift: "Tagesschicht",
+  contracts_randomContract: "Zufälliger Einsatz",
+  contracts_rank: "Rang",
+  contracts_seed: "Seed",
+  contracts_start: "Auftrag starten",
+  contracts_locked: "Alle Level abschließen zum Freischalten",
+  contract_levelName: "Auftrag",
+  contract_levelTask: "Piste auf Zielabdeckung präparieren",
+  contracts_briefing: "Briefing",
+  contracts_target: "Ziel",
+  contracts_timeLimit: "Zeit",
+  contracts_weather_clear: "Klarer Himmel",
+  contracts_weather_light_snow: "Leichter Schneefall",
+  contracts_weather_storm: "Sturmbedingungen",
+  contracts_night: "Nachtschicht",
+  contracts_day: "Tagschicht"
 };
 
 export default de;

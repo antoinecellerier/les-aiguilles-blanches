@@ -315,7 +315,24 @@ changelog_20260211: "⛷️ 整備後のスキー滑走\n🎯 整備品質\n🏔
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "デイリーラン",
+  contracts_dailyShift: "日勤",
+  contracts_randomContract: "ランダムラン",
+  contracts_rank: "ランク",
+  contracts_seed: "シード",
+  contracts_start: "契約を開始",
+  contracts_locked: "全レベルをクリアして解放",
+  contract_levelName: "契約",
+  contract_levelTask: "目標カバー率までゲレンデを整備せよ",
+  contracts_briefing: "概要",
+  contracts_target: "目標",
+  contracts_timeLimit: "制限時間",
+  contracts_weather_clear: "快晴",
+  contracts_weather_light_snow: "小雪",
+  contracts_weather_storm: "吹雪",
+  contracts_night: "夜勤",
+  contracts_day: "日勤"
 };
 
 export default ja;

@@ -60,6 +60,7 @@ snow-groomer/
 │   │   ├── HazardSystem.ts   # Avalanche zones, risk handling
 │   │   ├── WildlifeSystem.ts # Animal spawning, flee AI, update loop
 │   │   ├── LevelGeometry.ts # Piste path, cliff, access path geometry (pure data, no Phaser)
+│   │   ├── LevelGenerator.ts # Procedural level generation (seed + rank → Level object, validation)
 │   │   ├── MenuTerrainRenderer.ts # Menu background: sky, mountains, snow, trees, groomer
 │   │   ├── MenuWildlifeController.ts # Menu wildlife AI, snowflakes, animal tracks
 │   │   ├── ObstacleBuilder.ts # Obstacle placement, buildings, chalets
@@ -102,6 +103,7 @@ snow-groomer/
 │   │   ├── skiRunState.ts    # Shared groomed-tile state between GameScene and SkiRunScene
 │   │   ├── skiSprites.ts     # Procedural pixel art for skier & snowboarder (20×28px, 8 variants each)
 │   │   ├── storage.ts       # Type-safe localStorage helpers (getJSON/setJSON/getString/setString)
+│   │   ├── seededRNG.ts     # Seeded RNG wrapper (Phaser.Math.RND), seed↔code, daily seed
 │   │   ├── touchDetect.ts    # Touch detection with Firefox desktop fallback
 │   │   ├── fullscreen.ts     # Fullscreen toggle/query abstraction (browser + Electron IPC)
 │   │   └── updateCheck.ts    # Checks for newer deployed version via version.json
@@ -116,6 +118,7 @@ snow-groomer/
 │   │   ├── PauseScene.ts   # Pause menu
 │   │   ├── LevelCompleteScene.ts
 │   │   ├── SkiRunScene.ts  # Post-grooming ski/snowboard descent (reward run)
+│   │   ├── ContractsScene.ts # Procedural level generation (post-campaign)
 │   │   └── CreditsScene.ts
 ├── tests/
 │   ├── e2e/                # Playwright browser tests
@@ -1816,10 +1819,51 @@ This avoids any runtime overlay compositing. The only per-frame night cost is a 
 
 The HUD FPS counter uses `requestAnimationFrame` counting instead of `game.loop.delta` averaging. This measures actual rendered frames rather than Phaser loop ticks, which can diverge when the browser drops frames. The rAF callback counts frames over 500ms windows and updates the display text.
 
+## Resort Contracts (Procedural Generation)
+
+Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after completing Level 10.
+
+### Key Files
+
+- `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
+- `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety.
+- `src/scenes/ContractsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Contract button (random seed). Shows briefing preview (weather, target, time, dimensions).
+
+### Generation Pipeline
+
+```
+seed + rank → SeededRNG → RankConfig lookup
+  → generateRegularLevel() or generateParkLevel()
+    → dimensions, pisteWidth, pisteShape
+    → steepZones (distributed across height)
+    → winchAnchors (above steep zones)
+    → accessPaths (avoid steep overlaps)
+    → obstacles, wildlife, bonusObjectives
+    → slalomGates (chance by rank)
+    → computeTimeLimit() (reuses campaign formula)
+  → validateLevel()
+    → flood-fill reachability, min width, winch feasibility
+  → Level object → GameScene
+```
+
+### Rank System
+
+Rank sets hard rules; seed determines layout within those rules.
+
+| Rank | Steep Zones | Winch | Weather | Park Chance |
+|------|------------|-------|---------|-------------|
+| Green | 0 | No | Clear | 30% |
+| Blue | 1 (25-30°) | No | Clear | 25% |
+| Red | 2 (30-40°) | Yes | May snow | 20% |
+| Black | 3 (35-50°) | Yes | Night/storm | 15% |
+
+### Contract Level Flow
+
+Contract (Daily Run) session state lives in `src/systems/ContractSession.ts` — a module-level singleton. `ContractsScene` calls `startContractSession()` before launching `GameScene`. Any scene that needs contract context calls `getContractSession()`. The session is automatically cleared in `resetGameScenes()` when navigating to `MenuScene` or `ContractsScene`. This avoids threading contract fields through every scene transition path. Contract level IDs start at 100 (`CONTRACT_LEVEL_ID_BASE`) to avoid collision with campaign levels.
+
 ## Future Architecture Considerations
 
 1. **Save/Load**: Serialize gameState to localStorage
 2. **Multiplayer**: WebRTC for peer-to-peer
 3. **Level Editor**: Visual tool for creating custom levels
-4. **Procedural Generation**: Algorithm-based level creation
-5. **Sound System**: Web Audio API integration
+4. **Sound System**: Web Audio API integration

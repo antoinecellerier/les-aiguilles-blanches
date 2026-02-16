@@ -6,11 +6,11 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-(No active work items)
+- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. Seeded RNG generates pistes with Daily Shift (date-seeded) and Random Contract (shareable code) playlists. Four difficulty ranks (Green/Blue/Red/Black). Park levels generated 15-30% of the time (kickers+rails or halfpipe). Ski mode with slalom gates on regular levels, freestyle tricks on park levels. See GAME_DESIGN.md for full spec.
 
 ## Next Up
 
-- [ ] Advanced tiller mechanics — Tiller raise/lower for harder levels
+- ~~Advanced tiller mechanics~~ — Scrapped: the groom button already acts as implicit tiller up/down. Snow depth + front blade explored but too complex for the game's retro scope.
 - ✅ ~~Reload keyboard bindings on resume~~ — Both scenes now remove+re-add Phaser Key objects on resume so keyboard rebinds in Settings take effect immediately
 
 ## Future (Backlog)
@@ -20,7 +20,6 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ **Wildlife cliff awareness** — Ground animals (rabbits, marmots, foxes) no longer spawn on cliff tiles; spawn retries up to 8 times for valid terrain
 - ✅ Sound effects polish — Character voice differentiation (pitch gap, vowel formant), melody phrasing rests, piano legato sustain, bass rebalancing
 - [ ] More character dialogues per level
-- [ ] Procedural level generation
 - [ ] Leaderboards
 - [ ] Easter eggs (5G towers, Candide Thovex cameo)
 - [ ] Publish as standalone game package

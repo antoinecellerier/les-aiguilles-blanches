@@ -21,6 +21,7 @@ import { EngineSounds } from '../systems/EngineSounds';
 import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
+import { getContractSession } from '../systems/ContractSession';
 import { setGroomedTiles } from '../utils/skiRunState';
 import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
 import { cullOffscreenImages, emptyCullBounds, type CullBounds } from '../utils/cullImages';
@@ -69,7 +70,6 @@ export default class GameScene extends Phaser.Scene {
   // Level data
   private levelIndex = 0;
   private level!: Level;
-
   // World dimensions
   private tileSize = 16;
   private worldOffsetX = 0;
@@ -187,7 +187,8 @@ export default class GameScene extends Phaser.Scene {
   init(data: GameSceneData): void {
     this.levelIndex = data.level || 0;
     this.restartCount = data.restartCount || 0;
-    this.level = LEVELS[this.levelIndex];
+    const session = getContractSession();
+    this.level = session?.level || LEVELS[this.levelIndex];
 
     if (!this.level) {
       console.error('GameScene.init: LEVEL NOT FOUND!', this.levelIndex, 'LEVELS.length:', LEVELS.length);

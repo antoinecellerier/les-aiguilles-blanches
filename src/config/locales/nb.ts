@@ -316,7 +316,24 @@ changelog_20260211: "⛷️ Skikjøring etter preparering\n🎯 Prepareringskval
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "SLETT"
+  key_del: "SLETT",
+  contracts: "Dagens kjøringer",
+  contracts_dailyShift: "Dagskift",
+  contracts_randomContract: "Tilfeldig kjøring",
+  contracts_rank: "Rangering",
+  contracts_seed: "Frø",
+  contracts_start: "Start kontrakt",
+  contracts_locked: "Fullfør alle nivåer for å låse opp",
+  contract_levelName: "Kontrakt",
+  contract_levelTask: "Preparér løypa til måldekning",
+  contracts_briefing: "Oppdrag",
+  contracts_target: "Mål",
+  contracts_timeLimit: "Tid",
+  contracts_weather_clear: "Klarvær",
+  contracts_weather_light_snow: "Lett snøfall",
+  contracts_weather_storm: "Stormforhold",
+  contracts_night: "Nattskift",
+  contracts_day: "Dagskift"
 };
 
 export default nb;

@@ -5,6 +5,7 @@
  * and styling across MenuScene, PauseScene, LevelCompleteScene, and CreditsScene.
  * Works alongside gamepadMenu.ts (which handles gamepad-specific input).
  */
+import Phaser from 'phaser';
 import { THEME } from '../config/theme';
 import { playClick, playHover } from '../systems/UISounds';
 
@@ -73,6 +74,22 @@ export function createMenuButtonNav(
   };
 
   return nav;
+}
+
+/**
+ * Bind standard keyboard navigation to a MenuButtonNav.
+ * Up/Down navigate, Enter/Space activate, Escape calls onBack (if provided).
+ */
+export function bindMenuKeys(
+  scene: Phaser.Scene,
+  nav: MenuButtonNav,
+  onBack?: () => void,
+): void {
+  scene.input.keyboard?.on('keydown-UP', () => nav.navigate(-1));
+  scene.input.keyboard?.on('keydown-DOWN', () => nav.navigate(1));
+  scene.input.keyboard?.on('keydown-ENTER', () => nav.activate());
+  scene.input.keyboard?.on('keydown-SPACE', () => nav.activate());
+  if (onBack) scene.input.keyboard?.on('keydown-ESC', () => onBack());
 }
 
 // ── Preset stylers ──────────────────────────────────────────────────

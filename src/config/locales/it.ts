@@ -313,7 +313,24 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   key_enter: "INVIO",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "CANC"
+  key_del: "CANC",
+  contracts: "Uscite giornaliere",
+  contracts_dailyShift: "Turno giornaliero",
+  contracts_randomContract: "Uscita casuale",
+  contracts_rank: "Grado",
+  contracts_seed: "Seme",
+  contracts_start: "Avvia contratto",
+  contracts_locked: "Completa tutti i livelli per sbloccare",
+  contract_levelName: "Contratto",
+  contract_levelTask: "Prepara la pista alla copertura obiettivo",
+  contracts_briefing: "Briefing",
+  contracts_target: "Obiettivo",
+  contracts_timeLimit: "Tempo",
+  contracts_weather_clear: "Cielo sereno",
+  contracts_weather_light_snow: "Nevicata leggera",
+  contracts_weather_storm: "Condizioni di tempesta",
+  contracts_night: "Turno di notte",
+  contracts_day: "Turno diurno"
 };
 
 export default it;

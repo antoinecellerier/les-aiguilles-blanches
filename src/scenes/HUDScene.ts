@@ -10,6 +10,7 @@ import { captureGamepadButtons, isGamepadButtonPressed } from '../utils/gamepad'
 import { ResizeManager } from '../utils/resizeManager';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString } from '../utils/storage';
+import { markLevelCompleted } from '../utils/gameProgress';
 import { toggleFullscreen, isFullscreen, fullscreenEnabled } from '../utils/fullscreen';
 import { Accessibility } from '../utils/accessibility';
 import { isRenderThrottled } from '../utils/renderThrottle';
@@ -1003,6 +1004,9 @@ export default class HUDScene extends Phaser.Scene {
 
     if (this.isSkipping) return;
     this.isSkipping = true;
+
+    // Dev skip: mark current level completed (3 stars, fast time, bonus met)
+    markLevelCompleted(this.level.id, 3, 1, 1);
 
     if (nextLevel < LEVELS.length) {
       this.game.events.emit(GAME_EVENTS.SKIP_LEVEL, nextLevel);

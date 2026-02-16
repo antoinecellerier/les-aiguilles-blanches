@@ -8,8 +8,7 @@ import { getSavedProgress, isLevelCompleted, isLevelUnlocked, getLevelStats } fr
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
-import { MenuWildlifeController } from '../systems/MenuWildlifeController';
+import { createMenuBackdrop, createMenuHeader, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { playClick } from '../systems/UISounds';
 import { ResizeManager } from '../utils/resizeManager';
 
@@ -23,7 +22,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private buttonIsCTA: boolean[] = [];
   private buttonNav!: MenuButtonNav;
   private gamepadNav!: GamepadMenuNav;
-  private wildlife!: MenuWildlifeController;
+  private backdrop!: MenuBackdrop;
   private resizeManager!: ResizeManager;
   private isNavigating = false;
   private resolvedSkiMode: 'ski' | 'snowboard' = 'ski';
@@ -62,40 +61,13 @@ export default class LevelSelectScene extends Phaser.Scene {
     const scaleByW = width / 1024;
     const dprBoost = Math.sqrt(Math.min(dpr, 2));
     const scaleFactor = Math.min(scaleByH, scaleByW, 1.5) * dprBoost;
-    const isPortrait = width / height < 0.9;
-    const snowLinePct = isPortrait ? 0.82 : 0.78;
-    const snowLineY = height * snowLinePct;
-    const footerHeight = Math.round(36 * scaleFactor);
 
-    createMenuTerrain(this, width, height, snowLineY, footerHeight, scaleFactor);
-    this.wildlife = new MenuWildlifeController(this);
-    this.wildlife.snowLineY = snowLineY;
-    this.wildlife.create(width, height, snowLineY, footerHeight, scaleFactor);
+    this.backdrop = createMenuBackdrop(this);
 
     const cx = width / 2;
 
-    // --- Dark overlay behind level list for readability ---
-    this.add.rectangle(cx, height / 2, width, height, THEME.colors.darkBg)
-      .setAlpha(0.88).setDepth(DEPTHS.MENU_OVERLAY);
-
-    // --- Title ---
-    const titleSize = Math.max(16, Math.round(28 * scaleFactor));
-    const title = this.add.text(cx, Math.round(height * 0.06), t('levelSelect') || 'Level Select', {
-      fontFamily: THEME.fonts.family,
-      fontSize: `${titleSize}px`,
-      fontStyle: 'bold',
-      color: THEME.colors.accent,
-    }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_UI);
-
-    // --- Back button (top-left, first in nav order) ---
-    const btnFontSize = Math.max(10, Math.round(13 * scaleFactor));
-    const backBtn = this.add.text(Math.round(width * 0.05), Math.round(height * 0.06), '← ' + (t('menu') || 'Menu'), {
-      fontFamily: THEME.fonts.family,
-      fontSize: `${btnFontSize}px`,
-      color: THEME.colors.textPrimary,
-      backgroundColor: THEME.colors.panelBgHex,
-      padding: { x: 10, y: 6 },
-    }).setOrigin(0, 0).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
+    // --- Header (title + back button) ---
+    const { title, backBtn } = createMenuHeader(this, 'levelSelect', () => this.goBack(), scaleFactor);
 
     const backIdx = 0;
     this.menuButtons.push(backBtn);
@@ -103,10 +75,10 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.buttonIsCTA.push(false);
     this.buttonRow.push(-1);
     this.rowButtons.set(-1, [backIdx]);
-    backBtn.on('pointerdown', () => { playClick(); this.goBack(); });
     backBtn.on('pointerover', () => { this.buttonNav.select(backIdx); });
 
     // --- Level rows ---
+    const btnFontSize = Math.max(10, Math.round(13 * scaleFactor));
     const rowFontSize = Math.max(12, Math.round(15 * scaleFactor));
     const maxRowW = Math.min(width * 0.92, 600 * scaleFactor);
     const rowStartX = cx - maxRowW / 2;
@@ -460,7 +432,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private gamepadCooldown = 0;
 
   update(time: number, delta: number): void {
-    this.wildlife?.update(time, delta);
+    this.backdrop.wildlife?.update(time, delta);
     this.gamepadNav?.update(delta);
 
     // Gamepad grid navigation (d-pad + stick)
@@ -492,7 +464,7 @@ export default class LevelSelectScene extends Phaser.Scene {
     }
     this.input.off('wheel');
     this.resizeManager?.destroy();
-    this.wildlife?.destroy();
+    this.backdrop.wildlife?.destroy();
     this.listContainer = null;
     this.updateScrollHints = null;
   }

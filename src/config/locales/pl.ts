@@ -315,7 +315,24 @@ changelog_20260211: "⛷️ Zjazd na nartach po preparacji\n🎯 Jakość prepar
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "Dzienne zjazdy",
+  contracts_dailyShift: "Zmiana dzienna",
+  contracts_randomContract: "Losowy zjazd",
+  contracts_rank: "Ranga",
+  contracts_seed: "Ziarno",
+  contracts_start: "Rozpocznij kontrakt",
+  contracts_locked: "Ukończ wszystkie poziomy, aby odblokować",
+  contract_levelName: "Kontrakt",
+  contract_levelTask: "Przygotuj trasę do docelowego pokrycia",
+  contracts_briefing: "Odprawа",
+  contracts_target: "Cel",
+  contracts_timeLimit: "Czas",
+  contracts_weather_clear: "Bezchmurne niebo",
+  contracts_weather_light_snow: "Lekkie opady śniegu",
+  contracts_weather_storm: "Warunki burzowe",
+  contracts_night: "Zmiana nocna",
+  contracts_day: "Zmiana dzienna"
 };
 
 export default pl;

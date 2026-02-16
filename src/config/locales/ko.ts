@@ -315,7 +315,24 @@ changelog_20260211: "⛷️ 정비 후 스키 활강\n🎯 정비 품질\n🏔�
   key_enter: "ENTER",
   key_tab: "TAB",
   key_esc: "ESC",
-  key_del: "DEL"
+  key_del: "DEL",
+  contracts: "데일리 런",
+  contracts_dailyShift: "일일 근무",
+  contracts_randomContract: "랜덤 런",
+  contracts_rank: "등급",
+  contracts_seed: "시드",
+  contracts_start: "계약 시작",
+  contracts_locked: "모든 레벨을 완료하면 해제됩니다",
+  contract_levelName: "계약",
+  contract_levelTask: "목표 커버리지까지 슬로프를 정비하세요",
+  contracts_briefing: "브리핑",
+  contracts_target: "목표",
+  contracts_timeLimit: "시간",
+  contracts_weather_clear: "맑은 하늘",
+  contracts_weather_light_snow: "가벼운 눈",
+  contracts_weather_storm: "폭풍 상황",
+  contracts_night: "야간 근무",
+  contracts_day: "주간 근무"
 };
 
 export default ko;

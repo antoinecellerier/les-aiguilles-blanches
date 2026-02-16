@@ -2,11 +2,11 @@ import Phaser from 'phaser';
 import { t, Accessibility, TRANSLATIONS, getLanguage as getCurrentLanguage } from '../setup';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { getSavedProgress, clearProgress } from '../utils/gameProgress';
-import { setString, getString } from '../utils/storage';
+import { setString, getString, getJSON } from '../utils/storage';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
-import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
+import { createMenuButtonNav, bindMenuKeys, type MenuButtonNav } from '../utils/menuButtonNav';
 import { THEME } from '../config/theme';
 import { checkForUpdate } from '../utils/updateCheck';
 import { playClick, playDeviceChime, playToggle } from '../systems/UISounds';
@@ -20,6 +20,7 @@ import { OverlayManager } from '../utils/overlayManager';
 import { toggleFullscreen, isFullscreen as checkFullscreen, fullscreenEnabled } from '../utils/fullscreen';
 import { isDesktopApp, quitDesktopApp } from '../types/electron';
 import { LEVELS } from '../config/levels';
+import { DEPTHS } from '../config/gameConfig';
 
 /**
  * Les Aiguilles Blanches - Menu Scene
@@ -137,13 +138,13 @@ export default class MenuScene extends Phaser.Scene {
     // Night overlay — subtle tint so menu stays readable
     if (weather.isNight) {
       this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
-        .setAlpha(0.45).setDepth(5);
+        .setAlpha(0.45).setDepth(DEPTHS.MENU_TREES);
     }
 
     // Storm overlay — grey-blue haze for low visibility
     if (weather.weather === 'storm') {
       this.add.rectangle(width / 2, height / 2, width, height, 0x667788)
-        .setAlpha(0.25).setDepth(5);
+        .setAlpha(0.25).setDepth(DEPTHS.MENU_TREES);
     }
 
     // Snow particles for storm or light_snow
@@ -161,7 +162,7 @@ export default class MenuScene extends Phaser.Scene {
         lifespan: isStorm ? 2500 : 5000,
         blendMode: Phaser.BlendModes.ADD,
         tint: isStorm ? 0xCCDDFF : 0xFFFFFF,
-      }).setDepth(200);
+      }).setDepth(DEPTHS.MENU_TOAST);
     }
   }
 
@@ -177,9 +178,9 @@ export default class MenuScene extends Phaser.Scene {
     titleMeasure.destroy();
     const titleBgWidth = Math.round(Math.min(Math.max(titleTextW + 40, 520 * scaleFactor), width - 20));
     const titleBgHeight = Math.round(80 * scaleFactor);
-    this.add.rectangle(width / 2, titleY, titleBgWidth + 8, titleBgHeight + 8, 0x2d2822, 0.45).setOrigin(0.5).setDepth(10);
-    this.add.rectangle(width / 2, titleY, titleBgWidth, titleBgHeight, 0x1a2a3e, 0.4).setOrigin(0.5).setDepth(10);
-    const tbg = this.add.graphics().setDepth(10);
+    this.add.rectangle(width / 2, titleY, titleBgWidth + 8, titleBgHeight + 8, 0x2d2822, 0.45).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+    this.add.rectangle(width / 2, titleY, titleBgWidth, titleBgHeight, 0x1a2a3e, 0.4).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+    const tbg = this.add.graphics().setDepth(DEPTHS.MENU_UI);
     tbg.lineStyle(2, 0x87ceeb, 0.5);
     tbg.strokeRect(width / 2 - titleBgWidth / 2, titleY - titleBgHeight / 2, titleBgWidth, titleBgHeight);
     this.add.text(width / 2 + 3, titleY + 3, 'Les Aiguilles Blanches', {
@@ -187,13 +188,13 @@ export default class MenuScene extends Phaser.Scene {
       fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#2d2822',
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
     this.add.text(width / 2, titleY, 'Les Aiguilles Blanches', {
       fontFamily: THEME.fonts.family,
       fontSize: titleSize + 'px',
       fontStyle: 'bold',
       color: '#ffffff',
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
     const subtitleText = t('subtitle') || 'Snow Groomer Simulation';
     const subtitleY = titleY + titleBgHeight / 2 + Math.round(12 * scaleFactor);
@@ -209,7 +210,7 @@ export default class MenuScene extends Phaser.Scene {
     const notchH = Math.round(ribbonH * 0.2);
     const foldW = Math.round(4 * scaleFactor);
     const stripe = Math.round(3 * scaleFactor);
-    const ribbonG = this.add.graphics().setDepth(10);
+    const ribbonG = this.add.graphics().setDepth(DEPTHS.MENU_UI);
     const cx = width / 2;
     const rTop = subtitleY - ribbonH / 2;
     const rBot = subtitleY + ribbonH / 2;
@@ -238,16 +239,16 @@ export default class MenuScene extends Phaser.Scene {
       fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
       color: '#660000',
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
     this.add.text(cx, subtitleY, subtitleText, {
       fontFamily: THEME.fonts.family,
       fontSize: subtitleSize + 'px',
       color: '#FFD700',
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
     // Storm: snow on title box and subtitle ribbon
     if (isStorm) {
-      const snowG = this.add.graphics().setDepth(10);
+      const snowG = this.add.graphics().setDepth(DEPTHS.MENU_UI);
       snowG.fillStyle(0xf0f5f8, 0.85);
       const titleTop = titleY - titleBgHeight / 2;
       for (let sx = -titleBgWidth / 2; sx < titleBgWidth / 2; sx += 5) {
@@ -285,6 +286,7 @@ export default class MenuScene extends Phaser.Scene {
     if (hasProgress || hasCompletedLevels) {
       buttonDefs.push({ text: 'levelSelect', callback: () => this.showLevelSelect(), primary: false });
     }
+    buttonDefs.push({ text: 'contracts', callback: () => this.showContracts(), primary: false });
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
     buttonDefs.push({ text: 'changelog', callback: () => this.showChangelog(), primary: false });
     buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
@@ -315,7 +317,7 @@ export default class MenuScene extends Phaser.Scene {
     this.buttonCallbacks = [];
 
     // Container for all menu buttons — enables scrolling when needed
-    this.menuContainer = this.add.container(0, menuStartY).setDepth(10);
+    this.menuContainer = this.add.container(0, menuStartY).setDepth(DEPTHS.MENU_UI);
 
     const arrowSize = Math.round(22 * scaleFactor);
     this.selectionArrow = this.add.text(0, 0, '▶', {
@@ -369,6 +371,34 @@ export default class MenuScene extends Phaser.Scene {
       this.buttonCallbacks.push(btn.callback);
     });
 
+    // Daily Runs: golden glow if today's daily hasn't been played
+    const dailyRunIdx = buttonDefs.findIndex(b => b.text === 'contracts');
+    if (dailyRunIdx >= 0) {
+      const today = new Date().toISOString().slice(0, 10);
+      const dailyData = getJSON<{ date: string; ranks: string[] }>(STORAGE_KEYS.DAILY_RUN_DATE, { date: '', ranks: [] });
+      const allDone = dailyData.date === today && dailyData.ranks.length >= 4;
+      if (!allDone) {
+        const dailyBtn = this.menuButtons[dailyRunIdx];
+        const glowPad = Math.round(6 * scaleFactor);
+        const glow = this.add.rectangle(
+          dailyBtn.x, dailyBtn.y,
+          dailyBtn.width + glowPad * 2, dailyBtn.height + glowPad * 2,
+          0xffd700
+        ).setOrigin(0.5).setAlpha(0);
+        // Insert glow just before the button in the container
+        const btnIndex = this.menuContainer!.getIndex(dailyBtn);
+        this.menuContainer!.addAt(glow, btnIndex);
+        this.tweens.add({
+          targets: glow,
+          alpha: { from: 0.15, to: 0.5 },
+          duration: 1400,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      }
+    }
+
     // Storm: snow accumulation on top of each button
     if (isStorm) {
       this.menuButtons.forEach(btn => {
@@ -390,7 +420,7 @@ export default class MenuScene extends Phaser.Scene {
     this.menuMaxScroll = Math.max(0, totalMenuH - menuAvailableH);
 
     if (needsScroll) {
-      const maskGfx = this.add.graphics().setDepth(10);
+      const maskGfx = this.add.graphics().setDepth(DEPTHS.MENU_UI);
       maskGfx.fillStyle(0xffffff);
       maskGfx.fillRect(0, menuStartY, width, menuAvailableH);
       maskGfx.setVisible(false);
@@ -401,10 +431,10 @@ export default class MenuScene extends Phaser.Scene {
       const hintSize = Math.round(Math.max(12, 16 * scaleFactor));
       this.menuScrollUpHint = this.add.text(width / 2, menuStartY + 2, '▲', {
         fontFamily: THEME.fonts.family, fontSize: hintSize + 'px', color: '#ffffff',
-      }).setOrigin(0.5, 0).setDepth(11).setAlpha(0);
+      }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE).setAlpha(0);
       this.menuScrollDownHint = this.add.text(width / 2, menuEndY - 2, '▼', {
         fontFamily: THEME.fonts.family, fontSize: hintSize + 'px', color: '#ffffff',
-      }).setOrigin(0.5, 1).setDepth(11).setAlpha(0.7);
+      }).setOrigin(0.5, 1).setDepth(DEPTHS.MENU_SCROLL_FADE).setAlpha(0.7);
 
       const updateScrollHints = () => {
         if (this.menuScrollUpHint) this.menuScrollUpHint.setAlpha(this.menuScrollY > 0 ? 0.7 : 0);
@@ -494,8 +524,8 @@ export default class MenuScene extends Phaser.Scene {
 
   private createFooter(width: number, height: number, scaleFactor: number, footerHeight: number, safeAreaBottom: number): void {
     const footerTop = height - footerHeight - safeAreaBottom;
-    this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, THEME.colors.dialogBg).setOrigin(0.5, 0).setDepth(10);
-    this.add.rectangle(width / 2, footerTop, width, 2, THEME.colors.border).setOrigin(0.5, 0).setDepth(10);
+    this.add.rectangle(width / 2, footerTop, width, footerHeight + safeAreaBottom, THEME.colors.dialogBg).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_UI);
+    this.add.rectangle(width / 2, footerTop, width, 2, THEME.colors.border).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_UI);
     
     const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
     const footerFontSize = Math.round(Math.max(11, 13 * scaleFactor));
@@ -503,7 +533,7 @@ export default class MenuScene extends Phaser.Scene {
       fontFamily: THEME.fonts.family,
       fontSize: footerFontSize + 'px',
       color: THEME.colors.info,
-    }).setOrigin(0.5).setDepth(10)
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI)
       .setInteractive({ useHandCursor: true })
       .on('pointerover', () => githubLink.setColor(THEME.colors.accent))
       .on('pointerout', () => githubLink.setColor(THEME.colors.info))
@@ -534,7 +564,7 @@ export default class MenuScene extends Phaser.Scene {
           fontSize: footerFontSize + 'px',
           color: THEME.colors.accent,
         }
-      ).setOrigin(0.5).setDepth(10)
+      ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => location.reload());
     }).catch(() => {});
@@ -543,7 +573,7 @@ export default class MenuScene extends Phaser.Scene {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(Math.max(10, 12 * scaleFactor)) + 'px',
       color: THEME.colors.accent,
-    }).setOrigin(0.5).setDepth(10);
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
     this.footerGithubRight = githubLink.x + githubLink.width / 2;
     this.footerHintY = footerTop + footerHeight / 2;
@@ -574,10 +604,7 @@ export default class MenuScene extends Phaser.Scene {
       if (this.scene?.manager && this.scene.isActive()) this.updateInputHints();
     });
 
-    this.input.keyboard?.on('keydown-UP', () => this.buttonNav.navigate(-1));
-    this.input.keyboard?.on('keydown-DOWN', () => this.buttonNav.navigate(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
-    this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
+    bindMenuKeys(this, this.buttonNav);
 
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
       onNavigate: (dir) => this.buttonNav.navigate(dir),
@@ -624,7 +651,7 @@ export default class MenuScene extends Phaser.Scene {
     this.volumeIndicator = this.add.text(leftMargin, this.footerHintY, volumeIcon(), this.footerHintStyle)
       .setOrigin(0, 0.5)
       .setAlpha(muted ? inactiveAlpha : activeAlpha)
-      .setDepth(10);
+      .setDepth(DEPTHS.MENU_UI);
 
     // Use a zone for reliable hit detection and hand cursor (48px min touch target)
     const minHit = 48;
@@ -633,7 +660,7 @@ export default class MenuScene extends Phaser.Scene {
     const hitH = Math.max(bounds.height, minHit);
     const hitZoneIcon = this.add.zone(
       bounds.centerX, bounds.centerY, hitW, hitH
-    ).setDepth(13).setInteractive({ useHandCursor: true });
+    ).setDepth(DEPTHS.MENU_OVERLAY).setInteractive({ useHandCursor: true });
     this.volumeIconZone = hitZoneIcon;
 
     hitZoneIcon
@@ -677,7 +704,7 @@ export default class MenuScene extends Phaser.Scene {
     const cx = this.volumeIndicator.x + iconWidth / 2;
     const cy = this.footerHintY;
 
-    this.volumeMuteOverlay = this.add.graphics().setDepth(10);
+    this.volumeMuteOverlay = this.add.graphics().setDepth(DEPTHS.MENU_UI);
     this.volumeMuteOverlay.lineStyle(1.5, 0xcc2200, 0.6);
     this.volumeMuteOverlay.strokeCircle(cx, cy, r);
     const dx = r * Math.cos(Math.PI / 4);
@@ -726,7 +753,7 @@ export default class MenuScene extends Phaser.Scene {
     const panelW = trackWidth + padding * 2;
     const panelH = thumbH + padding * 3 + labelSpace;
     const panelY = sliderY - thumbH / 2 - padding * 2 - labelSpace;
-    const bg = this.add.graphics().setDepth(11);
+    const bg = this.add.graphics().setDepth(DEPTHS.MENU_SCROLL_FADE);
     bg.fillStyle(0x1a2a3a, 0.9);
     bg.fillRoundedRect(sliderX - padding, panelY, panelW, panelH, 4);
     bg.lineStyle(1, 0x4a6a8a, 0.5);
@@ -739,17 +766,17 @@ export default class MenuScene extends Phaser.Scene {
       fontFamily: this.footerHintStyle.fontFamily as string,
       fontSize: this.footerHintStyle.fontSize as string,
       color: THEME.colors.textPrimary,
-    }).setOrigin(0.5, 1).setDepth(12);
+    }).setOrigin(0.5, 1).setDepth(DEPTHS.MENU_BADGES);
     this.volumeSliderObjects.push(pctLabel);
 
     // Track
-    const track = this.add.graphics().setDepth(12);
+    const track = this.add.graphics().setDepth(DEPTHS.MENU_BADGES);
     track.fillStyle(0x2a4a5e, 1);
     track.fillRect(sliderX, sliderY - trackHeight / 2, trackWidth, trackHeight);
     this.volumeSliderObjects.push(track);
 
     // Fill
-    const fill = this.add.graphics().setDepth(12);
+    const fill = this.add.graphics().setDepth(DEPTHS.MENU_BADGES);
     const drawFill = (t: number) => {
       fill.clear();
       fill.fillStyle(0x87CEEB, 1);
@@ -759,7 +786,7 @@ export default class MenuScene extends Phaser.Scene {
     this.volumeSliderObjects.push(fill);
 
     // Thumb
-    const thumb = this.add.graphics().setDepth(12);
+    const thumb = this.add.graphics().setDepth(DEPTHS.MENU_BADGES);
     const drawThumb = (t: number) => {
       const x = sliderX + t * trackWidth;
       thumb.clear();
@@ -775,7 +802,7 @@ export default class MenuScene extends Phaser.Scene {
     const hitW = panelW;
     const hitH = panelH;
     const hitZone = this.add.zone(hitX, hitY, hitW, hitH)
-      .setOrigin(0, 0).setDepth(11).setInteractive({ useHandCursor: true });
+      .setOrigin(0, 0).setDepth(DEPTHS.MENU_SCROLL_FADE).setInteractive({ useHandCursor: true });
     this.volumeSliderObjects.push(hitZone);
 
     // Dismissal check area includes both panel and icon
@@ -874,7 +901,7 @@ export default class MenuScene extends Phaser.Scene {
       const hint = this.add.text(cursorX, this.footerHintY, text, this.footerHintStyle)
         .setOrigin(1, 0.5)
         .setAlpha(available ? activeAlpha : inactiveAlpha)
-        .setDepth(10);
+        .setDepth(DEPTHS.MENU_UI);
       this.inputHintTexts.push(hint);
 
       // Forbidden sign overlay centered on the icon
@@ -885,7 +912,7 @@ export default class MenuScene extends Phaser.Scene {
         const r = Math.round(hint.height * 0.7);
         const cx = cursorX - hint.width + iconWidth / 2;
         const cy = this.footerHintY;
-        const gfx = this.add.graphics().setDepth(10);
+        const gfx = this.add.graphics().setDepth(DEPTHS.MENU_UI);
         gfx.lineStyle(1.5, 0xcc2200, 0.6);
         gfx.strokeCircle(cx, cy, r);
         const dx = r * Math.cos(Math.PI / 4);
@@ -907,7 +934,7 @@ export default class MenuScene extends Phaser.Scene {
     const hoverW = width - rightMargin - hintsLeftX;
     const hoverH = 32;
     const hoverZone = this.add.zone(hoverX, this.footerHintY, hoverW, hoverH)
-      .setOrigin(0, 0.5).setDepth(13).setInteractive({ useHandCursor: false });
+      .setOrigin(0, 0.5).setDepth(DEPTHS.MENU_OVERLAY).setInteractive({ useHandCursor: false });
     this.inputHintTexts.push(hoverZone);
 
     // Large padded zone for touch/click
@@ -916,7 +943,7 @@ export default class MenuScene extends Phaser.Scene {
     const zoneW = width - rightMargin - hintsLeftX + zonePad * 2;
     const zoneH = hoverH + zonePad * 2;
     const touchZone = this.add.zone(zoneX, this.footerHintY, zoneW, zoneH)
-      .setOrigin(0, 0.5).setDepth(12).setInteractive({ useHandCursor: false });
+      .setOrigin(0, 0.5).setDepth(DEPTHS.MENU_BADGES).setInteractive({ useHandCursor: false });
     this.inputHintTexts.push(touchZone);
 
     const tooltipAboveY = this.footerHintY - hoverH / 2;
@@ -969,7 +996,7 @@ export default class MenuScene extends Phaser.Scene {
     const panelY = aboveY - panelH - 4;
 
     // Background
-    const bg = this.add.graphics().setDepth(11);
+    const bg = this.add.graphics().setDepth(DEPTHS.MENU_SCROLL_FADE);
     bg.fillStyle(0x1a2a3a, 0.92);
     bg.fillRoundedRect(panelX, panelY, panelW, panelH, 4);
     bg.lineStyle(1, 0x4a6a8a, 0.5);
@@ -982,7 +1009,7 @@ export default class MenuScene extends Phaser.Scene {
       const label = this.add.text(panelX + padding, y, item.text, {
         ...style,
         color: item.available ? THEME.colors.textPrimary : '#667788',
-      }).setOrigin(0, 0).setDepth(12);
+      }).setOrigin(0, 0).setDepth(DEPTHS.MENU_BADGES);
       this.inputTooltipObjects.push(label);
       y += item.h + lineGap;
     }
@@ -1050,6 +1077,12 @@ export default class MenuScene extends Phaser.Scene {
     const game = this.game;
     this.scene.stop('MenuScene');
     resetGameScenes(game, 'LevelSelectScene');
+  }
+
+  private showContracts(): void {
+    const game = this.game;
+    this.scene.stop('MenuScene');
+    resetGameScenes(game, 'ContractsScene');
   }
 
   private confirmNewGame(): void {

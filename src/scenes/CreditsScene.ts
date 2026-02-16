@@ -3,11 +3,12 @@ import { t, Accessibility } from '../setup';
 import { THEME, buttonStyle } from '../config/theme';
 import { isConfirmPressed, isBackPressed } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
-import { createMenuButtonNav, simpleStyler, type MenuButtonNav } from '../utils/menuButtonNav';
+import { createMenuButtonNav, simpleStyler, bindMenuKeys, type MenuButtonNav } from '../utils/menuButtonNav';
 import { playClick } from '../systems/UISounds';
 import { MusicSystem } from '../systems/MusicSystem';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { ResizeManager } from '../utils/resizeManager';
+import { DEPTHS } from '../config/gameConfig';
 
 /**
  * Les Aiguilles Blanches - Credits Scene
@@ -63,10 +64,10 @@ export default class CreditsScene extends Phaser.Scene {
 
     // Header zone background (covers scrolling credits)
     const headerBg = this.add.rectangle(width / 2, 100, width, 200, THEME.colors.darkBg);
-    headerBg.setDepth(10);
+    headerBg.setDepth(DEPTHS.MENU_UI);
 
     const trophy = this.add.text(width / 2, 60, '🏆', { font: `60px ${THEME.fonts.familyEmoji}` }).setOrigin(0.5);
-    trophy.setDepth(11);
+    trophy.setDepth(DEPTHS.MENU_SCROLL_FADE);
 
     const title = this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
       fontFamily: THEME.fonts.family,
@@ -74,18 +75,18 @@ export default class CreditsScene extends Phaser.Scene {
       fontStyle: 'bold',
       color: THEME.colors.accent,
     }).setOrigin(0.5);
-    title.setDepth(11);
+    title.setDepth(DEPTHS.MENU_SCROLL_FADE);
 
     const subtitle = this.add.text(width / 2, 160, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
       fontFamily: THEME.fonts.family,
       fontSize: `${THEME.fonts.sizes.medium}px`,
       color: THEME.colors.info,
     }).setOrigin(0.5);
-    subtitle.setDepth(11);
+    subtitle.setDepth(DEPTHS.MENU_SCROLL_FADE);
 
     // Footer zone background (covers scrolling credits at bottom)
     const footerBg = this.add.rectangle(width / 2, height - 50, width, 100, THEME.colors.darkBg);
-    footerBg.setDepth(10);
+    footerBg.setDepth(DEPTHS.MENU_UI);
 
     const credits = [
       '',
@@ -151,7 +152,7 @@ export default class CreditsScene extends Phaser.Scene {
 
     this.buttonsContainer = this.add.container(0, 0);
     this.buttonsContainer.setVisible(false);
-    this.buttonsContainer.setDepth(12);
+    this.buttonsContainer.setDepth(DEPTHS.MENU_BADGES);
 
     const btnStyle = buttonStyle(THEME.fonts.sizes.medium, 20, 10);
 
@@ -181,7 +182,7 @@ export default class CreditsScene extends Phaser.Scene {
       t('skipCredits') || 'Appuyez sur une touche pour passer',
       { fontFamily: THEME.fonts.family, fontSize: `${THEME.fonts.sizes.tiny}px`, color: THEME.colors.disabled }
     ).setOrigin(0.5);
-    this.skipHint.setDepth(12);
+    this.skipHint.setDepth(DEPTHS.MENU_BADGES);
 
     this.input.keyboard?.once('keydown', (event: KeyboardEvent) => {
       if (event.code === 'Escape') {
@@ -231,11 +232,9 @@ export default class CreditsScene extends Phaser.Scene {
     );
 
     this.input.keyboard?.removeAllListeners();
+    bindMenuKeys(this, this.buttonNav, () => this.returnToMenu());
     this.input.keyboard?.on('keydown-LEFT', () => this.buttonNav.navigate(-1));
     this.input.keyboard?.on('keydown-RIGHT', () => this.buttonNav.navigate(1));
-    this.input.keyboard?.on('keydown-ENTER', () => this.buttonNav.activate());
-    this.input.keyboard?.on('keydown-SPACE', () => this.buttonNav.activate());
-    this.input.keyboard?.on('keydown-ESC', () => this.returnToMenu());
     
     // Initialize selection highlight
     this.buttonNav.refreshStyles();

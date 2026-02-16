@@ -4,7 +4,7 @@ import { evaluateAllBonusObjectives, getBonusLabel, type BonusEvalState } from '
 import { THEME } from '../config/theme';
 import { BALANCE } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
-import { getString } from '../utils/storage';
+import { getString, setString, getJSON, setJSON } from '../utils/storage';
 import { getMappingFromGamepad } from '../utils/gamepad';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { createMenuButtonNav, ctaStyler, type MenuButtonNav } from '../utils/menuButtonNav';
@@ -14,6 +14,7 @@ import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
 import { markLevelCompleted } from '../utils/gameProgress';
 import { clearGroomedTiles } from '../utils/skiRunState';
+import { getContractSession } from '../systems/ContractSession';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -62,6 +63,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private skiTrickScore = 0;
   private skiTrickCount = 0;
   private skiBestCombo = 0;
+  private isContract = false;
   
   // Keyboard/gamepad navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -99,6 +101,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.skiTrickScore = data.skiTrickScore ?? 0;
     this.skiTrickCount = data.skiTrickCount ?? 0;
     this.skiBestCombo = data.skiBestCombo ?? 0;
+    const session = getContractSession();
+    this.isContract = !!session;
     
     // Reset navigation state
     this.menuButtons = [];
@@ -107,17 +111,22 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.inputReady = false;
     this.isNavigating = false;
 
-    // Persist per-level completion stats on win
-    if (this.won) {
+    // Persist per-level completion stats on win (campaign only)
+    if (this.won && !this.isContract) {
       const stars = this.getStarCount();
       const bonusMet = this.evaluateBonusObjectives().filter(r => r.met).length;
       markLevelCompleted(this.levelIndex, stars, this.timeUsed, bonusMet);
     }
   }
 
+  private getLevel(): Level {
+    const session = getContractSession();
+    return session?.level || LEVELS[this.levelIndex] as Level;
+  }
+
   create(): void {
     const { width, height } = this.cameras.main;
-    const level = LEVELS[this.levelIndex] as Level;
+    const level = this.getLevel();
     const padding = Math.min(20, width * 0.03, height * 0.03);
 
     // --- Alpine background (reuse menu terrain) ---
@@ -314,7 +323,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     }
 
     // Game complete message for final level win
-    if (this.won && this.levelIndex === LEVELS.length - 1) {
+    if (this.won && !this.isContract && this.levelIndex === LEVELS.length - 1) {
       const gcMsg = this.add.text(cx, cursorY, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
         fontFamily: THEME.fonts.family,
         fontSize: `${Math.round(baseFontSize * 1.25)}px`,
@@ -332,7 +341,36 @@ export default class LevelCompleteScene extends Phaser.Scene {
     if (skiMode === 'random') skiMode = Math.random() < 0.5 ? 'ski' : 'snowboard';
     const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
 
-    if (this.won && this.levelIndex < LEVELS.length - 1) {
+    if (this.isContract && this.won) {
+      // Track daily run completion per rank
+      const session = getContractSession();
+      if (session?.isDaily && session.rank) {
+        const today = new Date().toISOString().slice(0, 10);
+        const data = getJSON<{ date: string; ranks: string[] }>(STORAGE_KEYS.DAILY_RUN_DATE, { date: '', ranks: [] });
+        const rank = session.rank;
+        if (data.date !== today) {
+          setJSON(STORAGE_KEYS.DAILY_RUN_DATE, { date: today, ranks: [rank] });
+        } else if (!data.ranks.includes(rank)) {
+          data.ranks.push(rank);
+          setJSON(STORAGE_KEYS.DAILY_RUN_DATE, data);
+        }
+      }
+      // Contract complete — ski it + menu
+      this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true);
+      this.addButton(buttonContainer, t('contracts') || 'Contracts', buttonFontSize, buttonPadding2,
+        () => this.navigateTo('ContractsScene'));
+      this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
+        () => this.navigateTo('MenuScene'));
+    } else if (this.isContract && !this.won) {
+      // Contract failed — retry + menu
+      this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
+        () => this.navigateTo('GameScene', { level: this.levelIndex }), true);
+      this.addButton(buttonContainer, t('contracts') || 'Contracts', buttonFontSize, buttonPadding2,
+        () => this.navigateTo('ContractsScene'));
+      this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
+        () => this.navigateTo('MenuScene'));
+    } else if (this.won && this.levelIndex < LEVELS.length - 1) {
       this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true);
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
@@ -532,7 +570,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   }
 
   private getStarCount(): number {
-    const level = LEVELS[this.levelIndex] as Level;
+    const level = this.getLevel();
     const timePercent = level.timeLimit > 0 ? this.timeUsed / level.timeLimit : 0;
     const coverageBonus = this.coverage - level.targetCoverage;
     const bonusResults = this.evaluateBonusObjectives();
@@ -553,7 +591,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   }
 
   private evaluateBonusObjectives(): { objective: BonusObjective; met: boolean; label: string }[] {
-    const level = LEVELS[this.levelIndex] as Level;
+    const level = this.getLevel();
     if (!level.bonusObjectives || level.bonusObjectives.length === 0) return [];
 
     const state: BonusEvalState = {
@@ -1264,13 +1302,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const groundY = snowLineY;
     const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.002);
 
-    const level = LEVELS[levelIndex] as Level;
+    const level = this.getLevel();
 
     if (level.slalomGates) {
       this.drawSlalomGatePair(g, gx - 45 * s, groundY, s);
-    } else if (levelIndex === 3) {
+    } else if (level.specialFeatures?.includes('kickers') || level.specialFeatures?.includes('rails')) {
       this.drawParkKicker(g, gx - 40 * s, groundY, s);
-    } else if (levelIndex === 6) {
+    } else if (level.specialFeatures?.includes('halfpipe')) {
       this.drawHalfpipeWalls(g, gx, groundY, s);
     }
   }

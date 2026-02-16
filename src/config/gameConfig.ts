@@ -68,8 +68,18 @@ export const DEPTHS = {
   WEATHER: 200,       // Snow particles (same layer as feedback)
   VICTORY: 500,       // Victory text (topmost)
   // Menu/settings scene depths (separate from game world)
-  MENU_OVERLAY: 13,   // Darken overlay for settings/pause backdrops
-  MENU_UI: 15,        // UI panels, buttons, text above overlay
+  MENU_SKY: 0,        // Sky background (behind everything)
+  MENU_MOUNTAINS_FAR: 1, // Far mountains
+  MENU_MOUNTAINS_NEAR: 2, // Near mountains
+  MENU_SNOW: 3,       // Snow ground, groomed lines
+  MENU_TREES: 5,      // Trees, groomer (Y-sorted: 5 + y*0.001)
+  MENU_BACKDROP: 8,   // Dark semi-transparent overlay behind UI (readability)
+  MENU_UI: 10,        // UI panels, buttons, text (above terrain + backdrop)
+  MENU_SCROLL_FADE: 11, // Scroll fade gradients
+  MENU_BADGES: 12,    // Level badges, star overlays
+  MENU_OVERLAY: 13,   // Darken overlay for settings/pause modals
+  MENU_DIALOG: 15,    // Dialogs, modals (above overlay)
+  MENU_TOAST: 200,    // Toast notifications (topmost)
 } as const;
 
 /**
