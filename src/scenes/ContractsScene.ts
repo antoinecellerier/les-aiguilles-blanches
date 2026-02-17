@@ -276,7 +276,7 @@ export default class ContractsScene extends Phaser.Scene {
     const weatherKey = `contracts_weather_${level.weather || 'clear'}`;
     const shiftKey = level.isNight ? 'contracts_night' : 'contracts_day';
     const parkStr = isPark ? ` | ▲ ${t('rank_park')}` : '';
-    const winchStr = level.hasWinch ? ' | 🔗 Winch' : '';
+    const winchStr = level.hasWinch ? ` | 🔗 ${t('winch')}` : '';
 
     if (this.seedDisplay) {
       this.seedDisplay.setText(
