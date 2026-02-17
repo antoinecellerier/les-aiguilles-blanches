@@ -49,7 +49,10 @@ export interface BonusObjective {
 
 export interface Level {
   id: number;
+  /** Locale key for the level name. Used via t(nameKey). */
   nameKey: string;
+  /** Optional direct name string (bypasses locale lookup). Used for procedural levels. */
+  name?: string;
   taskKey: string;
   difficulty: DifficultyType;
   timeLimit: number;

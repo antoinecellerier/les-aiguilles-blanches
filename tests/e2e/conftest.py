@@ -204,12 +204,51 @@ BUTTON_START = 0
 BUTTON_HOW_TO_PLAY = 1
 BUTTON_CHANGELOG = 2
 BUTTON_SETTINGS = 3
+BUTTON_DAILY_RUNS = 4
 
 
 def click_button(page, button_index: int, description: str):
     """Click a menu button by index and wait briefly for it to register."""
     click_menu_button(page, button_index, description)
     page.wait_for_timeout(100)
+
+
+def navigate_to_contracts(page):
+    """From MenuScene, navigate to ContractsScene via the Daily Runs button."""
+    import time
+    idx = page.evaluate("""() => {
+        const ms = window.game?.scene?.getScene('MenuScene');
+        if (!ms?.menuButtons) return -1;
+        const texts = ms.menuButtons.map(b => b.text.toLowerCase());
+        for (let i = 0; i < texts.length; i++) {
+            if (texts[i].includes('daily') || texts[i].includes('piste') ||
+                texts[i].includes('contrat') || texts[i].includes('runs')) return i;
+        }
+        return -1;
+    }""")
+    assert idx >= 0, "Daily Runs button not found in menu"
+    page.evaluate(f"""() => {{
+        const ms = window.game?.scene?.getScene('MenuScene');
+        if (ms?.buttonNav) ms.buttonNav.select({idx});
+    }}""")
+    time.sleep(0.1)
+    page.keyboard.press("Enter")
+    wait_for_scene(page, "ContractsScene")
+
+
+def unlock_all_levels(page):
+    """Set localStorage so all 11 campaign levels are completed."""
+    page.evaluate("""() => {
+        const stats = {};
+        for (let i = 0; i <= 10; i++) {
+            stats[i] = {completed: true, bestStars: 3, bestTime: 60, bestBonusMet: 0};
+        }
+        localStorage.setItem('snowGroomer_progress', JSON.stringify({
+            currentLevel: 11,
+            levelStats: stats,
+            savedAt: new Date().toISOString()
+        }));
+    }""")
 
 
 def get_active_scenes(page) -> list:

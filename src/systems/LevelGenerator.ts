@@ -117,6 +117,197 @@ const WILDLIFE_POOL: AnimalType[] = ['bunny', 'marmot', 'chamois', 'bird', 'fox'
 /** Contract level IDs start at 100 to avoid collision with campaign levels. */
 const CONTRACT_LEVEL_ID_BASE = 100;
 
+// Procedural piste name pools — authentic Savoie/Alpine French
+// Each noun carries its gender for article/adjective agreement
+type NounGender = 'M' | 'F' | 'MP' | 'FP';
+interface PisteNoun { article: string; noun: string; gender: NounGender; }
+interface PisteAdj { M: string; F: string; MP: string; FP: string; }
+// Preposed adjectives (go before the noun): grand, petit, beau, vieux…
+// MV = masculine before vowel/h (beau→bel, vieux→vieil)
+interface PreAdj { M: string; F: string; MP: string; FP: string; MV?: string; }
+
+// Rank-themed noun pools (gentle → extreme)
+const NOUNS_GREEN: PisteNoun[] = [
+  { article: 'Le', noun: 'Pré', gender: 'M' },
+  { article: 'Le', noun: 'Chalet', gender: 'M' },
+  { article: 'Le', noun: 'Bois', gender: 'M' },
+  { article: 'Le', noun: 'Praz', gender: 'M' },
+  { article: 'Le', noun: 'Sentier', gender: 'M' },
+  { article: "L'", noun: 'Alpage', gender: 'M' },
+  { article: 'La', noun: 'Clairière', gender: 'F' },
+  { article: 'La', noun: 'Forêt', gender: 'F' },
+  { article: 'La', noun: 'Chapelle', gender: 'F' },
+  { article: 'La', noun: 'Prairie', gender: 'F' },
+  { article: 'Les', noun: 'Sapins', gender: 'MP' },
+];
+const NOUNS_BLUE: PisteNoun[] = [
+  { article: 'Le', noun: 'Lac', gender: 'M' },
+  { article: 'Le', noun: 'Torrent', gender: 'M' },
+  { article: 'Le', noun: 'Balcon', gender: 'M' },
+  { article: 'Le', noun: 'Refuge', gender: 'M' },
+  { article: 'Le', noun: 'Plateau', gender: 'M' },
+  { article: 'Le', noun: 'Nant', gender: 'M' },
+  { article: 'La', noun: 'Cascade', gender: 'F' },
+  { article: 'La', noun: 'Combe', gender: 'F' },
+  { article: 'La', noun: 'Vallée', gender: 'F' },
+  { article: 'La', noun: 'Traversée', gender: 'F' },
+  { article: 'Les', noun: 'Crêtes', gender: 'FP' },
+];
+const NOUNS_RED: PisteNoun[] = [
+  { article: 'Le', noun: 'Col', gender: 'M' },
+  { article: 'Le', noun: 'Glacier', gender: 'M' },
+  { article: 'Le', noun: 'Passage', gender: 'M' },
+  { article: 'Le', noun: 'Rocher', gender: 'M' },
+  { article: 'Le', noun: 'Mur', gender: 'M' },
+  { article: 'La', noun: 'Crête', gender: 'F' },
+  { article: 'La', noun: 'Corniche', gender: 'F' },
+  { article: 'La', noun: 'Face', gender: 'F' },
+  { article: 'La', noun: 'Balme', gender: 'F' },
+  { article: "L'", noun: 'Arête', gender: 'F' },
+  { article: 'Les', noun: 'Rochers', gender: 'MP' },
+];
+const NOUNS_BLACK: PisteNoun[] = [
+  { article: 'Le', noun: 'Ravin', gender: 'M' },
+  { article: 'Le', noun: 'Couloir', gender: 'M' },
+  { article: 'Le', noun: 'Précipice', gender: 'M' },
+  { article: 'Le', noun: 'Gouffre', gender: 'M' },
+  { article: 'Le', noun: 'Chaos', gender: 'M' },
+  { article: "L'", noun: 'Aiguille', gender: 'F' },
+  { article: "L'", noun: 'Enfer', gender: 'M' },
+  { article: 'La', noun: 'Brèche', gender: 'F' },
+  { article: 'La', noun: 'Crevasse', gender: 'F' },
+  { article: 'La', noun: 'Faille', gender: 'F' },
+];
+const RANK_NOUNS: Record<ContractRank, PisteNoun[]> = {
+  green: NOUNS_GREEN, blue: NOUNS_BLUE, red: NOUNS_RED, black: NOUNS_BLACK,
+};
+
+// Rank-themed adjective pools
+const ADJS_GREEN: PisteAdj[] = [
+  { M: 'Fleuri', F: 'Fleurie', MP: 'Fleuris', FP: 'Fleuries' },
+  { M: 'Ensoleillé', F: 'Ensoleillée', MP: 'Ensoleillés', FP: 'Ensoleillées' },
+  { M: 'Tranquille', F: 'Tranquille', MP: 'Tranquilles', FP: 'Tranquilles' },
+  { M: 'Doux', F: 'Douce', MP: 'Doux', FP: 'Douces' },
+  { M: 'Paisible', F: 'Paisible', MP: 'Paisibles', FP: 'Paisibles' },
+  { M: 'Boisé', F: 'Boisée', MP: 'Boisés', FP: 'Boisées' },
+];
+const ADJS_BLUE: PisteAdj[] = [
+  { M: 'Blanc', F: 'Blanche', MP: 'Blancs', FP: 'Blanches' },
+  { M: 'Enneigé', F: 'Enneigée', MP: 'Enneigés', FP: 'Enneigées' },
+  { M: 'Caché', F: 'Cachée', MP: 'Cachés', FP: 'Cachées' },
+  { M: 'Sauvage', F: 'Sauvage', MP: 'Sauvages', FP: 'Sauvages' },
+  { M: 'Secret', F: 'Secrète', MP: 'Secrets', FP: 'Secrètes' },
+  { M: 'Suspendu', F: 'Suspendue', MP: 'Suspendus', FP: 'Suspendues' },
+];
+const ADJS_RED: PisteAdj[] = [
+  { M: 'Haut', F: 'Haute', MP: 'Hauts', FP: 'Hautes' },
+  { M: 'Perdu', F: 'Perdue', MP: 'Perdus', FP: 'Perdues' },
+  { M: 'Escarpé', F: 'Escarpée', MP: 'Escarpés', FP: 'Escarpées' },
+  { M: 'Gelé', F: 'Gelée', MP: 'Gelés', FP: 'Gelées' },
+  { M: 'Vertigineux', F: 'Vertigineuse', MP: 'Vertigineux', FP: 'Vertigineuses' },
+];
+const ADJS_BLACK: PisteAdj[] = [
+  { M: 'Noir', F: 'Noire', MP: 'Noirs', FP: 'Noires' },
+  { M: 'Maudit', F: 'Maudite', MP: 'Maudits', FP: 'Maudites' },
+  { M: 'Infernal', F: 'Infernale', MP: 'Infernaux', FP: 'Infernales' },
+  { M: 'Mortel', F: 'Mortelle', MP: 'Mortels', FP: 'Mortelles' },
+  { M: 'Redoutable', F: 'Redoutable', MP: 'Redoutables', FP: 'Redoutables' },
+];
+const RANK_ADJS: Record<ContractRank, PisteAdj[]> = {
+  green: ADJS_GREEN, blue: ADJS_BLUE, red: ADJS_RED, black: ADJS_BLACK,
+};
+
+// Preposed adjective pools (Article + Adj + Noun)
+const PRE_GREEN: PreAdj[] = [
+  { M: 'Petit', F: 'Petite', MP: 'Petits', FP: 'Petites' },
+  { M: 'Joli', F: 'Jolie', MP: 'Jolis', FP: 'Jolies' },
+  { M: 'Beau', F: 'Belle', MP: 'Beaux', FP: 'Belles', MV: 'Bel' },
+  { M: 'Vieux', F: 'Vieille', MP: 'Vieux', FP: 'Vieilles', MV: 'Vieil' },
+];
+const PRE_BLUE: PreAdj[] = [
+  { M: 'Grand', F: 'Grande', MP: 'Grands', FP: 'Grandes' },
+  { M: 'Haut', F: 'Haute', MP: 'Hauts', FP: 'Hautes' },
+  { M: 'Beau', F: 'Belle', MP: 'Beaux', FP: 'Belles', MV: 'Bel' },
+];
+const PRE_RED: PreAdj[] = [
+  { M: 'Grand', F: 'Grande', MP: 'Grands', FP: 'Grandes' },
+  { M: 'Haut', F: 'Haute', MP: 'Hauts', FP: 'Hautes' },
+  { M: 'Mauvais', F: 'Mauvaise', MP: 'Mauvais', FP: 'Mauvaises' },
+];
+const PRE_BLACK: PreAdj[] = [
+  { M: 'Grand', F: 'Grande', MP: 'Grands', FP: 'Grandes' },
+  { M: 'Vieux', F: 'Vieille', MP: 'Vieux', FP: 'Vieilles', MV: 'Vieil' },
+];
+const RANK_PRE: Record<ContractRank, PreAdj[]> = {
+  green: PRE_GREEN, blue: PRE_BLUE, red: PRE_RED, black: PRE_BLACK,
+};
+
+// Rank-themed genitive pools
+const GENS_GREEN = [
+  'des Marmottes', 'du Berger', 'du Mélèze',
+  'du Hameau', 'des Myrtilles', 'des Arolles',
+];
+const GENS_BLUE = [
+  'des Chamois', 'de la Vanoise', 'du Beaufortain',
+  'des Sources', 'du Nant', 'de la Moraine',
+];
+const GENS_RED = [
+  "de l'Aigle", 'des Bouquetins', 'des Aiguilles', 'du Vent',
+  'des Séracs', 'du Diable', 'de la Pointe',
+];
+const GENS_BLACK = [
+  'du Loup', "de l'Ours", 'des Abîmes', 'du Néant',
+  'des Damnés', 'de la Mort', 'du Purgatoire', 'des Ombres',
+];
+const RANK_GENS: Record<ContractRank, string[]> = {
+  green: GENS_GREEN, blue: GENS_BLUE, red: GENS_RED, black: GENS_BLACK,
+};
+
+const PARK_NAMES = [
+  'Le Snowpark', "L'Évasion", 'Le Tremplin',
+  'La Rampe', 'Le Boardercross', 'Les Modules', 'Le Slopestyle',
+];
+
+/** Check if a genitive would be redundant with the noun (e.g. "Le Lac du Lac"). */
+function isRedundant(noun: string, gen: string): boolean {
+  const nLower = noun.toLowerCase();
+  return gen.toLowerCase().includes(nLower);
+}
+
+/** Generate a deterministic French piste name from the RNG. */
+function generatePisteName(rng: SeededRNG, isPark: boolean, rank: ContractRank): string {
+  if (isPark) return rng.pick(PARK_NAMES);
+  const n = rng.pick(RANK_NOUNS[rank]);
+  const space = n.article === "L'" ? '' : ' ';
+  // 40% genitive ("Le Col de l'Aigle"), 30% postposed adj ("Le Col Gelé"), 30% preposed adj ("Le Grand Col")
+  const roll = rng.frac();
+  if (roll < 0.4) {
+    const gens = RANK_GENS[rank];
+    let gen = rng.pick(gens);
+    if (isRedundant(n.noun, gen)) {
+      gen = gens.find(g => !isRedundant(n.noun, g)) || gen;
+    }
+    return `${n.article}${space}${n.noun} ${gen}`;
+  }
+  if (roll < 0.7) {
+    const adj = rng.pick(RANK_ADJS[rank]);
+    return `${n.article}${space}${n.noun} ${adj[n.gender]}`;
+  }
+  // Preposed: "Le Grand Col", "Le Bel Alpage", "La Belle Vallée"
+  const pre = rng.pick(RANK_PRE[rank]);
+  const startsVowel = /^[AEÉIOUÂÊÎÔÛ]/i.test(n.noun);
+  let form: string;
+  if (n.gender === 'M' && startsVowel && pre.MV) {
+    form = pre.MV; // beau→bel, vieux→vieil before vowel
+  } else {
+    form = pre[n.gender === 'MP' ? 'MP' : n.gender === 'FP' ? 'FP' : n.gender === 'F' ? 'F' : 'M'];
+  }
+  // L' nouns need full article when adjective separates: L'Alpage → Le Bel Alpage
+  const isFem = n.gender === 'F' || n.gender === 'FP';
+  const preArticle = n.article === "L'" ? (isFem ? 'La' : 'Le') : n.article;
+  return `${preArticle} ${form} ${n.noun}`;
+}
+
 /** Pick a briefing speaker and dialogue key based on level characteristics. */
 function pickContractBriefing(rng: SeededRNG, level: Level): { speaker: string; dialogue: string } {
   // Thierry warns about hazards (steep, avalanche, storm)
@@ -176,6 +367,7 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
   const level: Level = {
     id: CONTRACT_LEVEL_ID_BASE + (rng.seed % 1000),
     nameKey: `rank_${rank}`,
+    name: generatePisteName(rng, false, rank),
     taskKey: 'contract_levelTask',
     difficulty,
     timeLimit: 0, // computed below
@@ -241,6 +433,7 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
   const level: Level = {
     id: CONTRACT_LEVEL_ID_BASE + (rng.seed % 1000),
     nameKey: 'rank_park',
+    name: generatePisteName(rng, true, rank),
     taskKey: 'contract_levelTask',
     difficulty: 'park',
     timeLimit: 0,

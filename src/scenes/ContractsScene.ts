@@ -32,6 +32,7 @@ export default class ContractsScene extends Phaser.Scene {
   private greenIsPark = false;
   private rankButtons: Phaser.GameObjects.Text[] = [];
   private seedDisplay?: Phaser.GameObjects.Text;
+  private pisteNameDisplay?: Phaser.GameObjects.Text;
   private briefingText?: Phaser.GameObjects.Text;
   private buttonNav?: MenuButtonNav;
   private gamepadNav?: GamepadMenuNav;
@@ -143,14 +144,22 @@ export default class ContractsScene extends Phaser.Scene {
 
     // --- Daily briefing (compact, below rank row) ---
     const briefingY = rankY + Math.round(35 * scale);
-    this.seedDisplay = this.add.text(width / 2, briefingY, '', {
+    this.pisteNameDisplay = this.add.text(width / 2, briefingY, '', {
+      fontFamily: THEME.fonts.family,
+      fontSize: Math.round(13 * scale) + 'px',
+      color: THEME.colors.textPrimary,
+      fontStyle: 'bold',
+      align: 'center',
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+
+    this.seedDisplay = this.add.text(width / 2, briefingY + Math.round(18 * scale), '', {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(11 * scale) + 'px',
       color: THEME.colors.textMuted,
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
-    this.briefingText = this.add.text(width / 2, briefingY + Math.round(16 * scale), '', {
+    this.briefingText = this.add.text(width / 2, briefingY + Math.round(34 * scale), '', {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(11 * scale) + 'px',
       color: THEME.colors.textSecondary,
@@ -167,7 +176,7 @@ export default class ContractsScene extends Phaser.Scene {
     allCallbacks.push(() => this.goBack());
 
     const dailyCode = seedToCode(dailySeedNum);
-    const dailyY = briefingY + Math.round(50 * scale);
+    const dailyY = briefingY + Math.round(68 * scale);
 
     const dailyBtn = this.add.text(width / 2, dailyY,
       t('contracts_dailyShift') + '  [' + dailyCode + ']',
@@ -262,6 +271,10 @@ export default class ContractsScene extends Phaser.Scene {
     const dailySeedNum = dailySeed();
     const { level } = generateValidContractLevel(rankSeed(dailySeedNum, this.selectedRank), this.selectedRank);
     const isPark = level.difficulty === 'park';
+
+    if (this.pisteNameDisplay) {
+      this.pisteNameDisplay.setText(level.name || t(level.nameKey));
+    }
 
     const weatherKey = `contracts_weather_${level.weather || 'clear'}`;
     const shiftKey = level.isNight ? 'contracts_night' : 'contracts_day';

@@ -188,8 +188,11 @@ export default class HUDScene extends Phaser.Scene {
     this.add.rectangle(0, visorHeight - accentHeight, width, accentHeight, THEME.colors.infoHex)
       .setOrigin(0).setScrollFactor(0).setAlpha(hc ? 0.8 : 0.4);
 
-    // Level name
-    const levelNameText = visorText(padding, row1Y, t(this.level.nameKey) || 'Level', fontSmall);
+    // Level name — contracts compose "Rank - Piste Name", campaign levels have it in the locale key
+    const displayName = this.level.name
+      ? `${t(this.level.nameKey)} - ${this.level.name}`
+      : t(this.level.nameKey) || 'Level';
+    const levelNameText = visorText(padding, row1Y, displayName, fontSmall);
 
     // Buff indicator — shown right after level name on row 1
     const buffX = levelNameText.x + levelNameText.width + Math.round(12 * this.uiScale);

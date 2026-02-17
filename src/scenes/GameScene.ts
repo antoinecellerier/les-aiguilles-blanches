@@ -309,7 +309,10 @@ export default class GameScene extends Phaser.Scene {
       this.pauseGame();
     });
 
-    Accessibility.announce(t(this.level.nameKey) + ' - ' + t(this.level.taskKey));
+    const announceName = this.level.name
+      ? `${t(this.level.nameKey)} - ${this.level.name}`
+      : t(this.level.nameKey);
+    Accessibility.announce(announceName + ' - ' + t(this.level.taskKey));
 
     this.engineSounds.start();
     this.ambienceSounds.start(this.level.weather || 'clear', !!this.level.isNight);

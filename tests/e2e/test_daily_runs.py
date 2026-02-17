@@ -6,7 +6,7 @@ and cross-scene flows specific to the contracts/daily-runs feature.
 import pytest
 import time
 from playwright.sync_api import Page
-from conftest import wait_for_scene, get_active_scenes, GAME_URL
+from conftest import wait_for_scene, get_active_scenes, GAME_URL, navigate_to_contracts, unlock_all_levels
 from test_gamepad import tap_gamepad_button, MOCK_GAMEPAD_SCRIPT
 
 
@@ -14,21 +14,6 @@ from test_gamepad import tap_gamepad_button, MOCK_GAMEPAD_SCRIPT
 
 GP_A, GP_B, GP_START = 0, 1, 9
 GP_DPAD_DOWN = 13
-
-
-def unlock_all_levels(page: Page):
-    """Set localStorage so all 11 campaign levels are completed."""
-    page.evaluate("""() => {
-        const stats = {};
-        for (let i = 0; i <= 10; i++) {
-            stats[i] = {completed: true, bestStars: 3, bestTime: 60, bestBonusMet: 0};
-        }
-        localStorage.setItem('snowGroomer_progress', JSON.stringify({
-            currentLevel: 11,
-            levelStats: stats,
-            savedAt: new Date().toISOString()
-        }));
-    }""")
 
 
 def setup_unlocked(page: Page, width: int = 1280, height: int = 720):
@@ -39,29 +24,6 @@ def setup_unlocked(page: Page, width: int = 1280, height: int = 720):
     unlock_all_levels(page)
     page.reload()
     wait_for_scene(page, "MenuScene", timeout=15000)
-
-
-def navigate_to_contracts(page: Page):
-    """From MenuScene, select the Daily Runs button and wait for ContractsScene."""
-    idx = page.evaluate("""() => {
-        const ms = window.game?.scene?.getScene('MenuScene');
-        if (!ms?.menuButtons) return -1;
-        const texts = ms.menuButtons.map(b => b.text.toLowerCase());
-        for (let i = 0; i < texts.length; i++) {
-            if (texts[i].includes('daily') || texts[i].includes('contrat') ||
-                texts[i].includes('courses') || texts[i].includes('runs')) return i;
-        }
-        return -1;
-    }""")
-    assert idx >= 0, "Daily Runs button not found in menu"
-    # Use buttonNav.select for reliability across locales / button layouts
-    page.evaluate(f"""() => {{
-        const ms = window.game?.scene?.getScene('MenuScene');
-        if (ms?.buttonNav) ms.buttonNav.select({idx});
-    }}""")
-    time.sleep(0.1)
-    page.keyboard.press("Enter")
-    wait_for_scene(page, "ContractsScene")
 
 
 def wait_for_scene_ready(page: Page, scene: str, timeout: int = 8000):
@@ -282,7 +244,7 @@ class TestContractFlows:
             f"Contract complete should not show 'Next Level': {buttons}"
 
     def test_quit_clears_contract_session(self, page: Page):
-        """Quitting to menu should clear contract session."""
+        """Quitting from pause should return to ContractsScene."""
         setup_unlocked(page)
         navigate_to_contracts(page)
         start_daily_run(page)
@@ -297,7 +259,7 @@ class TestContractFlows:
             time.sleep(0.06)
         page.keyboard.press("Enter")
         time.sleep(0.5)
-        wait_for_scene(page, "MenuScene", timeout=8000)
+        wait_for_scene(page, "ContractsScene", timeout=8000)
 
 
 # ============================================================
@@ -331,9 +293,8 @@ class TestContractLevelGeneration:
             time.sleep(0.06)
         page.keyboard.press("Enter")
         time.sleep(0.5)
-        wait_for_scene(page, "MenuScene", timeout=8000)
+        wait_for_scene(page, "ContractsScene", timeout=8000)
 
-        navigate_to_contracts(page)
         start_daily_run(page)
 
         props2 = page.evaluate("""() => {
@@ -371,9 +332,8 @@ class TestContractLevelGeneration:
             time.sleep(0.06)
         page.keyboard.press("Enter")
         time.sleep(0.5)
-        wait_for_scene(page, "MenuScene", timeout=8000)
+        wait_for_scene(page, "ContractsScene", timeout=8000)
 
-        navigate_to_contracts(page)
         # Cycle rank: green → blue → red → black (3 right presses)
         for _ in range(3):
             page.keyboard.press("ArrowRight")

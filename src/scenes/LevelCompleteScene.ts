@@ -215,7 +215,10 @@ export default class LevelCompleteScene extends Phaser.Scene {
     cursorY += iconFontSize + 4;
 
     // Level name
-    const nameText = this.add.text(cx, cursorY, t(level.nameKey), {
+    const completeLevelName = level.name
+      ? `${t(level.nameKey)} - ${level.name}`
+      : t(level.nameKey);
+    const nameText = this.add.text(cx, cursorY, completeLevelName, {
       fontFamily: THEME.fonts.family,
       fontSize: `${titleFontSize}px`,
       fontStyle: 'bold',

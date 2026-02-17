@@ -39,6 +39,22 @@ describe('generateContractLevel', () => {
       expect(level.id).toBeGreaterThanOrEqual(100);
     }
   });
+
+  it('should generate French piste names', () => {
+    const names = new Set();
+    for (let seed = 0; seed < 50; seed++) {
+      for (const rank of ['green', 'blue', 'red', 'black']) {
+        const level = generateContractLevel(seed, rank);
+        expect(level.name).toBeDefined();
+        expect(level.name.length).toBeGreaterThan(3);
+        // Must start with a French article
+        expect(level.name).toMatch(/^(Le |La |Les |L')/);
+        names.add(level.name);
+      }
+    }
+    // Should generate variety (at least 20 unique names from 200 levels)
+    expect(names.size).toBeGreaterThan(20);
+  });
 });
 
 describe('rank difficulty scaling', () => {

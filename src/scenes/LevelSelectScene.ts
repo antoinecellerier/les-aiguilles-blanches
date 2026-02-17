@@ -153,7 +153,10 @@ export default class LevelSelectScene extends Phaser.Scene {
       const nameClipW = compact
         ? maxRowW - (nameX - rowStartX) - 10
         : maxRowW - (nameX - rowStartX) - 2 * btnMinW - 2 * btnGap - 10;
-      const nameText = this.add.text(nameX, nameLineY, t(level.nameKey) || level.nameKey, {
+      const selectLevelName = level.name
+        ? `${t(level.nameKey)} - ${level.name}`
+        : t(level.nameKey) || level.nameKey;
+      const nameText = this.add.text(nameX, nameLineY, selectLevelName, {
         fontFamily: THEME.fonts.family,
         fontSize: `${rowFontSize}px`,
         color: nameColor,

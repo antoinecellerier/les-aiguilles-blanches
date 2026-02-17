@@ -816,7 +816,10 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Level name (left)
     const modeIcon = this.resolvedMode === 'snowboard' ? '🏂' : '⛷️';
-    visorText(padding, row1Y, `${modeIcon} ${t(this.level.nameKey) || 'Ski Run'}`, Math.round(14 * uiScale));
+    const skiLevelName = this.level.name
+      ? `${t(this.level.nameKey)} - ${this.level.name}`
+      : t(this.level.nameKey) || 'Ski Run';
+    visorText(padding, row1Y, `${modeIcon} ${skiLevelName}`, Math.round(14 * uiScale));
 
     // Speed (left, row 2)
     this.speedText = visorText(padding, row2Y, '', Math.round(14 * uiScale));
