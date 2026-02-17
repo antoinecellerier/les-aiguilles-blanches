@@ -162,6 +162,7 @@ const tr: Record<string, string> = {
   pauseTitle: "⏸️ Duraklatıldı",
   restart: "Yeniden Başlat",
   skipRun: "Kaymayı atla",
+  newRun: "Yeni pist",
   quit: "Çık",
   menu: "Menü",
   levelSelect: "Pist Seç",

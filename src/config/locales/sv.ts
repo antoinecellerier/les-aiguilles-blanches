@@ -162,6 +162,7 @@ const sv: Record<string, string> = {
   pauseTitle: "⏸️ Paus",
   restart: "Starta om",
   skipRun: "Hoppa över åk",
+  newRun: "Ny pist",
   quit: "Avsluta",
   menu: "Meny",
   levelSelect: "Välj bana",

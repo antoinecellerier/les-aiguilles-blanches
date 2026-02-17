@@ -162,6 +162,7 @@ const sk: Record<string, string> = {
   pauseTitle: "⏸️ Pozastavené",
   restart: "Reštartovať",
   skipRun: "Preskočiť zjazd",
+  newRun: "Nová zjazdovka",
   quit: "Odísť",
   menu: "Menu",
   levelSelect: "Výber trate",

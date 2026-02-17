@@ -162,6 +162,7 @@ const ko: Record<string, string> = {
   pauseTitle: "⏸️ 일시정지",
   restart: "다시 시작",
   skipRun: "활강 건너뛰기",
+  newRun: "새 슬로프",
   quit: "종료",
   menu: "메뉴",
   levelSelect: "레벨 선택",

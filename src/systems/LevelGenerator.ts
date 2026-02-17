@@ -10,6 +10,14 @@ import { SeededRNG } from '../utils/seededRNG';
 
 export type ContractRank = 'green' | 'blue' | 'red' | 'black';
 
+export const RANKS: ContractRank[] = ['green', 'blue', 'red', 'black'];
+
+/** Derive a rank-specific seed from a base seed. */
+export function rankSeed(baseSeed: number, rank: ContractRank): number {
+  const rankIdx = RANKS.indexOf(rank);
+  return ((baseSeed * 31) + rankIdx * 7919) >>> 0;
+}
+
 interface RankConfig {
   widthRange: [number, number];
   heightRange: [number, number];

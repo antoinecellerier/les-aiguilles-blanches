@@ -143,6 +143,7 @@ const de: Record<string, string> = {
   pauseTitle: "⏸️ Pause",
   restart: "Neustart",
   skipRun: "Abfahrt überspringen",
+  newRun: "Neue Piste",
   quit: "Beenden",
   menu: "Menü",
   levelSelect: "Levelauswahl",

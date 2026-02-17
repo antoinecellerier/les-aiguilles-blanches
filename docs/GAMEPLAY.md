@@ -483,3 +483,9 @@ Green rank has 80% park chance; other ranks generate regular pistes only. Park c
 ### Ski Mode
 
 After grooming a contract, "Ski it!" lets you descend on your own work. Regular contracts may include slalom gates; park contracts include freestyle tricks.
+
+### Pause Menu in Contracts
+
+Pausing during a contract shows a contract-aware menu:
+- **Quit** returns to the Daily Runs screen (not main menu)
+- **New Run** (random contracts only) generates a fresh seed at the same difficulty rank

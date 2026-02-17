@@ -162,6 +162,7 @@ const ja: Record<string, string> = {
   pauseTitle: "⏸️ 一時停止",
   restart: "やり直し",
   skipRun: "滑走をスキップ",
+  newRun: "新しいコース",
   quit: "終了",
   menu: "メニュー",
   levelSelect: "レベル選択",

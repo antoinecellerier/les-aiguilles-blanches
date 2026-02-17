@@ -44,6 +44,11 @@ function hashString(s: string): number {
   return hash;
 }
 
+/** Generate a non-deterministic random seed (32-bit unsigned). */
+export function randomSeed(): number {
+  return (Date.now() ^ (Math.random() * 0xFFFFFFFF)) >>> 0;
+}
+
 /**
  * Seeded random number generator wrapping Phaser's RandomDataGenerator.
  * All methods produce deterministic results from the initial seed.

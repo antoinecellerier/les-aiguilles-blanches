@@ -12,6 +12,9 @@ import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
 import { isDesktopApp, quitDesktopApp } from '../types/electron';
+import { getContractSession, startContractSession } from '../systems/ContractSession';
+import { generateValidContractLevel, rankSeed } from '../systems/LevelGenerator';
+import { seedToCode, randomSeed } from '../utils/seededRNG';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -65,6 +68,9 @@ export default class PauseScene extends Phaser.Scene {
     const panelPad = Math.round(20 * scaleFactor);
     const titleGap = Math.round(16 * scaleFactor);
 
+    const session = getContractSession();
+    const isRandomRun = !!session && !session.isDaily;
+
     const buttonDefs = this.skiMode
       ? [
           { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
@@ -77,6 +83,7 @@ export default class PauseScene extends Phaser.Scene {
       : [
           { text: 'resume', callback: () => this.resumeGame(), isCTA: true },
           { text: 'restart', callback: () => this.restartLevel(), isCTA: false },
+          ...(isRandomRun ? [{ text: 'newRun', callback: () => this.startNewRandomRun(), isCTA: false }] : []),
           { text: 'settings', callback: () => this.openSettings(), isCTA: false },
           { text: 'quit', callback: () => this.quitToMenu(), isCTA: false },
           ...(isDesktopApp() ? [{ text: 'quitGame', callback: () => quitDesktopApp(), isCTA: false }] : []),
@@ -226,8 +233,23 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private quitToMenu(): void {
-    saveProgress(this.levelIndex, this.skiMode ? 'SkiRunScene' : 'GameScene');
-    resetGameScenes(this.game, 'MenuScene');
+    const session = getContractSession();
+    if (session) {
+      resetGameScenes(this.game, 'ContractsScene');
+    } else {
+      saveProgress(this.levelIndex, this.skiMode ? 'SkiRunScene' : 'GameScene');
+      resetGameScenes(this.game, 'MenuScene');
+    }
+  }
+
+  private startNewRandomRun(): void {
+    const session = getContractSession();
+    if (!session) return;
+    const seed = randomSeed();
+    const { level, usedSeed } = generateValidContractLevel(rankSeed(seed, session.rank), session.rank);
+    const code = seedToCode(usedSeed);
+    startContractSession({ level, seedCode: code, rank: session.rank, isDaily: false });
+    resetGameScenes(this.game, 'GameScene', { level: level.id });
   }
 
   shutdown(): void {

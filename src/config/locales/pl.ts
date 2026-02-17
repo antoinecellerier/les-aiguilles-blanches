@@ -162,6 +162,7 @@ const pl: Record<string, string> = {
   pauseTitle: "⏸️ Wstrzymano",
   restart: "Restart",
   skipRun: "Pomiń zjazd",
+  newRun: "Nowa trasa",
   quit: "Wyjdź",
   menu: "Menu",
   levelSelect: "Wybór trasy",

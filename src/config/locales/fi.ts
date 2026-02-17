@@ -162,6 +162,7 @@ const fi: Record<string, string> = {
   pauseTitle: "⏸️ Tauko",
   restart: "Aloita alusta",
   skipRun: "Ohita lasku",
+  newRun: "Uusi rinne",
   quit: "Lopeta",
   menu: "Valikko",
   levelSelect: "Valitse rinne",

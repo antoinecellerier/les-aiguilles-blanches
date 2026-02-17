@@ -162,6 +162,7 @@ const en: Record<string, string> = {
   pauseTitle: "⏸️ Paused",
   restart: "Restart",
   skipRun: "Skip Run",
+  newRun: "New Run",
   quit: "Quit",
   menu: "Menu",
   levelSelect: "Level Select",

@@ -162,6 +162,7 @@ const nb: Record<string, string> = {
   pauseTitle: "⏸️ Pause",
   restart: "Start på nytt",
   skipRun: "Hopp over løp",
+  newRun: "Ny løype",
   quit: "Avslutt",
   menu: "Meny",
   levelSelect: "Velg løype",

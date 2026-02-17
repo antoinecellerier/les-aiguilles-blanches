@@ -7,20 +7,12 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuBackdrop, createMenuHeader, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { playClick } from '../systems/UISounds';
-import { generateValidContractLevel, type ContractRank } from '../systems/LevelGenerator';
-import { seedToCode, dailySeed } from '../utils/seededRNG';
+import { generateValidContractLevel, rankSeed, RANKS, type ContractRank } from '../systems/LevelGenerator';
+import { seedToCode, dailySeed, randomSeed } from '../utils/seededRNG';
 import { DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { startContractSession } from '../systems/ContractSession';
 import { getJSON } from '../utils/storage';
-
-const RANKS: ContractRank[] = ['green', 'blue', 'red', 'black'];
-
-/** Mix rank into seed so each rank produces a unique level from the same base seed. */
-function rankSeed(baseSeed: number, rank: ContractRank): number {
-  const rankIdx = RANKS.indexOf(rank);
-  return ((baseSeed * 31) + rankIdx * 7919) >>> 0;
-}
 
 const RANK_COLORS: Record<ContractRank, string> = {
   green: '#22c55e',
@@ -211,13 +203,11 @@ export default class ContractsScene extends Phaser.Scene {
     ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
     randomBtn.on('pointerdown', () => {
       playClick();
-      const randomSeed = (Date.now() ^ (Math.random() * 0xFFFFFFFF)) >>> 0;
-      this.startContract(randomSeed);
+      this.startContract(randomSeed());
     });
     allButtons.push(randomBtn);
     allCallbacks.push(() => {
-      const randomSeed = (Date.now() ^ (Math.random() * 0xFFFFFFFF)) >>> 0;
-      this.startContract(randomSeed);
+      this.startContract(randomSeed());
     });
 
     // Keyboard/gamepad navigation: up/down for action buttons, left/right for rank

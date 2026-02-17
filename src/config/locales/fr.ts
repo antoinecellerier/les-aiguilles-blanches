@@ -166,6 +166,7 @@ const fr: Record<string, string> = {
   pauseTitle: "⏸️ Pause",
   restart: "Recommencer",
   skipRun: "Passer la descente",
+  newRun: "Nouvelle piste",
   quit: "Quitter",
   menu: "Menu",
   levelSelect: "Choix du niveau",
