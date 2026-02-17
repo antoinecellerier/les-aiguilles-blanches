@@ -95,7 +95,6 @@ export default class SettingsScene extends Phaser.Scene {
       weather: levelWeather,
       snowLinePct: 0.75,
       overlayAlpha: 0.92,
-      overlayDepth: DEPTHS.MENU_OVERLAY,
     });
     this.backdrop.wildlife.menuZone = { left: 0, right: width, top: this.backdrop.snowLineY, bottom: height };
 
