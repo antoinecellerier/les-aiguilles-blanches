@@ -284,6 +284,12 @@ const sv: Record<string, string> = {
   marieIntro: "Hej! Jag är Marie, jag driver restaurangen uppe vid pisten. Kom förbi när du vill — en varm måltid gör underverk!",
 
   // Changelog
+  changelog_20260217_date: "17 februari 2026",
+  changelog_20260217: "🏔️ Sju pistformer\n🎯 Banvariation förbättrad\n⚡ Smidigare skidåkning",
+  changelog_20260216_date: "16 februari 2026",
+  changelog_20260216: "🎲 Dagliga lopp",
+  changelog_20260215_date: "15 februari 2026",
+  changelog_20260215: "⚡ Nattrendering uppdaterad\n📱 Touchknappar i skidläge\n⌨️ Tangentbordslayout-detektion",
   changelog_20260214_date: "14 februari 2026",
   changelog_20260214: "🎪 Tricks & kombos\n🏂 Fartställning & halfpipe-fysik\n👁️ Bättre pistkontrast\n📱 Auto-pistning vid vinsch (touch)\n♿ Högkontrastläge",
   changelog_20260213_date: "13 februari 2026",

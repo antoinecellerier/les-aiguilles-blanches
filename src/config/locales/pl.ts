@@ -283,6 +283,12 @@ const pl: Record<string, string> = {
   marieIntro: "Cześć! Jestem Marie, prowadzę restaurację na górze trasy. Wpadaj kiedy chcesz — ciepły posiłek czyni cuda!",
 
   // Changelog
+  changelog_20260217_date: "17 lutego 2026",
+  changelog_20260217: "🏔️ Siedem kształtów tras\n🎯 Różnorodność poziomów\n⚡ Płynniejsza jazda",
+  changelog_20260216_date: "16 lutego 2026",
+  changelog_20260216: "🎲 Dzienne wyzwania",
+  changelog_20260215_date: "15 lutego 2026",
+  changelog_20260215: "⚡ Przebudowa nocnego renderingu\n📱 Przyciski dotykowe w trybie ski\n⌨️ Wykrywanie układu klawiatury",
   changelog_20260214_date: "14 lutego 2026",
   changelog_20260214: "🎪 Punktacja trików i combo\n🏂 Pozycja zjazdowa i fizyka halfpipe'u\n👁️ Lepszy kontrast tras\n📱 Automatyczne ratrakowanie na wciągarce (dotyk)\n♿ Tryb wysokiego kontrastu",
   changelog_20260213_date: "13 lutego 2026",

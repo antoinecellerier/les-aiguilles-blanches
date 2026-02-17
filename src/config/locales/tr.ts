@@ -283,6 +283,12 @@ const tr: Record<string, string> = {
   marieIntro: "Merhaba! Ben Marie, pistin üstündeki restoranı işletiyorum. İstediğin zaman uğra — sıcak yemek burada mucize yapar!",
 
   // Changelog
+  changelog_20260217_date: "17 Şubat 2026",
+  changelog_20260217: "🏔️ Yedi pist şekli\n🎯 Seviye çeşitliliği\n⚡ Akıcı kayak deneyimi",
+  changelog_20260216_date: "16 Şubat 2026",
+  changelog_20260216: "🎲 Günlük koşular",
+  changelog_20260215_date: "15 Şubat 2026",
+  changelog_20260215: "⚡ Gece görüntüleme yenilendi\n📱 Kayak modu dokunmatik düğmeler\n⌨️ Klavye düzeni algılama",
   changelog_20260214_date: "14 Şubat 2026",
   changelog_20260214: "🎪 Trick puanlama & kombolar\n🏂 Hız pozisyonu & halfpipe fiziği\n👁️ Daha iyi pist kontrastı\n📱 Vinçle otomatik ezme (dokunmatik)\n♿ Yüksek kontrast modu",
   changelog_20260213_date: "13 Şubat 2026",

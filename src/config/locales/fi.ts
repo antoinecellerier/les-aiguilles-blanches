@@ -284,6 +284,12 @@ const fi: Record<string, string> = {
   marieIntro: "Hei! Olen Marie, pyöritän ravintolaa rinteen yläpäässä. Piipahtele milloin vain — lämmin ateria tekee ihmeitä!",
 
   // Changelog
+  changelog_20260217_date: "17. helmikuuta 2026",
+  changelog_20260217: "🏔️ Seitsemän rinnemuotoa\n🎯 Kenttävaihtelu lisätty\n⚡ Sulavampi laskettelu",
+  changelog_20260216_date: "16. helmikuuta 2026",
+  changelog_20260216: "🎲 Päivittäiset haasteet",
+  changelog_20260215_date: "15. helmikuuta 2026",
+  changelog_20260215: "⚡ Yörenderöinnin uudistus\n📱 Hiihtotilan kosketuspainikkeet\n⌨️ Näppäimistön tunnistus",
   changelog_20260214_date: "14. helmikuuta 2026",
   changelog_20260214: "🎪 Temppupisteet & kombot\n🏂 Muna-asento & halfpipe-fysiikka\n👁️ Parempi rinnekontrasti\n📱 Automaattinen kunnostus vinssillä (kosketus)\n♿ Korkean kontrastin tila",
   changelog_20260213_date: "13. helmikuuta 2026",

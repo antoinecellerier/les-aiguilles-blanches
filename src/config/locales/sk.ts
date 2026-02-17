@@ -283,6 +283,12 @@ const sk: Record<string, string> = {
   marieIntro: "Ahoj! Som Marie, vediem reštauráciu hore pri zjazdovke. Stav sa kedy chceš — teplé jedlo tu robí zázraky!",
 
   // Changelog
+  changelog_20260217_date: "17. februára 2026",
+  changelog_20260217: "🏔️ Sedem tvarov zjazdoviek\n🎯 Rozmanitosť generovania\n⚡ Plynulejší zjazd",
+  changelog_20260216_date: "16. februára 2026",
+  changelog_20260216: "🎲 Denné výzvy",
+  changelog_20260215_date: "15. februára 2026",
+  changelog_20260215: "⚡ Prepracovanie nočného renderu\n📱 Dotykové tlačidlá v lyžovaní\n⌨️ Detekcia rozloženia klávesnice",
   changelog_20260214_date: "14. februára 2026",
   changelog_20260214: "🎪 Bodovanie trikov & kombá\n🏂 Zjazdový postoj & fyzika halfpipe\n👁️ Lepší kontrast zjazdoviek\n📱 Automatická úprava pri navijaku (dotyk)\n♿ Režim vysokého kontrastu",
   changelog_20260213_date: "13. februára 2026",

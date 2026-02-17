@@ -235,6 +235,12 @@ const es: Record<string, string> = {
   marieIntro: "¡Hola! Soy Marie, llevo el restaurante de arriba. Pasa cuando quieras — ¡una comida caliente hace milagros aquí!",
   
   // Changelog
+  changelog_20260217_date: "17 de febrero de 2026",
+  changelog_20260217: "🏔️ Siete formas de pista\n🎯 Variedad de niveles\n⚡ Descenso más fluido",
+  changelog_20260216_date: "16 de febrero de 2026",
+  changelog_20260216: "🎲 Carreras diarias",
+  changelog_20260215_date: "15 de febrero de 2026",
+  changelog_20260215: "⚡ Mejora del renderizado nocturno\n📱 Botones táctiles en esquí\n⌨️ Detección de teclado",
   changelog_20260214_date: "14 de febrero de 2026",
   changelog_20260214: "🎪 Puntuación de trucos y combos\n🏂 Posición de huevo y física del halfpipe\n👁️ Mejor contraste de pistas\n📱 Preparación auto con cabrestante (táctil)\n♿ Modo alto contraste",
   changelog_20260213_date: "13 de febrero de 2026",

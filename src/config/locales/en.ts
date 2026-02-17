@@ -283,6 +283,12 @@ const en: Record<string, string> = {
   marieIntro: "Hey there! I'm Marie — I run the restaurant up top. Stop by anytime, a hot meal does wonders out here!",
   
   // Changelog
+  changelog_20260217_date: "February 17, 2026",
+  changelog_20260217: "🏔️ Seven piste shapes\n🎯 Level generation variety\n⚡ Smoother ski runs",
+  changelog_20260216_date: "February 16, 2026",
+  changelog_20260216: "🎲 Daily Runs mode",
+  changelog_20260215_date: "February 15, 2026",
+  changelog_20260215: "⚡ Night rendering overhaul\n📱 Ski mode touch buttons\n⌨️ Keyboard layout detection",
   changelog_20260214_date: "February 14, 2026",
   changelog_20260214: "🎪 Trick scoring & combos\n🏂 Tuck & halfpipe physics\n👁️ Better piste contrast\n📱 Touch auto-groom on winch\n♿ High contrast mode",
   changelog_20260213_date: "February 13, 2026",

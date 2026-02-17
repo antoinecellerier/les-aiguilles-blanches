@@ -284,6 +284,12 @@ const nb: Record<string, string> = {
   marieIntro: "Hei! Jeg er Marie, jeg driver restauranten oppe ved løypa. Stikk innom når du vil — et varmt måltid gjør underverker!",
 
   // Changelog
+  changelog_20260217_date: "17. februar 2026",
+  changelog_20260217: "🏔️ Syv løypeformer\n🎯 Banevariasjon forbedret\n⚡ Jevnere skikjøring",
+  changelog_20260216_date: "16. februar 2026",
+  changelog_20260216: "🎲 Daglige løp",
+  changelog_20260215_date: "15. februar 2026",
+  changelog_20260215: "⚡ Nattgjengivelse oppgradert\n📱 Berøringsknapper i skimodus\n⌨️ Tastaturlayout-gjenkjenning",
   changelog_20260214_date: "14. februar 2026",
   changelog_20260214: "🎪 Tricks & komboer\n🏂 Eggposisjon & halfpipe-fysikk\n👁️ Bedre pistekontrast\n📱 Auto-preparering ved vinsj (touch)\n♿ Høykontrastmodus",
   changelog_20260213_date: "13. februar 2026",

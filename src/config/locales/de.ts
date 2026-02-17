@@ -235,6 +235,12 @@ const de: Record<string, string> = {
   marieIntro: "Hallo! Ich bin Marie, ich betreibe das Restaurant oben an der Piste. Komm vorbei, wann du willst — ein heißes Essen wirkt Wunder!",
   
   // Changelog
+  changelog_20260217_date: "17. Februar 2026",
+  changelog_20260217: "🏔️ Sieben Pistenformen\n🎯 Levelgenerierung-Vielfalt\n⚡ Flüssigere Abfahrt",
+  changelog_20260216_date: "16. Februar 2026",
+  changelog_20260216: "🎲 Tägliche Läufe",
+  changelog_20260215_date: "15. Februar 2026",
+  changelog_20260215: "⚡ Nacht-Rendering überarbeitet\n📱 Ski-Modus Touchbuttons\n⌨️ Tastaturlayout-Erkennung",
   changelog_20260214_date: "14. Februar 2026",
   changelog_20260214: "🎪 Tricks & Kombos\n🏂 Hocke & Halfpipe-Physik\n👁️ Besserer Pistenkontrast\n📱 Auto-Präparierung an der Winde (Touch)\n♿ Kontrastmodus",
   changelog_20260213_date: "13. Februar 2026",

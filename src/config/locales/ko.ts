@@ -283,6 +283,12 @@ const ko: Record<string, string> = {
   marieIntro: "안녕! 나 마리야, 슬로프 위에 식당을 운영해. 언제든 들러 — 따뜻한 한 끼가 힘이 돼!",
 
   // Changelog
+  changelog_20260217_date: "2026년 2월 17일",
+  changelog_20260217: "🏔️ 7종 코스 형태\n🎯 레벨 생성 다양성\n⚡ 스키 활주 개선",
+  changelog_20260216_date: "2026년 2월 16일",
+  changelog_20260216: "🎲 데일리 런",
+  changelog_20260215_date: "2026년 2월 15일",
+  changelog_20260215: "⚡ 야간 렌더링 개편\n📱 스키 모드 터치 버튼\n⌨️ 키보드 레이아웃 감지",
   changelog_20260214_date: "2026년 2월 14일",
   changelog_20260214: "🎪 트릭 점수 & 콤보\n🏂 크라우치 & 하프파이프 물리\n👁️ 슬로프 대비 개선\n📱 윈치 시 자동 정설 (터치)\n♿ 고대비 모드",
   changelog_20260213_date: "2026년 2월 13일",

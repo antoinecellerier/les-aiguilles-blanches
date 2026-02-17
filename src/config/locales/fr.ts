@@ -289,6 +289,12 @@ const fr: Record<string, string> = {
   marieIntro: "Salut ! Moi c'est Marie, je tiens le restaurant en haut de la piste. Passe quand tu veux — un bon plat chaud, ça recharge les batteries !",
   
   // Changelog
+  changelog_20260217_date: "17 février 2026",
+  changelog_20260217: "🏔️ Sept formes de piste\n🎯 Variété de génération\n⚡ Descente plus fluide",
+  changelog_20260216_date: "16 février 2026",
+  changelog_20260216: "🎲 Missions quotidiennes",
+  changelog_20260215_date: "15 février 2026",
+  changelog_20260215: "⚡ Refonte du rendu nocturne\n📱 Boutons tactiles en ski\n⌨️ Détection disposition clavier",
   changelog_20260214_date: "14 février 2026",
   changelog_20260214: "🎪 Tricks et combos\n🏂 Schuss et physique du halfpipe\n👁️ Meilleur contraste des pistes\n📱 Damage auto au treuil (tactile)\n♿ Mode contraste élevé",
   changelog_20260213_date: "13 février 2026",

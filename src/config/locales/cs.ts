@@ -283,6 +283,12 @@ const cs: Record<string, string> = {
   marieIntro: "Ahoj! Jsem Marie, vedu restauraci nahoře u sjezdovky. Stav se kdy chceš — teplé jídlo tu dělá zázraky!",
 
   // Changelog
+  changelog_20260217_date: "17. února 2026",
+  changelog_20260217: "🏔️ Sedm tvarů sjezdovek\n🎯 Rozmanitost generování\n⚡ Plynulejší sjezd",
+  changelog_20260216_date: "16. února 2026",
+  changelog_20260216: "🎲 Denní výzvy",
+  changelog_20260215_date: "15. února 2026",
+  changelog_20260215: "⚡ Přepracování nočního renderu\n📱 Dotyková tlačítka v lyžování\n⌨️ Detekce rozložení klávesnice",
   changelog_20260214_date: "14. února 2026",
   changelog_20260214: "🎪 Bodování triků & komba\n🏂 Sjezdový postoj & fyzika halfpipe\n👁️ Lepší kontrast sjezdovek\n📱 Automatická úprava navijákem (dotyk)\n♿ Režim vysokého kontrastu",
   changelog_20260213_date: "13. února 2026",
