@@ -116,6 +116,7 @@ Alpine rock with warm brown tones (NOT gray):
 | Warning/danger | Red | `0xcc2200` |
 | CTA button | Forest green | `0x228b22` |
 | CTA button hover | Bright green | `0x33bb33` |
+| Park rank button | Orange | `0xf59e0b` |
 | Gold/highlight | Gold | `0xffd700` |
 
 ### Menu Screen

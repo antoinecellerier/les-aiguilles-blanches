@@ -357,18 +357,18 @@ Post-campaign mastery mode unlocked after completing Level 10. Generates fresh p
 
 Player picks a rank; seed builds the mountain within those rules.
 
-| Rank | Piste | Steep | Mechanics | Conditions | Park Chance |
-|------|-------|-------|-----------|------------|-------------|
-| **Green** | Wide, straight/gentle | None | Basic grooming | Day, clear | 30% |
-| **Blue** | Medium, gentle/winding | 1 zone (25-30°) | Tighter time | Day, clear | 25% |
-| **Red** | Narrower, winding | 2 zones (30-40°) | Winch, access paths | May have snow | 20% |
-| **Black** | Narrow, serpentine | 3 zones (35-50°) | Winch, avalanche | Night or storm | 15% |
+| Rank | Piste | Shapes | Steep | Mechanics | Conditions | Park Chance |
+|------|-------|--------|-------|-----------|------------|-------------|
+| **Green** | Wide, gentle | gentle_curve, funnel | None | Basic grooming | Day, clear | 80% |
+| **Blue** | Medium, curved | gentle_curve, winding, dogleg | 1 zone (25-30°) | Tighter time | Day, clear | 0% |
+| **Red** | Narrower, winding | winding, serpentine, hourglass, dogleg, funnel | 2 zones (30-40°) | Winch, service roads (≥30° only) | May have snow | 0% |
+| **Black** | Narrow, serpentine | winding, serpentine, dogleg, hourglass | 3 zones (35-50°) | Winch, avalanche | Night or storm | 0% |
 
 ### Park Contracts
 
-When the seed rolls a park level, steep/winch/avalanche are replaced with park features:
-- Piste shape → straight or wide (parks need consistent width)
-- Features: kickers + rails, or halfpipe (50/50 from seed)
+Green rank has 80% park chance; other ranks generate regular pistes only. When park is rolled, steep/winch/avalanche are replaced with park features:
+- 5 feature combos: halfpipe+kickers, kickers+rails, kickers, halfpipe+kickers+rails, rails+kickers
+- Procedural Y placement, mixed lanes (40% chance to alternate kicker/rail), halfpipe feature offset when both types present
 - Coverage target raised to 90-95%, time relaxed
 - No obstacles on park levels
 
@@ -386,6 +386,10 @@ Contracts are the "resort keeps running" epilogue. Characters appear in short ra
 - Thierry: hazard warnings
 - Marie: food reminders
 - Émilie: rival PB teases
+
+### Level Variety
+
+7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` (freqOffset, ampScale, phase, widthPhase) making the same shape look different per seed. Steep zones placed with randomized gaps instead of fixed bands. Service roads generated only for dangerous zones (≥30°); safe zones on blue rank have no bypass. Winch anchors placed only above dangerous zones. Slalom gates cover 5% from top to bottom minus finish buffer.
 
 ### Validation
 

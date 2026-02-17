@@ -151,6 +151,9 @@ export class LevelGeometry {
     const worldHeight = level.height;
     const halfWidth = Math.floor(worldWidth * pisteWidth / 2);
 
+    // Per-seed variation for unique paths within the same shape
+    const v = level.pisteVariation || { freqOffset: 0, ampScale: 1, phase: 0, widthPhase: 0 };
+
     this.pistePath = [];
 
     for (let y = 0; y < worldHeight; y++) {
@@ -161,20 +164,61 @@ export class LevelGeometry {
       switch (shape) {
         case 'straight':
           break;
-        case 'gentle_curve':
-          centerX += Math.sin(progress * Math.PI * 2) * (worldWidth * 0.15);
+        case 'gentle_curve': {
+          const freq = Math.PI * (2 + v.freqOffset);
+          centerX += Math.sin(progress * freq + v.phase) * (worldWidth * 0.15 * v.ampScale);
           break;
-        case 'winding':
-          centerX += Math.sin(progress * Math.PI * 3) * (worldWidth * 0.2);
-          width = halfWidth * 2 * (0.8 + 0.2 * Math.cos(progress * Math.PI * 3));
+        }
+        case 'winding': {
+          const freq = Math.PI * (3 + v.freqOffset);
+          centerX += Math.sin(progress * freq + v.phase) * (worldWidth * 0.2 * v.ampScale);
+          width = halfWidth * 2 * (0.8 + 0.2 * Math.cos(progress * freq + v.widthPhase));
           break;
-        case 'serpentine':
-          centerX += Math.sin(progress * Math.PI * 4) * (worldWidth * 0.25);
-          width = halfWidth * 2 * (0.7 + 0.3 * Math.abs(Math.cos(progress * Math.PI * 4)));
+        }
+        case 'serpentine': {
+          const freq = Math.PI * (4 + v.freqOffset);
+          centerX += Math.sin(progress * freq + v.phase) * (worldWidth * 0.25 * v.ampScale);
+          width = halfWidth * 2 * (0.7 + 0.3 * Math.abs(Math.cos(progress * freq + v.widthPhase)));
           break;
+        }
         case 'wide':
           width = halfWidth * 2.5;
           break;
+        case 'dogleg': {
+          // Sharp S-bend: straight → hard turn → straight (chicane)
+          const bendCenter = 0.25 + 0.5 * (v.phase / (Math.PI * 2)); // 0.25-0.75
+          const bendWidth = 0.12 + 0.06 * v.ampScale;
+          const offset = worldWidth * 0.25 * v.ampScale;
+          const side = v.widthPhase > Math.PI ? -1 : 1;
+          if (progress < bendCenter - bendWidth) {
+            centerX += offset * side;
+          } else if (progress > bendCenter + bendWidth) {
+            centerX -= offset * side;
+          } else {
+            const t = (progress - (bendCenter - bendWidth)) / (bendWidth * 2);
+            centerX += offset * side * (1 - 2 * t);
+          }
+          width = halfWidth * 2 * (0.85 + 0.15 * Math.cos(progress * Math.PI * 2 + v.widthPhase));
+          break;
+        }
+        case 'funnel': {
+          // Wide at top, narrow at bottom (or reversed)
+          const reversed = v.phase > Math.PI;
+          const t = reversed ? 1 - progress : progress;
+          const minFrac = 0.6;
+          const widthFrac = 1 - (1 - minFrac) * t;
+          width = halfWidth * 2 * widthFrac;
+          centerX += Math.sin(progress * Math.PI * (2 + v.freqOffset) + v.phase) * (worldWidth * 0.1 * v.ampScale);
+          break;
+        }
+        case 'hourglass': {
+          // Wide at top and bottom, narrow in the middle
+          const squeeze = Math.sin(progress * Math.PI);
+          const minFrac = 0.5 + v.ampScale * 0.1;
+          width = halfWidth * 2 * (1 - squeeze * (1 - minFrac));
+          centerX += Math.sin(progress * Math.PI * (3 + v.freqOffset) + v.phase) * (worldWidth * 0.15);
+          break;
+        }
       }
 
       this.pistePath.push({

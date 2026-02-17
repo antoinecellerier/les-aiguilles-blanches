@@ -34,14 +34,14 @@ const RANK_CONFIGS: Record<ContractRank, RankConfig> = {
     widthRange: [28, 38],
     heightRange: [35, 50],
     pisteWidthRange: [0.6, 0.75],
-    shapes: ['straight', 'gentle_curve'],
+    shapes: ['gentle_curve', 'funnel'],
     steepZoneCount: 0,
     slopeRange: [0, 0],
     hasWinch: false,
     hasAvalanche: false,
     weatherPool: ['clear'],
     nightChance: 0,
-    parkChance: 0.3,
+    parkChance: 0.8,
     coverageRange: [75, 80],
     obstacleDensity: 0.15,
     slalomChance: 0,
@@ -52,14 +52,14 @@ const RANK_CONFIGS: Record<ContractRank, RankConfig> = {
     widthRange: [30, 42],
     heightRange: [40, 55],
     pisteWidthRange: [0.5, 0.65],
-    shapes: ['gentle_curve', 'winding'],
+    shapes: ['gentle_curve', 'winding', 'dogleg'],
     steepZoneCount: 1,
     slopeRange: [25, 30],
     hasWinch: false,
     hasAvalanche: false,
     weatherPool: ['clear'],
     nightChance: 0,
-    parkChance: 0.25,
+    parkChance: 0,
     coverageRange: [80, 85],
     obstacleDensity: 0.25,
     slalomChance: 0.3,
@@ -70,14 +70,14 @@ const RANK_CONFIGS: Record<ContractRank, RankConfig> = {
     widthRange: [32, 48],
     heightRange: [45, 60],
     pisteWidthRange: [0.4, 0.55],
-    shapes: ['winding', 'serpentine'],
+    shapes: ['winding', 'serpentine', 'hourglass', 'dogleg', 'funnel'],
     steepZoneCount: 2,
     slopeRange: [30, 40],
     hasWinch: true,
     hasAvalanche: false,
     weatherPool: ['clear', 'clear', 'light_snow'],
     nightChance: 0,
-    parkChance: 0.2,
+    parkChance: 0,
     coverageRange: [78, 84],
     obstacleDensity: 0.4,
     slalomChance: 0.5,
@@ -88,14 +88,14 @@ const RANK_CONFIGS: Record<ContractRank, RankConfig> = {
     widthRange: [35, 55],
     heightRange: [50, 70],
     pisteWidthRange: [0.3, 0.45],
-    shapes: ['winding', 'serpentine'],
+    shapes: ['winding', 'serpentine', 'dogleg', 'hourglass'],
     steepZoneCount: 3,
     slopeRange: [35, 50],
     hasWinch: true,
     hasAvalanche: true,
     weatherPool: ['clear', 'light_snow', 'storm'],
     nightChance: 0.35,
-    parkChance: 0.15,
+    parkChance: 0,
     coverageRange: [70, 80],
     obstacleDensity: 0.55,
     slalomChance: 0.7,
@@ -140,13 +140,19 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
   const height = rng.integerInRange(cfg.heightRange[0], cfg.heightRange[1]);
   const pisteWidth = rng.realInRange(cfg.pisteWidthRange[0], cfg.pisteWidthRange[1]);
   const pisteShape = rng.pick(cfg.shapes);
+  const pisteVariation = {
+    freqOffset: rng.realInRange(-0.5, 0.5),
+    ampScale: rng.realInRange(0.7, 1.3),
+    phase: rng.realInRange(0, Math.PI * 2),
+    widthPhase: rng.realInRange(0, Math.PI * 2),
+  };
   const weather = rng.pick(cfg.weatherPool);
   const isNight = rng.chance(cfg.nightChance);
   const targetCoverage = rng.integerInRange(cfg.coverageRange[0], cfg.coverageRange[1]);
 
   const steepZones = generateSteepZones(rng, cfg);
   const winchAnchors = cfg.hasWinch ? generateWinchAnchors(rng, steepZones) : [];
-  const accessPaths = (rank === 'red' || rank === 'black') ? generateAccessPaths(rng, steepZones) : [];
+  const accessPaths = generateAccessPaths(rng, steepZones);
   const obstacles = generateObstacleTypes(rng, rank);
   const wildlife = generateWildlife(rng);
   const bonusObjectives = generateBonusObjectives(rng, rank, cfg.hasWinch);
@@ -174,6 +180,7 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
     obstacles,
     pisteShape,
     pisteWidth,
+    pisteVariation,
     steepZones,
     winchAnchors,
     accessPaths,
@@ -184,6 +191,10 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
     hazards: cfg.hasAvalanche ? ['avalanche'] : [],
   };
   level.timeLimit = computeTimeLimit(level);
+  // Ensure time scales with area for variety (min 60s, +30s per 500 piste tiles)
+  const pisteTiles = width * height * pisteWidth;
+  const areaFloor = Math.ceil(Math.max(pisteTiles / 500 * 30, 60) / 30) * 30;
+  level.timeLimit = Math.max(level.timeLimit, areaFloor);
   const briefing = pickContractBriefing(rng, level);
   level.introDialogue = briefing.dialogue;
   level.introSpeaker = briefing.speaker;
@@ -194,16 +205,28 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
   const width = rng.integerInRange(25, 40);
   const height = rng.integerInRange(45, 60);
   const pisteWidth = rng.realInRange(0.5, 0.8);
-  const pisteShape: PisteShape = rng.pick(['straight', 'wide']);
-  const isHalfpipe = rng.chance(0.5);
-  const specialFeatures: SpecialFeature[] = isHalfpipe ? ['halfpipe'] : ['kickers', 'rails'];
+  const pisteShape: PisteShape = rng.pick(['straight', 'wide', 'gentle_curve', 'funnel']);
+  const pisteVariation = {
+    freqOffset: rng.realInRange(-0.3, 0.3),
+    ampScale: rng.realInRange(0.5, 0.8),  // gentler curves for parks
+    phase: rng.realInRange(0, Math.PI * 2),
+    widthPhase: rng.realInRange(0, Math.PI * 2),
+  };
+  // Feature combos — mix features across lanes for variety
+  const featureRoll = rng.frac();
+  const specialFeatures: SpecialFeature[] =
+    featureRoll < 0.25 ? ['halfpipe', 'kickers'] :
+    featureRoll < 0.50 ? ['kickers', 'rails'] :
+    featureRoll < 0.70 ? ['halfpipe', 'kickers', 'rails'] :
+    featureRoll < 0.85 ? ['kickers'] :
+    ['rails', 'kickers'];
   const targetCoverage = Math.min(95, rng.integerInRange(90, 96));
   const wildlife = generateWildlife(rng);
 
   const bonusObjectives: BonusObjective[] = [
     { type: 'precision_grooming', target: rng.integerInRange(65, 75) },
   ];
-  if (isHalfpipe) {
+  if (specialFeatures.includes('halfpipe')) {
     bonusObjectives.push({ type: 'pipe_mastery', target: rng.integerInRange(75, 85) });
   }
 
@@ -223,12 +246,16 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
     specialFeatures,
     pisteShape,
     pisteWidth,
+    pisteVariation,
     steepZones: [],
     winchAnchors: [],
     bonusObjectives,
     wildlife,
   };
   level.timeLimit = computeTimeLimit(level);
+  const parkTiles = width * height * pisteWidth;
+  const parkFloor = Math.ceil(Math.max(parkTiles / 500 * 30, 60) / 30) * 30;
+  level.timeLimit = Math.max(level.timeLimit, parkFloor);
   const briefing = pickContractBriefing(rng, level);
   level.introDialogue = briefing.dialogue;
   level.introSpeaker = briefing.speaker;
@@ -239,48 +266,65 @@ function generateSteepZones(rng: SeededRNG, cfg: RankConfig): SteepZone[] {
   const zones: SteepZone[] = [];
   if (cfg.steepZoneCount === 0) return zones;
 
-  const sectionHeight = 0.7 / cfg.steepZoneCount; // distribute across 15%-85% of height
+  // Place zones with random spacing across 15%-85% of height
+  const usable = 0.70; // 0.15 to 0.85
+  const minGap = 0.08; // minimum gap between zones
+  const zoneHeights: number[] = [];
   for (let i = 0; i < cfg.steepZoneCount; i++) {
-    const baseY = 0.15 + i * sectionHeight;
-    const startY = baseY + rng.realInRange(0, sectionHeight * 0.3);
-    const zoneHeight = rng.realInRange(0.08, 0.18);
-    const endY = Math.min(startY + zoneHeight, 0.85);
+    zoneHeights.push(rng.realInRange(0.08, 0.18));
+  }
+  const totalZoneH = zoneHeights.reduce((a, b) => a + b, 0);
+  const slack = Math.max(0, usable - totalZoneH - minGap * (cfg.steepZoneCount - 1));
+
+  // Distribute slack randomly among gaps (before first, between, after last)
+  const gapCount = cfg.steepZoneCount + 1;
+  const gapWeights: number[] = [];
+  for (let i = 0; i < gapCount; i++) gapWeights.push(rng.realInRange(0.1, 1));
+  const wSum = gapWeights.reduce((a, b) => a + b, 0);
+
+  let y = 0.15;
+  for (let i = 0; i < cfg.steepZoneCount; i++) {
+    const gapBefore = (gapWeights[i] / wSum) * slack + (i > 0 ? minGap : 0);
+    y += gapBefore;
+    const startY = y;
+    const endY = Math.min(startY + zoneHeights[i], 0.85);
     const slope = rng.integerInRange(cfg.slopeRange[0], cfg.slopeRange[1]);
     zones.push({ startY, endY, slope });
+    y = endY;
   }
   return zones;
 }
 
 function generateWinchAnchors(rng: SeededRNG, steepZones: SteepZone[]): WinchAnchor[] {
-  if (steepZones.length === 0) {
+  // Only dangerous zones (≥ slide threshold) need winch anchors
+  const dangerous = steepZones.filter(z => z.slope >= BALANCE.SLIDE_SLOPE_THRESHOLD);
+  if (dangerous.length === 0) {
     // Place 1-2 anchors at random positions
     const count = rng.integerInRange(1, 2);
     return Array.from({ length: count }, () => ({
       y: rng.realInRange(0.2, 0.7),
     }));
   }
-  // One anchor above each steep zone
-  return steepZones.map(zone => ({
+  // One anchor above each dangerous steep zone
+  return dangerous.map(zone => ({
     y: Math.max(0.05, zone.startY - 0.05),
   }));
 }
 
 function generateAccessPaths(rng: SeededRNG, steepZones: SteepZone[]): AccessPath[] {
-  const count = rng.integerInRange(1, 2);
-  const paths: AccessPath[] = [];
-  for (let i = 0; i < count; i++) {
-    const startY = rng.realInRange(0.15, 0.5);
-    const length = rng.realInRange(0.15, 0.35);
-    const endY = Math.min(startY + length, 0.85);
-    const side = (i % 2 === 0) ? 'left' as const : 'right' as const;
+  if (steepZones.length === 0) return [];
 
-    // Avoid overlapping steep zones
-    const overlaps = steepZones.some(z => startY < z.endY && endY > z.startY);
-    if (!overlaps) {
-      paths.push({ startY, endY, side });
-    }
-  }
-  return paths;
+  // Only create bypass roads for dangerous steep zones (≥ slide threshold).
+  // Safe zones below threshold are cosmetic — no road needed.
+  return steepZones
+    .filter(zone => zone.slope >= BALANCE.SLIDE_SLOPE_THRESHOLD)
+    .map((zone, i) => {
+      const margin = rng.realInRange(0.03, 0.08);
+      const startY = Math.max(0.05, zone.startY - margin);
+      const endY = Math.min(0.95, zone.endY + margin);
+      const side = (i % 2 === 0) ? 'left' as const : 'right' as const;
+      return { startY, endY, side };
+    });
 }
 
 function generateObstacleTypes(rng: SeededRNG, rank: ContractRank): ObstacleType[] {
@@ -324,7 +368,7 @@ function generateBonusObjectives(rng: SeededRNG, rank: ContractRank, hasWinch: b
 // --- Validation ---
 
 import { LevelGeometry } from './LevelGeometry';
-import { GAME_CONFIG } from '../config/gameConfig';
+import { GAME_CONFIG, BALANCE } from '../config/gameConfig';
 
 const MAX_GENERATION_ATTEMPTS = 10;
 
@@ -385,12 +429,12 @@ export function validateLevel(level: Level): string[] {
     }
   }
 
-  // 3. Reachability — enough tiles can be groomed
+  // 3. Reachability — piste has enough area for target coverage
   const groomableTiles = countGroomableTiles(geometry, level);
-  const totalPisteTiles = level.width * level.height; // approximation
-  const neededTiles = Math.floor(totalPisteTiles * (level.targetCoverage / 100));
-  if (groomableTiles < neededTiles * 0.9) {
-    issues.push(`Insufficient groomable area: ${groomableTiles} < ${neededTiles} needed`);
+  // Target coverage is a % of groomable piste tiles — check piste isn't degenerate
+  const minUsableTiles = 20;
+  if (groomableTiles < minUsableTiles) {
+    issues.push(`Insufficient groomable area: ${groomableTiles} tiles (min ${minUsableTiles})`);
   }
 
   // 4. Winch feasibility — steep tiles reachable from anchors
@@ -398,9 +442,12 @@ export function validateLevel(level: Level): string[] {
     issues.push('Winch enabled but no anchors placed');
   }
 
-  // 5. Start safety — spawn point (top-center) must be on piste
-  const spawnY = 0;
-  if (!geometry.isInPiste(Math.floor(level.width / 2), spawnY, level)) {
+  // 5. Start safety — spawn point must be on piste
+  // Groomer spawns at 90% height, at the piste center for that row
+  const spawnY = Math.min(level.height - 8, Math.floor(level.height * 0.9));
+  const spawnPath = geometry.pistePath[spawnY];
+  const spawnX = spawnPath ? Math.floor(spawnPath.centerX) : Math.floor(level.width / 2);
+  if (!geometry.isInPiste(spawnX, spawnY, level)) {
     issues.push('Spawn point is not on piste');
   }
 

@@ -333,3 +333,8 @@ with sync_playwright() as p:
 | 8 | Red | `hasWinch`, storm weather |
 
 See [GAMEPLAY.md](./GAMEPLAY.md) for full level details.
+
+## CLI Test Tools
+
+- **`tests/e2e/generate_level_previews.py`** — Generates annotated level preview images for visual inspection of procedural generation. Usage: `python tests/e2e/generate_level_previews.py --samples 5 --ranks green,blue,red,black`
+- **`capture_daily_runs.py`** — Captures daily run screenshots for regression comparison.

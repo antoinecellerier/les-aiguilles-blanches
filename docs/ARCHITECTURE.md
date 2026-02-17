@@ -1389,9 +1389,9 @@ GameScene delegates to extracted subsystems in `src/systems/`:
 - **WeatherSystem** — Night overlay rendering, headlight cones, weather particle emitters, accessibility filters
 - **HazardSystem** — Avalanche zone creation with irregular polygon shapes (randomized ellipse vertices), risk tracking, avalanche trigger sequence. Zones avoid piste path, cliffs, and each other via inter-zone spacing. Uses broad-phase rect + precise ray-casting `pointInPolygon()` for hitbox. Depth-layered above terrain (`CLIFFS+0.5`) with signage at `SIGNAGE`/`MARKERS` depth.
 - **WildlifeSystem** — Decorative animal spawning, flee-from-groomer AI, per-level species config. Uses shared utilities: `foxBehavior.ts` for fox hunting decisions, `animalTracks.ts` for track drawing, `animalSprites.ts` for procedural sprites (including side-view flying and perched bird variants). Animals avoid buildings/cliffs (non-climbing species), grooming erases tracks, and tracks are bootstrapped at level start.
-- **LevelGeometry** — Pure data system (no Phaser dependency). Generates piste path, access path zones/curves, and cliff segments from level config. Provides query methods `isInPiste()`, `isOnCliff()`, `isOnAccessPath()` used by rendering and physics. `getCliffAvoidRects()` returns bounding rects for avalanche zone placement. On levels with avalanche hazards, cliffs are limited to top/bottom bands (outside 15-65% height).
+- **LevelGeometry** — Pure data system (no Phaser dependency). Generates piste path, access path zones/curves, and cliff segments from level config. Provides query methods `isInPiste()`, `isOnCliff()`, `isOnAccessPath()` used by rendering and physics. `getCliffAvoidRects()` returns bounding rects for avalanche zone placement. On levels with avalanche hazards, cliffs are limited to top/bottom bands (outside 15-65% height). `pipeFloorHalfWidth()` returns half-width of the groomable halfpipe floor for park feature centering.
 - **ObstacleBuilder** — Creates obstacles (rocks, trees), interactable buildings (restaurant, fuel station), and decorative chalets. Tracks building footprints for wildlife collision avoidance.
-- **ParkFeatureSystem** — Terrain park feature placement and zone scoring. Arranges features in parallel lines (jump line with kickers, jib line with rails) at fixed positions on park levels, with approach/landing zones that override the default fall-line alignment for grooming quality scoring. Renders line corridors with subtle lane tinting and paint marks at takeoff/landing spots. Halfpipe mode narrows the groomable area with banked walls. Driving onto a feature triggers instant fail (forgiving hitbox at ~70% of visual size).
+- **ParkFeatureSystem** — Terrain park feature placement and zone scoring. 5 feature combos (halfpipe+kickers, kickers+rails, kickers, halfpipe+kickers+rails, rails+kickers) with procedural Y placement, mixed lanes (40% chance to alternate kicker/rail), and halfpipe feature offset when both types present. Approach/landing zones override fall-line alignment for grooming quality scoring. Renders line corridors with subtle lane tinting and paint marks at takeoff/landing spots. Halfpipe mode narrows the groomable area with banked walls. Driving onto a feature triggers instant fail (forgiving hitbox at ~70% of visual size).
 - **SlalomGateSystem** — Slalom gate placement and pass/miss detection for ski reward runs. Generates evenly-spaced red/blue pole pairs along the piste with alternating lateral offset. Detection triggers when skier Y enters the gate row range; hit = between poles, miss = outside. Visual feedback: ✓/✗ floating text, missed poles dim to 30% alpha. Returns `'hit'`/`'miss'`/`null` per frame for audio integration. Non-punitive — display-only results on level complete. Configured per-level via `slalomGates: { count, width }` in levels.ts.
 - **PisteRenderer** — All piste visual rendering: boundary colliders, cliff edge visuals, piste markers, forest trees, access path roads/poles, steep zone indicators, and extended background. Returns physics groups for GameScene collision setup.
 - **WinchSystem** — Winch anchor creation, cable rendering (taut/slack), attach/detach state. Exposes `isTaut()` query used by movement and resource systems.
@@ -1826,7 +1826,7 @@ Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after compl
 ### Key Files
 
 - `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
-- `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickContractBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP).
+- `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickContractBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP). 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` system (freqOffset, ampScale, phase, widthPhase) making each seed visually distinct. Steep zone placement randomized with variable gaps. Service roads only for dangerous zones (≥30°); safe zones have no bypass. Winch anchors placed only above dangerous zones.
 - `src/scenes/ContractsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Contract button (random seed). Shows briefing preview (weather, target, time, dimensions).
 
 ### Generation Pipeline
@@ -1852,10 +1852,10 @@ Rank sets hard rules; seed determines layout within those rules.
 
 | Rank | Steep Zones | Winch | Weather | Park Chance |
 |------|------------|-------|---------|-------------|
-| Green | 0 | No | Clear | 30% |
-| Blue | 1 (25-30°) | No | Clear | 25% |
-| Red | 2 (30-40°) | Yes | May snow | 20% |
-| Black | 3 (35-50°) | Yes | Night/storm | 15% |
+| Green | 0 | No | Clear | 80% |
+| Blue | 1 (25-30°) | No | Clear | 0% |
+| Red | 2 (30-40°) | Yes | May snow | 0% |
+| Black | 3 (35-50°) | Yes | Night/storm | 0% |
 
 ### Contract Level Flow
 

@@ -37,6 +37,7 @@ const RANK_LABELS: Record<ContractRank, string> = {
 
 export default class ContractsScene extends Phaser.Scene {
   private selectedRank: ContractRank = 'green';
+  private greenIsPark = false;
   private rankButtons: Phaser.GameObjects.Text[] = [];
   private seedDisplay?: Phaser.GameObjects.Text;
   private briefingText?: Phaser.GameObjects.Text;
@@ -102,6 +103,11 @@ export default class ContractsScene extends Phaser.Scene {
     const completedRanks = dailyData.date === today ? dailyData.ranks : [];
 
     // --- Rank selector row ---
+    // Pre-compute whether today's green level is a park
+    const dailySeedNum = dailySeed();
+    const { level: greenLevel } = generateValidContractLevel(rankSeed(dailySeedNum, 'green'), 'green');
+    this.greenIsPark = greenLevel.difficulty === 'park';
+
     const rankY = Math.round(height * 0.19);
     const rankSpacing = Math.round(100 * scale);
     const startX = width / 2 - (RANKS.length - 1) * rankSpacing / 2;
@@ -109,14 +115,16 @@ export default class ContractsScene extends Phaser.Scene {
     this.rankButtons = RANKS.map((rank, i) => {
       const x = startX + i * rankSpacing;
       const done = completedRanks.includes(rank);
-      const emoji = RANK_LABELS[rank];
-      const name = rank.charAt(0).toUpperCase() + rank.slice(1);
+      const showPark = rank === 'green' && this.greenIsPark;
+      const emoji = showPark ? '▲' : RANK_LABELS[rank];
+      const name = showPark ? t('rank_park') : t(`rank_${rank}`);
       const label = done ? `${emoji} ${name} ✓` : `${emoji} ${name}`;
+      const bgColor = showPark ? '#f59e0b' : RANK_COLORS[rank];
       const btn = this.add.text(x, rankY, label, {
         fontFamily: THEME.fonts.family,
         fontSize: smallFont + 'px',
         color: rank === this.selectedRank ? THEME.colors.textPrimary : THEME.colors.textMuted,
-        backgroundColor: rank === this.selectedRank ? RANK_COLORS[rank] : THEME.colors.panelBgHex,
+        backgroundColor: rank === this.selectedRank ? bgColor : THEME.colors.panelBgHex,
         padding: { x: Math.round(12 * scale), y: Math.round(6 * scale) },
         align: 'center',
       }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
@@ -130,8 +138,9 @@ export default class ContractsScene extends Phaser.Scene {
       return btn;
     });
 
-    // Equalize rank button widths (measure with ✓ for all)
-    const probeLabel = `${RANK_LABELS.green} Green ✓`;
+    // Equalize rank button widths (measure with longest rank name + ✓)
+    const longestRank = RANKS.reduce((a, b) => t(`rank_${a}`).length > t(`rank_${b}`).length ? a : b);
+    const probeLabel = `${RANK_LABELS[longestRank]} ${t(`rank_${longestRank}`)} ✓`;
     const probe = this.add.text(0, 0, probeLabel, {
       fontFamily: THEME.fonts.family, fontSize: smallFont + 'px',
       padding: { x: Math.round(12 * scale), y: Math.round(6 * scale) },
@@ -165,7 +174,6 @@ export default class ContractsScene extends Phaser.Scene {
     allButtons.push(backBtn);
     allCallbacks.push(() => this.goBack());
 
-    const dailySeedNum = dailySeed();
     const dailyCode = seedToCode(dailySeedNum);
     const dailyY = briefingY + Math.round(50 * scale);
 
@@ -248,21 +256,26 @@ export default class ContractsScene extends Phaser.Scene {
       const rank = RANKS[i];
       const selected = rank === this.selectedRank;
       const done = completedRanks ? completedRanks.includes(rank) : btn.text.includes('✓');
-      const name = rank.charAt(0).toUpperCase() + rank.slice(1);
-      const label = done ? `${RANK_LABELS[rank]} ${name} ✓` : `${RANK_LABELS[rank]} ${name}`;
+      // Show park-themed label when green rank has a park level
+      const showPark = rank === 'green' && this.greenIsPark;
+      const name = showPark ? t('rank_park') : t(`rank_${rank}`);
+      const emoji = showPark ? '▲' : RANK_LABELS[rank];
+      const label = done ? `${emoji} ${name} ✓` : `${emoji} ${name}`;
+      const bgColor = showPark ? '#f59e0b' : RANK_COLORS[rank];
       btn.setText(label);
       btn.setColor(selected ? THEME.colors.textPrimary : THEME.colors.textMuted);
-      btn.setBackgroundColor(selected ? RANK_COLORS[rank] : THEME.colors.panelBgHex);
+      btn.setBackgroundColor(selected ? bgColor : THEME.colors.panelBgHex);
     });
   }
 
   private updateBriefing(): void {
     const dailySeedNum = dailySeed();
     const { level } = generateValidContractLevel(rankSeed(dailySeedNum, this.selectedRank), this.selectedRank);
+    const isPark = level.difficulty === 'park';
 
     const weatherKey = `contracts_weather_${level.weather || 'clear'}`;
     const shiftKey = level.isNight ? 'contracts_night' : 'contracts_day';
-    const parkStr = level.specialFeatures?.length ? ' | 🏔️ Park' : '';
+    const parkStr = isPark ? ` | ▲ ${t('rank_park')}` : '';
     const winchStr = level.hasWinch ? ' | 🔗 Winch' : '';
 
     if (this.seedDisplay) {
@@ -275,6 +288,8 @@ export default class ContractsScene extends Phaser.Scene {
         `${t('contracts_target')}: ${level.targetCoverage}% | ${t('contracts_timeLimit')}: ${Math.floor(level.timeLimit / 60)}m${(level.timeLimit % 60) ? level.timeLimit % 60 + 's' : ''} | ${level.width}×${level.height}`
       );
     }
+    // Update green button to show park theme when the daily level is a park
+    this.updateRankSelection();
   }
 
   private startContract(seed: number, isDaily = false): void {

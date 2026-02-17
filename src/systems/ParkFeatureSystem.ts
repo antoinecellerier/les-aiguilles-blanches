@@ -65,17 +65,49 @@ interface HalfpipeData {
 const KICKER_LINE_X = -5; // jump line on the left
 const RAIL_LINE_X = 5;    // jib line on the right
 
-const KICKER_LAYOUT: ParkFeatureDef[] = [
-  { type: 'kicker', tileX: KICKER_LINE_X, tileY: 15, angle: 0 },
-  { type: 'kicker', tileX: KICKER_LINE_X, tileY: 27, angle: 0 },
-  { type: 'kicker', tileX: KICKER_LINE_X, tileY: 39, angle: 0 },
-];
+/** Generate procedural feature positions, optionally mixing types on a lane. */
+function generateFeatureLayout(
+  type: 'kicker' | 'rail',
+  levelHeight: number,
+  seed: number,
+  inHalfpipe = false,
+  pipeFloorHalfWidth = 0,
+): ParkFeatureDef[] {
+  // In halfpipe with both types: offset to opposite sides of pipe floor
+  // center to avoid overlap; derive offset from floor width (≈1/3 from center).
+  // When only one type present, center at 0.
+  const pipeOffset = (inHalfpipe && pipeFloorHalfWidth > 0)
+    ? Math.max(2, Math.floor(pipeFloorHalfWidth / 3)) : 0;
+  const lineX = inHalfpipe
+    ? (type === 'kicker' ? -pipeOffset : pipeOffset)
+    : (type === 'kicker' ? KICKER_LINE_X : RAIL_LINE_X);
+  const margin = 8; // tiles from top/bottom edges
+  const minSpacing = 10;
+  const usableHeight = levelHeight - margin * 2;
+  // Fewer features in halfpipe (leave room for pipe grooming)
+  const maxCount = inHalfpipe ? 3 : 5;
+  const count = Math.max(2, Math.min(maxCount, Math.floor(usableHeight / minSpacing)));
+  // Distribute evenly with a seeded offset
+  const spacing = usableHeight / count;
+  const seedOffset = ((seed * 7 + (type === 'kicker' ? 3 : 17)) % 5) - 2; // -2..2
 
-const RAIL_LAYOUT: ParkFeatureDef[] = [
-  { type: 'rail', tileX: RAIL_LINE_X, tileY: 18, angle: 0 },
-  { type: 'rail', tileX: RAIL_LINE_X, tileY: 30, angle: 0 },
-  { type: 'rail', tileX: RAIL_LINE_X, tileY: 42, angle: 0 },
-];
+  // Mix feature types within a lane: seeded alternation
+  const mixHash = (seed * 13 + (type === 'kicker' ? 7 : 23)) % 100;
+  const mixTypes = mixHash < 40; // 40% chance to mix types in this lane
+
+  const defs: ParkFeatureDef[] = [];
+  for (let i = 0; i < count; i++) {
+    const tileY = Math.floor(margin + spacing * (i + 0.5) + seedOffset);
+    if (tileY >= 5 && tileY < levelHeight - 5) {
+      // Alternate type every other feature when mixing
+      const actualType = mixTypes && (i % 2 === 1)
+        ? (type === 'kicker' ? 'rail' : 'kicker')
+        : type;
+      defs.push({ type: actualType, tileX: lineX, tileY, angle: 0 });
+    }
+  }
+  return defs;
+}
 
 // Feature dimensions in tiles (kept small — features are obstacles, not terrain)
 const KICKER_W = 3;
@@ -97,6 +129,12 @@ export class ParkFeatureSystem {
   private gameObjects: Phaser.GameObjects.GameObject[] = [];
   private _featureGroup: Phaser.Physics.Arcade.StaticGroup | null = null;
   private _pipeWallGroup: Phaser.Physics.Arcade.StaticGroup | null = null;
+
+  /** Compute pipe floor half-width from geometry at level midpoint. */
+  private static pipeFloorHalfWidth(level: Level, geometry: LevelGeometry): number {
+    const midPath = geometry.pistePath[Math.floor(level.height / 2)];
+    return midPath ? Math.floor(midPath.width / 2) - PIPE_WALL_TILES : 0;
+  }
 
   /**
    * Generate and place park features based on level config.
@@ -135,9 +173,14 @@ export class ParkFeatureSystem {
     group: Phaser.Physics.Arcade.StaticGroup,
     specials: SpecialFeature[]
   ): void {
+    const seed = level.id || 0;
+    const inHalfpipe = specials.includes('halfpipe');
+    const pipeFloorHW = ParkFeatureSystem.pipeFloorHalfWidth(level, geometry);
     const layouts: ParkFeatureDef[] = [];
-    if (specials.includes('kickers')) layouts.push(...KICKER_LAYOUT);
-    if (specials.includes('rails')) layouts.push(...RAIL_LAYOUT);
+    const hasBothTypes = inHalfpipe && specials.includes('kickers') && specials.includes('rails');
+    const offsetHW = hasBothTypes ? pipeFloorHW : 0;
+    if (specials.includes('kickers')) layouts.push(...generateFeatureLayout('kicker', level.height, seed, inHalfpipe, offsetHW));
+    if (specials.includes('rails')) layouts.push(...generateFeatureLayout('rail', level.height, seed, inHalfpipe, offsetHW));
 
     // Render line corridors first (behind features)
     this.renderLineCorridors(scene, level, geometry, specials);
@@ -357,9 +400,15 @@ export class ParkFeatureSystem {
     const ts = this.tileSize;
     const lineHalfW = 3; // corridor half-width in tiles
 
+    const seed = level.id || 0;
+    const inHalfpipe = specials.includes('halfpipe');
+    const pipeFloorHW = ParkFeatureSystem.pipeFloorHalfWidth(level, geometry);
+    const hasBothTypes = inHalfpipe && specials.includes('kickers') && specials.includes('rails');
+    const offsetHW = hasBothTypes ? pipeFloorHW : 0;
+    const pipeOffset = hasBothTypes ? Math.max(2, Math.floor(pipeFloorHW / 3)) : 0;
     const lines: { offsetX: number; color: number; features: ParkFeatureDef[] }[] = [];
-    if (specials.includes('kickers')) lines.push({ offsetX: KICKER_LINE_X, color: 0x4488cc, features: KICKER_LAYOUT });
-    if (specials.includes('rails')) lines.push({ offsetX: RAIL_LINE_X, color: 0xcc8844, features: RAIL_LAYOUT });
+    if (specials.includes('kickers')) lines.push({ offsetX: inHalfpipe ? -pipeOffset : KICKER_LINE_X, color: 0x4488cc, features: generateFeatureLayout('kicker', level.height, seed, inHalfpipe, offsetHW) });
+    if (specials.includes('rails')) lines.push({ offsetX: inHalfpipe ? pipeOffset : RAIL_LINE_X, color: 0xcc8844, features: generateFeatureLayout('rail', level.height, seed, inHalfpipe, offsetHW) });
 
     for (const line of lines) {
       // Corridor spans from first feature to last feature (with zone margin)

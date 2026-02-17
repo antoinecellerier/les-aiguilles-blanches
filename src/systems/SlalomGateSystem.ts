@@ -41,10 +41,8 @@ export class SlalomGateSystem {
     this.scene = scene;
 
     const { count, width } = level.slalomGates;
-    const startBuffer = BALANCE.SKI_FINISH_BUFFER + 3;
-    const endBuffer = BALANCE.SKI_FINISH_BUFFER + 2;
-    const usableStart = Math.round(level.height * 0.12) + startBuffer;
-    const usableEnd = level.height - endBuffer;
+    const usableStart = Math.round(level.height * 0.05) + 3;
+    const usableEnd = level.height - BALANCE.SKI_FINISH_BUFFER - 1;
     const spacing = Math.floor((usableEnd - usableStart) / (count + 1));
 
     for (let i = 0; i < count; i++) {

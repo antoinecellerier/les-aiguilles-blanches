@@ -8,7 +8,7 @@ import { GAME_CONFIG } from './gameConfig';
 import type { AnimalType } from '../utils/animalSprites';
 
 export type WeatherType = 'clear' | 'light_snow' | 'storm';
-export type PisteShape = 'straight' | 'gentle_curve' | 'winding' | 'serpentine' | 'wide';
+export type PisteShape = 'straight' | 'gentle_curve' | 'winding' | 'serpentine' | 'wide' | 'dogleg' | 'funnel' | 'hourglass';
 export type ObstacleType = 'trees' | 'rocks' | 'pylons' | 'jumps' | 'rails' | 'cliffs' | 'avalanche_zones' | 'snow_drifts';
 export type HazardType = 'avalanche';
 export type SpecialFeature = 'kickers' | 'rails' | 'halfpipe';
@@ -62,6 +62,8 @@ export interface Level {
   obstacles: ObstacleType[];
   pisteShape: PisteShape;
   pisteWidth: number;
+  /** Per-level path variation: frequency offset, amplitude jitter, phase shift. */
+  pisteVariation?: { freqOffset: number; ampScale: number; phase: number; widthPhase: number };
   steepZones: SteepZone[];
   winchAnchors: WinchAnchor[];
   introDialogue?: string;

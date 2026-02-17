@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking. Remaining: ski mode on procedural levels, park level generation (kickers+rails, halfpipe), shareable seed codes.
+- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking, procedural level variety. Remaining: ski mode on procedural levels, shareable seed codes.
 
 ## Next Up
 
@@ -30,6 +30,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Procedural level variety** — 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with per-seed variation, randomized steep zones, service road bypasses for dangerous zones only, 5 park feature combos with procedural placement, expanded slalom gate coverage.
 
 - ✅ **Contract briefing dialogues** — `pickContractBriefing()` selects speaker based on level characteristics (Thierry for hazards, Marie for night/cold, Émilie for easy runs, JP default). 4 locale keys × 14 languages. 10 unit tests + 4 E2E integration tests.
 

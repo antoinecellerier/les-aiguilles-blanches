@@ -467,17 +467,16 @@ Unlocked after completing all 10 campaign levels. Generates fresh pistes from a 
 
 ### Difficulty Ranks
 
-| Rank | Terrain | Features |
-|------|---------|----------|
-| 🟢 Green | Wide, gentle slopes | Basic grooming, 30% park chance |
-| 🔵 Blue | Curved, narrower | Tighter time, 30% slalom chance |
-| 🔴 Red | Winding, steep zones | Winch, access paths, 50% slalom |
-| ⚫ Black | Serpentine, narrow | Night/storm, avalanche, 70% slalom |
+| Rank | Terrain | Shapes | Features |
+|------|---------|--------|----------|
+| 🟢 Green | Wide, gentle slopes | gentle_curve, funnel | 80% park, basic grooming |
+| 🔵 Blue | Curved, narrower | gentle_curve, winding, dogleg | Tighter time, 30% slalom chance |
+| 🔴 Red | Winding, steep zones | winding, serpentine, hourglass, dogleg, funnel | Winch, service roads on dangerous slopes (≥30°), 50% slalom |
+| ⚫ Black | Serpentine, narrow | winding, serpentine, dogleg, hourglass | Night/storm, avalanche, 70% slalom |
 
 ### Park Contracts
 
-Some contracts generate terrain parks instead of regular pistes:
-- **Kickers + Rails** or **Halfpipe** (random)
+Green rank has 80% park chance; other ranks generate regular pistes only. Park contracts use one of 5 feature combos (halfpipe+kickers, kickers+rails, kickers, halfpipe+kickers+rails, rails+kickers) with procedural Y placement and mixed lanes (40% chance to alternate kicker/rail):
 - Coverage target ~95%, no steep zones or avalanche
 - Ski mode includes freestyle trick scoring
 
