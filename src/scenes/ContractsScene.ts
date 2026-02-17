@@ -23,16 +23,16 @@ function rankSeed(baseSeed: number, rank: ContractRank): number {
 }
 
 const RANK_COLORS: Record<ContractRank, string> = {
-  green: '#4caf50',
-  blue: '#2196f3',
-  red: '#f44336',
-  black: '#555555',
+  green: '#22c55e',
+  blue: '#3b82f6',
+  red: '#ef4444',
+  black: '#1f2937',
 };
 const RANK_LABELS: Record<ContractRank, string> = {
-  green: '🟢',
-  blue: '🔵',
-  red: '🔴',
-  black: '⚫',
+  green: '●',
+  blue: '■',
+  red: '◆',
+  black: '★',
 };
 
 export default class ContractsScene extends Phaser.Scene {
@@ -84,7 +84,7 @@ export default class ContractsScene extends Phaser.Scene {
     this.add.text(width / 2, Math.round(height * 0.4), '🔒 ' + t('contracts_locked'), {
       fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
-      color: '#aaaaaa',
+      color: THEME.colors.textSecondary,
       wordWrap: { width: width * 0.7 },
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
@@ -115,8 +115,8 @@ export default class ContractsScene extends Phaser.Scene {
       const btn = this.add.text(x, rankY, label, {
         fontFamily: THEME.fonts.family,
         fontSize: smallFont + 'px',
-        color: rank === this.selectedRank ? '#ffffff' : '#888888',
-        backgroundColor: rank === this.selectedRank ? RANK_COLORS[rank] : '#222222',
+        color: rank === this.selectedRank ? THEME.colors.textPrimary : THEME.colors.textMuted,
+        backgroundColor: rank === this.selectedRank ? RANK_COLORS[rank] : THEME.colors.panelBgHex,
         padding: { x: Math.round(12 * scale), y: Math.round(6 * scale) },
         align: 'center',
       }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
@@ -145,14 +145,14 @@ export default class ContractsScene extends Phaser.Scene {
     this.seedDisplay = this.add.text(width / 2, briefingY, '', {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(11 * scale) + 'px',
-      color: '#888888',
+      color: THEME.colors.textMuted,
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
     this.briefingText = this.add.text(width / 2, briefingY + Math.round(16 * scale), '', {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(11 * scale) + 'px',
-      color: '#aaaaaa',
+      color: THEME.colors.textSecondary,
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
@@ -174,7 +174,7 @@ export default class ContractsScene extends Phaser.Scene {
       {
         fontFamily: THEME.fonts.family,
         fontSize: fontSize + 'px',
-        color: '#ffffff',
+        color: THEME.colors.textPrimary,
         backgroundColor: THEME.colors.buttonCTAHex,
         padding: { x: btnPadX, y: btnPadY },
       }
@@ -187,8 +187,8 @@ export default class ContractsScene extends Phaser.Scene {
     const sepY = dailyY + Math.round(40 * scale);
     const lineW = Math.round(width * 0.25);
     const sepGfx = this.add.graphics().setDepth(DEPTHS.MENU_UI);
-    sepGfx.lineStyle(1, 0x666666, 0.4);
-    sepGfx.lineBetween(width / 2 - lineW / 2, sepY, width / 2 + lineW / 2, sepY);
+    sepGfx.fillStyle(0x666666, 0.4);
+    sepGfx.fillRect(width / 2 - lineW / 2, sepY, lineW, 1);
 
     const randomY = sepY + Math.round(22 * scale);
     const randomBtn = this.add.text(width / 2, randomY,
@@ -196,8 +196,8 @@ export default class ContractsScene extends Phaser.Scene {
       {
         fontFamily: THEME.fonts.family,
         fontSize: smallFont + 'px',
-        color: '#cccccc',
-        backgroundColor: '#333333',
+        color: THEME.colors.textSecondary,
+        backgroundColor: THEME.colors.textDark,
         padding: { x: Math.round(14 * scale), y: Math.round(5 * scale) },
       }
     ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
@@ -251,8 +251,8 @@ export default class ContractsScene extends Phaser.Scene {
       const name = rank.charAt(0).toUpperCase() + rank.slice(1);
       const label = done ? `${RANK_LABELS[rank]} ${name} ✓` : `${RANK_LABELS[rank]} ${name}`;
       btn.setText(label);
-      btn.setColor(selected ? '#ffffff' : '#888888');
-      btn.setBackgroundColor(selected ? RANK_COLORS[rank] : '#222222');
+      btn.setColor(selected ? THEME.colors.textPrimary : THEME.colors.textMuted);
+      btn.setBackgroundColor(selected ? RANK_COLORS[rank] : THEME.colors.panelBgHex);
     });
   }
 

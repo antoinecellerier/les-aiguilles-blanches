@@ -33,6 +33,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Contract briefing dialogues** — `pickContractBriefing()` selects speaker based on level characteristics (Thierry for hazards, Marie for night/cold, Émilie for easy runs, JP default). 4 locale keys × 14 languages. 10 unit tests + 4 E2E integration tests.
 
+- ✅ **Daily Runs art style compliance** — Rank indicators now use NF S52-102 shapes (●■◆★), colors match ART_STYLE.md palette, separator uses fillRect, all text colors from THEME.
+
 - ✅ **ContractsScene gamepad fix** — Gamepad d-pad/B button didn't work in Daily Runs screen because `gamepadNav.update(delta)` was missing from `update()`. All other scenes had it.
 
 - ✅ **Daily Runs E2E tests** — 14 tests in `test_daily_runs.py` covering keyboard, gamepad, multi-viewport navigation, rank cycling, and cross-scene flows (session persistence, completion UI, session cleanup).
