@@ -175,7 +175,7 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
 
   const level: Level = {
     id: CONTRACT_LEVEL_ID_BASE + (rng.seed % 1000),
-    nameKey: 'contract_levelName',
+    nameKey: `rank_${rank}`,
     taskKey: 'contract_levelTask',
     difficulty,
     timeLimit: 0, // computed below
@@ -240,7 +240,7 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
 
   const level: Level = {
     id: CONTRACT_LEVEL_ID_BASE + (rng.seed % 1000),
-    nameKey: 'contract_levelName',
+    nameKey: 'rank_park',
     taskKey: 'contract_levelTask',
     difficulty: 'park',
     timeLimit: 0,

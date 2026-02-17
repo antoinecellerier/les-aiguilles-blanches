@@ -14,6 +14,7 @@ import { markLevelCompleted } from '../utils/gameProgress';
 import { toggleFullscreen, isFullscreen, fullscreenEnabled } from '../utils/fullscreen';
 import { Accessibility } from '../utils/accessibility';
 import { isRenderThrottled } from '../utils/renderThrottle';
+import { getContractSession } from '../systems/ContractSession';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -1232,7 +1233,9 @@ export default class HUDScene extends Phaser.Scene {
         const targetFps = this.game.loop.targetFps || 60;
         const simPct = Math.min(100, Math.round((fps / targetFps) * 100));
         const throttleFlag = isRenderThrottled() ? ' ⏬' : '';
-        this.fpsText.setText('L' + this.gameState.levelIndex + ' · ' + fps + ' FPS · ' + simPct + '%' + throttleFlag);
+        const session = getContractSession();
+        const label = session ? session.seedCode : 'L' + this.gameState.levelIndex;
+        this.fpsText.setText(label + ' · ' + fps + ' FPS · ' + simPct + '%' + throttleFlag);
         this.rafFrameCount = 0;
         this.rafLastTime = now;
       }
