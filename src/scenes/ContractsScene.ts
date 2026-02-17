@@ -296,6 +296,7 @@ export default class ContractsScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
+    this.gamepadNav?.update(delta);
     this.backdrop.wildlife?.update(time, delta);
   }
 

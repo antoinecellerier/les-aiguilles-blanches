@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. Seeded RNG generates pistes with Daily Shift (date-seeded) and Random Contract (shareable code) playlists. Four difficulty ranks (Green/Blue/Red/Black). Park levels generated 15-30% of the time (kickers+rails or halfpipe). Ski mode with slalom gates on regular levels, freestyle tricks on park levels. See GAME_DESIGN.md for full spec.
+- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking. Remaining: ski mode on procedural levels, park level generation (kickers+rails, halfpipe), shareable seed codes.
 
 ## Next Up
 
@@ -30,6 +30,10 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **ContractsScene gamepad fix** — Gamepad d-pad/B button didn't work in Daily Runs screen because `gamepadNav.update(delta)` was missing from `update()`. All other scenes had it.
+
+- ✅ **Daily Runs E2E tests** — 14 tests in `test_daily_runs.py` covering keyboard, gamepad, multi-viewport navigation, rank cycling, and cross-scene flows (session persistence, completion UI, session cleanup).
 
 - ✅ **HUDScene event listener leak fix** — `game.events` listeners (`gameState`, `timerUpdate`, `accessibilityChanged`) leaked +3 per level transition because `events.once('shutdown', this.shutdown, this)` was only registered inside the `if (mode === 'ski')` branch. Moved registration before the branch so it runs for all modes.
 
