@@ -338,7 +338,11 @@ changelog_20260211: "⛷️ Descente à ski après le damage\n🎯 Qualité de d
   contracts_weather_light_snow: "Neige légère",
   contracts_weather_storm: "Tempête",
   contracts_night: "Service de nuit",
-  contracts_day: "Service de jour"
+  contracts_day: "Service de jour",
+  contractBriefingJP: "Cette piste doit être prête avant l'ouverture des remontées. Au boulot.",
+  contractBriefingThierry: "Fais gaffe là-haut — passages raides et neige instable. Reste vigilant.",
+  contractBriefingMarie: "Ça va cailler cette nuit. Passe te réchauffer au restaurant si besoin.",
+  contractBriefingEmilie: "Encore une piste à préparer. Essaie de battre mon chrono !",
 };
 
 export default fr;

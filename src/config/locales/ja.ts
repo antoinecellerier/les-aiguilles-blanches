@@ -332,7 +332,11 @@ changelog_20260211: "⛷️ 整備後のスキー滑走\n🎯 整備品質\n🏔
   contracts_weather_light_snow: "小雪",
   contracts_weather_storm: "吹雪",
   contracts_night: "夜勤",
-  contracts_day: "日勤"
+  contracts_day: "日勤",
+  contractBriefingJP: "リフトが動く前にゲレンデを仕上げろ。さっさとやれ。",
+  contractBriefingThierry: "気をつけろよ——急斜面に不安定な雪だ。油断するな。",
+  contractBriefingMarie: "今夜は冷え込むわよ。体が冷えたらレストランに寄ってね。",
+  contractBriefingEmilie: "また一本ゲレンデね。私のタイムに勝てるかな？"
 };
 
 export default ja;

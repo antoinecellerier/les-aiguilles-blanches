@@ -333,7 +333,11 @@ changelog_20260211: "⛷️ Skidåkning efter preparering\n🎯 Prepareringskval
   contracts_weather_light_snow: "Lätt snöfall",
   contracts_weather_storm: "Stormförhållanden",
   contracts_night: "Nattskift",
-  contracts_day: "Dagskift"
+  contracts_day: "Dagskift",
+  contractBriefingJP: "Pisten måste vara klar innan liftarna öppnar. Sätt igång.",
+  contractBriefingThierry: "Var försiktig där uppe — branta partier och instabil snö. Håll dig skärpt.",
+  contractBriefingMarie: "Det blir en kall natt ikväll. Kom in på restaurangen och värm dig om du behöver.",
+  contractBriefingEmilie: "Ännu en pist. Försök slå min tid!"
 };
 
 export default sv;

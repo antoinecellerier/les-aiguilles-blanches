@@ -333,7 +333,11 @@ changelog_20260211: "⛷️ Laskettelulasku tamppauksen jälkeen\n🎯 Tamppauks
   contracts_weather_light_snow: "Heikko lumisade",
   contracts_weather_storm: "Myrskyolosuhteet",
   contracts_night: "Yövuoro",
-  contracts_day: "Päivävuoro"
+  contracts_day: "Päivävuoro",
+  contractBriefingJP: "Rinne pitää olla valmis ennen hissien avaamista. Töihin.",
+  contractBriefingThierry: "Ole varovainen tuolla — jyrkkiä osuuksia ja epävakaata lunta. Pysy valppaana.",
+  contractBriefingMarie: "Tästä tulee kylmä yö. Pistäydy ravintolassa lämmittelemässä, jos tarvitsee.",
+  contractBriefingEmilie: "Taas yksi rinne. Yritäpä päihittää aikani!"
 };
 
 export default fi;

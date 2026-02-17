@@ -332,7 +332,11 @@ changelog_20260211: "⛷️ Zjazd na nartach po preparacji\n🎯 Jakość prepar
   contracts_weather_light_snow: "Lekkie opady śniegu",
   contracts_weather_storm: "Warunki burzowe",
   contracts_night: "Zmiana nocna",
-  contracts_day: "Zmiana dzienna"
+  contracts_day: "Zmiana dzienna",
+  contractBriefingJP: "Trasa musi być gotowa przed otwarciem wyciągów. Do roboty.",
+  contractBriefingThierry: "Uważaj tam — strome odcinki i niestabilny śnieg. Bądź czujny.",
+  contractBriefingMarie: "Dziś w nocy będzie porządny mróz. Wpadnij do restauracji się rozgrzać, jak będziesz potrzebować.",
+  contractBriefingEmilie: "Kolejna trasa do przygotowania. Spróbuj pobić mój czas!"
 };
 
 export default pl;

@@ -332,7 +332,11 @@ changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\
   contracts_weather_light_snow: "Mírné sněžení",
   contracts_weather_storm: "Bouřkové podmínky",
   contracts_night: "Noční směna",
-  contracts_day: "Denní směna"
+  contracts_day: "Denní směna",
+  contractBriefingJP: "Sjezdovka musí být připravená, než otevřou vleky. Do toho.",
+  contractBriefingThierry: "Dej si pozor — strmé úseky a nestabilní sníh. Buď ve střehu.",
+  contractBriefingMarie: "Dneska v noci bude pořádná zima. Zastav se v restauraci zahřát, kdyby bylo potřeba.",
+  contractBriefingEmilie: "Další sjezdovka na řadě. Zkus překonat můj čas!"
 };
 
 export default cs;

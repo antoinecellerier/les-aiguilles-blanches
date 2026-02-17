@@ -1826,7 +1826,7 @@ Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after compl
 ### Key Files
 
 - `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
-- `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety.
+- `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickContractBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP).
 - `src/scenes/ContractsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Contract button (random seed). Shows briefing preview (weather, target, time, dimensions).
 
 ### Generation Pipeline

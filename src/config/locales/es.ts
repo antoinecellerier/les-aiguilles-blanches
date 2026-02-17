@@ -330,7 +330,11 @@ changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calida
   contracts_weather_light_snow: "Nevada ligera",
   contracts_weather_storm: "Condiciones de tormenta",
   contracts_night: "Turno de noche",
-  contracts_day: "Turno de día"
+  contracts_day: "Turno de día",
+  contractBriefingJP: "Esta pista tiene que estar lista antes de que abran los remontes. A trabajar.",
+  contractBriefingThierry: "Ten cuidado ahí arriba — tramos empinados y nieve inestable. No te confíes.",
+  contractBriefingMarie: "Esta noche va a helar de lo lindo. Pásate por el restaurante a calentarte si lo necesitas.",
+  contractBriefingEmilie: "Otra pista más. ¡A ver si superas mi tiempo!"
 };
 
 export default es;

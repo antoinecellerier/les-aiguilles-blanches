@@ -109,6 +109,21 @@ const WILDLIFE_POOL: AnimalType[] = ['bunny', 'marmot', 'chamois', 'bird', 'fox'
 /** Contract level IDs start at 100 to avoid collision with campaign levels. */
 const CONTRACT_LEVEL_ID_BASE = 100;
 
+/** Pick a briefing speaker and dialogue key based on level characteristics. */
+function pickContractBriefing(rng: SeededRNG, level: Level): { speaker: string; dialogue: string } {
+  // Thierry warns about hazards (steep, avalanche, storm)
+  if (level.steepZones.length >= 2 || level.hazards?.includes('avalanche'))
+    return { speaker: 'Thierry', dialogue: 'contractBriefingThierry' };
+  // Marie for cold/night conditions
+  if (level.isNight || level.weather === 'storm')
+    return { speaker: 'Marie', dialogue: 'contractBriefingMarie' };
+  // Émilie teases on easier runs
+  if (level.difficulty === 'green' || level.difficulty === 'blue' || level.difficulty === 'park')
+    return { speaker: 'Émilie', dialogue: 'contractBriefingEmilie' };
+  // Jean-Pierre dispatches by default
+  return { speaker: 'Jean-Pierre', dialogue: 'contractBriefingJP' };
+}
+
 export function generateContractLevel(seed: number, rank: ContractRank): Level {
   const rng = new SeededRNG(seed);
   const cfg = RANK_CONFIGS[rank];
@@ -169,6 +184,9 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
     hazards: cfg.hasAvalanche ? ['avalanche'] : [],
   };
   level.timeLimit = computeTimeLimit(level);
+  const briefing = pickContractBriefing(rng, level);
+  level.introDialogue = briefing.dialogue;
+  level.introSpeaker = briefing.speaker;
   return level;
 }
 
@@ -211,6 +229,9 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
     wildlife,
   };
   level.timeLimit = computeTimeLimit(level);
+  const briefing = pickContractBriefing(rng, level);
+  level.introDialogue = briefing.dialogue;
+  level.introSpeaker = briefing.speaker;
   return level;
 }
 

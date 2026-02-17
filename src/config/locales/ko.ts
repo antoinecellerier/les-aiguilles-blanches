@@ -332,7 +332,11 @@ changelog_20260211: "⛷️ 정비 후 스키 활강\n🎯 정비 품질\n🏔�
   contracts_weather_light_snow: "가벼운 눈",
   contracts_weather_storm: "폭풍 상황",
   contracts_night: "야간 근무",
-  contracts_day: "주간 근무"
+  contracts_day: "주간 근무",
+  contractBriefingJP: "리프트 열기 전에 슬로프 정비 끝내. 빨리 움직여.",
+  contractBriefingThierry: "조심해 — 급경사에 불안정한 눈이야. 긴장 늦추지 마.",
+  contractBriefingMarie: "오늘 밤은 많이 추울 거야. 몸 녹이려면 식당에 들러.",
+  contractBriefingEmilie: "또 슬로프 하나 더! 내 기록 깰 수 있을까?"
 };
 
 export default ko;

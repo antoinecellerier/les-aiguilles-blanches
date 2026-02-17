@@ -332,7 +332,11 @@ changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔�
   contracts_weather_light_snow: "Light snowfall",
   contracts_weather_storm: "Storm conditions",
   contracts_night: "Night shift",
-  contracts_day: "Day shift"
+  contracts_day: "Day shift",
+  contractBriefingJP: "This piste needs prep before the lifts open. Get it done.",
+  contractBriefingThierry: "Watch yourself out there — steep sections and unstable snow. Stay sharp.",
+  contractBriefingMarie: "It's going to be a cold one tonight. Come warm up at the restaurant if you need to.",
+  contractBriefingEmilie: "Another day, another piste. Try to beat my time on this one!",
 };
 
 export default en;

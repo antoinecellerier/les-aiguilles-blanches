@@ -298,3 +298,121 @@ class TestContractFlows:
         page.keyboard.press("Enter")
         time.sleep(0.5)
         wait_for_scene(page, "MenuScene", timeout=8000)
+
+
+# ============================================================
+# LEVEL GENERATION INTEGRATION TESTS
+# ============================================================
+
+class TestContractLevelGeneration:
+    def test_daily_run_is_deterministic(self, page: Page):
+        """Same daily run started twice should produce identical level properties."""
+        setup_unlocked(page)
+        navigate_to_contracts(page)
+        start_daily_run(page)
+
+        props1 = page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            const l = gs?.level;
+            if (!l) return null;
+            return { id: l.id, width: l.width, height: l.height,
+                     targetCoverage: l.targetCoverage, timeLimit: l.timeLimit,
+                     weather: l.weather, isNight: l.isNight, hasWinch: l.hasWinch };
+        }""")
+        assert props1 is not None, "Level not loaded"
+
+        # Quit and restart same daily run
+        page.locator("canvas").click()
+        time.sleep(0.3)
+        page.keyboard.press("Escape")
+        wait_for_scene_ready(page, "PauseScene")
+        for _ in range(3):
+            page.keyboard.press("ArrowDown")
+            time.sleep(0.06)
+        page.keyboard.press("Enter")
+        time.sleep(0.5)
+        wait_for_scene(page, "MenuScene", timeout=8000)
+
+        navigate_to_contracts(page)
+        start_daily_run(page)
+
+        props2 = page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            const l = gs?.level;
+            if (!l) return null;
+            return { id: l.id, width: l.width, height: l.height,
+                     targetCoverage: l.targetCoverage, timeLimit: l.timeLimit,
+                     weather: l.weather, isNight: l.isNight, hasWinch: l.hasWinch };
+        }""")
+        assert props1 == props2, f"Daily run not deterministic:\n  run1={props1}\n  run2={props2}"
+
+    def test_rank_affects_difficulty(self, page: Page):
+        """Changing rank selector should change the generated level difficulty."""
+        setup_unlocked(page)
+        navigate_to_contracts(page)
+
+        # Start green run
+        start_daily_run(page)
+        green = page.evaluate("""() => {
+            const l = window.game?.scene?.getScene('GameScene')?.level;
+            return l ? { difficulty: l.difficulty } : null;
+        }""")
+        assert green is not None
+        assert green["difficulty"] in ("green", "park"), \
+            f"Green rank should produce green or park level, got {green['difficulty']}"
+
+        # Quit, go back, switch to black rank, start
+        page.locator("canvas").click()
+        time.sleep(0.3)
+        page.keyboard.press("Escape")
+        wait_for_scene_ready(page, "PauseScene")
+        for _ in range(3):
+            page.keyboard.press("ArrowDown")
+            time.sleep(0.06)
+        page.keyboard.press("Enter")
+        time.sleep(0.5)
+        wait_for_scene(page, "MenuScene", timeout=8000)
+
+        navigate_to_contracts(page)
+        # Cycle rank: green → blue → red → black (3 right presses)
+        for _ in range(3):
+            page.keyboard.press("ArrowRight")
+            time.sleep(0.15)
+        start_daily_run(page)
+
+        black = page.evaluate("""() => {
+            const l = window.game?.scene?.getScene('GameScene')?.level;
+            return l ? { difficulty: l.difficulty } : null;
+        }""")
+        assert black is not None
+        assert black["difficulty"] in ("black", "park"), \
+            f"Black rank should produce black or park level, got {black['difficulty']}"
+
+    def test_contract_level_has_briefing_dialogue(self, page: Page):
+        """Contract levels should have introDialogue and introSpeaker set."""
+        setup_unlocked(page)
+        navigate_to_contracts(page)
+        start_daily_run(page)
+
+        briefing = page.evaluate("""() => {
+            const l = window.game?.scene?.getScene('GameScene')?.level;
+            return l ? { dialogue: l.introDialogue, speaker: l.introSpeaker } : null;
+        }""")
+        assert briefing is not None
+        assert briefing["dialogue"] is not None, "Contract level missing introDialogue"
+        assert briefing["speaker"] is not None, "Contract level missing introSpeaker"
+        assert briefing["dialogue"].startswith("contractBriefing"), \
+            f"Unexpected dialogue key: {briefing['dialogue']}"
+        assert briefing["speaker"] in ["Jean-Pierre", "Thierry", "Marie", "Émilie"], \
+            f"Unexpected speaker: {briefing['speaker']}"
+
+    def test_contract_level_id_above_campaign(self, page: Page):
+        """Contract level IDs should be >= 100 (above campaign range)."""
+        setup_unlocked(page)
+        navigate_to_contracts(page)
+        start_daily_run(page)
+
+        level_id = page.evaluate("""() => {
+            return window.game?.scene?.getScene('GameScene')?.level?.id ?? -1;
+        }""")
+        assert level_id >= 100, f"Contract level ID should be >= 100, got {level_id}"

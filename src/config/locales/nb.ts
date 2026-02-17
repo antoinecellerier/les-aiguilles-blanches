@@ -333,7 +333,11 @@ changelog_20260211: "⛷️ Skikjøring etter preparering\n🎯 Prepareringskval
   contracts_weather_light_snow: "Lett snøfall",
   contracts_weather_storm: "Stormforhold",
   contracts_night: "Nattskift",
-  contracts_day: "Dagskift"
+  contracts_day: "Dagskift",
+  contractBriefingJP: "Løypa må klargjøres før heisene åpner. Sett i gang.",
+  contractBriefingThierry: "Vær forsiktig der oppe — bratte partier og ustabil snø. Hold deg skjerpet.",
+  contractBriefingMarie: "Det blir en kald natt i kveld. Stikk innom restauranten og varm deg hvis du trenger det.",
+  contractBriefingEmilie: "Enda en løype. Prøv å slå tiden min!"
 };
 
 export default nb;

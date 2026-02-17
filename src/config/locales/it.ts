@@ -330,7 +330,11 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   contracts_weather_light_snow: "Nevicata leggera",
   contracts_weather_storm: "Condizioni di tempesta",
   contracts_night: "Turno di notte",
-  contracts_day: "Turno diurno"
+  contracts_day: "Turno diurno",
+  contractBriefingJP: "Questa pista va preparata prima dell'apertura degli impianti. Al lavoro.",
+  contractBriefingThierry: "Occhio là fuori — tratti ripidi e neve instabile. Stai attento.",
+  contractBriefingMarie: "Stanotte farà un freddo cane. Passa al ristorante a scaldarti, se hai bisogno.",
+  contractBriefingEmilie: "Un'altra pista da preparare. Vediamo se batti il mio tempo!"
 };
 
 export default it;

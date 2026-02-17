@@ -332,7 +332,11 @@ changelog_20260211: "⛷️ Hazırlama sonrası kayak inişi\n🎯 Hazırlama ka
   contracts_weather_light_snow: "Hafif kar yağışı",
   contracts_weather_storm: "Fırtına koşulları",
   contracts_night: "Gece vardiyası",
-  contracts_day: "Gündüz vardiyası"
+  contracts_day: "Gündüz vardiyası",
+  contractBriefingJP: "Pist, liftler açılmadan hazır olmalı. Hadi başla.",
+  contractBriefingThierry: "Dikkat et orada — dik geçişler ve kararsız kar var. Tetikte ol.",
+  contractBriefingMarie: "Bu gece çok soğuk olacak. İhtiyacın olursa restorana gel, ısın biraz.",
+  contractBriefingEmilie: "Bir pist daha. Bakalım süreme yetişebilecek misin!"
 };
 
 export default tr;

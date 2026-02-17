@@ -330,7 +330,11 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   contracts_weather_light_snow: "Leichter Schneefall",
   contracts_weather_storm: "Sturmbedingungen",
   contracts_night: "Nachtschicht",
-  contracts_day: "Tagschicht"
+  contracts_day: "Tagschicht",
+  contractBriefingJP: "Die Piste muss fertig sein, bevor die Lifte öffnen. Los geht's.",
+  contractBriefingThierry: "Pass auf da oben — steile Abschnitte und instabiler Schnee. Bleib wachsam.",
+  contractBriefingMarie: "Heute Nacht wird's bitterkalt. Komm ins Restaurant, wenn du dich aufwärmen musst.",
+  contractBriefingEmilie: "Noch eine Piste. Versuch mal, meine Zeit zu schlagen!"
 };
 
 export default de;
