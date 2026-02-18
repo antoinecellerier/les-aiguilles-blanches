@@ -1015,7 +1015,7 @@ shutdown() {
 | HUDScene | Debounced restart (300ms, 10px threshold) |
 | LevelCompleteScene | Restart scene (preserves result data via `scene.settings.data`) |
 | DialogueScene | Debounced restart (300ms, 10px threshold) — saves/restores dialogue queue |
-| PauseScene | Debounced restart (300ms, 10px threshold) — preserves `levelIndex`. Contract-aware: quit returns to DailyRunsScene when in a contract, "New Run" button on random runs |
+| PauseScene | Debounced restart (300ms, 10px threshold) — preserves `levelIndex`. Daily-run-aware: quit returns to DailyRunsScene when in a daily run, "New Run" button on random runs |
 | CreditsScene | Debounced restart (300ms, 10px threshold) |
 
 **GameScene zoom strategy:** Uses diagonal ratio (`sqrt(w²+h²)`) of current vs original viewport to compute zoom. This is orientation-independent — rotating the device preserves perceived world scale. Zoom is clamped to [0.5, 1.5].
@@ -1819,15 +1819,15 @@ This avoids any runtime overlay compositing. The only per-frame night cost is a 
 
 The HUD FPS counter uses `requestAnimationFrame` counting instead of `game.loop.delta` averaging. This measures actual rendered frames rather than Phaser loop ticks, which can diverge when the browser drops frames. The rAF callback counts frames over 500ms windows and updates the display text.
 
-## Resort Contracts (Procedural Generation)
+## Daily Runs (Procedural Generation)
 
 Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after completing Level 10.
 
 ### Key Files
 
 - `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, `randomSeed()` for non-deterministic seeds, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
-- `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickContractBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP). 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` system (freqOffset, ampScale, phase, widthPhase) making each seed visually distinct. Steep zone placement randomized with variable gaps. Service roads only for dangerous zones (≥30°); safe zones have no bypass. Winch anchors placed only above dangerous zones.
-- `src/scenes/DailyRunsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Contract button (random seed). Shows briefing preview (weather, target, time, dimensions).
+- `src/systems/LevelGenerator.ts` — `generateDailyRunLevel(seed, rank)` produces a valid `Level` object. `generateValidDailyRunLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickDailyRunBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP). 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` system (freqOffset, ampScale, phase, widthPhase) making each seed visually distinct. Steep zone placement randomized with variable gaps. Service roads only for dangerous zones (≥30°); safe zones have no bypass. Winch anchors placed only above dangerous zones.
+- `src/scenes/DailyRunsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Run button (random seed). Shows briefing preview (weather, target, time, dimensions).
 
 ### Generation Pipeline
 
@@ -1857,9 +1857,9 @@ Rank sets hard rules; seed determines layout within those rules.
 | Red | 2 (30-40°) | Yes | May snow | 0% |
 | Black | 3 (35-50°) | Yes | Night/storm | 0% |
 
-### Contract Level Flow
+### Daily Run Level Flow
 
-Contract (Daily Run) session state lives in `src/systems/ContractSession.ts` — a module-level singleton. `DailyRunsScene` calls `startContractSession()` before launching `GameScene`. Any scene that needs contract context calls `getContractSession()`. The session is automatically cleared in `resetGameScenes()` when navigating to `MenuScene` or `DailyRunsScene`. This avoids threading contract fields through every scene transition path. Contract level IDs start at 100 (`CONTRACT_LEVEL_ID_BASE`) to avoid collision with campaign levels.
+Daily run session state lives in `src/systems/DailyRunSession.ts` — a module-level singleton. `DailyRunsScene` calls `startDailyRunSession()` before launching `GameScene`. Any scene that needs daily run context calls `getDailyRunSession()`. The session is automatically cleared in `resetGameScenes()` when navigating to `MenuScene` or `DailyRunsScene`. This avoids threading daily run fields through every scene transition path. Daily run level IDs start at 100 (`DAILY_RUN_LEVEL_ID_BASE`) to avoid collision with campaign levels.
 
 ## Future Architecture Considerations
 

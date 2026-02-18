@@ -70,4 +70,4 @@ export { STORAGE_KEYS } from '../../../src/config/storageKeys.ts';
 export { LevelGeometry } from '../../../src/systems/LevelGeometry.ts';
 export { getKeyboardLayout, setKeyboardLayout, getLayoutDefaults, getMovementKeyNames, getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../../../src/utils/keyboardLayout.ts';
 export { getSavedProgress, saveProgress, markLevelCompleted, isLevelUnlocked, clearProgress, getLevelStats } from '../../../src/utils/gameProgress.ts';
-export { generateContractLevel, generateValidContractLevel, validateLevel } from '../../../src/systems/LevelGenerator.ts';
+export { generateDailyRunLevel, generateValidDailyRunLevel, validateLevel } from '../../../src/systems/LevelGenerator.ts';

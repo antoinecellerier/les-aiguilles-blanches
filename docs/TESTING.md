@@ -44,7 +44,7 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
   - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`, `test_volume_indicator.py`
   - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
   - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
-  - `src/scenes/DailyRunsScene.ts`, `src/systems/ContractSession.ts`, `src/systems/LevelGenerator.ts` → also runs `test_daily_runs.py`
+  - `src/scenes/DailyRunsScene.ts`, `src/systems/DailyRunSession.ts`, `src/systems/LevelGenerator.ts` → also runs `test_daily_runs.py`
   - `src/scenes/SkiRunScene.ts`, `src/systems/ParkFeatureSystem.ts`, `src/utils/skiSprites.ts`, `src/utils/skiRunState.ts` → also runs `test_ski_run.py`
   - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`, `test_resize_touch.py`
   - `src/utils/keyboardLayout.ts` → also runs `test_key_hints.py`
@@ -188,7 +188,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
 | `test_volume_indicator.py` | Volume icon, mute toggle, hover slider, overlay |
 | `test_level_select.py` | Level select navigation, star ratings, ski/groom buttons |
-| `test_daily_runs.py` | Contracts/daily-runs navigation, rank cycling, gamepad, session persistence, briefing, level generation |
+| `test_daily_runs.py` | Daily runs navigation, rank cycling, gamepad, session persistence, briefing, level generation |
 | `test_ski_run.py` | Ski run HUD, descent mode settings, viewport bounds |
 | `test_performance.py` | Baseline object counts (L0 vs L9), object count stability (leak detection) |
 

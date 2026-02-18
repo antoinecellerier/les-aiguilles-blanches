@@ -14,7 +14,7 @@ import { markLevelCompleted } from '../utils/gameProgress';
 import { toggleFullscreen, isFullscreen, fullscreenEnabled } from '../utils/fullscreen';
 import { Accessibility } from '../utils/accessibility';
 import { isRenderThrottled } from '../utils/renderThrottle';
-import { getContractSession } from '../systems/ContractSession';
+import { getDailyRunSession } from '../systems/DailyRunSession';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -188,7 +188,7 @@ export default class HUDScene extends Phaser.Scene {
     this.add.rectangle(0, visorHeight - accentHeight, width, accentHeight, THEME.colors.infoHex)
       .setOrigin(0).setScrollFactor(0).setAlpha(hc ? 0.8 : 0.4);
 
-    // Level name — contracts compose "Rank - Piste Name", campaign levels have it in the locale key
+    // Level name — daily runs compose "Rank - Piste Name", campaign levels have it in the locale key
     const displayName = this.level.name
       ? `${t(this.level.nameKey)} - ${this.level.name}`
       : t(this.level.nameKey) || 'Level';
@@ -1236,7 +1236,7 @@ export default class HUDScene extends Phaser.Scene {
         const targetFps = this.game.loop.targetFps || 60;
         const simPct = Math.min(100, Math.round((fps / targetFps) * 100));
         const throttleFlag = isRenderThrottled() ? ' ⏬' : '';
-        const session = getContractSession();
+        const session = getDailyRunSession();
         const label = session ? session.seedCode : 'L' + this.gameState.levelIndex;
         this.fpsText.setText(label + ' · ' + fps + ' FPS · ' + simPct + '%' + throttleFlag);
         this.rafFrameCount = 0;

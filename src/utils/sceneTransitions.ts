@@ -9,7 +9,7 @@
  */
 import Phaser from 'phaser';
 import { resetSettleFrames } from './renderThrottle';
-import { clearContractSession } from '../systems/ContractSession';
+import { clearDailyRunSession } from '../systems/DailyRunSession';
 
 /** Registry of scene constructors, populated once at boot by main.ts. */
 // Stored on window to survive Vite HMR module instance splits in dev mode
@@ -85,9 +85,9 @@ export function resetGameScenes(
       }
     }
 
-    // Clear contract session when leaving gameplay for a menu
+    // Clear daily run session when leaving gameplay for a menu
     if (target === 'MenuScene' || target === 'DailyRunsScene') {
-      clearContractSession();
+      clearDailyRunSession();
     }
 
     // Start target

@@ -12,8 +12,8 @@ import { hasTouch as detectTouch } from '../utils/touchDetect';
 import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad';
 import { ResizeManager } from '../utils/resizeManager';
 import { isDesktopApp, quitDesktopApp } from '../types/electron';
-import { getContractSession, startContractSession } from '../systems/ContractSession';
-import { generateValidContractLevel, rankSeed } from '../systems/LevelGenerator';
+import { getDailyRunSession, startDailyRunSession } from '../systems/DailyRunSession';
+import { generateValidDailyRunLevel, rankSeed } from '../systems/LevelGenerator';
 import { seedToCode, randomSeed } from '../utils/seededRNG';
 
 /**
@@ -68,7 +68,7 @@ export default class PauseScene extends Phaser.Scene {
     const panelPad = Math.round(20 * scaleFactor);
     const titleGap = Math.round(16 * scaleFactor);
 
-    const session = getContractSession();
+    const session = getDailyRunSession();
     const isRandomRun = !!session && !session.isDaily;
 
     const buttonDefs = this.skiMode
@@ -233,7 +233,7 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private quitToMenu(): void {
-    const session = getContractSession();
+    const session = getDailyRunSession();
     if (session) {
       resetGameScenes(this.game, 'DailyRunsScene');
     } else {
@@ -243,12 +243,12 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private startNewRandomRun(): void {
-    const session = getContractSession();
+    const session = getDailyRunSession();
     if (!session) return;
     const seed = randomSeed();
-    const { level, usedSeed } = generateValidContractLevel(rankSeed(seed, session.rank), session.rank);
+    const { level, usedSeed } = generateValidDailyRunLevel(rankSeed(seed, session.rank), session.rank);
     const code = seedToCode(usedSeed);
-    startContractSession({ level, seedCode: code, rank: session.rank, isDaily: false });
+    startDailyRunSession({ level, seedCode: code, rank: session.rank, isDaily: false });
     resetGameScenes(this.game, 'GameScene', { level: level.id });
   }
 

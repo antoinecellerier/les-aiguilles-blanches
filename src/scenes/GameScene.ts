@@ -21,7 +21,7 @@ import { EngineSounds } from '../systems/EngineSounds';
 import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
-import { getContractSession } from '../systems/ContractSession';
+import { getDailyRunSession } from '../systems/DailyRunSession';
 import { setGroomedTiles } from '../utils/skiRunState';
 import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
 import { cullOffscreenImages, emptyCullBounds, type CullBounds } from '../utils/cullImages';
@@ -187,7 +187,7 @@ export default class GameScene extends Phaser.Scene {
   init(data: GameSceneData): void {
     this.levelIndex = data.level || 0;
     this.restartCount = data.restartCount || 0;
-    const session = getContractSession();
+    const session = getDailyRunSession();
     this.level = session?.level || LEVELS[this.levelIndex];
 
     if (!this.level) {

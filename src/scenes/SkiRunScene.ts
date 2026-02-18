@@ -25,7 +25,7 @@ import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem } from '../systems/MusicSystem';
 import { HazardSystem } from '../systems/HazardSystem';
 import { SlalomGateSystem } from '../systems/SlalomGateSystem';
-import { getContractSession } from '../systems/ContractSession';
+import { getDailyRunSession } from '../systems/DailyRunSession';
 
 /**
  * SkiRunScene — Post-grooming descent reward run.
@@ -119,7 +119,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
   init(data: SkiRunData): void {
     this.levelIndex = data.level ?? 0;
-    const session = getContractSession();
+    const session = getDailyRunSession();
     this.level = session?.level || LEVELS[this.levelIndex];
     this.nightSfx = this.level.isNight ? NIGHT_SUFFIX : '';
     this.nc = this.level.isNight ? nightColors : dayColors;

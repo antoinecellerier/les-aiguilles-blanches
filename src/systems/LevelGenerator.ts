@@ -1,5 +1,5 @@
 /**
- * Procedural level generator for Resort Contracts mode.
+ * Procedural level generator for Daily Runs mode.
  * Produces a valid Level object from a seed and difficulty rank.
  */
 
@@ -8,12 +8,12 @@ import { computeTimeLimit } from '../config/levels';
 import type { AnimalType } from '../utils/animalSprites';
 import { SeededRNG } from '../utils/seededRNG';
 
-export type ContractRank = 'green' | 'blue' | 'red' | 'black';
+export type DailyRunRank = 'green' | 'blue' | 'red' | 'black';
 
-export const RANKS: ContractRank[] = ['green', 'blue', 'red', 'black'];
+export const RANKS: DailyRunRank[] = ['green', 'blue', 'red', 'black'];
 
 /** Derive a rank-specific seed from a base seed. */
-export function rankSeed(baseSeed: number, rank: ContractRank): number {
+export function rankSeed(baseSeed: number, rank: DailyRunRank): number {
   const rankIdx = RANKS.indexOf(rank);
   return ((baseSeed * 31) + rankIdx * 7919) >>> 0;
 }
@@ -37,7 +37,7 @@ interface RankConfig {
   slalomWidth: number;
 }
 
-const RANK_CONFIGS: Record<ContractRank, RankConfig> = {
+const RANK_CONFIGS: Record<DailyRunRank, RankConfig> = {
   green: {
     widthRange: [28, 38],
     heightRange: [35, 50],
@@ -114,8 +114,8 @@ const RANK_CONFIGS: Record<ContractRank, RankConfig> = {
 
 const WILDLIFE_POOL: AnimalType[] = ['bunny', 'marmot', 'chamois', 'bird', 'fox'];
 
-/** Contract level IDs start at 100 to avoid collision with campaign levels. */
-const CONTRACT_LEVEL_ID_BASE = 100;
+/** Daily run level IDs start at 100 to avoid collision with campaign levels. */
+const DAILY_RUN_LEVEL_ID_BASE = 100;
 
 // Procedural piste name pools — authentic Savoie/Alpine French
 // Each noun carries its gender for article/adjective agreement
@@ -178,7 +178,7 @@ const NOUNS_BLACK: PisteNoun[] = [
   { article: 'La', noun: 'Crevasse', gender: 'F' },
   { article: 'La', noun: 'Faille', gender: 'F' },
 ];
-const RANK_NOUNS: Record<ContractRank, PisteNoun[]> = {
+const RANK_NOUNS: Record<DailyRunRank, PisteNoun[]> = {
   green: NOUNS_GREEN, blue: NOUNS_BLUE, red: NOUNS_RED, black: NOUNS_BLACK,
 };
 
@@ -213,7 +213,7 @@ const ADJS_BLACK: PisteAdj[] = [
   { M: 'Mortel', F: 'Mortelle', MP: 'Mortels', FP: 'Mortelles' },
   { M: 'Redoutable', F: 'Redoutable', MP: 'Redoutables', FP: 'Redoutables' },
 ];
-const RANK_ADJS: Record<ContractRank, PisteAdj[]> = {
+const RANK_ADJS: Record<DailyRunRank, PisteAdj[]> = {
   green: ADJS_GREEN, blue: ADJS_BLUE, red: ADJS_RED, black: ADJS_BLACK,
 };
 
@@ -238,7 +238,7 @@ const PRE_BLACK: PreAdj[] = [
   { M: 'Grand', F: 'Grande', MP: 'Grands', FP: 'Grandes' },
   { M: 'Vieux', F: 'Vieille', MP: 'Vieux', FP: 'Vieilles', MV: 'Vieil' },
 ];
-const RANK_PRE: Record<ContractRank, PreAdj[]> = {
+const RANK_PRE: Record<DailyRunRank, PreAdj[]> = {
   green: PRE_GREEN, blue: PRE_BLUE, red: PRE_RED, black: PRE_BLACK,
 };
 
@@ -259,7 +259,7 @@ const GENS_BLACK = [
   'du Loup', "de l'Ours", 'des Abîmes', 'du Néant',
   'des Damnés', 'de la Mort', 'du Purgatoire', 'des Ombres',
 ];
-const RANK_GENS: Record<ContractRank, string[]> = {
+const RANK_GENS: Record<DailyRunRank, string[]> = {
   green: GENS_GREEN, blue: GENS_BLUE, red: GENS_RED, black: GENS_BLACK,
 };
 
@@ -275,7 +275,7 @@ function isRedundant(noun: string, gen: string): boolean {
 }
 
 /** Generate a deterministic French piste name from the RNG. */
-function generatePisteName(rng: SeededRNG, isPark: boolean, rank: ContractRank): string {
+function generatePisteName(rng: SeededRNG, isPark: boolean, rank: DailyRunRank): string {
   if (isPark) return rng.pick(PARK_NAMES);
   const n = rng.pick(RANK_NOUNS[rank]);
   const space = n.article === "L'" ? '' : ' ';
@@ -309,21 +309,21 @@ function generatePisteName(rng: SeededRNG, isPark: boolean, rank: ContractRank):
 }
 
 /** Pick a briefing speaker and dialogue key based on level characteristics. */
-function pickContractBriefing(rng: SeededRNG, level: Level): { speaker: string; dialogue: string } {
+function pickDailyRunBriefing(rng: SeededRNG, level: Level): { speaker: string; dialogue: string } {
   // Thierry warns about hazards (steep, avalanche, storm)
   if (level.steepZones.length >= 2 || level.hazards?.includes('avalanche'))
-    return { speaker: 'Thierry', dialogue: 'contractBriefingThierry' };
+    return { speaker: 'Thierry', dialogue: 'dailyRunBriefingThierry' };
   // Marie for cold/night conditions
   if (level.isNight || level.weather === 'storm')
-    return { speaker: 'Marie', dialogue: 'contractBriefingMarie' };
+    return { speaker: 'Marie', dialogue: 'dailyRunBriefingMarie' };
   // Émilie teases on easier runs
   if (level.difficulty === 'green' || level.difficulty === 'blue' || level.difficulty === 'park')
-    return { speaker: 'Émilie', dialogue: 'contractBriefingEmilie' };
+    return { speaker: 'Émilie', dialogue: 'dailyRunBriefingEmilie' };
   // Jean-Pierre dispatches by default
-  return { speaker: 'Jean-Pierre', dialogue: 'contractBriefingJP' };
+  return { speaker: 'Jean-Pierre', dialogue: 'dailyRunBriefingJP' };
 }
 
-export function generateContractLevel(seed: number, rank: ContractRank): Level {
+export function generateDailyRunLevel(seed: number, rank: DailyRunRank): Level {
   const rng = new SeededRNG(seed);
   const cfg = RANK_CONFIGS[rank];
   const isPark = rng.chance(cfg.parkChance);
@@ -334,7 +334,7 @@ export function generateContractLevel(seed: number, rank: ContractRank): Level {
   return generateRegularLevel(rng, cfg, rank);
 }
 
-function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank): Level {
+function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: DailyRunRank): Level {
   const width = rng.integerInRange(cfg.widthRange[0], cfg.widthRange[1]);
   const height = rng.integerInRange(cfg.heightRange[0], cfg.heightRange[1]);
   const pisteWidth = rng.realInRange(cfg.pisteWidthRange[0], cfg.pisteWidthRange[1]);
@@ -365,10 +365,10 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
   const difficulty = rank === 'green' ? 'green' : rank === 'blue' ? 'blue' : rank === 'red' ? 'red' : 'black' as const;
 
   const level: Level = {
-    id: CONTRACT_LEVEL_ID_BASE + (rng.seed % 1000),
+    id: DAILY_RUN_LEVEL_ID_BASE + (rng.seed % 1000),
     nameKey: `rank_${rank}`,
     name: generatePisteName(rng, false, rank),
-    taskKey: 'contract_levelTask',
+    taskKey: 'dailyRun_levelTask',
     difficulty,
     timeLimit: 0, // computed below
     targetCoverage,
@@ -395,13 +395,13 @@ function generateRegularLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRan
   const pisteTiles = width * height * pisteWidth;
   const areaFloor = Math.ceil(Math.max(pisteTiles / 500 * 30, 60) / 30) * 30;
   level.timeLimit = Math.max(level.timeLimit, areaFloor);
-  const briefing = pickContractBriefing(rng, level);
+  const briefing = pickDailyRunBriefing(rng, level);
   level.introDialogue = briefing.dialogue;
   level.introSpeaker = briefing.speaker;
   return level;
 }
 
-function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank): Level {
+function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: DailyRunRank): Level {
   const width = rng.integerInRange(25, 40);
   const height = rng.integerInRange(45, 60);
   const pisteWidth = rng.realInRange(0.5, 0.8);
@@ -431,10 +431,10 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
   }
 
   const level: Level = {
-    id: CONTRACT_LEVEL_ID_BASE + (rng.seed % 1000),
+    id: DAILY_RUN_LEVEL_ID_BASE + (rng.seed % 1000),
     nameKey: 'rank_park',
     name: generatePisteName(rng, true, rank),
-    taskKey: 'contract_levelTask',
+    taskKey: 'dailyRun_levelTask',
     difficulty: 'park',
     timeLimit: 0,
     targetCoverage,
@@ -457,7 +457,7 @@ function generateParkLevel(rng: SeededRNG, cfg: RankConfig, rank: ContractRank):
   const parkTiles = width * height * pisteWidth;
   const parkFloor = Math.ceil(Math.max(parkTiles / 500 * 30, 60) / 30) * 30;
   level.timeLimit = Math.max(level.timeLimit, parkFloor);
-  const briefing = pickContractBriefing(rng, level);
+  const briefing = pickDailyRunBriefing(rng, level);
   level.introDialogue = briefing.dialogue;
   level.introSpeaker = briefing.speaker;
   return level;
@@ -528,7 +528,7 @@ function generateAccessPaths(rng: SeededRNG, steepZones: SteepZone[]): AccessPat
     });
 }
 
-function generateObstacleTypes(rng: SeededRNG, rank: ContractRank): ObstacleType[] {
+function generateObstacleTypes(rng: SeededRNG, rank: DailyRunRank): ObstacleType[] {
   const types: ObstacleType[] = ['trees'];
   if (rank !== 'green') types.push('rocks');
   if (rank === 'black' && rng.chance(0.4)) types.push('pylons');
@@ -544,7 +544,7 @@ function generateWildlife(rng: SeededRNG): WildlifeSpawn[] {
   }));
 }
 
-function generateBonusObjectives(rng: SeededRNG, rank: ContractRank, hasWinch: boolean): BonusObjective[] {
+function generateBonusObjectives(rng: SeededRNG, rank: DailyRunRank, hasWinch: boolean): BonusObjective[] {
   const objectives: BonusObjective[] = [];
 
   if (rng.chance(0.5)) {
@@ -574,17 +574,17 @@ import { GAME_CONFIG, BALANCE } from '../config/gameConfig';
 const MAX_GENERATION_ATTEMPTS = 10;
 
 /**
- * Generate a valid contract level, retrying with incremented seeds
+ * Generate a valid daily run level, retrying with incremented seeds
  * if validation fails. Returns the level and the seed that worked.
  */
-export function generateValidContractLevel(seed: number, rank: ContractRank): { level: Level; usedSeed: number } {
+export function generateValidDailyRunLevel(seed: number, rank: DailyRunRank): { level: Level; usedSeed: number } {
   let bestLevel: Level | null = null;
   let bestSeed = seed;
   let fewestIssues = Infinity;
 
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
     const trySeed = (seed + attempt) >>> 0;
-    const level = generateContractLevel(trySeed, rank);
+    const level = generateDailyRunLevel(trySeed, rank);
     const issues = validateLevel(level);
     if (issues.length === 0) {
       return { level, usedSeed: trySeed };
@@ -596,7 +596,7 @@ export function generateValidContractLevel(seed: number, rank: ContractRank): { 
     }
   }
   // Return the attempt with fewest validation issues (always set after ≥1 loop iteration)
-  return { level: bestLevel ?? generateContractLevel(seed, rank), usedSeed: bestSeed };
+  return { level: bestLevel ?? generateDailyRunLevel(seed, rank), usedSeed: bestSeed };
 }
 
 /** Returns an array of issue descriptions (empty = valid). */

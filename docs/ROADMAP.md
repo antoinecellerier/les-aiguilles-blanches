@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, contract-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle). Remaining: shareable seed codes (input/share UI — display done), rename DailyRunsScene→DailyRunsScene, responsive layout across form factors.
+- [ ] **Daily Runs (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), DailyRunSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, daily-run-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle). Remaining: shareable seed codes (input/share UI — display done), responsive layout across form factors.
 
 ## Next Up
 
@@ -33,7 +33,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Procedural French piste names** — Combinatorial name generation from rank-themed pools (nouns, adjectives, genitives) with full French grammar agreement (gender, number, elision, preposed adjective forms). Names shown in DailyRunsScene briefing, HUD visor, LevelCompleteScene, SkiRunScene, and accessibility announcements. Redundancy filter prevents combos like "Le Glacier du Glacier".
 
-- ✅ **Contract-aware pause menu** — Pause menu returns to DailyRunsScene (not main menu) during contract sessions. Random Runs get a "New Run" button to generate a fresh seed at the same rank. Extracted `rankSeed()` and `RANKS` to LevelGenerator, `randomSeed()` to seededRNG.
+- ✅ **Daily-run-aware pause menu** — Pause menu returns to DailyRunsScene (not main menu) during daily run sessions. Random Runs get a "New Run" button to generate a fresh seed at the same rank. Extracted `rankSeed()` and `RANKS` to LevelGenerator, `randomSeed()` to seededRNG.
 
 - ✅ **Ski mode UX improvements** — Pause/fullscreen touch buttons added to ski mode HUD. Resume from menu restores ski mode when quit from ski run. Adaptive camera lerp in SkiRunScene. Image culling in SkiRunScene for performance.
 
@@ -43,7 +43,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Procedural level variety** — 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with per-seed variation, randomized steep zones, service road bypasses for dangerous zones only, 5 park feature combos with procedural placement, expanded slalom gate coverage.
 
-- ✅ **Contract briefing dialogues** — `pickContractBriefing()` selects speaker based on level characteristics (Thierry for hazards, Marie for night/cold, Émilie for easy runs, JP default). 4 locale keys × 14 languages. 10 unit tests + 4 E2E integration tests.
+- ✅ **Daily run briefing dialogues** — `pickDailyRunBriefing()` selects speaker based on level characteristics (Thierry for hazards, Marie for night/cold, Émilie for easy runs, JP default). 4 locale keys × 14 languages. 10 unit tests + 4 E2E integration tests.
 
 - ✅ **Daily Runs art style compliance** — Rank indicators now use NF S52-102 shapes (●■◆★), colors match ART_STYLE.md palette, separator uses fillRect, all text colors from THEME.
 

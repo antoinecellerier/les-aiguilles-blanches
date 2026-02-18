@@ -456,14 +456,14 @@ Choose between Random, Ski, or Snowboard in **Settings → Bonus → Descent Mod
 
 *Bonne chance et bonne glisse!* 🎿
 
-## 🗂️ Resort Contracts (Procedural Mode)
+## 🗂️ Daily Runs (Procedural Mode)
 
 Unlocked after completing all 10 campaign levels. Generates fresh pistes from a shareable seed code.
 
 ### Playlists
 
 - **Daily Shift** — Same mountain for everyone (date-seeded). Compare runs with friends.
-- **Random Contract** — New seed each run, shown as a shareable 4-6 character code.
+- **Random Run** — New seed each run, shown as a shareable 4-6 character code.
 
 ### Difficulty Ranks
 
@@ -474,18 +474,18 @@ Unlocked after completing all 10 campaign levels. Generates fresh pistes from a 
 | 🔴 Red | Winding, steep zones | winding, serpentine, hourglass, dogleg, funnel | Winch, service roads on dangerous slopes (≥30°), 50% slalom |
 | ⚫ Black | Serpentine, narrow | winding, serpentine, dogleg, hourglass | Night/storm, avalanche, 70% slalom |
 
-### Park Contracts
+### Park Runs
 
-Green rank has 80% park chance; other ranks generate regular pistes only. Park contracts use one of 5 feature combos (halfpipe+kickers, kickers+rails, kickers, halfpipe+kickers+rails, rails+kickers) with procedural Y placement and mixed lanes (40% chance to alternate kicker/rail):
+Green rank has 80% park chance; other ranks generate regular pistes only. Park runs use one of 5 feature combos (halfpipe+kickers, kickers+rails, kickers, halfpipe+kickers+rails, rails+kickers) with procedural Y placement and mixed lanes (40% chance to alternate kicker/rail):
 - Coverage target ~95%, no steep zones or avalanche
 - Ski mode includes freestyle trick scoring
 
 ### Ski Mode
 
-After grooming a contract, "Ski it!" lets you descend on your own work. Regular contracts may include slalom gates; park contracts include freestyle tricks.
+After grooming a daily run, "Ski it!" lets you descend on your own work. Regular runs may include slalom gates; park runs include freestyle tricks.
 
-### Pause Menu in Contracts
+### Pause Menu in Daily Runs
 
-Pausing during a contract shows a contract-aware menu:
+Pausing during a daily run shows a daily-run-aware menu:
 - **Quit** returns to the Daily Runs screen (not main menu)
-- **New Run** (random contracts only) generates a fresh seed at the same difficulty rank
+- **New Run** (random runs only) generates a fresh seed at the same difficulty rank

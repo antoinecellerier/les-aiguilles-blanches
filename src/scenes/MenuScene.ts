@@ -286,7 +286,7 @@ export default class MenuScene extends Phaser.Scene {
     if (hasProgress || hasCompletedLevels) {
       buttonDefs.push({ text: 'levelSelect', callback: () => this.showLevelSelect(), primary: false });
     }
-    buttonDefs.push({ text: 'contracts', callback: () => this.showContracts(), primary: false });
+    buttonDefs.push({ text: 'dailyRuns', callback: () => this.showDailyRuns(), primary: false });
     buttonDefs.push({ text: 'howToPlay', callback: () => this.showHowToPlay(), primary: false });
     buttonDefs.push({ text: 'changelog', callback: () => this.showChangelog(), primary: false });
     buttonDefs.push({ text: 'settings', callback: () => this.showSettings(), primary: false });
@@ -372,7 +372,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     // Daily Runs: golden glow if today's daily hasn't been played
-    const dailyRunIdx = buttonDefs.findIndex(b => b.text === 'contracts');
+    const dailyRunIdx = buttonDefs.findIndex(b => b.text === 'dailyRuns');
     if (dailyRunIdx >= 0) {
       const today = new Date().toISOString().slice(0, 10);
       const dailyData = getJSON<{ date: string; ranks: string[] }>(STORAGE_KEYS.DAILY_RUN_DATE, { date: '', ranks: [] });
@@ -1079,7 +1079,7 @@ export default class MenuScene extends Phaser.Scene {
     resetGameScenes(game, 'LevelSelectScene');
   }
 
-  private showContracts(): void {
+  private showDailyRuns(): void {
     const game = this.game;
     this.scene.stop('MenuScene');
     resetGameScenes(game, 'DailyRunsScene');

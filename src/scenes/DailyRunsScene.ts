@@ -7,20 +7,20 @@ import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu'
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuBackdrop, createMenuHeader, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { playClick } from '../systems/UISounds';
-import { generateValidContractLevel, rankSeed, RANKS, type ContractRank } from '../systems/LevelGenerator';
+import { generateValidDailyRunLevel, rankSeed, RANKS, type DailyRunRank } from '../systems/LevelGenerator';
 import { seedToCode, dailySeed, randomSeed } from '../utils/seededRNG';
 import { DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
-import { startContractSession } from '../systems/ContractSession';
+import { startDailyRunSession } from '../systems/DailyRunSession';
 import { getJSON } from '../utils/storage';
 
-const RANK_COLORS: Record<ContractRank, string> = {
+const RANK_COLORS: Record<DailyRunRank, string> = {
   green: '#22c55e',
   blue: '#3b82f6',
   red: '#ef4444',
   black: '#1f2937',
 };
-const RANK_LABELS: Record<ContractRank, string> = {
+const RANK_LABELS: Record<DailyRunRank, string> = {
   green: '●',
   blue: '■',
   red: '◆',
@@ -28,7 +28,7 @@ const RANK_LABELS: Record<ContractRank, string> = {
 };
 
 export default class DailyRunsScene extends Phaser.Scene {
-  private selectedRank: ContractRank = 'green';
+  private selectedRank: DailyRunRank = 'green';
   private greenIsPark = false;
   private rankButtons: Phaser.GameObjects.Text[] = [];
   private seedDisplay?: Phaser.GameObjects.Text;
@@ -49,7 +49,7 @@ export default class DailyRunsScene extends Phaser.Scene {
     this.backdrop = createMenuBackdrop(this, { skipGroomer: true });
     const scaleFactor = this.backdrop.scaleFactor;
 
-    const { backBtn } = createMenuHeader(this, 'contracts', () => this.goBack(), scaleFactor);
+    const { backBtn } = createMenuHeader(this, 'dailyRuns', () => this.goBack(), scaleFactor);
 
     // Escape key always goes back (even when locked)
     this.input.keyboard?.on('keydown-ESC', () => this.goBack());
@@ -62,7 +62,7 @@ export default class DailyRunsScene extends Phaser.Scene {
       return;
     }
 
-    this.buildContractsUI(width, height, scaleFactor, backBtn);
+    this.buildDailyRunsUI(width, height, scaleFactor, backBtn);
   }
 
   private isCampaignComplete(): boolean {
@@ -75,7 +75,7 @@ export default class DailyRunsScene extends Phaser.Scene {
 
   private showLockedMessage(width: number, height: number, scale: number): void {
     const fontSize = Math.round(16 * scale);
-    this.add.text(width / 2, Math.round(height * 0.4), '🔒 ' + t('contracts_locked'), {
+    this.add.text(width / 2, Math.round(height * 0.4), '🔒 ' + t('dailyRuns_locked'), {
       fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
       color: THEME.colors.textSecondary,
@@ -84,7 +84,7 @@ export default class DailyRunsScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
   }
 
-  private buildContractsUI(width: number, height: number, scale: number, backBtn: Phaser.GameObjects.Text): void {
+  private buildDailyRunsUI(width: number, height: number, scale: number, backBtn: Phaser.GameObjects.Text): void {
     const fontSize = Math.round(16 * scale);
     const smallFont = Math.round(13 * scale);
     const btnPadX = Math.round(20 * scale);
@@ -98,7 +98,7 @@ export default class DailyRunsScene extends Phaser.Scene {
     // --- Rank selector row ---
     // Pre-compute whether today's green level is a park
     const dailySeedNum = dailySeed();
-    const { level: greenLevel } = generateValidContractLevel(rankSeed(dailySeedNum, 'green'), 'green');
+    const { level: greenLevel } = generateValidDailyRunLevel(rankSeed(dailySeedNum, 'green'), 'green');
     this.greenIsPark = greenLevel.difficulty === 'park';
 
     const rankY = Math.round(height * 0.19);
@@ -179,7 +179,7 @@ export default class DailyRunsScene extends Phaser.Scene {
     const dailyY = briefingY + Math.round(68 * scale);
 
     const dailyBtn = this.add.text(width / 2, dailyY,
-      t('contracts_dailyShift') + '  [' + dailyCode + ']',
+      t('dailyRuns_dailyShift') + '  [' + dailyCode + ']',
       {
         fontFamily: THEME.fonts.family,
         fontSize: fontSize + 'px',
@@ -188,9 +188,9 @@ export default class DailyRunsScene extends Phaser.Scene {
         padding: { x: btnPadX, y: btnPadY },
       }
     ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
-    dailyBtn.on('pointerdown', () => { playClick(); this.startContract(dailySeedNum, true); });
+    dailyBtn.on('pointerdown', () => { playClick(); this.startDailyRun(dailySeedNum, true); });
     allButtons.push(dailyBtn);
-    allCallbacks.push(() => this.startContract(dailySeedNum, true));
+    allCallbacks.push(() => this.startDailyRun(dailySeedNum, true));
 
     // --- Separator + Random Run (visually distinct section) ---
     const sepY = dailyY + Math.round(40 * scale);
@@ -201,7 +201,7 @@ export default class DailyRunsScene extends Phaser.Scene {
 
     const randomY = sepY + Math.round(22 * scale);
     const randomBtn = this.add.text(width / 2, randomY,
-      t('contracts_randomContract'),
+      t('dailyRuns_randomRun'),
       {
         fontFamily: THEME.fonts.family,
         fontSize: smallFont + 'px',
@@ -212,11 +212,11 @@ export default class DailyRunsScene extends Phaser.Scene {
     ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
     randomBtn.on('pointerdown', () => {
       playClick();
-      this.startContract(randomSeed());
+      this.startDailyRun(randomSeed());
     });
     allButtons.push(randomBtn);
     allCallbacks.push(() => {
-      this.startContract(randomSeed());
+      this.startDailyRun(randomSeed());
     });
 
     // Keyboard/gamepad navigation: up/down for action buttons, left/right for rank
@@ -269,15 +269,15 @@ export default class DailyRunsScene extends Phaser.Scene {
 
   private updateBriefing(): void {
     const dailySeedNum = dailySeed();
-    const { level } = generateValidContractLevel(rankSeed(dailySeedNum, this.selectedRank), this.selectedRank);
+    const { level } = generateValidDailyRunLevel(rankSeed(dailySeedNum, this.selectedRank), this.selectedRank);
     const isPark = level.difficulty === 'park';
 
     if (this.pisteNameDisplay) {
       this.pisteNameDisplay.setText(level.name || t(level.nameKey));
     }
 
-    const weatherKey = `contracts_weather_${level.weather || 'clear'}`;
-    const shiftKey = level.isNight ? 'contracts_night' : 'contracts_day';
+    const weatherKey = `dailyRuns_weather_${level.weather || 'clear'}`;
+    const shiftKey = level.isNight ? 'dailyRuns_night' : 'dailyRuns_day';
     const parkStr = isPark ? ` | ▲ ${t('rank_park')}` : '';
     const winchStr = level.hasWinch ? ` | 🔗 ${t('winch')}` : '';
 
@@ -288,18 +288,18 @@ export default class DailyRunsScene extends Phaser.Scene {
     }
     if (this.briefingText) {
       this.briefingText.setText(
-        `${t('contracts_target')}: ${level.targetCoverage}% | ${t('contracts_timeLimit')}: ${Math.floor(level.timeLimit / 60)}m${(level.timeLimit % 60) ? level.timeLimit % 60 + 's' : ''} | ${level.width}×${level.height}`
+        `${t('dailyRuns_target')}: ${level.targetCoverage}% | ${t('dailyRuns_timeLimit')}: ${Math.floor(level.timeLimit / 60)}m${(level.timeLimit % 60) ? level.timeLimit % 60 + 's' : ''} | ${level.width}×${level.height}`
       );
     }
     // Update green button to show park theme when the daily level is a park
     this.updateRankSelection();
   }
 
-  private startContract(seed: number, isDaily = false): void {
-    const { level, usedSeed } = generateValidContractLevel(rankSeed(seed, this.selectedRank), this.selectedRank);
+  private startDailyRun(seed: number, isDaily = false): void {
+    const { level, usedSeed } = generateValidDailyRunLevel(rankSeed(seed, this.selectedRank), this.selectedRank);
     const code = seedToCode(usedSeed);
 
-    startContractSession({
+    startDailyRunSession({
       level,
       seedCode: code,
       rank: this.selectedRank,

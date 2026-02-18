@@ -1,12 +1,12 @@
-"""E2E tests for Daily Runs (Contracts) mode.
+"""E2E tests for Daily Runs mode.
 
 Tests navigation, input methods (keyboard, mouse, gamepad), viewports,
-and cross-scene flows specific to the contracts/daily-runs feature.
+and cross-scene flows specific to the daily runs feature.
 """
 import pytest
 import time
 from playwright.sync_api import Page
-from conftest import wait_for_scene, get_active_scenes, GAME_URL, navigate_to_contracts, unlock_all_levels
+from conftest import wait_for_scene, get_active_scenes, GAME_URL, navigate_to_daily_runs, unlock_all_levels
 from test_gamepad import tap_gamepad_button, MOCK_GAMEPAD_SCRIPT
 
 
@@ -79,19 +79,19 @@ def gamepad_page(page: Page):
 
 
 # ============================================================
-# CONTRACTS SCENE — KEYBOARD
+# DAILY RUNS SCENE — KEYBOARD
 # ============================================================
 
-class TestContractsKeyboard:
+class TestDailyRunsKeyboard:
     @pytest.mark.parametrize("vw,vh", [(1280, 720), (375, 667), (1920, 800)])
-    def test_contracts_reachable(self, page: Page, vw, vh):
+    def test_daily_runs_reachable(self, page: Page, vw, vh):
         setup_unlocked(page, vw, vh)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         assert "DailyRunsScene" in get_active_scenes(page)
 
-    def test_contracts_rank_cycling(self, page: Page):
+    def test_daily_runs_rank_cycling(self, page: Page):
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
 
         rank0 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank0 == "green", f"Initial rank should be green, got {rank0}"
@@ -106,9 +106,9 @@ class TestContractsKeyboard:
         rank2 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank2 == "green", f"Left should cycle back to green, got {rank2}"
 
-    def test_contracts_button_nav(self, page: Page):
+    def test_daily_runs_button_nav(self, page: Page):
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
 
         # Should start on Daily Shift (index 1; 0 is back)
         idx = get_selected_index(page, "DailyRunsScene")
@@ -122,36 +122,36 @@ class TestContractsKeyboard:
         time.sleep(0.1)
         assert get_selected_index(page, "DailyRunsScene") == 1
 
-    def test_contracts_enter_starts_game(self, page: Page):
+    def test_daily_runs_enter_starts_game(self, page: Page):
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         page.keyboard.press("Enter")
         time.sleep(0.5)
         wait_for_scene(page, "GameScene", timeout=10000)
 
-    def test_contracts_space_starts_game(self, page: Page):
+    def test_daily_runs_space_starts_game(self, page: Page):
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         page.keyboard.press("Space")
         time.sleep(0.5)
         wait_for_scene(page, "GameScene", timeout=10000)
 
-    def test_contracts_escape_goes_back(self, page: Page):
+    def test_daily_runs_escape_goes_back(self, page: Page):
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         page.keyboard.press("Escape")
         time.sleep(0.5)
         wait_for_scene(page, "MenuScene", timeout=8000)
 
 
 # ============================================================
-# CONTRACTS SCENE — GAMEPAD
+# DAILY RUNS SCENE — GAMEPAD
 # ============================================================
 
-class TestContractsGamepad:
-    def test_contracts_gamepad_nav(self, gamepad_page: Page):
+class TestDailyRunsGamepad:
+    def test_daily_runs_gamepad_nav(self, gamepad_page: Page):
         setup_unlocked(gamepad_page)
-        navigate_to_contracts(gamepad_page)
+        navigate_to_daily_runs(gamepad_page)
 
         idx0 = get_selected_index(gamepad_page, "DailyRunsScene")
         tap_gamepad_button(gamepad_page, GP_DPAD_DOWN)
@@ -159,17 +159,17 @@ class TestContractsGamepad:
         idx1 = get_selected_index(gamepad_page, "DailyRunsScene")
         assert idx1 == idx0 + 1, f"Dpad down: {idx0} -> {idx1}"
 
-    def test_contracts_b_goes_back(self, gamepad_page: Page):
+    def test_daily_runs_b_goes_back(self, gamepad_page: Page):
         setup_unlocked(gamepad_page)
-        navigate_to_contracts(gamepad_page)
+        navigate_to_daily_runs(gamepad_page)
 
         tap_gamepad_button(gamepad_page, GP_B)
         time.sleep(0.5)
         wait_for_scene(gamepad_page, "MenuScene", timeout=8000)
 
-    def test_contracts_a_starts_game(self, gamepad_page: Page):
+    def test_daily_runs_a_starts_game(self, gamepad_page: Page):
         setup_unlocked(gamepad_page)
-        navigate_to_contracts(gamepad_page)
+        navigate_to_daily_runs(gamepad_page)
 
         tap_gamepad_button(gamepad_page, GP_A)
         time.sleep(0.5)
@@ -177,24 +177,24 @@ class TestContractsGamepad:
 
 
 # ============================================================
-# CROSS-SCENE FLOW TESTS (contracts-specific)
+# CROSS-SCENE FLOW TESTS (daily-run-specific)
 # ============================================================
 
-class TestContractFlows:
-    def test_contract_session_survives_restart(self, page: Page):
-        """Contract session must survive pause→restart."""
+class TestDailyRunFlows:
+    def test_daily_run_session_survives_restart(self, page: Page):
+        """Daily run session must survive pause→restart."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         start_daily_run(page)
         page.locator("canvas").click()
         time.sleep(0.3)
 
-        # Verify contract level loaded
+        # Verify daily run level loaded
         has_session = page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
             return gs?.level?.id >= 100;
         }""")
-        assert has_session, "Contract level not loaded (id should be >= 100)"
+        assert has_session, "Daily run level not loaded (id should be >= 100)"
 
         # Pause → Restart
         page.keyboard.press("Escape")
@@ -205,17 +205,17 @@ class TestContractFlows:
         time.sleep(0.5)
         wait_for_scene(page, "GameScene", timeout=10000)
 
-        # Contract session should still be active
+        # Daily run session should still be active
         has_session2 = page.evaluate("""() => {
             const gs = window.game?.scene?.getScene('GameScene');
             return gs?.level?.id >= 100;
         }""")
-        assert has_session2, "Contract session lost after restart"
+        assert has_session2, "Daily run session lost after restart"
 
-    def test_contract_completion_no_next_level(self, page: Page):
-        """Completing a contract should NOT show 'Next Level' button."""
+    def test_daily_run_completion_no_next_level(self, page: Page):
+        """Completing a daily run should NOT show 'Next Level' button."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         start_daily_run(page)
 
         page.evaluate("""() => {
@@ -241,12 +241,12 @@ class TestContractFlows:
         }""")
         combined = " ".join(buttons)
         assert "next" not in combined or "level" not in combined, \
-            f"Contract complete should not show 'Next Level': {buttons}"
+            f"Daily run complete should not show 'Next Level': {buttons}"
 
-    def test_quit_clears_contract_session(self, page: Page):
+    def test_quit_clears_daily_run_session(self, page: Page):
         """Quitting from pause should return to DailyRunsScene."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         start_daily_run(page)
         page.locator("canvas").click()
         time.sleep(0.3)
@@ -266,11 +266,11 @@ class TestContractFlows:
 # LEVEL GENERATION INTEGRATION TESTS
 # ============================================================
 
-class TestContractLevelGeneration:
+class TestDailyRunLevelGeneration:
     def test_daily_run_is_deterministic(self, page: Page):
         """Same daily run started twice should produce identical level properties."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         start_daily_run(page)
 
         props1 = page.evaluate("""() => {
@@ -310,7 +310,7 @@ class TestContractLevelGeneration:
     def test_rank_affects_difficulty(self, page: Page):
         """Changing rank selector should change the generated level difficulty."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
 
         # Start green run
         start_daily_run(page)
@@ -348,10 +348,10 @@ class TestContractLevelGeneration:
         assert black["difficulty"] in ("black", "park"), \
             f"Black rank should produce black or park level, got {black['difficulty']}"
 
-    def test_contract_level_has_briefing_dialogue(self, page: Page):
-        """Contract levels should have introDialogue and introSpeaker set."""
+    def test_daily_run_level_has_briefing_dialogue(self, page: Page):
+        """Daily run levels should have introDialogue and introSpeaker set."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         start_daily_run(page)
 
         briefing = page.evaluate("""() => {
@@ -359,20 +359,20 @@ class TestContractLevelGeneration:
             return l ? { dialogue: l.introDialogue, speaker: l.introSpeaker } : null;
         }""")
         assert briefing is not None
-        assert briefing["dialogue"] is not None, "Contract level missing introDialogue"
-        assert briefing["speaker"] is not None, "Contract level missing introSpeaker"
-        assert briefing["dialogue"].startswith("contractBriefing"), \
+        assert briefing["dialogue"] is not None, "Daily run level missing introDialogue"
+        assert briefing["speaker"] is not None, "Daily run level missing introSpeaker"
+        assert briefing["dialogue"].startswith("dailyRunBriefing"), \
             f"Unexpected dialogue key: {briefing['dialogue']}"
         assert briefing["speaker"] in ["Jean-Pierre", "Thierry", "Marie", "Émilie"], \
             f"Unexpected speaker: {briefing['speaker']}"
 
-    def test_contract_level_id_above_campaign(self, page: Page):
-        """Contract level IDs should be >= 100 (above campaign range)."""
+    def test_daily_run_level_id_above_campaign(self, page: Page):
+        """Daily run level IDs should be >= 100 (above campaign range)."""
         setup_unlocked(page)
-        navigate_to_contracts(page)
+        navigate_to_daily_runs(page)
         start_daily_run(page)
 
         level_id = page.evaluate("""() => {
             return window.game?.scene?.getScene('GameScene')?.level?.id ?? -1;
         }""")
-        assert level_id >= 100, f"Contract level ID should be >= 100, got {level_id}"
+        assert level_id >= 100, f"Daily run level ID should be >= 100, got {level_id}"

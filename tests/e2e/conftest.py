@@ -213,7 +213,7 @@ def click_button(page, button_index: int, description: str):
     page.wait_for_timeout(100)
 
 
-def navigate_to_contracts(page):
+def navigate_to_daily_runs(page):
     """From MenuScene, navigate to DailyRunsScene via the Daily Runs button."""
     import time
     idx = page.evaluate("""() => {

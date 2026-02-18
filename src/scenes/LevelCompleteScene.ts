@@ -14,7 +14,7 @@ import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
 import { markLevelCompleted } from '../utils/gameProgress';
 import { clearGroomedTiles } from '../utils/skiRunState';
-import { getContractSession } from '../systems/ContractSession';
+import { getDailyRunSession } from '../systems/DailyRunSession';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -63,7 +63,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   private skiTrickScore = 0;
   private skiTrickCount = 0;
   private skiBestCombo = 0;
-  private isContract = false;
+  private isDailyRun = false;
   
   // Keyboard/gamepad navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -101,8 +101,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.skiTrickScore = data.skiTrickScore ?? 0;
     this.skiTrickCount = data.skiTrickCount ?? 0;
     this.skiBestCombo = data.skiBestCombo ?? 0;
-    const session = getContractSession();
-    this.isContract = !!session;
+    const session = getDailyRunSession();
+    this.isDailyRun = !!session;
     
     // Reset navigation state
     this.menuButtons = [];
@@ -112,7 +112,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.isNavigating = false;
 
     // Persist per-level completion stats on win (campaign only)
-    if (this.won && !this.isContract) {
+    if (this.won && !this.isDailyRun) {
       const stars = this.getStarCount();
       const bonusMet = this.evaluateBonusObjectives().filter(r => r.met).length;
       markLevelCompleted(this.levelIndex, stars, this.timeUsed, bonusMet);
@@ -120,7 +120,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   }
 
   private getLevel(): Level {
-    const session = getContractSession();
+    const session = getDailyRunSession();
     return session?.level || LEVELS[this.levelIndex] as Level;
   }
 
@@ -326,7 +326,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     }
 
     // Game complete message for final level win
-    if (this.won && !this.isContract && this.levelIndex === LEVELS.length - 1) {
+    if (this.won && !this.isDailyRun && this.levelIndex === LEVELS.length - 1) {
       const gcMsg = this.add.text(cx, cursorY, '🎉 ' + (t('gameComplete') || 'Jeu terminé !') + ' 🎉', {
         fontFamily: THEME.fonts.family,
         fontSize: `${Math.round(baseFontSize * 1.25)}px`,
@@ -344,9 +344,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
     if (skiMode === 'random') skiMode = Math.random() < 0.5 ? 'ski' : 'snowboard';
     const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
 
-    if (this.isContract && this.won) {
+    if (this.isDailyRun && this.won) {
       // Track daily run completion per rank
-      const session = getContractSession();
+      const session = getDailyRunSession();
       if (session?.isDaily && session.rank) {
         const today = new Date().toISOString().slice(0, 10);
         const data = getJSON<{ date: string; ranks: string[] }>(STORAGE_KEYS.DAILY_RUN_DATE, { date: '', ranks: [] });
@@ -358,18 +358,18 @@ export default class LevelCompleteScene extends Phaser.Scene {
           setJSON(STORAGE_KEYS.DAILY_RUN_DATE, data);
         }
       }
-      // Contract complete — ski it + menu
+      // Daily run complete — ski it + menu
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
         () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true);
-      this.addButton(buttonContainer, t('contracts') || 'Contracts', buttonFontSize, buttonPadding2,
+      this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
         () => this.navigateTo('DailyRunsScene'));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
-    } else if (this.isContract && !this.won) {
-      // Contract failed — retry + menu
+    } else if (this.isDailyRun && !this.won) {
+      // Daily run failed — retry + menu
       this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex }), true);
-      this.addButton(buttonContainer, t('contracts') || 'Contracts', buttonFontSize, buttonPadding2,
+      this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
         () => this.navigateTo('DailyRunsScene'));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));

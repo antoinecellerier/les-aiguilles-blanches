@@ -1,13 +1,13 @@
 /**
- * Unit tests for LevelGenerator (procedural contract levels)
+ * Unit tests for LevelGenerator (procedural daily run levels)
  */
 import { describe, it, expect } from 'vitest';
-import { generateContractLevel, generateValidContractLevel, validateLevel } from './config-wrappers/index.js';
+import { generateDailyRunLevel, generateValidDailyRunLevel, validateLevel } from './config-wrappers/index.js';
 
-describe('generateContractLevel', () => {
+describe('generateDailyRunLevel', () => {
   it('should produce deterministic levels from the same seed', () => {
-    const a = generateContractLevel(12345, 'blue');
-    const b = generateContractLevel(12345, 'blue');
+    const a = generateDailyRunLevel(12345, 'blue');
+    const b = generateDailyRunLevel(12345, 'blue');
     expect(a.width).toBe(b.width);
     expect(a.height).toBe(b.height);
     expect(a.targetCoverage).toBe(b.targetCoverage);
@@ -18,24 +18,24 @@ describe('generateContractLevel', () => {
   });
 
   it('should produce different levels from different seeds', () => {
-    const a = generateContractLevel(100, 'green');
-    const b = generateContractLevel(999, 'green');
+    const a = generateDailyRunLevel(100, 'green');
+    const b = generateDailyRunLevel(999, 'green');
     // At least one property should differ (statistically near-certain)
     const same = a.width === b.width && a.height === b.height && a.targetCoverage === b.targetCoverage;
     expect(same).toBe(false);
   });
 
   it('should set introDialogue and introSpeaker', () => {
-    const level = generateContractLevel(42, 'red');
+    const level = generateDailyRunLevel(42, 'red');
     expect(level.introDialogue).toBeDefined();
-    expect(level.introDialogue).toMatch(/^contractBriefing/);
+    expect(level.introDialogue).toMatch(/^dailyRunBriefing/);
     expect(level.introSpeaker).toBeDefined();
     expect(['Jean-Pierre', 'Thierry', 'Marie', 'Émilie']).toContain(level.introSpeaker);
   });
 
   it('should assign level IDs >= 100', () => {
     for (const rank of ['green', 'blue', 'red', 'black']) {
-      const level = generateContractLevel(500, rank);
+      const level = generateDailyRunLevel(500, rank);
       expect(level.id).toBeGreaterThanOrEqual(100);
     }
   });
@@ -44,7 +44,7 @@ describe('generateContractLevel', () => {
     const names = new Set();
     for (let seed = 0; seed < 50; seed++) {
       for (const rank of ['green', 'blue', 'red', 'black']) {
-        const level = generateContractLevel(seed, rank);
+        const level = generateDailyRunLevel(seed, rank);
         expect(level.name).toBeDefined();
         expect(level.name.length).toBeGreaterThan(3);
         // Must start with a French article
@@ -59,7 +59,7 @@ describe('generateContractLevel', () => {
 
 describe('rank difficulty scaling', () => {
   it('green should have no steep zones or winch', () => {
-    const level = generateContractLevel(100, 'green');
+    const level = generateDailyRunLevel(100, 'green');
     expect(level.steepZones.length).toBe(0);
     expect(level.hasWinch).toBe(false);
   });
@@ -68,7 +68,7 @@ describe('rank difficulty scaling', () => {
     // Try multiple seeds to avoid park levels (which have no steep)
     let found = false;
     for (let seed = 1; seed < 50; seed++) {
-      const level = generateContractLevel(seed, 'black');
+      const level = generateDailyRunLevel(seed, 'black');
       if (level.difficulty === 'black') {
         expect(level.steepZones.length).toBeGreaterThan(0);
         expect(level.hasWinch).toBe(true);
@@ -83,8 +83,8 @@ describe('rank difficulty scaling', () => {
     // Check structural property: black levels have steep zones, green levels don't
     let greenSteep = 0, blackSteep = 0;
     for (let s = 1; s <= 20; s++) {
-      const gl = generateContractLevel(s, 'green');
-      const bl = generateContractLevel(s, 'black');
+      const gl = generateDailyRunLevel(s, 'green');
+      const bl = generateDailyRunLevel(s, 'black');
       if (gl.difficulty !== 'park') greenSteep += gl.steepZones.length;
       if (bl.difficulty !== 'park') blackSteep += bl.steepZones.length;
     }
@@ -93,8 +93,8 @@ describe('rank difficulty scaling', () => {
 });
 
 describe('validateLevel', () => {
-  it('should return a level from generateValidContractLevel', () => {
-    const { level, usedSeed } = generateValidContractLevel(42, 'blue');
+  it('should return a level from generateValidDailyRunLevel', () => {
+    const { level, usedSeed } = generateValidDailyRunLevel(42, 'blue');
     expect(level).toBeDefined();
     expect(level.id).toBeGreaterThanOrEqual(100);
     expect(usedSeed).toBeGreaterThanOrEqual(42);
@@ -105,7 +105,7 @@ describe('park level generation', () => {
   it('should sometimes generate park levels', () => {
     let parkCount = 0;
     for (let seed = 0; seed < 100; seed++) {
-      const level = generateContractLevel(seed, 'green');
+      const level = generateDailyRunLevel(seed, 'green');
       if (level.difficulty === 'park') parkCount++;
     }
     // Green has 30% park chance — expect at least a few
@@ -115,7 +115,7 @@ describe('park level generation', () => {
 
   it('park levels should have special features', () => {
     for (let seed = 0; seed < 100; seed++) {
-      const level = generateContractLevel(seed, 'green');
+      const level = generateDailyRunLevel(seed, 'green');
       if (level.difficulty === 'park') {
         expect(level.specialFeatures?.length).toBeGreaterThan(0);
         expect(level.steepZones.length).toBe(0);

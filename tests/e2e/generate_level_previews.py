@@ -38,7 +38,7 @@ SETUP_IMPORTS = """async () => {
 # Slalom gate generator mirrors SlalomGateSystem.create
 GENERATE_LEVELS_JS = """(args) => {
     const { targets, maxSeed, samplesPerTarget } = args;
-    const { generateValidContractLevel } = window.__lg;
+    const { generateValidDailyRunLevel } = window.__lg;
     const { LevelGeometry } = window.__geo;
     const { GAME_CONFIG, BALANCE } = window.__gc;
     const ts = GAME_CONFIG.TILE_SIZE;
@@ -97,7 +97,7 @@ GENERATE_LEVELS_JS = """(args) => {
     for (const t of targets) {
         let found = 0;
         for (let seed = 1; seed <= maxSeed && found < samplesPerTarget; seed++) {
-            const { level } = generateValidContractLevel(seed, t.rank);
+            const { level } = generateValidDailyRunLevel(seed, t.rank);
             const isPark = level.difficulty === 'park';
 
             if (t.filterType === 'park') {
@@ -380,7 +380,7 @@ def main():
         page.goto(GAME_URL)
         wait_for_scene(page, 'MenuScene', timeout=15000)
 
-        # Unlock contracts
+        # Unlock daily runs
         page.evaluate("""() => {
             const stats = {};
             for (let i = 0; i <= 10; i++)
