@@ -26,6 +26,7 @@ import { MusicSystem } from '../systems/MusicSystem';
 import { HazardSystem } from '../systems/HazardSystem';
 import { SlalomGateSystem } from '../systems/SlalomGateSystem';
 import { getDailyRunSession } from '../systems/DailyRunSession';
+import { ResizeManager } from '../utils/resizeManager';
 
 /**
  * SkiRunScene — Post-grooming descent reward run.
@@ -112,12 +113,15 @@ export default class SkiRunScene extends Phaser.Scene {
   private lastTrackPos: { x: number; y: number } | null = null;
   private isAirborne = false;
   private jumpKey: Phaser.Input.Keyboard.Key | null = null;
+  private resizeManager!: ResizeManager;
+  private initData!: SkiRunData;
 
   constructor() {
     super({ key: 'SkiRunScene' });
   }
 
   init(data: SkiRunData): void {
+    this.initData = data;
     this.levelIndex = data.level ?? 0;
     const session = getDailyRunSession();
     this.level = session?.level || LEVELS[this.levelIndex];
@@ -359,7 +363,10 @@ export default class SkiRunScene extends Phaser.Scene {
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.on(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
 
-    this.scale.on('resize', this.handleResize, this);
+    this.resizeManager = new ResizeManager(this, {
+      restartData: () => ({ ...this.initData, mode: this.resolvedMode }),
+    });
+    this.resizeManager.register();
     this.events.once('shutdown', this.shutdown, this);
   }
 
@@ -1297,16 +1304,6 @@ export default class SkiRunScene extends Phaser.Scene {
     return tiles;
   }
 
-  private handleResize(): void {
-    if (!this.cameras?.main || !this.level) return;
-    const worldWidth = this.level.width * this.tileSize;
-    const worldHeight = this.level.height * this.tileSize;
-    const zoomX = this.scale.width / worldWidth;
-    const zoomY = this.scale.height / worldHeight;
-    this.cameras.main.setZoom(Math.max(zoomX, zoomY, BALANCE.SKI_MIN_ZOOM));
-    this.weatherSystem?.handleFrostResize();
-  }
-
   shutdown(): void {
     this.skiSounds.stop();
     this.ambienceSounds.stop();
@@ -1333,7 +1330,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
-    this.scale.off('resize', this.handleResize, this);
+    this.resizeManager?.destroy();
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
   }
