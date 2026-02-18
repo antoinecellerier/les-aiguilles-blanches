@@ -1,6 +1,6 @@
 ---
 name: art-review
-description: Art director review of visual code and rendered output. Use this when asked to review visual consistency, art style compliance, sprite quality, or before committing visual changes.
+description: Art director review of visual code and rendered output. Use this when asked to review visual consistency, art style compliance, sprite quality, responsive layout across viewports, or before committing visual changes.
 ---
 
 ## Art Director Review Process
@@ -84,7 +84,7 @@ Read `docs/ART_STYLE.md` in full, then launch parallel explore agents to check e
 
 Launch the dev server and capture screenshots for visual verification:
 
-1. Start dev server: `npm run dev` (port 3000)
+1. Start dev server: `./dev.sh` (reads PORT from .env.local, default 3000)
 2. Use Playwright to navigate to affected screens:
    ```python
    from playwright.sync_api import sync_playwright
@@ -109,6 +109,54 @@ Launch the dev server and capture screenshots for visual verification:
    - Element overlap or z-ordering issues
    - Visual balance and composition
    - Retro aesthetic fidelity (crisp pixels, no blur)
+
+### Phase 3b: Responsive layout validation
+
+When reviewing scenes with UI layout (menus, overlays, HUD, settings, daily runs), test across representative viewports. This catches text overflow, button overlap, and elements going off-screen.
+
+**Reference viewports** (test at minimum 3, always include smallest and largest):
+
+| Name | Size | Use case |
+|------|------|----------|
+| Mobile portrait | 360×640 | Phones (smallest common) |
+| Mobile landscape | 640×360 | Phones rotated |
+| Tablet portrait | 768×1024 | iPad |
+| Tablet landscape | 1024×768 | iPad rotated |
+| Desktop | 1280×720 | Standard laptop (default) |
+| Ultrawide | 2560×1080 | Ultrawide monitors |
+
+**What to check at each viewport:**
+- **No text truncation** — all labels, titles, and descriptions fully visible
+- **No element overlap** — buttons, text blocks, and decorative elements must not collide
+- **No off-screen content** — all interactive elements reachable without scrolling
+- **Touch target size** — buttons ≥44px tall on mobile viewports (360–768px wide)
+- **Readable font size** — minimum ~12px effective on mobile; scale factor should keep text legible
+- **Consistent spacing** — margins and gaps proportional to viewport, no cramped layouts
+
+**Testing procedure:**
+```python
+VIEWPORTS = [
+    ("mobile_portrait", 360, 640),
+    ("mobile_landscape", 640, 360),
+    ("tablet_landscape", 1024, 768),
+    ("desktop", 1280, 720),
+    ("ultrawide", 2560, 1080),
+]
+
+for name, w, h in VIEWPORTS:
+    page.set_viewport_size({"width": w, "height": h})
+    # Wait for resize to propagate (debounced at 150ms + scene restart)
+    page.wait_for_timeout(500)
+    page.screenshot(path=f"tests/screenshots/art-review/{scene}_{name}.png")
+```
+
+**Orientation change:** After capturing landscape, resize to portrait (and vice versa) to verify the scene adapts without artifacts or frozen layouts.
+
+**Known patterns:**
+- Scenes use `scaleFactor = min(scaleByHeight, scaleByWidth) * dprBoost` — verify it doesn't produce illegible text at small viewports or wasteful whitespace at large ones
+- SettingsScene switches to single-column below 500px logical width
+- MenuScene drops Fullscreen button when buttons overflow vertical space
+- HUDScene uses debounced resize (300ms + 10px threshold) for mobile viewport jitter
 
 ### Phase 4: Cross-model consultation
 
