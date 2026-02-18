@@ -214,7 +214,7 @@ def click_button(page, button_index: int, description: str):
 
 
 def navigate_to_contracts(page):
-    """From MenuScene, navigate to ContractsScene via the Daily Runs button."""
+    """From MenuScene, navigate to DailyRunsScene via the Daily Runs button."""
     import time
     idx = page.evaluate("""() => {
         const ms = window.game?.scene?.getScene('MenuScene');
@@ -233,7 +233,7 @@ def navigate_to_contracts(page):
     }}""")
     time.sleep(0.1)
     page.keyboard.press("Enter")
-    wait_for_scene(page, "ContractsScene")
+    wait_for_scene(page, "DailyRunsScene")
 
 
 def unlock_all_levels(page):

@@ -235,7 +235,7 @@ export default class PauseScene extends Phaser.Scene {
   private quitToMenu(): void {
     const session = getContractSession();
     if (session) {
-      resetGameScenes(this.game, 'ContractsScene');
+      resetGameScenes(this.game, 'DailyRunsScene');
     } else {
       saveProgress(this.levelIndex, this.skiMode ? 'SkiRunScene' : 'GameScene');
       resetGameScenes(this.game, 'MenuScene');

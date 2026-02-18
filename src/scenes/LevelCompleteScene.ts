@@ -362,7 +362,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
         () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true);
       this.addButton(buttonContainer, t('contracts') || 'Contracts', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('ContractsScene'));
+        () => this.navigateTo('DailyRunsScene'));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else if (this.isContract && !this.won) {
@@ -370,7 +370,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex }), true);
       this.addButton(buttonContainer, t('contracts') || 'Contracts', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('ContractsScene'));
+        () => this.navigateTo('DailyRunsScene'));
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'));
     } else if (this.won && this.levelIndex < LEVELS.length - 1) {

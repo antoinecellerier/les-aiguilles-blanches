@@ -1,7 +1,7 @@
 /**
  * Shared contract session state.
  *
- * Set once by ContractsScene when starting a run; read by any scene that
+ * Set once by DailyRunsScene when starting a run; read by any scene that
  * needs contract context (GameScene, SkiRunScene, LevelCompleteScene, etc.).
  * Cleared when returning to the menu.
  *
@@ -24,7 +24,7 @@ export interface ContractSessionData {
 
 let active: ContractSessionData | null = null;
 
-/** Start a contract session. Call from ContractsScene before launching GameScene. */
+/** Start a contract session. Call from DailyRunsScene before launching GameScene. */
 export function startContractSession(data: ContractSessionData): void {
   active = { ...data };
 }

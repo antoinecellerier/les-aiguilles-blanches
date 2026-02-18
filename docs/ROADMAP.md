@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, contract-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle). Remaining: shareable seed codes (input/share UI — display done), rename ContractsScene→DailyRunsScene, responsive layout across form factors.
+- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, contract-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle). Remaining: shareable seed codes (input/share UI — display done), rename DailyRunsScene→DailyRunsScene, responsive layout across form factors.
 
 ## Next Up
 
@@ -31,9 +31,9 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
-- ✅ **Procedural French piste names** — Combinatorial name generation from rank-themed pools (nouns, adjectives, genitives) with full French grammar agreement (gender, number, elision, preposed adjective forms). Names shown in ContractsScene briefing, HUD visor, LevelCompleteScene, SkiRunScene, and accessibility announcements. Redundancy filter prevents combos like "Le Glacier du Glacier".
+- ✅ **Procedural French piste names** — Combinatorial name generation from rank-themed pools (nouns, adjectives, genitives) with full French grammar agreement (gender, number, elision, preposed adjective forms). Names shown in DailyRunsScene briefing, HUD visor, LevelCompleteScene, SkiRunScene, and accessibility announcements. Redundancy filter prevents combos like "Le Glacier du Glacier".
 
-- ✅ **Contract-aware pause menu** — Pause menu returns to ContractsScene (not main menu) during contract sessions. Random Runs get a "New Run" button to generate a fresh seed at the same rank. Extracted `rankSeed()` and `RANKS` to LevelGenerator, `randomSeed()` to seededRNG.
+- ✅ **Contract-aware pause menu** — Pause menu returns to DailyRunsScene (not main menu) during contract sessions. Random Runs get a "New Run" button to generate a fresh seed at the same rank. Extracted `rankSeed()` and `RANKS` to LevelGenerator, `randomSeed()` to seededRNG.
 
 - ✅ **Ski mode UX improvements** — Pause/fullscreen touch buttons added to ski mode HUD. Resume from menu restores ski mode when quit from ski run. Adaptive camera lerp in SkiRunScene. Image culling in SkiRunScene for performance.
 
@@ -47,7 +47,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Daily Runs art style compliance** — Rank indicators now use NF S52-102 shapes (●■◆★), colors match ART_STYLE.md palette, separator uses fillRect, all text colors from THEME.
 
-- ✅ **ContractsScene gamepad fix** — Gamepad d-pad/B button didn't work in Daily Runs screen because `gamepadNav.update(delta)` was missing from `update()`. All other scenes had it.
+- ✅ **DailyRunsScene gamepad fix** — Gamepad d-pad/B button didn't work in Daily Runs screen because `gamepadNav.update(delta)` was missing from `update()`. All other scenes had it.
 
 - ✅ **Daily Runs E2E tests** — 14 tests in `test_daily_runs.py` covering keyboard, gamepad, multi-viewport navigation, rank cycling, and cross-scene flows (session persistence, completion UI, session cleanup).
 

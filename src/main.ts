@@ -30,7 +30,7 @@ import SettingsScene from './scenes/SettingsScene';
 import GameScene from './scenes/GameScene';
 import SkiRunScene from './scenes/SkiRunScene';
 import LevelSelectScene from './scenes/LevelSelectScene';
-import ContractsScene from './scenes/ContractsScene';
+import DailyRunsScene from './scenes/DailyRunsScene';
 
 // Register game scenes for centralized cleanup (single source of truth)
 registerGameScenes([
@@ -43,7 +43,7 @@ registerGameScenes([
   { key: 'LevelCompleteScene', ctor: LevelCompleteScene },
   { key: 'SkiRunScene', ctor: SkiRunScene },
   { key: 'LevelSelectScene', ctor: LevelSelectScene },
-  { key: 'ContractsScene', ctor: ContractsScene },
+  { key: 'DailyRunsScene', ctor: DailyRunsScene },
   { key: 'CreditsScene', ctor: CreditsScene },
 ]);
 
@@ -104,7 +104,7 @@ const config: Phaser.Types.Core.GameConfig = {
     LevelCompleteScene,
     SkiRunScene,
     LevelSelectScene,
-    ContractsScene,
+    DailyRunsScene,
     CreditsScene,
   ],
 };

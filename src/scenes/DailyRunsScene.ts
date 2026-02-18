@@ -27,7 +27,7 @@ const RANK_LABELS: Record<ContractRank, string> = {
   black: '★',
 };
 
-export default class ContractsScene extends Phaser.Scene {
+export default class DailyRunsScene extends Phaser.Scene {
   private selectedRank: ContractRank = 'green';
   private greenIsPark = false;
   private rankButtons: Phaser.GameObjects.Text[] = [];
@@ -39,7 +39,7 @@ export default class ContractsScene extends Phaser.Scene {
   private backdrop!: MenuBackdrop;
 
   constructor() {
-    super({ key: 'ContractsScene' });
+    super({ key: 'DailyRunsScene' });
   }
 
   create(): void {

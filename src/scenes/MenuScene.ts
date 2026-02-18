@@ -1082,7 +1082,7 @@ export default class MenuScene extends Phaser.Scene {
   private showContracts(): void {
     const game = this.game;
     this.scene.stop('MenuScene');
-    resetGameScenes(game, 'ContractsScene');
+    resetGameScenes(game, 'DailyRunsScene');
   }
 
   private confirmNewGame(): void {

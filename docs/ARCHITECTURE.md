@@ -118,7 +118,7 @@ snow-groomer/
 │   │   ├── PauseScene.ts   # Pause menu
 │   │   ├── LevelCompleteScene.ts
 │   │   ├── SkiRunScene.ts  # Post-grooming ski/snowboard descent (reward run)
-│   │   ├── ContractsScene.ts # Procedural level generation (post-campaign)
+│   │   ├── DailyRunsScene.ts # Procedural level generation (post-campaign)
 │   │   └── CreditsScene.ts
 ├── tests/
 │   ├── e2e/                # Playwright browser tests
@@ -1015,7 +1015,7 @@ shutdown() {
 | HUDScene | Debounced restart (300ms, 10px threshold) |
 | LevelCompleteScene | Restart scene (preserves result data via `scene.settings.data`) |
 | DialogueScene | Debounced restart (300ms, 10px threshold) — saves/restores dialogue queue |
-| PauseScene | Debounced restart (300ms, 10px threshold) — preserves `levelIndex`. Contract-aware: quit returns to ContractsScene when in a contract, "New Run" button on random runs |
+| PauseScene | Debounced restart (300ms, 10px threshold) — preserves `levelIndex`. Contract-aware: quit returns to DailyRunsScene when in a contract, "New Run" button on random runs |
 | CreditsScene | Debounced restart (300ms, 10px threshold) |
 
 **GameScene zoom strategy:** Uses diagonal ratio (`sqrt(w²+h²)`) of current vs original viewport to compute zoom. This is orientation-independent — rotating the device preserves perceived world scale. Zoom is clamped to [0.5, 1.5].
@@ -1827,7 +1827,7 @@ Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after compl
 
 - `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, `randomSeed()` for non-deterministic seeds, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
 - `src/systems/LevelGenerator.ts` — `generateContractLevel(seed, rank)` produces a valid `Level` object. `generateValidContractLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickContractBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP). 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` system (freqOffset, ampScale, phase, widthPhase) making each seed visually distinct. Steep zone placement randomized with variable gaps. Service roads only for dangerous zones (≥30°); safe zones have no bypass. Winch anchors placed only above dangerous zones.
-- `src/scenes/ContractsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Contract button (random seed). Shows briefing preview (weather, target, time, dimensions).
+- `src/scenes/DailyRunsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Contract button (random seed). Shows briefing preview (weather, target, time, dimensions).
 
 ### Generation Pipeline
 
@@ -1859,7 +1859,7 @@ Rank sets hard rules; seed determines layout within those rules.
 
 ### Contract Level Flow
 
-Contract (Daily Run) session state lives in `src/systems/ContractSession.ts` — a module-level singleton. `ContractsScene` calls `startContractSession()` before launching `GameScene`. Any scene that needs contract context calls `getContractSession()`. The session is automatically cleared in `resetGameScenes()` when navigating to `MenuScene` or `ContractsScene`. This avoids threading contract fields through every scene transition path. Contract level IDs start at 100 (`CONTRACT_LEVEL_ID_BASE`) to avoid collision with campaign levels.
+Contract (Daily Run) session state lives in `src/systems/ContractSession.ts` — a module-level singleton. `DailyRunsScene` calls `startContractSession()` before launching `GameScene`. Any scene that needs contract context calls `getContractSession()`. The session is automatically cleared in `resetGameScenes()` when navigating to `MenuScene` or `DailyRunsScene`. This avoids threading contract fields through every scene transition path. Contract level IDs start at 100 (`CONTRACT_LEVEL_ID_BASE`) to avoid collision with campaign levels.
 
 ## Future Architecture Considerations
 

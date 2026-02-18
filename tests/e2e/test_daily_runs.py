@@ -60,7 +60,7 @@ def get_selected_index(page: Page, scene: str) -> int:
 
 
 def start_daily_run(page: Page, use_gamepad: bool = False):
-    """From ContractsScene (default on Daily Shift), press Enter/A to start."""
+    """From DailyRunsScene (default on Daily Shift), press Enter/A to start."""
     if use_gamepad:
         tap_gamepad_button(page, GP_A)
     else:
@@ -87,23 +87,23 @@ class TestContractsKeyboard:
     def test_contracts_reachable(self, page: Page, vw, vh):
         setup_unlocked(page, vw, vh)
         navigate_to_contracts(page)
-        assert "ContractsScene" in get_active_scenes(page)
+        assert "DailyRunsScene" in get_active_scenes(page)
 
     def test_contracts_rank_cycling(self, page: Page):
         setup_unlocked(page)
         navigate_to_contracts(page)
 
-        rank0 = page.evaluate("() => window.game?.scene?.getScene('ContractsScene')?.selectedRank")
+        rank0 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank0 == "green", f"Initial rank should be green, got {rank0}"
 
         page.keyboard.press("ArrowRight")
         time.sleep(0.15)
-        rank1 = page.evaluate("() => window.game?.scene?.getScene('ContractsScene')?.selectedRank")
+        rank1 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank1 == "blue", f"Right should cycle to blue, got {rank1}"
 
         page.keyboard.press("ArrowLeft")
         time.sleep(0.15)
-        rank2 = page.evaluate("() => window.game?.scene?.getScene('ContractsScene')?.selectedRank")
+        rank2 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank2 == "green", f"Left should cycle back to green, got {rank2}"
 
     def test_contracts_button_nav(self, page: Page):
@@ -111,16 +111,16 @@ class TestContractsKeyboard:
         navigate_to_contracts(page)
 
         # Should start on Daily Shift (index 1; 0 is back)
-        idx = get_selected_index(page, "ContractsScene")
+        idx = get_selected_index(page, "DailyRunsScene")
         assert idx == 1, f"Should start on Daily Shift (1), got {idx}"
 
         page.keyboard.press("ArrowDown")
         time.sleep(0.1)
-        assert get_selected_index(page, "ContractsScene") == 2
+        assert get_selected_index(page, "DailyRunsScene") == 2
 
         page.keyboard.press("ArrowUp")
         time.sleep(0.1)
-        assert get_selected_index(page, "ContractsScene") == 1
+        assert get_selected_index(page, "DailyRunsScene") == 1
 
     def test_contracts_enter_starts_game(self, page: Page):
         setup_unlocked(page)
@@ -153,10 +153,10 @@ class TestContractsGamepad:
         setup_unlocked(gamepad_page)
         navigate_to_contracts(gamepad_page)
 
-        idx0 = get_selected_index(gamepad_page, "ContractsScene")
+        idx0 = get_selected_index(gamepad_page, "DailyRunsScene")
         tap_gamepad_button(gamepad_page, GP_DPAD_DOWN)
         time.sleep(0.2)
-        idx1 = get_selected_index(gamepad_page, "ContractsScene")
+        idx1 = get_selected_index(gamepad_page, "DailyRunsScene")
         assert idx1 == idx0 + 1, f"Dpad down: {idx0} -> {idx1}"
 
     def test_contracts_b_goes_back(self, gamepad_page: Page):
@@ -244,7 +244,7 @@ class TestContractFlows:
             f"Contract complete should not show 'Next Level': {buttons}"
 
     def test_quit_clears_contract_session(self, page: Page):
-        """Quitting from pause should return to ContractsScene."""
+        """Quitting from pause should return to DailyRunsScene."""
         setup_unlocked(page)
         navigate_to_contracts(page)
         start_daily_run(page)
@@ -259,7 +259,7 @@ class TestContractFlows:
             time.sleep(0.06)
         page.keyboard.press("Enter")
         time.sleep(0.5)
-        wait_for_scene(page, "ContractsScene", timeout=8000)
+        wait_for_scene(page, "DailyRunsScene", timeout=8000)
 
 
 # ============================================================
@@ -293,7 +293,7 @@ class TestContractLevelGeneration:
             time.sleep(0.06)
         page.keyboard.press("Enter")
         time.sleep(0.5)
-        wait_for_scene(page, "ContractsScene", timeout=8000)
+        wait_for_scene(page, "DailyRunsScene", timeout=8000)
 
         start_daily_run(page)
 
@@ -332,7 +332,7 @@ class TestContractLevelGeneration:
             time.sleep(0.06)
         page.keyboard.press("Enter")
         time.sleep(0.5)
-        wait_for_scene(page, "ContractsScene", timeout=8000)
+        wait_for_scene(page, "DailyRunsScene", timeout=8000)
 
         # Cycle rank: green → blue → red → black (3 right presses)
         for _ in range(3):

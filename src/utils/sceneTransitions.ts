@@ -86,7 +86,7 @@ export function resetGameScenes(
     }
 
     // Clear contract session when leaving gameplay for a menu
-    if (target === 'MenuScene' || target === 'ContractsScene') {
+    if (target === 'MenuScene' || target === 'DailyRunsScene') {
       clearContractSession();
     }
 

@@ -394,7 +394,7 @@ def main():
         wait_for_scene(page, 'MenuScene', timeout=15000)
         time.sleep(0.3)
 
-        # Navigate to ContractsScene (needed for dynamic imports)
+        # Navigate to DailyRunsScene (needed for dynamic imports)
         idx = page.evaluate("""() => {
             const ms = window.game?.scene?.getScene('MenuScene');
             if (!ms?.menuButtons) return -1;
@@ -412,7 +412,7 @@ def main():
         }}""")
         time.sleep(0.2)
         page.keyboard.press('Enter')
-        wait_for_scene(page, 'ContractsScene')
+        wait_for_scene(page, 'DailyRunsScene')
         time.sleep(0.3)
 
         # Import game modules
