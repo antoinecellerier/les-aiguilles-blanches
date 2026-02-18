@@ -84,11 +84,15 @@ BUTTON_SETTINGS = 3                # ❌ stale constant
 
 **Good:** Key-based lookup immune to reordering.
 ```python
-click_menu_by_key(page, 'settings')              # ✅
-idx = find_menu_button_index(page, 'settings')    # ✅
+click_menu_by_key(page, 'settings')                            # ✅ MenuScene
+idx = find_menu_button_index(page, 'skipRun', 'PauseScene')   # ✅ any scene
 ```
 
-MenuScene buttons are tagged with `button.setData('key', btnKey)` where keys match the translation key (e.g., `'startGame'`, `'settings'`, `'howToPlay'`, `'changelog'`, `'dailyRuns'`, `'newGame'`).
+All four button-bearing scenes have data keys via `button.setData('key', keyName)`:
+- **MenuScene**: `'startGame'`, `'resumeGame'`, `'newGame'`, `'levelSelect'`, `'dailyRuns'`, `'howToPlay'`, `'changelog'`, `'settings'`
+- **PauseScene**: `'resume'`, `'restart'`, `'skipRun'`, `'settings'`, `'quit'`, `'newRun'`, `'quitGame'`
+- **LevelCompleteScene**: `'nextLevel'`, `'retry'`, `'ski'`, `'skiAgain'`, `'menu'`, `'viewCredits'`, `'dailyRuns'`
+- **CreditsScene**: `'playAgain'`, `'menu'`
 
 **Exception:** `BUTTON_START = 0` is safe — the primary action button is always first. But prefer `click_menu_by_key(page, 'startGame')` for clarity.
 
@@ -203,6 +207,41 @@ When adding new source files or test files, update `run-tests.sh`:
 - New `tests/e2e/test_foo.py` → add to `KNOWN_E2E_FILES`
 - Renamed scenes → update both the case branch and `SCENE_TESTS` mapping
 
+#### 9. scene.restart() race condition ❌
+
+**Bad:** `scene.restart()` destroys and recreates the scene. `wait_for_scene` may return before buttons exist, and `getScene()` may return a stale reference mid-restart.
+```python
+page.evaluate("window.game.scene.getScene('MenuScene')?.scene.restart()")
+wait_for_scene(page, 'MenuScene')       # ❌ may return immediately (scene was active)
+click_menu_by_key(page, 'changelog')    # ❌ buttons may not exist yet
+```
+
+**Good:** Avoid `scene.restart()` entirely. Navigate away and back, or operate on the scene as-is. If restart is truly needed, poll for buttons to exist:
+```python
+# Preferred: navigate away and back
+click_menu_by_key(page, 'settings')
+wait_for_scene(page, 'SettingsScene')
+page.keyboard.press("Escape")
+wait_for_scene(page, 'MenuScene')
+
+# If restart unavoidable: wait for buttons
+page.evaluate("window.game.scene.getScene('MenuScene')?.scene.restart()")
+wait_for_scene(page, 'MenuScene')
+page.wait_for_function("() => window.game?.scene?.getScene('MenuScene')?.menuButtons?.length > 0", timeout=8000)
+```
+
+#### 10. Emitting wrong pointer event ❌
+
+**Bad:** MenuScene buttons use `pointerup`, not `pointerdown`. Other scenes may differ.
+```python
+btn.emit('pointerdown')  # ❌ MenuScene buttons listen on pointerup
+```
+
+**Good:** Check the scene source for which event triggers the callback, or use keyboard navigation instead.
+```python
+click_menu_by_key(page, 'changelog')  # ✅ uses keyboard — avoids event name guessing
+```
+
 ### Phase 4: Maintainability
 
 1. **DRY without over-abstraction** — Shared setup belongs in conftest fixtures or helper functions. But don't abstract away test clarity; a reader should understand what a test does without jumping to 5 helpers.
@@ -235,8 +274,8 @@ Organize by severity:
 
 | Severity | Criteria |
 |----------|----------|
-| **HIGH** | Will fail under parallel load, breaks on menu reorder, uses wrong coordinates, tests depend on each other, no assertions |
-| **MEDIUM** | Duplicates helpers, uses unnecessarily tight timeouts, missing inputReady, poor error messages, tests multiple unrelated behaviors |
+| **HIGH** | Will fail under parallel load, breaks on menu reorder, uses wrong coordinates, tests depend on each other, no assertions, scene.restart() race |
+| **MEDIUM** | Duplicates helpers, uses unnecessarily tight timeouts, missing inputReady, poor error messages, tests multiple unrelated behaviors, wrong pointer event |
 | **LOW** | Style inconsistency, could use a better helper but works correctly, missing edge case coverage |
 
 ### Phase 8: Verification
@@ -256,7 +295,7 @@ Organize by severity:
 | Helper | Purpose |
 |--------|---------|
 | `click_menu_by_key(page, key)` | Click menu button by data key (immune to reorder) |
-| `find_menu_button_index(page, key)` | Get button index by data key |
+| `find_menu_button_index(page, key, scene)` | Get button index by data key (any scene) |
 | `click_button(page, index, desc)` | Click by index (for non-menu buttons like pause menu) |
 | `wait_for_scene(page, name)` | Wait for scene active (8s default) |
 | `wait_for_scene_inactive(page, name)` | Wait for scene to stop |
