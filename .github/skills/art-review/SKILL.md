@@ -154,6 +154,10 @@ for name, w, h in VIEWPORTS:
 
 **Known patterns:**
 - Scenes use `scaleFactor = min(scaleByHeight, scaleByWidth) * dprBoost` — verify it doesn't produce illegible text at small viewports or wasteful whitespace at large ones
+- **Text scale floor**: UI scenes should use `textScale = Math.max(0.7, scale)` for font sizing to ensure minimum ~8px effective text on mobile. Use raw `scale` for layout spacing so elements don't overflow.
+- **Button width capping**: When using `setFixedSize` to equalize button widths, cap to `(width - margin) / buttonCount` to prevent clipping on narrow screens
+- **ResizeManager required**: All menu/overlay scenes must register `ResizeManager` (or custom resize handler) for orientation changes. Missing resize handler = frozen layout on rotation.
+- **Vertical gap compression**: Use `vGap = height < 450 ? 0.7 : 1.0` multiplier on vertical offsets for landscape phones
 - SettingsScene switches to single-column below 500px logical width
 - MenuScene drops Fullscreen button when buttons overflow vertical space
 - HUDScene uses debounced resize (300ms + 10px threshold) for mobile viewport jitter

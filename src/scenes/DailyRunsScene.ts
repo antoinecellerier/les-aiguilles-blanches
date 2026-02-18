@@ -13,6 +13,7 @@ import { DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { startDailyRunSession } from '../systems/DailyRunSession';
 import { getJSON } from '../utils/storage';
+import { ResizeManager } from '../utils/resizeManager';
 
 const RANK_COLORS: Record<DailyRunRank, string> = {
   green: '#22c55e',
@@ -37,6 +38,7 @@ export default class DailyRunsScene extends Phaser.Scene {
   private buttonNav?: MenuButtonNav;
   private gamepadNav?: GamepadMenuNav;
   private backdrop!: MenuBackdrop;
+  private resizeManager!: ResizeManager;
 
   constructor() {
     super({ key: 'DailyRunsScene' });
@@ -74,21 +76,27 @@ export default class DailyRunsScene extends Phaser.Scene {
   }
 
   private showLockedMessage(width: number, height: number, scale: number): void {
-    const fontSize = Math.round(16 * scale);
+    const fontSize = Math.round(16 * Math.max(0.7, scale));
     this.add.text(width / 2, Math.round(height * 0.4), '🔒 ' + t('dailyRuns_locked'), {
       fontFamily: THEME.fonts.family,
       fontSize: fontSize + 'px',
       color: THEME.colors.textSecondary,
-      wordWrap: { width: width * 0.7 },
+      wordWrap: { width: width * 0.8 },
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
   }
 
   private buildDailyRunsUI(width: number, height: number, scale: number, backBtn: Phaser.GameObjects.Text): void {
-    const fontSize = Math.round(16 * scale);
-    const smallFont = Math.round(13 * scale);
-    const btnPadX = Math.round(20 * scale);
-    const btnPadY = Math.round(8 * scale);
+    // Floor scale for text legibility on small viewports
+    const textScale = Math.max(0.7, scale);
+    const fontSize = Math.round(16 * textScale);
+    const smallFont = Math.round(13 * textScale);
+    const btnPadX = Math.round(20 * textScale);
+    const btnPadY = Math.round(8 * textScale);
+
+    // Adaptive vertical spacing: tighter on short viewports (landscape phones)
+    const isShort = height < 450;
+    const vGap = isShort ? 0.7 : 1.0;
 
     // Get today's completed ranks
     const today = new Date().toISOString().slice(0, 10);
@@ -101,8 +109,8 @@ export default class DailyRunsScene extends Phaser.Scene {
     const { level: greenLevel } = generateValidDailyRunLevel(rankSeed(dailySeedNum, 'green'), 'green');
     this.greenIsPark = greenLevel.difficulty === 'park';
 
-    const rankY = Math.round(height * 0.19);
-    const rankSpacing = Math.round(100 * scale);
+    const rankY = Math.round(height * (isShort ? 0.22 : 0.19));
+    const rankSpacing = Math.round(Math.min(100 * scale, (width - 40) / RANKS.length));
     const startX = width / 2 - (RANKS.length - 1) * rankSpacing / 2;
 
     this.rankButtons = RANKS.map((rank, i) => {
@@ -118,7 +126,7 @@ export default class DailyRunsScene extends Phaser.Scene {
         fontSize: smallFont + 'px',
         color: rank === this.selectedRank ? THEME.colors.textPrimary : THEME.colors.textMuted,
         backgroundColor: rank === this.selectedRank ? bgColor : THEME.colors.panelBgHex,
-        padding: { x: Math.round(12 * scale), y: Math.round(6 * scale) },
+        padding: { x: Math.round(12 * textScale), y: Math.round(6 * textScale) },
         align: 'center',
       }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
 
@@ -136,32 +144,39 @@ export default class DailyRunsScene extends Phaser.Scene {
     const probeLabel = `${RANK_LABELS[longestRank]} ${t(`rank_${longestRank}`)} ✓`;
     const probe = this.add.text(0, 0, probeLabel, {
       fontFamily: THEME.fonts.family, fontSize: smallFont + 'px',
-      padding: { x: Math.round(12 * scale), y: Math.round(6 * scale) },
+      padding: { x: Math.round(12 * textScale), y: Math.round(6 * textScale) },
     });
-    const maxW = probe.width;
+    // Cap button width so all 4 fit with gaps
+    const maxAvailPerButton = Math.floor((width - 20) / RANKS.length) - 4;
+    const maxW = Math.min(probe.width, maxAvailPerButton);
     probe.destroy();
     this.rankButtons.forEach(b => b.setFixedSize(maxW, 0));
 
+    // Re-derive spacing from actual button width for centering
+    const actualSpacing = Math.max(rankSpacing, maxW + 4);
+    const actualStartX = width / 2 - (RANKS.length - 1) * actualSpacing / 2;
+    this.rankButtons.forEach((b, i) => b.setX(actualStartX + i * actualSpacing));
+
     // --- Daily briefing (compact, below rank row) ---
-    const briefingY = rankY + Math.round(35 * scale);
+    const briefingY = rankY + Math.round(35 * scale * vGap);
     this.pisteNameDisplay = this.add.text(width / 2, briefingY, '', {
       fontFamily: THEME.fonts.family,
-      fontSize: Math.round(13 * scale) + 'px',
+      fontSize: Math.round(13 * textScale) + 'px',
       color: THEME.colors.textPrimary,
       fontStyle: 'bold',
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
-    this.seedDisplay = this.add.text(width / 2, briefingY + Math.round(18 * scale), '', {
+    this.seedDisplay = this.add.text(width / 2, briefingY + Math.round(18 * scale * vGap), '', {
       fontFamily: THEME.fonts.family,
-      fontSize: Math.round(11 * scale) + 'px',
+      fontSize: Math.round(11 * textScale) + 'px',
       color: THEME.colors.textMuted,
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
 
-    this.briefingText = this.add.text(width / 2, briefingY + Math.round(34 * scale), '', {
+    this.briefingText = this.add.text(width / 2, briefingY + Math.round(34 * scale * vGap), '', {
       fontFamily: THEME.fonts.family,
-      fontSize: Math.round(11 * scale) + 'px',
+      fontSize: Math.round(11 * textScale) + 'px',
       color: THEME.colors.textSecondary,
       align: 'center',
     }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
@@ -176,7 +191,7 @@ export default class DailyRunsScene extends Phaser.Scene {
     allCallbacks.push(() => this.goBack());
 
     const dailyCode = seedToCode(dailySeedNum);
-    const dailyY = briefingY + Math.round(68 * scale);
+    const dailyY = briefingY + Math.round(68 * scale * vGap);
 
     const dailyBtn = this.add.text(width / 2, dailyY,
       t('dailyRuns_dailyShift') + '  [' + dailyCode + ']',
@@ -193,13 +208,13 @@ export default class DailyRunsScene extends Phaser.Scene {
     allCallbacks.push(() => this.startDailyRun(dailySeedNum, true));
 
     // --- Separator + Random Run (visually distinct section) ---
-    const sepY = dailyY + Math.round(40 * scale);
+    const sepY = dailyY + Math.round(40 * scale * vGap);
     const lineW = Math.round(width * 0.25);
     const sepGfx = this.add.graphics().setDepth(DEPTHS.MENU_UI);
     sepGfx.fillStyle(0x666666, 0.4);
     sepGfx.fillRect(width / 2 - lineW / 2, sepY, lineW, 1);
 
-    const randomY = sepY + Math.round(22 * scale);
+    const randomY = sepY + Math.round(22 * scale * vGap);
     const randomBtn = this.add.text(width / 2, randomY,
       t('dailyRuns_randomRun'),
       {
@@ -207,7 +222,7 @@ export default class DailyRunsScene extends Phaser.Scene {
         fontSize: smallFont + 'px',
         color: THEME.colors.textSecondary,
         backgroundColor: THEME.colors.textDark,
-        padding: { x: Math.round(14 * scale), y: Math.round(5 * scale) },
+        padding: { x: Math.round(14 * textScale), y: Math.round(5 * textScale) },
       }
     ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
     randomBtn.on('pointerdown', () => {
@@ -239,6 +254,9 @@ export default class DailyRunsScene extends Phaser.Scene {
       onConfirm: () => this.buttonNav!.activate(),
       onBack: () => this.goBack(),
     });
+
+    this.resizeManager = new ResizeManager(this);
+    this.resizeManager.register();
   }
 
   private cycleRank(dir: number): void {
@@ -319,6 +337,7 @@ export default class DailyRunsScene extends Phaser.Scene {
   }
 
   private shutdown(): void {
+    this.resizeManager?.destroy();
     this.buttonNav = undefined;
     this.gamepadNav = undefined;
     this.backdrop.wildlife?.destroy();
