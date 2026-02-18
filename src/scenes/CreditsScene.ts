@@ -167,7 +167,7 @@ export default class CreditsScene extends Phaser.Scene {
       t('playAgain') || 'Rejouer',
       btnStyle
     ).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    this.setupButton(playAgainBtn, 0, () => this.restartGame());
+    this.setupButton(playAgainBtn, 0, () => this.restartGame(), 'playAgain');
 
     // Menu button
     const menuBtn = this.add.text(
@@ -176,7 +176,7 @@ export default class CreditsScene extends Phaser.Scene {
       t('menu') || 'Menu',
       btnStyle
     ).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    this.setupButton(menuBtn, 1, () => this.returnToMenu());
+    this.setupButton(menuBtn, 1, () => this.returnToMenu(), 'menu');
 
     this.buttonsContainer.add([playAgainBtn, menuBtn]);
 
@@ -244,10 +244,11 @@ export default class CreditsScene extends Phaser.Scene {
     this.buttonNav.refreshStyles();
   }
   
-  private setupButton(btn: Phaser.GameObjects.Text, index: number, callback: () => void): void {
+  private setupButton(btn: Phaser.GameObjects.Text, index: number, callback: () => void, key?: string): void {
     btn.on('pointerover', () => this.buttonNav?.select(index));
     btn.on('pointerout', () => this.buttonNav?.refreshStyles());
     btn.on('pointerdown', () => { playClick(); callback(); });
+    if (key) btn.setData('key', key);
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);
   }

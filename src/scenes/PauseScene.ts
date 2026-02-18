@@ -129,6 +129,7 @@ export default class PauseScene extends Phaser.Scene {
         .on('pointerover', () => this.buttonNav.select(i))
         .on('pointerout', () => this.buttonNav.refreshStyles())
         .on('pointerdown', () => { playClick(); btn.callback(); });
+      button.setData('key', btn.text);
       
       this.menuButtons.push(button);
       this.buttonCallbacks.push(btn.callback);

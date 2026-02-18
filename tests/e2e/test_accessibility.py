@@ -21,41 +21,33 @@ class TestAccessibility:
 
     def test_colorblind_filter_applied(self, game_page: Page):
         """Test that colorblind mode applies CSS filter to canvas."""
-        click_menu_by_key(game_page, 'settings')
-        wait_for_scene(game_page, 'SettingsScene')
-        
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        game_page.mouse.click(box["x"] + 80, box["y"] + 180)
-        game_page.wait_for_timeout(300)
-        
-        game_page.keyboard.press("Escape")
-        wait_for_scene(game_page, 'MenuScene')
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
+        game_page.evaluate("""() => {
+            const a = window.Accessibility;
+            if (a) {
+                a.settings.colorblindMode = 'deuteranopia';
+                a.applyDOMSettings();
+            }
+        }""")
         
         filter_exists = game_page.evaluate("""() => {
             return document.getElementById('colorblind-filters') !== null;
         }""")
+        assert filter_exists, "Colorblind SVG filter element should exist after enabling colorblind mode"
 
     def test_high_contrast_class_applied(self, game_page: Page):
         """Test that high contrast mode adds CSS class."""
-        click_menu_by_key(game_page, 'settings')
-        wait_for_scene(game_page, 'SettingsScene')
-        
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        game_page.mouse.click(box["x"] + 200, box["y"] + 140)
-        game_page.wait_for_timeout(300)
-        
-        game_page.keyboard.press("Escape")
-        wait_for_scene(game_page, 'MenuScene')
-        click_button(game_page, BUTTON_START, "Start Game")
-        wait_for_scene(game_page, 'GameScene')
+        game_page.evaluate("""() => {
+            const a = window.Accessibility;
+            if (a) {
+                a.settings.highContrast = true;
+                a.applyDOMSettings();
+            }
+        }""")
         
         has_class = game_page.evaluate("""() => {
             return document.body.classList.contains('high-contrast');
         }""")
+        assert has_class, "Body should have 'high-contrast' class after enabling high contrast mode"
 
 
 class TestHUD:

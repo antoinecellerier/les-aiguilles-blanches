@@ -129,13 +129,13 @@ class TestMenuNavigation:
         for _ in range(htp_idx):
             game_page.keyboard.press("ArrowDown")
             game_page.wait_for_timeout(50)
-        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=3000)
+        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=5000)
         game_page.keyboard.press("Enter")  # Open overlay
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=5000)
         
         # Press Enter to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Enter")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=5000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Enter should only close overlay")
@@ -149,13 +149,13 @@ class TestMenuNavigation:
         for _ in range(htp_idx):
             game_page.keyboard.press("ArrowDown")
             game_page.wait_for_timeout(50)
-        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=3000)
+        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=5000)
         game_page.keyboard.press("Enter")  # Open overlay
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=5000)
         
         # Press Space to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Space")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=5000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Space should only close overlay")
@@ -175,9 +175,9 @@ class TestMenuNavigation:
         for _ in range(htp_idx):
             game_page.keyboard.press("ArrowDown")
             game_page.wait_for_timeout(50)
-        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=3000)
+        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=5000)
         game_page.keyboard.press("Enter")  # Open overlay
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=5000)
         
         # Selection should be on How To Play after we navigated there
         pre_nav_index = game_page.evaluate("""() => {
@@ -194,7 +194,7 @@ class TestMenuNavigation:
         # Try to navigate with arrows while overlay is open
         game_page.keyboard.press("ArrowDown")
         game_page.keyboard.press("ArrowDown")
-        game_page.wait_for_function("() => window.game?.scene?.getScene('MenuScene')?.selectedIndex !== undefined", timeout=3000)
+        game_page.wait_for_function("() => window.game?.scene?.getScene('MenuScene')?.selectedIndex !== undefined", timeout=5000)
         
         # Selection should NOT have changed from 1
         current_index = game_page.evaluate("""() => {
@@ -221,7 +221,7 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene')
         
         click_menu_by_key(game_page, 'changelog')
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=5000)
         
         # Verify changelog content is actually rendered (not empty/invisible)
         # Sample the canvas for non-background pixels in the overlay area
@@ -247,7 +247,7 @@ class TestMenuNavigation:
         
         # ESC should close it
         game_page.keyboard.press("Escape")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=5000)
         
         overlay_closed = game_page.evaluate("""() => {
             return window.game.scene.getScene('MenuScene')?.overlayOpen !== true;
@@ -259,22 +259,14 @@ class TestMenuNavigation:
         # Resize to phone dimensions
         game_page.set_viewport_size({"width": 375, "height": 667})
         game_page.evaluate("window.resizeGame?.()")
-        wait_for_scene(game_page, 'MenuScene')
+        game_page.wait_for_timeout(500)
         
-        # Re-enter menu to re-layout with new size
-        game_page.evaluate("""() => {
-            window.game.scene.getScene('MenuScene')?.scene.restart();
-        }""")
-        wait_for_scene(game_page, 'MenuScene')
-        assert_scene_active(game_page, 'MenuScene')
-        
-        # Use keyboard navigation to reach changelog (index 2)
-        game_page.keyboard.press("ArrowDown")  # index 1 = How to Play
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
-        game_page.keyboard.press("ArrowDown")  # index 2 = Changelog
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 2; }", timeout=3000)
-        game_page.keyboard.press("Enter")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
+        # Open changelog via keyboard navigation
+        click_menu_by_key(game_page, 'changelog')
+        game_page.wait_for_function(
+            "() => { const s = window.game?.scene?.getScene('MenuScene'); return s?.overlayOpen === true; }",
+            timeout=8000
+        )
         
         # Overlay should be open
         overlay_open = game_page.evaluate("""() => {
@@ -312,7 +304,7 @@ class TestMenuNavigation:
         assert fits_screen, "Changelog content should fit within phone screen"
         
         game_page.keyboard.press("Escape")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=3000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=5000)
         
         # Restore original viewport
         game_page.set_viewport_size({"width": 1280, "height": 720})

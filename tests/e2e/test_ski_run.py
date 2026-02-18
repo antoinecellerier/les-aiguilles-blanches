@@ -2,8 +2,8 @@
 import pytest
 from playwright.sync_api import Page
 from conftest import (
-    wait_for_scene, click_button, get_active_scenes,
-    assert_scene_active, BUTTON_START, GAME_URL, wait_for_game_ready,
+    wait_for_scene, click_button, get_active_scenes, find_menu_button_index,
+    assert_scene_active, wait_for_input_ready, BUTTON_START, GAME_URL, wait_for_game_ready,
 )
 
 
@@ -75,10 +75,11 @@ class TestSkiRun:
                             "ESC should open pause menu during ski run")
 
         # Wait for PauseScene input delay
-        game_page.wait_for_timeout(400)
+        wait_for_input_ready(game_page, 'PauseScene')
 
-        # Click "Skip Run" (index 2 in ski mode: Resume, Restart, Skip Run, Settings, Quit)
-        click_button(game_page, 2, "Skip Run")
+        # Click "Skip Run" by data key
+        skip_idx = find_menu_button_index(game_page, 'skipRun', 'PauseScene')
+        click_button(game_page, skip_idx, "Skip Run")
         wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
         assert_scene_active(game_page, 'LevelCompleteScene',
                             "Skip Run should return to LevelCompleteScene")

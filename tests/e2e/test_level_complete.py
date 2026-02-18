@@ -4,7 +4,7 @@ from playwright.sync_api import Page
 from conftest import (
     wait_for_scene, skip_to_level, skip_to_credits,
     click_button, click_menu_by_key, get_current_level, get_active_scenes,
-    assert_scene_active, assert_scene_not_active,
+    assert_scene_active, assert_scene_not_active, wait_for_input_ready,
     BUTTON_START,
 )
 
@@ -229,6 +229,7 @@ class TestFailScreen:
         }""")
         
         wait_for_scene(game_page, 'LevelCompleteScene')
+        wait_for_input_ready(game_page, 'LevelCompleteScene')
         
         initial_state = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelCompleteScene');

@@ -205,14 +205,15 @@ def click_menu_button(page, button_index: int, button_name: str = "button"):
     page.keyboard.press("Enter")
 
 
-def find_menu_button_index(page, key: str) -> int:
-    """Find a menu button's index by its data key (e.g., 'startGame', 'settings')."""
+def find_menu_button_index(page, key: str, scene_name: str = 'MenuScene') -> int:
+    """Find a menu button's index by its data key (e.g., 'startGame', 'settings').
+    Works with any scene that has a menuButtons array with data keys."""
     idx = page.evaluate(f"""() => {{
-        const scene = window.game?.scene?.getScene('MenuScene');
+        const scene = window.game?.scene?.getScene('{scene_name}');
         if (!scene?.menuButtons) return -1;
         return scene.menuButtons.findIndex(b => b.getData('key') === '{key}');
     }}""")
-    assert idx >= 0, f"Menu button with key '{key}' not found"
+    assert idx >= 0, f"Button with key '{key}' not found in {scene_name}"
     return idx
 
 

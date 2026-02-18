@@ -360,52 +360,52 @@ export default class LevelCompleteScene extends Phaser.Scene {
       }
       // Daily run complete — ski it + menu
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true);
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true, 'ski');
       this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('DailyRunsScene'));
+        () => this.navigateTo('DailyRunsScene'), false, 'dailyRuns');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'));
+        () => this.navigateTo('MenuScene'), false, 'menu');
     } else if (this.isDailyRun && !this.won) {
       // Daily run failed — retry + menu
       this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('GameScene', { level: this.levelIndex }), true);
+        () => this.navigateTo('GameScene', { level: this.levelIndex }), true, 'retry');
       this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('DailyRunsScene'));
+        () => this.navigateTo('DailyRunsScene'), false, 'dailyRuns');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'));
+        () => this.navigateTo('MenuScene'), false, 'menu');
     } else if (this.won && this.levelIndex < LEVELS.length - 1) {
       this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true);
+        () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true, 'nextLevel');
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }));
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), false, 'ski');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'));
+        () => this.navigateTo('MenuScene'), false, 'menu');
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('CreditsScene'), true);
+        () => this.navigateTo('CreditsScene'), true, 'viewCredits');
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }));
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), false, 'ski');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'));
+        () => this.navigateTo('MenuScene'), false, 'menu');
     } else if (isSkiCrash) {
       // Ski crash — retry the run (re-randomize if needed) + next level + menu
       const retryLabel = skiMode === 'snowboard' ? (t('rideAgain') || 'Ride Again!') : (t('skiAgain') || 'Ski Again!');
       this.addButton(buttonContainer, retryLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true);
+        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true, 'skiAgain');
       if (this.levelIndex < LEVELS.length - 1) {
         this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
-          () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }));
+          () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), false, 'nextLevel');
       } else {
         this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
-          () => this.navigateTo('CreditsScene'));
+          () => this.navigateTo('CreditsScene'), false, 'viewCredits');
       }
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'));
+        () => this.navigateTo('MenuScene'), false, 'menu');
     } else {
       this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('GameScene', { level: this.levelIndex, restartCount: this.restartCount + 1 }), true);
+        () => this.navigateTo('GameScene', { level: this.levelIndex, restartCount: this.restartCount + 1 }), true, 'retry');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'));
+        () => this.navigateTo('MenuScene'), false, 'menu');
     }
 
     // Position buttons horizontally centered
@@ -491,7 +491,8 @@ export default class LevelCompleteScene extends Phaser.Scene {
     fontSize: number,
     padding: { x: number; y: number },
     callback: () => void,
-    isCTA: boolean = false
+    isCTA: boolean = false,
+    key?: string,
   ): void {
     const index = this.menuButtons.length;
     const bgColor = isCTA ? THEME.colors.buttonCTAHex : THEME.colors.buttonPrimaryHex;
@@ -505,6 +506,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       .on('pointerover', () => this.buttonNav.select(index))
       .on('pointerout', () => this.buttonNav.refreshStyles())
       .on('pointerdown', () => { playClick(); callback(); });
+    if (key) btn.setData('key', key);
     
     this.menuButtons.push(btn);
     this.buttonCallbacks.push(callback);

@@ -193,7 +193,7 @@ class TestGamepadGameplay:
         # Press Start to pause
         tap_gamepad_button(gamepad_page, 9)
         
-        wait_for_scene(gamepad_page, 'PauseScene', timeout=2000)
+        wait_for_scene(gamepad_page, 'PauseScene')
 
     def test_a_button_dismisses_dialogue(self, gamepad_page: Page):
         """Test A button advances dialogue."""

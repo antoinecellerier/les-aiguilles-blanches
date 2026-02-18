@@ -4,7 +4,7 @@ Validates that each level intro shows the correct character name and portrait.
 """
 import pytest
 from playwright.sync_api import Page
-from conftest import wait_for_scene, skip_to_level
+from conftest import wait_for_scene, skip_to_level, click_menu_by_key
 
 
 # Expected speaker for each level's intro dialogue
@@ -52,12 +52,7 @@ def clear_dialogue_queue(page: Page):
 
 def start_game(page: Page):
     """Click Start Game from menu."""
-    page.evaluate("""() => {
-        const menu = window.game?.scene?.getScene('MenuScene');
-        if (menu && menu.menuButtons && menu.menuButtons[0]) {
-            menu.menuButtons[0].emit('pointerup');
-        }
-    }""")
+    click_menu_by_key(page, 'startGame')
     wait_for_scene(page, 'GameScene')
 
 
