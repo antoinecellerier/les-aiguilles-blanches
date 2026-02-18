@@ -66,7 +66,8 @@ export interface MenuHeader {
  */
 export function createMenuHeader(scene: Phaser.Scene, titleKey: string, onBack: () => void, scaleFactor: number): MenuHeader {
   const { width, height } = scene.cameras.main;
-  const titleSize = Math.max(16, Math.round(28 * scaleFactor));
+  const dprBoost = Math.sqrt(Math.min(window.devicePixelRatio || 1, 2));
+  const titleSize = Math.max(16, Math.round(28 * scaleFactor * dprBoost));
   const title = scene.add.text(width / 2, Math.round(height * 0.06), t(titleKey), {
     fontFamily: THEME.fonts.family,
     fontSize: `${titleSize}px`,
@@ -74,13 +75,13 @@ export function createMenuHeader(scene: Phaser.Scene, titleKey: string, onBack: 
     color: THEME.colors.accent,
   }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_UI);
 
-  const btnFontSize = Math.max(10, Math.round(13 * scaleFactor));
+  const btnFontSize = Math.max(10, Math.round(13 * scaleFactor * dprBoost));
   const backBtn = scene.add.text(Math.round(width * 0.05), Math.round(height * 0.06), '← ' + (t('menu') || 'Menu'), {
     fontFamily: THEME.fonts.family,
     fontSize: `${btnFontSize}px`,
     color: THEME.colors.textPrimary,
     backgroundColor: THEME.colors.buttonPrimaryHex,
-    padding: { x: 10, y: 6 },
+    padding: { x: Math.round(10 * dprBoost), y: Math.round(6 * dprBoost) },
   }).setOrigin(0, 0).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
   backBtn.on('pointerdown', () => { playClick(); onBack(); });
 

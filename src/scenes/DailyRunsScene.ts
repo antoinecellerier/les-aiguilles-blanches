@@ -107,18 +107,24 @@ export default class DailyRunsScene extends Phaser.Scene {
     const { level: greenLevel } = generateValidDailyRunLevel(rankSeed(dailySeedNum, 'green'), 'green');
     this.greenIsPark = greenLevel.difficulty === 'park';
 
-    // Compact layout strategy (Option C):
-    // Anchor content near top (15%) to leave bottom ~35% open for mountains
-    // Use consistent vertical gaps based on textScale rather than screen height percentages
-    const startY = Math.round(height * 0.15);
-    const gapBriefing = Math.round(45 * textScale); // Rank -> Briefing
-    const gapDaily = Math.round(85 * textScale);    // Briefing -> Daily (needs space for 3 lines)
-    const gapRandom = Math.round(50 * textScale);   // Daily -> Random
-
-    const rankY = startY;
-    const briefingY = rankY + gapBriefing;
-    const dailyY = briefingY + gapDaily;
-    const randomY = dailyY + gapRandom;
+    // Proportional layout: anchor ranks below header, distribute remaining content with capped spread
+    // Compute header bottom analytically (Phaser text dimensions aren't ready before first render)
+    const titleTop = Math.round(height * 0.06);
+    const titleFontSize = Math.max(16, Math.round(28 * scale * dprBoost));
+    const titleBottom = titleTop + Math.round(titleFontSize * 1.2);
+    const backBtnFontSize = Math.max(10, Math.round(13 * scale * dprBoost));
+    const backBtnPadY = Math.round(6 * dprBoost);
+    const backBtnBottom = titleTop + backBtnFontSize + 2 * backBtnPadY;
+    const headerBottom = Math.max(titleBottom, backBtnBottom);
+    // Rank buttons use origin(0.5) so they extend upward by half their height;
+    // offset rankY so the button TOP sits 8px below the header
+    const rankBtnHalfH = Math.round((smallFont + 2 * Math.round(6 * textScale)) / 2);
+    const rankY = headerBottom + rankBtnHalfH + 8;
+    const bottomBound = Math.round(height * 0.72);
+    const available = Math.min(bottomBound - rankY, Math.round(height * 0.45));
+    const briefingY = rankY + Math.round(available * 0.20);
+    const dailyY = rankY + Math.round(available * 0.55);
+    const randomY = rankY + Math.round(available * 0.75);
 
     const rankSpacing = Math.round(Math.min(100 * scale, (width - 40) / RANKS.length));
     const startX = width / 2 - (RANKS.length - 1) * rankSpacing / 2;

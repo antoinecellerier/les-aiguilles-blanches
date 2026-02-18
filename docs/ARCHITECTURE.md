@@ -943,7 +943,7 @@ this.rexUI.add.fixWidthSizer({
 
 ### MenuScene Scaling
 
-Menu uses responsive scaling based on viewport. On landscape phones where buttons overflow the available vertical space, the Fullscreen button is automatically dropped. Title background width is clamped to `width - 20` to prevent overflow on narrow screens.
+Menu uses responsive scaling based on viewport. On landscape phones where buttons overflow the available vertical space, the Fullscreen button is automatically dropped. Title background width is clamped to `width - 20` to prevent overflow on narrow screens. `createMenuHeader()` applies `dprBoost` to title font size, back button font size, and back button padding so text remains legible on high-DPR mobile screens.
 
 ```typescript
 const scaleByHeight = Math.max(0.7, Math.min(height / 768, 1.5));
@@ -1827,7 +1827,7 @@ Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after compl
 
 - `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, `randomSeed()` for non-deterministic seeds, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
 - `src/systems/LevelGenerator.ts` — `generateDailyRunLevel(seed, rank)` produces a valid `Level` object. `generateValidDailyRunLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickDailyRunBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP). 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` system (freqOffset, ampScale, phase, widthPhase) making each seed visually distinct. Steep zone placement randomized with variable gaps. Service roads only for dangerous zones (≥30°); safe zones have no bypass. Winch anchors placed only above dangerous zones.
-- `src/scenes/DailyRunsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Run button (random seed). Shows briefing preview (weather, target, time, dimensions).
+- `src/scenes/DailyRunsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Run button (random seed). Shows briefing preview (weather, target, time, dimensions). Uses proportional vertical layout: computes header bottom analytically (title line-height + back button padding), then distributes briefing/daily/random buttons at 20%/55%/75% of available space (capped at `height * 0.45` to avoid over-spreading). Rank buttons use origin(0.5) centering so `rankY` includes a half-height offset to prevent title overlap.
 
 ### Generation Pipeline
 
