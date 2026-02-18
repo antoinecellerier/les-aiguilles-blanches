@@ -5,7 +5,7 @@ description: Reviews E2E test code for brittleness, flakiness, and anti-patterns
 
 ## E2E Test Review Process
 
-Review all E2E test code against the project's established patterns. The test suite uses Playwright + pytest-xdist (6 parallel workers) against a Phaser 3 Canvas game — timing sensitivity and shared state are the primary failure vectors.
+Review all E2E test code as an experienced test engineer would. The test suite uses Playwright + pytest-xdist (6 parallel workers) against a Phaser 3 Canvas game — timing sensitivity and shared state are the primary failure vectors.
 
 ### Phase 1: Scope detection
 
@@ -20,7 +20,49 @@ If no test files changed, check if source changes require new tests:
 - New buttons/UI → need navigation tests
 - New game mechanics → need gameplay tests
 
-### Phase 2: Anti-pattern detection
+### Phase 2: Test design quality
+
+Review each test for sound engineering:
+
+#### Test naming and intent
+- **Name describes the expected behavior**, not the mechanism: `test_escape_returns_to_menu` ✅ not `test_press_escape_key` ❌
+- **Docstring explains the regression** or user story being validated, not just rephrasing the name
+- **One assertion per logical behavior** — a test can have multiple `assert` statements if they all verify aspects of the same behavior, but should not test two unrelated things
+
+#### Arrange / Act / Assert structure
+Every test should have clear phases. Flag tests that intermix setup with verification.
+```python
+# ✅ Clear AAA
+def test_pause_resumes_gameplay(self, game_page):
+    # Arrange
+    click_button(game_page, BUTTON_START, "Start Game")
+    wait_for_scene(game_page, 'GameScene')
+    dismiss_dialogues(game_page)
+    # Act
+    game_page.keyboard.press("Escape")
+    wait_for_scene(game_page, 'PauseScene')
+    wait_for_input_ready(game_page, 'PauseScene')
+    game_page.keyboard.press("Escape")
+    # Assert
+    wait_for_scene_inactive(game_page, 'PauseScene')
+    assert_scene_active(game_page, 'GameScene')
+```
+
+#### Assertion quality
+- **Assert on behavior, not implementation** — check what the user sees, not internal state when possible
+- **Meaningful error messages** — include actual vs expected: `f"Should be on level 0, got {level}"` not just `assert level == 0`
+- **Not over-specified** — don't assert on exact pixel positions, frame counts, or timing values that vary under load
+- **Not under-specified** — every test must have at least one assertion; flag any test that only calls functions without asserting outcomes
+
+#### Edge cases and failure paths
+Check that the test suite covers:
+- **Happy path** — normal user flow works
+- **Error recovery** — what happens when a scene transition fails, fuel runs out, timer expires
+- **Boundary conditions** — first level, last level, zero values, max values
+- **Interruption** — pause during transition, resize during dialogue, orientation change during gameplay
+- **State reset** — returning to menu clears game state properly
+
+### Phase 3: Project-specific anti-patterns
 
 Launch explore agents to check each changed test file for these patterns:
 
@@ -153,31 +195,43 @@ When adding new source files or test files, update `run-tests.sh`:
 - New `tests/e2e/test_foo.py` → add to `KNOWN_E2E_FILES`
 - Renamed scenes → update both the case branch and `SCENE_TESTS` mapping
 
-### Phase 3: Structural checks
+### Phase 4: Maintainability
 
-1. **Imports** — Verify test files import helpers from conftest rather than reimplementing
-2. **Fixture usage** — Tests should use `game_page` fixture (auto-clears localStorage on teardown)
-3. **Scene navigation** — Use `skip_to_level(page, N)`, `dismiss_dialogues(page)`, `click_menu_by_key(page, key)` from conftest
-4. **Assertions** — Use `assert_scene_active`, `assert_scene_not_active` over raw evaluates
+1. **DRY without over-abstraction** — Shared setup belongs in conftest fixtures or helper functions. But don't abstract away test clarity; a reader should understand what a test does without jumping to 5 helpers.
+2. **Test class grouping** — Related tests grouped in classes (`TestPauseMenu`, `TestSkiJump`). Classes should share a common setup pattern and test a single feature area.
+3. **Consistent patterns across files** — Same flow (start game → navigate → assert) should use the same helpers everywhere. New test files should follow the established structure of existing ones.
+4. **No orphaned tests** — Tests that were disabled, skipped, or commented out should be deleted or fixed. `@pytest.mark.skip` must have a reason.
+5. **Import hygiene** — Only import what's used. Don't import removed constants (`BUTTON_SETTINGS` etc.).
 
-### Phase 4: Parallel safety
+### Phase 5: Parallel safety and isolation
 
 1. **No shared mutable state** — Tests must not depend on localStorage from other tests (fixture clears it)
 2. **No port conflicts** — All tests use `GAME_URL` from conftest (reads PORT from `.env.local`)
 3. **No file system side effects** — Screenshots go to `tests/screenshots/` only
 4. **Idempotent setup** — Each test must work regardless of execution order
+5. **No test interdependence** — Test A must not set state that test B relies on. If you see tests that only pass when run together, flag as HIGH.
+6. **Deterministic behavior** — Tests must not depend on wall-clock time, random values, or network. Game uses seeded RNG for daily runs; tests should inject known seeds when testing procedural content.
 
-### Phase 5: Findings
+### Phase 6: Coverage assessment
+
+For changed or new features, verify:
+
+1. **Critical path covered** — Can the user complete the main flow without hitting untested code?
+2. **Regression test for bugs** — Every bug fix should have a test that would have caught it. The docstring should reference what broke.
+3. **Input method coverage** — Keyboard, mouse/touch, gamepad should all be tested for interactive features. At minimum, keyboard (most reliable in Playwright).
+4. **Viewport coverage** — Tests that depend on layout should verify at least the default viewport (1280×720). Responsive-critical features use the `touch_page` fixture (390×844 portrait).
+
+### Phase 7: Findings
 
 Organize by severity:
 
 | Severity | Criteria |
 |----------|----------|
-| **HIGH** | Will fail under parallel load, breaks on menu reorder, uses wrong coordinates |
-| **MEDIUM** | Duplicates helpers, uses unnecessarily tight timeouts, missing inputReady |
-| **LOW** | Style inconsistency, could use a better helper but works correctly |
+| **HIGH** | Will fail under parallel load, breaks on menu reorder, uses wrong coordinates, tests depend on each other, no assertions |
+| **MEDIUM** | Duplicates helpers, uses unnecessarily tight timeouts, missing inputReady, poor error messages, tests multiple unrelated behaviors |
+| **LOW** | Style inconsistency, could use a better helper but works correctly, missing edge case coverage |
 
-### Phase 6: Verification
+### Phase 8: Verification
 
 ```bash
 # Run changed tests in isolation
