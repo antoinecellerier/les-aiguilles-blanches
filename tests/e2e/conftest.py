@@ -20,10 +20,10 @@ GAME_URL = os.environ.get(
 )
 
 
-def wait_for_scene(page, scene_name: str, timeout: int = 5000):
+def wait_for_scene(page, scene_name: str, timeout: int = 8000):
     """Wait for a specific scene to be active.
     
-    More reliable than wait_for_timeout as it checks actual game state.
+    Default timeout is 8s to handle CPU contention under parallel test execution.
     """
     page.wait_for_function(
         f"""() => {{
@@ -36,7 +36,7 @@ def wait_for_scene(page, scene_name: str, timeout: int = 5000):
     )
 
 
-def wait_for_scene_inactive(page, scene_name: str, timeout: int = 5000):
+def wait_for_scene_inactive(page, scene_name: str, timeout: int = 8000):
     """Wait for a specific scene to be inactive."""
     page.wait_for_function(
         f"""() => {{
@@ -58,6 +58,17 @@ def wait_for_game_ready(page, timeout: int = 10000):
             const menu = game.scene.getScene('MenuScene');
             return menu && menu.sys && menu.sys.isActive();
         }""",
+        timeout=timeout
+    )
+
+
+def wait_for_input_ready(page, scene_name: str, timeout: int = 5000):
+    """Wait for a scene's input delay to expire (BALANCE.SCENE_INPUT_DELAY)."""
+    page.wait_for_function(
+        f"""() => {{
+            const scene = window.game?.scene?.getScene('{scene_name}');
+            return scene?.inputReady === true;
+        }}""",
         timeout=timeout
     )
 
@@ -187,24 +198,33 @@ def dismiss_dialogues(page, timeout: int = 5000):
 
 
 def click_menu_button(page, button_index: int, button_name: str = "button"):
-    """Click a menu button by index (0=Start, 1=How to Play, 2=Changelog, 3=Settings).
-
-    Uses keyboard navigation for reliability across scrollable menu layouts.
-    """
-    # Keyboard navigation is most reliable since button positions are container-relative
-    # which doesn't map directly to screen coordinates in a scrollable menu.
+    """Click a menu button by index. Prefer click_menu_by_key() for resilience to reordering."""
     for _ in range(button_index):
         page.keyboard.press("ArrowDown")
         page.wait_for_timeout(50)
     page.keyboard.press("Enter")
 
 
-# Menu button index constants
+def find_menu_button_index(page, key: str) -> int:
+    """Find a menu button's index by its data key (e.g., 'startGame', 'settings')."""
+    idx = page.evaluate(f"""() => {{
+        const scene = window.game?.scene?.getScene('MenuScene');
+        if (!scene?.menuButtons) return -1;
+        return scene.menuButtons.findIndex(b => b.getData('key') === '{key}');
+    }}""")
+    assert idx >= 0, f"Menu button with key '{key}' not found"
+    return idx
+
+
+def click_menu_by_key(page, key: str):
+    """Click a menu button by its data key — immune to button reordering."""
+    idx = find_menu_button_index(page, key)
+    click_menu_button(page, idx, key)
+    page.wait_for_timeout(100)
+
+
+# Start Game is always index 0 (first primary button)
 BUTTON_START = 0
-BUTTON_HOW_TO_PLAY = 1
-BUTTON_CHANGELOG = 2
-BUTTON_SETTINGS = 3
-BUTTON_DAILY_RUNS = 4
 
 
 def click_button(page, button_index: int, description: str):
@@ -216,17 +236,7 @@ def click_button(page, button_index: int, description: str):
 def navigate_to_daily_runs(page):
     """From MenuScene, navigate to DailyRunsScene via the Daily Runs button."""
     import time
-    idx = page.evaluate("""() => {
-        const ms = window.game?.scene?.getScene('MenuScene');
-        if (!ms?.menuButtons) return -1;
-        const texts = ms.menuButtons.map(b => b.text.toLowerCase());
-        for (let i = 0; i < texts.length; i++) {
-            if (texts[i].includes('daily') || texts[i].includes('piste') ||
-                texts[i].includes('contrat') || texts[i].includes('runs')) return i;
-        }
-        return -1;
-    }""")
-    assert idx >= 0, "Daily Runs button not found in menu"
+    idx = find_menu_button_index(page, 'dailyRuns')
     page.evaluate(f"""() => {{
         const ms = window.game?.scene?.getScene('MenuScene');
         if (ms?.buttonNav) ms.buttonNav.select({idx});
@@ -343,6 +353,21 @@ def navigate_to_settings(page):
         }
     }""")
     wait_for_scene(page, 'SettingsScene')
+
+
+@pytest.fixture(scope="session")
+def browser_type_launch_args(browser_type_launch_args):
+    """Reduce Chromium CPU usage during parallel test runs."""
+    return {
+        **browser_type_launch_args,
+        "args": [
+            "--disable-gpu",
+            "--disable-software-rasterizer",
+            "--disable-dev-shm-usage",
+            "--disable-extensions",
+            "--no-sandbox",
+        ],
+    }
 
 
 @pytest.fixture(scope="session")

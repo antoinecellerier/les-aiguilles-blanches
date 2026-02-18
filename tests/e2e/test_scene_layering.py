@@ -68,13 +68,17 @@ class TestSceneLayering:
             if (!scene) return null;
             const items = [];
             for (const btn of (scene.menuButtons || [])) {
-                items.push({ label: 'button:' + btn.text, depth: btn.depth });
+                // Buttons are inside menuContainer — effective depth = container depth + local depth
+                const containerDepth = btn.parentContainer ? btn.parentContainer.depth : 0;
+                items.push({ label: 'button:' + btn.text, depth: btn.depth + containerDepth });
             }
             for (const s of (scene.buttonShadows || [])) {
-                items.push({ label: 'shadow', depth: s.depth });
+                const containerDepth = s.parentContainer ? s.parentContainer.depth : 0;
+                items.push({ label: 'shadow', depth: s.depth + containerDepth });
             }
             if (scene.selectionArrow) {
-                items.push({ label: 'arrow', depth: scene.selectionArrow.depth });
+                const containerDepth = scene.selectionArrow.parentContainer ? scene.selectionArrow.parentContainer.depth : 0;
+                items.push({ label: 'arrow', depth: scene.selectionArrow.depth + containerDepth });
             }
             return items;
         }""")

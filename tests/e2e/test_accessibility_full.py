@@ -14,7 +14,7 @@ from conftest import (
     wait_for_scene,
     click_button, assert_scene_active, assert_canvas_renders_content,
     navigate_to_settings, dismiss_dialogues,
-    BUTTON_START, BUTTON_SETTINGS,
+    BUTTON_START,
 )
 
 SCREENSHOT_DIR = "tests/screenshots"

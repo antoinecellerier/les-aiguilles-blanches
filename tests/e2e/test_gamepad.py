@@ -1,7 +1,7 @@
 """E2E tests for gamepad support using mocked Gamepad API."""
 import pytest
 from playwright.sync_api import Page
-from conftest import wait_for_scene, dismiss_dialogues, GAME_URL
+from conftest import wait_for_scene, dismiss_dialogues, find_menu_button_index, GAME_URL
 
 
 def make_mock_gamepad_script(gamepad_id: str = 'Mock Gamepad (STANDARD GAMEPAD)') -> str:
@@ -153,28 +153,28 @@ class TestGamepadMenuNavigation:
         tap_gamepad_button(gamepad_page, 0)
         
         # Should transition to GameScene
-        wait_for_scene(gamepad_page, 'GameScene', timeout=3000)
+        wait_for_scene(gamepad_page, 'GameScene')
 
     def test_b_button_in_settings_goes_back(self, gamepad_page: Page):
         """Test B button goes back from settings."""
-        # Navigate to settings: Start(0) -> HowToPlay(1) -> Changelog(2) -> Settings(3)
-        navigate_stick_down(gamepad_page, 3)
+        # Find settings button index dynamically
+        settings_idx = find_menu_button_index(gamepad_page, 'settings')
+        navigate_stick_down(gamepad_page, settings_idx)
         
-        # Verify we're on Settings (index 3)
         selected = gamepad_page.evaluate(
             "() => window.game.scene.getScene('MenuScene').selectedIndex"
         )
-        assert selected == 3, f"Should be on Settings (index 3), got {selected}"
+        assert selected == settings_idx, f"Should be on Settings (index {settings_idx}), got {selected}"
         
         # Press A to enter settings
         tap_gamepad_button(gamepad_page, 0, delay=150)
         
-        wait_for_scene(gamepad_page, 'SettingsScene', timeout=3000)
+        wait_for_scene(gamepad_page, 'SettingsScene')
         
         # Press B to go back
         tap_gamepad_button(gamepad_page, 1, delay=150)
         
-        wait_for_scene(gamepad_page, 'MenuScene', timeout=3000)
+        wait_for_scene(gamepad_page, 'MenuScene')
 
 
 class TestGamepadGameplay:
@@ -242,23 +242,24 @@ class TestNintendoControllerSwap:
         tap_gamepad_button(nintendo_page, 1)  # Nintendo A = index 1
         
         # Should start game (confirm action)
-        wait_for_scene(nintendo_page, 'GameScene', timeout=3000)
+        wait_for_scene(nintendo_page, 'GameScene')
 
     def test_nintendo_b_button_goes_back(self, nintendo_page: Page):
         """On Nintendo, physical B button (index 0) should go back."""
-        # First enter settings (index 3) — longer delays for parallel stability
-        navigate_stick_down(nintendo_page, 3)
+        # Find settings button index dynamically
+        settings_idx = find_menu_button_index(nintendo_page, 'settings')
+        navigate_stick_down(nintendo_page, settings_idx)
         nintendo_page.wait_for_timeout(300)  # Let menu settle before confirm
         
         # Confirm with Nintendo A (index 1)
         tap_gamepad_button(nintendo_page, 1, delay=200)
         
-        wait_for_scene(nintendo_page, 'SettingsScene', timeout=5000)
+        wait_for_scene(nintendo_page, 'SettingsScene')
         
         # Go back with Nintendo B (index 0)
         tap_gamepad_button(nintendo_page, 0, delay=200)  # Nintendo B = index 0
         
-        wait_for_scene(nintendo_page, 'MenuScene', timeout=5000)
+        wait_for_scene(nintendo_page, 'MenuScene')
 
 
 # PlayStation controller mock
@@ -286,22 +287,23 @@ class TestPlayStationController:
         tap_gamepad_button(playstation_page, 0)
         
         # Should start game (confirm action)
-        wait_for_scene(playstation_page, 'GameScene', timeout=3000)
+        wait_for_scene(playstation_page, 'GameScene')
 
     def test_playstation_circle_button_goes_back(self, playstation_page: Page):
         """On PlayStation, Circle button (index 1) should go back."""
-        # First enter settings (index 3)
-        navigate_stick_down(playstation_page, 3)
+        # Find settings button index dynamically
+        settings_idx = find_menu_button_index(playstation_page, 'settings')
+        navigate_stick_down(playstation_page, settings_idx)
         
         # Confirm with Cross (index 0)
         tap_gamepad_button(playstation_page, 0, delay=150)
         
-        wait_for_scene(playstation_page, 'SettingsScene', timeout=3000)
+        wait_for_scene(playstation_page, 'SettingsScene')
         
         # Go back with Circle (index 1)
         tap_gamepad_button(playstation_page, 1, delay=150)
         
-        wait_for_scene(playstation_page, 'MenuScene', timeout=3000)
+        wait_for_scene(playstation_page, 'MenuScene')
 
 
 class TestGamepadDialogueDismiss:

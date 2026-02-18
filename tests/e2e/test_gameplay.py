@@ -214,12 +214,7 @@ class TestSnowContrast:
         """Test that grooming changes tile from ungroomed to groomed."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
-        
-        canvas = game_page.locator("canvas")
-        box = canvas.bounding_box()
-        for _ in range(10):
-            game_page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
-            game_page.wait_for_timeout(200)
+        dismiss_dialogues(game_page)
         
         initial_count = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
@@ -228,16 +223,13 @@ class TestSnowContrast:
         
         game_page.keyboard.down("Space")
         game_page.keyboard.down("w")
-        game_page.wait_for_timeout(300)
+        # Poll until grooming registers instead of fixed timeout
+        game_page.wait_for_function(f"""() => {{
+            const gs = window.game.scene.getScene('GameScene');
+            return gs && gs.groomedCount > {initial_count};
+        }}""", timeout=5000)
         game_page.keyboard.up("w")
         game_page.keyboard.up("Space")
-        
-        new_count = game_page.evaluate("""() => {
-            const gs = window.game.scene.getScene('GameScene');
-            return gs ? gs.groomedCount : -1;
-        }""")
-        
-        assert new_count > initial_count, f"Grooming should increase count: {initial_count} -> {new_count}"
 
 
 class TestBonusObjectives:

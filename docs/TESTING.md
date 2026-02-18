@@ -63,7 +63,11 @@ All 78 source files have explicit mappings. Three validation layers enforce this
 
 ## Test Helpers
 
-Core helpers are in `tests/e2e/conftest.py`, including `click_menu_button`, `click_button`, `BUTTON_*` constants, `LEVEL_INDEX`, `assert_scene_active`, `assert_scene_not_active`, `assert_no_error_message`, `assert_not_on_menu`, `assert_canvas_renders_content`, `get_active_scenes`, `get_current_level`, `navigate_to_settings`, and other shared utilities.
+Core helpers are in `tests/e2e/conftest.py`, including `click_menu_button`, `click_button`, `click_menu_by_key`, `find_menu_button_index`, `BUTTON_START`, `LEVEL_INDEX`, `assert_scene_active`, `assert_scene_not_active`, `assert_no_error_message`, `assert_not_on_menu`, `assert_canvas_renders_content`, `get_active_scenes`, `get_current_level`, `navigate_to_settings`, and other shared utilities.
+
+### Key-based button lookup
+
+Menu buttons are tagged with `button.setData('key', btnKey)` in MenuScene. Tests use `find_menu_button_index(page, 'settings')` or `click_menu_by_key(page, 'settings')` instead of hardcoded button indices — this is immune to button reordering.
 
 ### Fixtures
 
@@ -75,9 +79,10 @@ def test_example(self, game_page: Page):  # Auto-navigates to game, waits for Me
 ### Scene Utilities
 
 ```python
-wait_for_scene(page, 'GameScene')           # Wait for scene to be active
+wait_for_scene(page, 'GameScene')           # Wait for scene to be active (8s default)
 wait_for_scene_inactive(page, 'PauseScene') # Wait for scene to stop
 wait_for_game_ready(page)                   # Wait for MenuScene (used by fixture)
+wait_for_input_ready(page, 'PauseScene')    # Wait for SCENE_INPUT_DELAY to expire
 ```
 
 ### Level Navigation

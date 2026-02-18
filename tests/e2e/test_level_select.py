@@ -7,6 +7,7 @@ from conftest import (
     get_active_scenes,
     wait_for_scene,
     wait_for_scene_inactive,
+    wait_for_input_ready,
 )
 
 
@@ -102,9 +103,8 @@ class TestLevelSelectWithProgress:
     def test_groom_starts_game(self, game_page: Page):
         """Clicking Groom on an unlocked level should start GameScene."""
         navigate_to_level_select(game_page)
-        # Activate first level's Groom button via keyboard
-        game_page.keyboard.press('ArrowDown')
-        game_page.wait_for_timeout(100)
+        wait_for_input_ready(game_page, 'LevelSelectScene')
+        # Groom button is auto-selected as default CTA, just press Enter
         game_page.keyboard.press('Enter')
         wait_for_scene(game_page, 'GameScene', timeout=10000)
         assert_scene_active(game_page, 'GameScene')

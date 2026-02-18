@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import Page
 from conftest import (
     wait_for_scene, skip_to_level, skip_to_credits,
-    click_button, get_current_level, get_active_scenes,
+    click_button, click_menu_by_key, get_current_level, get_active_scenes,
     assert_scene_active, assert_scene_not_active,
     BUTTON_START,
 )
@@ -40,7 +40,7 @@ class TestLevelComplete:
                 gameScene.gameOver(false, 'fuel');
             }
         }""")
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
 
         game_page.set_viewport_size({"width": 800, "height": 600})
         game_page.evaluate("() => window.resizeGame?.()")
@@ -109,7 +109,7 @@ class TestLevelComplete:
             const gs = window.game.scene.getScene('GameScene');
             gs.gameOver(false, 'fuel');
         }""")
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
 
         # restartCount should be 0 on fail screen
         rc_fail = game_page.evaluate("""() => {
@@ -137,7 +137,7 @@ class TestLevelComplete:
             const gs = window.game.scene.getScene('GameScene');
             gs.gameOver(true);
         }""")
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
 
         flawless_retry = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelCompleteScene');
@@ -163,7 +163,7 @@ class TestFailScreen:
             }
         }""")
         
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
         
         scene_data = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelCompleteScene');
@@ -191,7 +191,7 @@ class TestFailScreen:
             }
         }""")
         
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
         
         game_page.wait_for_timeout(150)
         
@@ -228,7 +228,7 @@ class TestFailScreen:
             }
         }""")
         
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
         
         initial_state = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelCompleteScene');
@@ -266,7 +266,7 @@ class TestFailScreen:
             window.game.scene.start('CreditsScene');
         }""")
         
-        wait_for_scene(game_page, 'CreditsScene', timeout=3000)
+        wait_for_scene(game_page, 'CreditsScene')
         
         game_page.keyboard.press("s")
         game_page.wait_for_timeout(300)
@@ -317,7 +317,7 @@ class TestFailScreen:
             }
         }""")
         
-        wait_for_scene(game_page, 'LevelCompleteScene', timeout=3000)
+        wait_for_scene(game_page, 'LevelCompleteScene')
         
         game_page.screenshot(path="tests/screenshots/fail_screen_taunt.png")
 
@@ -347,7 +347,7 @@ class TestCreditsScreen:
         wait_for_scene(game_page, 'MenuScene')
         assert_scene_active(game_page, 'MenuScene')
         
-        click_button(game_page, 1, "New Game")
+        click_menu_by_key(game_page, 'startGame')
         wait_for_scene(game_page, 'GameScene')
         
         assert_scene_active(game_page, 'GameScene')

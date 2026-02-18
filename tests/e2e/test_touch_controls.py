@@ -14,7 +14,7 @@ IPHONE_PORTRAIT = {"width": 390, "height": 844}
 IPHONE_LANDSCAPE = {"width": 844, "height": 390}
 
 def click_start_button(page: Page):
-    """Click the Start Game button by querying its position from the game scene."""
+    """Click the Start Game button by querying its screen position from the game scene."""
     box = page.locator("canvas").bounding_box()
     
     pos = page.evaluate("""() => {
@@ -22,7 +22,10 @@ def click_start_button(page: Page):
         if (!scene || !scene.menuButtons) return null;
         const btn = scene.menuButtons[0];
         if (!btn) return null;
-        return { x: btn.x, y: btn.y };
+        // Account for parent container offset (buttons are inside menuContainer)
+        const cx = btn.parentContainer ? btn.parentContainer.x : 0;
+        const cy = btn.parentContainer ? btn.parentContainer.y : 0;
+        return { x: cx + btn.x, y: cy + btn.y };
     }""")
     
     if pos:

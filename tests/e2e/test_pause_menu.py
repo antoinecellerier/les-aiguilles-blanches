@@ -2,9 +2,9 @@
 import pytest
 from playwright.sync_api import Page
 from conftest import (
-    wait_for_scene, wait_for_scene_inactive, dismiss_dialogues,
-    click_button, get_active_scenes, assert_scene_active, assert_scene_not_active,
-    BUTTON_START, BUTTON_SETTINGS,
+    wait_for_scene, wait_for_scene_inactive, wait_for_input_ready, dismiss_dialogues,
+    click_button, click_menu_by_key, get_active_scenes, assert_scene_active, assert_scene_not_active,
+    BUTTON_START,
 )
 
 
@@ -35,7 +35,7 @@ class TestPauseMenu:
         wait_for_scene(game_page, 'PauseScene')
         assert_scene_active(game_page, 'PauseScene')
         
-        game_page.wait_for_timeout(350)
+        wait_for_input_ready(game_page, "PauseScene")
         
         game_page.keyboard.press("Escape")
         wait_for_scene_inactive(game_page, 'PauseScene')
@@ -78,7 +78,7 @@ class TestPauseMenu:
 
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
-        game_page.wait_for_timeout(350)
+        wait_for_input_ready(game_page, "PauseScene")
 
         game_page.evaluate("""() => {
             const ps = window.game?.scene?.getScene('PauseScene');
@@ -97,7 +97,7 @@ class TestPauseMenu:
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
         assert_scene_active(game_page, 'PauseScene', "Should return to Pause after Settings")
-        game_page.wait_for_timeout(350)
+        wait_for_input_ready(game_page, "PauseScene")
 
         game_page.keyboard.press("Escape")
         wait_for_scene_inactive(game_page, 'PauseScene')
@@ -117,7 +117,7 @@ class TestPauseMenu:
         # First: Pause → Settings → Back → Resume
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
-        game_page.wait_for_timeout(350)
+        wait_for_input_ready(game_page, "PauseScene")
         game_page.evaluate("""() => {
             const ps = window.game?.scene?.getScene('PauseScene');
             for (const child of ps.children.list) {
@@ -131,14 +131,14 @@ class TestPauseMenu:
         wait_for_scene(game_page, 'SettingsScene')
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
-        game_page.wait_for_timeout(350)
+        wait_for_input_ready(game_page, "PauseScene")
         game_page.keyboard.press("Escape")
         wait_for_scene_inactive(game_page, 'PauseScene')
 
         # Now: Pause → Quit to menu
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
-        game_page.wait_for_timeout(350)
+        wait_for_input_ready(game_page, "PauseScene")
         game_page.evaluate("""() => {
             const ps = window.game?.scene?.getScene('PauseScene');
             for (const child of ps.children.list) {
@@ -152,7 +152,7 @@ class TestPauseMenu:
         wait_for_scene(game_page, 'MenuScene')
 
         # Menu → Settings → Back: must return to Menu
-        click_button(game_page, BUTTON_SETTINGS, "Settings")
+        click_menu_by_key(game_page, 'settings')
         wait_for_scene(game_page, 'SettingsScene')
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'MenuScene')

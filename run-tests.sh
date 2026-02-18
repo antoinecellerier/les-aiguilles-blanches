@@ -88,7 +88,7 @@ if [ "$SMART_MODE" = true ]; then
                 src/scenes/CreditsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
                 src/scenes/MenuScene.ts)     SMART_E2E_FILES+=("tests/e2e/test_scene_layering.py" "tests/e2e/test_volume_indicator.py" "tests/e2e/test_level_select.py") ;;
                 src/scenes/LevelSelectScene.ts) SMART_E2E_FILES+=("tests/e2e/test_level_select.py") ;;
-                src/scenes/ContractsScene.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py") ;;
+                src/scenes/DailyRunsScene.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py") ;;
                 src/scenes/SkiRunScene.ts)   SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
                 src/systems/ParkFeatureSystem.ts) SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
                 src/utils/skiSprites.ts)     SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
@@ -203,7 +203,7 @@ if [ "$SMART_MODE" = true ]; then
             src/scenes/CreditsScene.ts)   SCENE_TESTS+=("test_level_complete.py") ;;
             src/scenes/MenuScene.ts)      SCENE_TESTS+=("test_scene_layering.py" "test_volume_indicator.py" "test_level_select.py") ;;
             src/scenes/LevelSelectScene.ts) SCENE_TESTS+=("test_level_select.py") ;;
-            src/scenes/ContractsScene.ts) SCENE_TESTS+=("test_daily_runs.py") ;;
+            src/scenes/DailyRunsScene.ts) SCENE_TESTS+=("test_daily_runs.py") ;;
             src/scenes/SkiRunScene.ts)    SCENE_TESTS+=("test_ski_run.py") ;;
             src/scenes/BootScene.ts)      SCENE_TESTS+=("test_performance.py") ;;
         esac

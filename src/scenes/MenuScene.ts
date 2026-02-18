@@ -374,6 +374,7 @@ export default class MenuScene extends Phaser.Scene {
           playClick();
           btn.callback();
         });
+      button.setData('key', btn.text);
       this.menuContainer.add(button);
 
       this.menuButtons.push(button);

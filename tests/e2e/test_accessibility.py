@@ -3,8 +3,8 @@ import pytest
 from playwright.sync_api import Page
 from conftest import (
     wait_for_scene,
-    click_button, assert_scene_active, assert_no_error_message,
-    BUTTON_START, BUTTON_SETTINGS,
+    click_button, click_menu_by_key, assert_scene_active, assert_no_error_message,
+    BUTTON_START,
 )
 
 
@@ -13,7 +13,7 @@ class TestAccessibility:
 
     def test_settings_has_accessibility_options(self, game_page: Page):
         """Test that settings scene has accessibility toggles."""
-        click_button(game_page, BUTTON_SETTINGS, "Settings")
+        click_menu_by_key(game_page, 'settings')
         wait_for_scene(game_page, 'SettingsScene')
         
         assert_scene_active(game_page, 'SettingsScene')
@@ -21,7 +21,7 @@ class TestAccessibility:
 
     def test_colorblind_filter_applied(self, game_page: Page):
         """Test that colorblind mode applies CSS filter to canvas."""
-        click_button(game_page, BUTTON_SETTINGS, "Settings")
+        click_menu_by_key(game_page, 'settings')
         wait_for_scene(game_page, 'SettingsScene')
         
         canvas = game_page.locator("canvas")
@@ -40,7 +40,7 @@ class TestAccessibility:
 
     def test_high_contrast_class_applied(self, game_page: Page):
         """Test that high contrast mode adds CSS class."""
-        click_button(game_page, BUTTON_SETTINGS, "Settings")
+        click_menu_by_key(game_page, 'settings')
         wait_for_scene(game_page, 'SettingsScene')
         
         canvas = game_page.locator("canvas")
@@ -106,6 +106,6 @@ class TestBackgroundRendering:
         
         has_bg = game_page.evaluate("""() => {
             const gs = window.game.scene.getScene('GameScene');
-            return gs && typeof gs.createExtendedBackground === 'function';
+            return gs && gs.pisteRenderer && typeof gs.pisteRenderer.createExtendedBackground === 'function';
         }""")
-        assert has_bg, "GameScene should have createExtendedBackground method"
+        assert has_bg, "GameScene should have pisteRenderer.createExtendedBackground method"

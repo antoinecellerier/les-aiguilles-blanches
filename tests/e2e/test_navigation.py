@@ -3,10 +3,11 @@ import pytest
 from playwright.sync_api import Page, expect
 from conftest import (
     wait_for_scene, skip_to_credits, wait_for_level_or_credits,
-    click_button, click_menu_button, get_active_scenes, get_current_level,
+    click_button, click_menu_button, click_menu_by_key, find_menu_button_index,
+    get_active_scenes, get_current_level,
     assert_canvas_renders_content, assert_scene_active, assert_scene_not_active,
     assert_not_on_menu, assert_no_error_message,
-    BUTTON_START, BUTTON_HOW_TO_PLAY, BUTTON_CHANGELOG, BUTTON_SETTINGS,
+    BUTTON_START,
 )
 
 
@@ -72,7 +73,7 @@ class TestMenuNavigation:
         """Test How to Play button shows overlay while keeping menu."""
         assert_scene_active(game_page, 'MenuScene')
         
-        click_button(game_page, BUTTON_HOW_TO_PLAY, "How to Play")
+        click_menu_by_key(game_page, 'howToPlay')
         
         # Menu should still be active (overlay on top)
         assert_scene_active(game_page, 'MenuScene')
@@ -88,7 +89,7 @@ class TestMenuNavigation:
         """Regression: How to Play content text must render above dialog background."""
         assert_scene_active(game_page, 'MenuScene')
         
-        click_button(game_page, BUTTON_HOW_TO_PLAY, "How to Play")
+        click_menu_by_key(game_page, 'howToPlay')
         game_page.wait_for_timeout(500)
         
         # The content text should exist at depth >= 100 and have non-zero height
@@ -124,8 +125,11 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene')
         
         # Navigate to How To Play with keyboard and activate it
-        game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
+        htp_idx = find_menu_button_index(game_page, 'howToPlay')
+        for _ in range(htp_idx):
+            game_page.keyboard.press("ArrowDown")
+            game_page.wait_for_timeout(50)
+        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=3000)
         game_page.keyboard.press("Enter")  # Open overlay
         game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
@@ -141,8 +145,11 @@ class TestMenuNavigation:
         assert_scene_active(game_page, 'MenuScene')
         
         # Navigate to How To Play with keyboard and activate it
-        game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
+        htp_idx = find_menu_button_index(game_page, 'howToPlay')
+        for _ in range(htp_idx):
+            game_page.keyboard.press("ArrowDown")
+            game_page.wait_for_timeout(50)
+        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=3000)
         game_page.keyboard.press("Enter")  # Open overlay
         game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
@@ -164,16 +171,19 @@ class TestMenuNavigation:
         assert initial_index == 0, "Should start with first button selected"
         
         # Open How To Play overlay via keyboard (not mouse) to avoid hover effects
-        game_page.keyboard.press("ArrowDown")  # Move to How To Play (index 1)
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === 1; }", timeout=3000)
+        htp_idx = find_menu_button_index(game_page, 'howToPlay')
+        for _ in range(htp_idx):
+            game_page.keyboard.press("ArrowDown")
+            game_page.wait_for_timeout(50)
+        game_page.wait_for_function(f"() => {{ const s = window.game?.scene?.getScene('MenuScene'); return s && s.selectedIndex === {htp_idx}; }}", timeout=3000)
         game_page.keyboard.press("Enter")  # Open overlay
         game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
-        # Selection should be 1 (How To Play) after we navigated there
+        # Selection should be on How To Play after we navigated there
         pre_nav_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('MenuScene')?.selectedIndex;
         }""")
-        assert pre_nav_index == 1, "Should be on How To Play button"
+        assert pre_nav_index == htp_idx, f"Should be on How To Play button (index {htp_idx})"
         
         # Verify overlay is open
         overlay_open = game_page.evaluate("""() => {
@@ -196,7 +206,7 @@ class TestMenuNavigation:
         """Test Settings button opens SettingsScene."""
         assert_scene_active(game_page, 'MenuScene')
         
-        click_button(game_page, BUTTON_SETTINGS, "Settings")
+        click_menu_by_key(game_page, 'settings')
         wait_for_scene(game_page, 'SettingsScene')
         
         assert_scene_active(game_page, 'SettingsScene', "Settings should open")
@@ -210,7 +220,7 @@ class TestMenuNavigation:
         """Test Changelog overlay opens and renders visible text content."""
         assert_scene_active(game_page, 'MenuScene')
         
-        click_button(game_page, BUTTON_CHANGELOG, "Changelog")
+        click_menu_by_key(game_page, 'changelog')
         game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === true; }", timeout=3000)
         
         # Verify changelog content is actually rendered (not empty/invisible)
@@ -373,9 +383,8 @@ class TestGameProgress:
         game_page.reload()
         wait_for_scene(game_page, 'MenuScene')
         
-        # With saved progress, button layout is: Resume(0), New Game(1), How to Play(2), Settings(3)
-        # Click New Game (index 1)
-        click_button(game_page, 1, "New Game")
+        # With saved progress, button layout changes. Use key-based lookup.
+        click_menu_by_key(game_page, 'newGame')
         wait_for_scene(game_page, 'GameScene')
         
         # Should start from level 0
