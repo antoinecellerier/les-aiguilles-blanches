@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] **Daily Runs (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), DailyRunSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, daily-run-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle). Remaining: shareable seed codes (input/share UI — display done), responsive layout across form factors.
+- [ ] **Daily Runs (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), DailyRunSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, daily-run-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle), responsive layout across form factors. Remaining: shareable seed codes (input/share UI — display done), route ObstacleBuilder/HazardSystem/WildlifeSystem through seeded RNG for full determinism.
 
 ## Next Up
 
@@ -30,6 +30,14 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Test review & hardening** — Full test review (E2E + unit) against 10 anti-patterns. Fixed 7 HIGH issues: missing assertions in accessibility tests, hardcoded button indices, tight timeouts, missing inputReady waits, flaky changelog test (scene.restart race). Added data keys to PauseScene, LevelCompleteScene, CreditsScene buttons. Generalized `find_menu_button_index` to work with any scene. Bumped tight 3s timeouts to 5s. 248/248 E2E + 205/205 unit stable.
+
+- ✅ **Test-review skill** — New `.github/skills/test-review/SKILL.md` covering 10 E2E anti-patterns and 6 unit test anti-patterns, plus test design quality, maintainability, parallel safety, and coverage assessment phases.
+
+- ✅ **Text truncation fix** — MenuScene title and CreditsScene subtitle truncated on mobile portrait (360px). Shrink-to-fit for title, wordWrap + headerScale for subtitle.
+
+- ✅ **E2E test infrastructure overhaul** — Replaced all hardcoded menu button indices with key-based lookup (`click_menu_by_key`, `find_menu_button_index`). Replaced fixed timeouts with state polling (`wait_for_input_ready`). Added browser launch args for reduced CPU. Capped parallel workers at 6. Fixed 27 failures.
 
 - ✅ **Procedural French piste names** — Combinatorial name generation from rank-themed pools (nouns, adjectives, genitives) with full French grammar agreement (gender, number, elision, preposed adjective forms). Names shown in DailyRunsScene briefing, HUD visor, LevelCompleteScene, SkiRunScene, and accessibility announcements. Redundancy filter prevents combos like "Le Glacier du Glacier".
 
@@ -196,6 +204,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - Nintendo B-button back navigation flaky under parallel test execution
 - Y-depth sorting and collision hitbox changes lack dedicated E2E regression tests
+- Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
 
 ### Deferred Refactors
 
@@ -208,6 +217,5 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - ✅ ~~Timing magic numbers: various hardcoded delays in DialogueScene, HazardSystem.~~ Centralized into `BALANCE` constants (DIALOGUE_SLIDE_DURATION, TYPEWRITER_CHAR_DELAY, TYPEWRITER_SAFETY_BUFFER, AVALANCHE_WIPEOUT_DELAY).
 - ✅ ~~Color magic numbers: inline `0x...` colors in ObstacleBuilder, WinchSystem, WeatherSystem, HazardSystem.~~ Centralized into `THEME.colors` world-element palette.
 - ✅ ~~Silent storage errors: `storage.ts` catch blocks have no user notification.~~ Added `console.warn` logging to all write/remove failures for debugging.
-- Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
 - ✅ ~~Bonus evaluation duplication: HUDScene and LevelCompleteScene both evaluate bonus types with similar switch logic.~~ Extracted shared `getBonusLabel()`, `evaluateBonusObjective()`, `evaluateAllBonusObjectives()` to `src/utils/bonusObjectives.ts`.
 - Static Graphics to textures: Trees/rocks/cliffs/animal tracks baked. Night overlay light cone commands reduced 71%. Remaining: ~26 pole/marker Graphics (11-20 commands each, diminishing returns).
