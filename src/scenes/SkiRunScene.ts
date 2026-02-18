@@ -359,6 +359,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.on(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
 
+    this.scale.on('resize', this.handleResize, this);
     this.events.once('shutdown', this.shutdown, this);
   }
 
@@ -1296,6 +1297,16 @@ export default class SkiRunScene extends Phaser.Scene {
     return tiles;
   }
 
+  private handleResize(): void {
+    if (!this.cameras?.main || !this.level) return;
+    const worldWidth = this.level.width * this.tileSize;
+    const worldHeight = this.level.height * this.tileSize;
+    const zoomX = this.scale.width / worldWidth;
+    const zoomY = this.scale.height / worldHeight;
+    this.cameras.main.setZoom(Math.max(zoomX, zoomY, BALANCE.SKI_MIN_ZOOM));
+    this.weatherSystem?.handleFrostResize();
+  }
+
   shutdown(): void {
     this.skiSounds.stop();
     this.ambienceSounds.stop();
@@ -1322,6 +1333,7 @@ export default class SkiRunScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.PAUSE_REQUEST, this.boundPauseHandler);
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
+    this.scale.off('resize', this.handleResize, this);
     this.input.removeAllListeners();
     this.input.keyboard?.removeAllListeners();
   }
