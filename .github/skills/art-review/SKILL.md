@@ -118,8 +118,9 @@ When reviewing scenes with UI layout (menus, overlays, HUD, settings, daily runs
 
 | Name | Size | Use case |
 |------|------|----------|
-| Mobile portrait | 360×640 | Phones (smallest common) |
-| Mobile landscape | 640×360 | Phones rotated |
+| Mobile portrait | 360×640 @2x | Phones (smallest common) |
+| Mobile landscape | 640×360 @2x | Phones rotated |
+| High-DPR landscape | 854×384 @3.75x | Galaxy S20 landscape (stress test) |
 | Tablet portrait | 768×1024 | iPad |
 | Tablet landscape | 1024×768 | iPad rotated |
 | Desktop | 1280×720 | Standard laptop (default) |
@@ -136,27 +137,35 @@ When reviewing scenes with UI layout (menus, overlays, HUD, settings, daily runs
 **Testing procedure:**
 ```python
 VIEWPORTS = [
-    ("mobile_portrait", 360, 640),
-    ("mobile_landscape", 640, 360),
-    ("tablet_landscape", 1024, 768),
-    ("desktop", 1280, 720),
-    ("ultrawide", 2560, 1080),
+    ("mobile_portrait", 360, 640, 2),
+    ("mobile_landscape", 640, 360, 2),
+    ("high_dpr_landscape", 854, 384, 3.75),
+    ("tablet_landscape", 1024, 768, 1),
+    ("desktop", 1280, 720, 1),
+    ("ultrawide", 2560, 1080, 1),
 ]
 
-for name, w, h in VIEWPORTS:
-    page.set_viewport_size({"width": w, "height": h})
-    # Wait for resize to propagate (debounced at 150ms + scene restart)
+for name, w, h, dpr in VIEWPORTS:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={"width": w, "height": h}, device_scale_factor=dpr)
+    page.goto(URL)
+    # Navigate to scene, wait for resize to propagate (debounced at 150ms + scene restart)
     page.wait_for_timeout(500)
     page.screenshot(path=f"tests/screenshots/art-review/{scene}_{name}.png")
+    browser.close()
 ```
 
 **Orientation change:** After capturing landscape, resize to portrait (and vice versa) to verify the scene adapts without artifacts or frozen layouts.
 
 **Known patterns:**
 - Scenes use `scaleFactor = min(scaleByHeight, scaleByWidth) * dprBoost` — verify it doesn't produce illegible text at small viewports or wasteful whitespace at large ones
-- **Text scale floor**: UI scenes should use `textScale = Math.max(0.7, scale)` for font sizing to ensure minimum ~8px effective text on mobile. Use raw `scale` for layout spacing so elements don't overflow.
+- **DPR boost**: `dprBoost = Math.sqrt(Math.min(dpr, 2))` applies to font sizes and padding but NOT to layout gaps. Gaps are in CSS pixels; scaling them by dprBoost causes overflow on high-DPR short screens.
+- **Text scale floor**: UI scenes should use `textScale = Math.max(0.7, scale) * dprBoost` for font sizing. Use raw `scale` (no dprBoost) for layout spacing so elements don't overflow.
+- **Proportional layout**: Prefer distributing content as percentages of available vertical space (e.g., `rankY + available * 0.20`) with a height-proportional cap (`height * 0.45`), rather than fixed pixel gaps. Fixed gaps either overflow on short screens or waste space on tall ones.
+- **Analytical header bottom**: Phaser text `.height` is 0 before first render. Compute header bottom analytically: `titleTop + round(titleFontSize * 1.2)` for line-height, `titleTop + btnFontSize + 2 * padY` for back button.
+- **Origin-centering pitfall**: Elements with `.setOrigin(0.5)` extend upward by half their height. When computing Y position below a header, add half the element height to prevent overlap.
 - **Button width capping**: When using `setFixedSize` to equalize button widths, cap to `(width - margin) / buttonCount` to prevent clipping on narrow screens
-- **ResizeManager required**: All menu/overlay scenes must register `ResizeManager` (or custom resize handler) for orientation changes. Missing resize handler = frozen layout on rotation.
+- **ResizeManager required**: All gameplay and menu/overlay scenes must register `ResizeManager` for orientation changes. Missing resize handler = frozen layout on rotation. SkiRunScene, HUDScene, DailyRunsScene all use ResizeManager for full scene restart.
 - **Vertical gap compression**: Use `vGap = height < 450 ? 0.7 : 1.0` multiplier on vertical offsets for landscape phones
 - SettingsScene switches to single-column below 500px logical width
 - MenuScene drops Fullscreen button when buttons overflow vertical space
