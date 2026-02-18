@@ -1,24 +1,32 @@
 ---
 name: test-review
-description: Reviews E2E test code for brittleness, flakiness, and anti-patterns. Use this when writing new E2E tests, fixing test failures, or before committing test changes.
+description: Reviews test code (E2E and unit) for brittleness, flakiness, and anti-patterns. Use this when writing or fixing tests, or before committing test changes.
 ---
 
-## E2E Test Review Process
+## Test Review Process
 
-Review all E2E test code as an experienced test engineer would. The test suite uses Playwright + pytest-xdist (6 parallel workers) against a Phaser 3 Canvas game — timing sensitivity and shared state are the primary failure vectors.
+Review all test code as an experienced test engineer would. The project has two test layers:
+
+| Layer | Framework | Location | Runner |
+|-------|-----------|----------|--------|
+| **Unit** | Vitest 4.x | `tests/unit-js/*.test.js` | `npm test` / `npm run test:watch` |
+| **E2E** | Playwright + pytest-xdist (6 workers) | `tests/e2e/test_*.py` | `./run-tests.sh --browser chromium` |
 
 ### Phase 1: Scope detection
 
-Identify changed test files and the conftest infrastructure:
+Identify changed test files:
 
 ```bash
-git --no-pager diff --name-only | grep -E 'tests/e2e/|pytest.ini'
+git --no-pager diff --name-only | grep -E 'tests/e2e/|tests/unit-js/|pytest.ini'
 ```
 
 If no test files changed, check if source changes require new tests:
-- New scenes → need test file + `run-tests.sh` smart mapping entry
-- New buttons/UI → need navigation tests
-- New game mechanics → need gameplay tests
+- New scenes → E2E test file + `run-tests.sh` smart mapping entry
+- New buttons/UI → E2E navigation tests
+- New game mechanics → E2E gameplay tests
+- New config values/formulas → unit tests
+- New utility functions → unit tests
+- New procedural generation logic → unit tests with deterministic seeds
 
 ### Phase 2: Test design quality
 
@@ -262,3 +270,149 @@ Organize by severity:
 | `assert_scene_not_active(page, name)` | Assert scene is not active |
 | `get_active_scenes(page)` | List all active scene keys |
 | `get_current_level(page)` | Get current GameScene level index |
+
+---
+
+## Unit Test Review (Vitest)
+
+Unit tests validate pure logic — config values, math formulas, procedural generation, utility functions — without needing a browser. They should be fast, deterministic, and focused.
+
+### Unit test architecture
+
+```
+tests/unit-js/
+├── config-wrappers/
+│   └── index.js          # Re-exports from src/ TS modules + global mocks
+├── gameConfig.test.js     # Config values, BALANCE constants
+├── levels.test.js         # Level definitions, time limits
+├── levelGenerator.test.js # Procedural generation, seed determinism
+├── frost.test.js          # Freeze rate math, speed multipliers
+├── foodBuff.test.js       # Food buff calculations
+├── groomingQuality.test.js # Grooming formula verification
+├── gameProgress.test.js   # localStorage persistence, level unlock logic
+├── localization.test.js   # Translation key parity across all languages
+├── keyboardLayout.test.js # Layout switching, key name resolution
+├── gamepad.test.js        # Controller mapping, axis handling
+├── yDepth.test.js         # Y-based depth sorting
+├── characterPortraits.test.js # Portrait config validation
+└── parkFeatures.test.js   # Park feature definitions
+```
+
+### Config wrappers pattern
+
+All unit tests import through `tests/unit-js/config-wrappers/index.js` — a re-export layer that:
+1. **Polyfills browser globals** — `localStorage`, `navigator`, `Phaser.Math.RandomDataGenerator`
+2. **Re-exports TS source modules** — so tests import from one place
+
+```javascript
+// ✅ Import through wrappers
+import { BALANCE, LEVELS } from './config-wrappers/index.js';
+
+// ❌ Don't import source directly (mocks won't be set up)
+import { BALANCE } from '../../../src/config/gameConfig.ts';
+```
+
+### Unit test anti-patterns
+
+#### 1. Missing mock setup ❌
+
+**Bad:** Test imports source module before mocks are established.
+```javascript
+import { generateDailyRunLevel } from '../../../src/systems/LevelGenerator.ts'; // ❌
+// Phaser.Math.RandomDataGenerator not available → crash
+```
+
+**Good:** Import through config-wrappers which sets up mocks first.
+```javascript
+import { generateDailyRunLevel } from './config-wrappers/index.js'; // ✅
+```
+
+#### 2. Shared state between tests ❌
+
+**Bad:** Test relies on localStorage state from a previous test.
+```javascript
+it('saves progress', () => {
+    saveProgress({ level: 3 });
+});
+it('reads saved progress', () => {
+    const p = getSavedProgress(); // ❌ depends on test above
+    expect(p.level).toBe(3);
+});
+```
+
+**Good:** Each test sets up its own state.
+```javascript
+beforeEach(() => localStorage.clear());
+
+it('saves and reads progress', () => {
+    saveProgress({ level: 3 });
+    const p = getSavedProgress(); // ✅ self-contained
+    expect(p.level).toBe(3);
+});
+```
+
+#### 3. Non-deterministic assertions ❌
+
+**Bad:** Tests random output without controlling the seed.
+```javascript
+const level = generateDailyRunLevel();
+expect(level.obstacles.length).toBeGreaterThan(0); // ❌ flaky, depends on random seed
+```
+
+**Good:** Use a known seed for reproducibility.
+```javascript
+const level = generateDailyRunLevel('fixed-seed-123');
+expect(level.obstacles.length).toBe(12); // ✅ deterministic with this seed
+```
+
+#### 4. Testing implementation instead of behavior ❌
+
+**Bad:** Asserts on internal structure that may change.
+```javascript
+expect(LEVELS[0]._internalFlags).toEqual([1, 0, 1]); // ❌ implementation detail
+```
+
+**Good:** Assert on the observable behavior.
+```javascript
+expect(LEVELS[0].timeLimit).toBeGreaterThan(0); // ✅ behavior contract
+expect(computeTimeLimit(LEVELS[0])).toBe(120);  // ✅ function output
+```
+
+#### 5. Missing edge cases in math tests ❌
+
+For formula/math tests (frost, food buffs, grooming quality), always test:
+- **Zero values** — `frostRate(0)`, `buffMultiplier(0)`
+- **Negative values** — if inputs can go negative
+- **Boundary values** — min/max level, first/last food item
+- **Extreme values** — very large inputs, overflow potential
+
+#### 6. Incomplete localization coverage ❌
+
+The localization test dynamically discovers all keys. If adding new translatable strings:
+- Add the key to ALL 14 language files
+- The test should catch missing keys — verify it does
+- Check that interpolation placeholders (`{0}`, `{1}`) match across languages
+
+### Unit test quality checks
+
+1. **Pure functions only** — Unit tests should not depend on DOM, Canvas, or Phaser runtime. If a function needs Phaser objects, it belongs in E2E tests.
+2. **Fast execution** — All unit tests should complete in < 5 seconds total. Flag any test that takes > 500ms.
+3. **Descriptive names** — `it('returns 0 grooming quality when snowfall exceeds threshold')` ✅ not `it('test case 1')` ❌
+4. **No network or filesystem** — Unit tests must not make HTTP requests or write files.
+5. **Snapshot sparingly** — Prefer explicit assertions over snapshot tests. Snapshots hide what matters and break on any formatting change.
+
+### Running unit tests
+
+```bash
+# Full suite
+npm test
+
+# Watch mode (re-runs on save)
+npm run test:watch
+
+# Single file
+npx vitest run tests/unit-js/frost.test.js
+
+# Pattern match
+npx vitest run -t "freeze rate"
+```

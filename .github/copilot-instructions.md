@@ -47,7 +47,7 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 4. **`audio-review`** — if audio files changed (audio system, SFX, volume).
 5. **`content-review`** — if changelog or localization strings changed. Changelog: 3–5 items, no enumerations, no parenthetical details.
 6. **`documentation-screenshots`** — if visual changes may require updated screenshots.
-7. **`test-review`** — if E2E test files changed. Checks for hardcoded indices, fixed timeouts, missing inputReady waits, duplicated helpers.
+7. **`test-review`** — if test files changed (E2E or unit). Checks anti-patterns, test design quality, coverage, parallel safety, mock hygiene.
 
 ### During feature design
 8. **`game-design`** — invoke when designing or significantly changing: new levels, difficulty/balance tuning, new mechanics, progression changes, narrative/dialogue, food/economy systems, bonus objectives, or any feature that affects the player experience arc. This is advisory — it reviews then asks before changing.
