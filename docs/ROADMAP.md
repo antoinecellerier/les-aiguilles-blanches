@@ -6,7 +6,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Active Work
 
-- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking, procedural level variety. Remaining: ski mode on procedural levels, shareable seed codes.
+- [ ] **Resort Contracts (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), ContractSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, contract-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle). Remaining: shareable seed codes (input/share UI — display done), rename ContractsScene→DailyRunsScene, responsive layout across form factors.
 
 ## Next Up
 
@@ -30,6 +30,16 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Make level select look like a ski resort trail map
 
 ## Recently Completed
+
+- ✅ **Procedural French piste names** — Combinatorial name generation from rank-themed pools (nouns, adjectives, genitives) with full French grammar agreement (gender, number, elision, preposed adjective forms). Names shown in ContractsScene briefing, HUD visor, LevelCompleteScene, SkiRunScene, and accessibility announcements. Redundancy filter prevents combos like "Le Glacier du Glacier".
+
+- ✅ **Contract-aware pause menu** — Pause menu returns to ContractsScene (not main menu) during contract sessions. Random Runs get a "New Run" button to generate a fresh seed at the same rank. Extracted `rankSeed()` and `RANKS` to LevelGenerator, `randomSeed()` to seededRNG.
+
+- ✅ **Ski mode UX improvements** — Pause/fullscreen touch buttons added to ski mode HUD. Resume from menu restores ski mode when quit from ski run. Adaptive camera lerp in SkiRunScene. Image culling in SkiRunScene for performance.
+
+- ✅ **Settings overlay depth fix** — SettingsScene overlay was covering UI after MENU_UI depth change in Daily Runs commit; removed explicit overlayDepth override.
+
+- ✅ **Default engine volume reduced to 25%** — Lower default for continuous motor sounds to reduce fatigue.
 
 - ✅ **Procedural level variety** — 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with per-seed variation, randomized steep zones, service road bypasses for dangerous zones only, 5 park feature combos with procedural placement, expanded slalom gate coverage.
 
