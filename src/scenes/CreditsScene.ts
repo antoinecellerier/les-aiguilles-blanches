@@ -69,9 +69,11 @@ export default class CreditsScene extends Phaser.Scene {
     const trophy = this.add.text(width / 2, 60, '🏆', { font: `60px ${THEME.fonts.familyEmoji}` }).setOrigin(0.5);
     trophy.setDepth(DEPTHS.MENU_SCROLL_FADE);
 
+    const headerScale = Math.min(1, width / 420);
+    const heroSize = Math.max(20, Math.round(THEME.fonts.sizes.hero * headerScale));
     const title = this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
       fontFamily: THEME.fonts.family,
-      fontSize: `${THEME.fonts.sizes.hero}px`,
+      fontSize: `${heroSize}px`,
       fontStyle: 'bold',
       color: THEME.colors.accent,
     }).setOrigin(0.5);
@@ -81,6 +83,8 @@ export default class CreditsScene extends Phaser.Scene {
       fontFamily: THEME.fonts.family,
       fontSize: `${THEME.fonts.sizes.medium}px`,
       color: THEME.colors.info,
+      wordWrap: { width: width - 40 },
+      align: 'center',
     }).setOrigin(0.5);
     subtitle.setDepth(DEPTHS.MENU_SCROLL_FADE);
 

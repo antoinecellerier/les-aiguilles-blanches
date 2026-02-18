@@ -174,8 +174,18 @@ export default class MenuScene extends Phaser.Scene {
     const titleMeasure = this.add.text(0, -100, titleText, {
       fontFamily: THEME.fonts.family, fontSize: titleSize + 'px', fontStyle: 'bold',
     });
-    const titleTextW = titleMeasure.width;
+    let titleTextW = titleMeasure.width;
     titleMeasure.destroy();
+    // Shrink title font if text overflows viewport
+    const maxTitleW = width - 40;
+    if (titleTextW > maxTitleW) {
+      titleSize = Math.max(14, Math.round(titleSize * maxTitleW / titleTextW));
+      const reMeasure = this.add.text(0, -100, titleText, {
+        fontFamily: THEME.fonts.family, fontSize: titleSize + 'px', fontStyle: 'bold',
+      });
+      titleTextW = reMeasure.width;
+      reMeasure.destroy();
+    }
     const titleBgWidth = Math.round(Math.min(Math.max(titleTextW + 40, 520 * scaleFactor), width - 20));
     const titleBgHeight = Math.round(80 * scaleFactor);
     this.add.rectangle(width / 2, titleY, titleBgWidth + 8, titleBgHeight + 8, 0x2d2822, 0.45).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
