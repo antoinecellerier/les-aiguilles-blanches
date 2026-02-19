@@ -22,6 +22,7 @@ import { playAnimalCall } from '../systems/WildlifeSounds';
 import { AmbienceSounds } from '../systems/AmbienceSounds';
 import { MusicSystem, getMoodForLevel } from '../systems/MusicSystem';
 import { getDailyRunSession } from '../systems/DailyRunSession';
+import { SeededRNG, codeToSeed } from '../utils/seededRNG';
 import { setGroomedTiles } from '../utils/skiRunState';
 import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
 import { cullOffscreenImages, emptyCullBounds, type CullBounds } from '../utils/cullImages';
@@ -156,6 +157,7 @@ export default class GameScene extends Phaser.Scene {
   private obstacleBuilder!: ObstacleBuilder;
   private parkFeatures = new ParkFeatureSystem();
   private buildingRects: ObstacleRect[] = [];
+  private dailyRunSeed: number | null = null;
   private engineSounds = new EngineSounds();
   private ambienceSounds = new AmbienceSounds();
 
@@ -189,6 +191,7 @@ export default class GameScene extends Phaser.Scene {
     this.restartCount = data.restartCount || 0;
     const session = getDailyRunSession();
     this.level = session?.level || LEVELS[this.levelIndex];
+    this.dailyRunSeed = session ? codeToSeed(session.seedCode) : null;
 
     if (!this.level) {
       console.error('GameScene.init: LEVEL NOT FOUND!', this.levelIndex, 'LEVELS.length:', LEVELS.length);
@@ -374,7 +377,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.obstacles = this.physics.add.staticGroup();
     this.interactables = this.physics.add.staticGroup();
-    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry, this.nightSfx, this.nc);
+    const obstacleRng = this.dailyRunSeed !== null ? new SeededRNG((this.dailyRunSeed + 1) >>> 0) : null;
+    this.obstacleBuilder = new ObstacleBuilder(this, this.geometry, this.nightSfx, this.nc, obstacleRng);
     // Compute spawn position to create exclusion zone for obstacles
     const spawnYIndex = Math.min(this.level.height - 8, Math.floor(this.level.height * 0.9));
     const spawnPath = this.geometry.pistePath[spawnYIndex] || { centerX: this.level.width / 2 };
@@ -438,7 +442,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.winchSystem = new WinchSystem(this, this.geometry, this.nc);
     this.weatherSystem = new WeatherSystem(this, this.tileSize);
-    this.hazardSystem = new HazardSystem(this, this.nc);
+    const hazardRng = this.dailyRunSeed !== null ? new SeededRNG((this.dailyRunSeed + 2) >>> 0) : null;
+    this.hazardSystem = new HazardSystem(this, this.nc, hazardRng);
     this.wildlifeSystem = new WildlifeSystem(this, this.tileSize, this.nc, this.nightSfx);
 
     this.tutorialStep = 0;

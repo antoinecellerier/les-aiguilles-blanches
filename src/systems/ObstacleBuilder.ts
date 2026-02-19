@@ -6,6 +6,7 @@ import type { Level } from '../config/levels';
 import type { LevelGeometry } from './LevelGeometry';
 import type { ObstacleRect } from './WildlifeSystem';
 import { type ColorTransform, dayColors } from '../utils/nightPalette';
+import type { SeededRNG } from '../utils/seededRNG';
 
 /**
  * Creates obstacles, interactable buildings (restaurant, fuel station),
@@ -16,14 +17,16 @@ export class ObstacleBuilder {
   private geometry: LevelGeometry;
   private nightSfx: string;
   private nc: ColorTransform;
+  private rng: SeededRNG | null;
 
   buildingRects: ObstacleRect[] = [];
 
-  constructor(scene: Phaser.Scene, geometry: LevelGeometry, nightSfx = '', nc: ColorTransform = dayColors) {
+  constructor(scene: Phaser.Scene, geometry: LevelGeometry, nightSfx = '', nc: ColorTransform = dayColors, rng: SeededRNG | null = null) {
     this.scene = scene;
     this.geometry = geometry;
     this.nightSfx = nightSfx;
     this.nc = nc;
+    this.rng = rng;
   }
 
   /**
@@ -61,7 +64,7 @@ export class ObstacleBuilder {
     const minSpacingSq = minSpacing * minSpacing;
 
     for (let i = 0; i < obstacleCount; i++) {
-      const type = Phaser.Utils.Array.GetRandom(obstacleTypes);
+      const type = this.rng ? this.rng.pick(obstacleTypes) : Phaser.Utils.Array.GetRandom(obstacleTypes);
       if (!type) continue;
 
       let x: number, y: number;
@@ -78,17 +81,17 @@ export class ObstacleBuilder {
         });
       };
       do {
-        if (Math.random() < 0.9) {
+        if (this.rand() < 0.9) {
           // Piste edges — where real obstacles naturally sit
-          if (Math.random() < 0.5) {
-            x = Phaser.Math.Between(tileSize * 3, tileSize * 6);
+          if (this.rand() < 0.5) {
+            x = this.between(tileSize * 3, tileSize * 6);
           } else {
-            x = Phaser.Math.Between(worldWidth - tileSize * 6, worldWidth - tileSize * 3);
+            x = this.between(worldWidth - tileSize * 6, worldWidth - tileSize * 3);
           }
-          y = Phaser.Math.Between(tileSize * 5, worldHeight - tileSize * 5);
+          y = this.between(tileSize * 5, worldHeight - tileSize * 5);
         } else {
-          x = Phaser.Math.Between(tileSize * 8, worldWidth - tileSize * 8);
-          y = Phaser.Math.Between(tileSize * 10, worldHeight - tileSize * 10);
+          x = this.between(tileSize * 8, worldWidth - tileSize * 8);
+          y = this.between(tileSize * 10, worldHeight - tileSize * 10);
         }
         attempts++;
       } while ((this.geometry.isOnAccessPath(x, y) || this.geometry.isOnCliff(x, y) || tooClose(x, y)) && attempts < 30);
@@ -277,5 +280,15 @@ export class ObstacleBuilder {
 
   reset(): void {
     this.buildingRects = [];
+  }
+
+  /** Random float 0–1, seeded if available. */
+  private rand(): number {
+    return this.rng ? this.rng.frac() : Math.random();
+  }
+
+  /** Random integer in [min, max], seeded if available. */
+  private between(min: number, max: number): number {
+    return this.rng ? this.rng.integerInRange(min, max) : Phaser.Math.Between(min, max);
   }
 }

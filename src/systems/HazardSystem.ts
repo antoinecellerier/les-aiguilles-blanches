@@ -4,6 +4,7 @@ import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { THEME } from '../config/theme';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
 import { type ColorTransform, dayColors } from '../utils/nightPalette';
+import type { SeededRNG } from '../utils/seededRNG';
 
 export interface AvalancheZone extends Phaser.GameObjects.Rectangle {
   avalancheRisk: number;
@@ -19,6 +20,7 @@ export class HazardSystem {
   private avalancheTriggered = false;
   private avalancheTimer?: Phaser.Time.TimerEvent;
   private nc: ColorTransform;
+  private rng: SeededRNG | null;
 
   /** Optional sound callback: 1 = warning1, 2 = warning2, 3 = trigger */
   onAvalancheSound: ((level: number) => void) | null = null;
@@ -30,9 +32,10 @@ export class HazardSystem {
   /** Multiplier for risk accumulation rate (default 1.0, higher = faster trigger). */
   riskMultiplier = 1.0;
 
-  constructor(scene: Phaser.Scene, nc: ColorTransform = dayColors) {
+  constructor(scene: Phaser.Scene, nc: ColorTransform = dayColors, rng: SeededRNG | null = null) {
     this.scene = scene;
     this.nc = nc;
+    this.rng = rng;
   }
 
   get isTriggered(): boolean {
@@ -68,7 +71,7 @@ export class HazardSystem {
 
     const avalancheGroup = this.scene.physics.add.staticGroup();
 
-    const zoneCount = 3 + Math.floor(Math.random() * 2);
+    const zoneCount = 3 + Math.floor(this.rand() * 2);
     // Track placed zones so subsequent zones spread out
     const placedRects: { startY: number; endY: number; leftX: number; rightX: number }[] = [];
 
@@ -79,10 +82,10 @@ export class HazardSystem {
 
       // Try to place zone avoiding obstacles and previously placed zones
       do {
-        zoneX = Phaser.Math.Between(tileSize * 5, worldWidth - tileSize * 5);
-        zoneY = Phaser.Math.Between(worldHeight * 0.15, worldHeight * 0.65);
-        zoneWidth = Phaser.Math.Between(tileSize * 4, tileSize * 8);
-        zoneHeight = Phaser.Math.Between(tileSize * 6, tileSize * 12);
+        zoneX = this.between(tileSize * 5, worldWidth - tileSize * 5);
+        zoneY = this.between(Math.round(worldHeight * 0.15), Math.round(worldHeight * 0.65));
+        zoneWidth = this.between(tileSize * 4, tileSize * 8);
+        zoneHeight = this.between(tileSize * 6, tileSize * 12);
 
         // Shrink zones after many failed attempts to improve placement odds
         if (attempts > 30) {
@@ -162,14 +165,14 @@ export class HazardSystem {
       });
 
       // Generate irregular polygon vertices from an ellipse
-      const vertexCount = 8 + Math.floor(Math.random() * 5);
+      const vertexCount = 8 + Math.floor(this.rand() * 5);
       const points: { x: number; y: number }[] = [];
       for (let v = 0; v < vertexCount; v++) {
         const angle = (v / vertexCount) * Math.PI * 2;
         const rx = zoneWidth / 2;
         const ry = zoneHeight / 2;
         // Randomize radius by ±25%
-        const jitter = 0.75 + Math.random() * 0.5;
+        const jitter = 0.75 + this.rand() * 0.5;
         points.push({
           x: zoneX + Math.cos(angle) * rx * jitter,
           y: zoneY + Math.sin(angle) * ry * jitter,
@@ -411,5 +414,15 @@ export class HazardSystem {
       fontSize: '5px',
       color: '#000000'
     }).setOrigin(0.5).setDepth(DEPTHS.SIGNAGE);
+  }
+
+  /** Random float 0–1, seeded if available. */
+  private rand(): number {
+    return this.rng ? this.rng.frac() : Math.random();
+  }
+
+  /** Random integer in [min, max], seeded if available. */
+  private between(min: number, max: number): number {
+    return this.rng ? this.rng.integerInRange(min, max) : Phaser.Math.Between(min, max);
   }
 }
