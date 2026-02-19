@@ -135,7 +135,7 @@ export const LEVELS: Level[] = [
     taskKey: 'tutorialTask',
     difficulty: 'tutorial',
     timeLimit: 0,
-    targetCoverage: 40,
+    targetCoverage: 60,
     width: 15,
     height: 20,
     hasWinch: false,
@@ -153,7 +153,7 @@ export const LEVELS: Level[] = [
       { trigger: 'start', dialogue: 'tutorialWelcome', delay: 800 },
       { trigger: 'moved', dialogue: 'tutorialGroomAction', delay: 500 },
       { trigger: 'groomed', dialogue: 'tutorialGroomGoal', delay: 500 },
-      { trigger: 'coverage40', dialogue: 'tutorialComplete' },
+      { trigger: 'coverage60', dialogue: 'tutorialComplete' },
     ],
     wildlife: [
       { type: 'bunny', count: 3 },

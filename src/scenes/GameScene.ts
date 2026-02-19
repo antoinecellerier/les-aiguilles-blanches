@@ -1672,8 +1672,8 @@ export default class GameScene extends Phaser.Scene {
       case 'coverage20':
         shouldTrigger = coverage >= 20;
         break;
-      case 'coverage40':
-        shouldTrigger = coverage >= 40;
+      case 'coverage60':
+        shouldTrigger = coverage >= 60;
         break;
       case 'complete':
         shouldTrigger = coverage >= this.level.targetCoverage;
