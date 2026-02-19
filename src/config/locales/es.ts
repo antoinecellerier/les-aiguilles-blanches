@@ -171,6 +171,8 @@ const es: Record<string, string> = {
   // Levels - Tutorial step by step
   tutorialName: "Tutorial - Primeros Pasos",
   tutorialTask: "Aprende lo básico",
+  prologueLine: "Las 4. La montaña es tuya. A trabajar.",
+  prologueSkip: "Pulsa para continuar",
   tutorialIntro: "¡Bienvenido a Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Saltando tutorial… Toca para repetirlo.",
   skipTutorialGamepad: "⏭️ Saltando tutorial… Pulsa para repetirlo.",

@@ -190,6 +190,8 @@ const ko: Record<string, string> = {
   // Tutorial
   tutorialName: "튜토리얼 - 첫 걸음",
   tutorialTask: "정설 기초를 배우기",
+  prologueLine: "새벽 4시. 산은 네 거다. 일이다.",
+  prologueSkip: "아무 키나 눌러 계속",
   tutorialIntro: "Les Aiguilles Blanches에 오신 것을 환영합니다!",
   skipTutorial: "⏭️ 튜토리얼 건너뛰기…탭으로 다시 보기.",
   skipTutorialGamepad: "⏭️ 튜토리얼 건너뛰기…버튼으로 다시 보기.",

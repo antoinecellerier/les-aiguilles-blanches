@@ -190,6 +190,8 @@ const ja: Record<string, string> = {
   // Tutorial
   tutorialName: "チュートリアル - はじめの一歩",
   tutorialTask: "圧雪の基本を学ぶ",
+  prologueLine: "午前4時。山はお前のもんだ。仕事だ。",
+  prologueSkip: "キーを押して続ける",
   tutorialIntro: "Les Aiguilles Blanchesへようこそ！",
   skipTutorial: "⏭️ チュートリアルをスキップ…タップでリプレイ。",
   skipTutorialGamepad: "⏭️ チュートリアルをスキップ…ボタンでリプレイ。",

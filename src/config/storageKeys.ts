@@ -32,6 +32,7 @@ export const STORAGE_KEYS = {
   DISPLAY_MODE: 'snowGroomer_displayMode', // 'windowed' | 'fullscreen' | 'borderless'
   BACKGROUND_AUDIO: 'snowGroomer_backgroundAudio', // 'true' | 'false' (desktop only)
   DAILY_RUN_DATE: 'snowGroomer_dailyRunDate', // YYYY-MM-DD of last completed daily run
+  PROLOGUE_SEEN: 'snowGroomer_prologueSeen', // '1' after cold-open prologue
 } as const;
 
 /** Increment when key binding schema changes to invalidate saved bindings. */

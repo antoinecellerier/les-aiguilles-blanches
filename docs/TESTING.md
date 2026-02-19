@@ -170,7 +170,7 @@ def test_example(self, game_page: Page):
 
 All keys are centralized in `src/config/storageKeys.ts`. Tests should use the same key strings.
 
-The `game_page` fixture automatically clears localStorage after each test to prevent state leakage between tests.
+The `game_page` fixture automatically clears localStorage after each test to prevent state leakage between tests. An autouse `skip_prologue` fixture sets `PROLOGUE_SEEN` in localStorage before every test so the cold-open cinematic is never triggered during E2E runs.
 
 ## Test Categories
 

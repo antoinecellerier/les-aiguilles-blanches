@@ -194,6 +194,8 @@ const fr: Record<string, string> = {
   // Tutorial - Step by step
   tutorialName: "Tutoriel - Premiers Pas",
   tutorialTask: "Apprenez les bases du damage",
+  prologueLine: "4h du mat'. La montagne est à toi. Au boulot.",
+  prologueSkip: "Appuyez pour continuer",
   tutorialIntro: "Bienvenue aux Aiguilles Blanches !",
   skipTutorial: "⏭️ Passer le tutoriel… Appuyez pour le refaire.",
   skipTutorialGamepad: "⏭️ Passer le tutoriel… Appuyez pour le refaire.",

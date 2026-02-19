@@ -286,9 +286,9 @@ export default class MenuScene extends Phaser.Scene {
       buttonDefs.push({ text: 'resumeGame', callback: () => this.startGame(savedProgress.currentLevel, savedProgress.lastScene), primary: true });
     }
     if (!hasProgress && !hasCompletedLevels) {
-      buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
+      buttonDefs.push({ text: 'startGame', callback: () => this.startOrPrologue(), primary: true });
     } else if (!hasProgress) {
-      buttonDefs.push({ text: 'startGame', callback: () => this.startGame(0), primary: true });
+      buttonDefs.push({ text: 'startGame', callback: () => this.startOrPrologue(), primary: true });
     }
     if (hasProgress) {
       buttonDefs.push({ text: 'newGame', callback: () => this.confirmNewGame(), primary: false });
@@ -1081,6 +1081,17 @@ export default class MenuScene extends Phaser.Scene {
       resetGameScenes(game, 'SkiRunScene', { level, mode });
     } else {
       resetGameScenes(game, 'GameScene', { level });
+    }
+  }
+
+  /** Show prologue for first-time players, otherwise go straight to tutorial. */
+  private startOrPrologue(): void {
+    if (getString(STORAGE_KEYS.PROLOGUE_SEEN)) {
+      this.startGame(0);
+    } else {
+      const game = this.game;
+      this.scene.stop('MenuScene');
+      resetGameScenes(game, 'PrologueScene');
     }
   }
 

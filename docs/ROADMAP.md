@@ -7,6 +7,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Active Work
 
 - [x] **Daily Runs (procedural generation)** — Post-campaign mode unlocked after L10. ✅ Core implemented: seeded RNG level generation, Daily Shift (date-seeded), Random Run, four difficulty ranks (Green/Blue/Red/Black), DailyRunSession singleton, per-rank completion tracking, procedural level variety, procedural French piste names with rank-themed pools and grammar agreement, daily-run-aware pause menu (quit to Daily Runs, new run for Random Runs), seed code displayed in FPS HUD, ski mode on procedural levels (slalom + freestyle), responsive layout across form factors, ✅ shareable seed codes (share button with clipboard copy, URL with ?seed=CODE&rank=RANK, BootScene URL parsing, shared seed display on DailyRunsScene, share on daily run win screen), ✅ seeded RNG determinism (ObstacleBuilder and HazardSystem route through SeededRNG during daily/random runs for reproducible obstacle placement and avalanche zone generation; wildlife remains cosmetically random).
+- [ ] **Player retention** — Improve first-time player hook. ✅ Streamlined tutorial (9→4 steps, 14s→1.8s dialogue delay). ✅ Ski run teaser (primary CTA after tutorial). ✅ Cold-open prologue (12s night cinematic for first visit). Remaining: menu atmosphere cycling, L1 atmosphere polish.
 
 ## Next Up
 

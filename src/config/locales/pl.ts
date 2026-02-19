@@ -190,6 +190,8 @@ const pl: Record<string, string> = {
   // Tutorial
   tutorialName: "Samouczek - Pierwsze kroki",
   tutorialTask: "Naucz się podstaw ratrakowania",
+  prologueLine: "4 rano. Góra jest twoja. Do roboty.",
+  prologueSkip: "Naciśnij, aby kontynuować",
   tutorialIntro: "Witaj w Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Pomijam samouczek… Dotknij aby powtórzyć.",
   skipTutorialGamepad: "⏭️ Pomijam samouczek… Naciśnij przycisk aby powtórzyć.",

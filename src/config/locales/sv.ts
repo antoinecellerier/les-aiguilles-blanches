@@ -190,6 +190,8 @@ const sv: Record<string, string> = {
   // Tutorial
   tutorialName: "Handledning - Första stegen",
   tutorialTask: "Lär dig grunderna i preparering",
+  prologueLine: "Klockan 4. Berget är ditt. Dags att jobba.",
+  prologueSkip: "Tryck för att fortsätta",
   tutorialIntro: "Välkommen till Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Hoppar över handledning… Tryck för att göra om.",
   skipTutorialGamepad: "⏭️ Hoppar över handledning… Tryck valfri knapp för att göra om.",

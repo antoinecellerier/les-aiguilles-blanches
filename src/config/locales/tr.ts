@@ -190,6 +190,8 @@ const tr: Record<string, string> = {
   // Tutorial
   tutorialName: "Öğretici - İlk Adımlar",
   tutorialTask: "Pist bakım temellerini öğren",
+  prologueLine: "Saat 4. Dağ senin. İş başına.",
+  prologueSkip: "Devam için bas",
   tutorialIntro: "Les Aiguilles Blanches'a hoş geldin!",
   skipTutorial: "⏭️ Öğretici atlanıyor… Tekrar için dokun.",
   skipTutorialGamepad: "⏭️ Öğretici atlanıyor… Tekrar için düğmeye bas.",

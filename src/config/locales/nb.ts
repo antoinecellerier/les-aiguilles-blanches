@@ -190,6 +190,8 @@ const nb: Record<string, string> = {
   // Tutorial
   tutorialName: "Opplæring - Første steg",
   tutorialTask: "Lær deg grunnleggende preparering",
+  prologueLine: "Klokken 4. Fjellet er ditt. På'n.",
+  prologueSkip: "Trykk for å fortsette",
   tutorialIntro: "Velkommen til Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Hopper over opplæring… Trykk for å gjøre på nytt.",
   skipTutorialGamepad: "⏭️ Hopper over opplæring… Trykk en knapp for å gjøre på nytt.",

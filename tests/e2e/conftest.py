@@ -382,6 +382,12 @@ def browser_context_args(browser_context_args):
     }
 
 
+@pytest.fixture(autouse=True)
+def skip_prologue(page):
+    """Skip the cold-open prologue in all tests."""
+    page.add_init_script("localStorage.setItem('snowGroomer_prologueSeen', '1');")
+
+
 @pytest.fixture
 def game_page(page):
     """Navigate to the game and wait for Phaser to initialize."""

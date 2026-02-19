@@ -190,6 +190,8 @@ const sk: Record<string, string> = {
   // Tutorial
   tutorialName: "Návod - Prvé kroky",
   tutorialTask: "Nauč sa základy úpravy",
+  prologueLine: "4 ráno. Hora je tvoja. Do práce.",
+  prologueSkip: "Stlač pre pokračovanie",
   tutorialIntro: "Vitaj v Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Preskakujem návod… Ťukni pre prehranie.",
   skipTutorialGamepad: "⏭️ Preskakujem návod… Stlač tlačidlo pre prehranie.",

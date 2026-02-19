@@ -190,6 +190,8 @@ const en: Record<string, string> = {
   // Tutorial - Full walkthrough
   tutorialName: "Tutorial - First Steps",
   tutorialTask: "Learn grooming basics",
+  prologueLine: "4 AM. The mountain is yours. Let's get to work.",
+  prologueSkip: "Press any key to continue",
   tutorialIntro: "Welcome to Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Skipping tutorial… Tap to replay instead.",
   skipTutorialGamepad: "⏭️ Skipping tutorial… Press any button to replay.",

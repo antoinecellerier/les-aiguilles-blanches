@@ -190,6 +190,8 @@ const fi: Record<string, string> = {
   // Tutorial
   tutorialName: "Opastus - Ensiaskeleet",
   tutorialTask: "Opi tamppauksen perusteet",
+  prologueLine: "Kello 4. Vuori on sinun. Töihin.",
+  prologueSkip: "Paina jatkaaksesi",
   tutorialIntro: "Tervetuloa Les Aiguilles Blanches'iin!",
   skipTutorial: "⏭️ Ohitetaan opastus… Napauta toistaaksesi.",
   skipTutorialGamepad: "⏭️ Ohitetaan opastus… Paina nappia toistaaksesi.",

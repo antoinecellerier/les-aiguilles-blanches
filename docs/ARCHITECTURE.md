@@ -111,6 +111,7 @@ snow-groomer/
 │   │   └── updateCheck.ts    # Checks for newer deployed version via version.json
 │   ├── scenes/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
+│   │   ├── PrologueScene.ts # Cold-open cinematic for first-time players
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
 │   │   ├── LevelSelectScene.ts # Level select / replay (browse + star ratings)
 │   │   ├── SettingsScene.ts # Language, a11y, gameplay prefs, display mode (desktop), controls, keyboard layout
@@ -147,7 +148,10 @@ snow-groomer/
 
 ```
 BootScene → MenuScene → GameScene ⟷ HUDScene
-     ↑           ↑↓           ↓         ↓
+     ↑      ↑    ↓          ↓         ↓
+     │      │  PrologueScene │         │
+     │      │    ↓ (first    │         │
+     │      │    visit)      │         │
      │    LevelSelectScene DialogueScene │
      │           ↑            ↓         │
      │           │      PauseScene      │
@@ -1828,6 +1832,7 @@ Post-campaign mode generating fresh pistes from seeded RNG. Unlocked after compl
 - `src/utils/seededRNG.ts` — `SeededRNG` class wrapping `Phaser.Math.RandomDataGenerator`. Seed↔code conversion (Base36 4-6 chars), daily seed from date hash, `randomSeed()` for non-deterministic seeds, deterministic `frac()`/`integerInRange()`/`chance()`/`pick()`/`shuffle()`.
 - `src/systems/LevelGenerator.ts` — `generateDailyRunLevel(seed, rank)` produces a valid `Level` object. `generateValidDailyRunLevel()` retries with seed+1 on validation failure (max 10 attempts). `validateLevel()` checks piste width, halfpipe width, reachability, winch feasibility, start safety. `pickDailyRunBriefing()` selects speaker + dialogue key based on level characteristics (hazards → Thierry, night/cold → Marie, easy → Émilie, default → JP). 7 piste shapes (straight, gentle_curve, winding, serpentine, dogleg, funnel, hourglass) with `pisteVariation` system (freqOffset, ampScale, phase, widthPhase) making each seed visually distinct. Steep zone placement randomized with variable gaps. Service roads only for dangerous zones (≥30°); safe zones have no bypass. Winch anchors placed only above dangerous zones.
 - `src/scenes/DailyRunsScene.ts` — UI scene: rank selector (Green/Blue/Red/Black), Daily Shift button (date-seeded), Random Run button (random seed). Shows briefing preview (weather, target, time, dimensions). Uses proportional vertical layout: computes header bottom analytically (title line-height + back button padding), then distributes briefing/daily/random buttons at 20%/55%/75% of available space (capped at `height * 0.45` to avoid over-spreading). Rank buttons use origin(0.5) centering so `rankY` includes a half-height offset to prevent title overlap.
+- `src/scenes/PrologueScene.ts` — Cold-open cinematic shown once for first-time players. Uses `createMenuTerrain` with `isNight: true`, adds night overlay (`0x000022` at 0.45 alpha), and animates a groomer across the slope with directional headlight rectangles on the snow surface. JP dialogue at 4s, auto-advance at 12s, skip on any input. Sets `PROLOGUE_SEEN` in storage. Has shutdown handler for timer/input cleanup.
 
 ### Generation Pipeline
 

@@ -171,6 +171,8 @@ const de: Record<string, string> = {
   // Levels - Tutorial step by step
   tutorialName: "Tutorial - Erste Schritte",
   tutorialTask: "Grundlagen lernen",
+  prologueLine: "4 Uhr morgens. Der Berg gehört dir. An die Arbeit.",
+  prologueSkip: "Beliebige Taste drücken",
   tutorialIntro: "Willkommen in Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Tutorial wird übersprungen… Tippen zum Wiederholen.",
   skipTutorialGamepad: "⏭️ Tutorial wird übersprungen… Drücke eine Taste zum Wiederholen.",
