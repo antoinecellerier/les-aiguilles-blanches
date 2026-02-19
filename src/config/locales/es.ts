@@ -328,6 +328,7 @@ changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calida
   dailyRuns_seed: "Semilla",
   // UNUSED   dailyRuns_start: "Iniciar contrato",
   dailyRuns_locked: "Completa todos los niveles para desbloquear",
+  dailyRuns_lockedShared: "Completa todos los niveles para desbloquear las Carreras diarias y jugar esta pista compartida",
   // UNUSED   dailyRun_levelName: "Contrato",
   dailyRun_levelTask: "Prepara la pista hasta la cobertura objetivo",
   dailyRuns_briefing: "Informe",

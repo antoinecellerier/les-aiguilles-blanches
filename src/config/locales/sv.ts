@@ -331,6 +331,7 @@ changelog_20260211: "⛷️ Skidåkning efter preparering\n🎯 Prepareringskval
   dailyRuns_seed: "Frö",
   // UNUSED   dailyRuns_start: "Starta kontrakt",
   dailyRuns_locked: "Slutför alla nivåer för att låsa upp",
+  dailyRuns_lockedShared: "Klara alla nivåer för att låsa upp dagliga rundor och spela denna delade piste",
   // UNUSED   dailyRun_levelName: "Kontrakt",
   dailyRun_levelTask: "Preparera pisten till måltäckning",
   dailyRuns_briefing: "Uppdrag",

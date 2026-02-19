@@ -14,7 +14,7 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 import { startDailyRunSession } from '../systems/DailyRunSession';
 import { getJSON } from '../utils/storage';
 import { ResizeManager } from '../utils/resizeManager';
-import { buildShareUrl, copyToClipboard } from '../utils/shareUrl';
+import { buildShareMessage, copyToClipboard } from '../utils/shareUrl';
 import { showToast } from '../utils/toastNotification';
 
 const RANK_COLORS: Record<DailyRunRank, string> = {
@@ -72,6 +72,8 @@ export default class DailyRunsScene extends Phaser.Scene {
 
     if (!isUnlocked) {
       this.showLockedMessage(width, height, scaleFactor);
+      this.resizeManager = new ResizeManager(this);
+      this.resizeManager.register();
       return;
     }
 
@@ -87,15 +89,100 @@ export default class DailyRunsScene extends Phaser.Scene {
   }
 
   private showLockedMessage(width: number, height: number, scale: number): void {
-    const dprBoost = Math.sqrt(Math.min(window.devicePixelRatio || 1, 2));
-    const fontSize = Math.round(16 * Math.max(0.7, scale) * dprBoost);
-    this.add.text(width / 2, Math.round(height * 0.4), '🔒 ' + t('dailyRuns_locked'), {
-      fontFamily: THEME.fonts.family,
-      fontSize: fontSize + 'px',
-      color: THEME.colors.textSecondary,
-      wordWrap: { width: width * 0.8 },
-      align: 'center',
-    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+    const dpr = window.devicePixelRatio || 1;
+    const dprBoost = Math.sqrt(Math.min(dpr, 2));
+    const textScale = Math.max(0.7, scale) * dprBoost;
+    const fontSize = Math.round(16 * textScale);
+    const smallFont = Math.round(13 * textScale);
+    const tinyFont = Math.round(11 * textScale);
+    const vGap = height < 450 ? 0.7 : 1.0;
+    const wrapWidth = width * 0.85;
+
+    // Analytical header bottom (same formula as buildDailyRunsUI)
+    const titleTop = Math.round(height * 0.06);
+    const titleFontSize = Math.max(16, Math.round(28 * scale * dprBoost));
+    const headerBottom = titleTop + Math.round(titleFontSize * 1.2);
+
+    if (this.sharedSeedNum !== null) {
+      // Proportional layout: distribute preview + lock message in available space
+      const available = Math.round(height * 0.85) - headerBottom;
+      let yPos = headerBottom + Math.round(available * 0.08);
+
+      const { level } = generateValidDailyRunLevel(rankSeed(this.sharedSeedNum, this.selectedRank), this.selectedRank);
+      const pisteName = level.name || t(level.nameKey);
+      const isPark = level.difficulty === 'park';
+      const showPark = this.selectedRank === 'green' && isPark;
+      const rankLabel = showPark ? '▲' : RANK_LABELS[this.selectedRank];
+      const rankName = showPark ? t('rank_park') : t(`rank_${this.selectedRank}`);
+      const rankColor = showPark ? '#f59e0b' : RANK_COLORS[this.selectedRank];
+
+      // Rank badge
+      this.add.text(width / 2, yPos, `${rankLabel} ${rankName}`, {
+        fontFamily: THEME.fonts.family, fontSize: smallFont + 'px',
+        color: THEME.colors.textPrimary, backgroundColor: rankColor,
+        padding: { x: Math.round(12 * textScale), y: Math.round(6 * textScale) },
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+      yPos += Math.round(available * 0.12 * vGap);
+
+      // Piste name
+      this.add.text(width / 2, yPos, pisteName, {
+        fontFamily: THEME.fonts.family, fontSize: fontSize + 'px',
+        color: THEME.colors.textPrimary, fontStyle: 'bold',
+        wordWrap: { width: wrapWidth },
+        align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+      yPos += Math.round(available * 0.10 * vGap);
+
+      // Level characteristics
+      const weatherKey = `dailyRuns_weather_${level.weather || 'clear'}`;
+      const shiftKey = level.isNight ? 'dailyRuns_night' : 'dailyRuns_day';
+      const parkStr = isPark ? ` | ▲ ${t('rank_park')}` : '';
+      const winchStr = level.hasWinch ? ` | 🔗 ${t('winch')}` : '';
+      this.add.text(width / 2, yPos, `${t(shiftKey)} | ${t(weatherKey)}${parkStr}${winchStr}`, {
+        fontFamily: THEME.fonts.family, fontSize: tinyFont + 'px',
+        color: THEME.colors.textMuted,
+        wordWrap: { width: wrapWidth },
+        align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+      yPos += Math.round(available * 0.08 * vGap);
+
+      // Briefing stats
+      this.add.text(width / 2, yPos,
+        `${t('dailyRuns_target')}: ${level.targetCoverage}% | ${t('dailyRuns_timeLimit')}: ${Math.floor(level.timeLimit / 60)}m${(level.timeLimit % 60) ? level.timeLimit % 60 + 's' : ''} | ${level.width}×${level.height}`,
+        {
+          fontFamily: THEME.fonts.family, fontSize: tinyFont + 'px',
+          color: THEME.colors.textSecondary,
+          wordWrap: { width: wrapWidth },
+          align: 'center',
+        }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+      yPos += Math.round(available * 0.07 * vGap);
+
+      // Seed code reference
+      const sharedCode = seedToCode(this.sharedSeedNum);
+      this.add.text(width / 2, yPos, `[${sharedCode}]`, {
+        fontFamily: THEME.fonts.family, fontSize: tinyFont + 'px',
+        color: THEME.colors.textSecondary,
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+      yPos += Math.round(available * 0.15 * vGap);
+
+      // Lock message
+      this.add.text(width / 2, yPos, '🔒 ' + t('dailyRuns_lockedShared'), {
+        fontFamily: THEME.fonts.family,
+        fontSize: Math.round(14 * textScale) + 'px',
+        color: THEME.colors.textSecondary,
+        wordWrap: { width: wrapWidth },
+        align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+    } else {
+      // Simple locked message centered in available space
+      this.add.text(width / 2, Math.round(height * 0.4), '🔒 ' + t('dailyRuns_locked'), {
+        fontFamily: THEME.fonts.family,
+        fontSize: Math.round(14 * textScale) + 'px',
+        color: THEME.colors.textSecondary,
+        wordWrap: { width: wrapWidth },
+        align: 'center',
+      }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI);
+    }
   }
 
   private buildDailyRunsUI(width: number, height: number, scale: number, backBtn: Phaser.GameObjects.Text): void {
@@ -264,14 +351,16 @@ export default class DailyRunsScene extends Phaser.Scene {
     allButtons.push(dailyBtn);
     allCallbacks.push(() => this.startDailyRun(dailySeedNum, true));
 
-    // Share button (📋) — right of Daily Shift
+    // Share button (📋) — right of Daily Shift, min 44px touch target
+    const sharePadX = Math.max(Math.round(10 * textScale), 14);
+    const sharePadY = Math.max(isSecondaryCTA ? Math.round(5 * textScale) : btnPadY, 12);
     const shareBtn = this.add.text(0, dailyBtnY,
       '📋',
       {
         fontFamily: THEME.fonts.family,
         fontSize: (isSecondaryCTA ? smallFont : fontSize) + 'px',
         color: THEME.colors.textMuted,
-        padding: { x: Math.round(6 * textScale), y: isSecondaryCTA ? Math.round(5 * textScale) : btnPadY },
+        padding: { x: sharePadX, y: sharePadY },
       }
     ).setOrigin(0, 0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
     shareBtn.setData('key', 'share');
@@ -279,8 +368,9 @@ export default class DailyRunsScene extends Phaser.Scene {
     shareBtn.setX(Math.round(dailyBtn.x + dailyBtn.width / 2 + 6 * textScale));
     shareBtn.on('pointerdown', () => {
       playClick();
-      const url = buildShareUrl(dailyCode, this.selectedRank);
-      copyToClipboard(url).then(ok => { if (ok) showToast(this, t('copied')); });
+      const pisteName = this.pisteNameDisplay?.text || '';
+      const msg = buildShareMessage(dailyCode, this.selectedRank, pisteName);
+      copyToClipboard(msg).then(ok => { if (ok) showToast(this, t('copied')); });
     });
 
     // --- Separator + Random Run (hide when shared seed takes the daily spot) ---

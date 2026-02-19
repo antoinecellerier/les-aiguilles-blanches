@@ -331,6 +331,7 @@ changelog_20260211: "⛷️ Skikjøring etter preparering\n🎯 Prepareringskval
   dailyRuns_seed: "Frø",
   // UNUSED   dailyRuns_start: "Start kontrakt",
   dailyRuns_locked: "Fullfør alle nivåer for å låse opp",
+  dailyRuns_lockedShared: "Fullfør alle nivåer for å låse opp daglige runder og spille denne delte løypa",
   // UNUSED   dailyRun_levelName: "Kontrakt",
   dailyRun_levelTask: "Preparér løypa til måldekning",
   dailyRuns_briefing: "Oppdrag",

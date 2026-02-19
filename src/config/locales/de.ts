@@ -328,6 +328,7 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   dailyRuns_seed: "Seed",
   // UNUSED   dailyRuns_start: "Auftrag starten",
   dailyRuns_locked: "Alle Level abschließen zum Freischalten",
+  dailyRuns_lockedShared: "Schließe alle Level ab, um die Tagesläufe freizuschalten und diese geteilte Piste zu spielen",
   // UNUSED   dailyRun_levelName: "Auftrag",
   dailyRun_levelTask: "Piste auf Zielabdeckung präparieren",
   dailyRuns_briefing: "Briefing",

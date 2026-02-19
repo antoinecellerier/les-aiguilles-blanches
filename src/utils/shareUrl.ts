@@ -11,6 +11,13 @@ export function buildShareUrl(seedCode: string, rank: DailyRunRank): string {
   return `${base}?seed=${encodeURIComponent(seedCode)}&rank=${encodeURIComponent(rank)}`;
 }
 
+/** Build a formatted share message with URL for messaging apps. */
+export function buildShareMessage(seedCode: string, rank: DailyRunRank, pisteName: string): string {
+  const emoji: Record<DailyRunRank, string> = { green: '🟢', blue: '🔵', red: '🔴', black: '⚫' };
+  const url = buildShareUrl(seedCode, rank);
+  return `${url}\n🏔️ ${pisteName} — ${emoji[rank]} ${rank.charAt(0).toUpperCase() + rank.slice(1)} [${seedCode}]`;
+}
+
 /** Parse seed and rank from current URL query params. Returns null if not present. */
 export function parseShareParams(): { seedCode: string; rank: DailyRunRank } | null {
   const params = new URLSearchParams(window.location.search);

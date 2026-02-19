@@ -493,7 +493,8 @@ Pausing during a daily run shows a daily-run-aware menu:
 ### Sharing Runs
 
 Each procedural level has a unique 4–6 character seed code (Base36). Share runs with friends:
-- **📋 Share button** on the Daily Runs screen copies a URL like `?seed=ABC123&rank=blue` to the clipboard
+- **📋 Share button** on the Daily Runs screen copies a formatted message with URL (e.g., `?seed=ABC123&rank=blue`) to the clipboard
 - **Share after winning** — the level complete screen for daily runs includes a Share button
 - **Opening a share URL** takes you straight to the Daily Runs screen with the seed and rank preset, ready to play
 - If the shared seed matches today's Daily Shift, no extra button appears — it's already the daily run
+- **Recipients who haven't unlocked Daily Runs** see a locked preview showing the piste name, rank badge, weather, stats, and seed code — with a message to complete all campaign levels first

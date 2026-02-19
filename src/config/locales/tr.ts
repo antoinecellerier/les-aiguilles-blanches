@@ -330,6 +330,7 @@ changelog_20260211: "⛷️ Hazırlama sonrası kayak inişi\n🎯 Hazırlama ka
   dailyRuns_seed: "Tohum",
   // UNUSED   dailyRuns_start: "Sözleşmeyi Başlat",
   dailyRuns_locked: "Kilidini açmak için tüm seviyeleri tamamlayın",
+  dailyRuns_lockedShared: "Tüm seviyeleri tamamlayarak Günlük Turları açın ve bu paylaşılan pisti oynayın",
   // UNUSED   dailyRun_levelName: "Sözleşme",
   dailyRun_levelTask: "Pisti hedef kaplama oranına kadar hazırlayın",
   dailyRuns_briefing: "Brifing",

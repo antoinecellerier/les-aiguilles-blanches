@@ -330,6 +330,7 @@ changelog_20260211: "⛷️ 정비 후 스키 활강\n🎯 정비 품질\n🏔�
   dailyRuns_seed: "시드",
   // UNUSED   dailyRuns_start: "계약 시작",
   dailyRuns_locked: "모든 레벨을 완료하면 해제됩니다",
+  dailyRuns_lockedShared: "모든 레벨을 완료하여 데일리 런을 잠금 해제하고 이 공유 코스를 플레이하세요",
   // UNUSED   dailyRun_levelName: "계약",
   dailyRun_levelTask: "목표 커버리지까지 슬로프를 정비하세요",
   dailyRuns_briefing: "브리핑",

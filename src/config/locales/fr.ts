@@ -336,6 +336,7 @@ changelog_20260211: "⛷️ Descente à ski après le damage\n🎯 Qualité de d
   dailyRuns_seed: "Code",
   // UNUSED   dailyRuns_start: "Lancer le contrat",
   dailyRuns_locked: "Termine tous les niveaux pour débloquer",
+  dailyRuns_lockedShared: "Terminez tous les niveaux pour débloquer les Pistes du jour et jouer cette piste partagée",
   // UNUSED   dailyRun_levelName: "Contrat",
   dailyRun_levelTask: "Damez la piste jusqu'à l'objectif de couverture",
   dailyRuns_briefing: "Briefing",

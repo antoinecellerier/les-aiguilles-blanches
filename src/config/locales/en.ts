@@ -330,6 +330,7 @@ changelog_20260211: "⛷️ Ski run after grooming\n🎯 Grooming quality\n🏔�
   dailyRuns_seed: "Seed",
   // UNUSED   dailyRuns_start: "Start Contract",
   dailyRuns_locked: "Complete all levels to unlock",
+  dailyRuns_lockedShared: "Complete all levels to unlock Daily Runs and play this shared piste",
   // UNUSED   dailyRun_levelName: "Contract",
   dailyRun_levelTask: "Groom the piste to target coverage",
   dailyRuns_briefing: "Briefing",

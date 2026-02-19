@@ -330,6 +330,7 @@ changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\
   dailyRuns_seed: "Seed",
   // UNUSED   dailyRuns_start: "Zahájit kontrakt",
   dailyRuns_locked: "Dokonči všechny úrovně pro odemknutí",
+  dailyRuns_lockedShared: "Dokončete všechny úrovně k odemknutí denních běhů a zahrání této sdílené sjezdovky",
   // UNUSED   dailyRun_levelName: "Kontrakt",
   dailyRun_levelTask: "Uprav sjezdovku na cílové pokrytí",
   dailyRuns_briefing: "Zadání",

@@ -331,6 +331,7 @@ changelog_20260211: "⛷️ Laskettelulasku tamppauksen jälkeen\n🎯 Tamppauks
   dailyRuns_seed: "Siemen",
   // UNUSED   dailyRuns_start: "Aloita sopimus",
   dailyRuns_locked: "Läpäise kaikki tasot avataksesi",
+  dailyRuns_lockedShared: "Suorita kaikki tasot avataksesi päivittäiset kierrokset ja pelataksesi tämän jaetun rinteen",
   // UNUSED   dailyRun_levelName: "Sopimus",
   dailyRun_levelTask: "Kunnostakaa rinne tavoitepeittoon",
   dailyRuns_briefing: "Toimeksianto",

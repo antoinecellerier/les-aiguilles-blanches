@@ -330,6 +330,7 @@ changelog_20260211: "⛷️ Zjazd na lyžiach po úprave\n🎯 Kvalita úpravy\n
   dailyRuns_seed: "Seed",
   // UNUSED   dailyRuns_start: "Začať kontrakt",
   dailyRuns_locked: "Dokonči všetky úrovne na odomknutie",
+  dailyRuns_lockedShared: "Dokončite všetky úrovne na odomknutie denných behov a zahranie tejto zdieľanej zjazdovky",
   // UNUSED   dailyRun_levelName: "Kontrakt",
   dailyRun_levelTask: "Uprav zjazdovku na cieľové pokrytie",
   dailyRuns_briefing: "Zadanie",

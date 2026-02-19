@@ -328,6 +328,7 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   dailyRuns_seed: "Seme",
   // UNUSED   dailyRuns_start: "Avvia contratto",
   dailyRuns_locked: "Completa tutti i livelli per sbloccare",
+  dailyRuns_lockedShared: "Completa tutti i livelli per sbloccare le Corse giornaliere e giocare questa pista condivisa",
   // UNUSED   dailyRun_levelName: "Contratto",
   dailyRun_levelTask: "Prepara la pista alla copertura obiettivo",
   dailyRuns_briefing: "Briefing",

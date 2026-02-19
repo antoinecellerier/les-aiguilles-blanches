@@ -15,7 +15,7 @@ import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
 import { markLevelCompleted } from '../utils/gameProgress';
 import { clearGroomedTiles } from '../utils/skiRunState';
 import { getDailyRunSession } from '../systems/DailyRunSession';
-import { buildShareUrl, copyToClipboard } from '../utils/shareUrl';
+import { buildShareMessage, copyToClipboard } from '../utils/shareUrl';
 import { showToast } from '../utils/toastNotification';
 
 /**
@@ -366,8 +366,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.addButton(buttonContainer, '📋 ' + t('share'), buttonFontSize, buttonPadding2,
         () => {
           if (session?.baseSeedCode) {
-            const url = buildShareUrl(session.baseSeedCode, session.rank);
-            copyToClipboard(url).then(ok => { if (ok) showToast(this, t('copied')); });
+            const pisteName = session.level.name || t(session.level.nameKey);
+            const msg = buildShareMessage(session.baseSeedCode, session.rank, pisteName);
+            copyToClipboard(msg).then(ok => { if (ok) showToast(this, t('copied')); });
           }
         }, false, 'share');
       this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,

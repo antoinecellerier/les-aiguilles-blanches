@@ -157,6 +157,15 @@ for name, w, h, dpr in VIEWPORTS:
 
 **Orientation change:** After capturing landscape, resize to portrait (and vice versa) to verify the scene adapts without artifacts or frozen layouts.
 
+**Conditional UI states:** Many scenes have multiple visual states (locked/unlocked, shared/non-shared, empty/populated, win/fail). When reviewing a scene, identify ALL distinct visual branches in `create()` and test EACH one at multiple viewports. Examples:
+- DailyRunsScene: unlocked UI, locked message, locked with shared seed preview
+- LevelCompleteScene: campaign win, daily run win (has share button), fail
+- SettingsScene: single-column (narrow) vs multi-column (wide)
+
+To reach conditional states, use URL params, localStorage manipulation, or `page.evaluate()` before navigating. For example, a locked DailyRunsScene with shared seed: `page.goto('http://localhost:PORT/?seed=ABC123&rank=blue')` on a fresh profile (no campaign progress).
+
+**ResizeManager in all branches:** When a scene has early-return branches (e.g., locked state), verify that ResizeManager is registered in EVERY branch, not just the main path. Missing resize registration = frozen layout on device rotation.
+
 **Known patterns:**
 - Scenes use `scaleFactor = min(scaleByHeight, scaleByWidth) * dprBoost` — verify it doesn't produce illegible text at small viewports or wasteful whitespace at large ones
 - **DPR boost**: `dprBoost = Math.sqrt(Math.min(dpr, 2))` applies to font sizes and padding but NOT to layout gaps. Gaps are in CSS pixels; scaling them by dprBoost causes overflow on high-DPR short screens.

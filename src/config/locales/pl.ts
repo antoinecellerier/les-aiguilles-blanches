@@ -330,6 +330,7 @@ changelog_20260211: "⛷️ Zjazd na nartach po preparacji\n🎯 Jakość prepar
   dailyRuns_seed: "Ziarno",
   // UNUSED   dailyRuns_start: "Rozpocznij kontrakt",
   dailyRuns_locked: "Ukończ wszystkie poziomy, aby odblokować",
+  dailyRuns_lockedShared: "Ukończ wszystkie poziomy, aby odblokować dzienne biegi i zagrać tę udostępnioną trasę",
   // UNUSED   dailyRun_levelName: "Kontrakt",
   dailyRun_levelTask: "Przygotuj trasę do docelowego pokrycia",
   dailyRuns_briefing: "Odprawа",
