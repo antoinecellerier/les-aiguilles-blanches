@@ -275,6 +275,7 @@ const ko: Record<string, string> = {
   tauntSkiWipeout5: "산양들도 그 착지를 보고 얼굴을 찡그렸다.",
 
   jeanPierreIntro: "튜토리얼 잘했어. 이제 진짜다 — 초급 코스, 시간 제한과 연료 관리가 있어.",
+  level_marmottesMid: "봉우리의 저 빛이 보여? 첫 여명이야. 이 일의 가장 좋은 순간 — 너, 기계, 그리고 깨어나는 산뿐이지.",
   level_chamoisIntro: "안녕, 나 Émilie야 — JP가 중급 코스로 보내. 초급만 하는 게 아니라는 걸 보여줘.",
   level_airZoneIntro: "스노파크는 내 영역이야 — 끝내주는 코스를 만들 거야! 모듈 하나하나 완벽해야 해, 라이더들이 기대하고 있거든.",
   level_aigleIntro: "L'Aigle은 진짜다. 연료에 주의해. 작업 도로로 올라갈 수 있어 — 노란색과 검은색 줄무늬 기둥을 찾아.",

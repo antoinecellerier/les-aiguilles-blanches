@@ -121,6 +121,9 @@ export default class GameScene extends Phaser.Scene {
   private tutorialSkipPending = false;
   private hasMoved = false;
   private hasGroomed = false;
+  // Mid-level dialogue triggers (non-tutorial)
+  private dialogueTriggerStep = 0;
+  private dialogueTriggered: Record<string, boolean> = {};
 
   // Game objects
   private groomer!: Phaser.Physics.Arcade.Sprite;
@@ -448,6 +451,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.tutorialStep = 0;
     this.tutorialTriggered = {};
+    this.dialogueTriggerStep = 0;
+    this.dialogueTriggered = {};
     this.tutorialSkipped = false;
     const tutorialDone = !!getString(STORAGE_KEYS.TUTORIAL_DONE) ||
       (getSavedProgress()?.currentLevel ?? 0) > 0;
@@ -891,6 +896,7 @@ export default class GameScene extends Phaser.Scene {
     this.checkCliffFall();
     this.updateResources(delta);
     this.checkTutorialProgress();
+    this.checkDialogueTriggers();
     this.checkWinCondition();
     this.cullOffscreen();
     
@@ -1683,6 +1689,28 @@ export default class GameScene extends Phaser.Scene {
     if (shouldTrigger) {
       this.tutorialTriggered[step.trigger] = true;
       this.tutorialStep++;
+      const delay = step.delay || 300;
+      this.time.delayedCall(delay, () => {
+        this.showDialogue(step.dialogue, this.level.introSpeaker);
+      });
+    }
+  }
+
+  /** Fire dialogueTriggers on non-tutorial levels (coverage-based mid-level lines) */
+  private checkDialogueTriggers(): void {
+    const triggers = this.level.dialogueTriggers;
+    if (!triggers || this.level.isTutorial) return;
+    const step = triggers[this.dialogueTriggerStep];
+    if (!step || this.dialogueTriggered[step.trigger]) return;
+
+    const coverage = this.getCoverage();
+    let shouldTrigger = false;
+    const match = step.trigger.match(/^coverage(\d+)$/);
+    if (match) shouldTrigger = coverage >= parseInt(match[1], 10);
+
+    if (shouldTrigger) {
+      this.dialogueTriggered[step.trigger] = true;
+      this.dialogueTriggerStep++;
       const delay = step.delay || 300;
       this.time.delayedCall(delay, () => {
         this.showDialogue(step.dialogue, this.level.introSpeaker);

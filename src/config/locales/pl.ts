@@ -275,6 +275,7 @@ const pl: Record<string, string> = {
   tauntSkiWipeout5: "Nawet kozice skrzywiły się na to lądowanie.",
 
   jeanPierreIntro: "Dobrze ci poszło na szkoleniu. Teraz jest na poważnie — zielona trasa, z czasem i paliwem do ogarnięcia.",
+  level_marmottesMid: "Widzisz ten blask na szczytach? Pierwszy brzask. Najlepsza część tej roboty — tylko ty, maszyna i góra, która się budzi.",
   level_chamoisIntro: "Hej, jestem Émilie — JP wysyła cię na niebieską. Pokaż, że umiesz więcej niż kłaść aksamit na zielonej.",
   level_airZoneIntro: "Snowpark to MOJA działka — przygotujemy im coś szalonego! Każdy moduł musi być idealny, riderzy na nas liczą.",
   level_aigleIntro: "L'Aigle to poważna sprawa. Pilnuj paliwa. Drogi serwisowe pozwalają wrócić — szukaj żółto-czarnych słupków.",

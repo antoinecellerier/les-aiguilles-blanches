@@ -281,6 +281,7 @@ const fr: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "T'as bien bossé sur le tutoriel, petit. Maintenant c'est du vrai — la Verte, avec du chrono et du carburant.",
+  level_marmottesMid: "Tu vois cette lueur sur les crêtes ? Le premier jour. Le meilleur moment — juste toi, la machine, et la montagne qui se réveille.",
   level_chamoisIntro: "Salut, moi c'est Émilie — JP te met sur la bleue. Allez, montre que tu sais faire autre chose que du velours sur la verte.",
   level_airZoneIntro: "Le snowpark c'est MON domaine — on va leur préparer un terrain de fou ! Chaque module doit être nickel, les riders comptent sur nous.",
   level_aigleIntro: "L'Aigle, c'est du sérieux. Surveille ton carburant. Les chemins de dameuse permettent de remonter la piste — repère les piquets jaunes et noirs.",

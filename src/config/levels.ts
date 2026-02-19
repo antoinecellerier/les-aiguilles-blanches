@@ -81,6 +81,8 @@ export interface Level {
   accessPaths?: AccessPath[];
   bonusObjectives?: BonusObjective[];
   wildlife?: WildlifeSpawn[];
+  /** Mid-level dialogue triggers (same format as tutorialSteps, works on non-tutorial levels) */
+  dialogueTriggers?: TutorialStep[];
   /** Override computed time limit (seconds). When set, computeTimeLimit is ignored. */
   timeLimitOverride?: number;
 }
@@ -168,7 +170,7 @@ export const LEVELS: Level[] = [
     timeLimit: 300,
     targetCoverage: 80,
     width: 40,
-    height: 60,
+    height: 50,
     hasWinch: false,
     isNight: false,
     weather: 'clear',
@@ -186,6 +188,9 @@ export const LEVELS: Level[] = [
       { type: 'bunny', count: 3 },
       { type: 'marmot', count: 2 },
       { type: 'bird', count: 5 },
+    ],
+    dialogueTriggers: [
+      { trigger: 'coverage40', dialogue: 'level_marmottesMid', delay: 500 },
     ],
   },
   {

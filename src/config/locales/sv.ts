@@ -276,6 +276,7 @@ const sv: Record<string, string> = {
 
   // Dialogues
   jeanPierreIntro: "Bra jobbat med handledningen. Nu är det på riktigt — gröna pisten, med tidur och bränsle att hålla koll på.",
+  level_marmottesMid: "Ser du det där skenet på topparna? Första ljuset. Det bästa med det här jobbet — bara du, maskinen och berget som vaknar.",
   level_chamoisIntro: "Hej, jag är Émilie — JP skickar dig till blå pisten. Visa att du kan mer än att dra sammet på gröna.",
   level_airZoneIntro: "Snowparken är MITT område — vi bygger nåt sjukt åt dem! Varje modul måste sitta perfekt, åkarna räknar med oss.",
   level_aigleIntro: "L'Aigle är på allvar. Håll koll på bränslet. Servicevägarna leder dig uppåt — leta efter de gula och svarta stolparna.",

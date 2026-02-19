@@ -276,6 +276,7 @@ const fi: Record<string, string> = {
 
   // Dialogues
   jeanPierreIntro: "Hyvin tehty tutoriaalissa. Nyt on totta — vihreä rinne, ajastimella ja polttoaineella.",
+  level_marmottesMid: "Näetkö sen hohteen huipuilla? Ensivalo. Tämän työn paras hetki — vain sinä, kone ja heräävä vuori.",
   level_chamoisIntro: "Hei, olen Émilie — JP lähettää sinut siniselle. Näytä, että osaat muutakin kuin samettia vihreällä.",
   level_airZoneIntro: "Snowpark on MINUN aluettani — rakennetaan heille jotain mahtavaa! Jokaisen moduulin pitää olla täydellinen, laskijat luottavat meihin.",
   level_aigleIntro: "L'Aigle on vakavaa. Tarkkaile polttoainetta. Huoltotiet vievät takaisin ylös — etsi kelta-mustaisia tolppia.",

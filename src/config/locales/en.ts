@@ -275,6 +275,7 @@ const en: Record<string, string> = {
   tauntSkiWipeout5: "Even the bouquetins winced at that landing.",
   
   jeanPierreIntro: "Good work on the tutorial, kid. Now it's for real — the Green Piste, with a timer and fuel to manage.",
+  level_marmottesMid: "See that glow on the peaks? First light. Best part of this job — just you, the machine, and the mountain waking up.",
   level_chamoisIntro: "Hey, I'm Émilie — JP's putting you on the blue. Come on, show you can do more than lay corduroy on the green.",
   level_airZoneIntro: "The snowpark's MY turf — we're gonna set up something sick! Every feature needs to be dialed, the riders are counting on us.",
   level_aigleIntro: "L'Aigle is serious. Watch your fuel. Access paths let you drive back up — look for the amber and black striped poles.",

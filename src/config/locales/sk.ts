@@ -275,6 +275,7 @@ const sk: Record<string, string> = {
   tauntSkiWipeout5: "Aj kamzíky sa pri tom dopade zaškierili.",
 
   jeanPierreIntro: "Dobrá práca v tutoriáli. Teraz to bude naostro — zelená zjazdovka, s časom a palivom na starosti.",
+  level_marmottesMid: "Vidíš tú žiaru na hrebeňoch? Prvé svitanie. Najlepšia časť tejto práce — len ty, stroj a hora, čo sa prebúdza.",
   level_chamoisIntro: "Ahoj, som Émilie — JP ťa posiela na modrú. Ukáž, že zvládneš viac než len samety na zelenej.",
   level_airZoneIntro: "Snowpark je MÔJ rajón — pripravíme im niečo šialené! Každý modul musí sedieť, jazdci na nás počítajú.",
   level_aigleIntro: "L'Aigle je vážna vec. Sleduj palivo. Po servisných cestách sa vrátiš hore — hľadaj žlto-čierne stĺpiky.",

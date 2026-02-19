@@ -227,6 +227,7 @@ const it: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "Bravo per il tutorial, ragazzo. Ora si fa sul serio — la Verde, con cronometro e carburante da gestire.",
+  level_marmottesMid: "Vedi quel bagliore sulle cime? La prima luce. Il bello di questo lavoro — solo tu, la macchina e la montagna che si sveglia.",
   level_chamoisIntro: "Ciao, sono Émilie — JP ti manda sulla blu. Dai, dimostra che sai fare di più che velluto sulla verde.",
   level_airZoneIntro: "Lo snowpark è il MIO territorio — prepareremo qualcosa di pazzesco! Ogni modulo dev'essere perfetto, i rider contano su di noi.",
   level_aigleIntro: "L'Aigle è roba seria. Occhio al carburante. I tracciati battipista permettono di risalire — cerca i pali a strisce gialle e nere.",

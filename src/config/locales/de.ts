@@ -227,6 +227,7 @@ const de: Record<string, string> = {
   
   // Dialogues
   jeanPierreIntro: "Gut gemacht im Tutorial, Kleiner. Jetzt wird's ernst — die Grüne, mit Timer und Kraftstoff.",
+  level_marmottesMid: "Siehst du das Leuchten auf den Gipfeln? Das erste Licht. Das Beste an diesem Job — nur du, die Maschine und der Berg, der erwacht.",
   level_chamoisIntro: "Hey, ich bin Émilie — JP schickt dich auf die Blaue. Zeig, dass du mehr kannst als nur grüne Pisten zu bügeln.",
   level_airZoneIntro: "Der Snowpark ist MEIN Revier — wir bauen denen was Krasses auf! Jedes Modul muss perfekt sitzen, die Rider zählen auf uns.",
   level_aigleIntro: "L'Aigle ist ernst. Achte auf den Kraftstoff. Die Ziehwege führen zurück nach oben — achte auf die gelb-schwarz gestreiften Stangen.",

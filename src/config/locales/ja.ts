@@ -275,6 +275,7 @@ const ja: Record<string, string> = {
   tauntSkiWipeout5: "アイベックスでさえ、あの着地には顔をしかめた。",
 
   jeanPierreIntro: "チュートリアルはよくやった。ここからが本番だ — 初級コース、タイマーと燃料管理ありだ。",
+  level_marmottesMid: "山頂のあの光が見えるか？夜明けだ。この仕事で一番いい瞬間 — お前と、マシンと、目覚める山だけだ。",
   level_chamoisIntro: "やあ、Émilieよ — JPが中級コースに行かせるって。初級だけじゃないところを見せて。",
   level_airZoneIntro: "スノーパークは私の領域よ — とんでもないコースを作るわ！モジュールは全部完璧に、ライダーが期待してるんだから。",
   level_aigleIntro: "L'Aigleは本格的だ。燃料に注意。作業道で登り返せる — 黄色と黒のポールを探せ。",

@@ -276,6 +276,7 @@ const nb: Record<string, string> = {
 
   // Dialogues
   jeanPierreIntro: "Bra jobbet med opplæringen. Nå er det alvor — grønn løype, med klokke og drivstoff å passe på.",
+  level_marmottesMid: "Ser du det lysskjæret på toppene? Første dagslys. Det beste med denne jobben — bare deg, maskinen og fjellet som våkner.",
   level_chamoisIntro: "Hei, jeg er Émilie — JP sender deg til den blå løypa. Vis at du kan mer enn å legge fløyel på grønne.",
   level_airZoneIntro: "Snowparken er MITT område — vi bygger noe sykt for dem! Hver modul må sitte perfekt, riderne regner med oss.",
   level_aigleIntro: "L'Aigle er alvor. Hold øye med drivstoffet. Serviceveiene lar deg kjøre opp igjen — se etter de gule og svarte stolpene.",

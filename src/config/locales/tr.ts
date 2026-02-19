@@ -275,6 +275,7 @@ const tr: Record<string, string> = {
   tauntSkiWipeout5: "Dağ keçileri bile o inişe yüzlerini buruşturdu.",
 
   jeanPierreIntro: "Eğitimde iyi iş çıkardın. Şimdi gerçek başlıyor — yeşil pist, süre ve yakıt yönetimiyle.",
+  level_marmottesMid: "Zirvelerdeki o ışığı görüyor musun? İlk aydınlık. Bu işin en güzel yanı — sadece sen, makine ve uyanan dağ.",
   level_chamoisIntro: "Selam, ben Émilie — JP seni mavi piste gönderiyor. Sadece yeşilde kadife döşemekten fazlasını yapabildiğini göster.",
   level_airZoneIntro: "Snowpark BENİM alanım — müthiş bir parkur hazırlayacağız! Her modül mükemmel olmalı, sporcular bize güveniyor.",
   level_aigleIntro: "L'Aigle ciddi iş. Yakıta dikkat et. Servis yollarıyla geri çıkabilirsin — sarı-siyah direkleri ara.",
