@@ -291,7 +291,7 @@ const sk: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19. februára 2026",
-  changelog_20260219: "🎬 Prológ pre nových hráčov\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasie v menu\n⛷️ Zjazd na lyžiach po tutoriáli",
+  changelog_20260219: "🎬 Prológ pre nových hráčov\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasie v menu\n🔗 Zdieľateľné denné zjazdy",
   changelog_20260217_date: "17. februára 2026",
   changelog_20260217: "🏔️ Sedem tvarov zjazdoviek\n🎯 Rozmanitosť generovania\n⚡ Plynulejší zjazd",
   changelog_20260216_date: "16. februára 2026",

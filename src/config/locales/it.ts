@@ -177,7 +177,7 @@ const it: Record<string, string> = {
   skipTutorial: "⏭️ Saltando il tutorial… Tocca per rifarlo.",
   skipTutorialGamepad: "⏭️ Saltando il tutorial… Premi per rifarlo.",
   tutorialWelcome: "🏔️ Jean-Pierre, capo gattista. Vai sulla pista — usa {keys} o le frecce ↑↓←→.",
-  tutorialWelcomeTouch: "��️ Jean-Pierre, capo gattista. Vai sulla pista — usa il D-pad a sinistra.",
+  tutorialWelcomeTouch: "🧑‍🔧 Jean-Pierre, capo gattista. Vai sulla pista — usa il D-pad a sinistra.",
   tutorialWelcomeGamepad: "🏔️ Jean-Pierre, capo gattista. Vai sulla pista — usa lo stick sinistro o il D-pad.",
   // UNUSED     tutorialControls: "🎮 Per muovere il gatto delle nevi, usa {keys} o le frecce ↑↓←→.",
   // UNUSED     tutorialControlsTouch: "🎮 Per muoverti, usa il D-pad ◀▲▼▶ a sinistra.",
@@ -243,7 +243,7 @@ const it: Record<string, string> = {
   
   // Changelog
   changelog_20260219_date: "19 febbraio 2026",
-  changelog_20260219: "🎬 Prologo per nuovi giocatori\n📖 Tutorial semplificato\n🌦️ Meteo casuale nel menu\n⛷️ Discesa sugli sci dopo il tutorial",
+  changelog_20260219: "🎬 Prologo per nuovi giocatori\n📖 Tutorial semplificato\n🌦️ Meteo casuale nel menu\n🔗 Piste del giorno condivisibili",
   changelog_20260217_date: "17 febbraio 2026",
   changelog_20260217: "🏔️ Sette forme di pista\n🎯 Varietà dei livelli\n⚡ Discesa più fluida",
   changelog_20260216_date: "16 febbraio 2026",

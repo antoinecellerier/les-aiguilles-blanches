@@ -291,7 +291,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19 Şubat 2026",
-  changelog_20260219: "🎬 Yeni oyuncular için prolog\n📖 Basitleştirilmiş eğitim\n🌦️ Menüde rastgele hava\n⛷️ Eğitimden sonra kayak inişi",
+  changelog_20260219: "🎬 Yeni oyuncular için prolog\n📖 Basitleştirilmiş eğitim\n🌦️ Menüde rastgele hava\n🔗 Paylaşılabilir günlük parkurlar",
   changelog_20260217_date: "17 Şubat 2026",
   changelog_20260217: "🏔️ Yedi pist şekli\n🎯 Seviye çeşitliliği\n⚡ Akıcı kayak deneyimi",
   changelog_20260216_date: "16 Şubat 2026",

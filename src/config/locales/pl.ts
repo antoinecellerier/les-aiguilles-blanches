@@ -196,7 +196,7 @@ const pl: Record<string, string> = {
   skipTutorial: "⏭️ Pomijam samouczek… Dotknij aby powtórzyć.",
   skipTutorialGamepad: "⏭️ Pomijam samouczek… Naciśnij przycisk aby powtórzyć.",
   tutorialWelcome: "🏔️ Jean-Pierre, główny ratrakista. Jedź po trasie — użyj {keys} lub ↑↓←→.",
-  tutorialWelcomeTouch: "��️ Jean-Pierre, główny ratrakista. Jedź po trasie — użyj D-pada po lewej.",
+  tutorialWelcomeTouch: "🧑‍🔧 Jean-Pierre, główny ratrakista. Jedź po trasie — użyj D-pada po lewej.",
   tutorialWelcomeGamepad: "🏔️ Jean-Pierre, główny ratrakista. Jedź po trasie — użyj lewej gałki lub D-pada.",
   // UNUSED     tutorialControls: "🎮 Aby poruszać ratrakiem, użyj {keys} lub strzałek ↑↓←→.",
   // UNUSED     tutorialControlsTouch: "🎮 Aby poruszać ratrakiem, użyj D-pada ◀▲▼▶ po lewej.",
@@ -291,7 +291,7 @@ const pl: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19 lutego 2026",
-  changelog_20260219: "🎬 Prolog dla nowych graczy\n📖 Uproszczony samouczek\n🌦️ Losowa pogoda w menu\n⛷️ Zjazd na nartach po samouczku",
+  changelog_20260219: "🎬 Prolog dla nowych graczy\n📖 Uproszczony samouczek\n🌦️ Losowa pogoda w menu\n🔗 Udostępniane zjazdy dnia",
   changelog_20260217_date: "17 lutego 2026",
   changelog_20260217: "🏔️ Siedem kształtów tras\n🎯 Różnorodność poziomów\n⚡ Płynniejsza jazda",
   changelog_20260216_date: "16 lutego 2026",

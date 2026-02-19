@@ -291,7 +291,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "2026년 2월 19일",
-  changelog_20260219: "🎬 신규 플레이어 프롤로그\n📖 튜토리얼 간소화\n🌦️ 메뉴 랜덤 날씨\n⛷️ 튜토리얼 후 스키 활강",
+  changelog_20260219: "🎬 신규 플레이어 프롤로그\n📖 튜토리얼 간소화\n🌦️ 메뉴 랜덤 날씨\n🔗 데일리 런 공유",
   changelog_20260217_date: "2026년 2월 17일",
   changelog_20260217: "🏔️ 7종 코스 형태\n🎯 레벨 생성 다양성\n⚡ 스키 활주 개선",
   changelog_20260216_date: "2026년 2월 16일",

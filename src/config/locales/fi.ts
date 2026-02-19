@@ -292,7 +292,7 @@ const fi: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19. helmikuuta 2026",
-  changelog_20260219: "🎬 Prologi uusille pelaajille\n📖 Yksinkertaistettu opastus\n🌦️ Satunnainen valikon sää\n⛷️ Hiihtolasku opastuksen jälkeen",
+  changelog_20260219: "🎬 Prologi uusille pelaajille\n📖 Yksinkertaistettu opastus\n🌦️ Satunnainen valikon sää\n🔗 Jaettavat päivän laskut",
   changelog_20260217_date: "17. helmikuuta 2026",
   changelog_20260217: "🏔️ Seitsemän rinnemuotoa\n🎯 Kenttävaihtelu lisätty\n⚡ Sulavampi laskettelu",
   changelog_20260216_date: "16. helmikuuta 2026",
