@@ -114,12 +114,16 @@ class TestDialogueSpeakers:
         
         # Dismiss any intro dialogue first
         game_page.wait_for_timeout(1000)
-        clear_dialogue_queue(game_page)
         
-        # Trigger avalancheWarning directly (no explicit speaker)
+        # Atomically clear queue and trigger avalancheWarning in one evaluate
+        # to prevent tutorial dialogues from re-firing between clear and show
         game_page.evaluate("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
-            if (ds && ds.showDialogue) ds.showDialogue('avalancheWarning');
+            if (ds) {
+                ds.dialogueQueue = [];
+                if (ds.hideDialogue) ds.hideDialogue();
+                ds.showDialogue('avalancheWarning');
+            }
         }""")
         
         wait_for_dialogue(game_page, timeout=3000)

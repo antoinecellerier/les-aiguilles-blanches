@@ -24,7 +24,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 echo "Installing test dependencies..."
-pip install -q playwright pytest-playwright pytest-xdist pillow
+pip install -q playwright pytest-playwright pytest-xdist pytest-rerunfailures pillow
 
 echo "Installing Playwright browsers: ${BROWSERS[*]}..."
 if [ "${PLAYWRIGHT_WITH_DEPS:-0}" = "1" ]; then

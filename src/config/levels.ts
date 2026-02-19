@@ -525,12 +525,3 @@ for (const level of LEVELS) {
     }
   }
 }
-
-if (typeof console !== 'undefined') {
-  console.table(LEVELS.map(l => ({
-    id: l.id, name: l.nameKey.replace('level_', '').replace('Name', ''),
-    difficulty: l.difficulty, size: `${l.width}×${l.height}`,
-    target: `${l.targetCoverage}%`, timeLimit: `${l.timeLimit}s`,
-    paths: l.accessPaths?.length ?? 0, winch: l.hasWinch,
-  })));
-}

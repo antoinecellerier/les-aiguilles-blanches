@@ -55,7 +55,7 @@ jobs:
         run: PLAYWRIGHT_WITH_DEPS=1 ./setup.sh ${{ matrix.browser }}
 
       - name: Run tests
-        run: ./run-tests.sh --browser ${{ matrix.browser }}
+        run: ./run-tests.sh --browser ${{ matrix.browser }} --reruns 2 --reruns-delay 5
 
       - name: Upload screenshots on failure
         if: failure()

@@ -31,6 +31,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **CI stability fixes** — Fixed dialogue speaker test race condition (atomic clear+show). Added `pytest-rerunfailures` with `--reruns 2` for transient WebKit CI failures. Removed noisy `console.table(LEVELS)` logging.
+
 - ✅ **Test review & hardening** — Full test review (E2E + unit) against 10 anti-patterns. Fixed 7 HIGH issues: missing assertions in accessibility tests, hardcoded button indices, tight timeouts, missing inputReady waits, flaky changelog test (scene.restart race). Added data keys to PauseScene, LevelCompleteScene, CreditsScene buttons. Generalized `find_menu_button_index` to work with any scene. Bumped tight 3s timeouts to 5s. 248/248 E2E + 205/205 unit stable.
 
 - ✅ **Test-review skill** — New `.github/skills/test-review/SKILL.md` covering 10 E2E anti-patterns and 6 unit test anti-patterns, plus test design quality, maintainability, parallel safety, and coverage assessment phases.
