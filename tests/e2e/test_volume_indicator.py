@@ -137,7 +137,11 @@ class TestVolumeIndicator:
         # Move far away
         game_page.mouse.move(canvas["x"] + canvas["width"] / 2,
                              canvas["y"] + canvas["height"] / 2)
-        game_page.wait_for_timeout(500)
+
+        game_page.wait_for_function("""() => {
+            const scene = window.game?.scene?.getScene('MenuScene');
+            return !(scene?.volumeSliderVisible ?? false);
+        }""", timeout=3000)
 
         slider_visible = game_page.evaluate("""() => {
             const scene = window.game?.scene?.getScene('MenuScene');

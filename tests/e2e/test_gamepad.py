@@ -77,12 +77,30 @@ def tap_gamepad_button(page: Page, button_index: int, delay: int = 100):
 
 
 def navigate_stick_down(page: Page, steps: int = 3):
-    """Navigate down N steps using left stick pulses (for menu navigation)."""
-    for _ in range(steps):
+    """Navigate down N steps using left stick pulses (for menu navigation).
+    
+    Verifies each step actually moved the selection before proceeding,
+    which prevents flakiness on slow engines (WebKit CI).
+    """
+    for i in range(steps):
+        expected = i + 1
         set_gamepad_stick(page, 'left', 0, 0.8)
-        page.wait_for_timeout(150)
+        try:
+            page.wait_for_function(
+                f"() => (window.game?.scene?.getScene('MenuScene')?.selectedIndex ?? -1) >= {expected}",
+                timeout=3000
+            )
+        except Exception:
+            # Retry: re-pulse the stick for this step
+            set_gamepad_stick(page, 'left', 0, 0)
+            page.wait_for_timeout(250)
+            set_gamepad_stick(page, 'left', 0, 0.8)
+            page.wait_for_function(
+                f"() => (window.game?.scene?.getScene('MenuScene')?.selectedIndex ?? -1) >= {expected}",
+                timeout=3000
+            )
         set_gamepad_stick(page, 'left', 0, 0)
-        page.wait_for_timeout(350)
+        page.wait_for_timeout(250)
 
 
 def set_gamepad_stick(page: Page, stick: str, x: float, y: float):
@@ -208,7 +226,9 @@ class TestGamepadGameplay:
             return ds && ds.isDialogueShowing && ds.isDialogueShowing();
         }""", timeout=3000)
         
-        # Press A to dismiss
+        # Press A to advance/dismiss (may need two: one to complete typewriter, one to advance)
+        tap_gamepad_button(gamepad_page, 0, delay=150)
+        gamepad_page.wait_for_timeout(400)
         tap_gamepad_button(gamepad_page, 0, delay=150)
         gamepad_page.wait_for_timeout(300)
         

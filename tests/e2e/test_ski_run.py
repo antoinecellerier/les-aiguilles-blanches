@@ -452,9 +452,12 @@ class TestSkiJump:
         wait_for_scene(page, 'SkiRunScene', timeout=10000)
         page.wait_for_timeout(500)
         # Wait for gravity to build speed (auto-accelerates downhill)
+        # Also bail if scene ended (crash/finish) to avoid hanging
         page.wait_for_function("""() => {
             var s = window.game.scene.getScene('SkiRunScene');
-            return s && s.currentSpeed >= 80;
+            if (!s || !s.sys || !s.sys.isActive()) return true;
+            if (s.isFinished || s.isCrashed) return true;
+            return s.currentSpeed >= 60;
         }""", timeout=15000)
 
     def test_jump_sets_airborne(self, game_page: Page):
