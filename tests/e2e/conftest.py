@@ -357,8 +357,10 @@ def navigate_to_settings(page):
 
 
 @pytest.fixture(scope="session")
-def browser_type_launch_args(browser_type_launch_args):
-    """Reduce Chromium CPU usage during parallel test runs."""
+def browser_type_launch_args(browser_type_launch_args, browser_name):
+    """Reduce Chromium CPU usage during parallel test runs. Skip for non-Chromium."""
+    if browser_name != "chromium":
+        return browser_type_launch_args
     return {
         **browser_type_launch_args,
         "args": [

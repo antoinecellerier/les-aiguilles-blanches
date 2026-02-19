@@ -187,7 +187,7 @@ class TestSkiRun:
         }""")
         has_retry = any('Again' in t or 'Re-' in t or 'Nochmal' in t or 'Otra' in t
                         or 'もう一度' in t or '다시' in t for t in buttons)
-        has_next = any('Next' in t or 'Suivant' in t for t in buttons)
+        has_next = any('Next' in t or 'suivant' in t.lower() for t in buttons)
         assert has_retry, f"Should show ski retry button, got: {buttons}"
         assert has_next, f"Should show Next Level button on ski fail (skiing is optional), got: {buttons}"
 
