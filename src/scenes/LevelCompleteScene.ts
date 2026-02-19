@@ -384,10 +384,18 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'), false, 'menu');
     } else if (this.won && this.levelIndex < LEVELS.length - 1) {
-      this.addButton(buttonContainer, t('nextLevel') || 'Next Level', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }), true, 'nextLevel');
-      this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
-        () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), false, 'ski');
+      // After tutorial, promote ski run to primary CTA to hook the player
+      const isTutorial = this.levelIndex === 0;
+      this.addButton(buttonContainer, isTutorial ? skiLabel : (t('nextLevel') || 'Next Level'), buttonFontSize, buttonPadding2,
+        isTutorial
+          ? () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' })
+          : () => this.navigateTo('GameScene', { level: this.levelIndex + 1 }),
+        true, isTutorial ? 'ski' : 'nextLevel');
+      this.addButton(buttonContainer, isTutorial ? (t('nextLevel') || 'Next Level') : skiLabel, buttonFontSize, buttonPadding2,
+        isTutorial
+          ? () => this.navigateTo('GameScene', { level: this.levelIndex + 1 })
+          : () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }),
+        false, isTutorial ? 'nextLevel' : 'ski');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
         () => this.navigateTo('MenuScene'), false, 'menu');
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
