@@ -489,3 +489,11 @@ After grooming a daily run, "Ski it!" lets you descend on your own work. Regular
 Pausing during a daily run shows a daily-run-aware menu:
 - **Quit** returns to the Daily Runs screen (not main menu)
 - **New Run** (random runs only) generates a fresh seed at the same difficulty rank
+
+### Sharing Runs
+
+Each procedural level has a unique 4–6 character seed code (Base36). Share runs with friends:
+- **📋 Share button** on the Daily Runs screen copies a URL like `?seed=ABC123&rank=blue` to the clipboard
+- **Share after winning** — the level complete screen for daily runs includes a Share button
+- **Opening a share URL** takes you straight to the Daily Runs screen with the seed and rank preset, ready to play
+- If the shared seed matches today's Daily Shift, no extra button appears — it's already the daily run

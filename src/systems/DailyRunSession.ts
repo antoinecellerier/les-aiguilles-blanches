@@ -16,6 +16,8 @@ export interface DailyRunSessionData {
   level: Level;
   /** Human-readable seed code (e.g. "17UK8P4"). */
   seedCode: string;
+  /** Base seed code before rank transformation (for sharing). */
+  baseSeedCode: string;
   /** Selected difficulty rank. */
   rank: DailyRunRank;
   /** True when this is a daily run (not a random run). */

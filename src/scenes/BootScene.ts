@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { Accessibility, setLanguage, detectLanguage } from '../setup';
 import { detectKeyboardLayout } from '../utils/keyboardLayout';
+import { parseShareParams, clearShareParams } from '../utils/shareUrl';
+import { isLevelCompleted } from '../utils/gameProgress';
 import { createSkierTexture, createSkierLeftTexture, createSkierRightTexture, createSkierBrakeTexture, createSkierTuckTexture, createSnowboarderTexture, createSnowboarderLeftTexture, createSnowboarderRightTexture, createSnowboarderBrakeTexture, createSnowboarderTuckTexture } from '../utils/skiSprites';
 import { BALANCE } from '../config/gameConfig';
 import { NIGHT_SUFFIX, NIGHT_TEXTURE_KEYS } from '../utils/nightPalette';
@@ -57,9 +59,20 @@ export default class BootScene extends Phaser.Scene {
       // Generate placeholder textures
       this.generateTextures();
 
-      // Start menu
+      // Start menu (or daily runs if share URL detected)
       if ((window as any)._loadFallbackTimer) clearTimeout((window as any)._loadFallbackTimer);
-      this.scene.start('MenuScene');
+
+      const shareParams = parseShareParams();
+      if (shareParams && this.isCampaignComplete()) {
+        clearShareParams();
+        this.scene.start('DailyRunsScene', {
+          seedCode: shareParams.seedCode,
+          rank: shareParams.rank,
+        });
+      } else {
+        if (shareParams) clearShareParams();
+        this.scene.start('MenuScene');
+      }
     } catch (error) {
       console.error('BootScene error:', error);
       const message = error instanceof Error ? error.message : String(error);
@@ -533,5 +546,12 @@ export default class BootScene extends Phaser.Scene {
       const nightTex = this.textures.addCanvas(nKey, canvas);
       if (nightTex?.source?.[0]) nightTex.source[0].scaleMode = NEAREST;
     }
+  }
+
+  private isCampaignComplete(): boolean {
+    for (let i = 1; i <= 10; i++) {
+      if (!isLevelCompleted(i)) return false;
+    }
+    return true;
   }
 }

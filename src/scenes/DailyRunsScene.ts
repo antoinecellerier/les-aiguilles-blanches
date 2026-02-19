@@ -8,12 +8,14 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuBackdrop, createMenuHeader, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { playClick } from '../systems/UISounds';
 import { generateValidDailyRunLevel, rankSeed, RANKS, type DailyRunRank } from '../systems/LevelGenerator';
-import { seedToCode, dailySeed, randomSeed } from '../utils/seededRNG';
+import { seedToCode, codeToSeed, dailySeed, randomSeed } from '../utils/seededRNG';
 import { DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { startDailyRunSession } from '../systems/DailyRunSession';
 import { getJSON } from '../utils/storage';
 import { ResizeManager } from '../utils/resizeManager';
+import { buildShareUrl, copyToClipboard } from '../utils/shareUrl';
+import { showToast } from '../utils/toastNotification';
 
 const RANK_COLORS: Record<DailyRunRank, string> = {
   green: '#22c55e',
@@ -39,13 +41,22 @@ export default class DailyRunsScene extends Phaser.Scene {
   private gamepadNav?: GamepadMenuNav;
   private backdrop!: MenuBackdrop;
   private resizeManager!: ResizeManager;
+  private sharedSeedNum: number | null = null;
 
   constructor() {
     super({ key: 'DailyRunsScene' });
   }
 
-  create(): void {
+  create(data?: { seedCode?: string; rank?: DailyRunRank }): void {
     this.events.once('shutdown', this.shutdown, this);
+
+    // Check for shared seed from URL params
+    if (data?.seedCode) {
+      this.sharedSeedNum = codeToSeed(data.seedCode);
+      if (data.rank) this.selectedRank = data.rank;
+    } else {
+      this.sharedSeedNum = null;
+    }
 
     const { width, height } = this.cameras.main;
     this.backdrop = createMenuBackdrop(this, { skipGroomer: true });
@@ -209,26 +220,77 @@ export default class DailyRunsScene extends Phaser.Scene {
 
     const dailyCode = seedToCode(dailySeedNum);
 
-    const dailyBtn = this.add.text(width / 2, dailyY,
+    // Only show separate shared button when the seed differs from today's daily
+    const isSharedDifferentFromDaily = this.sharedSeedNum !== null && this.sharedSeedNum !== dailySeedNum;
+
+    // Shared seed button (when arriving via share URL with a non-daily seed)
+    if (isSharedDifferentFromDaily) {
+      const sharedCode = seedToCode(this.sharedSeedNum!);
+      const sharedBtn = this.add.text(width / 2, dailyY,
+        t('playSharedSeed') + '  [' + sharedCode + ']',
+        {
+          fontFamily: THEME.fonts.family,
+          fontSize: fontSize + 'px',
+          color: THEME.colors.textPrimary,
+          backgroundColor: THEME.colors.buttonCTAHex,
+          padding: { x: btnPadX, y: btnPadY },
+        }
+      ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
+      sharedBtn.setData('key', 'playSharedSeed');
+      sharedBtn.on('pointerdown', () => { playClick(); this.startDailyRun(this.sharedSeedNum!); });
+      allButtons.push(sharedBtn);
+      allCallbacks.push(() => this.startDailyRun(this.sharedSeedNum!));
+    }
+
+    // Daily Shift button + share icon
+    const dailyBtnY = isSharedDifferentFromDaily
+      ? Math.round((dailyY + randomY) / 2)
+      : dailyY;
+    const isSecondaryCTA = isSharedDifferentFromDaily;
+
+    const dailyBtn = this.add.text(width / 2, dailyBtnY,
       t('dailyRuns_dailyShift') + '  [' + dailyCode + ']',
       {
         fontFamily: THEME.fonts.family,
-        fontSize: fontSize + 'px',
-        color: THEME.colors.textPrimary,
-        backgroundColor: THEME.colors.buttonCTAHex,
-        padding: { x: btnPadX, y: btnPadY },
+        fontSize: (isSecondaryCTA ? smallFont : fontSize) + 'px',
+        color: isSecondaryCTA ? THEME.colors.textSecondary : THEME.colors.textPrimary,
+        backgroundColor: isSecondaryCTA ? THEME.colors.textDark : THEME.colors.buttonCTAHex,
+        padding: { x: isSecondaryCTA ? Math.round(14 * textScale) : btnPadX,
+                   y: isSecondaryCTA ? Math.round(5 * textScale) : btnPadY },
       }
     ).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
+    dailyBtn.setData('key', 'dailyShift');
     dailyBtn.on('pointerdown', () => { playClick(); this.startDailyRun(dailySeedNum, true); });
     allButtons.push(dailyBtn);
     allCallbacks.push(() => this.startDailyRun(dailySeedNum, true));
 
-    // --- Separator + Random Run ---
-    const sepY = Math.round((dailyY + randomY) / 2);
-    const lineW = Math.round(width * 0.25);
-    const sepGfx = this.add.graphics().setDepth(DEPTHS.MENU_UI);
-    sepGfx.fillStyle(0x666666, 0.4);
-    sepGfx.fillRect(width / 2 - lineW / 2, sepY, lineW, 1);
+    // Share button (📋) — right of Daily Shift
+    const shareBtn = this.add.text(0, dailyBtnY,
+      '📋',
+      {
+        fontFamily: THEME.fonts.family,
+        fontSize: (isSecondaryCTA ? smallFont : fontSize) + 'px',
+        color: THEME.colors.textMuted,
+        padding: { x: Math.round(6 * textScale), y: isSecondaryCTA ? Math.round(5 * textScale) : btnPadY },
+      }
+    ).setOrigin(0, 0.5).setDepth(DEPTHS.MENU_UI).setInteractive({ useHandCursor: true });
+    shareBtn.setData('key', 'share');
+    // Position right of daily button
+    shareBtn.setX(Math.round(dailyBtn.x + dailyBtn.width / 2 + 6 * textScale));
+    shareBtn.on('pointerdown', () => {
+      playClick();
+      const url = buildShareUrl(dailyCode, this.selectedRank);
+      copyToClipboard(url).then(ok => { if (ok) showToast(this, t('copied')); });
+    });
+
+    // --- Separator + Random Run (hide when shared seed takes the daily spot) ---
+    if (!isSharedDifferentFromDaily) {
+      const sepY = Math.round((dailyY + randomY) / 2);
+      const lineW = Math.round(width * 0.25);
+      const sepGfx = this.add.graphics().setDepth(DEPTHS.MENU_UI);
+      sepGfx.fillStyle(0x666666, 0.4);
+      sepGfx.fillRect(width / 2 - lineW / 2, sepY, lineW, 1);
+    }
 
     const randomBtn = this.add.text(width / 2, randomY,
       t('dailyRuns_randomRun'),
@@ -250,9 +312,12 @@ export default class DailyRunsScene extends Phaser.Scene {
     });
 
     // Keyboard/gamepad navigation: up/down for action buttons, left/right for rank
-    const isCTA = [false, true, false]; // back, daily(CTA), random
+    // isCTA: back=false, [shared=true if present], daily=CTA when no shared, random=false
+    const isCTA = isSharedDifferentFromDaily
+      ? [false, true, false, false]  // back, shared(CTA), daily, random
+      : [false, true, false];        // back, daily(CTA), random
     this.buttonNav = createMenuButtonNav(allButtons, allCallbacks, ctaStyler(isCTA));
-    this.buttonNav.select(1); // Start on Daily Shift
+    this.buttonNav.select(1); // Start on first action button (shared or daily)
 
     // Left/right arrows cycle rank, standard keys for button nav
     this.input.keyboard?.on('keydown-LEFT', () => this.cycleRank(-1));
@@ -301,8 +366,8 @@ export default class DailyRunsScene extends Phaser.Scene {
   }
 
   private updateBriefing(): void {
-    const dailySeedNum = dailySeed();
-    const { level } = generateValidDailyRunLevel(rankSeed(dailySeedNum, this.selectedRank), this.selectedRank);
+    const baseSeed = this.sharedSeedNum ?? dailySeed();
+    const { level } = generateValidDailyRunLevel(rankSeed(baseSeed, this.selectedRank), this.selectedRank);
     const isPark = level.difficulty === 'park';
 
     if (this.pisteNameDisplay) {
@@ -335,6 +400,7 @@ export default class DailyRunsScene extends Phaser.Scene {
     startDailyRunSession({
       level,
       seedCode: code,
+      baseSeedCode: seedToCode(seed),
       rank: this.selectedRank,
       isDaily,
     });

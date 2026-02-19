@@ -249,7 +249,7 @@ export default class PauseScene extends Phaser.Scene {
     const seed = randomSeed();
     const { level, usedSeed } = generateValidDailyRunLevel(rankSeed(seed, session.rank), session.rank);
     const code = seedToCode(usedSeed);
-    startDailyRunSession({ level, seedCode: code, rank: session.rank, isDaily: false });
+    startDailyRunSession({ level, seedCode: code, baseSeedCode: seedToCode(seed), rank: session.rank, isDaily: false });
     resetGameScenes(this.game, 'GameScene', { level: level.id });
   }
 

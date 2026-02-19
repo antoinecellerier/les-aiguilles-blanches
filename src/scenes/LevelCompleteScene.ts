@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level, type BonusObjective } from '../setup';
 import { evaluateAllBonusObjectives, getBonusLabel, type BonusEvalState } from '../utils/bonusObjectives';
 import { THEME } from '../config/theme';
-import { BALANCE } from '../config/gameConfig';
+import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { getString, setString, getJSON, setJSON } from '../utils/storage';
 import { getMappingFromGamepad } from '../utils/gamepad';
@@ -15,6 +15,8 @@ import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
 import { markLevelCompleted } from '../utils/gameProgress';
 import { clearGroomedTiles } from '../utils/skiRunState';
 import { getDailyRunSession } from '../systems/DailyRunSession';
+import { buildShareUrl, copyToClipboard } from '../utils/shareUrl';
+import { showToast } from '../utils/toastNotification';
 
 /**
  * Les Aiguilles Blanches - Level Complete Scene
@@ -358,9 +360,16 @@ export default class LevelCompleteScene extends Phaser.Scene {
           setJSON(STORAGE_KEYS.DAILY_RUN_DATE, data);
         }
       }
-      // Daily run complete — ski it + menu
+      // Daily run complete — ski it + share + menu
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
         () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), true, 'ski');
+      this.addButton(buttonContainer, '📋 ' + t('share'), buttonFontSize, buttonPadding2,
+        () => {
+          if (session?.baseSeedCode) {
+            const url = buildShareUrl(session.baseSeedCode, session.rank);
+            copyToClipboard(url).then(ok => { if (ok) showToast(this, t('copied')); });
+          }
+        }, false, 'share');
       this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
         () => this.navigateTo('DailyRunsScene'), false, 'dailyRuns');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,

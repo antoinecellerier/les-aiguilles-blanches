@@ -104,6 +104,8 @@ snow-groomer/
 │   │   ├── skiSprites.ts     # Procedural pixel art for skier & snowboarder (20×28px, 8 variants each)
 │   │   ├── storage.ts       # Type-safe localStorage helpers (getJSON/setJSON/getString/setString)
 │   │   ├── seededRNG.ts     # Seeded RNG wrapper (Phaser.Math.RND), seed↔code, daily seed
+│   │   ├── shareUrl.ts      # Share URL builder/parser, clipboard copy, seed sharing
+│   │   ├── toastNotification.ts # Brief toast notification (fade in/out)
 │   │   ├── touchDetect.ts    # Touch detection with Firefox desktop fallback
 │   │   ├── fullscreen.ts     # Fullscreen toggle/query abstraction (browser + Electron IPC)
 │   │   └── updateCheck.ts    # Checks for newer deployed version via version.json
