@@ -291,6 +291,8 @@ const sv: Record<string, string> = {
   marieIntro: "Hej! Jag är Marie, jag driver restaurangen uppe vid pisten. Kom förbi när du vill — en varm måltid gör underverk!",
 
   // Changelog
+  changelog_20260219_date: "19 februari 2026",
+  changelog_20260219: "🎬 Prolog för nya spelare\n📖 Förenklad handledning\n🌦️ Slumpmässigt menyväder\n⛷️ Skidåkning efter handledningen",
   changelog_20260217_date: "17 februari 2026",
   changelog_20260217: "🏔️ Sju pistformer\n🎯 Banvariation förbättrad\n⚡ Smidigare skidåkning",
   changelog_20260216_date: "16 februari 2026",

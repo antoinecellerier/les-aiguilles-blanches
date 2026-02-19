@@ -290,6 +290,8 @@ const pl: Record<string, string> = {
   marieIntro: "Cześć! Jestem Marie, prowadzę restaurację na górze trasy. Wpadaj kiedy chcesz — ciepły posiłek czyni cuda!",
 
   // Changelog
+  changelog_20260219_date: "19 lutego 2026",
+  changelog_20260219: "🎬 Prolog dla nowych graczy\n📖 Uproszczony samouczek\n🌦️ Losowa pogoda w menu\n⛷️ Zjazd na nartach po samouczku",
   changelog_20260217_date: "17 lutego 2026",
   changelog_20260217: "🏔️ Siedem kształtów tras\n🎯 Różnorodność poziomów\n⚡ Płynniejsza jazda",
   changelog_20260216_date: "16 lutego 2026",

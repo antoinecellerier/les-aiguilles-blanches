@@ -291,6 +291,8 @@ const nb: Record<string, string> = {
   marieIntro: "Hei! Jeg er Marie, jeg driver restauranten oppe ved løypa. Stikk innom når du vil — et varmt måltid gjør underverker!",
 
   // Changelog
+  changelog_20260219_date: "19. februar 2026",
+  changelog_20260219: "🎬 Prolog for nye spillere\n📖 Forenklet opplæring\n🌦️ Tilfeldig menøvær\n⛷️ Skikjøring etter opplæringen",
   changelog_20260217_date: "17. februar 2026",
   changelog_20260217: "🏔️ Syv løypeformer\n🎯 Banevariasjon forbedret\n⚡ Jevnere skikjøring",
   changelog_20260216_date: "16. februar 2026",

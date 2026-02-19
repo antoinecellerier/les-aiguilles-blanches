@@ -242,6 +242,8 @@ const es: Record<string, string> = {
   marieIntro: "¡Hola! Soy Marie, llevo el restaurante de arriba. Pasa cuando quieras — ¡una comida caliente hace milagros aquí!",
   
   // Changelog
+  changelog_20260219_date: "19 de febrero de 2026",
+  changelog_20260219: "🎬 Prólogo para nuevos jugadores\n📖 Tutorial simplificado\n🌦️ Clima aleatorio en el menú\n⛷️ Descenso en esquí tras el tutorial",
   changelog_20260217_date: "17 de febrero de 2026",
   changelog_20260217: "🏔️ Siete formas de pista\n🎯 Variedad de niveles\n⚡ Descenso más fluido",
   changelog_20260216_date: "16 de febrero de 2026",

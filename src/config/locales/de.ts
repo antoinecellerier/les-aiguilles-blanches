@@ -242,6 +242,8 @@ const de: Record<string, string> = {
   marieIntro: "Hallo! Ich bin Marie, ich betreibe das Restaurant oben an der Piste. Komm vorbei, wann du willst — ein heißes Essen wirkt Wunder!",
   
   // Changelog
+  changelog_20260219_date: "19. Februar 2026",
+  changelog_20260219: "🎬 Prolog für neue Spieler\n📖 Vereinfachtes Tutorial\n🌦️ Zufälliges Menüwetter\n⛷️ Skiabfahrt nach dem Tutorial",
   changelog_20260217_date: "17. Februar 2026",
   changelog_20260217: "🏔️ Sieben Pistenformen\n🎯 Levelgenerierung-Vielfalt\n⚡ Flüssigere Abfahrt",
   changelog_20260216_date: "16. Februar 2026",

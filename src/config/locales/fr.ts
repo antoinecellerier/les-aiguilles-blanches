@@ -296,6 +296,8 @@ const fr: Record<string, string> = {
   marieIntro: "Salut ! Moi c'est Marie, je tiens le restaurant en haut de la piste. Passe quand tu veux — un bon plat chaud, ça recharge les batteries !",
   
   // Changelog
+  changelog_20260219_date: "19 février 2026",
+  changelog_20260219: "�� Prologue pour les nouveaux joueurs\n📖 Tutoriel simplifié\n🌦️ Météo aléatoire au menu\n⛷️ Descente à ski après le tutoriel",
   changelog_20260217_date: "17 février 2026",
   changelog_20260217: "🏔️ Sept formes de piste\n🎯 Variété de génération\n⚡ Descente plus fluide",
   changelog_20260216_date: "16 février 2026",

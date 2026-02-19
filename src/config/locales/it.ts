@@ -242,6 +242,8 @@ const it: Record<string, string> = {
   marieIntro: "Ciao! Sono Marie, gestisco il ristorante in cima. Passa quando vuoi — un piatto caldo fa miracoli quassù!",
   
   // Changelog
+  changelog_20260219_date: "19 febbraio 2026",
+  changelog_20260219: "🎬 Prologo per nuovi giocatori\n📖 Tutorial semplificato\n🌦️ Meteo casuale nel menu\n⛷️ Discesa sugli sci dopo il tutorial",
   changelog_20260217_date: "17 febbraio 2026",
   changelog_20260217: "🏔️ Sette forme di pista\n🎯 Varietà dei livelli\n⚡ Discesa più fluida",
   changelog_20260216_date: "16 febbraio 2026",

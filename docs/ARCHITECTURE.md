@@ -949,6 +949,14 @@ this.rexUI.add.fixWidthSizer({
 
 Menu uses responsive scaling based on viewport. On landscape phones where buttons overflow the available vertical space, the Fullscreen button is automatically dropped. Title background width is clamped to `width - 20` to prevent overflow on narrow screens. `createMenuHeader()` applies `dprBoost` to title font size, back button font size, and back button padding so text remains legible on high-DPR mobile screens.
 
+#### Random Menu Weather
+
+When no saved progress exists, `MenuScene.init()` picks a random weather mood (clear day, snowy day, clear night, snowy night at 22% each; daytime storm at 12%). The mood is picked once in `init()` and persists across resize restarts (stored as `this.randomMood`). First-time visitors (prologue not yet seen) never get storm. When saved progress exists, the menu uses the current level's weather instead.
+
+#### Mid-Level Dialogue Triggers
+
+Non-tutorial levels can define `dialogueTriggers: TutorialStep[]` in `levels.ts`. `GameScene.checkDialogueTriggers()` fires coverage-based dialogue during gameplay (e.g., JP comments at 40% coverage on L1). Uses the same `TutorialStep` type as tutorial steps but runs independently via `dialogueTriggerStep` / `dialogueTriggered` state.
+
 ```typescript
 const scaleByHeight = Math.max(0.7, Math.min(height / 768, 1.5));
 const scaleByWidth = Math.max(0.5, Math.min(width / 1024, 1.5));
