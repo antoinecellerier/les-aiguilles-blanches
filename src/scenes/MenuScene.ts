@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, Accessibility, TRANSLATIONS, getLanguage as getCurrentLanguage } from '../setup';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
-import { getSavedProgress, clearProgress } from '../utils/gameProgress';
+import { getSavedProgress, clearProgress, isLevelCompleted } from '../utils/gameProgress';
 import { setString, getString, getJSON } from '../utils/storage';
 import { STORAGE_KEYS } from '../config/storageKeys';
 import { loadGamepadBindings, getButtonName, getConnectedControllerType } from '../utils/gamepad';
@@ -120,6 +120,7 @@ export default class MenuScene extends Phaser.Scene {
     this.createMenuButtons(width, height, snowLineY, scaleFactor, isPortrait, buttonSize, buttonPadding, footerHeight, safeAreaBottom, subtitleBottom, isStorm);
     this.createFooter(width, height, scaleFactor, footerHeight, safeAreaBottom);
     this.createMenuWeather(width, height, levelWeather);
+    if (!levelWeather) this.createAtmosphereCycle(width, height);
     this.setupInput();
 
     Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
@@ -164,6 +165,54 @@ export default class MenuScene extends Phaser.Scene {
         tint: isStorm ? 0xCCDDFF : 0xFFFFFF,
       }).setDepth(DEPTHS.MENU_TOAST);
     }
+  }
+
+  /** Cycle through weather moods on the default clear-sky menu.
+   *  Clear(1s) → snow+dusk(3s) → night+snow(3s) → dawn(2s) → repeat ~10s */
+  private createAtmosphereCycle(width: number, height: number): void {
+    const tint = this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
+      .setAlpha(0).setDepth(DEPTHS.MENU_TREES);
+
+    // Snow particle emitter — starts paused, toggled by cycle
+    const hasSnowTex = this.textures.exists('snow_ungroomed');
+    let emitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
+    if (hasSnowTex) {
+      emitter = this.add.particles(0, 0, 'snow_ungroomed', {
+        x: { min: 0, max: width },
+        y: -10,
+        quantity: 1,
+        frequency: 300,
+        speedY: { min: 15, max: 50 },
+        speedX: { min: -8, max: 8 },
+        scale: { start: 0.25, end: 0.06 },
+        alpha: { start: 0.7, end: 0.2 },
+        lifespan: 4000,
+        blendMode: Phaser.BlendModes.ADD,
+      }).setDepth(DEPTHS.MENU_TOAST);
+      emitter.stop();
+    }
+
+    // Phase timeline: clear → snow → night+snow → dawn → repeat
+    const timeline = this.add.timeline([
+      { at: 0,    run: () => { /* clear day */ } },
+      { at: 1000, run: () => { // snow + dusk
+        emitter?.start();
+        this.tweens.add({ targets: tint, alpha: 0.15, duration: 1500, ease: 'Sine.easeIn' });
+      }},
+      { at: 4000, run: () => { // night
+        this.tweens.add({ targets: tint, alpha: 0.40, duration: 2000, ease: 'Sine.easeIn' });
+        if (emitter) { emitter.frequency = 150; (emitter as any).quantity = 3; }
+        this.wildlife.setNightMode(true);
+      }},
+      { at: 7000, run: () => { // dawn
+        this.tweens.add({ targets: tint, alpha: 0, duration: 2000, ease: 'Sine.easeOut' });
+        if (emitter) { emitter.frequency = 400; (emitter as any).quantity = 1; }
+        this.wildlife.setNightMode(false);
+      }},
+      { at: 8500, run: () => { emitter?.stop(); } },
+      { at: 10000, run: () => { /* loop */ } },
+    ]);
+    timeline.repeat(-1).play();
   }
 
   /** Returns the Y coordinate of the subtitle ribbon bottom edge. */
@@ -382,9 +431,10 @@ export default class MenuScene extends Phaser.Scene {
       this.buttonCallbacks.push(btn.callback);
     });
 
-    // Daily Runs: golden glow if today's daily hasn't been played
+    // Daily Runs: golden glow if unlocked and today's daily hasn't been played
     const dailyRunIdx = buttonDefs.findIndex(b => b.text === 'dailyRuns');
-    if (dailyRunIdx >= 0) {
+    const campaignComplete = (() => { for (let i = 1; i <= 10; i++) { if (!isLevelCompleted(i)) return false; } return true; })();
+    if (dailyRunIdx >= 0 && campaignComplete) {
       const today = new Date().toISOString().slice(0, 10);
       const dailyData = getJSON<{ date: string; ranks: string[] }>(STORAGE_KEYS.DAILY_RUN_DATE, { date: '', ranks: [] });
       const allDone = dailyData.date === today && dailyData.ranks.length >= 4;
