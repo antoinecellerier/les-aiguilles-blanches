@@ -57,9 +57,21 @@ export default class MenuScene extends Phaser.Scene {
   private volumeSliderTimer: Phaser.Time.TimerEvent | null = null;
   private volumeSliderListeners: { onMove: Function; onUp: Function } | null = null;
   private inputTooltipObjects: Phaser.GameObjects.GameObject[] = [];
+  private randomMood: { isNight: boolean; weather: string } | null = null;
    
   constructor() {
     super({ key: 'MenuScene' });
+  }
+
+  init(): void {
+    // Pick random mood once per visit (not per restart), before first render
+    const progress = getSavedProgress();
+    const currentLevel = progress ? LEVELS[progress.currentLevel] : null;
+    if (!currentLevel && !this.randomMood) {
+      this.randomMood = this.pickRandomMenuMood();
+    } else if (currentLevel) {
+      this.randomMood = null;
+    }
   }
 
   create(): void {
@@ -107,12 +119,12 @@ export default class MenuScene extends Phaser.Scene {
     const footerHeight = Math.round(36 * scaleFactor);
     const safeAreaBottom = isPortrait ? Math.round(20 * scaleFactor) : 0;
 
-    // Determine weather from player's current level progress
+    // Determine weather from player's current level progress or pre-picked random mood
     const progress = getSavedProgress();
     const currentLevel = progress ? LEVELS[progress.currentLevel] : null;
     const levelWeather = currentLevel
       ? { isNight: currentLevel.isNight, weather: currentLevel.weather }
-      : undefined;
+      : this.randomMood ?? undefined;
 
     this.createSkyAndGround(width, height, snowLineY, footerHeight, scaleFactor, safeAreaBottom, levelWeather);
     const isStorm = levelWeather?.weather === 'storm';
@@ -120,7 +132,6 @@ export default class MenuScene extends Phaser.Scene {
     this.createMenuButtons(width, height, snowLineY, scaleFactor, isPortrait, buttonSize, buttonPadding, footerHeight, safeAreaBottom, subtitleBottom, isStorm);
     this.createFooter(width, height, scaleFactor, footerHeight, safeAreaBottom);
     this.createMenuWeather(width, height, levelWeather);
-    if (!levelWeather) this.createAtmosphereCycle(width, height);
     this.setupInput();
 
     Accessibility.announce((t('subtitle') || '') + ' - ' + (t('startGame') || ''));
@@ -167,52 +178,18 @@ export default class MenuScene extends Phaser.Scene {
     }
   }
 
-  /** Cycle through weather moods on the default clear-sky menu.
-   *  Clear(2s) → dusk+snow(3s) → night+snow(5s) → dawn(2s) → repeat ~14s */
-  private createAtmosphereCycle(width: number, height: number): void {
-    const tint = this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
-      .setAlpha(0).setDepth(DEPTHS.MENU_TREES);
-
-    // Snow particle emitter — starts paused, toggled by cycle
-    const hasSnowTex = this.textures.exists('snow_ungroomed');
-    let emitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
-    if (hasSnowTex) {
-      emitter = this.add.particles(0, 0, 'snow_ungroomed', {
-        x: { min: 0, max: width },
-        y: -10,
-        quantity: 1,
-        frequency: 300,
-        speedY: { min: 15, max: 50 },
-        speedX: { min: -8, max: 8 },
-        scale: { start: 0.25, end: 0.06 },
-        alpha: { start: 0.7, end: 0.2 },
-        lifespan: 4000,
-        blendMode: Phaser.BlendModes.ADD,
-      }).setDepth(DEPTHS.MENU_TOAST);
-      emitter.stop();
-    }
-
-    // Phase timeline: clear → snow → night+snow → dawn → repeat
-    const timeline = this.add.timeline([
-      { at: 0,     run: () => { /* clear day */ } },
-      { at: 2000,  run: () => { // dusk + snow
-        emitter?.start();
-        this.tweens.add({ targets: tint, alpha: 0.15, duration: 1500, ease: 'Sine.easeIn' });
-      }},
-      { at: 5000,  run: () => { // night
-        this.tweens.add({ targets: tint, alpha: 0.40, duration: 2000, ease: 'Sine.easeIn' });
-        if (emitter) { emitter.frequency = 150; (emitter as any).quantity = 3; }
-        this.wildlife.setNightMode(true);
-      }},
-      { at: 10000, run: () => { // dawn
-        this.tweens.add({ targets: tint, alpha: 0, duration: 2500, ease: 'Sine.easeOut' });
-        if (emitter) { emitter.frequency = 400; (emitter as any).quantity = 1; }
-        this.wildlife.setNightMode(false);
-      }},
-      { at: 12000, run: () => { emitter?.stop(); } },
-      { at: 14000, run: () => { /* loop */ } },
-    ]);
-    timeline.repeat(-1).play();
+  /** Pick a random weather mood for the menu when no level progress exists.
+   *  Each visit feels slightly different. Weighted toward clear (most welcoming). */
+  private pickRandomMenuMood(): { isNight: boolean; weather: string } {
+    const isFirstVisit = !getString(STORAGE_KEYS.PROLOGUE_SEEN);
+    const roll = Math.random();
+    if (roll < 0.22) return { isNight: false, weather: 'clear' };
+    if (roll < 0.44) return { isNight: false, weather: 'light_snow' };
+    if (roll < 0.66) return { isNight: true, weather: 'clear' };
+    if (roll < 0.88) return { isNight: true, weather: 'light_snow' };
+    // Storm only for returning players
+    if (isFirstVisit) return { isNight: false, weather: 'clear' };
+    return { isNight: false, weather: 'storm' };
   }
 
   /** Returns the Y coordinate of the subtitle ribbon bottom edge. */

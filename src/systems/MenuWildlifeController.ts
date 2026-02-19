@@ -855,42 +855,6 @@ export class MenuWildlifeController {
     }
   }
 
-  /** Transition animals to/from sleeping for atmosphere cycling */
-  setNightMode(isNight: boolean): void {
-    for (const a of this.menuAnimals) {
-      if (isNight) {
-        // Put non-fox ground animals and perched/flying birds to sleep
-        if (a.type === 'ground' && a.species !== 'fox' && a.state !== 'sleeping' && a.state !== 'hiding') {
-          a.state = 'sleeping';
-          a.vx = 0; a.vy = 0;
-          if (!a.sleepZzz) a.sleepZzz = this.createSleepZzz(a.x, a.y);
-        } else if (a.type === 'bird' && a.state !== 'sleeping') {
-          // Only perched birds sleep — flying birds keep flying during night
-          if (a.state === 'perched') {
-            a.state = 'sleeping';
-            a.vx = 0; a.vy = 0;
-            if (!a.sleepZzz) a.sleepZzz = this.createSleepZzz(a.x, a.y);
-          }
-        }
-      } else {
-        // Wake everyone up
-        if (a.state === 'sleeping') {
-          if (a.sleepZzz) { a.sleepZzz.forEach(z => z.destroy()); a.sleepZzz = undefined; }
-          if (a.type === 'bird') {
-            a.state = 'flying';
-            a.sprite.setTexture('menu_bird_flying');
-            a.vx = (Math.random() - 0.5) * 12;
-            a.vy = -2 - Math.random() * 3;
-            a.wanderTimer = 2000 + Math.random() * 3000;
-          } else {
-            a.state = undefined;
-            a.wanderTimer = 500 + Math.random() * 2000;
-          }
-        }
-      }
-    }
-  }
-
   /** Create floating "zzz" text trail above a sleeping animal */
   private createSleepZzz(x: number, y: number): Phaser.GameObjects.Text[] {
     const zTexts: Phaser.GameObjects.Text[] = [];
