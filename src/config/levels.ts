@@ -150,14 +150,9 @@ export const LEVELS: Level[] = [
     introDialogue: 'tutorialIntro',
     introSpeaker: 'Jean-Pierre',
     tutorialSteps: [
-      { trigger: 'start', dialogue: 'tutorialWelcome', delay: 1000 },
-      { trigger: 'welcomeDone', dialogue: 'tutorialControls', delay: 3000 },
-      { trigger: 'controlsDone', dialogue: 'tutorialMove', delay: 3000 },
-      { trigger: 'moved', dialogue: 'tutorialGroomIntro' },
-      { trigger: 'groomIntroDone', dialogue: 'tutorialGroomAction', delay: 3000 },
-      { trigger: 'groomed', dialogue: 'tutorialCoverage' },
-      { trigger: 'coverage20', dialogue: 'tutorialHUD' },
-      { trigger: 'hudDone', dialogue: 'tutorialGoal', delay: 4000 },
+      { trigger: 'start', dialogue: 'tutorialWelcome', delay: 800 },
+      { trigger: 'moved', dialogue: 'tutorialGroomAction', delay: 500 },
+      { trigger: 'groomed', dialogue: 'tutorialGroomGoal', delay: 500 },
       { trigger: 'coverage40', dialogue: 'tutorialComplete' },
     ],
     wildlife: [
