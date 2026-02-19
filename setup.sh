@@ -1,6 +1,14 @@
 #!/bin/bash
 # Setup script for Les Aiguilles Blanches
 # Downloads dependencies and sets up the development environment
+#
+# Usage: ./setup.sh [browsers...]
+#   ./setup.sh                    # Install chromium + firefox (default)
+#   ./setup.sh chromium           # Install chromium only
+#   ./setup.sh chromium firefox webkit  # Install all three
+#
+# Set PLAYWRIGHT_WITH_DEPS=1 to install system dependencies (for CI):
+#   PLAYWRIGHT_WITH_DEPS=1 ./setup.sh chromium
 
 set -e
 
@@ -8,11 +16,7 @@ cd "$(dirname "$0")"
 
 echo "=== Setting up Les Aiguilles Blanches ==="
 
-# Download Phaser 3
-echo "Downloading Phaser 3..."
-mkdir -p js
-curl -sL "https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js" -o js/phaser.js
-echo "  Downloaded js/phaser.js"
+BROWSERS=("${@:-chromium firefox}")
 
 # Setup Python virtual environment for E2E tests
 echo "Setting up Python virtual environment..."
@@ -22,8 +26,12 @@ source .venv/bin/activate
 echo "Installing test dependencies..."
 pip install -q playwright pytest-playwright pytest-xdist pillow
 
-echo "Installing Playwright browsers..."
-python -m playwright install chromium firefox
+echo "Installing Playwright browsers: ${BROWSERS[*]}..."
+if [ "${PLAYWRIGHT_WITH_DEPS:-0}" = "1" ]; then
+    python -m playwright install --with-deps "${BROWSERS[@]}"
+else
+    python -m playwright install "${BROWSERS[@]}"
+fi
 
 echo ""
 echo "=== Setup complete! ==="
