@@ -168,7 +168,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   /** Cycle through weather moods on the default clear-sky menu.
-   *  Clear(1s) → snow+dusk(3s) → night+snow(3s) → dawn(2s) → repeat ~10s */
+   *  Clear(2s) → dusk+snow(3s) → night+snow(5s) → dawn(2s) → repeat ~14s */
   private createAtmosphereCycle(width: number, height: number): void {
     const tint = this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
       .setAlpha(0).setDepth(DEPTHS.MENU_TREES);
@@ -194,23 +194,23 @@ export default class MenuScene extends Phaser.Scene {
 
     // Phase timeline: clear → snow → night+snow → dawn → repeat
     const timeline = this.add.timeline([
-      { at: 0,    run: () => { /* clear day */ } },
-      { at: 1000, run: () => { // snow + dusk
+      { at: 0,     run: () => { /* clear day */ } },
+      { at: 2000,  run: () => { // dusk + snow
         emitter?.start();
         this.tweens.add({ targets: tint, alpha: 0.15, duration: 1500, ease: 'Sine.easeIn' });
       }},
-      { at: 4000, run: () => { // night
+      { at: 5000,  run: () => { // night
         this.tweens.add({ targets: tint, alpha: 0.40, duration: 2000, ease: 'Sine.easeIn' });
         if (emitter) { emitter.frequency = 150; (emitter as any).quantity = 3; }
         this.wildlife.setNightMode(true);
       }},
-      { at: 7000, run: () => { // dawn
-        this.tweens.add({ targets: tint, alpha: 0, duration: 2000, ease: 'Sine.easeOut' });
+      { at: 10000, run: () => { // dawn
+        this.tweens.add({ targets: tint, alpha: 0, duration: 2500, ease: 'Sine.easeOut' });
         if (emitter) { emitter.frequency = 400; (emitter as any).quantity = 1; }
         this.wildlife.setNightMode(false);
       }},
-      { at: 8500, run: () => { emitter?.stop(); } },
-      { at: 10000, run: () => { /* loop */ } },
+      { at: 12000, run: () => { emitter?.stop(); } },
+      { at: 14000, run: () => { /* loop */ } },
     ]);
     timeline.repeat(-1).play();
   }

@@ -865,16 +865,12 @@ export class MenuWildlifeController {
           a.vx = 0; a.vy = 0;
           if (!a.sleepZzz) a.sleepZzz = this.createSleepZzz(a.x, a.y);
         } else if (a.type === 'bird' && a.state !== 'sleeping') {
-          // Land birds on their perch then sleep
-          if (a.perchTarget) {
-            a.x = a.perchTarget.x; a.y = a.perchTarget.y - 4;
-            a.sprite.setPosition(a.x, a.y);
+          // Only perched birds sleep — flying birds keep flying during night
+          if (a.state === 'perched') {
+            a.state = 'sleeping';
+            a.vx = 0; a.vy = 0;
+            if (!a.sleepZzz) a.sleepZzz = this.createSleepZzz(a.x, a.y);
           }
-          a.state = 'sleeping';
-          a.vx = 0; a.vy = 0;
-          a.sprite.setTexture('menu_bird_perched');
-          a.sprite.setRotation(0);
-          if (!a.sleepZzz) a.sleepZzz = this.createSleepZzz(a.x, a.y);
         }
       } else {
         // Wake everyone up
