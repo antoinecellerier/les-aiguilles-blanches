@@ -184,6 +184,16 @@ const en: Record<string, string> = {
   viewCredits: "View Credits",
   creditsTitle: "Congratulations!",
   creditsSubtitle: "You have mastered Les Aiguilles Blanches",
+  creditsCreatedBy: "Created by",
+  creditsDevelopedWith: "Developed with",
+  creditsArtDirection: "Art Direction",
+  creditsRetroInspiration: "A nod to retro classics like SkiFree",
+  creditsInspiredBy: "Inspired by",
+  creditsGroomers: "The snow groomers of Savoie",
+  creditsDedication: "For the night crews who prepare the slopes while we sleep",
+  creditsThanks: "Thanks for playing!",
+  creditsSeeYou: "See you on the slopes!",
+  creditsLine: "Come on, kid. The sun is rising. The mountain is ready.",
   playAgain: "Play Again",
   skipCredits: "Press any key to skip",
   
@@ -291,7 +301,7 @@ const en: Record<string, string> = {
   
   // Changelog
   changelog_20260219_date: "February 19, 2026",
-  changelog_20260219: "🎬 Cold-open prologue for new players\n📖 Streamlined tutorial\n🌦️ Random menu weather\n🔗 Shareable daily runs",
+  changelog_20260219: "🎬 Cold-open prologue for new players\n📖 Streamlined tutorial\n🌦️ Random menu weather\n🔗 Shareable daily runs\n🎥 Cinematic credits scene",
   changelog_20260217_date: "February 17, 2026",
   changelog_20260217: "🏔️ Seven piste shapes\n🎯 Level generation variety\n⚡ Smoother ski runs",
   changelog_20260216_date: "February 16, 2026",

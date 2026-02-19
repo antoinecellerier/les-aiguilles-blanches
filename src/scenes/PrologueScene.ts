@@ -5,6 +5,7 @@ import { STORAGE_KEYS } from '../config/storageKeys';
 import { setString } from '../utils/storage';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
+import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { MusicSystem } from '../systems/MusicSystem';
 import { ResizeManager } from '../utils/resizeManager';
 import { t } from '../setup';
@@ -17,6 +18,7 @@ import { t } from '../setup';
 export default class PrologueScene extends Phaser.Scene {
   private trailTimer?: Phaser.Time.TimerEvent;
   private resizeManager?: ResizeManager;
+  private wildlife?: MenuWildlifeController;
 
   constructor() {
     super({ key: 'PrologueScene' });
@@ -30,8 +32,13 @@ export default class PrologueScene extends Phaser.Scene {
     const snowLineY = Math.round(height * 0.78);
 
     // Night alpine backdrop (include groomer so the texture is freshly created)
-    createMenuTerrain(this, width, height, snowLineY, 0, scaleFactor,
-      { isNight: true, weather: 'clear' });
+    const nightWeather = { isNight: true, weather: 'clear' as const };
+    createMenuTerrain(this, width, height, snowLineY, 0, scaleFactor, nightWeather);
+
+    // Sleeping wildlife on the night slope
+    this.wildlife = new MenuWildlifeController(this);
+    this.wildlife.snowLineY = snowLineY;
+    this.wildlife.create(width, height, snowLineY, 0, scaleFactor, nightWeather);
 
     // Night overlay — match MenuScene's night tint for visual consistency
     this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
@@ -159,9 +166,14 @@ export default class PrologueScene extends Phaser.Scene {
     this.resizeManager.register();
   }
 
+  update(time: number, delta: number): void {
+    this.wildlife?.update(time, delta);
+  }
+
   private shutdown(): void {
     this.resizeManager?.destroy();
     this.trailTimer?.destroy();
+    this.wildlife?.destroy();
     this.input.off('pointerdown');
     this.input.keyboard?.removeAllListeners();
     if (this.input.gamepad) {

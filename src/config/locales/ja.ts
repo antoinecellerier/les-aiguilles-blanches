@@ -184,6 +184,16 @@ const ja: Record<string, string> = {
   viewCredits: "クレジット",
   creditsTitle: "おめでとう！",
   creditsSubtitle: "Les Aiguilles Blanchesを制覇しました",
+  creditsCreatedBy: "制作",
+  creditsDevelopedWith: "開発ツール",
+  creditsArtDirection: "アートディレクション",
+  creditsRetroInspiration: "SkiFreeなどレトロの名作へのオマージュ",
+  creditsInspiredBy: "インスピレーション",
+  creditsGroomers: "サヴォワの圧雪車オペレーター",
+  creditsDedication: "私たちが眠る間にゲレンデを整備する夜勤チームへ",
+  creditsThanks: "プレイありがとう！",
+  creditsSeeYou: "ゲレンデでまた会おう！",
+  creditsLine: "さあ、行くぞ、小僧。日が昇る。山の準備は整った。",
   playAgain: "もう一度プレイ",
   skipCredits: "キーを押してスキップ",
 
@@ -291,7 +301,7 @@ const ja: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "2026年2月19日",
-  changelog_20260219: "🎬 新規プレイヤー向けプロローグ\n📖 チュートリアル簡略化\n🌦️ メニューのランダム天候\n🔗 デイリーラン共有",
+  changelog_20260219: "🎬 新規プレイヤー向けプロローグ\n📖 チュートリアル簡略化\n🌦️ メニューのランダム天候\n🔗 デイリーラン共有\n🎥 シネマティックエンドロール",
   changelog_20260217_date: "2026年2月17日",
   changelog_20260217: "🏔️ 7種のコース形状\n🎯 レベル生成の多様性\n⚡ スキー滑走改善",
   changelog_20260216_date: "2026年2月16日",

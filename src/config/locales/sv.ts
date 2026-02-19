@@ -184,6 +184,16 @@ const sv: Record<string, string> = {
   viewCredits: "Visa tack",
   creditsTitle: "Grattis!",
   creditsSubtitle: "Du har bemästrat Les Aiguilles Blanches",
+  creditsCreatedBy: "Skapad av",
+  creditsDevelopedWith: "Utvecklad med",
+  creditsArtDirection: "Konstnärlig ledning",
+  creditsRetroInspiration: "En hyllning till retroklassiker som SkiFree",
+  creditsInspiredBy: "Inspirerad av",
+  creditsGroomers: "Pistmaskinisterna i Savoie",
+  creditsDedication: "Till nattskiften som preparerar pisterna medan vi sover",
+  creditsThanks: "Tack för att du spelade!",
+  creditsSeeYou: "Vi ses på pisterna!",
+  creditsLine: "Kom igen, grabben. Solen går upp. Berget är redo.",
   playAgain: "Spela igen",
   skipCredits: "Tryck valfri tangent för att hoppa över",
 
@@ -292,7 +302,7 @@ const sv: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19 februari 2026",
-  changelog_20260219: "🎬 Prolog för nya spelare\n📖 Förenklad handledning\n🌦️ Slumpmässigt menyväder\n🔗 Delbara dagliga åk",
+  changelog_20260219: "🎬 Prolog för nya spelare\n📖 Förenklad handledning\n🌦️ Slumpmässigt menyväder\n🔗 Delbara dagliga åk\n🎥 Filmisk sluttext",
   changelog_20260217_date: "17 februari 2026",
   changelog_20260217: "🏔️ Sju pistformer\n🎯 Banvariation förbättrad\n⚡ Smidigare skidåkning",
   changelog_20260216_date: "16 februari 2026",

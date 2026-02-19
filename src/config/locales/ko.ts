@@ -184,6 +184,16 @@ const ko: Record<string, string> = {
   viewCredits: "크레딧",
   creditsTitle: "축하합니다!",
   creditsSubtitle: "Les Aiguilles Blanches를 정복했습니다",
+  creditsCreatedBy: "제작",
+  creditsDevelopedWith: "개발 도구",
+  creditsArtDirection: "아트 디렉션",
+  creditsRetroInspiration: "SkiFree 같은 레트로 명작에 대한 오마주",
+  creditsInspiredBy: "영감",
+  creditsGroomers: "사부아의 설상차 운전사들",
+  creditsDedication: "우리가 잠든 사이 슬로프를 준비하는 야간 팀에게",
+  creditsThanks: "플레이해 주셔서 감사합니다!",
+  creditsSeeYou: "슬로프에서 또 만나요!",
+  creditsLine: "자, 꼬마야. 해가 뜬다. 산은 준비됐어.",
   playAgain: "다시 플레이",
   skipCredits: "아무 키를 눌러 건너뛰기",
 
@@ -291,7 +301,7 @@ const ko: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "2026년 2월 19일",
-  changelog_20260219: "🎬 신규 플레이어 프롤로그\n📖 튜토리얼 간소화\n🌦️ 메뉴 랜덤 날씨\n🔗 데일리 런 공유",
+  changelog_20260219: "🎬 신규 플레이어 프롤로그\n📖 튜토리얼 간소화\n🌦️ 메뉴 랜덤 날씨\n🔗 데일리 런 공유\n🎥 시네마틱 크레딧",
   changelog_20260217_date: "2026년 2월 17일",
   changelog_20260217: "🏔️ 7종 코스 형태\n🎯 레벨 생성 다양성\n⚡ 스키 활주 개선",
   changelog_20260216_date: "2026년 2월 16일",

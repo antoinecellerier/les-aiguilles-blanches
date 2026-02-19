@@ -184,6 +184,16 @@ const sk: Record<string, string> = {
   viewCredits: "Zobraziť titulky",
   creditsTitle: "Gratulujeme!",
   creditsSubtitle: "Ovládol si Les Aiguilles Blanches",
+  creditsCreatedBy: "Vytvoril",
+  creditsDevelopedWith: "Vyvinuté s",
+  creditsArtDirection: "Umelecká réžia",
+  creditsRetroInspiration: "Pocta retro klasikám ako SkiFree",
+  creditsInspiredBy: "Inšpirované",
+  creditsGroomers: "Ratrakári zo Savoie",
+  creditsDedication: "Pre nočné posádky, ktoré pripravujú svahy, kým spíme",
+  creditsThanks: "Vďaka za hru!",
+  creditsSeeYou: "Vidíme sa na svahoch!",
+  creditsLine: "Poď, chlapče. Slnko vychádza. Hora je pripravená.",
   playAgain: "Hrať znova",
   skipCredits: "Stlač klávesu pre preskočenie",
 
@@ -291,7 +301,7 @@ const sk: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19. februára 2026",
-  changelog_20260219: "🎬 Prológ pre nových hráčov\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasie v menu\n🔗 Zdieľateľné denné zjazdy",
+  changelog_20260219: "🎬 Prológ pre nových hráčov\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasie v menu\n🔗 Zdieľateľné denné zjazdy\n🎥 Filmové titulky",
   changelog_20260217_date: "17. februára 2026",
   changelog_20260217: "🏔️ Sedem tvarov zjazdoviek\n🎯 Rozmanitosť generovania\n⚡ Plynulejší zjazd",
   changelog_20260216_date: "16. februára 2026",

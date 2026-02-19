@@ -9,10 +9,14 @@ import { MusicSystem } from '../systems/MusicSystem';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { ResizeManager } from '../utils/resizeManager';
 import { DEPTHS } from '../config/gameConfig';
+import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
+import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 
 /**
  * Les Aiguilles Blanches - Credits Scene
- * Shows end-game credits after completing all levels
+ * Cinematic night-slope credits that bookend the prologue:
+ * groomer drives across the piste while credits scroll,
+ * JP delivers a farewell when the groomer stops.
  */
 
 export default class CreditsScene extends Phaser.Scene {
@@ -20,6 +24,7 @@ export default class CreditsScene extends Phaser.Scene {
   private buttonsContainer!: Phaser.GameObjects.Container;
   private skipHint!: Phaser.GameObjects.Text;
   private creditsHeight = 0;
+  private scrollTop = 0;
   
   // Keyboard navigation
   private menuButtons: Phaser.GameObjects.Text[] = [];
@@ -33,6 +38,8 @@ export default class CreditsScene extends Phaser.Scene {
   // Gamepad state
   private gamepadNav!: GamepadMenuNav;
   private resizeManager!: ResizeManager;
+  private wildlife?: MenuWildlifeController;
+  private trailTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super({ key: 'CreditsScene' });
@@ -59,74 +66,95 @@ export default class CreditsScene extends Phaser.Scene {
     });
     this.gamepadNav.initState();
 
-    this.cameras.main.setBackgroundColor(THEME.colors.darkBg);
-    this.createStars();
+    const scaleFactor = Math.min(width / 800, height / 600);
+    const snowLineY = Math.round(height * 0.78);
+    const nightWeather = { isNight: true, weather: 'light_snow' as const };
 
-    // Header zone background (covers scrolling credits)
-    const headerBg = this.add.rectangle(width / 2, 100, width, 200, THEME.colors.darkBg);
-    headerBg.setDepth(DEPTHS.MENU_UI);
+    // Night alpine backdrop
+    createMenuTerrain(this, width, height, snowLineY, 0, scaleFactor, nightWeather);
 
-    const trophy = this.add.text(width / 2, 60, '🏆', { font: `60px ${THEME.fonts.familyEmoji}` }).setOrigin(0.5);
-    trophy.setDepth(DEPTHS.MENU_SCROLL_FADE);
+    // Night overlay
+    this.add.rectangle(width / 2, height / 2, width, height, 0x000022)
+      .setAlpha(0.45).setDepth(DEPTHS.MENU_TREES);
 
+    // Sleeping wildlife + light snow particles
+    this.wildlife = new MenuWildlifeController(this);
+    this.wildlife.snowLineY = snowLineY;
+    this.wildlife.create(width, height, snowLineY, 0, scaleFactor, nightWeather);
+
+    // Groomer animation (same technique as PrologueScene)
+    this.setupGroomer(width, snowLineY, scaleFactor);
+
+    // Text shadow for readability over terrain
+    const textShadow = { offsetX: 2, offsetY: 2, color: '#1a1612', blur: 0, stroke: false, fill: false };
+
+    // Header: congratulations (fixed position, no opaque background)
     const headerScale = Math.min(1, width / 420);
     const heroSize = Math.max(20, Math.round(THEME.fonts.sizes.hero * headerScale));
-    const title = this.add.text(width / 2, 120, t('creditsTitle') || 'Félicitations !', {
+
+    const title = this.add.text(width / 2, 40, t('creditsTitle') || 'Félicitations !', {
       fontFamily: THEME.fonts.family,
       fontSize: `${heroSize}px`,
       fontStyle: 'bold',
       color: THEME.colors.accent,
+      shadow: textShadow,
     }).setOrigin(0.5);
     title.setDepth(DEPTHS.MENU_SCROLL_FADE);
 
-    const subtitle = this.add.text(width / 2, 160, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
+    const subtitle = this.add.text(width / 2, 80, t('creditsSubtitle') || 'Vous avez maîtrisé Les Aiguilles Blanches', {
       fontFamily: THEME.fonts.family,
       fontSize: `${THEME.fonts.sizes.medium}px`,
       color: THEME.colors.info,
       wordWrap: { width: width - 40 },
       align: 'center',
+      shadow: textShadow,
     }).setOrigin(0.5);
     subtitle.setDepth(DEPTHS.MENU_SCROLL_FADE);
 
-    // Footer zone background (covers scrolling credits at bottom)
-    const footerBg = this.add.rectangle(width / 2, height - 50, width, 100, THEME.colors.darkBg);
-    footerBg.setDepth(DEPTHS.MENU_UI);
+    // Viewport zone where scrolling credits are visible (between header and footer)
+    this.scrollTop = subtitle.y + subtitle.height / 2 + 10;
+    const scrollBottom = height - 40;
 
+    // Scrolling credits
     const credits = [
       '',
       '🎿 LES AIGUILLES BLANCHES 🎿',
       '',
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
       '',
-      'Créé par',
-      'Antoine',
+      t('creditsCreatedBy') || 'Créé par',
+      'Antoine Cellerier',
       '',
-      'Développé avec',
-      'GitHub Copilot',
+      t('creditsDevelopedWith') || 'Développé avec',
+      'GitHub Copilot CLI',
       '',
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
       '',
-      'Direction Artistique',
-      'Style "SkiFree" classique',
+      t('creditsArtDirection') || 'Direction Artistique',
+      t('creditsRetroInspiration') || 'A nod to retro classics like SkiFree',
       '',
-      'Inspiré par',
-      'Les dameurs de Savoie',
+      t('creditsInspiredBy') || 'Inspiré par',
+      t('creditsGroomers') || 'Les dameurs de Savoie',
       'PistenBully 600',
       '',
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
       '',
-      'Gastronomie Savoyarde',
-      'Tartiflette • Fondue • Raclette',
-      'Génépi • Vin Chaud',
+      t('creditsDedication') || 'For the night crews who prepare the slopes while we sleep',
       '',
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
       '',
-      'Merci d\'avoir joué !',
+      t('creditsThanks') || 'Merci d\'avoir joué !',
       '',
-      '🏔️ À bientôt sur les pistes ! 🏔️',
+      '🏔️ ' + (t('creditsSeeYou') || 'À bientôt sur les pistes !') + ' 🏔️',
     ];
 
     this.creditsContainer = this.add.container(0, height);
+    this.creditsContainer.setDepth(DEPTHS.MENU_UI);
+
+    // Geometry mask clips scrolling text to the viewport zone (no opaque bars needed)
+    const maskShape = this.make.graphics();
+    maskShape.fillRect(0, this.scrollTop, width, scrollBottom - this.scrollTop);
+    this.creditsContainer.setMask(maskShape.createGeometryMask());
 
     let yOffset = 0;
     credits.forEach((line) => {
@@ -137,6 +165,7 @@ export default class CreditsScene extends Phaser.Scene {
         fontStyle: isTitle ? 'bold' : 'normal',
         color: isTitle ? THEME.colors.accent : THEME.colors.textPrimary,
         align: 'center',
+        shadow: textShadow,
       };
 
       const text = this.add.text(width / 2, yOffset, line, style).setOrigin(0.5);
@@ -146,9 +175,10 @@ export default class CreditsScene extends Phaser.Scene {
 
     this.creditsHeight = yOffset;
 
+    // Scroll from below the viewport to above it
     this.tweens.add({
       targets: this.creditsContainer,
-      y: -this.creditsHeight + 100,
+      y: this.scrollTop - this.creditsHeight,
       duration: 15000,
       ease: 'Linear',
       onComplete: () => this.showButtons(),
@@ -159,11 +189,13 @@ export default class CreditsScene extends Phaser.Scene {
     this.buttonsContainer.setDepth(DEPTHS.MENU_BADGES);
 
     const btnStyle = buttonStyle(THEME.fonts.sizes.medium, 20, 10);
+    const btnSpacing = Math.min(100, width * 0.15);
+    const btnY = height - Math.max(40, Math.round(60 * scaleFactor));
 
     // Play Again button
     const playAgainBtn = this.add.text(
-      width / 2 - 100,
-      height - 60,
+      width / 2 - btnSpacing,
+      btnY,
       t('playAgain') || 'Rejouer',
       btnStyle
     ).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -171,8 +203,8 @@ export default class CreditsScene extends Phaser.Scene {
 
     // Menu button
     const menuBtn = this.add.text(
-      width / 2 + 100,
-      height - 60,
+      width / 2 + btnSpacing,
+      btnY,
       t('menu') || 'Menu',
       btnStyle
     ).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -182,9 +214,9 @@ export default class CreditsScene extends Phaser.Scene {
 
     this.skipHint = this.add.text(
       width / 2,
-      height - 20,
+      btnY + 30,
       t('skipCredits') || 'Appuyez sur une touche pour passer',
-      { fontFamily: THEME.fonts.family, fontSize: `${THEME.fonts.sizes.tiny}px`, color: THEME.colors.disabled }
+      { fontFamily: THEME.fonts.family, fontSize: `${THEME.fonts.sizes.tiny}px`, color: THEME.colors.disabled, shadow: textShadow }
     ).setOrigin(0.5);
     this.skipHint.setDepth(DEPTHS.MENU_BADGES);
 
@@ -205,24 +237,77 @@ export default class CreditsScene extends Phaser.Scene {
     this.resizeManager.register();
   }
 
-  private createStars(): void {
-    const { width, height } = this.cameras.main;
-    const graphics = this.add.graphics();
+  private setupGroomer(width: number, snowLineY: number, scaleFactor: number): void {
+    const s = scaleFactor;
 
-    for (let i = 0; i < 50; i++) {
-      const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height);
-      const size = Phaser.Math.FloatBetween(0.5, 2);
-      const alpha = Phaser.Math.FloatBetween(0.3, 1);
+    // Find the groomer placed by createMenuTerrain
+    const groomer = this.children.list.find(
+      (c: any) => c.texture?.key === '_menu_groomer'
+    ) as Phaser.GameObjects.Image;
+    if (!groomer) return;
 
-      graphics.fillStyle(0xffffff, alpha);
-      graphics.fillCircle(x, y, size);
-    }
+    groomer.setPosition(width * 0.85, snowLineY - 20 * s);
+    groomer.setDepth(DEPTHS.MENU_TREES + 1);
+
+    const groomerH = groomer.displayHeight || 80 * s;
+    const trackY = Math.round(groomerH * 0.85);
+
+    // Headlight glow (same colors as PrologueScene)
+    const frontW = Math.max(60, Math.round(120 * s));
+    const frontH = Math.max(8, Math.round(12 * s));
+    const rearW = Math.max(30, Math.round(50 * s));
+    const rearH = Math.max(6, Math.round(8 * s));
+    const frontBeam = this.add.rectangle(0, 0, frontW, frontH, 0xffffee)
+      .setAlpha(0.30).setDepth(DEPTHS.MENU_TREES + 1);
+    const rearGlow = this.add.rectangle(0, 0, rearW, rearH, 0xffddcc)
+      .setAlpha(0.16).setDepth(DEPTHS.MENU_TREES + 1);
+    const lampSize = Math.max(3, Math.round(4 * s));
+    const lamp = this.add.rectangle(0, 0, lampSize, lampSize, 0xffee88)
+      .setAlpha(0.9).setDepth(DEPTHS.MENU_TREES + 2);
+
+    const updateLights = () => {
+      const gx = (groomer as any).x ?? 0;
+      const gy = (groomer as any).y ?? 0;
+      const snowY = gy + trackY;
+      frontBeam.setPosition(gx - frontW * 0.6, snowY);
+      rearGlow.setPosition(gx + rearW * 0.4, snowY);
+      lamp.setPosition(gx - 12 * s, gy - 6 * s);
+    };
+    updateLights();
+
+    // Groomer drives across the slope, matching the 15s credits scroll
+    this.tweens.add({
+      targets: groomer,
+      x: width * 0.15,
+      y: snowLineY - 60 * s,
+      duration: 15000,
+      ease: 'Linear',
+      onUpdate: updateLights,
+    });
+
+    // Corduroy trail behind the groomer
+    const trail = this.add.graphics().setDepth(DEPTHS.MENU_SNOW + 1);
+    let lastTrailX = groomer.x;
+    const trailH = Math.max(2, Math.round(3 * s));
+    this.trailTimer = this.time.addEvent({
+      delay: 200,
+      loop: true,
+      callback: () => {
+        const gx = (groomer as any).x;
+        const gy = (groomer as any).y;
+        const trailSurfaceY = gy + trackY;
+        const segW = Math.abs(gx - lastTrailX) || 1;
+        trail.fillStyle(0xc8dce8, 0.25);
+        trail.fillRect(Math.min(lastTrailX, gx), trailSurfaceY - 1, segW, trailH);
+        lastTrailX = gx;
+      },
+    });
   }
 
   private skipCredits(): void {
+    if (this.buttonsShown) return;
     this.tweens.killAll();
-    this.creditsContainer.setY(-this.creditsHeight + 100);
+    this.creditsContainer.setY(this.scrollTop - this.creditsHeight);
     this.showButtons();
   }
 
@@ -230,6 +315,21 @@ export default class CreditsScene extends Phaser.Scene {
     this.buttonsShown = true;
     this.buttonsContainer.setVisible(true);
     this.skipHint.setVisible(false);
+    this.trailTimer?.destroy();
+
+    // JP's farewell line — the groomer has stopped, the shift is ending
+    const { width, height } = this.cameras.main;
+    const scaleFactor = Math.min(width / 800, height / 600);
+    const fontSize = Math.max(12, Math.round(14 * scaleFactor));
+    const jpLine = this.add.text(width / 2, height * 0.55, t('creditsLine') || 'Allez, petit. Le soleil se lève. La montagne est prête.', {
+      fontFamily: THEME.fonts.family,
+      fontSize: fontSize + 'px',
+      color: THEME.colors.textSecondary,
+      wordWrap: { width: width * 0.8 },
+      align: 'center',
+      shadow: { offsetX: 2, offsetY: 2, color: '#1a1612', blur: 0, stroke: false, fill: false },
+    }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI).setAlpha(0);
+    this.tweens.add({ targets: jpLine, alpha: 1, duration: 800 });
 
     this.buttonNav = createMenuButtonNav(
       this.menuButtons, this.buttonCallbacks, simpleStyler(),
@@ -259,7 +359,9 @@ export default class CreditsScene extends Phaser.Scene {
     resetGameScenes(game, 'GameScene', { level: 0 });
   }
 
-  update(_time: number, delta: number): void {
+  update(time: number, delta: number): void {
+    this.wildlife?.update(time, delta);
+
     if (!this.input.gamepad || this.input.gamepad.total === 0) return;
     const pad = this.input.gamepad.getPad(0);
     if (!pad) return;
@@ -280,6 +382,8 @@ export default class CreditsScene extends Phaser.Scene {
   shutdown(): void {
     // Music persists (singleton)
     this.resizeManager.destroy();
+    this.wildlife?.destroy();
+    this.trailTimer?.destroy();
     this.input.keyboard?.removeAllListeners();
     this.tweens.killAll();
     this.children.removeAll(true);

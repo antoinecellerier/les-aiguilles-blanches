@@ -184,6 +184,16 @@ const nb: Record<string, string> = {
   viewCredits: "Se takk",
   creditsTitle: "Gratulerer!",
   creditsSubtitle: "Du har mestret Les Aiguilles Blanches",
+  creditsCreatedBy: "Laget av",
+  creditsDevelopedWith: "Utviklet med",
+  creditsArtDirection: "Kunstnerisk ledelse",
+  creditsRetroInspiration: "En hyllest til retroklassikere som SkiFree",
+  creditsInspiredBy: "Inspirert av",
+  creditsGroomers: "Løypemaskinistene i Savoie",
+  creditsDedication: "Til nattskiftene som preparerer løypene mens vi sover",
+  creditsThanks: "Takk for at du spilte!",
+  creditsSeeYou: "Vi ses på løypene!",
+  creditsLine: "Kom igjen, gutten. Sola går opp. Fjellet er klart.",
   playAgain: "Spill igjen",
   skipCredits: "Trykk en tast for å hoppe over",
 
@@ -292,7 +302,7 @@ const nb: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19. februar 2026",
-  changelog_20260219: "🎬 Prolog for nye spillere\n📖 Forenklet opplæring\n🌦️ Tilfeldig menøvær\n🔗 Delbare daglige løyper",
+  changelog_20260219: "🎬 Prolog for nye spillere\n📖 Forenklet opplæring\n🌦️ Tilfeldig menøvær\n🔗 Delbare daglige løyper\n🎥 Filmisk rulletekst",
   changelog_20260217_date: "17. februar 2026",
   changelog_20260217: "🏔️ Syv løypeformer\n🎯 Banevariasjon forbedret\n⚡ Jevnere skikjøring",
   changelog_20260216_date: "16. februar 2026",

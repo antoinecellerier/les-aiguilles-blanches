@@ -184,6 +184,16 @@ const tr: Record<string, string> = {
   viewCredits: "Jenerikleri Gör",
   creditsTitle: "Tebrikler!",
   creditsSubtitle: "Les Aiguilles Blanches'ta ustalaştın",
+  creditsCreatedBy: "Yapımcı",
+  creditsDevelopedWith: "Geliştirme aracı",
+  creditsArtDirection: "Sanat Yönetimi",
+  creditsRetroInspiration: "SkiFree gibi retro klasiklere selam",
+  creditsInspiredBy: "İlham kaynağı",
+  creditsGroomers: "Savoie'nin pist bakımcıları",
+  creditsDedication: "Biz uyurken pistleri hazırlayan gece ekiplerine",
+  creditsThanks: "Oynadığın için teşekkürler!",
+  creditsSeeYou: "Pistlerde görüşürüz!",
+  creditsLine: "Hadi, evlat. Güneş doğuyor. Dağ hazır.",
   playAgain: "Tekrar Oyna",
   skipCredits: "Atlamak için bir tuşa bas",
 
@@ -291,7 +301,7 @@ const tr: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19 Şubat 2026",
-  changelog_20260219: "🎬 Yeni oyuncular için prolog\n📖 Basitleştirilmiş eğitim\n🌦️ Menüde rastgele hava\n🔗 Paylaşılabilir günlük parkurlar",
+  changelog_20260219: "🎬 Yeni oyuncular için prolog\n📖 Basitleştirilmiş eğitim\n🌦️ Menüde rastgele hava\n🔗 Paylaşılabilir günlük parkurlar\n🎥 Sinematik jenerik",
   changelog_20260217_date: "17 Şubat 2026",
   changelog_20260217: "🏔️ Yedi pist şekli\n🎯 Seviye çeşitliliği\n⚡ Akıcı kayak deneyimi",
   changelog_20260216_date: "16 Şubat 2026",

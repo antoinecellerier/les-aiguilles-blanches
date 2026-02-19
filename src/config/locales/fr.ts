@@ -188,6 +188,16 @@ const fr: Record<string, string> = {
   viewCredits: "Voir les crédits",
   creditsTitle: "Félicitations !",
   creditsSubtitle: "Tu as maîtrisé Les Aiguilles Blanches",
+  creditsCreatedBy: "Créé par",
+  creditsDevelopedWith: "Développé avec",
+  creditsArtDirection: "Direction Artistique",
+  creditsRetroInspiration: "Un clin d'œil aux classiques rétro comme SkiFree",
+  creditsInspiredBy: "Inspiré par",
+  creditsGroomers: "Les dameurs de Savoie",
+  creditsDedication: "Pour les équipes de nuit qui préparent les pistes pendant notre sommeil",
+  creditsThanks: "Merci d'avoir joué !",
+  creditsSeeYou: "À bientôt sur les pistes !",
+  creditsLine: "Allez, petit. Le soleil se lève. La montagne est prête.",
   playAgain: "Rejouer",
   skipCredits: "Appuyez sur une touche pour passer",
   
@@ -297,7 +307,7 @@ const fr: Record<string, string> = {
   
   // Changelog
   changelog_20260219_date: "19 février 2026",
-  changelog_20260219: "🎬 Prologue pour les nouveaux joueurs\n📖 Tutoriel simplifié\n🌦️ Météo aléatoire au menu\n🔗 Pistes du jour partageables",
+  changelog_20260219: "🎬 Prologue pour les nouveaux joueurs\n📖 Tutoriel simplifié\n🌦️ Météo aléatoire au menu\n🔗 Pistes du jour partageables\n🎥 Générique cinématique",
   changelog_20260217_date: "17 février 2026",
   changelog_20260217: "🏔️ Sept formes de piste\n🎯 Variété de génération\n⚡ Descente plus fluide",
   changelog_20260216_date: "16 février 2026",

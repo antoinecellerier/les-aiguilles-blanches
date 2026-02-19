@@ -184,6 +184,16 @@ const cs: Record<string, string> = {
   viewCredits: "Zobrazit titulky",
   creditsTitle: "Gratulujeme!",
   creditsSubtitle: "Ovládl jsi Les Aiguilles Blanches",
+  creditsCreatedBy: "Vytvořil",
+  creditsDevelopedWith: "Vyvinuto s",
+  creditsArtDirection: "Umělecká režie",
+  creditsRetroInspiration: "Pocta retro klasikám jako SkiFree",
+  creditsInspiredBy: "Inspirováno",
+  creditsGroomers: "Ratrakáři ze Savoie",
+  creditsDedication: "Pro noční posádky, které připravují sjezdovky, zatímco spíme",
+  creditsThanks: "Díky za hru!",
+  creditsSeeYou: "Brzy se uvidíme na sjezdovkách!",
+  creditsLine: "Pojď, chlapče. Slunce vychází. Hora je připravena.",
   playAgain: "Hrát znovu",
   skipCredits: "Stiskni klávesu pro přeskočení",
 
@@ -291,7 +301,7 @@ const cs: Record<string, string> = {
 
   // Changelog
   changelog_20260219_date: "19. února 2026",
-  changelog_20260219: "🎬 Prolog pro nové hráče\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasí v menu\n🔗 Sdílitelné denní sjezdy",
+  changelog_20260219: "🎬 Prolog pro nové hráče\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasí v menu\n🔗 Sdílitelné denní sjezdy\n🎥 Filmové titulky",
   changelog_20260217_date: "17. února 2026",
   changelog_20260217: "🏔️ Sedm tvarů sjezdovek\n🎯 Rozmanitost generování\n⚡ Plynulejší sjezd",
   changelog_20260216_date: "16. února 2026",
