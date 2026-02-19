@@ -201,7 +201,10 @@ class TestFailScreen:
         
         game_page.keyboard.up("Space")
         
-        game_page.wait_for_timeout(250)
+        game_page.wait_for_function("""() => {
+            const scene = window.game?.scene?.getScene('LevelCompleteScene');
+            return scene?.inputReady ?? false;
+        }""", timeout=3000)
         
         input_ready = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelCompleteScene');

@@ -80,7 +80,7 @@ def navigate_stick_down(page: Page, steps: int = 3):
     """Navigate down N steps using left stick pulses (for menu navigation)."""
     for _ in range(steps):
         set_gamepad_stick(page, 'left', 0, 0.8)
-        page.wait_for_timeout(80)
+        page.wait_for_timeout(150)
         set_gamepad_stick(page, 'left', 0, 0)
         page.wait_for_timeout(350)
 

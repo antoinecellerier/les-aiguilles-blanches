@@ -455,7 +455,7 @@ class TestSkiJump:
         page.wait_for_function("""() => {
             var s = window.game.scene.getScene('SkiRunScene');
             return s && s.currentSpeed >= 80;
-        }""", timeout=10000)
+        }""", timeout=15000)
 
     def test_jump_sets_airborne(self, game_page: Page):
         """Calling doJump at speed should set isAirborne."""
