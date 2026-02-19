@@ -124,8 +124,6 @@ snow-groomer/
 │   ├── e2e/                # Playwright browser tests
 │   └── unit-js/            # Vitest config validation
 ├── .github/
-│   ├── agents/
-│   │   └── code-health.agent.md  # Code audit custom agent
 │   ├── skills/
 │   │   ├── art-review/    # Art director visual review skill
 │   │   ├── audio-review/  # Audio director review skill
