@@ -44,9 +44,13 @@ class TestLevelComplete:
 
         game_page.set_viewport_size({"width": 800, "height": 600})
         game_page.evaluate("() => window.resizeGame?.()")
-        wait_for_scene(game_page, 'LevelCompleteScene')
-
-        assert_scene_active(game_page, 'LevelCompleteScene', "after resize")
+        # handleResize() triggers scene.restart() via requestAnimationFrame —
+        # wait for the restarted scene to fully rebuild its children
+        game_page.wait_for_function("""() => {
+            const scene = window.game?.scene?.getScene('LevelCompleteScene');
+            return scene && scene.sys && scene.sys.isActive() &&
+                   scene.children && scene.children.list.length > 3;
+        }""", timeout=8000)
 
         bounds_ok = game_page.evaluate("""() => {
             const scene = window.game?.scene?.getScene('LevelCompleteScene');

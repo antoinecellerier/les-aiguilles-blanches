@@ -155,7 +155,7 @@ class TestMenuNavigation:
         
         # Press Space to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Space")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=5000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=8000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Space should only close overlay")

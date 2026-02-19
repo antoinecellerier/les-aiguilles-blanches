@@ -112,6 +112,11 @@ class TestPauseMenu:
         """
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
+        # Wait for tutorial dialogue to appear (500ms delayed call in GameScene)
+        game_page.wait_for_function("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds && ds.isDialogueShowing && ds.isDialogueShowing();
+        }""", timeout=5000)
         dismiss_dialogues(game_page)
 
         # First: Pause → Settings → Back → Resume
@@ -136,6 +141,8 @@ class TestPauseMenu:
         wait_for_scene_inactive(game_page, 'PauseScene')
 
         # Now: Pause → Quit to menu
+        # After resume, tutorial may have triggered a new dialogue — dismiss it
+        dismiss_dialogues(game_page)
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
         wait_for_input_ready(game_page, "PauseScene")

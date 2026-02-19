@@ -342,17 +342,17 @@ class TestGamepadDialogueDismiss:
             return ds && ds.isDialogueShowing && ds.isDialogueShowing();
         }""", timeout=5000)
         
-        # Press B (button 1) to dismiss
-        tap_gamepad_button(gamepad_page, 1, delay=150)
-        gamepad_page.wait_for_timeout(300)
+        # Press B (button 1) to dismiss — hold long enough for Phaser's
+        # gamepad poll to detect it (CI runs at lower FPS than local)
+        press_gamepad_button(gamepad_page, 1)
         
-        # Dialogue should be dismissed
-        showing = gamepad_page.evaluate("""() => {
+        # Poll until dialogue is dismissed (instead of fixed timeout + assert)
+        gamepad_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
-            return ds?.isDialogueShowing ? ds.isDialogueShowing() : false;
-        }""")
+            return !ds || !ds.isDialogueShowing || !ds.isDialogueShowing();
+        }""", timeout=5000)
         
-        assert not showing, "B button should dismiss all dialogue"
+        release_gamepad_button(gamepad_page, 1)
 
 
 class TestGamepadSelectSkip:
