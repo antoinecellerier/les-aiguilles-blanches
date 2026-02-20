@@ -7,6 +7,7 @@ js/phaser.min.js
 __pycache__/
 *.pyc
 .pytest_cache/
+.pytest-e2e-durations.json
 
 # Playwright
 test-results/

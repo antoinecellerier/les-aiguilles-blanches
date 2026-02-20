@@ -8,6 +8,7 @@
 #   ./run-tests.sh --browser chromium # Single browser only
 #   ./run-tests.sh --smart            # Only run tests affected by uncommitted changes
 #   ./run-tests.sh --e2e-only         # Skip unit tests, run only Playwright E2E
+#   ./run-tests.sh --screenshots      # Keep screenshot files from E2E tests
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -18,12 +19,15 @@ cd "$(dirname "$0")"
 # Check for --smart flag and strip it from args
 SMART_MODE=false
 E2E_ONLY=false
+WRITE_SCREENSHOTS=false
 ARGS=()
 for arg in "$@"; do
     if [ "$arg" = "--smart" ]; then
         SMART_MODE=true
     elif [ "$arg" = "--e2e-only" ]; then
         E2E_ONLY=true
+    elif [ "$arg" = "--screenshots" ]; then
+        WRITE_SCREENSHOTS=true
     else
         ARGS+=("$arg")
     fi
@@ -294,6 +298,11 @@ if [ "$SKIP_E2E" = false ]; then
         ./setup.sh
     fi
     source .venv/bin/activate
+    if [ "$WRITE_SCREENSHOTS" = true ]; then
+        export E2E_WRITE_SCREENSHOTS=1
+    else
+        export E2E_WRITE_SCREENSHOTS=0
+    fi
 
     # Check if --browser was explicitly provided
     if [[ "$*" == *"--browser"* ]]; then

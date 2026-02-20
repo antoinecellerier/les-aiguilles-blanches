@@ -1,6 +1,12 @@
 """Pytest configuration for Playwright E2E tests."""
 import os
+import json
+from pathlib import Path
 import pytest
+from playwright.sync_api import Page as PlaywrightPage
+
+_E2E_DURATIONS_FILE = Path(__file__).resolve().parents[2] / '.pytest-e2e-durations.json'
+_RECENT_DURATIONS: dict[str, float] = {}
 
 # Load .env.local if present (matches run-tests.sh behavior)
 _env_local = os.path.join(os.path.dirname(__file__), '..', '..', '.env.local')
@@ -18,6 +24,61 @@ GAME_URL = os.environ.get(
     "GAME_URL",
     f"http://localhost:{_port}/index.html"
 )
+
+
+def _load_duration_history() -> dict[str, float]:
+    if not _E2E_DURATIONS_FILE.exists():
+        return {}
+    try:
+        data = json.loads(_E2E_DURATIONS_FILE.read_text(encoding='utf-8'))
+        if not isinstance(data, dict):
+            return {}
+        return {str(k): float(v) for k, v in data.items()}
+    except Exception:
+        return {}
+
+
+def _duration_key(nodeid: str) -> str:
+    return nodeid.split('[', 1)[0]
+
+
+def pytest_collection_modifyitems(config, items):
+    """Run historically slower tests earlier to reduce long-tail runtime."""
+    if os.environ.get('PYTEST_DISABLE_DURATION_ORDERING') == '1':
+        return
+    history = _load_duration_history()
+    if not history:
+        return
+
+    original_order = {item.nodeid: idx for idx, item in enumerate(items)}
+
+    def weight(item):
+        return history.get(item.nodeid, history.get(_duration_key(item.nodeid), 0.0))
+
+    items.sort(key=lambda item: (-weight(item), original_order[item.nodeid]))
+
+
+def pytest_runtest_logreport(report):
+    """Capture per-test durations to improve future ordering."""
+    if report.when != 'call':
+        return
+    _RECENT_DURATIONS[report.nodeid] = float(report.duration)
+    base_key = _duration_key(report.nodeid)
+    _RECENT_DURATIONS[base_key] = max(_RECENT_DURATIONS.get(base_key, 0.0), float(report.duration))
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Persist duration history once per run (controller process only)."""
+    if hasattr(session.config, 'workerinput'):
+        return
+    if not _RECENT_DURATIONS:
+        return
+    existing = _load_duration_history()
+    existing.update(_RECENT_DURATIONS)
+    _E2E_DURATIONS_FILE.write_text(
+        json.dumps(existing, indent=2, sort_keys=True),
+        encoding='utf-8',
+    )
 
 
 def wait_for_scene(page, scene_name: str, timeout: int = 8000):
@@ -383,6 +444,27 @@ def browser_context_args(browser_context_args):
 def skip_prologue(page):
     """Skip the cold-open prologue in all tests."""
     page.add_init_script("localStorage.setItem('snowGroomer_prologueSeen', '1');")
+
+
+@pytest.fixture(scope='session', autouse=True)
+def disable_nonessential_screenshot_writes():
+    """Skip disk screenshot writes by default; set E2E_WRITE_SCREENSHOTS=1 to enable."""
+    if os.environ.get('E2E_WRITE_SCREENSHOTS') == '1':
+        yield
+        return
+
+    original = PlaywrightPage.screenshot
+
+    def patched(self, *args, **kwargs):
+        if kwargs.get('path'):
+            return b''
+        return original(self, *args, **kwargs)
+
+    PlaywrightPage.screenshot = patched
+    try:
+        yield
+    finally:
+        PlaywrightPage.screenshot = original
 
 
 @pytest.fixture

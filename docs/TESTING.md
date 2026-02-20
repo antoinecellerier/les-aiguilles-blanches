@@ -17,11 +17,13 @@ For architecture details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ./run-tests.sh --smart                # Only tests affected by uncommitted changes
 ./run-tests.sh --smart --browser chromium  # Smart + single browser (fastest)
 ./run-tests.sh --e2e-only --browser chromium  # E2E only (skip unit tests)
+./run-tests.sh --browser chromium --screenshots  # Keep screenshot files
 npm test                              # Unit tests only
 ```
 
 The test script auto-starts the dev server if not running.
 Pytest uses xdist work-stealing scheduling by default (`--dist=worksteal`) to reduce long-tail worker idle time.
+E2E collection also uses previous-run duration history (`.pytest-e2e-durations.json`) to start slower tests earlier.
 
 ## E2E Setup (first time)
 

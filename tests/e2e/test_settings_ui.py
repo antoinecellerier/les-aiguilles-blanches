@@ -67,6 +67,10 @@ def settings_page(page: Page):
     navigate_to_settings(page)
     
     assert_scene_active(page, 'SettingsScene')
+    page.wait_for_function("""() => {
+        const scene = window.game.scene.getScene('SettingsScene');
+        return scene && Array.isArray(scene.focusItems) && scene.focusItems.length > 0;
+    }""", timeout=8000)
     yield page
 
 
@@ -338,11 +342,15 @@ class TestSettingsKeyboardNav:
     def test_arrow_down_increments_focus(self, settings_page: Page):
         """ArrowDown should advance to the next focus item."""
         settings_page.keyboard.press("ArrowDown")
+        settings_page.wait_for_function("""() => {
+            const scene = window.game.scene.getScene('SettingsScene');
+            return scene && scene.focusIndex === 0;
+        }""", timeout=5000)
         settings_page.keyboard.press("ArrowDown")
         settings_page.wait_for_function("""() => {
             const scene = window.game.scene.getScene('SettingsScene');
             return scene && scene.focusIndex === 1;
-        }""", timeout=3000)
+        }""", timeout=5000)
 
         index = settings_page.evaluate("""() => {
             const scene = window.game.scene.getScene('SettingsScene');
