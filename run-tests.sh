@@ -88,7 +88,7 @@ if [ "$SMART_MODE" = true ]; then
                 src/scenes/CreditsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
                 src/scenes/MenuScene.ts)     SMART_E2E_FILES+=("tests/e2e/test_scene_layering.py" "tests/e2e/test_volume_indicator.py" "tests/e2e/test_level_select.py") ;;
                 src/scenes/LevelSelectScene.ts) SMART_E2E_FILES+=("tests/e2e/test_level_select.py") ;;
-                src/scenes/DailyRunsScene.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py") ;;
+                src/scenes/DailyRunsScene.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py" "tests/e2e/test_seed_sharing.py") ;;
                 src/scenes/SkiRunScene.ts)   SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
                 src/systems/ParkFeatureSystem.ts) SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
                 src/utils/skiSprites.ts)     SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
@@ -109,7 +109,8 @@ if [ "$SMART_MODE" = true ]; then
                 src/systems/SlalomGateSystem.ts) SMART_E2E_FILES+=("tests/e2e/test_ski_run.py") ;;
                 src/systems/MenuTerrainRenderer.ts|src/systems/MenuWildlifeController.ts) SMART_E2E_FILES+=("tests/e2e/test_scene_layering.py") ;;
                 src/systems/GamepadDiagnostic.ts) SMART_E2E_FILES+=("tests/e2e/test_gamepad.py") ;;
-                src/systems/ContractSession.ts|src/systems/LevelGenerator.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py") ;;
+                src/systems/ContractSession.ts|src/systems/LevelGenerator.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py" "tests/e2e/test_seed_sharing.py") ;;
+                src/utils/shareUrl.ts|src/utils/seededRNG.ts) SMART_E2E_FILES+=("tests/e2e/test_seed_sharing.py") ;;
                 src/utils/storage.ts|src/utils/fullscreen.ts) SMART_E2E_FILES+=("tests/e2e/test_settings_ui.py") ;;
                 src/utils/gameProgress.ts)   SMART_E2E_FILES+=("tests/e2e/test_level_complete.py" "tests/e2e/test_navigation.py") ;;
                 src/utils/sceneTransitions.ts|src/utils/menuButtonNav.ts) SMART_E2E_FILES+=("tests/e2e/test_navigation.py" "tests/e2e/test_level_select.py") ;;
@@ -143,7 +144,7 @@ if [ "$SMART_MODE" = true ]; then
 
     # Validate: every E2E test file on disk must be known to the selection logic.
     # This catches new test files that haven't been added to the mapping above.
-    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_accessibility_full.py test_key_hints.py test_level_mechanics.py test_level_select.py test_ski_run.py test_volume_indicator.py test_performance.py test_resize_touch.py test_daily_runs.py"
+    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_accessibility_full.py test_key_hints.py test_level_mechanics.py test_level_select.py test_ski_run.py test_volume_indicator.py test_performance.py test_resize_touch.py test_daily_runs.py test_seed_sharing.py"
     UNKNOWN_E2E=()
     for f in tests/e2e/test_*.py; do
         [ -f "$f" ] || continue
@@ -203,9 +204,9 @@ if [ "$SMART_MODE" = true ]; then
             src/scenes/CreditsScene.ts)   SCENE_TESTS+=("test_level_complete.py") ;;
             src/scenes/MenuScene.ts)      SCENE_TESTS+=("test_scene_layering.py" "test_volume_indicator.py" "test_level_select.py") ;;
             src/scenes/LevelSelectScene.ts) SCENE_TESTS+=("test_level_select.py") ;;
-            src/scenes/DailyRunsScene.ts) SCENE_TESTS+=("test_daily_runs.py") ;;
+            src/scenes/DailyRunsScene.ts) SCENE_TESTS+=("test_daily_runs.py" "test_seed_sharing.py") ;;
             src/scenes/SkiRunScene.ts)    SCENE_TESTS+=("test_ski_run.py") ;;
-            src/scenes/BootScene.ts)      SCENE_TESTS+=("test_performance.py") ;;
+            src/scenes/BootScene.ts)      SCENE_TESTS+=("test_performance.py" "test_seed_sharing.py") ;;
         esac
         mapped_tests=$(printf '%s\n' "${SCENE_TESTS[@]}" | sort -u)
 
