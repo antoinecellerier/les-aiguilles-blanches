@@ -167,6 +167,7 @@ const tr: Record<string, string> = {
   menu: "Menü",
   levelSelect: "Pist Seç",
   locked: "Kilitli",
+   completeToUnlock: "{name} tamamla, kilidi aç",
   // UNUSED target: "Hedef",
   tutorial: "Öğretici",
   timeUsed: "Geçen Süre",

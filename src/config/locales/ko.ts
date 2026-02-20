@@ -167,6 +167,7 @@ const ko: Record<string, string> = {
   menu: "메뉴",
   levelSelect: "레벨 선택",
   locked: "잠김",
+   completeToUnlock: "{name} 완료하여 잠금 해제",
   // UNUSED target: "목표",
   tutorial: "튜토리얼",
   timeUsed: "경과 시간",

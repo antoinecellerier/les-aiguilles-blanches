@@ -167,6 +167,7 @@ const cs: Record<string, string> = {
   menu: "Menu",
   levelSelect: "Výběr tratě",
   locked: "Zamčeno",
+   completeToUnlock: "Dokonči {name} pro odemknutí",
   // UNUSED target: "Cíl",
   tutorial: "Výukový program",
   timeUsed: "Spotřebovaný čas",

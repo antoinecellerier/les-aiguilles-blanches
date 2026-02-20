@@ -148,6 +148,7 @@ const es: Record<string, string> = {
   menu: "Menú",
   levelSelect: "Elegir nivel",
   locked: "Bloqueado",
+   completeToUnlock: "Completa {name} para desbloquear",
   tutorial: "Tutorial",
   timeUsed: "Tiempo usado",
   excellent: "¡Excelente!",

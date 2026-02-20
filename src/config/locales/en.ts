@@ -167,6 +167,7 @@ const en: Record<string, string> = {
   menu: "Menu",
   levelSelect: "Level Select",
   locked: "Locked",
+   completeToUnlock: "Complete {name} to unlock",
   // UNUSED target: "Target",
   tutorial: "Tutorial",
   timeUsed: "Time Used",

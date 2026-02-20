@@ -167,6 +167,7 @@ const nb: Record<string, string> = {
   menu: "Meny",
   levelSelect: "Velg løype",
   locked: "Låst",
+   completeToUnlock: "Fullfør {name} for å låse opp",
   // UNUSED target: "Mål",
   tutorial: "Opplæring",
   timeUsed: "Tid brukt",

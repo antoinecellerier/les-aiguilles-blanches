@@ -171,6 +171,7 @@ const fr: Record<string, string> = {
   menu: "Menu",
   levelSelect: "Choix du niveau",
   locked: "Verrouillé",
+   completeToUnlock: "Complète {name} pour débloquer",
   // UNUSED target: "Objectif",
   tutorial: "Tutoriel",
   timeUsed: "Temps utilisé",

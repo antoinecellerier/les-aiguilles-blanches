@@ -167,6 +167,7 @@ const fi: Record<string, string> = {
   menu: "Valikko",
   levelSelect: "Valitse rinne",
   locked: "Lukittu",
+   completeToUnlock: "Suorita {name} avataksesi",
   // UNUSED target: "Tavoite",
   tutorial: "Opastus",
   timeUsed: "Käytetty aika",

@@ -148,6 +148,7 @@ const de: Record<string, string> = {
   menu: "Menü",
   levelSelect: "Levelauswahl",
   locked: "Gesperrt",
+   completeToUnlock: "Schließe {name} ab zum Freischalten",
   tutorial: "Tutorial",
   timeUsed: "Benötigte Zeit",
   excellent: "Ausgezeichnet!",

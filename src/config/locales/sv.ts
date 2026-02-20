@@ -167,6 +167,7 @@ const sv: Record<string, string> = {
   menu: "Meny",
   levelSelect: "Välj bana",
   locked: "Låst",
+   completeToUnlock: "Klara {name} för att låsa upp",
   // UNUSED target: "Mål",
   tutorial: "Handledning",
   timeUsed: "Tid använd",

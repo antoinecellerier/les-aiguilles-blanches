@@ -655,11 +655,13 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.infoName?.setText(`${marker?.symbol ?? ''} ${displayName}`);
 
     if (!unlocked) {
-      let lockMsg = `🔒\u00A0${t('locked') || 'Locked'}`;
+      let lockMsg = '';
       if (levelIdx > 0) {
         const prevFull = t(LEVELS[levelIdx - 1].nameKey) || LEVELS[levelIdx - 1].nameKey;
         const prevShort = prevFull.includes(' - ') ? prevFull.split(' - ').slice(1).join(' - ') : prevFull;
-        lockMsg += `  ·  ▶\u00A0${prevShort.replace(/ /g, '\u00A0')}`;
+        lockMsg = (t('completeToUnlock') || 'Complete {name} to unlock').replace('{name}', prevShort);
+      } else {
+        lockMsg = t('locked') || 'Locked';
       }
       this.infoDetails?.setText(lockMsg);
       this.groomBtn?.setVisible(false);

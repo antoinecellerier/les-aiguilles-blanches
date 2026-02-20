@@ -167,6 +167,7 @@ const sk: Record<string, string> = {
   menu: "Menu",
   levelSelect: "Výber trate",
   locked: "Zamknuté",
+   completeToUnlock: "Dokonči {name} na odomknutie",
   // UNUSED target: "Cieľ",
   tutorial: "Návod",
   timeUsed: "Spotrebovaný čas",

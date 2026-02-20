@@ -167,6 +167,7 @@ const ja: Record<string, string> = {
   menu: "メニュー",
   levelSelect: "レベル選択",
   locked: "ロック中",
+   completeToUnlock: "{name}をクリアして解除",
   // UNUSED target: "目標",
   tutorial: "チュートリアル",
   timeUsed: "経過時間",
