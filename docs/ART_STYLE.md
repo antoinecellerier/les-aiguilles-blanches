@@ -360,6 +360,37 @@ On fail screens, the standard groomer is replaced by a failure-specific visual d
 | Fuel | Smoke plumes rising, red fuel gauge | Smoke `0x666666`; gauge `0xff0000` |
 | Time | Gray "zzZ" sleep marks above groomer | Text `0xaaaacc` |
 
+## Level Select Trail Map
+
+The trail map uses a three-peak mountain silhouette with colored run paths, difficulty markers, a chairlift, and a lodge. All elements are rectangles only.
+
+### Mountain Terrain
+- Three peaks: main center (x≈0.50), left shoulder (x≈0.18), right ridge (x≈0.82)
+- Rock palette: shadow `0x2d2822`, mid `0x4a423a`, light `0x6a5e52`, highlight `0x8a7e6a`
+- Snow cap on summit top ~20% (white `0xffffff`)
+- Summit cross landmark: dark brown `0x2d2822`
+
+### Run Paths & Markers
+- Path color by difficulty: Green `0x22c55e`, Blue `0x3b82f6`, Red `0xef4444`, Black `0x1f2937`, Park `0xf59e0b`
+- White outline pass + colored inner pass for depth; alpha 0.85 unlocked, 0.25 locked
+- Marker squares: ~28px scaled, white border (2px), difficulty-colored fill, symbol (●■◆★▲ or 🔒)
+- Selection ring: gold `0xffd700` border (3px) + translucent glow (0.4 alpha)
+
+### Chairlift (Right Ridge)
+- Cable: dark brown `0x2d2822` at 0.9 alpha, pixel-stepped for continuity
+- 4 pylons with cross-arms along cable
+- Gondola cars: red `0xcc2200` body, light blue `0x87ceeb` window
+- Base station: brown `0x4a423a` body, red `0xcc2200` roof, "Télécabine" label
+
+### Lodge (Chez Marie)
+- Body: warm brown `0x8b4513`, stepped roof dark red `0x8b1a1a` with white snow cap
+- Windows: gold `0xffd700`, door: dark brown `0x2d2822`
+- Chimney: brown `0x4a423a` with white smoke rectangles
+
+### Info Panel
+- Background: navy `0x1a1a2e` at 0.94 alpha, gold accent line at top
+- Groom/Ski buttons using standard CTA styling
+
 ## Rendering Guidelines
 
 ### Depth/Layering (Phaser depth values)

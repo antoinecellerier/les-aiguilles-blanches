@@ -35,7 +35,7 @@ export class MenuWildlifeController {
   private scene: Phaser.Scene;
   private snowflakes: { rect: Phaser.GameObjects.Rectangle; speed: number; wobbleOffset: number }[] = [];
   private menuAnimals: MenuAnimal[] = [];
-  private perchSpots: { x: number; y: number }[] = [];
+  perchSpots: { x: number; y: number }[] = [];
   private menuTracks: { image: Phaser.GameObjects.Image; age: number }[] = [];
   private readonly MENU_TRACK_LIFETIME = 12000;
   private readonly MENU_MAX_TRACKS = 40;

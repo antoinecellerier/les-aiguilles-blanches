@@ -8,6 +8,7 @@ import { t } from '../setup';
 export interface MenuBackdropOptions {
   weather?: { isNight: boolean; weather: string };
   skipGroomer?: boolean;
+  skipMountains?: boolean;
   /** Darken overlay alpha (0 = no overlay). Default 0.88 */
   overlayAlpha?: number;
   /** Depth for the dark overlay. Default MENU_BACKDROP */
@@ -34,7 +35,7 @@ export function createMenuBackdrop(scene: Phaser.Scene, opts: MenuBackdropOption
   const snowLinePct = opts.snowLinePct ?? (isPortrait ? 0.82 : 0.78);
   const snowLineY = Math.round(height * snowLinePct);
 
-  createMenuTerrain(scene, width, height, snowLineY, 0, scaleFactor, opts.weather, opts.skipGroomer);
+  createMenuTerrain(scene, width, height, snowLineY, 0, scaleFactor, opts.weather, opts.skipGroomer, opts.skipMountains);
 
   const wildlife = new MenuWildlifeController(scene);
   wildlife.snowLineY = snowLineY;
@@ -92,10 +93,10 @@ export function createMenuHeader(scene: Phaser.Scene, titleKey: string, onBack: 
  * Renders the static menu background: sky gradient, mountains, snow ground, trees, and groomer.
  * Pure rendering — no state, no updates. Created once per scene lifecycle.
  */
-export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }, skipGroomer = false): void {
+export function createMenuTerrain(scene: Phaser.Scene, width: number, height: number, snowLineY: number, footerHeight: number, scaleFactor: number, weather?: { isNight: boolean; weather: string }, skipGroomer = false, skipMountains = false): void {
   const isStorm = weather?.weather === 'storm';
   createSky(scene, width, snowLineY, weather);
-  createMountains(scene, width, snowLineY, scaleFactor, isStorm);
+  if (!skipMountains) createMountains(scene, width, snowLineY, scaleFactor, isStorm);
   createSnowGround(scene, width, height, snowLineY, footerHeight);
   createTrees(scene, width, snowLineY, scaleFactor, isStorm);
   if (!skipGroomer) createGroomer(scene, width, snowLineY, scaleFactor, isStorm);

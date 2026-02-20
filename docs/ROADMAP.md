@@ -28,7 +28,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [ ] Ski/snowboard reward run (v2) — Freestyle elements on park levels, per-level modifications, best time tracking
 - ✅ ~~Ski mode: remember grooming state~~ — Persists groomed tiles to localStorage on level win; ski mode from level select loads the last successful grooming instead of a synthetic pattern
 - ✅ ~~Ski mode touch controls — Jump/brake buttons should match the same layout as groom/winch buttons in grooming mode~~ — Diagonal layout matching grooming mode, pixel art chevron icon for JMP button.
-- [ ] Make level select look like a ski resort trail map
+- ✅ ~~Make level select look like a ski resort trail map~~ — Trail map with three peaks, colored run paths, difficulty markers, chairlift, lodge, and shared MenuTerrainRenderer backdrop (sky, trees, wildlife, snow).
 
 ## Recently Completed
 

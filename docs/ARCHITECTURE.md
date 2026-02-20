@@ -113,7 +113,7 @@ snow-groomer/
 │   │   ├── BootScene.ts    # Asset loading, texture generation
 │   │   ├── PrologueScene.ts # Cold-open cinematic for first-time players
 │   │   ├── MenuScene.ts    # Main menu, How to Play overlay
-│   │   ├── LevelSelectScene.ts # Level select / replay (browse + star ratings)
+│   │   ├── LevelSelectScene.ts # Trail map level select (mountain, run paths, markers)
 │   │   ├── SettingsScene.ts # Language, a11y, gameplay prefs, display mode (desktop), controls, keyboard layout
 │   │   ├── GameScene.ts    # Main gameplay
 │   │   ├── HUDScene.ts     # UI overlay (parallel to GameScene)

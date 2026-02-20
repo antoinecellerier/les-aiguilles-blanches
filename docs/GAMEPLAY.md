@@ -129,15 +129,18 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
 
 Your progress is automatically saved when you complete a level. Best star ratings, times, and bonus objectives are tracked per level. When you return to the game:
 - **Resume**: Continue from where you left off
-- **Level Select**: Browse all levels, replay completed ones, and aim for ⭐⭐⭐
+- **Level Select**: Trail map view — navigate the mountain to pick a run and aim for ⭐⭐⭐
 - **New Game**: Start fresh from the tutorial
 
 ### Level Select
 
-Once you've completed the tutorial, the **Level Select** button appears on the main menu. From there you can:
-- **Groom** any unlocked level (replay or continue)
-- **Ski/Snowboard** any completed level (must groom it first!)
-- See your best star rating (⭐ to ⭐⭐⭐) for each level
+Once you've completed the tutorial, the **Level Select** button appears on the main menu. The trail map shows the full resort mountain with colored run paths in classic ski map style:
+- **Click or tap** a marker to select it — a gold ring highlights the chosen run
+- **Click again** (or press Enter) to start grooming; use the info panel buttons for Groom or Ski
+- **Navigate** with arrow keys or gamepad (↑ towards summit, ↓ towards base)
+- **Piste names** are also clickable touch targets for easy selection
+- Marker colors match difficulty: 🟢 Green, 🔵 Blue, 🔴 Red, ⬛ Black, 🟠 Park
+- Star ratings and best times shown for completed levels
 - Locked levels are visible but grayed out
 
 ### Difficulty Scaling

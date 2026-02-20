@@ -75,30 +75,33 @@ class TestLevelSelectBasic:
 class TestLevelSelectWithProgress:
     """Tests with injected save data."""
 
-    def test_completed_level_has_ski_button(self, game_page: Page):
-        """Completed levels should show both Groom and Ski buttons."""
+    def test_completed_level_has_ski_option(self, game_page: Page):
+        """Completed levels should show a Ski button in the info panel."""
         inject_progress(game_page, current_level=1, completed_levels='{"0": {"completed": true, "stars": 2, "bestTime": 120}}')
         navigate_to_level_select(game_page)
-        button_count = game_page.evaluate("""() => {
+        wait_for_input_ready(game_page, 'LevelSelectScene')
+        # Navigate down to select level 0 (default is at currentLevel=1, down = towards base)
+        game_page.keyboard.press('ArrowDown')
+        game_page.wait_for_timeout(100)
+        has_ski = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelSelectScene');
-            if (!scene || !scene.rowButtons) return 0;
-            // Row 0 = first level; should have 2 buttons (Groom + Ski)
-            const row0 = scene.rowButtons.get(0);
-            return row0 ? row0.length : 0;
+            return scene?.skiBtn?.visible === true;
         }""")
-        assert button_count == 2, f"Completed level should have 2 buttons, got {button_count}"
+        assert has_ski, "Completed level should show Ski button in info panel"
 
     def test_locked_levels_not_interactive(self, game_page: Page):
-        """Locked levels should have no interactive buttons."""
+        """Locked levels should not start game on click."""
         navigate_to_level_select(game_page)
-        # Level 5 (index 5) should be locked with no progress
-        locked_buttons = game_page.evaluate("""() => {
+        wait_for_input_ready(game_page, 'LevelSelectScene')
+        # Level 5 (index 5) should be locked — its marker hit zone should not have useHandCursor
+        locked_interactive = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelSelectScene');
-            if (!scene || !scene.rowButtons) return -1;
-            const row5 = scene.rowButtons.get(5);
-            return row5 ? row5.length : 0;
+            if (!scene || !scene.menuButtons) return true;
+            // Button index 6 = level 5 marker (0=back, 1-11=levels)
+            const btn = scene.menuButtons[6];
+            return btn?.input?.cursor === 'pointer';
         }""")
-        assert locked_buttons == 0, f"Locked level should have 0 buttons, got {locked_buttons}"
+        assert not locked_interactive, "Locked level marker should not show pointer cursor"
 
     def test_groom_starts_game(self, game_page: Page):
         """Clicking Groom on an unlocked level should start GameScene."""
