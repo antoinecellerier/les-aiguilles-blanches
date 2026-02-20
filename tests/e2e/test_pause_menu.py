@@ -3,7 +3,8 @@ import pytest
 from playwright.sync_api import Page
 from conftest import (
     wait_for_scene, wait_for_scene_inactive, wait_for_input_ready, dismiss_dialogues,
-    click_button, click_menu_by_key, get_active_scenes, assert_scene_active, assert_scene_not_active,
+    click_button, click_menu_by_key, skip_to_level, get_active_scenes,
+    assert_scene_active, assert_scene_not_active,
     BUTTON_START,
 )
 
@@ -112,12 +113,9 @@ class TestPauseMenu:
         """
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
-        # Wait for tutorial dialogue to appear (500ms delayed call in GameScene)
-        game_page.wait_for_function("""() => {
-            const ds = window.game?.scene?.getScene('DialogueScene');
-            return ds && ds.isDialogueShowing && ds.isDialogueShowing();
-        }""", timeout=5000)
-        dismiss_dialogues(game_page)
+        # Skip to level 1 to avoid tutorial dialogues entirely —
+        # this test is about Settings returnTo, not tutorials
+        skip_to_level(game_page, 1)
 
         # First: Pause → Settings → Back → Resume
         game_page.keyboard.press("Escape")
@@ -141,8 +139,6 @@ class TestPauseMenu:
         wait_for_scene_inactive(game_page, 'PauseScene')
 
         # Now: Pause → Quit to menu
-        # After resume, tutorial may have triggered a new dialogue — dismiss it
-        dismiss_dialogues(game_page)
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
         wait_for_input_ready(game_page, "PauseScene")
