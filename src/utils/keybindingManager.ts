@@ -87,7 +87,9 @@ export class KeybindingManager {
       setString(STORAGE_KEYS.BINDINGS_VERSION, String(BINDINGS_VERSION));
       setString(STORAGE_KEYS.BINDINGS, JSON.stringify(this.bindings));
       setString(STORAGE_KEYS.DISPLAY_NAMES, JSON.stringify(this.displayNames));
-    } catch { /* Private browsing or quota exceeded */ }
+    } catch (e) {
+      console.debug('[keybindings] Save skipped', e);
+    }
   }
 
   getKeyName(keyCode: number): string {

@@ -8,6 +8,7 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 // Setup globals first (side-effect import)
 import './setup';
+import { SCENE_KEYS } from './config/sceneKeys';
 import { STORAGE_KEYS } from './config/storageKeys';
 import { getString } from './utils/storage';
 import { isDesktopApp } from './types/electron';
@@ -35,18 +36,18 @@ import PrologueScene from './scenes/PrologueScene';
 
 // Register game scenes for centralized cleanup (single source of truth)
 registerGameScenes([
-  { key: 'MenuScene', ctor: MenuScene },
-  { key: 'SettingsScene', ctor: SettingsScene },
-  { key: 'GameScene', ctor: GameScene },
-  { key: 'HUDScene', ctor: HUDScene },
-  { key: 'DialogueScene', ctor: DialogueScene },
-  { key: 'PauseScene', ctor: PauseScene },
-  { key: 'LevelCompleteScene', ctor: LevelCompleteScene },
-  { key: 'SkiRunScene', ctor: SkiRunScene },
-  { key: 'LevelSelectScene', ctor: LevelSelectScene },
-  { key: 'DailyRunsScene', ctor: DailyRunsScene },
-  { key: 'CreditsScene', ctor: CreditsScene },
-  { key: 'PrologueScene', ctor: PrologueScene },
+  { key: SCENE_KEYS.MENU, ctor: MenuScene },
+  { key: SCENE_KEYS.SETTINGS, ctor: SettingsScene },
+  { key: SCENE_KEYS.GAME, ctor: GameScene },
+  { key: SCENE_KEYS.HUD, ctor: HUDScene },
+  { key: SCENE_KEYS.DIALOGUE, ctor: DialogueScene },
+  { key: SCENE_KEYS.PAUSE, ctor: PauseScene },
+  { key: SCENE_KEYS.LEVEL_COMPLETE, ctor: LevelCompleteScene },
+  { key: SCENE_KEYS.SKI_RUN, ctor: SkiRunScene },
+  { key: SCENE_KEYS.LEVEL_SELECT, ctor: LevelSelectScene },
+  { key: SCENE_KEYS.DAILY_RUNS, ctor: DailyRunsScene },
+  { key: SCENE_KEYS.CREDITS, ctor: CreditsScene },
+  { key: SCENE_KEYS.PROLOGUE, ctor: PrologueScene },
 ]);
 
 declare global {
@@ -182,19 +183,23 @@ window.addEventListener('load', () => {
     if (e.key === 'f' || e.key === 'F') {
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
       // During gameplay, only toggle if F isn't bound to a game control
-      if (window.game?.scene?.isActive('GameScene')) {
+      if (window.game?.scene?.isActive(SCENE_KEYS.GAME)) {
         try {
           const saved = getString(STORAGE_KEYS.BINDINGS);
           const codes = saved ? Object.values(JSON.parse(saved)) as number[] : [];
           if (codes.includes(e.keyCode)) return;
-        } catch { /* use default bindings — F is not bound */ }
+        } catch (err) {
+          console.debug('[fullscreen] Failed to read bindings; using defaults', err);
+        }
       }
       if (isDesktopApp()) {
         window.electronAPI!.toggleFullscreen();
       } else if (document.fullscreenElement) {
         document.exitFullscreen();
       } else if (document.fullscreenEnabled) {
-        document.documentElement.requestFullscreen().catch(() => {});
+        document.documentElement.requestFullscreen().catch((err) => {
+          console.debug('[fullscreen] requestFullscreen rejected', err);
+        });
       }
     }
   });

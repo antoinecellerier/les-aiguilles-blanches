@@ -1,0 +1,15 @@
+export const SCENE_KEYS = {
+  BOOT: 'BootScene',
+  MENU: 'MenuScene',
+  SETTINGS: 'SettingsScene',
+  GAME: 'GameScene',
+  HUD: 'HUDScene',
+  DIALOGUE: 'DialogueScene',
+  PAUSE: 'PauseScene',
+  LEVEL_COMPLETE: 'LevelCompleteScene',
+  SKI_RUN: 'SkiRunScene',
+  LEVEL_SELECT: 'LevelSelectScene',
+  DAILY_RUNS: 'DailyRunsScene',
+  CREDITS: 'CreditsScene',
+  PROLOGUE: 'PrologueScene',
+} as const;

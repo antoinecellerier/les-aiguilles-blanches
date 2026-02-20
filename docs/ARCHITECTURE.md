@@ -53,6 +53,7 @@ snow-groomer/
 │   │   ├── gameConfig.ts   # Game constants, colors, BALANCE tuning, DEPTHS layering
 │   │   ├── levels.ts       # Level definitions
 │   │   ├── localization.ts # i18n translations (uses {placeholder} syntax)
+│   │   ├── sceneKeys.ts    # Shared scene key constants (SCENE_KEYS)
 │   │   ├── storageKeys.ts  # Centralized localStorage key constants
 │   │   └── theme.ts        # UI colors, fonts, button styles, world-element colors
 │   ├── systems/
@@ -1426,11 +1427,15 @@ Five failure groomer effects: **tumble** (upside-down groomer), **avalanche** (s
 
 ### Balance Constants
 
-All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights, grooming quality. Never hardcode magic numbers in GameScene — add them to `BALANCE`.
+All gameplay tuning values are centralized in `BALANCE` (exported from `src/config/gameConfig.ts`). Categories: stamina, fuel, movement, slopes, avalanche, camera, timing, night/headlights, grooming quality, and ski-run smoothing rates. Never hardcode magic numbers in gameplay scenes — add them to `BALANCE`.
 
 ### Depth Constants
 
 All Phaser depth (z-order) values are centralized in `DEPTHS` (exported from `src/config/gameConfig.ts`). Never use magic depth numbers — always use `DEPTHS.*` constants. See `docs/ART_STYLE.md` for the full layer table. Menu/settings scenes use `DEPTHS.MENU_OVERLAY` (13) and `DEPTHS.MENU_UI` (15) to layer UI above terrain backdrops with animated wildlife.
+
+### Scene Key Constants
+
+High-traffic scene routing paths use `SCENE_KEYS` from `src/config/sceneKeys.ts` to avoid typo-prone string literals in scene registration and transition cleanup checks.
 
 ### Overlay Scene Input Handling
 

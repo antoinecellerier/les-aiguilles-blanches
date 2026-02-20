@@ -8,6 +8,7 @@
  * - No circular imports — constructors are registered at boot via registerGameScenes()
  */
 import Phaser from 'phaser';
+import { SCENE_KEYS } from '../config/sceneKeys';
 import { resetSettleFrames } from './renderThrottle';
 import { clearDailyRunSession } from '../systems/DailyRunSession';
 import { clearLaunchOrigin } from '../systems/LaunchOrigin';
@@ -87,12 +88,12 @@ export function resetGameScenes(
     }
 
     // Clear daily run session when leaving gameplay for a menu
-    if (target === 'MenuScene' || target === 'DailyRunsScene') {
+    if (target === SCENE_KEYS.MENU || target === SCENE_KEYS.DAILY_RUNS) {
       clearDailyRunSession();
     }
 
     // Clear launch origin when returning to any menu hub
-    if (target === 'MenuScene' || target === 'LevelSelectScene' || target === 'DailyRunsScene') {
+    if (target === SCENE_KEYS.MENU || target === SCENE_KEYS.LEVEL_SELECT || target === SCENE_KEYS.DAILY_RUNS) {
       clearLaunchOrigin();
     }
 

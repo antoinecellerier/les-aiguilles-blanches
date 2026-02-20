@@ -415,7 +415,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Ramp binary inputs so keyboard taps feel analog (quick tap = gentle turn)
     if (!isAnalog) {
-      const rampRate = 5.0; // reaches full input in ~0.2s
+      const rampRate = BALANCE.SKI_INPUT_RAMP_RATE; // reaches full input in ~0.2s
       const target = lateralInput;
       if (Math.abs(target) > 0.1) {
         this.smoothedInput += (target - this.smoothedInput) * Math.min(1, rampRate * dt);
@@ -466,7 +466,7 @@ export default class SkiRunScene extends Phaser.Scene {
       rawTerrainMult = nearPiste ? BALANCE.SKI_UNGROOMED_MULTIPLIER : BALANCE.SKI_OFFPISTE_MULTIPLIER;
     }
     // Lerp terrain blend for smooth groomed↔ungroomed transitions
-    const blendRate = 3.0; // how fast terrain effect transitions (higher = faster)
+    const blendRate = BALANCE.SKI_TERRAIN_BLEND_RATE; // how fast terrain effect transitions (higher = faster)
     this.terrainBlend += (rawTerrainMult - this.terrainBlend) * Math.min(1, blendRate * dt);
     const terrainMultiplier = this.terrainBlend;
 
@@ -576,7 +576,7 @@ export default class SkiRunScene extends Phaser.Scene {
     const targetVx = lateralInput * BALANCE.SKI_LATERAL_SPEED * speedRatio * turnRamp * steerMult;
     // Smooth lateral velocity — lerp toward target for carved turns, not instant zigzags
     // During tricks, suppress lateral input (ballistic arc — no air control)
-    const lerpRate = 2.0; // higher = more responsive, lower = smoother
+    const lerpRate = BALANCE.SKI_LATERAL_LERP_RATE; // higher = more responsive, lower = smoother
     if (this.trickActive) {
       this.smoothedLateral += (0 - this.smoothedLateral) * Math.min(1, lerpRate * dt);
     } else {
