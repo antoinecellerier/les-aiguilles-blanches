@@ -125,7 +125,6 @@ def test_touch_dpad_movement(touch_page: Page):
     
     # Use arrow keys to test movement (keyboard always works)
     touch_page.keyboard.down("ArrowRight")
-    touch_page.wait_for_timeout(500)
     touch_page.keyboard.up("ArrowRight")
     
     # Wait for groomer to have moved right
@@ -242,7 +241,6 @@ def test_multitouch_simultaneous_inputs(touch_page: Page):
     # Simulate multitouch via keyboard: move right + down
     touch_page.keyboard.down("ArrowRight")
     touch_page.keyboard.down("ArrowDown")
-    touch_page.wait_for_timeout(500)
     touch_page.keyboard.up("ArrowRight")
     touch_page.keyboard.up("ArrowDown")
     
@@ -296,7 +294,6 @@ class TestOrientationChanges:
         
         # Switch to landscape and wait for resize to propagate
         page.set_viewport_size(IPHONE_LANDSCAPE)
-        page.wait_for_timeout(100)
         page.evaluate("() => window.resizeGame?.()")
         page.wait_for_function(
             "() => window.game?.scale?.gameSize?.width > window.game?.scale?.gameSize?.height",
@@ -312,7 +309,6 @@ class TestOrientationChanges:
         
         # Switch to portrait and wait for resize to propagate
         page.set_viewport_size(IPHONE_PORTRAIT)
-        page.wait_for_timeout(100)
         page.evaluate("() => window.resizeGame?.()")
         page.wait_for_function(
             "() => window.game?.scale?.gameSize?.height > window.game?.scale?.gameSize?.width",
@@ -344,7 +340,10 @@ class TestOrientationChanges:
         
         # Change orientation
         page.set_viewport_size(IPHONE_LANDSCAPE)
-        page.wait_for_timeout(100)
+        page.wait_for_function(
+            "() => window.innerWidth > window.innerHeight",
+            timeout=3000
+        )
         
         # Verify game is still running
         scenes_after = page.evaluate("""
@@ -418,7 +417,10 @@ class TestOrientationChanges:
         # Start in portrait phone dimensions
         game_page.set_viewport_size(IPHONE_PORTRAIT)
         game_page.evaluate("() => window.resizeGame?.()")
-        game_page.wait_for_timeout(100)
+        game_page.wait_for_function(
+            "() => window.game?.scale?.gameSize?.height > window.game?.scale?.gameSize?.width",
+            timeout=3000
+        )
 
         skip_to_level(game_page, 0)
         wait_for_scene(game_page, 'HUDScene')
@@ -477,7 +479,10 @@ def test_groomer_above_touch_controls_portrait(touch_page: Page):
     # Skip to La Verticale (level 7) — tall level where groomer spawns near bottom
     skip_to_level(touch_page, 7)
     dismiss_dialogues(touch_page)
-    touch_page.wait_for_timeout(500)
+    touch_page.wait_for_function("""() => {
+        const hud = window.game.scene.getScene('HUDScene');
+        return hud && (hud.touchControlsTopEdge ?? null) !== null;
+    }""", timeout=5000)
 
     result = touch_page.evaluate("""() => {
         const gs = window.game.scene.getScene('GameScene');
@@ -504,7 +509,6 @@ def test_zoom_stable_across_rotation(touch_page: Page):
     click_start_button(touch_page)
     wait_for_scene(touch_page, 'GameScene')
     dismiss_dialogues(touch_page)
-    touch_page.wait_for_timeout(500)
 
     # Record initial zoom in portrait
     initial = touch_page.evaluate("""() => {
@@ -515,14 +519,20 @@ def test_zoom_stable_across_rotation(touch_page: Page):
     # Rotate to landscape
     touch_page.set_viewport_size(IPHONE_LANDSCAPE)
     touch_page.evaluate(f"() => window.game.scale.resize({IPHONE_LANDSCAPE['width']}, {IPHONE_LANDSCAPE['height']})")
-    touch_page.wait_for_timeout(500)
+    touch_page.wait_for_function("""() => {
+        const gs = window.game.scene.getScene('GameScene');
+        return gs?.game?.scale?.width === %d && gs?.game?.scale?.height === %d;
+    }""" % (IPHONE_LANDSCAPE['width'], IPHONE_LANDSCAPE['height']), timeout=5000)
 
     landscape = touch_page.evaluate("() => ({ zoom: window.game.scene.getScene('GameScene').cameras.main.zoom })")
 
     # Rotate back to portrait
     touch_page.set_viewport_size(IPHONE_PORTRAIT)
     touch_page.evaluate(f"() => window.game.scale.resize({IPHONE_PORTRAIT['width']}, {IPHONE_PORTRAIT['height']})")
-    touch_page.wait_for_timeout(500)
+    touch_page.wait_for_function("""() => {
+        const gs = window.game.scene.getScene('GameScene');
+        return gs?.game?.scale?.width === %d && gs?.game?.scale?.height === %d;
+    }""" % (IPHONE_PORTRAIT['width'], IPHONE_PORTRAIT['height']), timeout=5000)
 
     back = touch_page.evaluate("() => ({ zoom: window.game.scene.getScene('GameScene').cameras.main.zoom })")
 

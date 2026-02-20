@@ -21,7 +21,7 @@ class TestSkiRun:
             if (gs && gs.gameOver) gs.gameOver(true);
         }""")
         wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
-        game_page.wait_for_timeout(500)
+        wait_for_input_ready(game_page, 'LevelCompleteScene')
 
         has_ski_btn = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('LevelCompleteScene');
@@ -113,7 +113,11 @@ class TestSkiRun:
 
         game_page.keyboard.press("k")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
-        game_page.wait_for_timeout(1000)  # let speed build up
+        game_page.wait_for_function("""() => {
+            const scene = window.game.scene.getScene('SkiRunScene');
+            if (!scene) return false;
+            return scene.children.list.some(c => c.type === 'Text' && c.text && c.text.includes('km/h'));
+        }""", timeout=5000)
 
         hud_texts = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('SkiRunScene');
@@ -135,7 +139,7 @@ class TestSkiRun:
         game_page.keyboard.press("k")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
         wait_for_scene(game_page, 'LevelCompleteScene', timeout=30000)
-        game_page.wait_for_timeout(1000)  # let UI fully render
+        wait_for_input_ready(game_page, 'LevelCompleteScene')
 
         has_ski_btn = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('LevelCompleteScene');
@@ -171,7 +175,7 @@ class TestSkiRun:
         }""")
 
         wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
-        game_page.wait_for_timeout(500)
+        wait_for_input_ready(game_page, 'LevelCompleteScene')
 
         # Should show retry button (Ski Again / Ride Again), not Next Level
         buttons = game_page.evaluate("""() => {
@@ -208,7 +212,7 @@ class TestSkiRun:
         }""")
 
         wait_for_scene(game_page, 'LevelCompleteScene', timeout=10000)
-        game_page.wait_for_timeout(500)
+        wait_for_input_ready(game_page, 'LevelCompleteScene')
 
         buttons = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('LevelCompleteScene');
@@ -260,7 +264,10 @@ class TestSkiHudVisibility:
 
         game_page.keyboard.press("k")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
-        game_page.wait_for_timeout(1000)
+        game_page.wait_for_function("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            return !!scene?.cameras?.main;
+        }""", timeout=5000)
 
         result = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('SkiRunScene');
@@ -318,7 +325,10 @@ class TestSkiTouchControls:
 
         touch_game.keyboard.press("k")
         wait_for_scene(touch_game, 'SkiRunScene', timeout=10000)
-        touch_game.wait_for_timeout(500)
+        touch_game.wait_for_function("""() => {
+            var hud = window.game.scene.getScene('HUDScene');
+            return !!hud?.touchControlsContainer;
+        }""", timeout=5000)
 
         controls = touch_game.evaluate("""() => {
             var hud = window.game.scene.getScene('HUDScene');
@@ -348,7 +358,10 @@ class TestSkiTouchControls:
 
         touch_game.keyboard.press("k")
         wait_for_scene(touch_game, 'SkiRunScene', timeout=10000)
-        touch_game.wait_for_timeout(500)
+        touch_game.wait_for_function("""() => {
+            var hud = window.game.scene.getScene('HUDScene');
+            return !!hud?.touchControlsContainer;
+        }""", timeout=5000)
 
         result = touch_game.evaluate("""() => {
             var hud = window.game.scene.getScene('HUDScene');
@@ -391,7 +404,10 @@ class TestSlalomGates:
             window.game.scene.start('SkiRunScene', { level: 4, mode: 'ski' });
         }""")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
-        game_page.wait_for_timeout(500)
+        game_page.wait_for_function("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            return !!scene?.slalomSystem;
+        }""", timeout=5000)
 
         gate_info = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('SkiRunScene');
@@ -410,7 +426,10 @@ class TestSlalomGates:
             window.game.scene.start('SkiRunScene', { level: 4, mode: 'ski' });
         }""")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
-        game_page.wait_for_timeout(500)
+        game_page.wait_for_function("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            return !!scene?.slalomSystem;
+        }""", timeout=5000)
 
         hud_texts = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('SkiRunScene');
@@ -429,7 +448,10 @@ class TestSlalomGates:
 
         game_page.keyboard.press("k")
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
-        game_page.wait_for_timeout(500)
+        game_page.wait_for_function("""() => {
+            var scene = window.game.scene.getScene('SkiRunScene');
+            return !!scene?.slalomSystem;
+        }""", timeout=5000)
 
         gate_info = game_page.evaluate("""() => {
             var scene = window.game.scene.getScene('SkiRunScene');
@@ -450,7 +472,6 @@ class TestSkiJump:
             window.game.scene.start('SkiRunScene', {{ level: {level}, mode: 'ski' }});
         }}""")
         wait_for_scene(page, 'SkiRunScene', timeout=10000)
-        page.wait_for_timeout(500)
         # Wait for gravity to build speed (auto-accelerates downhill)
         # Also bail if scene ended (crash/finish) to avoid hanging
         page.wait_for_function("""() => {
@@ -500,9 +521,11 @@ class TestSkiJump:
         wait_for_scene(game_page, 'SkiRunScene', timeout=10000)
         page = game_page
         # Don't build speed — press jump immediately
-        page.wait_for_timeout(200)
         page.keyboard.down('Space')
-        page.wait_for_timeout(200)
+        page.wait_for_function("""() => {
+            var s = window.game.scene.getScene('SkiRunScene');
+            return !!s && s.isAirborne === false;
+        }""", timeout=2000)
 
         airborne = page.evaluate("""() => {
             var s = window.game.scene.getScene('SkiRunScene');

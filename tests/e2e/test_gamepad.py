@@ -123,6 +123,16 @@ def set_gamepad_stick(page: Page, stick: str, x: float, y: float):
         }}""")
 
 
+def wait_for_level_index(page: Page, expected: int, timeout: int = 5000):
+    page.wait_for_function(
+        f"""() => {{
+            const gs = window.game?.scene?.getScene('GameScene');
+            return gs?.levelIndex === {expected};
+        }}""",
+        timeout=timeout
+    )
+
+
 gamepad_page = _make_gamepad_fixture(MOCK_GAMEPAD_SCRIPT)
 
 
@@ -155,13 +165,18 @@ class TestGamepadMenuNavigation:
 
     def test_stick_navigation_changes_selection(self, gamepad_page: Page):
         """Test that stick movement changes menu selection."""
+        initial = gamepad_page.evaluate(
+            "() => window.game?.scene?.getScene('MenuScene')?.selectedIndex ?? -1"
+        )
         # Move stick down
         set_gamepad_stick(gamepad_page, 'left', 0, 0.8)
-        gamepad_page.wait_for_timeout(300)  # Navigation cooldown
+        gamepad_page.wait_for_function(
+            f"() => (window.game?.scene?.getScene('MenuScene')?.selectedIndex ?? -1) > {initial}",
+            timeout=3000
+        )
         
         # Move stick back to center
         set_gamepad_stick(gamepad_page, 'left', 0, 0)
-        gamepad_page.wait_for_timeout(100)
         
         # Verify menu is still responsive - wait_for_scene returns None on success
         wait_for_scene(gamepad_page, 'MenuScene')
@@ -227,10 +242,26 @@ class TestGamepadGameplay:
         }""", timeout=3000)
         
         # Press A to advance/dismiss (may need two: one to complete typewriter, one to advance)
+        before_first = gamepad_page.evaluate("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds?.dialogueText?.text ?? '';
+        }""")
         tap_gamepad_button(gamepad_page, 0, delay=150)
-        gamepad_page.wait_for_timeout(400)
+        gamepad_page.wait_for_function(f"""() => {{
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            if (!ds || !ds.isDialogueShowing || !ds.isDialogueShowing()) return true;
+            return (ds?.dialogueText?.text ?? '') !== {before_first!r};
+        }}""", timeout=2000)
+        before_second = gamepad_page.evaluate("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds?.dialogueText?.text ?? '';
+        }""")
         tap_gamepad_button(gamepad_page, 0, delay=150)
-        gamepad_page.wait_for_timeout(300)
+        gamepad_page.wait_for_function(f"""() => {{
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            if (!ds || !ds.isDialogueShowing || !ds.isDialogueShowing()) return true;
+            return (ds?.dialogueText?.text ?? '') !== {before_second!r};
+        }}""", timeout=2000)
         
         # Verify game is still active (didn't crash or go back to menu)
         wait_for_scene(gamepad_page, 'GameScene')
@@ -269,7 +300,6 @@ class TestNintendoControllerSwap:
         # Find settings button index dynamically
         settings_idx = find_menu_button_index(nintendo_page, 'settings')
         navigate_stick_down(nintendo_page, settings_idx)
-        nintendo_page.wait_for_timeout(300)  # Let menu settle before confirm
         
         # Confirm with Nintendo A (index 1)
         tap_gamepad_button(nintendo_page, 1, delay=200)
@@ -364,7 +394,7 @@ class TestGamepadSelectSkip:
         tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
-        gamepad_page.wait_for_timeout(1000)
+        wait_for_level_index(gamepad_page, 0, timeout=8000)
         
         # Get current level
         level_before = gamepad_page.evaluate("""() => {
@@ -374,7 +404,7 @@ class TestGamepadSelectSkip:
         
         # Press Select (button 8)
         tap_gamepad_button(gamepad_page, 8, delay=150)
-        gamepad_page.wait_for_timeout(1000)
+        wait_for_level_index(gamepad_page, level_before + 1, timeout=8000)
         
         # Level should have advanced
         level_after = gamepad_page.evaluate("""() => {
@@ -392,7 +422,7 @@ class TestGamepadSelectSkip:
         tap_gamepad_button(gamepad_page, 0)
 
         wait_for_scene(gamepad_page, 'GameScene')
-        gamepad_page.wait_for_timeout(1000)
+        wait_for_level_index(gamepad_page, 0, timeout=8000)
 
         # Press Select and HOLD it across the transition
         press_gamepad_button(gamepad_page, 8)
@@ -404,7 +434,7 @@ class TestGamepadSelectSkip:
             const gs = window.game?.scene?.getScene('GameScene');
             return gs?.levelIndex >= 1;
         }""", timeout=5000)
-        gamepad_page.wait_for_timeout(1500)
+        wait_for_level_index(gamepad_page, 1, timeout=5000)
 
         # Should be on level 1, NOT level 2+ (no double-skip)
         level = gamepad_page.evaluate("""() => {
@@ -427,12 +457,23 @@ class TestDialoguePlaceholders:
         tap_gamepad_button(gamepad_page, 0)
         
         wait_for_scene(gamepad_page, 'GameScene')
-        gamepad_page.wait_for_timeout(2000)
+        gamepad_page.wait_for_function("""() => {
+            const ds = window.game?.scene?.getScene('DialogueScene');
+            return ds && ds.isDialogueShowing && ds.isDialogueShowing();
+        }""", timeout=5000)
         
         # Advance to groom tutorial dialogue
         for _ in range(10):
+            before = gamepad_page.evaluate("""() => {
+                const ds = window.game?.scene?.getScene('DialogueScene');
+                return ds?.dialogueText?.text ?? '';
+            }""")
             tap_gamepad_button(gamepad_page, 0)
-            gamepad_page.wait_for_timeout(400)
+            gamepad_page.wait_for_function(f"""() => {{
+                const ds = window.game?.scene?.getScene('DialogueScene');
+                if (!ds || !ds.isDialogueShowing || !ds.isDialogueShowing()) return true;
+                return (ds?.dialogueText?.text ?? '') !== {before!r};
+            }}""", timeout=2000)
             
             # Check if current dialogue contains groom key info
             text = gamepad_page.evaluate("""() => {
