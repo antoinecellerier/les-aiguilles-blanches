@@ -318,7 +318,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private drawMarkers(progress: ReturnType<typeof getSavedProgress>, scale: number): void {
     const ms = this.markerSize;
     const symFont = Math.max(14, Math.round(18 * Math.min(scale, 1.3)));
-    const nameFont = Math.max(9, Math.round(11 * Math.min(scale, 1.3)));
+    const nameFont = Math.max(11, Math.round(11 * Math.min(scale, 1.3)));
 
     // Selection ring drawn ABOVE everything on the map
     this.selectionRing = this.add.graphics().setDepth(DEPTHS.MENU_UI + 6);
@@ -349,11 +349,10 @@ export default class LevelSelectScene extends Phaser.Scene {
       mg.fillStyle(bgColor);
       mg.fillRect(x - ms / 2, y - ms / 2, ms, ms);
 
-      // Symbol text — white on dark colors, dark on orange/yellow
-      const symColor = diffKey === 'park' ? '#1a1612' : '#ffffff';
+      // Symbol text — white on all colors with dark stroke for contrast
       this.add.text(x, y, unlocked ? (marker?.symbol ?? '●') : '🔒', {
         fontFamily: THEME.fonts.family, fontSize: symFont + 'px',
-        color: symColor, stroke: '#000000', strokeThickness: isBlack ? 0 : 2,
+        color: '#ffffff', stroke: '#000000', strokeThickness: isBlack ? 0 : 2,
       }).setOrigin(0.5).setDepth(DEPTHS.MENU_UI + 2);
 
       // Name label — always visible, also a click/touch target
@@ -592,17 +591,19 @@ export default class LevelSelectScene extends Phaser.Scene {
     }).setDepth(DEPTHS.MENU_UI + 1);
 
     this.infoDetails = this.add.text(leftX, detailY, '', {
-      fontFamily: THEME.fonts.family, fontSize: Math.round(10 * ts) + 'px',
+      fontFamily: THEME.fonts.family, fontSize: Math.max(9, Math.round(10 * ts)) + 'px',
       color: THEME.colors.textSecondary,
     }).setDepth(DEPTHS.MENU_UI + 1);
 
-    // Groom button
+    // Groom button (min 44px height for touch)
     const btnFont = Math.round(12 * ts);
+    const btnPadX = Math.round(12 * ts);
+    const btnPadY = Math.max(Math.round(8 * ts), Math.round((44 - btnFont) / 2));
     const btnRightX = Math.round(width * 0.96);
     this.groomBtn = this.add.text(btnRightX, btnY, t('groom') || 'Groom', {
       fontFamily: THEME.fonts.family, fontSize: btnFont + 'px',
       color: '#ffffff', backgroundColor: THEME.colors.buttonCTAHex,
-      padding: { x: Math.round(12 * ts), y: Math.round(8 * ts) },
+      padding: { x: btnPadX, y: btnPadY },
     }).setOrigin(1, 0.5).setDepth(DEPTHS.MENU_UI + 1).setInteractive({ useHandCursor: true });
     this.groomBtn.on('pointerdown', () => {
       if (this.inputReady && !this.isNavigating && isLevelUnlocked(this.selectedLevel)) {
@@ -616,7 +617,7 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.skiBtn = this.add.text(0, btnY, skiLabel, {
       fontFamily: THEME.fonts.family, fontSize: btnFont + 'px',
       color: '#ffffff', backgroundColor: THEME.colors.buttonPrimaryHex,
-      padding: { x: Math.round(12 * ts), y: Math.round(8 * ts) },
+      padding: { x: btnPadX, y: btnPadY },
     }).setOrigin(1, 0.5).setDepth(DEPTHS.MENU_UI + 1).setInteractive({ useHandCursor: true }).setVisible(false);
     this.skiBtn.on('pointerdown', () => {
       if (this.inputReady && !this.isNavigating && isLevelCompleted(this.selectedLevel)) {
@@ -626,6 +627,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   }
 
   private updateInfoPanel(levelIdx: number): void {
+    if (levelIdx < 0 || levelIdx >= LEVELS.length) return;
     const level = LEVELS[levelIdx] as Level;
     const unlocked = isLevelUnlocked(levelIdx);
     const completed = isLevelCompleted(levelIdx);
@@ -638,18 +640,30 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.infoName?.setText(`${marker?.symbol ?? ''} ${displayName}`);
 
     if (!unlocked) {
-      this.infoDetails?.setText('🔒 ' + (t('locked') || 'Locked'));
+      const prevName = levelIdx > 0
+        ? (t(LEVELS[levelIdx - 1].nameKey) || LEVELS[levelIdx - 1].nameKey) : '';
+      const lockMsg = prevName
+        ? `🔒 ${t('locked') || 'Locked'} — ${t('complete') || 'Complete'} ${prevName}`
+        : `🔒 ${t('locked') || 'Locked'}`;
+      this.infoDetails?.setText(lockMsg);
       this.groomBtn?.setVisible(false);
       this.skiBtn?.setVisible(false);
+      Accessibility.announce(`${displayName}. ${t('locked') || 'Locked'}`);
     } else {
       const parts: string[] = [];
       parts.push(diffKey.charAt(0).toUpperCase() + diffKey.slice(1));
+      if (level.targetCoverage) parts.push(`${level.targetCoverage}%`);
+      if (level.timeLimit) {
+        const m = Math.floor(level.timeLimit / 60);
+        const sec = level.timeLimit % 60;
+        parts.push(`${m}:${String(sec).padStart(2, '0')}`);
+      }
       if (completed && stats) {
         parts.push('⭐'.repeat(stats.bestStars) + '☆'.repeat(3 - stats.bestStars));
         if (stats.bestTime) {
           const m = Math.floor(stats.bestTime / 60);
           const sec = stats.bestTime % 60;
-          parts.push(`${m}:${String(sec).padStart(2, '0')}`);
+          parts.push(`Best ${m}:${String(sec).padStart(2, '0')}`);
         }
       }
       this.infoDetails?.setText(parts.join('  ·  '));
@@ -662,6 +676,7 @@ export default class LevelSelectScene extends Phaser.Scene {
       } else {
         this.skiBtn?.setVisible(false);
       }
+      Accessibility.announce(`${marker?.symbol ?? ''} ${displayName}. ${diffKey}`);
     }
   }
 
@@ -683,6 +698,7 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.gamepadNav = createGamepadMenuNav(this, 'vertical', {
       onNavigate: (dir) => this.navigateMarker(-dir),
       onConfirm: () => this.handleStartLevel('groom'),
+      onSecondary: () => this.handleStartLevel('ski'),
       onBack: () => { if (this.inputReady) this.goBack(); },
     });
   }

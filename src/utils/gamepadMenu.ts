@@ -16,6 +16,8 @@ export interface GamepadMenuCallbacks {
   onConfirm: () => void;
   /** Called on back (B/Circle) press. Optional — some scenes handle back differently. */
   onBack?: () => void;
+  /** Called on secondary (Y/Triangle) press. Optional — used for alt actions like ski mode. */
+  onSecondary?: () => void;
   /** If provided, called when navigation should be suppressed (e.g., overlay is open). */
   isBlocked?: () => boolean;
 }
@@ -46,6 +48,7 @@ export function createGamepadMenuNav(
 ): GamepadMenuNav {
   let confirmPressed = false;
   let backPressed = false;
+  let secondaryPressed = false;
   let navCooldown = 0;
 
   const nav: GamepadMenuNav = {
@@ -59,10 +62,12 @@ export function createGamepadMenuNav(
         if (pad) {
           confirmPressed = isConfirmPressed(pad);
           backPressed = isBackPressed(pad);
+          secondaryPressed = pad.buttons[3]?.pressed ?? false;
         }
       } else {
         confirmPressed = false;
         backPressed = false;
+        secondaryPressed = false;
       }
     },
 
@@ -75,6 +80,7 @@ export function createGamepadMenuNav(
         // Still track button state so we don't get phantom presses when unblocked
         confirmPressed = isConfirmPressed(pad);
         backPressed = isBackPressed(pad);
+        secondaryPressed = pad.buttons[3]?.pressed ?? false;
         return;
       }
 
@@ -115,6 +121,13 @@ export function createGamepadMenuNav(
         callbacks.onBack();
       }
       backPressed = nowBack;
+
+      // Secondary button Y/Triangle (debounced)
+      const nowSecondary = pad.buttons[3]?.pressed ?? false;
+      if (nowSecondary && !secondaryPressed && callbacks.onSecondary) {
+        callbacks.onSecondary();
+      }
+      secondaryPressed = nowSecondary;
     },
   };
 
