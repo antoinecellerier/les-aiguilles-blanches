@@ -15,9 +15,13 @@ export function getJSON<T>(key: string, fallback: T): T {
   }
 }
 
-/** Read a raw string from localStorage. Returns fallback if missing. */
+/** Read a raw string from localStorage. Returns fallback if missing or on error. */
 export function getString(key: string, fallback: string | null = null): string | null {
-  return localStorage.getItem(key) ?? fallback;
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 /** Write a JSON-serialized value to localStorage. Logs warning on failure. */

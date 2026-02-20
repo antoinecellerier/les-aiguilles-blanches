@@ -641,11 +641,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
   /** Weather effects: night overlay, storm haze, snow particles. */
   private createWeather(width: number, height: number, weather?: { isNight: boolean; weather: string }): void {
     if (!weather) return;
+    // Overlay below victory props (depth MENU_TREES + offset) but above terrain
+    const overlayDepth = DEPTHS.MENU_TREES;
     if (weather.isNight) {
-      this.add.rectangle(width / 2, height / 2, width, height, 0x000022).setAlpha(0.45).setDepth(5);
+      this.add.rectangle(width / 2, height / 2, width, height, 0x000022).setAlpha(0.45).setDepth(overlayDepth);
     }
     if (weather.weather === 'storm') {
-      this.add.rectangle(width / 2, height / 2, width, height, 0x667788).setAlpha(0.25).setDepth(5);
+      this.add.rectangle(width / 2, height / 2, width, height, 0x667788).setAlpha(0.25).setDepth(overlayDepth);
     }
     if (weather.weather !== 'clear' && this.textures.exists('snow_ungroomed')) {
       const isStorm = weather.weather === 'storm';
@@ -661,7 +663,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
         lifespan: isStorm ? 2500 : 5000,
         blendMode: Phaser.BlendModes.ADD,
         tint: isStorm ? 0xCCDDFF : 0xFFFFFF,
-      }).setDepth(200);
+      }).setDepth(DEPTHS.WEATHER);
     }
   }
 
@@ -699,8 +701,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
       case 8: // Col Dangereux — avalanche debris
         this.drawAvalancheDebris(g, gx - 50 * s, groundY, s);
         break;
+      case 9: // Tempête — wind sock on pole
+        this.drawWindSock(g, gx - 35 * s, groundY, s);
+        break;
       case 10: // Coupe des Aiguilles — trophy
         this.drawTrophy(g, gx - 40 * s, groundY, s);
+        break;
+      default:
         break;
     }
   }
@@ -862,6 +869,22 @@ export default class LevelCompleteScene extends Phaser.Scene {
     g.fillRect(x + 15 * s, groundY - 12 * s, 2 * s, 12 * s);
     g.fillStyle(0x2d5a1a);
     g.fillRect(x + 12 * s, groundY - 16 * s, 8 * s, 5 * s);
+  }
+
+  private drawWindSock(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {
+    // Pole
+    g.fillStyle(0x888888);
+    g.fillRect(x - 1 * s, groundY - 30 * s, 2 * s, 30 * s);
+    // Cross-arm
+    g.fillRect(x, groundY - 30 * s, 3 * s, 2 * s);
+    // Wind sock — horizontal tapered stripes blowing right in the storm
+    const sockY = groundY - 31 * s;
+    g.fillStyle(0xff6600);
+    g.fillRect(x + 3 * s, sockY, 12 * s, 4 * s);
+    g.fillStyle(0xffffff);
+    g.fillRect(x + 15 * s, sockY + 0.5 * s, 10 * s, 3 * s);
+    g.fillStyle(0xff6600);
+    g.fillRect(x + 25 * s, sockY + 1 * s, 8 * s, 2 * s);
   }
 
   private drawTrophy(g: Phaser.GameObjects.Graphics, x: number, groundY: number, s: number): void {

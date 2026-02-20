@@ -77,6 +77,8 @@ export class MenuWildlifeController {
       a.sprite.destroy();
     }
     this._menuAnimals.length = 0;
+    for (const f of this.snowflakes) f.rect.destroy();
+    this.snowflakes.length = 0;
     for (const t of this.menuTracks) t.image.destroy();
     this.menuTracks.length = 0;
     for (const key of this.generatedTexKeys) {

@@ -17,7 +17,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## Future (Backlog)
 
 - [ ] Halfpipe scoring zones — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
-- ✅ **Contextual win screen graphics** — Level-specific victory props next to character on win screen. Groomer: chalet (L1), snow rock (L2), kicker ramp (L3), slope warning sign (L4), winch anchor with cable (L5), halfpipe walls (L6), moon and stars (L7), avalanche debris (L8), gold trophy (L10). Ski/snowboard: slalom gates (L4/L5/L10), kicker (L3), halfpipe (L6). Rectangle-only pixel art.
+- ✅ **Contextual win screen graphics** — Level-specific victory props next to character on win screen. Groomer: chalet (L1), snow rock (L2), kicker ramp (L3), slope warning sign (L4), winch anchor with cable (L5), halfpipe walls (L6), moon and stars (L7), avalanche debris (L8), wind sock (L9), gold trophy (L10). Ski/snowboard: slalom gates (L4/L5/L10), kicker (L3), halfpipe (L6). Rectangle-only pixel art.
 - ✅ **Wildlife cliff awareness** — Ground animals (rabbits, marmots, foxes) no longer spawn on cliff tiles; spawn retries up to 8 times for valid terrain
 - ✅ Sound effects polish — Character voice differentiation (pitch gap, vowel formant), melody phrasing rests, piano legato sustain, bass rebalancing
 - [ ] More character dialogues per level

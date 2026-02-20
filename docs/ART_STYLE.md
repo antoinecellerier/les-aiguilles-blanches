@@ -411,10 +411,13 @@ All depth values are centralized in `DEPTHS` from `src/config/gameConfig.ts`:
 | Signage | 8 | `SIGNAGE` | Avalanche warnings, hazards |
 | Markers | 9 | `MARKERS` | Piste poles, road poles, danger poles |
 | Winch cable | 50 | `WINCH_CABLE` | Cable graphics |
+| Dialogue hit zone | 50 | `DIALOGUE_HITZONE` | Dialogue click area (DialogueScene only) |
 | Airborne | 55 | `AIRBORNE` | Flying birds, airborne objects |
 | Night overlay | 100 | `NIGHT_OVERLAY` | Night/weather darkening |
+| Dialogue box | 100 | `DIALOGUE_BOX` | Dialogue container (DialogueScene only) |
 | Player | 101 | `PLAYER` | Groomer (above night for headlights) |
 | Feedback/Weather | 200 | `FEEDBACK`/`WEATHER` | Floating text, snow particles |
+| Frost overlay | 250 | `FROST_OVERLAY` | Frost vignette (above player and weather) |
 | Victory | 500 | `VICTORY` | Victory text (topmost) |
 
 ### Organic Edges

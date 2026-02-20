@@ -4,7 +4,7 @@ import { drawPortrait } from '../utils/characterPortraits';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
-import { BALANCE } from '../config/gameConfig';
+import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { ResizeManager } from '../utils/resizeManager';
 import { playVoiceBlip } from '../systems/VoiceSounds';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
@@ -176,7 +176,7 @@ export default class DialogueScene extends Phaser.Scene {
     // Create hit zone that covers most of screen except top-right button area
     // Use a larger zone that starts below the button area
     this.hitZone = this.add.rectangle(width / 2, height / 2 + this.excludeSize / 4, width, height - this.excludeSize / 2, 0x000000, 0);
-    this.hitZone.setDepth(50); // Above game, below dialogue box
+    this.hitZone.setDepth(DEPTHS.DIALOGUE_HITZONE); // Above game, below dialogue box
     this.hitZone.setInteractive();
     this.hitZone.disableInteractive(); // Start disabled
     this.hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -190,7 +190,7 @@ export default class DialogueScene extends Phaser.Scene {
 
     this.container = this.add.container(0, this.getDialogueY());
     this.container.setVisible(false);
-    this.container.setDepth(100); // Above hit zone
+    this.container.setDepth(DEPTHS.DIALOGUE_BOX); // Above hit zone
 
     const boxWidth = Math.min(width - 40, 800);
     const boxHeight = this.dialogueBoxHeight;

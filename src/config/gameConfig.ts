@@ -61,6 +61,8 @@ export const DEPTHS = {
   MARKERS: 9,         // Piste marker poles, service road poles
   WINCH_CABLE: 50,    // Winch cable graphics
   AIRBORNE: 55,       // Flying birds, airborne objects (above cable, below overlay)
+  DIALOGUE_HITZONE: 50,  // Dialogue click zone (above game, below dialogue box)
+  DIALOGUE_BOX: 100,     // Dialogue container (above hit zone)
   NIGHT_OVERLAY: 100, // Night/weather darkening
   FROST_OVERLAY: 250, // Frost vignette (above player and weather)
   PLAYER: 101,        // Groomer/skier victory depth (gameplay uses yDepth for Y-sorting)

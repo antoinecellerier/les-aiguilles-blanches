@@ -238,7 +238,7 @@ export class KeybindingManager {
       this.displayNames = {};
       this.save();
       this.onRestart();
-    });
+    }).catch(() => {});
   }
 
   setLayout(layout: KeyboardLayout): void {
