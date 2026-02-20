@@ -9,6 +9,7 @@ import { MenuWildlifeController } from '../systems/MenuWildlifeController';
 import { MusicSystem } from '../systems/MusicSystem';
 import { ResizeManager } from '../utils/resizeManager';
 import { t } from '../setup';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * Cold-open prologue: a 12-second cinematic showing a groomer working
@@ -21,7 +22,7 @@ export default class PrologueScene extends Phaser.Scene {
   private wildlife?: MenuWildlifeController;
 
   constructor() {
-    super({ key: 'PrologueScene' });
+    super({ key: SCENE_KEYS.PROLOGUE });
   }
 
   create(): void {
@@ -148,7 +149,7 @@ export default class PrologueScene extends Phaser.Scene {
       setString(STORAGE_KEYS.PROLOGUE_SEEN, '1');
       this.cameras.main.fadeOut(600, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        resetGameScenes(this.game, 'GameScene', { level: 0 });
+        resetGameScenes(this.game, SCENE_KEYS.GAME, { level: 0 });
       });
     };
 

@@ -14,6 +14,7 @@ import { ResizeManager } from '../utils/resizeManager';
 import { formatTime } from '../utils/bonusObjectives';
 import { getButtonName, getConnectedControllerType } from '../utils/gamepad';
 import { setLaunchOrigin } from '../systems/LaunchOrigin';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 // Run marker positions as % of map area (x, y). y=0 is summit, y=1 is base.
 const RUN_POSITIONS: [number, number][] = [
@@ -81,7 +82,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private markerSize = 28;
 
   constructor() {
-    super({ key: 'LevelSelectScene' });
+    super({ key: SCENE_KEYS.LEVEL_SELECT });
   }
 
   create(): void {
@@ -792,18 +793,18 @@ export default class LevelSelectScene extends Phaser.Scene {
   private startLevel(level: number, mode: 'groom' | 'ski'): void {
     if (this.isNavigating) return;
     this.isNavigating = true;
-    setLaunchOrigin('LevelSelectScene');
+    setLaunchOrigin(SCENE_KEYS.LEVEL_SELECT);
     if (mode === 'ski') {
-      resetGameScenes(this.game, 'SkiRunScene', { level, mode: this.resolvedSkiMode });
+      resetGameScenes(this.game, SCENE_KEYS.SKI_RUN, { level, mode: this.resolvedSkiMode });
     } else {
-      resetGameScenes(this.game, 'GameScene', { level });
+      resetGameScenes(this.game, SCENE_KEYS.GAME, { level });
     }
   }
 
   private goBack(): void {
     if (this.isNavigating) return;
     this.isNavigating = true;
-    resetGameScenes(this.game, 'MenuScene');
+    resetGameScenes(this.game, SCENE_KEYS.MENU);
   }
 
   update(time: number, delta: number): void {

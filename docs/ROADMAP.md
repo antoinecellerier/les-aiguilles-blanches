@@ -32,6 +32,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Scene key constant migration** — Replaced hardcoded scene-name string literals across scene constructors, launches/stops, and transitions with `SCENE_KEYS` (Boot/Menu/Pause/Settings/Game/HUD/Dialogue/SkiRun/LevelComplete/LevelSelect/DailyRuns/Credits/Prologue). Reduces typo risk and centralizes routing keys.
+
 - ✅ **Trail map level select polish** — Locked level interaction (click selects with gray ring + prerequisite info), gamepad button hints (Ⓐ Groom / Ⓨ Ski), shared `formatTime()` utility, Linux Xbox X/Y button label swap (`xpad` driver fix), `LaunchOrigin` singleton so quit returns to level select when launched from there. `onSecondary` gamepad callback for Y/Triangle button. Visual fixes: lodge repositioned clear of run paths, bouquetins remapped to visible left shoulder, bird perch spots aligned deterministically with drawn landmarks (cross arm, pylon cross-arms, tree tops) via `landmarkPerches` array populated by draw methods. Menu-style stepped mountain rendering with depth layering. Responsive info panel: adaptive wide/narrow layout (buttons on name row when space allows, two-row layout on narrow screens), non-breaking spaces within stat items, dynamic word wrap constrained by button positions.
 
 - ✅ **Seed sharing E2E tests** — 14 tests covering URL param parsing (?seed=&rank=), share button clipboard, locked/unlocked shared seed display, seed determinism, rank defaults, and uppercase normalization. Smart test mapping added to `run-tests.sh`.

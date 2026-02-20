@@ -21,6 +21,7 @@ import { toggleFullscreen, isFullscreen as checkFullscreen, fullscreenEnabled } 
 import { isDesktopApp, quitDesktopApp } from '../types/electron';
 import { LEVELS } from '../config/levels';
 import { DEPTHS } from '../config/gameConfig';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * Les Aiguilles Blanches - Menu Scene
@@ -60,7 +61,7 @@ export default class MenuScene extends Phaser.Scene {
   private randomMood: { isNight: boolean; weather: string } | null = null;
    
   constructor() {
-    super({ key: 'MenuScene' });
+    super({ key: SCENE_KEYS.MENU });
   }
 
   init(): void {
@@ -1099,15 +1100,15 @@ export default class MenuScene extends Phaser.Scene {
 
 
 
-  private startGame(level: number = 0, lastScene?: 'GameScene' | 'SkiRunScene'): void {
+  private startGame(level: number = 0, lastScene?: typeof SCENE_KEYS.GAME | typeof SCENE_KEYS.SKI_RUN): void {
     const game = this.game;
-    this.scene.stop('MenuScene');
-    if (lastScene === 'SkiRunScene') {
+    this.scene.stop(SCENE_KEYS.MENU);
+    if (lastScene === SCENE_KEYS.SKI_RUN) {
       let mode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
       if (mode === 'random') mode = Math.random() < 0.5 ? 'ski' : 'snowboard';
-      resetGameScenes(game, 'SkiRunScene', { level, mode });
+      resetGameScenes(game, SCENE_KEYS.SKI_RUN, { level, mode });
     } else {
-      resetGameScenes(game, 'GameScene', { level });
+      resetGameScenes(game, SCENE_KEYS.GAME, { level });
     }
   }
 
@@ -1117,21 +1118,21 @@ export default class MenuScene extends Phaser.Scene {
       this.startGame(0);
     } else {
       const game = this.game;
-      this.scene.stop('MenuScene');
-      resetGameScenes(game, 'PrologueScene');
+      this.scene.stop(SCENE_KEYS.MENU);
+      resetGameScenes(game, SCENE_KEYS.PROLOGUE);
     }
   }
 
   private showLevelSelect(): void {
     const game = this.game;
-    this.scene.stop('MenuScene');
-    resetGameScenes(game, 'LevelSelectScene');
+    this.scene.stop(SCENE_KEYS.MENU);
+    resetGameScenes(game, SCENE_KEYS.LEVEL_SELECT);
   }
 
   private showDailyRuns(): void {
     const game = this.game;
-    this.scene.stop('MenuScene');
-    resetGameScenes(game, 'DailyRunsScene');
+    this.scene.stop(SCENE_KEYS.MENU);
+    resetGameScenes(game, SCENE_KEYS.DAILY_RUNS);
   }
 
   private confirmNewGame(): void {
@@ -1197,7 +1198,7 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   private showSettings(): void {
-    this.scene.start('SettingsScene', { returnTo: null });
+    this.scene.start(SCENE_KEYS.SETTINGS, { returnTo: null });
   }
 
   private showChangelog(): void {

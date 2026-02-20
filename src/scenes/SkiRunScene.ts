@@ -28,6 +28,7 @@ import { HazardSystem } from '../systems/HazardSystem';
 import { SlalomGateSystem } from '../systems/SlalomGateSystem';
 import { getDailyRunSession } from '../systems/DailyRunSession';
 import { ResizeManager } from '../utils/resizeManager';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * SkiRunScene — Post-grooming descent reward run.
@@ -118,7 +119,7 @@ export default class SkiRunScene extends Phaser.Scene {
   private initData!: SkiRunData;
 
   constructor() {
-    super({ key: 'SkiRunScene' });
+    super({ key: SCENE_KEYS.SKI_RUN });
   }
 
   init(data: SkiRunData): void {
@@ -345,8 +346,8 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Launch HUDScene in ski mode for touch controls (joystick + brake)
     this.game.events.on(GAME_EVENTS.TOUCH_INPUT, this.boundTouchHandler);
-    this.scene.launch('HUDScene', { level: this.level, mode: 'ski' });
-    this.scene.bringToTop('HUDScene');
+    this.scene.launch(SCENE_KEYS.HUD, { level: this.level, mode: 'ski' });
+    this.scene.bringToTop(SCENE_KEYS.HUD);
 
     // HUD overlay
     this.createHUD();
@@ -1179,7 +1180,7 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Wipeout ends the run — transition to fail screen after a brief pause
     this.time.delayedCall(BALANCE.SKI_CRASH_DURATION * 1000, () => {
-      resetGameScenes(this.game, 'LevelCompleteScene', {
+      resetGameScenes(this.game, SCENE_KEYS.LEVEL_COMPLETE, {
         won: false,
         level: this.levelIndex,
         coverage: 0,
@@ -1195,12 +1196,12 @@ export default class SkiRunScene extends Phaser.Scene {
     this.skiSounds.pause();
     this.ambienceSounds.pause();
     this.scene.pause();
-    this.scene.launch('PauseScene', {
+    this.scene.launch(SCENE_KEYS.PAUSE, {
       levelIndex: this.levelIndex,
       skiMode: true,
       skiRunMode: this.resolvedMode as 'ski' | 'snowboard',
     });
-    this.scene.bringToTop('PauseScene');
+    this.scene.bringToTop(SCENE_KEYS.PAUSE);
   }
 
   private resumeGame(): void {
@@ -1221,7 +1222,7 @@ export default class SkiRunScene extends Phaser.Scene {
     playLevelWin();
 
     this.time.delayedCall(BALANCE.SKI_CELEBRATION_DELAY, () => {
-      resetGameScenes(this.game, 'LevelCompleteScene', {
+      resetGameScenes(this.game, SCENE_KEYS.LEVEL_COMPLETE, {
         won: true,
         level: this.levelIndex,
         coverage: 100,

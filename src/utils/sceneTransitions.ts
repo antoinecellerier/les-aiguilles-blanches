@@ -41,7 +41,7 @@ function setTransitionPending(v: boolean): void { _global.__transitionPending = 
  * (quit to menu, restart level, next level, etc.).
  *
  * @param game     - The Phaser.Game instance (capture with `this.game` BEFORE stopping self)
- * @param target   - Scene key to start after cleanup (e.g. 'GameScene', 'MenuScene')
+ * @param target   - Scene key to start after cleanup (e.g. SCENE_KEYS.GAME, SCENE_KEYS.MENU)
  * @param data     - Data to pass to the target scene's init(). Pass {} explicitly to avoid stale data.
  */
 export function resetGameScenes(

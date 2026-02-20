@@ -11,6 +11,7 @@ import { ResizeManager } from '../utils/resizeManager';
 import { DEPTHS } from '../config/gameConfig';
 import { createMenuTerrain } from '../systems/MenuTerrainRenderer';
 import { MenuWildlifeController } from '../systems/MenuWildlifeController';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * Les Aiguilles Blanches - Credits Scene
@@ -42,7 +43,7 @@ export default class CreditsScene extends Phaser.Scene {
   private trailTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
-    super({ key: 'CreditsScene' });
+    super({ key: SCENE_KEYS.CREDITS });
   }
 
   create(): void {
@@ -355,8 +356,8 @@ export default class CreditsScene extends Phaser.Scene {
 
   private restartGame(): void {
     const game = this.game;
-    this.scene.stop('CreditsScene');
-    resetGameScenes(game, 'GameScene', { level: 0 });
+    this.scene.stop(SCENE_KEYS.CREDITS);
+    resetGameScenes(game, SCENE_KEYS.GAME, { level: 0 });
   }
 
   update(time: number, delta: number): void {
@@ -391,7 +392,7 @@ export default class CreditsScene extends Phaser.Scene {
 
   private returnToMenu(): void {
     const game = this.game;
-    this.scene.stop('CreditsScene');
-    resetGameScenes(game, 'MenuScene');
+    this.scene.stop(SCENE_KEYS.CREDITS);
+    resetGameScenes(game, SCENE_KEYS.MENU);
   }
 }

@@ -5,6 +5,7 @@ import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
 import { THEME } from '../config/theme';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
+import { SCENE_KEYS } from '../config/sceneKeys';
 import { ResizeManager } from '../utils/resizeManager';
 import { playVoiceBlip } from '../systems/VoiceSounds';
 import { GAME_EVENTS } from '../types/GameSceneInterface';
@@ -66,7 +67,7 @@ export default class DialogueScene extends Phaser.Scene {
   private currentSpeaker = 'Jean-Pierre';
 
   constructor() {
-    super({ key: 'DialogueScene' });
+    super({ key: SCENE_KEYS.DIALOGUE });
   }
 
   // Dialogue box base height (minimum)
@@ -87,7 +88,7 @@ export default class DialogueScene extends Phaser.Scene {
     }
     
     // Get touch controls top edge from HUDScene
-    const hudScene = this.scene.get('HUDScene') as { getTouchControlsTopEdge?: () => number } | null;
+    const hudScene = this.scene.get(SCENE_KEYS.HUD) as { getTouchControlsTopEdge?: () => number } | null;
     if (hudScene?.getTouchControlsTopEdge) {
       const touchTop = hudScene.getTouchControlsTopEdge();
       // Position dialogue so its bottom edge (Y + boxHeight/2) is above touch controls
@@ -130,7 +131,7 @@ export default class DialogueScene extends Phaser.Scene {
   
   // Check if HUDScene's touch controls are currently visible
   private areTouchControlsVisible(): boolean {
-    const hudScene = this.scene.get('HUDScene') as { touchControlsContainer?: Phaser.GameObjects.Container } | null;
+    const hudScene = this.scene.get(SCENE_KEYS.HUD) as { touchControlsContainer?: Phaser.GameObjects.Container } | null;
     return hudScene?.touchControlsContainer?.visible === true;
   }
 

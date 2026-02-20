@@ -13,9 +13,7 @@ from playwright.sync_api import Page
 
 from conftest import (
     GAME_URL,
-    skip_to_level,
     dismiss_dialogues,
-    wait_for_scene,
     wait_for_game_ready,
 )
 
@@ -50,17 +48,64 @@ def _trigger_resize(page: Page, size: dict):
     )
 
 
-def _wait_for_hud_restart(page: Page, timeout: int = 3000):
-    """Wait for HUD scene to restart after resize (300ms debounce + create)."""
+def _start_game_level(page: Page, level: int, dismiss: bool = True):
+    """Start directly in GameScene at the target level, then wait for HUD readiness."""
+    page.evaluate(
+        f"""() => {{
+            const game = window.game;
+            if (!game?.scene) return;
+            const stopKeys = [
+                'PauseScene', 'SettingsScene', 'LevelCompleteScene', 'CreditsScene',
+                'SkiRunScene', 'DailyRunsScene', 'LevelSelectScene', 'PrologueScene',
+                'HUDScene', 'DialogueScene', 'GameScene', 'MenuScene'
+            ];
+            for (const key of stopKeys) {{
+                const scene = game.scene.getScene(key);
+                if (scene?.sys?.isActive()) game.scene.stop(key);
+            }}
+            game.scene.start('GameScene', {{ level: {level} }});
+        }}"""
+    )
+    page.wait_for_function(
+        f"""() => {{
+            const gs = window.game?.scene?.getScene('GameScene');
+            const hud = window.game?.scene?.getScene('HUDScene');
+            return gs?.sys?.isActive() &&
+                   gs?.levelIndex === {level} &&
+                   !!gs?.groomer &&
+                   hud?.sys?.isActive();
+        }}""",
+        timeout=10000,
+    )
+    if dismiss:
+        dismiss_dialogues(page)
     page.wait_for_function(
         """() => {
             const hud = window.game?.scene?.getScene('HUDScene');
-            return hud && hud.sys && hud.sys.isActive();
+            return !!hud?.touchControlsContainer && typeof hud?.touchControlsTopEdge === 'number';
         }""",
+        timeout=8000,
+    )
+
+
+def _wait_for_resize_stable(page: Page, size: dict, timeout: int = 8000):
+    """Wait until resized scenes are active with updated dimensions and HUD layout."""
+    page.wait_for_function(
+        f"""() => {{
+            const game = window.game;
+            const gs = game?.scene?.getScene('GameScene');
+            const hud = game?.scene?.getScene('HUDScene');
+            if (!game?.scale || game.scale.width !== {size['width']} || game.scale.height !== {size['height']}) return false;
+            if (!gs?.sys?.isActive() || !hud?.sys?.isActive()) return false;
+            return !!hud?.touchControlsContainer && typeof hud?.touchControlsTopEdge === 'number';
+        }}""",
         timeout=timeout,
     )
-    # Extra wait for touch controls to be created and events to propagate
-    page.wait_for_timeout(600)
+
+
+def _resize_and_wait(page: Page, size: dict, timeout: int = 8000):
+    _trigger_resize(page, size)
+    _wait_for_resize_stable(page, size, timeout=timeout)
 
 
 def _get_camera_state(page: Page) -> dict:
@@ -99,9 +144,7 @@ class TestStaticToFollowTransition:
 
     def test_l7_portrait_uses_follow_with_touch(self, touch_page: Page):
         """L7 (50×90 grid) in portrait with touch → camera follows groomer."""
-        skip_to_level(touch_page, 7)
-        # Don't dismiss dialogues — we want them for the dialogue test later
-        touch_page.wait_for_timeout(800)
+        _start_game_level(touch_page, 7, dismiss=False)
 
         state = _get_camera_state(touch_page)
         assert state is not None, "Should get camera state"
@@ -119,11 +162,9 @@ class TestStaticToFollowTransition:
     def test_l7_landscape_no_touch_overlap(self, touch_page: Page):
         """In landscape, touch controls don't overlap play area (wide aspect),
         so follow offset should be zero even if camera is following."""
-        skip_to_level(touch_page, 7)
-        dismiss_dialogues(touch_page)
+        _start_game_level(touch_page, 7)
 
-        _trigger_resize(touch_page, GALAXY_LANDSCAPE)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_LANDSCAPE)
 
         state = _get_camera_state(touch_page)
         assert state is not None
@@ -143,9 +184,7 @@ class TestGroomerAboveTouchControls:
 
     def test_groomer_above_controls_initial(self, touch_page: Page):
         """On initial load in portrait, groomer must be above touch controls."""
-        skip_to_level(touch_page, 7)
-        dismiss_dialogues(touch_page)
-        touch_page.wait_for_timeout(500)
+        _start_game_level(touch_page, 7)
 
         state = _get_camera_state(touch_page)
         assert state is not None
@@ -157,16 +196,13 @@ class TestGroomerAboveTouchControls:
 
     def test_groomer_above_controls_after_resize(self, touch_page: Page):
         """After landscape→portrait resize, groomer must still be above controls."""
-        skip_to_level(touch_page, 7)
-        dismiss_dialogues(touch_page)
+        _start_game_level(touch_page, 7)
 
         # Rotate to landscape
-        _trigger_resize(touch_page, GALAXY_LANDSCAPE)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_LANDSCAPE)
 
         # Rotate back to portrait
-        _trigger_resize(touch_page, GALAXY_PORTRAIT)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_PORTRAIT)
 
         state = _get_camera_state(touch_page)
         assert state is not None
@@ -179,25 +215,21 @@ class TestGroomerAboveTouchControls:
     def test_touch_follow_offset_recalculated_on_resize(self, touch_page: Page):
         """Follow offset must be recalculated for new zoom after resize,
         not reuse the stale value from the old viewport."""
-        skip_to_level(touch_page, 7)
-        dismiss_dialogues(touch_page)
-        touch_page.wait_for_timeout(500)
+        _start_game_level(touch_page, 7)
 
         offset_portrait = touch_page.evaluate(
             "() => window.game.scene.getScene('GameScene').cameras.main.followOffset?.y ?? 0"
         )
 
         # Rotate to landscape (offset should clear — wide aspect)
-        _trigger_resize(touch_page, GALAXY_LANDSCAPE)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_LANDSCAPE)
 
         offset_landscape = touch_page.evaluate(
             "() => window.game.scene.getScene('GameScene').cameras.main.followOffset?.y ?? 0"
         )
 
         # Back to portrait (offset should be negative again)
-        _trigger_resize(touch_page, GALAXY_PORTRAIT)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_PORTRAIT)
 
         offset_back = touch_page.evaluate(
             "() => window.game.scene.getScene('GameScene').cameras.main.followOffset?.y ?? 0"
@@ -244,13 +276,12 @@ class TestDialogueAboveTouchControls:
 
     def test_dialogue_above_controls_on_initial_load(self, touch_page: Page):
         """Dialogue should clear touch controls on a level with intro dialogue."""
-        skip_to_level(touch_page, 7)  # L7 has intro dialogue from Thierry
+        _start_game_level(touch_page, 7, dismiss=False)  # L7 has intro dialogue from Thierry
         # Wait for dialogue to appear
         touch_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             return ds?.container?.visible === true;
         }""", timeout=5000)
-        touch_page.wait_for_timeout(300)
 
         pos = self._get_dialogue_positions(touch_page)
         assert pos is not None, "Should get dialogue positions"
@@ -262,22 +293,20 @@ class TestDialogueAboveTouchControls:
 
     def test_dialogue_repositions_after_resize(self, touch_page: Page):
         """After resize, dialogue must reposition above touch controls."""
-        skip_to_level(touch_page, 7)
+        _start_game_level(touch_page, 7, dismiss=False)
         touch_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             return ds?.container?.visible === true;
         }""", timeout=5000)
 
         # Resize to narrower portrait (changes control positions)
-        _trigger_resize(touch_page, IPHONESE_PORTRAIT)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, IPHONESE_PORTRAIT)
 
         # Wait for dialogue to re-show after scene restart
         touch_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             return ds?.container?.visible === true;
         }""", timeout=5000)
-        touch_page.wait_for_timeout(300)
 
         pos = self._get_dialogue_positions(touch_page)
         assert pos is not None, "Should get dialogue positions after resize"
@@ -289,24 +318,22 @@ class TestDialogueAboveTouchControls:
 
     def test_dialogue_above_controls_after_rotation_roundtrip(self, touch_page: Page):
         """Dialogue must stay above controls after portrait→landscape→portrait."""
-        skip_to_level(touch_page, 7)
+        _start_game_level(touch_page, 7, dismiss=False)
         touch_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             return ds?.container?.visible === true;
         }""", timeout=5000)
 
-        # Rotate to landscape and back
-        _trigger_resize(touch_page, GALAXY_LANDSCAPE)
-        _wait_for_hud_restart(touch_page)
-        _trigger_resize(touch_page, GALAXY_PORTRAIT)
-        _wait_for_hud_restart(touch_page)
+        # Rotate to landscape and back. _resize_and_wait asserts each target
+        # viewport size is applied (GameScale width/height) before continuing.
+        _resize_and_wait(touch_page, GALAXY_LANDSCAPE)
+        _resize_and_wait(touch_page, GALAXY_PORTRAIT)
 
         # Wait for dialogue to re-show
         touch_page.wait_for_function("""() => {
             const ds = window.game?.scene?.getScene('DialogueScene');
             return ds?.container?.visible === true;
         }""", timeout=5000)
-        touch_page.wait_for_timeout(300)
 
         pos = self._get_dialogue_positions(touch_page)
         assert pos is not None
@@ -326,19 +353,15 @@ class TestZoomStability:
 
     def test_zoom_roundtrip_with_touch(self, touch_page: Page):
         """Zoom in portrait should be identical after portrait→landscape→portrait."""
-        skip_to_level(touch_page, 0)
-        dismiss_dialogues(touch_page)
-        touch_page.wait_for_timeout(500)
+        _start_game_level(touch_page, 0)
 
         z1 = touch_page.evaluate(
             "() => window.game.scene.getScene('GameScene').cameras.main.zoom"
         )
 
-        _trigger_resize(touch_page, GALAXY_LANDSCAPE)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_LANDSCAPE)
 
-        _trigger_resize(touch_page, GALAXY_PORTRAIT)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, GALAXY_PORTRAIT)
 
         z2 = touch_page.evaluate(
             "() => window.game.scene.getScene('GameScene').cameras.main.zoom"
@@ -355,14 +378,11 @@ class TestZoomStability:
         screen. Resizing to a larger desktop viewport should show more world
         (zoom ≤ 1.0), not the same world at oversized pixels (zoom > 1.0).
         """
-        skip_to_level(touch_page, 7)
-        dismiss_dialogues(touch_page)
-        touch_page.wait_for_timeout(500)
+        _start_game_level(touch_page, 7)
 
         # Resize to a large desktop viewport
         desktop = {"width": 980, "height": 1080}
-        _trigger_resize(touch_page, desktop)
-        _wait_for_hud_restart(touch_page)
+        _resize_and_wait(touch_page, desktop)
 
         zoom = touch_page.evaluate(
             "() => window.game.scene.getScene('GameScene').cameras.main.zoom"

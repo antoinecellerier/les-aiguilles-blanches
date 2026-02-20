@@ -4,7 +4,10 @@
  */
 
 import { STORAGE_KEYS } from '../config/storageKeys';
+import { SCENE_KEYS } from '../config/sceneKeys';
 import { getJSON, setJSON, removeKey } from './storage';
+
+type ResumeSceneKey = typeof SCENE_KEYS.GAME | typeof SCENE_KEYS.SKI_RUN;
 
 export interface LevelStats {
   completed: boolean;
@@ -15,7 +18,7 @@ export interface LevelStats {
 
 interface GameProgress {
   currentLevel: number;
-  lastScene?: 'GameScene' | 'SkiRunScene';
+  lastScene?: ResumeSceneKey;
   levelStats?: Record<number, LevelStats>;
   savedAt: string;
 }
@@ -34,7 +37,7 @@ export function getSavedProgress(): GameProgress | null {
   return progress;
 }
 
-export function saveProgress(level: number, lastScene?: 'GameScene' | 'SkiRunScene'): void {
+export function saveProgress(level: number, lastScene?: ResumeSceneKey): void {
   const existing = getSavedProgress();
   const progress: GameProgress = {
     currentLevel: level,

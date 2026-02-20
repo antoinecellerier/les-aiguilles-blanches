@@ -16,6 +16,7 @@ import { getDailyRunSession, startDailyRunSession } from '../systems/DailyRunSes
 import { getLaunchOrigin } from '../systems/LaunchOrigin';
 import { generateValidDailyRunLevel, rankSeed } from '../systems/LevelGenerator';
 import { seedToCode, randomSeed } from '../utils/seededRNG';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * Les Aiguilles Blanches - Pause Scene
@@ -36,7 +37,7 @@ export default class PauseScene extends Phaser.Scene {
   private inputReadyTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor() {
-    super({ key: 'PauseScene' });
+    super({ key: SCENE_KEYS.PAUSE });
   }
 
   init(data: PauseSceneData): void {
@@ -204,15 +205,15 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   private restartLevel(): void {
-    resetGameScenes(this.game, 'GameScene', { level: this.levelIndex });
+    resetGameScenes(this.game, SCENE_KEYS.GAME, { level: this.levelIndex });
   }
 
   private restartSkiRun(): void {
-    resetGameScenes(this.game, 'SkiRunScene', { level: this.levelIndex, mode: this.skiRunMode });
+    resetGameScenes(this.game, SCENE_KEYS.SKI_RUN, { level: this.levelIndex, mode: this.skiRunMode });
   }
 
   private skipSkiRun(): void {
-    resetGameScenes(this.game, 'LevelCompleteScene', {
+    resetGameScenes(this.game, SCENE_KEYS.LEVEL_COMPLETE, {
       won: true,
       level: this.levelIndex,
       coverage: 100,
@@ -227,20 +228,20 @@ export default class PauseScene extends Phaser.Scene {
     const levelIndex = this.levelIndex;
     const skiMode = this.skiMode;
     const skiRunMode = this.skiRunMode;
-    this.scene.stop('HUDScene');
-    this.scene.stop('DialogueScene');
-    this.scene.stop('PauseScene');
-    game.scene.start('SettingsScene', { returnTo: 'PauseScene', levelIndex, skiMode, skiRunMode });
-    game.scene.bringToTop('SettingsScene');
+    this.scene.stop(SCENE_KEYS.HUD);
+    this.scene.stop(SCENE_KEYS.DIALOGUE);
+    this.scene.stop(SCENE_KEYS.PAUSE);
+    game.scene.start(SCENE_KEYS.SETTINGS, { returnTo: SCENE_KEYS.PAUSE, levelIndex, skiMode, skiRunMode });
+    game.scene.bringToTop(SCENE_KEYS.SETTINGS);
   }
 
   private quitToMenu(): void {
     const session = getDailyRunSession();
     if (session) {
-      resetGameScenes(this.game, 'DailyRunsScene');
+      resetGameScenes(this.game, SCENE_KEYS.DAILY_RUNS);
     } else {
-      saveProgress(this.levelIndex, this.skiMode ? 'SkiRunScene' : 'GameScene');
-      resetGameScenes(this.game, getLaunchOrigin() || 'MenuScene');
+      saveProgress(this.levelIndex, this.skiMode ? SCENE_KEYS.SKI_RUN : SCENE_KEYS.GAME);
+      resetGameScenes(this.game, getLaunchOrigin() || SCENE_KEYS.MENU);
     }
   }
 
@@ -251,7 +252,7 @@ export default class PauseScene extends Phaser.Scene {
     const { level, usedSeed } = generateValidDailyRunLevel(rankSeed(seed, session.rank), session.rank);
     const code = seedToCode(usedSeed);
     startDailyRunSession({ level, seedCode: code, baseSeedCode: seedToCode(seed), rank: session.rank, isDaily: false });
-    resetGameScenes(this.game, 'GameScene', { level: level.id });
+    resetGameScenes(this.game, SCENE_KEYS.GAME, { level: level.id });
   }
 
   shutdown(): void {

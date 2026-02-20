@@ -16,6 +16,7 @@ import { getJSON } from '../utils/storage';
 import { ResizeManager } from '../utils/resizeManager';
 import { buildShareMessage, copyToClipboard } from '../utils/shareUrl';
 import { showToast } from '../utils/toastNotification';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 const RANK_COLORS: Record<DailyRunRank, string> = {
   green: '#22c55e',
@@ -44,7 +45,7 @@ export default class DailyRunsScene extends Phaser.Scene {
   private sharedSeedNum: number | null = null;
 
   constructor() {
-    super({ key: 'DailyRunsScene' });
+    super({ key: SCENE_KEYS.DAILY_RUNS });
   }
 
   create(data?: { seedCode?: string; rank?: DailyRunRank }): void {
@@ -495,11 +496,11 @@ export default class DailyRunsScene extends Phaser.Scene {
       isDaily,
     });
 
-    resetGameScenes(this.game, 'GameScene', { level: level.id });
+    resetGameScenes(this.game, SCENE_KEYS.GAME, { level: level.id });
   }
 
   private goBack(): void {
-    resetGameScenes(this.game, 'MenuScene');
+    resetGameScenes(this.game, SCENE_KEYS.MENU);
   }
 
   update(time: number, delta: number): void {

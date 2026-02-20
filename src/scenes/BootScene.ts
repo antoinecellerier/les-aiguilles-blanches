@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Accessibility, setLanguage, detectLanguage } from '../setup';
+import { SCENE_KEYS } from '../config/sceneKeys';
 import { detectKeyboardLayout } from '../utils/keyboardLayout';
 import { parseShareParams, clearShareParams } from '../utils/shareUrl';
 import { createSkierTexture, createSkierLeftTexture, createSkierRightTexture, createSkierBrakeTexture, createSkierTuckTexture, createSnowboarderTexture, createSnowboarderLeftTexture, createSnowboarderRightTexture, createSnowboarderBrakeTexture, createSnowboarderTuckTexture } from '../utils/skiSprites';
@@ -13,7 +14,7 @@ import { NIGHT_SUFFIX, NIGHT_TEXTURE_KEYS } from '../utils/nightPalette';
 
 export default class BootScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'BootScene' });
+    super({ key: SCENE_KEYS.BOOT });
   }
 
   preload(): void {
@@ -65,12 +66,12 @@ export default class BootScene extends Phaser.Scene {
       if (shareParams) {
         clearShareParams();
         // Always route to DailyRunsScene — it handles the locked state itself
-        this.scene.start('DailyRunsScene', {
+        this.scene.start(SCENE_KEYS.DAILY_RUNS, {
           seedCode: shareParams.seedCode,
           rank: shareParams.rank,
         });
       } else {
-        this.scene.start('MenuScene');
+        this.scene.start(SCENE_KEYS.MENU);
       }
     } catch (error) {
       console.error('BootScene error:', error);

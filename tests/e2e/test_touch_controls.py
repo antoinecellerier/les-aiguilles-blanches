@@ -125,16 +125,17 @@ def test_touch_dpad_movement(touch_page: Page):
     
     # Use arrow keys to test movement (keyboard always works)
     touch_page.keyboard.down("ArrowRight")
-    touch_page.keyboard.up("ArrowRight")
-    
-    # Wait for groomer to have moved right
-    touch_page.wait_for_function(
-        """() => {
-            const gs = window.game?.scene?.getScene('GameScene');
-            return gs?.groomer?.x > %d;
-        }""" % int(initial_pos["x"]),
-        timeout=3000
-    )
+    try:
+        # Keep key held while polling movement to avoid missed one-frame taps under load.
+        touch_page.wait_for_function(
+            """() => {
+                const gs = window.game?.scene?.getScene('GameScene');
+                return gs?.groomer?.x > %d;
+            }""" % int(initial_pos["x"]),
+            timeout=5000
+        )
+    finally:
+        touch_page.keyboard.up("ArrowRight")
     
     # Get new position
     new_pos = touch_page.evaluate("""
@@ -241,17 +242,18 @@ def test_multitouch_simultaneous_inputs(touch_page: Page):
     # Simulate multitouch via keyboard: move right + down
     touch_page.keyboard.down("ArrowRight")
     touch_page.keyboard.down("ArrowDown")
-    touch_page.keyboard.up("ArrowRight")
-    touch_page.keyboard.up("ArrowDown")
-    
-    # Wait for groomer to have moved diagonally
-    touch_page.wait_for_function(
-        """() => {
-            const gs = window.game?.scene?.getScene('GameScene');
-            return gs?.groomer?.x > %d && gs?.groomer?.y > %d;
-        }""" % (int(initial_pos["x"]), int(initial_pos["y"])),
-        timeout=3000
-    )
+    try:
+        # Keep both keys held while polling to avoid under-load missed taps.
+        touch_page.wait_for_function(
+            """() => {
+                const gs = window.game?.scene?.getScene('GameScene');
+                return gs?.groomer?.x > %d && gs?.groomer?.y > %d;
+            }""" % (int(initial_pos["x"]), int(initial_pos["y"])),
+            timeout=5000
+        )
+    finally:
+        touch_page.keyboard.up("ArrowRight")
+        touch_page.keyboard.up("ArrowDown")
     
     # Get new position
     new_pos = touch_page.evaluate("""

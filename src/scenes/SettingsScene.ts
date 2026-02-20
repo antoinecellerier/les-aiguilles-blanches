@@ -18,6 +18,7 @@ import { createMenuBackdrop, type MenuBackdrop } from '../systems/MenuTerrainRen
 import { getSavedProgress } from '../utils/gameProgress';
 import { GamepadDiagnosticPanel } from '../systems/GamepadDiagnostic';
 import { isDesktopApp, setDisplayMode, setBackgroundAudio } from '../types/electron';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -71,7 +72,7 @@ export default class SettingsScene extends Phaser.Scene {
   private diagnosticPanel: GamepadDiagnosticPanel | null = null;
 
   constructor() {
-    super({ key: 'SettingsScene' });
+    super({ key: SCENE_KEYS.SETTINGS });
   }
 
   init(data: SettingsSceneData): void {
@@ -782,7 +783,7 @@ export default class SettingsScene extends Phaser.Scene {
   }
 
   private createBackButton(width: number, height: number, padding: number): void {
-    const backLabel = this.returnTo === 'PauseScene' ? (t('back') || 'Back')
+    const backLabel = this.returnTo === SCENE_KEYS.PAUSE ? (t('back') || 'Back')
       : this.returnTo ? (t('backToGame') || 'Back to Game')
       : (t('back') || 'Back');
     const backBtn = this.createTouchButton('← ' + backLabel, this.fontSize * 1.1, THEME.colors.textPrimary, THEME.colors.buttonDangerHex);
@@ -1343,20 +1344,20 @@ export default class SettingsScene extends Phaser.Scene {
       return;
     }
 
-    if (this.returnTo === 'PauseScene') {
+    if (this.returnTo === SCENE_KEYS.PAUSE) {
       // Return to pause menu — GameScene is still paused, just resume overlays
       const game = this.game;
       const levelIndex = this.levelIndex;
-      this.scene.stop('SettingsScene');
-      game.scene.start('HUDScene', { level: LEVELS[levelIndex] });
-      game.scene.start('DialogueScene');
-      game.scene.start('PauseScene', { levelIndex, skiMode: this.skiMode, skiRunMode: this.skiRunMode });
-    } else if (this.returnTo === 'GameScene') {
+      this.scene.stop(SCENE_KEYS.SETTINGS);
+      game.scene.start(SCENE_KEYS.HUD, { level: LEVELS[levelIndex] });
+      game.scene.start(SCENE_KEYS.DIALOGUE);
+      game.scene.start(SCENE_KEYS.PAUSE, { levelIndex, skiMode: this.skiMode, skiRunMode: this.skiRunMode });
+    } else if (this.returnTo === SCENE_KEYS.GAME) {
       const game = this.game;
-      this.scene.stop('SettingsScene');
-      resetGameScenes(game, 'GameScene', { level: this.levelIndex });
+      this.scene.stop(SCENE_KEYS.SETTINGS);
+      resetGameScenes(game, SCENE_KEYS.GAME, { level: this.levelIndex });
     } else {
-      this.scene.start('MenuScene');
+      this.scene.start(SCENE_KEYS.MENU);
     }
   }
 

@@ -1435,7 +1435,7 @@ All Phaser depth (z-order) values are centralized in `DEPTHS` (exported from `sr
 
 ### Scene Key Constants
 
-High-traffic scene routing paths use `SCENE_KEYS` from `src/config/sceneKeys.ts` to avoid typo-prone string literals in scene registration and transition cleanup checks.
+Scene registration, transitions, and cross-scene lookups use `SCENE_KEYS` from `src/config/sceneKeys.ts` to avoid typo-prone string literals.
 
 ### Overlay Scene Input Handling
 

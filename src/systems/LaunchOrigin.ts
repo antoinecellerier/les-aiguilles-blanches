@@ -11,7 +11,7 @@
 
 const _g = globalThis as Record<string, unknown>;
 
-/** Set the launch origin scene key (e.g. 'LevelSelectScene'). */
+/** Set the launch origin scene key (e.g. SCENE_KEYS.LEVEL_SELECT). */
 export function setLaunchOrigin(sceneKey: string): void {
   _g.__launchOrigin = sceneKey;
 }

@@ -15,6 +15,7 @@ import { toggleFullscreen, isFullscreen, fullscreenEnabled } from '../utils/full
 import { Accessibility } from '../utils/accessibility';
 import { isRenderThrottled } from '../utils/renderThrottle';
 import { getDailyRunSession } from '../systems/DailyRunSession';
+import { SCENE_KEYS } from '../config/sceneKeys';
 
 /**
  * Les Aiguilles Blanches - HUD Scene
@@ -89,7 +90,7 @@ export default class HUDScene extends Phaser.Scene {
   }> = [];
 
   constructor() {
-    super({ key: 'HUDScene' });
+    super({ key: SCENE_KEYS.HUD });
   }
   
   /** Get the Y coordinate of the top edge of touch controls (for dialogue positioning) */
@@ -983,7 +984,7 @@ export default class HUDScene extends Phaser.Scene {
   }
 
   private openPauseMenu(): void {
-    if (!this.scene.isActive('PauseScene')) {
+    if (!this.scene.isActive(SCENE_KEYS.PAUSE)) {
       this.game.events.emit(GAME_EVENTS.PAUSE_REQUEST);
     }
   }
@@ -1015,7 +1016,7 @@ export default class HUDScene extends Phaser.Scene {
     if (nextLevel < LEVELS.length) {
       this.game.events.emit(GAME_EVENTS.SKIP_LEVEL, nextLevel);
     } else {
-      resetGameScenes(this.game, 'CreditsScene');
+      resetGameScenes(this.game, SCENE_KEYS.CREDITS);
     }
   }
 
