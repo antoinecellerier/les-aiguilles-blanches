@@ -302,6 +302,8 @@ const cs: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19. února 2026",
   changelog_20260219: "🎬 Prolog pro nové hráče\n📖 Zjednodušený tutoriál\n🌦️ Náhodné počasí v menu\n🔗 Sdílitelné denní sjezdy\n🎥 Filmové titulky",
+  changelog_20260220_date: "20. února 2026",
+  changelog_20260220: "🗺️ Mapa tratí pro výběr úrovně",
   changelog_20260217_date: "17. února 2026",
   changelog_20260217: "🏔️ Sedm tvarů sjezdovek\n🎯 Rozmanitost generování\n⚡ Plynulejší sjezd",
   changelog_20260216_date: "16. února 2026",

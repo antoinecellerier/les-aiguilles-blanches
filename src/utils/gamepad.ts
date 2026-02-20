@@ -68,13 +68,17 @@ const BUTTON_NAMES_PLAYSTATION: Record<number, string> = {
   12: '↑', 13: '↓', 14: '←', 15: '→',
 };
 
-const BUTTON_NAMES_XBOX: Record<number, string> = {
-  0: 'Ⓐ', 1: 'Ⓑ', 2: 'Ⓧ', 3: 'Ⓨ',
-  4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
-  8: 'View', 9: 'Menu',
-  10: 'L3', 11: 'R3',
-  12: '↑', 13: '↓', 14: '←', 15: '→',
-};
+// Linux xpad driver swaps Xbox X(2)↔Y(3) vs W3C standard — affects all browsers.
+const isLinux = typeof navigator !== 'undefined' && /linux/i.test(navigator.userAgent);
+const BUTTON_NAMES_XBOX: Record<number, string> = isLinux
+  ? { 0: 'Ⓐ', 1: 'Ⓑ', 2: 'Ⓨ', 3: 'Ⓧ',
+      4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
+      8: 'View', 9: 'Menu', 10: 'L3', 11: 'R3',
+      12: '↑', 13: '↓', 14: '←', 15: '→' }
+  : { 0: 'Ⓐ', 1: 'Ⓑ', 2: 'Ⓧ', 3: 'Ⓨ',
+      4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT',
+      8: 'View', 9: 'Menu', 10: 'L3', 11: 'R3',
+      12: '↑', 13: '↓', 14: '←', 15: '→' };
 
 export function getDefaultGamepadBindings(): GamepadBindings {
   return { groom: 0, winch: 4, pause: 9 };

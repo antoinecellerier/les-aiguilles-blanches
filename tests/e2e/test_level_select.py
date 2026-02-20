@@ -4,6 +4,7 @@ from playwright.sync_api import Page
 from conftest import (
     assert_no_error_message,
     assert_scene_active,
+    dismiss_dialogues,
     find_menu_button_index,
     wait_for_scene,
     wait_for_input_ready,
@@ -100,15 +101,13 @@ class TestLevelSelectWithProgress:
 
     def test_info_panel_shows_level_stats(self, game_page: Page):
         """Info panel should display coverage target and time limit."""
+        inject_progress(game_page, current_level=0)
         navigate_to_level_select(game_page)
-        # Navigate to level 1 (has targetCoverage and timeLimit)
-        game_page.keyboard.press('ArrowDown')
-        game_page.wait_for_timeout(150)
+        # Level 0 (tutorial) is selected by default — check its info panel
         details = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelSelectScene');
             return scene?.infoDetails?.text ?? '';
         }""")
-        # Level 0 (tutorial) has 60% coverage, no time limit
         assert '%' in details, f"Info panel should show coverage target, got: {details}"
 
     def test_groom_starts_game(self, game_page: Page):
@@ -118,12 +117,32 @@ class TestLevelSelectWithProgress:
         wait_for_scene(game_page, 'GameScene', timeout=10000)
         assert_scene_active(game_page, 'GameScene')
 
+    def test_pause_quit_returns_to_level_select(self, game_page: Page):
+        """Quitting from pause should return to LevelSelectScene when launched from there."""
+        from conftest import skip_to_level
+        skip_to_level(game_page, 0)
+        dismiss_dialogues(game_page)
+        # Simulate launch origin as if started from LevelSelectScene
+        game_page.evaluate("window.__launchOrigin = 'LevelSelectScene'")
+        game_page.wait_for_timeout(300)
+        game_page.keyboard.press('Escape')
+        wait_for_scene(game_page, 'PauseScene', timeout=5000)
+        wait_for_input_ready(game_page, 'PauseScene')
+        idx = find_menu_button_index(game_page, 'quit', 'PauseScene')
+        game_page.evaluate(f"""() => {{
+            const scene = window.game.scene.getScene('PauseScene');
+            scene.menuButtons[{idx}].emit('pointerdown');
+        }}""")
+        wait_for_scene(game_page, 'LevelSelectScene', timeout=10000)
+        assert_scene_active(game_page, 'LevelSelectScene')
+
 
 class TestLevelSelectKeyboardNav:
     """Keyboard navigation tests."""
 
     def test_arrow_keys_change_selection(self, game_page: Page):
         """Arrow keys should move selection between levels."""
+        inject_progress(game_page, current_level=0)
         navigate_to_level_select(game_page)
         initial = get_selected_level(game_page)
         # ArrowUp moves towards summit (higher level index)

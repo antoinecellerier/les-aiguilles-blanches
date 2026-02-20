@@ -32,6 +32,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Trail map level select polish** — Locked level interaction (click selects with gray ring + prerequisite info), gamepad button hints (Ⓐ Groom / Ⓨ Ski), shared `formatTime()` utility, Linux Xbox X/Y button label swap (`xpad` driver fix), `LaunchOrigin` singleton so quit returns to level select when launched from there. `onSecondary` gamepad callback for Y/Triangle button.
+
 - ✅ **Seed sharing E2E tests** — 14 tests covering URL param parsing (?seed=&rank=), share button clipboard, locked/unlocked shared seed display, seed determinism, rank defaults, and uppercase normalization. Smart test mapping added to `run-tests.sh`.
 
 - ✅ **Cinematic credits scene** — Replaced bare starfield with night alpine terrain, groomer driving with headlights + corduroy trail, sleeping wildlife, light snow. Credits text geometry-masked to scroll zone. JP farewell bookends prologue opener. Localized headings (10 new keys × 14 languages). Dedication to real night-shift groomers.

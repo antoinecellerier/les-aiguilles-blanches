@@ -76,13 +76,15 @@ snow-groomer/
 │   │   ├── UISounds.ts     # Procedural UI SFX (click, hover, cancel, toggle, level win/fail)
 │   │   ├── VoiceSounds.ts  # Celeste-style voice gibberish (4 speaker profiles)
 │   │   ├── WildlifeSounds.ts # Animal flee/alarm sounds (marmot, chamois, bird, bunny, bouquetin, fox)
-│   │   └── GamepadDiagnostic.ts # Live button/stick/trigger readout for controller testing in settings
+│   │   ├── GamepadDiagnostic.ts # Live button/stick/trigger readout for controller testing in settings
+│   │   ├── DailyRunSession.ts # Module-level singleton: daily run session state (set/get/clear)
+│   │   └── LaunchOrigin.ts    # Module-level singleton: tracks launch origin for quit navigation
 │   ├── types/
 │   │   ├── global.d.ts           # Window/navigator type augmentations
 │   │   └── GameSceneInterface.ts # Cross-scene event types (GAME_EVENTS)
 │   ├── utils/
 │   │   ├── accessibility.ts # A11y helpers, settings
-│   │   ├── bonusObjectives.ts # Shared bonus objective evaluation and label formatting
+│   │   ├── bonusObjectives.ts # Shared bonus objective evaluation, label formatting, formatTime()
 │   │   ├── animalSprites.ts  # Procedural pixel art for alpine wildlife (6 species + perched/flying variants)
 │   │   ├── animalTracks.ts   # Shared track/footprint drawing for menu & game scenes
 │   │   ├── characterPortraits.ts # Procedural 12×12 pixel art portraits
@@ -1874,6 +1876,14 @@ Rank sets hard rules; seed determines layout within those rules.
 ### Daily Run Level Flow
 
 Daily run session state lives in `src/systems/DailyRunSession.ts` — a module-level singleton. `DailyRunsScene` calls `startDailyRunSession()` before launching `GameScene`. Any scene that needs daily run context calls `getDailyRunSession()`. The session is automatically cleared in `resetGameScenes()` when navigating to `MenuScene` or `DailyRunsScene`. This avoids threading daily run fields through every scene transition path. Daily run level IDs start at 100 (`DAILY_RUN_LEVEL_ID_BASE`) to avoid collision with campaign levels.
+
+### Launch Origin Singleton
+
+`src/systems/LaunchOrigin.ts` tracks which hub scene (e.g. `LevelSelectScene`) launched the current gameplay session. `LevelSelectScene` calls `setLaunchOrigin('LevelSelectScene')` before starting a level. `PauseScene` and `LevelCompleteScene` read it via `getLaunchOrigin()` to route "Quit" / "Menu" back to the correct hub instead of always going to `MenuScene`. Cleared automatically by `resetGameScenes()` when navigating to any menu hub (`MenuScene`, `LevelSelectScene`, `DailyRunsScene`). Same singleton pattern as `DailyRunSession` — stored on `globalThis` to survive HMR and be accessible from E2E tests.
+
+### Linux Xbox Gamepad Button Swap
+
+The Linux `xpad` kernel driver swaps Xbox X (button 2) and Y (button 3) relative to the W3C Gamepad API standard. `src/utils/gamepad.ts` detects Linux via `navigator.userAgent` and swaps entries 2↔3 in the Xbox button name table. This only affects button _labels_ (e.g. showing Ⓨ for what the driver reports as index 2); button _indices_ in handlers remain W3C-standard. Affects all browsers on Linux. PlayStation, Nintendo, and generic controllers are unaffected.
 
 ## Future Architecture Considerations
 

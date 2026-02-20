@@ -62,7 +62,7 @@ export function createGamepadMenuNav(
         if (pad) {
           confirmPressed = isConfirmPressed(pad);
           backPressed = isBackPressed(pad);
-          secondaryPressed = pad.buttons[3]?.pressed ?? false;
+          secondaryPressed = pad.buttons[2]?.pressed ?? false;
         }
       } else {
         confirmPressed = false;
@@ -80,7 +80,7 @@ export function createGamepadMenuNav(
         // Still track button state so we don't get phantom presses when unblocked
         confirmPressed = isConfirmPressed(pad);
         backPressed = isBackPressed(pad);
-        secondaryPressed = pad.buttons[3]?.pressed ?? false;
+        secondaryPressed = pad.buttons[2]?.pressed ?? false;
         return;
       }
 
@@ -122,8 +122,8 @@ export function createGamepadMenuNav(
       }
       backPressed = nowBack;
 
-      // Secondary button Y/Triangle (debounced)
-      const nowSecondary = pad.buttons[3]?.pressed ?? false;
+      // Secondary button (debounced) — button index 2
+      const nowSecondary = pad.buttons[2]?.pressed ?? false;
       if (nowSecondary && !secondaryPressed && callbacks.onSecondary) {
         callbacks.onSecondary();
       }

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { t, Accessibility, LEVELS, type Level, type BonusObjective } from '../setup';
-import { evaluateAllBonusObjectives, getBonusLabel, type BonusEvalState } from '../utils/bonusObjectives';
+import { evaluateAllBonusObjectives, getBonusLabel, formatTime, type BonusEvalState } from '../utils/bonusObjectives';
 import { THEME } from '../config/theme';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { STORAGE_KEYS } from '../config/storageKeys';
@@ -15,6 +15,7 @@ import { playClick, playLevelWin, playLevelFail } from '../systems/UISounds';
 import { markLevelCompleted } from '../utils/gameProgress';
 import { clearGroomedTiles } from '../utils/skiRunState';
 import { getDailyRunSession } from '../systems/DailyRunSession';
+import { getLaunchOrigin } from '../systems/LaunchOrigin';
 import { buildShareMessage, copyToClipboard } from '../utils/shareUrl';
 import { showToast } from '../utils/toastNotification';
 
@@ -272,9 +273,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
       // Grooming stats only shown for grooming completions (not ski runs)
       if (!this.skiMode) {
         statsLines.push(t('coverage') + ': ' + this.coverage + '% / ' + level.targetCoverage + '%');
-        statsLines.push(t('timeUsed') + ': ' + this.formatTime(this.timeUsed));
+        statsLines.push(t('timeUsed') + ': ' + formatTime(this.timeUsed));
       } else {
-        statsLines.push(t('timeUsed') + ': ' + this.formatTime(this.timeUsed));
+        statsLines.push(t('timeUsed') + ': ' + formatTime(this.timeUsed));
       }
 
       let bonusResults: { objective: BonusObjective; met: boolean; label: string }[] = [];
@@ -374,7 +375,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
         () => this.navigateTo('DailyRunsScene'), false, 'dailyRuns');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'), false, 'menu');
+        () => this.navigateBack(), false, 'menu');
     } else if (this.isDailyRun && !this.won) {
       // Daily run failed — retry + menu
       this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
@@ -382,7 +383,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       this.addButton(buttonContainer, t('dailyRuns') || 'Daily Runs', buttonFontSize, buttonPadding2,
         () => this.navigateTo('DailyRunsScene'), false, 'dailyRuns');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'), false, 'menu');
+        () => this.navigateBack(), false, 'menu');
     } else if (this.won && this.levelIndex < LEVELS.length - 1) {
       // After tutorial, promote ski run to primary CTA to hook the player
       const isTutorial = this.levelIndex === 0;
@@ -397,14 +398,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
           : () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }),
         false, isTutorial ? 'nextLevel' : 'ski');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'), false, 'menu');
+        () => this.navigateBack(), false, 'menu');
     } else if (this.won && this.levelIndex === LEVELS.length - 1) {
       this.addButton(buttonContainer, t('viewCredits') || 'View Credits', buttonFontSize, buttonPadding2,
         () => this.navigateTo('CreditsScene'), true, 'viewCredits');
       this.addButton(buttonContainer, skiLabel, buttonFontSize, buttonPadding2,
         () => this.navigateTo('SkiRunScene', { level: this.levelIndex, mode: skiMode as 'ski' | 'snowboard' }), false, 'ski');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'), false, 'menu');
+        () => this.navigateBack(), false, 'menu');
     } else if (isSkiCrash) {
       // Ski crash — retry the run (re-randomize if needed) + next level + menu
       const retryLabel = skiMode === 'snowboard' ? (t('rideAgain') || 'Ride Again!') : (t('skiAgain') || 'Ski Again!');
@@ -418,12 +419,12 @@ export default class LevelCompleteScene extends Phaser.Scene {
           () => this.navigateTo('CreditsScene'), false, 'viewCredits');
       }
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'), false, 'menu');
+        () => this.navigateBack(), false, 'menu');
     } else {
       this.addButton(buttonContainer, t('retry') || 'Retry', buttonFontSize, buttonPadding2,
         () => this.navigateTo('GameScene', { level: this.levelIndex, restartCount: this.restartCount + 1 }), true, 'retry');
       this.addButton(buttonContainer, t('menu') || 'Menu', buttonFontSize, buttonPadding2,
-        () => this.navigateTo('MenuScene'), false, 'menu');
+        () => this.navigateBack(), false, 'menu');
     }
 
     // Position buttons horizontally centered
@@ -444,7 +445,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-RIGHT', () => this.buttonNav.navigate(1));
     this.input.keyboard?.on('keydown-ENTER', () => { if (this.inputReady) this.buttonNav.activate(); });
     this.input.keyboard?.on('keydown-SPACE', () => { if (this.inputReady) this.buttonNav.activate(); });
-    this.input.keyboard?.on('keydown-ESC', () => { if (this.inputReady) this.navigateTo('MenuScene'); });
+    this.input.keyboard?.on('keydown-ESC', () => { if (this.inputReady) this.navigateBack(); });
     
     // Initialize selection
     this.buttonNav.refreshStyles();
@@ -453,7 +454,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     this.gamepadNav = createGamepadMenuNav(this, 'horizontal', {
       onNavigate: (dir) => this.buttonNav.navigate(dir),
       onConfirm: () => { if (this.inputReady) this.buttonNav.activate(); },
-      onBack: () => { if (this.inputReady) this.navigateTo('MenuScene'); },
+      onBack: () => { if (this.inputReady) this.navigateBack(); },
     });
     this.gamepadNav.initState();
 
@@ -543,11 +544,9 @@ export default class LevelCompleteScene extends Phaser.Scene {
     resetGameScenes(this.game, targetKey, data);
   }
 
-  private formatTime(seconds: number): string {
-    const s = Math.floor(seconds);
-    const mins = Math.floor(s / 60);
-    const secs = s % 60;
-    return mins + ':' + secs.toString().padStart(2, '0');
+  /** Navigate back to the launch origin (level select) or main menu */
+  private navigateBack(): void {
+    this.navigateTo(getLaunchOrigin() || 'MenuScene');
   }
 
   private getFailIcon(): string {

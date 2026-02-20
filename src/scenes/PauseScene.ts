@@ -13,6 +13,7 @@ import { isGamepadButtonPressed, captureGamepadButtons } from '../utils/gamepad'
 import { ResizeManager } from '../utils/resizeManager';
 import { isDesktopApp, quitDesktopApp } from '../types/electron';
 import { getDailyRunSession, startDailyRunSession } from '../systems/DailyRunSession';
+import { getLaunchOrigin } from '../systems/LaunchOrigin';
 import { generateValidDailyRunLevel, rankSeed } from '../systems/LevelGenerator';
 import { seedToCode, randomSeed } from '../utils/seededRNG';
 
@@ -239,7 +240,7 @@ export default class PauseScene extends Phaser.Scene {
       resetGameScenes(this.game, 'DailyRunsScene');
     } else {
       saveProgress(this.levelIndex, this.skiMode ? 'SkiRunScene' : 'GameScene');
-      resetGameScenes(this.game, 'MenuScene');
+      resetGameScenes(this.game, getLaunchOrigin() || 'MenuScene');
     }
   }
 

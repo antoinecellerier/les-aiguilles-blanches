@@ -11,6 +11,9 @@ import { resetGameScenes } from '../utils/sceneTransitions';
 import { createMenuBackdrop, createMenuHeader, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { playClick } from '../systems/UISounds';
 import { ResizeManager } from '../utils/resizeManager';
+import { formatTime } from '../utils/bonusObjectives';
+import { getButtonName, getConnectedControllerType } from '../utils/gamepad';
+import { setLaunchOrigin } from '../systems/LaunchOrigin';
 
 // Run marker positions as % of map area (x, y). y=0 is summit, y=1 is base.
 const RUN_POSITIONS: [number, number][] = [
@@ -407,9 +410,9 @@ export default class LevelSelectScene extends Phaser.Scene {
   }
 
   private onMarkerClick(levelIdx: number, btnIdx: number, unlocked: boolean): void {
-    if (!unlocked || !this.inputReady || this.isNavigating) return;
+    if (!this.inputReady || this.isNavigating) return;
     playClick();
-    if (this.userSelected && this.selectedLevel === levelIdx) {
+    if (unlocked && this.userSelected && this.selectedLevel === levelIdx) {
       this.startLevel(levelIdx, 'groom');
     } else {
       this.userSelected = true;
@@ -429,11 +432,13 @@ export default class LevelSelectScene extends Phaser.Scene {
     const pad = 6;
     const outer = ms / 2 + pad;
     const border = 3;
+    const unlocked = isLevelUnlocked(levelIdx);
+    const ringColor = unlocked ? 0xffd700 : 0x8a7e6a;
     // Outer glow (wider translucent rect)
-    this.selectionRing.fillStyle(0xffd700, 0.4);
+    this.selectionRing.fillStyle(ringColor, 0.4);
     this.selectionRing.fillRect(x - outer - border - 1, y - outer - border - 1, (outer + border + 1) * 2, (outer + border + 1) * 2);
-    // Gold border — four fillRect edges
-    this.selectionRing.fillStyle(0xffd700, 1);
+    // Border — four fillRect edges
+    this.selectionRing.fillStyle(ringColor, 1);
     this.selectionRing.fillRect(x - outer, y - outer, outer * 2, border);           // top
     this.selectionRing.fillRect(x - outer, y + outer - border, outer * 2, border);   // bottom
     this.selectionRing.fillRect(x - outer, y - outer, border, outer * 2);            // left
@@ -640,11 +645,12 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.infoName?.setText(`${marker?.symbol ?? ''} ${displayName}`);
 
     if (!unlocked) {
-      const prevName = levelIdx > 0
-        ? (t(LEVELS[levelIdx - 1].nameKey) || LEVELS[levelIdx - 1].nameKey) : '';
-      const lockMsg = prevName
-        ? `🔒 ${t('locked') || 'Locked'} — ${t('complete') || 'Complete'} ${prevName}`
-        : `🔒 ${t('locked') || 'Locked'}`;
+      let lockMsg = `🔒 ${t('locked') || 'Locked'}`;
+      if (levelIdx > 0) {
+        const prevFull = t(LEVELS[levelIdx - 1].nameKey) || LEVELS[levelIdx - 1].nameKey;
+        const prevShort = prevFull.includes(' - ') ? prevFull.split(' - ').slice(1).join(' - ') : prevFull;
+        lockMsg += `  ·  ▶ ${prevShort}`;
+      }
       this.infoDetails?.setText(lockMsg);
       this.groomBtn?.setVisible(false);
       this.skiBtn?.setVisible(false);
@@ -654,23 +660,28 @@ export default class LevelSelectScene extends Phaser.Scene {
       parts.push(diffKey.charAt(0).toUpperCase() + diffKey.slice(1));
       if (level.targetCoverage) parts.push(`${level.targetCoverage}%`);
       if (level.timeLimit) {
-        const m = Math.floor(level.timeLimit / 60);
-        const sec = level.timeLimit % 60;
-        parts.push(`${m}:${String(sec).padStart(2, '0')}`);
+        parts.push(formatTime(level.timeLimit));
       }
       if (completed && stats) {
         parts.push('⭐'.repeat(stats.bestStars) + '☆'.repeat(3 - stats.bestStars));
         if (stats.bestTime) {
-          const m = Math.floor(stats.bestTime / 60);
-          const sec = stats.bestTime % 60;
-          parts.push(`Best ${m}:${String(sec).padStart(2, '0')}`);
+          parts.push(`Best ${formatTime(stats.bestTime)}`);
         }
       }
       this.infoDetails?.setText(parts.join('  ·  '));
 
+      const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+      const ctrlType = hasGamepad ? getConnectedControllerType() : undefined;
+      const groomPrefix = ctrlType ? getButtonName(0, ctrlType) + ' ' : '';
+      const skiPrefix = ctrlType ? getButtonName(2, ctrlType) + ' ' : '';
+
+      this.groomBtn?.setText(groomPrefix + (t('groom') || 'Groom'));
       this.groomBtn?.setVisible(true);
       // Position ski button left of groom
       if (completed) {
+        const skiLabel = this.resolvedSkiMode === 'snowboard'
+          ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
+        this.skiBtn?.setText(skiPrefix + skiLabel);
         this.skiBtn?.setVisible(true);
         this.skiBtn?.setX((this.groomBtn?.x ?? 0) - (this.groomBtn?.width ?? 0) - 8);
       } else {
@@ -723,6 +734,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private startLevel(level: number, mode: 'groom' | 'ski'): void {
     if (this.isNavigating) return;
     this.isNavigating = true;
+    setLaunchOrigin('LevelSelectScene');
     if (mode === 'ski') {
       resetGameScenes(this.game, 'SkiRunScene', { level, mode: this.resolvedSkiMode });
     } else {

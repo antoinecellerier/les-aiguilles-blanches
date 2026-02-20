@@ -13,6 +13,7 @@ import { WeatherSystem } from '../systems/WeatherSystem';
 import { THEME } from '../config/theme';
 import { resetGameScenes } from '../utils/sceneTransitions';
 import { isGamepadButtonPressed, captureGamepadButtons, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
+import { formatTime } from '../utils/bonusObjectives';
 import { playLevelWin } from '../systems/UISounds';
 import { getLayoutDefaults } from '../utils/keyboardLayout';
 import { BINDINGS_VERSION } from '../config/storageKeys';
@@ -610,7 +611,7 @@ export default class SkiRunScene extends Phaser.Scene {
     // HUD update
     const kmh = Math.round(this.currentSpeed * BALANCE.SKI_SPEED_SCALE);
     this.speedText.setText(`${t('skiRunSpeed') || 'Speed'}: ${kmh} km/h`);
-    this.timeText.setText(`${t('skiRunTime') || 'Time'}: ${this.formatTime(this.elapsedTime)}`);
+    this.timeText.setText(`${t('skiRunTime') || 'Time'}: ${formatTime(this.elapsedTime)}`);
 
     // Audio update
     this.skiSounds.update(this.currentSpeed, braking, onGroomed, delta);
@@ -1233,13 +1234,6 @@ export default class SkiRunScene extends Phaser.Scene {
         skiBestCombo: this.trickCount > 0 ? this.bestCombo : undefined,
       });
     });
-  }
-
-  private formatTime(seconds: number): string {
-    const s = Math.floor(seconds);
-    const mins = Math.floor(s / 60);
-    const secs = s % 60;
-    return mins + ':' + secs.toString().padStart(2, '0');
   }
 
   private loadKeyBindings(): { up: number; down: number; left: number; right: number; groom: number; winch: number } {

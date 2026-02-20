@@ -254,6 +254,8 @@ const de: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19. Februar 2026",
   changelog_20260219: "🎬 Prolog für neue Spieler\n📖 Vereinfachtes Tutorial\n🌦️ Zufälliges Menüwetter\n🔗 Tagesabfahrten teilbar\n🎥 Filmischer Abspann",
+  changelog_20260220_date: "20. Februar 2026",
+  changelog_20260220: "🗺️ Pistenkarte zur Levelauswahl",
   changelog_20260217_date: "17. Februar 2026",
   changelog_20260217: "🏔️ Sieben Pistenformen\n🎯 Levelgenerierung-Vielfalt\n⚡ Flüssigere Abfahrt",
   changelog_20260216_date: "16. Februar 2026",
