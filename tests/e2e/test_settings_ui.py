@@ -117,44 +117,45 @@ class TestSettingsLayout:
 
     def test_settings_toggles_clickable(self, settings_page: Page):
         """Test that toggle buttons are interactive."""
-        # Find and click High Contrast toggle
         result = settings_page.evaluate("""() => {
             const scene = window.game.scene.getScene('SettingsScene');
-            if (!scene) return { found: false };
-            
-            let toggleFound = false;
-            scene.children.list.forEach(child => {
-                if (child.type === 'Text' && child.text && 
-                    (child.text.includes('ON') || child.text.includes('OFF'))) {
-                    toggleFound = true;
-                    // Simulate click by emitting pointerdown
-                    if (child.input && child.input.enabled) {
-                        child.emit('pointerdown');
-                    }
+            if (!scene) return null;
+            for (const child of scene.children.list) {
+                if (child.type === 'Text' && child.text &&
+                    (child.text.includes('ON') || child.text.includes('OFF')) &&
+                    child.input?.enabled) {
+                    const b = child.getBounds();
+                    return { x: b.centerX, y: b.centerY };
                 }
-            });
-            return { found: toggleFound };
+            }
+            return null;
         }""")
-        
-        assert result['found'], "No toggle buttons found in Settings"
+        assert result is not None, "No clickable toggle buttons found in Settings"
+        canvas = settings_page.locator("canvas").bounding_box()
+        assert canvas is not None
+        settings_page.mouse.click(canvas["x"] + result["x"], canvas["y"] + result["y"])
+        assert_scene_active(settings_page, 'SettingsScene')
 
     def test_settings_back_button_works(self, settings_page: Page):
         """Test that Back button returns to menu."""
-        # Find and click Back button
-        settings_page.evaluate("""() => {
+        pos = settings_page.evaluate("""() => {
             const scene = window.game.scene.getScene('SettingsScene');
-            if (!scene) return;
-            
-            scene.children.list.forEach(child => {
+            if (!scene) return null;
+            for (const child of scene.children.list) {
                 if (child.type === 'Text' && child.text && 
                     (child.text.includes('Back') || child.text.includes('←'))) {
                     if (child.input && child.input.enabled) {
-                        child.emit('pointerdown');
+                        const b = child.getBounds();
+                        return { x: b.centerX, y: b.centerY };
                     }
                 }
-            });
+            }
+            return null;
         }""")
-        
+        assert pos is not None, "Back button should be clickable"
+        canvas = settings_page.locator("canvas").bounding_box()
+        assert canvas is not None
+        settings_page.mouse.click(canvas["x"] + pos["x"], canvas["y"] + pos["y"])
         wait_for_scene(settings_page, 'MenuScene')
 
 
@@ -322,7 +323,10 @@ class TestSettingsKeyboardNav:
     def test_arrow_keys_move_focus(self, settings_page: Page):
         """Arrow keys should highlight settings items."""
         settings_page.keyboard.press("ArrowDown")
-        settings_page.wait_for_timeout(100)
+        settings_page.wait_for_function("""() => {
+            const scene = window.game.scene.getScene('SettingsScene');
+            return scene && scene.focusIndex >= 0 && scene.focusItems.length > 0;
+        }""", timeout=3000)
 
         has_focus = settings_page.evaluate("""() => {
             const scene = window.game.scene.getScene('SettingsScene');
@@ -334,9 +338,11 @@ class TestSettingsKeyboardNav:
     def test_arrow_down_increments_focus(self, settings_page: Page):
         """ArrowDown should advance to the next focus item."""
         settings_page.keyboard.press("ArrowDown")
-        settings_page.wait_for_timeout(50)
         settings_page.keyboard.press("ArrowDown")
-        settings_page.wait_for_timeout(50)
+        settings_page.wait_for_function("""() => {
+            const scene = window.game.scene.getScene('SettingsScene');
+            return scene && scene.focusIndex === 1;
+        }""", timeout=3000)
 
         index = settings_page.evaluate("""() => {
             const scene = window.game.scene.getScene('SettingsScene');

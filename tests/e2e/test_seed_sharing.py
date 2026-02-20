@@ -18,6 +18,21 @@ def goto_with_seed(page: Page, seed: str, rank: str = "green", width: int = 1280
     page.goto(f"{GAME_URL}?seed={seed}&rank={rank}")
 
 
+def click_daily_runs_button(page: Page, key: str):
+    """Click a DailyRunsScene button by data-key using real pointer input."""
+    pos = page.evaluate(f"""() => {{
+        const s = window.game?.scene?.getScene('DailyRunsScene');
+        const btn = s?.children.list.find(c => c.getData && c.getData('key') === '{key}');
+        if (!btn || !btn.input?.enabled) return null;
+        const b = btn.getBounds();
+        return {{ x: b.centerX, y: b.centerY }};
+    }}""")
+    assert pos is not None, f"Button with key '{key}' not found in DailyRunsScene"
+    canvas = page.locator("canvas").bounding_box()
+    assert canvas is not None, "Canvas should be visible"
+    page.mouse.click(canvas["x"] + pos["x"], canvas["y"] + pos["y"])
+
+
 # --- URL Parameter Parsing ---
 
 def test_shared_seed_routes_to_daily_runs(page: Page):
@@ -181,12 +196,7 @@ def test_share_button_copies_to_clipboard(page: Page):
             return orig(text).catch(() => {}); // swallow permission errors
         };
     }""")
-    # Click the share button
-    page.evaluate("""() => {
-        const s = window.game?.scene?.getScene('DailyRunsScene');
-        const btn = s?.children.list.find(c => c.getData && c.getData('key') === 'share');
-        if (btn) btn.emit('pointerdown');
-    }""")
+    click_daily_runs_button(page, 'share')
     page.wait_for_function("() => window.__clipboardText !== null", timeout=3000)
     clipboard = page.evaluate("() => window.__clipboardText")
     assert clipboard is not None, "Share button should have written to clipboard"
@@ -203,12 +213,7 @@ def test_share_button_shows_toast(page: Page):
     page.evaluate("""() => {
         navigator.clipboard.writeText = async (text) => { return; };
     }""")
-    # Click share
-    page.evaluate("""() => {
-        const s = window.game?.scene?.getScene('DailyRunsScene');
-        const btn = s?.children.list.find(c => c.getData && c.getData('key') === 'share');
-        if (btn) btn.emit('pointerdown');
-    }""")
+    click_daily_runs_button(page, 'share')
     # Wait for toast to appear (depth >= 200 = MENU_TOAST)
     has_toast = page.wait_for_function("""() => {
         const s = window.game?.scene?.getScene('DailyRunsScene');

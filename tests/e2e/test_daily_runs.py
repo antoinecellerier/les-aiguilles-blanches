@@ -4,9 +4,11 @@ Tests navigation, input methods (keyboard, mouse, gamepad), viewports,
 and cross-scene flows specific to the daily runs feature.
 """
 import pytest
-import time
 from playwright.sync_api import Page
-from conftest import wait_for_scene, get_active_scenes, GAME_URL, navigate_to_daily_runs, unlock_all_levels
+from conftest import (
+    wait_for_scene, get_active_scenes, GAME_URL, navigate_to_daily_runs,
+    unlock_all_levels, click_menu_by_key,
+)
 from test_gamepad import tap_gamepad_button, MOCK_GAMEPAD_SCRIPT
 
 
@@ -49,7 +51,10 @@ def dismiss_dialogues(page: Page):
         if (ds.isDialogueShowing && ds.isDialogueShowing() && ds.hideDialogue) ds.hideDialogue();
         ds.showDialogue = function() {};
     }""")
-    time.sleep(0.2)
+    page.wait_for_function("""() => {
+        const ds = window.game?.scene?.getScene('DialogueScene');
+        return !ds || !ds.isDialogueShowing || !ds.isDialogueShowing();
+    }""", timeout=3000)
 
 
 def get_selected_index(page: Page, scene: str) -> int:
@@ -57,6 +62,21 @@ def get_selected_index(page: Page, scene: str) -> int:
         const s = window.game?.scene?.getScene('{scene}');
         return s?.buttonNav?.selectedIndex ?? s?.selectedIndex ?? -1;
     }}""")
+
+
+def wait_for_selected_index(page: Page, scene: str, expected: int, timeout: int = 3000):
+    page.wait_for_function(f"""() => {{
+        const s = window.game?.scene?.getScene('{scene}');
+        const idx = s?.buttonNav?.selectedIndex ?? s?.selectedIndex ?? -1;
+        return idx === {expected};
+    }}""", timeout=timeout)
+
+
+def wait_for_rank(page: Page, expected: str, timeout: int = 3000):
+    page.wait_for_function(f"""() => {{
+        const s = window.game?.scene?.getScene('DailyRunsScene');
+        return s?.selectedRank === '{expected}';
+    }}""", timeout=timeout)
 
 
 def start_daily_run(page: Page, use_gamepad: bool = False):
@@ -67,7 +87,6 @@ def start_daily_run(page: Page, use_gamepad: bool = False):
         page.keyboard.press("Enter")
     wait_for_scene(page, "GameScene", timeout=10000)
     dismiss_dialogues(page)
-    time.sleep(0.3)
 
 
 # --- Gamepad fixture ---
@@ -97,12 +116,12 @@ class TestDailyRunsKeyboard:
         assert rank0 == "green", f"Initial rank should be green, got {rank0}"
 
         page.keyboard.press("ArrowRight")
-        time.sleep(0.15)
+        wait_for_rank(page, "blue")
         rank1 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank1 == "blue", f"Right should cycle to blue, got {rank1}"
 
         page.keyboard.press("ArrowLeft")
-        time.sleep(0.15)
+        wait_for_rank(page, "green")
         rank2 = page.evaluate("() => window.game?.scene?.getScene('DailyRunsScene')?.selectedRank")
         assert rank2 == "green", f"Left should cycle back to green, got {rank2}"
 
@@ -115,32 +134,29 @@ class TestDailyRunsKeyboard:
         assert idx == 1, f"Should start on Daily Shift (1), got {idx}"
 
         page.keyboard.press("ArrowDown")
-        time.sleep(0.1)
+        wait_for_selected_index(page, "DailyRunsScene", 2)
         assert get_selected_index(page, "DailyRunsScene") == 2
 
         page.keyboard.press("ArrowUp")
-        time.sleep(0.1)
+        wait_for_selected_index(page, "DailyRunsScene", 1)
         assert get_selected_index(page, "DailyRunsScene") == 1
 
     def test_daily_runs_enter_starts_game(self, page: Page):
         setup_unlocked(page)
         navigate_to_daily_runs(page)
         page.keyboard.press("Enter")
-        time.sleep(0.5)
         wait_for_scene(page, "GameScene", timeout=10000)
 
     def test_daily_runs_space_starts_game(self, page: Page):
         setup_unlocked(page)
         navigate_to_daily_runs(page)
         page.keyboard.press("Space")
-        time.sleep(0.5)
         wait_for_scene(page, "GameScene", timeout=10000)
 
     def test_daily_runs_escape_goes_back(self, page: Page):
         setup_unlocked(page)
         navigate_to_daily_runs(page)
         page.keyboard.press("Escape")
-        time.sleep(0.5)
         wait_for_scene(page, "MenuScene", timeout=8000)
 
 
@@ -155,7 +171,7 @@ class TestDailyRunsGamepad:
 
         idx0 = get_selected_index(gamepad_page, "DailyRunsScene")
         tap_gamepad_button(gamepad_page, GP_DPAD_DOWN)
-        time.sleep(0.2)
+        wait_for_selected_index(gamepad_page, "DailyRunsScene", idx0 + 1)
         idx1 = get_selected_index(gamepad_page, "DailyRunsScene")
         assert idx1 == idx0 + 1, f"Dpad down: {idx0} -> {idx1}"
 
@@ -164,7 +180,6 @@ class TestDailyRunsGamepad:
         navigate_to_daily_runs(gamepad_page)
 
         tap_gamepad_button(gamepad_page, GP_B)
-        time.sleep(0.5)
         wait_for_scene(gamepad_page, "MenuScene", timeout=8000)
 
     def test_daily_runs_a_starts_game(self, gamepad_page: Page):
@@ -172,7 +187,6 @@ class TestDailyRunsGamepad:
         navigate_to_daily_runs(gamepad_page)
 
         tap_gamepad_button(gamepad_page, GP_A)
-        time.sleep(0.5)
         wait_for_scene(gamepad_page, "GameScene", timeout=10000)
 
 
@@ -187,7 +201,6 @@ class TestDailyRunFlows:
         navigate_to_daily_runs(page)
         start_daily_run(page)
         page.locator("canvas").click()
-        time.sleep(0.3)
 
         # Verify daily run level loaded
         has_session = page.evaluate("""() => {
@@ -199,10 +212,7 @@ class TestDailyRunFlows:
         # Pause → Restart
         page.keyboard.press("Escape")
         wait_for_scene_ready(page, "PauseScene")
-        page.keyboard.press("ArrowDown")
-        time.sleep(0.06)
-        page.keyboard.press("Enter")
-        time.sleep(0.5)
+        click_menu_by_key(page, 'restart', 'PauseScene')
         wait_for_scene(page, "GameScene", timeout=10000)
 
         # Daily run session should still be active
@@ -222,7 +232,6 @@ class TestDailyRunFlows:
             const gs = window.game?.scene?.getScene('GameScene');
             if (gs && typeof gs.gameOver === 'function') gs.gameOver(true);
         }""")
-        time.sleep(1)
         wait_for_scene(page, "LevelCompleteScene", timeout=10000)
 
         buttons = page.evaluate("""() => {
@@ -249,16 +258,11 @@ class TestDailyRunFlows:
         navigate_to_daily_runs(page)
         start_daily_run(page)
         page.locator("canvas").click()
-        time.sleep(0.3)
 
-        # Pause → Quit (Resume=0, Restart=1, Settings=2, Quit=3)
+        # Pause → Quit
         page.keyboard.press("Escape")
         wait_for_scene_ready(page, "PauseScene")
-        for _ in range(3):
-            page.keyboard.press("ArrowDown")
-            time.sleep(0.06)
-        page.keyboard.press("Enter")
-        time.sleep(0.5)
+        click_menu_by_key(page, 'quit', 'PauseScene')
         wait_for_scene(page, "DailyRunsScene", timeout=8000)
 
 
@@ -285,14 +289,9 @@ class TestDailyRunLevelGeneration:
 
         # Quit and restart same daily run
         page.locator("canvas").click()
-        time.sleep(0.3)
         page.keyboard.press("Escape")
         wait_for_scene_ready(page, "PauseScene")
-        for _ in range(3):
-            page.keyboard.press("ArrowDown")
-            time.sleep(0.06)
-        page.keyboard.press("Enter")
-        time.sleep(0.5)
+        click_menu_by_key(page, 'quit', 'PauseScene')
         wait_for_scene(page, "DailyRunsScene", timeout=8000)
 
         start_daily_run(page)
@@ -324,20 +323,15 @@ class TestDailyRunLevelGeneration:
 
         # Quit, go back, switch to black rank, start
         page.locator("canvas").click()
-        time.sleep(0.3)
         page.keyboard.press("Escape")
         wait_for_scene_ready(page, "PauseScene")
-        for _ in range(3):
-            page.keyboard.press("ArrowDown")
-            time.sleep(0.06)
-        page.keyboard.press("Enter")
-        time.sleep(0.5)
+        click_menu_by_key(page, 'quit', 'PauseScene')
         wait_for_scene(page, "DailyRunsScene", timeout=8000)
 
         # Cycle rank: green → blue → red → black (3 right presses)
-        for _ in range(3):
+        for expected_rank in ("blue", "red", "black"):
             page.keyboard.press("ArrowRight")
-            time.sleep(0.15)
+            wait_for_rank(page, expected_rank)
         start_daily_run(page)
 
         black = page.evaluate("""() => {
