@@ -8,7 +8,7 @@ import { getSavedProgress, isLevelCompleted, isLevelUnlocked, getLevelStats } fr
 import { createMenuButtonNav, type MenuButtonNav } from '../utils/menuButtonNav';
 import { createGamepadMenuNav, type GamepadMenuNav } from '../utils/gamepadMenu';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { createMenuBackdrop, createMenuHeader, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
+import { createMenuBackdrop, createMenuHeader, drawSteppedMountain, type MenuBackdrop } from '../systems/MenuTerrainRenderer';
 import { playClick } from '../systems/UISounds';
 import { ResizeManager } from '../utils/resizeManager';
 import { formatTime } from '../utils/bonusObjectives';
@@ -240,26 +240,24 @@ export default class LevelSelectScene extends Phaser.Scene {
 
   private drawMountain(scale: number): void {
     const { mapLeft: ml, mapTop: mt, mapW: mw, mapH: mh } = this;
+    const baseY = mt + mh * 1.02;  // extend below map for overlap
+    const depth = DEPTHS.MENU_SNOW - 0.5;
 
-    const mg = this.add.graphics().setDepth(DEPTHS.MENU_SNOW - 0.5);
-    const rockColors = [0x4a423a, 0x6a5e52, 0x8a7e6a];
-    const steps = Math.max(18, Math.round(30 * Math.min(scale, 1.2)));
+    // Same 3 peaks, rendered with menu-style stepped rectangles + snow caps
+    // Main peak (center) — far layer, darkest
+    drawSteppedMountain(this, ml + mw * 0.50, baseY, mw * 0.96, mh * 0.99, 0x2d2822, 0x4a423a, true, depth, false);
+    // Left shoulder — mid layer
+    drawSteppedMountain(this, ml + mw * 0.18, baseY, mw * 0.48, mh * 0.86, 0x4a423a, 0x6a5e52, true, depth + 0.1, false);
+    // Right ridge — near layer, lightest
+    drawSteppedMountain(this, ml + mw * 0.82, baseY, mw * 0.44, mh * 0.82, 0x6a5e52, 0x8a7e6a, true, depth + 0.2, false);
 
-    // Main peak (center) — extends to bottom of map so mountains meet the snow ground
-    this.drawPeak(mg, ml + mw * 0.50, mt + mh * 0.01, mt + mh * 1.02, mw * 0.48, steps, rockColors, 0.08);
-    // Left shoulder
-    this.drawPeak(mg, ml + mw * 0.18, mt + mh * 0.14, mt + mh * 1.02, mw * 0.24,
-      Math.round(steps * 0.7), rockColors, 0.10);
-    // Right ridge
-    this.drawPeak(mg, ml + mw * 0.82, mt + mh * 0.18, mt + mh * 1.02, mw * 0.22,
-      Math.round(steps * 0.65), rockColors, 0.10);
-
-    // Summit cross — prominent landmark
+    // Summit cross — planted on the actual peak top
+    const peakTopY = baseY - mh * 0.99;  // must match main peak's peakHeight
     const crossX = ml + mw * 0.50;
-    const crossY = mt + mh * 0.01 - Math.round(8 * scale);
+    const cs = Math.max(8, Math.round(12 * Math.min(scale, 1.2)));
+    const crossY = peakTopY - cs;  // center cross arm at peak top minus half-height
     const crossG = this.add.graphics().setDepth(DEPTHS.MENU_UI);
     crossG.fillStyle(0x2d2822);
-    const cs = Math.max(8, Math.round(12 * Math.min(scale, 1.2)));
     crossG.fillRect(crossX - 2, crossY - cs, 4, cs * 2 + 3);
     crossG.fillRect(crossX - Math.round(cs * 0.7), crossY - Math.round(cs * 0.3), Math.round(cs * 1.4), 4);
     // Bird perch: right arm tip, on top of the 4px-thick bar
@@ -267,41 +265,6 @@ export default class LevelSelectScene extends Phaser.Scene {
       x: crossX + Math.round(cs * 0.7),
       y: crossY - Math.round(cs * 0.3),
     });
-  }
-
-  private drawPeak(g: Phaser.GameObjects.Graphics, peakX: number, peakY: number, baseY: number,
-    baseHalfW: number, steps: number, colors: number[], topNarrow: number): void {
-    const stepH = (baseY - peakY) / steps;
-    for (let s = 0; s < steps; s++) {
-      const frac = s / steps;
-      const y = peakY + s * stepH;
-      const halfW = baseHalfW * (topNarrow + frac * (1 - topNarrow));
-      g.fillStyle(colors[s % colors.length]);
-      g.fillRect(peakX - halfW, y, halfW * 2, stepH + 1);
-    }
-    // Snow cap — top ~20% of peak, pure white
-    const snowSteps = Math.max(2, Math.round(steps * 0.20));
-    for (let s = 0; s < snowSteps; s++) {
-      const frac = s / steps;
-      const y = peakY + s * stepH;
-      const halfW = baseHalfW * (topNarrow + frac * (1 - topNarrow));
-      g.fillStyle(0xffffff);
-      g.fillRect(peakX - halfW, y, halfW * 2, stepH + 1);
-    }
-    // Small snow patches — scattered white splotches using a simple hash
-    for (let s = snowSteps; s < Math.round(steps * 0.50); s++) {
-      const hash = ((s * 7 + 13) * 31) % 100;
-      if (hash > 30) continue; // only ~30% of rows get a patch
-      const frac = s / steps;
-      const y = peakY + s * stepH;
-      const halfW = baseHalfW * (topNarrow + frac * (1 - topNarrow));
-      // Patch on left or right side, small
-      const side = (hash % 2 === 0) ? -1 : 1;
-      const patchW = halfW * (0.15 + (hash % 20) * 0.01);
-      const offset = side * halfW * (0.1 + (hash % 30) * 0.015);
-      g.fillStyle(0xe8eff3, 0.6);
-      g.fillRect(peakX + offset, y, patchW, stepH + 1);
-    }
   }
 
   // ==================

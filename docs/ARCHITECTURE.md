@@ -1420,7 +1420,7 @@ Each system takes the Phaser scene in its constructor and exposes methods called
 
 ### MenuTerrainRenderer Reuse
 
-`createMenuTerrain()` accepts a `skipGroomer` parameter (default `false`). LevelCompleteScene passes `skipGroomer: true` to draw custom failure-specific groomer effects via `drawGroomerFailEffect()` instead of the standard side-view groomer. LevelCompleteScene also uses `MenuWildlifeController` for wildlife and applies weather effects (night overlay, storm particles) matching the completed level's weather config.
+`createMenuTerrain()` accepts a `skipGroomer` parameter (default `false`). LevelCompleteScene passes `skipGroomer: true` to draw custom failure-specific groomer effects via `drawGroomerFailEffect()` instead of the standard side-view groomer. LevelCompleteScene also uses `MenuWildlifeController` for wildlife and applies weather effects (night overlay, storm particles) matching the completed level's weather config. LevelSelectScene passes `skipMountains: true` and uses the exported `drawSteppedMountain()` directly to draw its own 3-peak trail map with per-peak depth layers matching the menu scene's stepped-rectangle style.
 
 Five failure groomer effects: **tumble** (upside-down groomer), **avalanche** (snow pile with cabin tip), **cliff** (tilted with debris), **fuel** (smoke plumes + gauge), **time** (zzZ sleep marks).
 

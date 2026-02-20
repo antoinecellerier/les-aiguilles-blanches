@@ -162,7 +162,7 @@ function createMountains(scene: Phaser.Scene, width: number, snowLineY: number, 
   drawSteppedMountain(scene, 750 * sx, snowLineY, 260 * mtnScale, 180 * mtnScale, 0x6a5e52, 0x8a7e6a, false, DEPTHS.MENU_MOUNTAINS_NEAR, isStorm);
 }
 
-function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean): void {
+export function drawSteppedMountain(scene: Phaser.Scene, cx: number, baseY: number, baseWidth: number, peakHeight: number, bodyColor: number, highlightColor: number, snowCap: boolean, depth: number, isStorm: boolean): void {
   const stepH = 16;
   const steps = Math.ceil(peakHeight / stepH);
   // Start 2 steps below baseY to overlap with snow ground (no gap)
