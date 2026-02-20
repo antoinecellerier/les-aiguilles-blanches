@@ -9,15 +9,42 @@ Tests every accessibility setting across key scenes and form factors:
 - Responsive form factors (phone, tablet, desktop)
 """
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Browser, BrowserContext, Page
 from conftest import (
-    wait_for_scene,
+    GAME_URL, wait_for_game_ready, wait_for_scene,
     click_button, assert_scene_active, assert_canvas_renders_content,
     navigate_to_settings, dismiss_dialogues,
     BUTTON_START,
 )
 
 SCREENSHOT_DIR = "tests/screenshots"
+
+
+@pytest.fixture(autouse=True)
+def skip_prologue():
+    """Override global autouse fixture; this module sets init script on context."""
+    return
+
+
+@pytest.fixture(scope="module")
+def module_context(browser: Browser) -> BrowserContext:
+    """Reuse one context for this module to reduce browser setup overhead."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.add_init_script("localStorage.setItem('snowGroomer_prologueSeen', '1');")
+    yield context
+    context.close()
+
+
+@pytest.fixture
+def game_page(module_context: BrowserContext):
+    """Fresh page per test from shared context, with clean game boot."""
+    page = module_context.new_page()
+    page.goto(GAME_URL)
+    page.wait_for_selector("canvas", timeout=10000)
+    wait_for_game_ready(page)
+    yield page
+    page.evaluate("localStorage.clear()")
+    page.close()
 
 
 # ── Helpers ──────────────────────────────────────────────────────────
@@ -83,7 +110,7 @@ def start_game_and_wait(page: Page):
     click_button(page, BUTTON_START, "Start Game")
     wait_for_scene(page, 'GameScene')
     dismiss_dialogues(page)
-    page.wait_for_timeout(500)  # let HUD render
+    wait_for_scene(page, 'HUDScene')
 
 
 def screenshot(page: Page, name: str):

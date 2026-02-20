@@ -4,7 +4,7 @@ Tests navigation, input methods (keyboard, mouse, gamepad), viewports,
 and cross-scene flows specific to the daily runs feature.
 """
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Browser, BrowserContext, Page
 from conftest import (
     wait_for_scene, get_active_scenes, GAME_URL, navigate_to_daily_runs,
     unlock_all_levels, click_menu_by_key,
@@ -90,6 +90,31 @@ def start_daily_run(page: Page, use_gamepad: bool = False):
 
 
 # --- Gamepad fixture ---
+
+
+@pytest.fixture(autouse=True)
+def skip_prologue():
+    """Override global autouse fixture; this module sets init script on context."""
+    return
+
+
+@pytest.fixture(scope="module")
+def module_context(browser: Browser) -> BrowserContext:
+    """Reuse one context for Daily Runs module to reduce setup overhead."""
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    context.add_init_script("localStorage.setItem('snowGroomer_prologueSeen', '1');")
+    yield context
+    context.close()
+
+
+@pytest.fixture
+def page(module_context: BrowserContext):
+    """Fresh page per test from a shared context."""
+    p = module_context.new_page()
+    yield p
+    p.evaluate("""() => { try { localStorage.clear(); } catch (_) {} }""")
+    p.close()
+
 
 @pytest.fixture
 def gamepad_page(page: Page):

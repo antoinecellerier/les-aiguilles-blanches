@@ -7,6 +7,7 @@
 #   ./run-tests.sh -k "test_skip"     # Run specific tests
 #   ./run-tests.sh --browser chromium # Single browser only
 #   ./run-tests.sh --smart            # Only run tests affected by uncommitted changes
+#   ./run-tests.sh --e2e-only         # Skip unit tests, run only Playwright E2E
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -16,10 +17,13 @@ cd "$(dirname "$0")"
 
 # Check for --smart flag and strip it from args
 SMART_MODE=false
+E2E_ONLY=false
 ARGS=()
 for arg in "$@"; do
     if [ "$arg" = "--smart" ]; then
         SMART_MODE=true
+    elif [ "$arg" = "--e2e-only" ]; then
+        E2E_ONLY=true
     else
         ARGS+=("$arg")
     fi
@@ -249,6 +253,10 @@ if [ "$SMART_MODE" = true ]; then
         fi
     fi
     echo ""
+fi
+
+if [ "$E2E_ONLY" = true ]; then
+    SKIP_UNIT=true
 fi
 
 # --- Run unit tests ---

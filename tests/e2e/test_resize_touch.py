@@ -9,7 +9,7 @@ These test the fixes from aabd59e4 and subsequent commits:
 """
 
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Browser, BrowserContext, Page
 
 from conftest import (
     GAME_URL,
@@ -25,19 +25,35 @@ GALAXY_LANDSCAPE = {"width": 915, "height": 412}
 IPHONESE_PORTRAIT = {"width": 375, "height": 667}
 
 
-@pytest.fixture
-def touch_page(page: Page):
-    """Page emulating a portrait touch device."""
-    page.set_viewport_size(GALAXY_PORTRAIT)
-    page.add_init_script("""
+@pytest.fixture(autouse=True)
+def skip_prologue():
+    """Override global autouse fixture; this module sets its own init script."""
+    return
+
+
+@pytest.fixture(scope="module")
+def touch_context(browser: Browser) -> BrowserContext:
+    """Reuse one browser context for this module; reset state per test via page reload."""
+    context = browser.new_context(viewport=GALAXY_PORTRAIT)
+    context.add_init_script("""
+        localStorage.setItem('snowGroomer_prologueSeen', '1');
         Object.defineProperty(navigator, 'maxTouchPoints', { get: () => 5 });
         window.ontouchstart = function() {};
     """)
+    yield context
+    context.close()
+
+
+@pytest.fixture
+def touch_page(touch_context: BrowserContext):
+    """Fresh page per test from a reused context (faster than new context each test)."""
+    page = touch_context.new_page()
     page.goto(GAME_URL)
     page.wait_for_selector("canvas", timeout=10000)
     wait_for_game_ready(page)
     yield page
     page.evaluate("localStorage.clear()")
+    page.close()
 
 
 def _trigger_resize(page: Page, size: dict):
