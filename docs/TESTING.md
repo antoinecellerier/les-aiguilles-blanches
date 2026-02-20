@@ -68,7 +68,7 @@ Core helpers are in `tests/e2e/conftest.py`, including `click_menu_button`, `cli
 
 ### Key-based button lookup
 
-Menu buttons are tagged with `button.setData('key', btnKey)` in MenuScene. Tests use `find_menu_button_index(page, 'settings')` or `click_menu_by_key(page, 'settings')` instead of hardcoded button indices — this is immune to button reordering.
+Menu buttons are tagged with `button.setData('key', btnKey)`. Tests use `find_menu_button_index(page, 'settings', 'MenuScene')` or `click_menu_by_key(page, 'settings')` instead of hardcoded indices/text matching — this is immune to button reordering. For non-menu scenes, pass `scene_name` (for example: `click_menu_by_key(page, 'quit', 'PauseScene')`).
 
 ### Fixtures
 

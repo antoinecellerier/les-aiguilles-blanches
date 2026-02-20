@@ -217,11 +217,15 @@ def find_menu_button_index(page, key: str, scene_name: str = 'MenuScene') -> int
     return idx
 
 
-def click_menu_by_key(page, key: str):
-    """Click a menu button by its data key — immune to button reordering."""
-    idx = find_menu_button_index(page, key)
-    click_menu_button(page, idx, key)
-    page.wait_for_timeout(100)
+def click_menu_by_key(page, key: str, scene_name: str = 'MenuScene'):
+    """Click a scene menu button by its data key — immune to button reordering."""
+    idx = find_menu_button_index(page, key, scene_name)
+    page.evaluate(f"""() => {{
+        const scene = window.game?.scene?.getScene('{scene_name}');
+        if (scene?.buttonNav?.select) scene.buttonNav.select({idx});
+    }}""")
+    page.keyboard.press("Enter")
+    page.wait_for_timeout(50)
 
 
 # Start Game is always index 0 (first primary button)
@@ -236,14 +240,7 @@ def click_button(page, button_index: int, description: str):
 
 def navigate_to_daily_runs(page):
     """From MenuScene, navigate to DailyRunsScene via the Daily Runs button."""
-    import time
-    idx = find_menu_button_index(page, 'dailyRuns')
-    page.evaluate(f"""() => {{
-        const ms = window.game?.scene?.getScene('MenuScene');
-        if (ms?.buttonNav) ms.buttonNav.select({idx});
-    }}""")
-    time.sleep(0.1)
-    page.keyboard.press("Enter")
+    click_menu_by_key(page, 'dailyRuns')
     wait_for_scene(page, "DailyRunsScene")
 
 

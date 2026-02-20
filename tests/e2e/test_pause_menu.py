@@ -81,17 +81,7 @@ class TestPauseMenu:
         wait_for_scene(game_page, 'PauseScene')
         wait_for_input_ready(game_page, "PauseScene")
 
-        game_page.evaluate("""() => {
-            const ps = window.game?.scene?.getScene('PauseScene');
-            for (const child of ps.children.list) {
-                if (child.type === 'Text' && child.input?.enabled) {
-                    if (child.text.toLowerCase().includes('settings') || child.text.toLowerCase().includes('paramètres')) {
-                        child.emit('pointerdown');
-                        return;
-                    }
-                }
-            }
-        }""")
+        click_menu_by_key(game_page, 'settings', 'PauseScene')
         wait_for_scene(game_page, 'SettingsScene')
         assert_scene_active(game_page, 'SettingsScene', "Settings should open from Pause")
 
@@ -121,16 +111,7 @@ class TestPauseMenu:
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
         wait_for_input_ready(game_page, "PauseScene")
-        game_page.evaluate("""() => {
-            const ps = window.game?.scene?.getScene('PauseScene');
-            for (const child of ps.children.list) {
-                if (child.type === 'Text' && child.input?.enabled &&
-                    (child.text.toLowerCase().includes('settings') || child.text.toLowerCase().includes('paramètres'))) {
-                    child.emit('pointerdown');
-                    return;
-                }
-            }
-        }""")
+        click_menu_by_key(game_page, 'settings', 'PauseScene')
         wait_for_scene(game_page, 'SettingsScene')
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
@@ -142,16 +123,7 @@ class TestPauseMenu:
         game_page.keyboard.press("Escape")
         wait_for_scene(game_page, 'PauseScene')
         wait_for_input_ready(game_page, "PauseScene")
-        game_page.evaluate("""() => {
-            const ps = window.game?.scene?.getScene('PauseScene');
-            for (const child of ps.children.list) {
-                if (child.type === 'Text' && child.input?.enabled &&
-                    (child.text.toLowerCase().includes('quit') || child.text.toLowerCase().includes('quitter'))) {
-                    child.emit('pointerdown');
-                    return;
-                }
-            }
-        }""")
+        click_menu_by_key(game_page, 'quit', 'PauseScene')
         wait_for_scene(game_page, 'MenuScene')
 
         # Menu → Settings → Back: must return to Menu

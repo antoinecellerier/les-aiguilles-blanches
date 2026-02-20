@@ -4,6 +4,7 @@ from playwright.sync_api import Page
 from conftest import (
     assert_no_error_message,
     assert_scene_active,
+    click_menu_by_key,
     dismiss_dialogues,
     find_menu_button_index,
     wait_for_scene,
@@ -81,7 +82,10 @@ class TestLevelSelectWithProgress:
         navigate_to_level_select(game_page)
         # Navigate down to select level 0 (down = towards base)
         game_page.keyboard.press('ArrowDown')
-        game_page.wait_for_timeout(150)
+        game_page.wait_for_function("""() => {
+            const scene = window.game.scene.getScene('LevelSelectScene');
+            return scene?.selectedLevel === 0;
+        }""", timeout=3000)
         has_ski = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelSelectScene');
             return scene?.skiBtn?.visible === true;
@@ -124,15 +128,10 @@ class TestLevelSelectWithProgress:
         dismiss_dialogues(game_page)
         # Simulate launch origin as if started from LevelSelectScene
         game_page.evaluate("window.__launchOrigin = 'LevelSelectScene'")
-        game_page.wait_for_timeout(300)
         game_page.keyboard.press('Escape')
         wait_for_scene(game_page, 'PauseScene', timeout=5000)
         wait_for_input_ready(game_page, 'PauseScene')
-        idx = find_menu_button_index(game_page, 'quit', 'PauseScene')
-        game_page.evaluate(f"""() => {{
-            const scene = window.game.scene.getScene('PauseScene');
-            scene.menuButtons[{idx}].emit('pointerdown');
-        }}""")
+        click_menu_by_key(game_page, 'quit', 'PauseScene')
         wait_for_scene(game_page, 'LevelSelectScene', timeout=10000)
         assert_scene_active(game_page, 'LevelSelectScene')
 
@@ -147,11 +146,17 @@ class TestLevelSelectKeyboardNav:
         initial = get_selected_level(game_page)
         # ArrowUp moves towards summit (higher level index)
         game_page.keyboard.press('ArrowUp')
-        game_page.wait_for_timeout(150)
+        game_page.wait_for_function(f"""() => {{
+            const scene = window.game.scene.getScene('LevelSelectScene');
+            return scene?.selectedLevel !== {initial};
+        }}""", timeout=3000)
         after_up = get_selected_level(game_page)
         assert after_up != initial, f"Selection should change after ArrowUp: was {initial}, still {after_up}"
         game_page.keyboard.press('ArrowDown')
-        game_page.wait_for_timeout(150)
+        game_page.wait_for_function(f"""() => {{
+            const scene = window.game.scene.getScene('LevelSelectScene');
+            return scene?.selectedLevel === {initial};
+        }}""", timeout=3000)
         after_down = get_selected_level(game_page)
         assert after_down == initial, f"Selection should return after ArrowDown: expected {initial}, got {after_down}"
         assert_no_error_message(game_page)
@@ -166,6 +171,9 @@ class TestMenuScrolling:
         game_page.set_viewport_size({"width": 915, "height": 412})
         game_page.evaluate("window.game.scene.start('MenuScene')")
         wait_for_scene(game_page, 'MenuScene')
-        game_page.wait_for_timeout(500)
+        game_page.wait_for_function("""() => {
+            const scene = window.game?.scene?.getScene('MenuScene');
+            return scene?.menuButtons?.length > 0;
+        }""", timeout=5000)
         assert_scene_active(game_page, 'MenuScene')
         assert_no_error_message(game_page)
