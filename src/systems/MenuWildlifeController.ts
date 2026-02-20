@@ -34,7 +34,9 @@ interface MenuAnimal {
 export class MenuWildlifeController {
   private scene: Phaser.Scene;
   private snowflakes: { rect: Phaser.GameObjects.Rectangle; speed: number; wobbleOffset: number }[] = [];
-  private menuAnimals: MenuAnimal[] = [];
+  private _menuAnimals: MenuAnimal[] = [];
+  /** Read-only access for external depth/position adjustments */
+  get menuAnimals(): readonly MenuAnimal[] { return this._menuAnimals; }
   perchSpots: { x: number; y: number }[] = [];
   private menuTracks: { image: Phaser.GameObjects.Image; age: number }[] = [];
   private readonly MENU_TRACK_LIFETIME = 12000;
@@ -47,6 +49,7 @@ export class MenuWildlifeController {
   behindBackdrop = false;
   private weatherConfig = { isNight: false, weather: 'clear' };
   private generatedTexKeys: string[] = [];
+  birdHalfH = 4;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -67,13 +70,13 @@ export class MenuWildlifeController {
   }
 
   destroy(): void {
-    for (const a of this.menuAnimals) {
+    for (const a of this._menuAnimals) {
       if (a.burrowMask) a.sprite.clearMask(true);
       if (a.burrowMaskShape) a.burrowMaskShape.destroy();
       if (a.sleepZzz) a.sleepZzz.forEach(z => z.destroy());
       a.sprite.destroy();
     }
-    this.menuAnimals.length = 0;
+    this._menuAnimals.length = 0;
     for (const t of this.menuTracks) t.image.destroy();
     this.menuTracks.length = 0;
     for (const key of this.generatedTexKeys) {
@@ -146,7 +149,7 @@ export class MenuWildlifeController {
     // Fallback to active pointer if no pressed pointers (mouse hover)
     if (activePointers.length === 0) activePointers.push(this.scene.input.activePointer);
 
-    for (const a of this.menuAnimals) {
+    for (const a of this._menuAnimals) {
       // Sleeping animals: gentle breathing bob, no wandering
       if (a.state === 'sleeping') {
         const bob = Math.sin(time / 800 + a.homeX) * 0.5;
@@ -213,11 +216,11 @@ export class MenuWildlifeController {
     } else if (a.state === 'landing' && a.perchTarget) {
       // Glide toward perch target
       const ldx = a.perchTarget.x - a.x;
-      const ldy = (a.perchTarget.y - 4) - a.y;
+      const ldy = (a.perchTarget.y - this.birdHalfH) - a.y;
       const ldist = Math.sqrt(ldx * ldx + ldy * ldy);
       if (ldist < 4) {
         a.x = a.perchTarget.x;
-        a.y = a.perchTarget.y - 4;
+        a.y = a.perchTarget.y - this.birdHalfH;
         a.state = 'perched';
         a.vx = 0; a.vy = 0;
         a.sprite.setRotation(0);
@@ -439,7 +442,7 @@ export class MenuWildlifeController {
 
     // Soft repulsion: nudge apart from nearby same-species animals
     const minDist = 12;
-    for (const b of this.menuAnimals) {
+    for (const b of this._menuAnimals) {
       if (b === a || b.type !== 'ground' || b.species !== a.species) continue;
       const dx = a.x - b.x;
       const dy = a.y - b.y;
@@ -456,7 +459,7 @@ export class MenuWildlifeController {
 
     // Fox scares nearby ground animals
     if (a.species === 'fox') {
-      for (const prey of this.menuAnimals) {
+      for (const prey of this._menuAnimals) {
         if (prey === a || prey.type !== 'ground' || prey.species === 'fox') continue;
         if (prey.state === 'hiding') continue;
         const fdx = prey.x - a.x;
@@ -545,7 +548,7 @@ export class MenuWildlifeController {
       if (Math.random() < 0.1) {
         const newHomeX = 50 + Math.random() * (this.scene.scale.width - 100);
         const newHomeY = this.snowLineY + 10 + Math.random() * (this.snowBottomY - this.snowLineY - 20);
-        for (const c of this.menuAnimals) {
+        for (const c of this._menuAnimals) {
           if (c.species !== 'chamois') continue;
           c.homeX = newHomeX + (Math.random() - 0.5) * 40;
           c.homeY = newHomeY + (Math.random() - 0.5) * 20;
@@ -565,7 +568,7 @@ export class MenuWildlifeController {
     } else if (a.species === 'fox') {
       let nearestDist = Infinity;
       let huntAngle = 0;
-      for (const prey of this.menuAnimals) {
+      for (const prey of this._menuAnimals) {
         if (prey === a || prey.type !== 'ground' || prey.species === 'fox') continue;
         if (prey.state === 'hiding') continue;
         const d = Math.sqrt((prey.x - a.x) ** 2 + (prey.y - a.y) ** 2);
@@ -619,7 +622,7 @@ export class MenuWildlifeController {
     const sx = width / 1024;
     const s = Math.max(2, 3 * scaleFactor);
     const mtnScale = snowLineY / 600;
-    this.menuAnimals = [];
+    this._menuAnimals = [];
     const { isNight, weather } = this.weatherConfig;
     const isStorm = weather === 'storm';
 
@@ -637,7 +640,7 @@ export class MenuWildlifeController {
     const addGroundAnimal = (img: Phaser.GameObjects.Image, x: number, y: number, rangeX: number, species: string) => {
       const fo = feetOffset(species);
       img.setDepth(5 + (y + fo) * 0.001);
-      this.menuAnimals.push({
+      this._menuAnimals.push({
         sprite: img, x, y, homeX: x, homeY: y,
         vx: 0, vy: 0, wanderTimer: Math.random() * 3000,
         type: 'ground', species,
@@ -704,7 +707,7 @@ export class MenuWildlifeController {
         spriteH: slideDistance,
         feetOffsetY: feetOffset('marmot'),
       };
-      this.menuAnimals.push(animal);
+      this._menuAnimals.push(animal);
     }
 
     // Chamois: small herd of 2-3 (1 sheltering during storms, fewer at night)
@@ -720,7 +723,7 @@ export class MenuWildlifeController {
       cg.setPosition(cx, cy).setDepth(5 + cy * 0.001);
       addGroundAnimal(cg, cx, cy, width * 0.4, 'chamois');
       if (isNight) {
-        const sleeper = this.menuAnimals[this.menuAnimals.length - 1];
+        const sleeper = this._menuAnimals[this._menuAnimals.length - 1];
         sleeper.state = 'sleeping';
         sleeper.sleepZzz = this.createSleepZzz(cx, cy);
       }
@@ -782,7 +785,7 @@ export class MenuWildlifeController {
       const startIdx = ib * 2;
       const startPt = climbPath[startIdx % climbPath.length];
       ibexImg.setPosition(startPt.x, startPt.y);
-      this.menuAnimals.push({
+      this._menuAnimals.push({
         sprite: ibexImg, x: startPt.x, y: startPt.y,
         homeX: startPt.x, homeY: startPt.y,
         vx: 0, vy: 0, wanderTimer: ib * 1500,
@@ -797,6 +800,8 @@ export class MenuWildlifeController {
     const { isNight, weather } = this.weatherConfig;
     const isStorm = weather === 'storm';
     const birdScale = Math.max(1.5, 2 * scaleFactor);
+    const birdHalfH = Math.round((ANIMAL_GRID.bird_perched.h * birdScale + 2) / 2);
+    this.birdHalfH = birdHalfH;
     // Fewer birds in bad weather; at night most are roosting
     const birdCount = isStorm ? 0 : isNight ? 2 : 4 + Math.floor(Math.random() * 4);
     // At night, all birds start perched (roosting)
@@ -810,7 +815,7 @@ export class MenuWildlifeController {
       if (startPerched) {
         const perch = allPerches[i % allPerches.length];
         bx = perch.x;
-        by = perch.y - 4;
+        by = perch.y - birdHalfH;
         state = isNight ? 'sleeping' : 'perched';
         texKey = 'menu_bird_perched';
       } else {
@@ -824,7 +829,7 @@ export class MenuWildlifeController {
       const birdImg = this.scene.add.image(bx, by, texKey).setDepth(birdDepth);
       const initAngle = (Math.random() - 0.5) * Math.PI * 0.8;
       const initSpeed = 6 + Math.random() * 10;
-      this.menuAnimals.push({
+      this._menuAnimals.push({
         sprite: birdImg, x: bx, y: by, homeX: bx, homeY: by,
         vx: state === 'flying' ? Math.cos(initAngle) * initSpeed : 0,
         vy: state === 'flying' ? Math.sin(initAngle) * initSpeed * 0.5 : 0,
@@ -877,7 +882,7 @@ export class MenuWildlifeController {
   /** Animate floating zzz: each "z" rises, grows, fades, then loops */
   private updateSleepZzz(time: number): void {
     const cycleMs = 3000;
-    for (const a of this.menuAnimals) {
+    for (const a of this._menuAnimals) {
       if (a.state !== 'sleeping' || !a.sleepZzz) continue;
       for (const z of a.sleepZzz) {
         const phase = z.getData('phase') as number;

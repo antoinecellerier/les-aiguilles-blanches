@@ -72,6 +72,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private mapTop = 0;
   private mapW = 0;
   private mapH = 0;
+  private landmarkPerches: { x: number; y: number }[] = [];
   private selectedLevel = 0;
   private selectionRing?: Phaser.GameObjects.Graphics;
   private markerNames: Phaser.GameObjects.Text[] = [];
@@ -93,6 +94,7 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.buttonIsCTA = [];
     this.markerNames = [];
     this.markerStars = [];
+    this.landmarkPerches = [];
 
     // --- Shared backdrop: sky, standard mountains, snow ground, trees, wildlife ---
     const isPortrait = height > width;
@@ -106,28 +108,6 @@ export default class LevelSelectScene extends Phaser.Scene {
     const sf = this.backdrop.scaleFactor;
     this.scaleFactor = sf;
     this.markerSize = Math.max(28, Math.round(36 * Math.min(sf, 1.3)));
-
-    // Boost bird depth so they fly in front of the trail map
-    this.children.each((child: Phaser.GameObjects.GameObject) => {
-      if (child instanceof Phaser.GameObjects.Image && child.depth === 11) {
-        child.setDepth(DEPTHS.MENU_UI + 8);
-      }
-    });
-
-    // Override bird perch spots with trail map landmarks
-    if (this.backdrop?.wildlife) {
-      const mt = this.mapTop;
-      const ml = this.mapLeft;
-      const mw = this.mapW;
-      const mh = this.mapH;
-      this.backdrop.wildlife.perchSpots = [
-        { x: ml + mw * 0.50, y: mt + mh * 0.01 - 10 },  // summit cross
-        { x: ml + mw * 0.86, y: mt + mh * 0.50 },        // mid chairlift pylon
-        { x: ml + mw * 0.88, y: mt + mh * 0.72 },        // lower chairlift pylon
-        { x: ml + mw * 0.15, y: mt + mh * 0.75 },        // left tree area
-        { x: ml + mw * 0.70, y: mt + mh * 0.80 },        // right tree area
-      ];
-    }
 
     // --- Header ---
     const { title, backBtn } = createMenuHeader(this, 'levelSelect', () => this.goBack(), sf);
@@ -158,6 +138,61 @@ export default class LevelSelectScene extends Phaser.Scene {
     this.drawLodge(sf);
     this.drawMarkers(progress, sf);
     this.createInfoPanel(width, height, sf);
+
+    // Reposition wildlife to trail map landmarks (must run after draw methods populate landmarkPerches)
+    if (this.backdrop?.wildlife) {
+      const { mapLeft: ml, mapTop: mt, mapW: mw, mapH: mh } = this;
+
+      // Landmark perches from drawMountain (cross arm) and drawChairlift (pylon arms)
+      // Add tree-top perches by finding actual tree images from the backdrop
+      const treePerches: { x: number; y: number }[] = [];
+      this.children.list.forEach(child => {
+        if (child instanceof Phaser.GameObjects.Image && child.texture?.key?.startsWith('_menu_tree_')) {
+          // Trees use setOrigin(0.5, 1) — top is at y - height
+          treePerches.push({ x: child.x, y: child.y - child.height });
+        }
+      });
+      // Pick 2 spread-out trees for variety (first and last)
+      if (treePerches.length >= 2) {
+        this.landmarkPerches.push(treePerches[0], treePerches[treePerches.length - 1]);
+      } else if (treePerches.length === 1) {
+        this.landmarkPerches.push(treePerches[0]);
+      }
+      this.backdrop.wildlife.perchSpots = [...this.landmarkPerches];
+
+      for (const a of this.backdrop.wildlife.menuAnimals) {
+        if (a.type === 'bird') {
+          a.sprite.setDepth(DEPTHS.MENU_UI + 8);
+          if (a.state === 'perched' || a.state === 'sleeping') {
+            const perch = this.backdrop.wildlife.perchSpots[
+              Math.floor(Math.random() * this.backdrop.wildlife.perchSpots.length)
+            ];
+            // Use controller's birdHalfH for consistent offset with landing code
+            const bhh = this.backdrop!.wildlife!.birdHalfH;
+            a.x = perch.x; a.y = perch.y - bhh;
+            a.homeX = perch.x; a.homeY = perch.y - bhh;
+            a.perchTarget = perch;
+            a.sprite.setPosition(a.x, a.y);
+            a.wanderTimer = 5000 + Math.random() * 8000;
+          }
+        } else if (a.type === 'climber' && a.climbPath) {
+          a.sprite.setDepth(DEPTHS.MENU_UI + 3);
+          const peakX = ml + mw * 0.18;
+          const peakY = mt + mh * 0.14;
+          const baseY = mt + mh * 0.60;
+          const halfW = mw * 0.10;
+          for (let ci = 0; ci < a.climbPath.length; ci++) {
+            const t = ci / (a.climbPath.length - 1);
+            const flank = halfW * (0.3 + (ci % 2) * 0.2);
+            a.climbPath[ci] = { x: peakX + flank, y: baseY - t * (baseY - peakY) };
+          }
+          const startPt = a.climbPath[a.climbIndex ?? 0];
+          a.x = startPt.x; a.y = startPt.y;
+          a.homeX = startPt.x; a.homeY = startPt.y;
+          a.sprite.setPosition(a.x, a.y);
+        }
+      }
+    }
 
     // --- Navigation ---
     this.buttonNav = createMenuButtonNav(
@@ -227,6 +262,11 @@ export default class LevelSelectScene extends Phaser.Scene {
     const cs = Math.max(8, Math.round(12 * Math.min(scale, 1.2)));
     crossG.fillRect(crossX - 2, crossY - cs, 4, cs * 2 + 3);
     crossG.fillRect(crossX - Math.round(cs * 0.7), crossY - Math.round(cs * 0.3), Math.round(cs * 1.4), 4);
+    // Bird perch: right arm tip, on top of the 4px-thick bar
+    this.landmarkPerches.push({
+      x: crossX + Math.round(cs * 0.7),
+      y: crossY - Math.round(cs * 0.3),
+    });
   }
 
   private drawPeak(g: Phaser.GameObjects.Graphics, peakX: number, peakY: number, baseY: number,
@@ -485,6 +525,11 @@ export default class LevelSelectScene extends Phaser.Scene {
       // Cross-arm
       const armW = Math.round(10 * s);
       g.fillRect(px - Math.round(armW / 2), py, armW, Math.max(3, Math.round(3 * s)));
+      // Bird perch on cross-arm tip (skip end pylons 0 and 3 — obscured by stations)
+      if (i === 1 || i === 2) {
+        const side = i === 1 ? 1 : -1;
+        this.landmarkPerches.push({ x: px + side * Math.round(armW / 2), y: py });
+      }
     }
 
     // Gondola cars — larger and more visible
@@ -523,7 +568,7 @@ export default class LevelSelectScene extends Phaser.Scene {
   private drawLodge(scale: number): void {
     const g = this.add.graphics().setDepth(DEPTHS.MENU_UI - 1);
     const s = Math.min(scale, 1.2);
-    const bx = this.mapLeft + this.mapW * 0.42;
+    const bx = this.mapLeft + this.mapW * 0.14;
     const by = this.mapTop + this.mapH * 0.90;
     const bw = Math.round(30 * s);
     const bh = Math.round(18 * s);
@@ -751,6 +796,10 @@ export default class LevelSelectScene extends Phaser.Scene {
   update(time: number, delta: number): void {
     this.gamepadNav?.update(delta);
     this.backdrop?.wildlife.update(time, delta);
+    // Re-boost climber depth after wildlife update resets it
+    for (const a of this.backdrop?.wildlife.menuAnimals ?? []) {
+      if (a.type === 'climber') a.sprite.setDepth(DEPTHS.MENU_UI + 3);
+    }
   }
 
   private shutdown(): void {
