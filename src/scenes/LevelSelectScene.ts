@@ -593,17 +593,19 @@ export default class LevelSelectScene extends Phaser.Scene {
     bg.fillStyle(0xffd700, 0.5);
     bg.fillRect(0, panelY, width, 2);
 
-    const nameY = panelY + Math.round(panelH * 0.18);
-    const detailY = panelY + Math.round(panelH * 0.50);
-    const btnY = panelY + Math.round(panelH * 0.50);
-    const leftX = Math.round(width * 0.04);
+    const pad = Math.round(width * 0.04);
+    const nameY = panelY + Math.round(panelH * 0.12);
+    const fullTextW = width - pad * 2;
 
-    this.infoName = this.add.text(leftX, nameY, '', {
+    // Row 1: piste name — full width
+    this.infoName = this.add.text(pad, nameY, '', {
       fontFamily: THEME.fonts.family, fontSize: Math.round(14 * ts) + 'px',
       fontStyle: 'bold', color: THEME.colors.accent,
+      wordWrap: { width: fullTextW, useAdvancedWrap: true },
     }).setDepth(DEPTHS.MENU_UI + 1);
 
-    this.infoDetails = this.add.text(leftX, detailY, '', {
+    // Row 2: stats left, buttons right — positioned dynamically in updateInfoPanel
+    this.infoDetails = this.add.text(pad, 0, '', {
       fontFamily: THEME.fonts.family, fontSize: Math.max(9, Math.round(10 * ts)) + 'px',
       color: THEME.colors.textSecondary,
     }).setDepth(DEPTHS.MENU_UI + 1);
@@ -613,11 +615,11 @@ export default class LevelSelectScene extends Phaser.Scene {
     const btnPadX = Math.round(12 * ts);
     const btnPadY = Math.max(Math.round(8 * ts), Math.round((44 - btnFont) / 2));
     const btnRightX = Math.round(width * 0.96);
-    this.groomBtn = this.add.text(btnRightX, btnY, t('groom') || 'Groom', {
+    this.groomBtn = this.add.text(btnRightX, 0, t('groom') || 'Groom', {
       fontFamily: THEME.fonts.family, fontSize: btnFont + 'px',
       color: '#ffffff', backgroundColor: THEME.colors.buttonCTAHex,
       padding: { x: btnPadX, y: btnPadY },
-    }).setOrigin(1, 0.5).setDepth(DEPTHS.MENU_UI + 1).setInteractive({ useHandCursor: true });
+    }).setOrigin(1, 0).setDepth(DEPTHS.MENU_UI + 1).setInteractive({ useHandCursor: true });
     this.groomBtn.on('pointerdown', () => {
       if (this.inputReady && !this.isNavigating && isLevelUnlocked(this.selectedLevel)) {
         playClick(); this.startLevel(this.selectedLevel, 'groom');
@@ -627,11 +629,11 @@ export default class LevelSelectScene extends Phaser.Scene {
     // Ski button (left of Groom)
     const skiLabel = this.resolvedSkiMode === 'snowboard'
       ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
-    this.skiBtn = this.add.text(0, btnY, skiLabel, {
+    this.skiBtn = this.add.text(0, 0, skiLabel, {
       fontFamily: THEME.fonts.family, fontSize: btnFont + 'px',
       color: '#ffffff', backgroundColor: THEME.colors.buttonPrimaryHex,
       padding: { x: btnPadX, y: btnPadY },
-    }).setOrigin(1, 0.5).setDepth(DEPTHS.MENU_UI + 1).setInteractive({ useHandCursor: true }).setVisible(false);
+    }).setOrigin(1, 0).setDepth(DEPTHS.MENU_UI + 1).setInteractive({ useHandCursor: true }).setVisible(false);
     this.skiBtn.on('pointerdown', () => {
       if (this.inputReady && !this.isNavigating && isLevelCompleted(this.selectedLevel)) {
         playClick(); this.startLevel(this.selectedLevel, 'ski');
@@ -649,21 +651,23 @@ export default class LevelSelectScene extends Phaser.Scene {
     const marker = DIFFICULTY_MARKERS[diffKey as keyof typeof DIFFICULTY_MARKERS];
 
     const displayName = level.name
-      ? `${t(level.nameKey)} — ${level.name}` : t(level.nameKey) || level.nameKey;
+      ? `${t(level.nameKey)}\u00A0—\u00A0${level.name}` : t(level.nameKey) || level.nameKey;
     this.infoName?.setText(`${marker?.symbol ?? ''} ${displayName}`);
 
     if (!unlocked) {
-      let lockMsg = `🔒 ${t('locked') || 'Locked'}`;
+      let lockMsg = `🔒\u00A0${t('locked') || 'Locked'}`;
       if (levelIdx > 0) {
         const prevFull = t(LEVELS[levelIdx - 1].nameKey) || LEVELS[levelIdx - 1].nameKey;
         const prevShort = prevFull.includes(' - ') ? prevFull.split(' - ').slice(1).join(' - ') : prevFull;
-        lockMsg += `  ·  ▶ ${prevShort}`;
+        lockMsg += `  ·  ▶\u00A0${prevShort.replace(/ /g, '\u00A0')}`;
       }
       this.infoDetails?.setText(lockMsg);
       this.groomBtn?.setVisible(false);
       this.skiBtn?.setVisible(false);
       Accessibility.announce(`${displayName}. ${t('locked') || 'Locked'}`);
     } else {
+      // Use non-breaking spaces within items so word wrap only breaks at · separators
+      const nbsp = '\u00A0';
       const parts: string[] = [];
       parts.push(diffKey.charAt(0).toUpperCase() + diffKey.slice(1));
       if (level.targetCoverage) parts.push(`${level.targetCoverage}%`);
@@ -673,7 +677,7 @@ export default class LevelSelectScene extends Phaser.Scene {
       if (completed && stats) {
         parts.push('⭐'.repeat(stats.bestStars) + '☆'.repeat(3 - stats.bestStars));
         if (stats.bestTime) {
-          parts.push(`Best ${formatTime(stats.bestTime)}`);
+          parts.push(`Best${nbsp}${formatTime(stats.bestTime)}`);
         }
       }
       this.infoDetails?.setText(parts.join('  ·  '));
@@ -696,6 +700,50 @@ export default class LevelSelectScene extends Phaser.Scene {
         this.skiBtn?.setVisible(false);
       }
       Accessibility.announce(`${marker?.symbol ?? ''} ${displayName}. ${diffKey}`);
+    }
+
+    // Layout: wide screens put buttons on name row, narrow screens use 2 rows
+    const width = this.game.scale.width;
+    const btnTotalW = (this.groomBtn?.visible ? (this.groomBtn?.width ?? 0) : 0)
+      + (this.skiBtn?.visible ? (this.skiBtn?.width ?? 0) + 8 : 0);
+    const nameW = this.infoName?.width ?? 0;
+    const pad = this.infoDetails?.x ?? Math.round(width * 0.04);
+    const wideMode = (nameW + btnTotalW + 24) < (width - pad * 2);
+
+    const height = this.game.scale.height;
+    const panelH = Math.round(Math.max(height * 0.16, 80));
+    const panelY = height - panelH;
+
+    if (wideMode && this.groomBtn?.visible) {
+      // Wide: buttons vertically centered on name row, details below
+      const nameH = this.infoName?.height ?? 16;
+      const btnH = this.groomBtn?.height ?? 0;
+      const nameMidY = (this.infoName?.y ?? 0) + nameH / 2;
+      const minBtnY = panelY + Math.round(panelH * 0.12);
+      const btnY = Math.max(minBtnY, nameMidY - btnH / 2);
+      this.groomBtn?.setY(btnY);
+      this.skiBtn?.setY(btnY);
+      const detailY = (this.infoName?.y ?? 0) + nameH + 2;
+      this.infoDetails?.setY(detailY);
+      const fullW = width - pad * 2;
+      this.infoDetails?.setStyle({ wordWrap: { width: fullW, useAdvancedWrap: true } });
+    } else {
+      // Narrow: name row 1, details + buttons row 2
+      const row2Y = (this.infoName?.y ?? 0) + (this.infoName?.height ?? 16) + 4;
+      this.infoDetails?.setY(row2Y);
+      this.groomBtn?.setY(row2Y);
+      this.skiBtn?.setY(row2Y);
+      if (this.infoDetails && this.groomBtn?.visible) {
+        const leftmostBtn = this.skiBtn?.visible
+          ? (this.skiBtn.x - this.skiBtn.width) : (this.groomBtn.x - this.groomBtn.width);
+        const maxTextW = leftmostBtn - this.infoDetails.x - 8;
+        if (maxTextW > 0) {
+          this.infoDetails.setStyle({ wordWrap: { width: maxTextW, useAdvancedWrap: true } });
+        }
+      } else if (this.infoDetails) {
+        const fullW = width - pad * 2;
+        this.infoDetails.setStyle({ wordWrap: { width: fullW, useAdvancedWrap: true } });
+      }
     }
   }
 
