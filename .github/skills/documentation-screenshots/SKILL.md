@@ -5,102 +5,82 @@ description: Captures game screenshots for README and documentation using Playwr
 
 ## Documentation Screenshot Capture
 
-Captures 4 screenshots at 1280×720 for the README: menu, gameplay, level complete, and ski trick.
+Captures 6 screenshots at 1280×720 + 1 Open Graph image at 1200×630.
 
-### Prerequisites
+### Quick Start
 
-- Vite dev server running (`npm run dev`)
-- Playwright installed (`.venv/bin/activate`)
+```bash
+./capture-screenshots.sh                    # All 7 images
+./capture-screenshots.sh --only menu,og     # Specific captures
+./capture-screenshots.sh --only gameplay    # Single capture
+```
+
+Requires dev server running (`./dev.sh`) and Playwright installed (`.venv/`).
 
 ### Screenshot Specifications
 
-All screenshots must be **1280×720** (matching `viewport={'width': 1280, 'height': 720}`).
+All screenshots are **1280×720** except OG which is **1200×630**.
 
 | File | Scene | What to show |
 |------|-------|-------------|
-| `assets/screenshot-menu.png` | MenuScene | Title screen with mountain scenery and wildlife |
-| `assets/screenshot-gameplay.png` | GameScene | Groomer mid-piste with visible grooming progress (30-50% coverage), HUD, obstacles |
-| `assets/screenshot-level.png` | LevelCompleteScene | Win screen with realistic stats (coverage, time, stars, bonus objectives) |
-| `assets/screenshot-ski.png` | SkiRunScene | Skier doing a trick on a park feature (kicker), with trick name text visible |
+| `assets/screenshot-menu.png` | MenuScene | Night + light snow, title with mountain scenery |
+| `assets/screenshot-trailmap.png` | LevelSelectScene | Trail map with full progress, colored run paths |
+| `assets/screenshot-dailyruns.png` | DailyRunsScene | Daily runs mode with procedural generation |
+| `assets/screenshot-gameplay.png` | GameScene | Groomer mid-piste with adjacent grooming passes, realistic HUD |
+| `assets/screenshot-level.png` | LevelCompleteScene | Win screen with stars and stats |
+| `assets/screenshot-ski.png` | SkiRunScene | Skier doing a 720 trick on a park kicker |
+| `public/og-image.png` | MenuScene | Clear daytime menu (intentionally light weather) |
 
-### Capture Techniques
+### Implementation
 
-#### Menu screenshot
-Simply wait for MenuScene and screenshot. No interaction needed.
+The capture script is `scripts/capture_screenshots.py`. Key techniques:
 
-#### Gameplay screenshot
-1. Start game → skip to level 4+ via `transitionToLevel()`
-2. Dismiss dialogues programmatically
-3. Auto-groom upper portion (~40-50%) via direct `snowGrid` manipulation for visible groomed/ungroomed contrast
-4. Teleport groomer to the groomed/ungroomed boundary (~45% down)
-5. Drive briefly (0.5-1s) while grooming for "in action" feel
-6. Screenshot while Space (groom) is still held
+#### snowGrid grooming (gameplay & level complete)
+
+Cells have `{ groomed, groomable, quality }` — **no `.tile` property**. The piste uses a DynamicTexture. To groom programmatically:
 
 ```javascript
-// Auto-groom pattern (run in page.evaluate)
 const gs = window.game.scene.getScene('GameScene');
-const midY = Math.floor(gs.level.height * 0.50);
-for (let y = 0; y < midY; y++) {
-    for (let x = 0; x < gs.level.width; x++) {
-        const cell = gs.snowGrid[y]?.[x];
-        if (cell?.groomable && !cell.groomed && Math.random() < 0.70) {
-            cell.groomed = true;
-            cell.tile.setTexture('snow_groomed');
-            gs.groomedCount++;
-        }
-    }
-}
-// Teleport groomer to boundary
-const path = gs.geometry?.pistePath?.[midY];
-const centerX = path ? path.centerX * gs.tileSize : gs.groomer.x;
-gs.groomer.setPosition(centerX, midY * gs.tileSize);
+const texKey = 'snow_groomed' + gs.nightSfx;
+// Set cell state AND stamp the visual texture
+cell.groomed = true;
+cell.quality = 0.8;
+gs.groomedCount++;
+gs.stampPisteTile(texKey, x, y);
 ```
 
-#### Level complete screenshot
-1. Skip to a mid-game level (4-6)
-2. Auto-groom to ~90% coverage
-3. Set realistic time: `gs.timeRemaining = gs.level.timeLimit - 245` (~4 min used)
-4. Set fuel usage: `gs.fuelUsed = 40`
-5. Call `gs.gameOver(true)` to trigger win with realistic stats
+Never use `cell.tile.setTexture()` — cells don't have tiles.
 
-#### Ski trick screenshot
-1. Force ski mode: `localStorage.setItem('snowGroomer_skiMode', 'ski')`
-2. Skip to level 3 (Air Zone — has park features)
-3. Press `K` to auto-groom and launch SkiRunScene
-4. Override `Math.random` to force a specific trick (e.g., 720):
-   ```javascript
-   const origRandom = Math.random;
-   let callCount = 0;
-   Math.random = function() {
-       callCount++;
-       if (callCount === 1) return 0.3; // index 1 = 720
-       return origRandom();
-   };
-   setTimeout(() => { Math.random = origRandom; }, 2000);
-   ```
-5. Teleport skier to kicker hitbox edge, set `currentSpeed = 25`
-6. Press ArrowDown, poll for `trickActive === true`
-7. On trigger: **pause the scene** (`ski.scene.pause()`) — this stops `update()` which otherwise resets depth via `yDepth()`
-8. Pose the skier:
-   - Move up: `ski.skier.y -= tileSize * 1.5` (airborne above kicker)
-   - Scale: `setScale(baseScale * 1.5)` (full trick scale)
-   - Rotate: `setAngle(430)` (mid-720 spin)
-   - Depth: `setDepth(150)` (renders above kicker — only works with scene paused)
-9. Fix popup text: `setAlpha(1)`, reposition above skier, `setDepth(200)`
+#### Menu weather control
+
+Set `currentLevel=99` (beyond LEVELS array) so `init()` uses `randomMood`. Then monkey-patch `pickRandomMenuMood()`:
+
+```javascript
+menu.pickRandomMenuMood = () => ({ isNight: true, weather: 'light_snow' });
+menu.randomMood = null;
+menu.scene.restart();
+```
+
+#### Grooming pattern (gameplay)
+
+Uses adjacent top-down passes with smooth sine-wave drift (like a real groomer). Pass width matches `GROOM_WIDTH` config (baseRadius=2 → 5 tiles). 3 full-height passes + 1 partial pass in progress. Groomer positioned at the tip of the partial pass.
+
+#### Ski trick
+
+Pause the scene after trick triggers — `update()` resets depth every frame via `yDepth()`. Pose skier airborne above kicker with mid-spin angle.
 
 ### Key Gotchas
 
-- **Scene must be paused** for ski trick depth fix — `update()` resets depth every frame via `yDepth()`
-- **`transitionToLevel()`** requires GameScene to already be active — start game first via menu
+- **`stampPisteTile(texKey, x, y)`** — only way to update piste visuals (DynamicTexture canvas)
+- **Scene must be paused** for ski trick depth fix
+- **HUD reads via GAME_STATE event** — set `fuel`/`stamina`/`timeRemaining` on GameScene, then wait ≥1 frame for HUD to update (don't pause immediately)
+- **Setting `timeRemaining` too low** triggers instant game over on next frame
 - **Tutorial (level 0)** has extensive dialogue — use level 1+ for clean screenshots
-- **K shortcut** goes directly to SkiRunScene (not through LevelCompleteScene)
-- **Ski run length** varies by level — tutorial is very short, level 3+ gives enough time
-- **Trick text fades** via tween (1200ms) — pause scene immediately to keep it bright
-- **Trick list** (kicker): `[360, 720, Backflip, Frontflip, Method]` — Math.random index 0-4
-- **Skier texture** controlled by `snowGroomer_skiMode` localStorage key — set before starting game
+- **Snow particles** need ~5s warm-up delay before menu screenshot
+- **OG image** uses separate browser context at 1200×630 — wrap in try/finally
 
 ### After Capturing
 
-1. Verify all 4 images are 1280×720
-2. `git add assets/screenshot-*.png`
-3. Update alt text in README.md if screenshot content changed significantly
+1. Verify images: 6 at 1280×720, OG at 1200×630
+2. `git add assets/screenshot-*.png public/og-image.png`
+3. Update README.md alt text if screenshot content changed significantly

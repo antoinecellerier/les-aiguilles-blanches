@@ -32,6 +32,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Documentation screenshots & OG image** — Automated Playwright capture script (`capture-screenshots.sh`) for 6 doc screenshots (menu, gameplay, trail map, daily runs, level complete, ski trick) + Open Graph image. README updated to 3×2 screenshot grid.
+
 - ✅ **E2E runtime optimization defaults** — Added `--e2e-only` mode to `run-tests.sh`, added optional screenshot write flag (`--screenshots`), switched pytest parallel scheduling to `--dist=worksteal` with 7 workers by default, added duration-aware E2E ordering from persisted history (`.pytest-e2e-durations.json`), and reused module-scoped Playwright contexts in heavy suites (`resize_touch`, `accessibility_full`, `daily_runs`) while keeping per-test page/storage isolation.
 
 - ✅ **Scene key constant migration** — Replaced hardcoded scene-name string literals across scene constructors, launches/stops, and transitions with `SCENE_KEYS` (Boot/Menu/Pause/Settings/Game/HUD/Dialogue/SkiRun/LevelComplete/LevelSelect/DailyRuns/Credits/Prologue). Reduces typo risk and centralizes routing keys.

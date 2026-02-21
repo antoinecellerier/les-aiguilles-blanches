@@ -3,8 +3,12 @@
 **[▶️ Play Online](https://cellerier.net/les-aiguilles-blanches/)** — No installation required!
 
 <p align="center">
-  <img src="assets/screenshot-menu.png" alt="Main menu with alpine scenery" width="45%">
-  <img src="assets/screenshot-gameplay.png" alt="Grooming a red piste with dialogue" width="45%">
+  <img src="assets/screenshot-menu.png" alt="Night menu with alpine scenery and snow" width="45%">
+  <img src="assets/screenshot-gameplay.png" alt="Grooming a blue piste with corduroy tracks" width="45%">
+</p>
+<p align="center">
+  <img src="assets/screenshot-trailmap.png" alt="Trail map with colored run paths across three peaks" width="45%">
+  <img src="assets/screenshot-dailyruns.png" alt="Daily Runs mode with procedural piste generation" width="45%">
 </p>
 <p align="center">
   <img src="assets/screenshot-level.png" alt="Run complete with trophy and stars" width="45%">
