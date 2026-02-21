@@ -56,4 +56,10 @@ describe('Level unlock logic', () => {
     expect(isLevelUnlocked(3)).toBe(true);  // level 2 was completed
     expect(isLevelUnlocked(4)).toBe(false); // level 3 was never completed
   });
+
+  it('clearProgress resets one-shot dialogue flags', () => {
+    localStorage.setItem('snowGroomer_marieIntroSeen', '1');
+    clearProgress();
+    expect(localStorage.getItem('snowGroomer_marieIntroSeen')).toBeNull();
+  });
 });
