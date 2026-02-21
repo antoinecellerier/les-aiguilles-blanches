@@ -516,11 +516,12 @@ export default class HUDScene extends Phaser.Scene {
     
     if (startHidden) {
       this.touchControlsContainer.setVisible(false);
+      this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, { y: this.touchControlsTopEdge, visible: false });
       onTouchAvailable(() => {
         if (this.touchControlsContainer) {
           this.touchControlsContainer.setVisible(true);
           // Re-emit so DialogueScene repositions above controls
-          this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.touchControlsTopEdge);
+          this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, { y: this.touchControlsTopEdge, visible: true });
         }
       });
     }
@@ -544,7 +545,7 @@ export default class HUDScene extends Phaser.Scene {
     this.touchControlsTopEdge = joystickTopEdge - margin;
 
     // Notify GameScene so it can offset the camera to keep groomer above controls
-    this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.touchControlsTopEdge);
+    this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, { y: this.touchControlsTopEdge, visible: true });
 
     // Joystick base (outer circle) — beveled retro style
     this.joystickBase = this.add.circle(joystickX, joystickY, joystickRadius, 0x222222, alpha * 0.7)
@@ -650,7 +651,7 @@ export default class HUDScene extends Phaser.Scene {
       onTouchAvailable(() => {
         if (this.touchControlsContainer) {
           this.touchControlsContainer.setVisible(true);
-          this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.touchControlsTopEdge);
+          this.game.events.emit(GAME_EVENTS.TOUCH_CONTROLS_TOP, { y: this.touchControlsTopEdge, visible: true });
         }
       });
     }

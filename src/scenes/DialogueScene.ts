@@ -3,6 +3,7 @@ import { t, Accessibility } from '../setup';
 import { drawPortrait } from '../utils/characterPortraits';
 import { isConfirmPressed, isBackPressed, getMappingFromGamepad } from '../utils/gamepad';
 import { getMovementKeysString, getGroomKeyName, getWinchKeyName } from '../utils/keyboardLayout';
+import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
 import { THEME } from '../config/theme';
 import { BALANCE, DEPTHS } from '../config/gameConfig';
 import { SCENE_KEYS } from '../config/sceneKeys';
@@ -58,6 +59,10 @@ export default class DialogueScene extends Phaser.Scene {
   private currentBoxHeight = 130;
   private countdownBar: Phaser.GameObjects.Rectangle | null = null;
 
+  // Cached touch controls state (from TOUCH_CONTROLS_TOP events)
+  private touchControlsY = 0;
+  private touchControlsVisible = false;
+
   // Typewriter state
   public fullText = '';
   private typewriterTimer: Phaser.Time.TimerEvent | null = null;
@@ -83,34 +88,18 @@ export default class DialogueScene extends Phaser.Scene {
     const height = this.cameras.main.height;
     const defaultY = height - this.currentBoxHeight; // Default position without touch controls
     
-    if (!this.areTouchControlsVisible()) {
+    if (!this.touchControlsVisible) {
       return defaultY;
     }
     
-    // Get touch controls top edge from HUDScene
-    const hudScene = this.scene.get(SCENE_KEYS.HUD) as { getTouchControlsTopEdge?: () => number } | null;
-    if (hudScene?.getTouchControlsTopEdge) {
-      const touchTop = hudScene.getTouchControlsTopEdge();
-      // Position dialogue so its bottom edge (Y + boxHeight/2) is above touch controls
-      const y = touchTop - this.currentBoxHeight / 2;
-      return y;
-    }
-    
-    return defaultY;
+    // Position dialogue so its bottom edge (Y + boxHeight/2) is above touch controls
+    const y = this.touchControlsY - this.currentBoxHeight / 2;
+    return y;
   }
   
   // Get starting Y position (slightly below show position for animation)
   private getDialogueY(): number {
     return this.getDialogueShowY() + 20;
-  }
-
-  /** Reposition dialogue when touch controls appear/change. */
-  private onTouchControlsChanged(): void {
-    if (this.isShowing && this.container) {
-      // Kill show tween so it doesn't override the repositioned Y
-      this.tweens.killTweensOf(this.container);
-      this.container.setY(this.getDialogueShowY());
-    }
   }
 
   private resizeDialogueBox(newHeight: number): void {
@@ -129,10 +118,15 @@ export default class DialogueScene extends Phaser.Scene {
     if (this.portraitGraphics) this.portraitGraphics.setY((newHeight - oldH) / 4);
   }
   
-  // Check if HUDScene's touch controls are currently visible
-  private areTouchControlsVisible(): boolean {
-    const hudScene = this.scene.get(SCENE_KEYS.HUD) as { touchControlsContainer?: Phaser.GameObjects.Container } | null;
-    return hudScene?.touchControlsContainer?.visible === true;
+  /** Reposition dialogue when touch controls appear/change. */
+  private onTouchControlsChanged(payload: { y: number; visible: boolean }): void {
+    this.touchControlsY = payload.y;
+    this.touchControlsVisible = payload.visible;
+    if (this.isShowing && this.container) {
+      // Kill show tween so it doesn't override the repositioned Y
+      this.tweens.killTweensOf(this.container);
+      this.container.setY(this.getDialogueShowY());
+    }
   }
 
   // Saved state for resize restart
@@ -172,6 +166,10 @@ export default class DialogueScene extends Phaser.Scene {
 
     // Reposition dialogue when touch controls appear mid-game (Firefox desktop)
     this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsChanged, this);
+    // Listen for dialogue commands from other scenes (replaces direct scene.get coupling)
+    this.game.events.on(GAME_EVENTS.SHOW_DIALOGUE, this.onShowDialogue, this);
+    this.game.events.on(GAME_EVENTS.SHOW_COUNTDOWN, this.onShowCountdown, this);
+    this.game.events.on(GAME_EVENTS.DISMISS_ALL_DIALOGUE, this.dismissAllDialogue, this);
     // Exclude top-right corner (200x200) where HUD buttons are located
     
     // Create hit zone that covers most of screen except top-right button area
@@ -333,10 +331,34 @@ export default class DialogueScene extends Phaser.Scene {
     }
   }
 
+  /** Handle SHOW_DIALOGUE event from GameScene/HazardSystem */
+  private onShowDialogue(key: string, speaker?: string): void {
+    this.showDialogue(key, speaker);
+  }
+
+  /** Handle SHOW_COUNTDOWN event from GameScene */
+  private onShowCountdown(durationMs: number): void {
+    this.showCountdown(durationMs);
+  }
+
   showDialogue(key: string, speaker?: string): void {
     if (!this.dialogueText || !this.dialogueText.active) return;
-    let text = t(key);
-    if (!text || text === key) return;
+
+    // Resolve input-variant key: prefer gamepad/touch-specific text when available
+    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
+    const hasTouch = detectTouch();
+    const isTouchOnly = isMobile() && hasTouch && !hasGamepad;
+    let resolvedKey = key;
+    if (hasGamepad) {
+      const gk = key + 'Gamepad';
+      if (t(gk, { probe: true }) !== gk) resolvedKey = gk;
+    } else if (isTouchOnly) {
+      const tk = key + 'Touch';
+      if (t(tk, { probe: true }) !== tk) resolvedKey = tk;
+    }
+
+    let text = t(resolvedKey);
+    if (!text || text === resolvedKey) return;
 
     // Replace dynamic key placeholders
     text = text.replace('{keys}', getMovementKeysString());
@@ -439,6 +461,7 @@ export default class DialogueScene extends Phaser.Scene {
 
     const dialogue = this.dialogueQueue.shift()!;
     this.isShowing = true;
+    this.game.events.emit(GAME_EVENTS.DIALOGUE_ACTIVE, true);
 
     // Kill any hide tween in progress to prevent race conditions
     this.tweens.killTweensOf(this.container);
@@ -588,6 +611,13 @@ export default class DialogueScene extends Phaser.Scene {
   private hideDialogue(): void {
     this.isShowing = false;
     this.lastDismissedAt = Date.now();
+    // Emit DIALOGUE_ACTIVE:false after 200ms cooldown (matches isDialogueShowing logic
+    // that prevents ESC from both dismissing dialogue and triggering pause)
+    this.time.delayedCall(200, () => {
+      if (!this.isShowing) {
+        this.game.events.emit(GAME_EVENTS.DIALOGUE_ACTIVE, false);
+      }
+    });
     this.isTyping = false;
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();
@@ -645,6 +675,9 @@ export default class DialogueScene extends Phaser.Scene {
   shutdown(): void {
     this.resizeManager?.destroy();
     this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsChanged, this);
+    this.game.events.off(GAME_EVENTS.SHOW_DIALOGUE, this.onShowDialogue, this);
+    this.game.events.off(GAME_EVENTS.SHOW_COUNTDOWN, this.onShowCountdown, this);
+    this.game.events.off(GAME_EVENTS.DISMISS_ALL_DIALOGUE, this.dismissAllDialogue, this);
     this.input.keyboard?.removeAllListeners();
     if (this.typewriterTimer) {
       this.typewriterTimer.destroy();

@@ -45,7 +45,7 @@ export const GAME_EVENTS = {
   SKIP_LEVEL: 'skipLevel',
   /** HUDScene → GameScene: start ski/snowboard reward run (dev shortcut) */
   START_SKI_RUN: 'startSkiRun',
-  /** HUDScene → GameScene: top edge of touch controls in screen pixels */
+  /** HUDScene → GameScene/DialogueScene: touch controls layout { y: number, visible: boolean } */
   TOUCH_CONTROLS_TOP: 'touchControlsTop',
   /** SettingsScene → HUDScene: accessibility settings changed, redraw needed */
   ACCESSIBILITY_CHANGED: 'accessibilityChanged',
@@ -55,8 +55,14 @@ export const GAME_EVENTS = {
   MUTE_CHANGED: 'muteChanged',
   /** DialogueScene → GameScene: all dialogues dismissed via ESC/B (not advanced) */
   DIALOGUE_DISMISSED: 'dialogueDismissed',
-  /** HazardSystem → GameScene: show a dialogue by key */
+  /** DialogueScene → GameScene: dialogue visibility changed (active: boolean) */
+  DIALOGUE_ACTIVE: 'dialogueActive',
+  /** GameScene/HazardSystem → DialogueScene: show a dialogue by key + optional speaker */
   SHOW_DIALOGUE: 'showDialogue',
+  /** GameScene → DialogueScene: show countdown bar (durationMs: number) */
+  SHOW_COUNTDOWN: 'showCountdown',
+  /** GameScene → DialogueScene: dismiss all queued dialogues */
+  DISMISS_ALL_DIALOGUE: 'dismissAllDialogue',
   /** HazardSystem → GameScene: trigger game over (won: boolean, reason: string) */
   HAZARD_GAME_OVER: 'hazardGameOver',
 } as const;

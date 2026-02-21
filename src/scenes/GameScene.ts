@@ -8,7 +8,6 @@ import { getString, setString } from '../utils/storage';
 import { saveProgress, getSavedProgress } from '../utils/gameProgress';
 import { isConfirmPressed, isGamepadButtonPressed, captureGamepadButtons, getMappingFromGamepad, loadGamepadBindings, type GamepadBindings } from '../utils/gamepad';
 import { resetGameScenes } from '../utils/sceneTransitions';
-import { hasTouch as detectTouch, isMobile } from '../utils/touchDetect';
 import { GAME_EVENTS, type GameStateEvent, type TouchInputEvent } from '../types/GameSceneInterface';
 import { WeatherSystem } from '../systems/WeatherSystem';
 import { HazardSystem } from '../systems/HazardSystem';
@@ -27,7 +26,6 @@ import { SeededRNG, codeToSeed } from '../utils/seededRNG';
 import { setGroomedTiles } from '../utils/skiRunState';
 import { NIGHT_SUFFIX, type ColorTransform, dayColors, nightColors } from '../utils/nightPalette';
 import { cullOffscreenImages, emptyCullBounds, type CullBounds } from '../utils/cullImages';
-import DialogueScene from './DialogueScene';
 
 /** Normalize angle difference to [-π, π] range */
 function normalizeAngle(a: number): number {
@@ -176,14 +174,16 @@ export default class GameScene extends Phaser.Scene {
   // Bound event handlers for clean game.events.off() removal
   private boundTouchHandler = (data: TouchInputEvent) => { this.touchInput = data; };
   private boundPauseHandler = () => {
-    const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-    if (!dlg?.isDialogueShowing()) this.pauseGame();
+    if (!this.dialogueActive) this.pauseGame();
   };
   private boundResumeHandler = () => { this.resumeGame(); };
   private boundSkipHandler = (nextLevel: number) => { this.transitionToLevel(nextLevel); };
   private boundSkiRunHandler = () => { this.startSkiRun(); };
-  private boundShowDialogueHandler = (key: string) => { this.showDialogue(key); };
   private boundHazardGameOverHandler = (won: boolean, reason: string) => { this.gameOver(won, reason); };
+
+  // Dialogue state tracked via DIALOGUE_ACTIVE event (replaces direct scene.get coupling)
+  private dialogueActive = false;
+  private boundDialogueActiveHandler = (active: boolean) => { this.dialogueActive = active; };
 
 
   constructor() {
@@ -311,8 +311,7 @@ export default class GameScene extends Phaser.Scene {
 
     // Pause on ESC (but not while dialogue is showing — ESC dismisses dialogue first)
     this.input.keyboard?.on('keydown-ESC', () => {
-      const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-      if (dlg?.isDialogueShowing()) return;
+      if (this.dialogueActive) return;
       this.pauseGame();
     });
 
@@ -499,9 +498,9 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.on(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.on(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
     this.game.events.on(GAME_EVENTS.START_SKI_RUN, this.boundSkiRunHandler);
-    this.game.events.on(GAME_EVENTS.SHOW_DIALOGUE, this.boundShowDialogueHandler);
     this.game.events.on(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
     this.game.events.on(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
+    this.game.events.on(GAME_EVENTS.DIALOGUE_ACTIVE, this.boundDialogueActiveHandler);
     
     
     this.scene.launch(SCENE_KEYS.DIALOGUE, { weather: this.level.weather });
@@ -520,19 +519,18 @@ export default class GameScene extends Phaser.Scene {
 
           // Auto-skip after 3s: skip entire tutorial level → advance to level 1
           const skipDelay = 3000;
-          const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene | null;
-          dlg?.showCountdown(skipDelay);
+          this.game.events.emit(GAME_EVENTS.SHOW_COUNTDOWN, skipDelay);
           const autoSkipTimer = this.time.delayedCall(skipDelay, () => {
             this.tutorialSkipped = true;
             this.tutorialSkipPending = false;
-            dlg?.dismissAllDialogue();
+            this.game.events.emit(GAME_EVENTS.DISMISS_ALL_DIALOGUE);
             this.transitionToLevel(this.levelIndex + 1);
           });
 
           // If player advances/dismisses the dialogue before timeout → replay tutorial
           const checkClosed = this.time.addEvent({ delay: 200, loop: true, callback: () => {
             if (this.tutorialSkipped) { checkClosed.destroy(); return; }
-            if (dlg && !dlg.isDialogueShowing()) {
+            if (!this.dialogueActive) {
               autoSkipTimer.destroy();
               this.tutorialSkipPending = false;
               checkClosed.destroy();
@@ -580,8 +578,7 @@ export default class GameScene extends Phaser.Scene {
       this.wildlifeSystem.bootstrapTracks();
       this.wildlifeSystem.onAnimalFlee = (type) => {
         // Suppress flee sounds during dialogue to avoid drowning out voice
-        const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as { isDialogueShowing?: () => boolean } | undefined;
-        if (dlg?.isDialogueShowing?.()) return;
+        if (this.dialogueActive) return;
         playAnimalCall(type);
       };
     }
@@ -863,8 +860,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.gamepad) {
       const startPressed = isGamepadButtonPressed(this.gamepad, this.gamepadBindings.pause);
       if (startPressed && !this.gamepadStartPressed && !this.isGameOver) {
-        const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-        if (!dlg?.isDialogueShowing()) {
+        if (!this.dialogueActive) {
           this.pauseGame();
         }
       }
@@ -924,13 +920,11 @@ export default class GameScene extends Phaser.Scene {
     this.ambienceSounds.update(delta);
 
     // Duck ambience & engine during dialogue so voice is audible
-    const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as { isDialogueShowing?: () => boolean } | undefined;
-    const dialogueActive = !!dlg?.isDialogueShowing?.();
-    if (dialogueActive && !this.dialogueDucked) {
+    if (this.dialogueActive && !this.dialogueDucked) {
       this.dialogueDucked = true;
       this.ambienceSounds.setDuck(0.2);
       this.engineSounds.setDuck(0.3);
-    } else if (!dialogueActive && this.dialogueDucked) {
+    } else if (!this.dialogueActive && this.dialogueDucked) {
       this.dialogueDucked = false;
       this.ambienceSounds.setDuck(1);
       this.engineSounds.setDuck(1);
@@ -1181,8 +1175,7 @@ export default class GameScene extends Phaser.Scene {
 
   private handleMovement(): void {
     // Don't handle movement while dialogue is showing or stunned
-    const dialogueScene = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-    if (dialogueScene && dialogueScene.isDialogueShowing()) {
+    if (this.dialogueActive) {
       this.groomer.setVelocity(0, 0);
       return;
     }
@@ -1314,8 +1307,7 @@ export default class GameScene extends Phaser.Scene {
 
   private handleGrooming(): void {
     // Don't handle grooming while dialogue is showing
-    const dialogueScene = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-    if (dialogueScene && dialogueScene.isDialogueShowing()) {
+    if (this.dialogueActive) {
       this.isGrooming = false;
       this.dialogueWasShowing = true;
       return;
@@ -1473,10 +1465,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     // Pause buff timers and frost during dialogue so nothing ticks while reading
-    const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-    const dialogueActive = dlg?.isDialogueShowing() ?? false;
-
-    if (!dialogueActive) {
+    if (!this.dialogueActive) {
       for (const buff in this.buffs) {
         this.buffs[buff] -= dt * 1000;
         if (this.buffs[buff] <= 0) {
@@ -1490,7 +1479,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     // Frost accumulation — warmth buff pauses it; dialogue pauses it
-    if (this.frostRate > 0 && !this.buffs.warmth && !dialogueActive) {
+    if (this.frostRate > 0 && !this.buffs.warmth && !this.dialogueActive) {
       this.frostLevel = Math.min(100, this.frostLevel + (this.frostRate / 60) * dt);
     }
 
@@ -1510,8 +1499,7 @@ export default class GameScene extends Phaser.Scene {
   private updateTimer(): void {
     if (this.level.timeLimit <= 0) return;
     // Pause timer while dialogue is showing (e.g. intro)
-    const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene;
-    if (dlg?.isDialogueShowing()) return;
+    if (this.dialogueActive) return;
     if (this.timeRemaining > 0) {
       this.timeRemaining--;
       // Urgent ticks when time is running low (last 15% of time limit)
@@ -1776,35 +1764,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private showDialogue(key: string, speaker?: string): void {
-    // Check for gamepad first, then touch, then default
-    const hasGamepad = this.input.gamepad && this.input.gamepad.total > 0;
-    const hasTouch = detectTouch();
-    const isTouchOnly = isMobile() && hasTouch && !hasGamepad;
-    
-    let dialogueKey = key;
-    
-    if (hasGamepad) {
-      const gamepadKey = key + 'Gamepad';
-      if (t(gamepadKey, { probe: true }) !== gamepadKey) {
-        dialogueKey = gamepadKey;
-      }
-    } else if (isTouchOnly) {
-      const touchKey = key + 'Touch';
-      if (t(touchKey, { probe: true }) !== touchKey) {
-        dialogueKey = touchKey;
-      }
-    }
-    
-    const dlg = this.scene.get(SCENE_KEYS.DIALOGUE) as DialogueScene | null;
-    if (dlg?.showDialogue) {
-      dlg.showDialogue(dialogueKey, speaker);
-      // Immediately duck engine/ambience so first voice blips are audible
-      // (the update loop also manages this, but may lag a few frames)
-      if (!this.dialogueDucked) {
-        this.dialogueDucked = true;
-        this.ambienceSounds.setDuck(0.2);
-        this.engineSounds.setDuck(0.3);
-      }
+    this.game.events.emit(GAME_EVENTS.SHOW_DIALOGUE, key, speaker);
+    // Immediately duck engine/ambience so first voice blips are audible
+    // (the update loop also manages this, but may lag a few frames)
+    if (!this.dialogueDucked) {
+      this.dialogueDucked = true;
+      this.ambienceSounds.setDuck(0.2);
+      this.engineSounds.setDuck(0.3);
     }
   }
 
@@ -1915,9 +1881,9 @@ export default class GameScene extends Phaser.Scene {
     );
   }
 
-  private onTouchControlsTop(topEdge: number): void {
+  private onTouchControlsTop(payload: { y: number; visible: boolean }): void {
     const screenH = this.scale.height;
-    this.touchControlsHeight = screenH - topEdge;
+    this.touchControlsHeight = payload.visible ? screenH - payload.y : 0;
     this.recalcTouchFollowOffset();
   }
 
@@ -2147,9 +2113,9 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.off(GAME_EVENTS.RESUME_REQUEST, this.boundResumeHandler);
     this.game.events.off(GAME_EVENTS.SKIP_LEVEL, this.boundSkipHandler);
     this.game.events.off(GAME_EVENTS.START_SKI_RUN, this.boundSkiRunHandler);
-    this.game.events.off(GAME_EVENTS.SHOW_DIALOGUE, this.boundShowDialogueHandler);
     this.game.events.off(GAME_EVENTS.HAZARD_GAME_OVER, this.boundHazardGameOverHandler);
     this.game.events.off(GAME_EVENTS.TOUCH_CONTROLS_TOP, this.onTouchControlsTop, this);
+    this.game.events.off(GAME_EVENTS.DIALOGUE_ACTIVE, this.boundDialogueActiveHandler);
     this.game.events.off(GAME_EVENTS.DIALOGUE_DISMISSED);
 
     this.scale.off('resize', this.handleResize, this);

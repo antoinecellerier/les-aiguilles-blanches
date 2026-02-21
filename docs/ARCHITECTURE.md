@@ -1379,18 +1379,23 @@ GameScene and HUDScene communicate via Phaser's global event emitter (`game.even
 | `RESUME_REQUEST` | Pause → GameScene | — | On button press |
 | `SKIP_LEVEL` | HUD → GameScene | nextLevel | On button press |
 | `START_SKI_RUN` | HUD → GameScene | — | On button press |
-| `TOUCH_CONTROLS_TOP` | HUD → GameScene | topEdge (screen px) | On touch control layout |
+| `TOUCH_CONTROLS_TOP` | HUD → GameScene/Dialogue | `{ y, visible }` | On touch control layout |
 | `ACCESSIBILITY_CHANGED` | Settings → HUD | — | On setting change |
 | `VOLUME_CHANGED` | Settings → AudioSystem | — | On setting change |
 | `MUTE_CHANGED` | Settings/Pause → AudioSystem | — | On setting change |
+| `DIALOGUE_ACTIVE` | Dialogue → GameScene | `boolean` | On show/hide (200ms cooldown on false) |
 | `DIALOGUE_DISMISSED` | Dialogue → GameScene | — | On ESC/B press |
+| `SHOW_DIALOGUE` | GameScene/Hazard → Dialogue | `key, speaker?` | On dialogue trigger |
+| `SHOW_COUNTDOWN` | GameScene → Dialogue | `durationMs` | Tutorial skip |
+| `DISMISS_ALL_DIALOGUE` | GameScene → Dialogue | — | Tutorial skip timeout |
+| `HAZARD_GAME_OVER` | Hazard → GameScene | `won, reason` | On avalanche trigger |
 
 Always clean up listeners in `shutdown()` with `this.game.events.off(GAME_EVENTS.*)`.
 
 GameScene constructs the `GAME_STATE` payload via `buildGameStatePayload()` — a single method used by both the per-frame emit in `update()` and the final emit in `gameOver()`. HUDScene uses the bonus stats to evaluate bonus objectives in real-time inside the visor, with irreversible failure tracking for `no_tumble` and `speed_run`.
 #### Touch Controls Camera Offset
 
-On narrow/portrait devices (aspect ≤ 1.2), virtual touch controls overlap the play area. HUDScene emits `TOUCH_CONTROLS_TOP` with the top edge of the controls in screen pixels. GameScene caches this as `touchControlsHeight` (viewport-independent) and calls `recalcTouchFollowOffset()` to adjust the camera:
+On narrow/portrait devices (aspect ≤ 1.2), virtual touch controls overlap the play area. HUDScene emits `TOUCH_CONTROLS_TOP` with `{ y, visible }` payload. GameScene caches `touchControlsHeight` (viewport-independent) and calls `recalcTouchFollowOffset()` to adjust the camera:
 
 1. **Follow camera (large world)**: Applies a negative `followOffset.y` so the groomer renders above the controls. Camera bounds are extended downward by `|followOffset.y|` via `updateCameraBoundsForOffset()`.
 2. **Static camera, world fits**: Re-centers the world in the effective area (`screenH - touchControlsHeight`) without enforcing `CAMERA_MIN_OFFSET_Y` (which would push the world into the controls).
@@ -1398,7 +1403,7 @@ On narrow/portrait devices (aspect ≤ 1.2), virtual touch controls overlap the 
 
 `handleResize()` uses `effectiveHeight` (accounting for touch controls) for the static vs follow decision. `recalcTouchFollowOffset()` is called both from `onTouchControlsTop()` (when HUD emits) and from `handleResize()` (when viewport changes before HUD restarts).
 
-**Dialogue positioning**: DialogueScene listens for `TOUCH_CONTROLS_TOP` and repositions above controls via `onTouchControlsChanged()`. The handler kills any running show tween before setting Y to prevent the tween from overriding the repositioned value.
+**Dialogue positioning**: DialogueScene listens for `TOUCH_CONTROLS_TOP` and caches `{ y, visible }` to position dialogue above controls. The `onTouchControlsChanged()` handler kills any running show tween before setting Y to prevent the tween from overriding the repositioned value.
 
 ### GameScene System Extraction
 
