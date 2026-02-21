@@ -102,6 +102,8 @@ export function clearProgress(): void {
   } else {
     removeKey(STORAGE_KEYS.PROGRESS);
   }
+  // Reset one-shot dialogue flags so they replay on a new game
+  removeKey(STORAGE_KEYS.MARIE_INTRO_SEEN);
 }
 
 export function hasSavedProgress(): boolean {
