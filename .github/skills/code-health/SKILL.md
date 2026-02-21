@@ -59,7 +59,7 @@ For each fix:
 1. **Extract, don't patch** — Create reusable utilities rather than adding more conditionals
 2. **Registration over import** — When utilities need to reference multiple modules, use a registration pattern to avoid circular dependencies
 3. **Single source of truth** — Centralize lists, config, and constants that are duplicated
-4. **Preserve behavior** — Refactoring must not change observable behavior. Run tests after each change.
+4. **Preserve behavior** — Refactoring must not change observable behavior. Run `./run-tests.sh --smart --browser chromium` after each change to catch regressions early.
 
 ### Phase 5: Verification & documentation
 

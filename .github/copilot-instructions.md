@@ -54,6 +54,9 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 9. **`art-review`** — invoke when designing new visual elements (sprites, textures, UI components) or testing responsive layout across viewports, to validate style compliance early, before implementation.
 10. **`audio-review`** — invoke when designing new sound effects, music moods, or voice profiles to validate audio direction early.
 
+### During development
+8b. **Smart tests at meaningful checkpoints** — run `./run-tests.sh --smart --browser chromium` after completing a coherent unit of work (feature wired end-to-end, bug fix applied, multi-file refactor complete). Don't run after every tiny edit — wait until a logical milestone where a regression could hide. Typical cadence: 2–4 times per session, not after each file save.
+
 ### Tests
 11. Regression test exists and passes.
 
