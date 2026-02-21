@@ -35,6 +35,8 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 - **Deep copy arrays** before capturing in closures if reused/cleared (see cliff system in ARCHITECTURE.md).
 - **Per-texture NEAREST scaling** — after `generateTexture()` or `addDynamicTexture()`, set `source[0].scaleMode = Phaser.ScaleModes.NEAREST`. On DynamicTexture contexts, set `imageSmoothingEnabled = false`. Never use global `pixelArt: true` (breaks Firefox Canvas).
 - **Use `gpt-5.2` for melody composition** — when composing or rewriting MusicSystem melody/bass arrays, always delegate to `gpt-5.2` model for best nocturne-style results.
+- **Verify visual changes with screenshots** — after any change to layout, sprites, scenes, or UI, take a screenshot and inspect it yourself before reporting the fix as done. If the screenshot shows the issue persists, keep iterating — don't ask the user to verify what you can check.
+- **Only change what was requested** — do not make adjacent improvements, style tweaks, or "while I'm here" fixes without asking first. One task at a time. If you spot something worth improving, mention it — don't just do it.
 
 ## Skill Triggers
 
