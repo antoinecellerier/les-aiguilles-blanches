@@ -121,7 +121,7 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
   - ☰ **Pause**: `||` button with dark pill background
   - ⛶ **Fullscreen**: `[]` (enter) or `X` (exit) with dark pill background
 
-**Tutorial**: The tutorial adapts to your input method - showing keyboard, touch, or gamepad controls based on what's detected.
+**Ski School**: The ski school adapts to your input method - showing keyboard, touch, or gamepad controls based on what's detected.
 
 ## 🎯 Level Progression
 
@@ -129,19 +129,19 @@ Touch controls appear automatically on mobile devices. On desktop with touchscre
 
 Your progress is automatically saved when you complete a level. Best star ratings, times, and bonus objectives are tracked per level. When you return to the game:
 - **Resume**: Continue from where you left off
-- **Level Select**: Trail map view — navigate the mountain to pick a run and aim for ⭐⭐⭐
-- **New Game**: Start fresh from the tutorial
+- **Trail Map**: Trail map view — navigate the mountain to pick a run and aim for ⭐⭐⭐
+- **New Game**: Start fresh from the ski school
 
-### Level Select
+### Trail Map
 
-Once you've completed the tutorial, the **Level Select** button appears on the main menu. The trail map shows the full resort mountain with colored run paths in classic ski map style:
+Once you've completed the ski school, the **Trail Map** button appears on the main menu. The trail map shows the full resort mountain with colored run paths in classic ski map style:
 - **Click or tap** a marker to select it — a gold ring highlights the chosen run
 - **Click again** (or press Enter) to start grooming; use the info panel buttons for Groom or Ski
 - **Navigate** with arrow keys or gamepad (↑ towards summit, ↓ towards base)
 - **Piste names** are also clickable touch targets for easy selection
 - Marker colors match difficulty: 🟢 Green, 🔵 Blue, 🔴 Red, ⬛ Black, 🟠 Park
-- Star ratings and best times shown for completed levels
-- Locked levels are visible but grayed out
+- Star ratings and best times shown for completed runs
+- Closed runs are visible but grayed out
 
 ### Difficulty Scaling
 

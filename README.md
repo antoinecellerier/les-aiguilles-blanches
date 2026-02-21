@@ -7,11 +7,11 @@
   <img src="assets/screenshot-gameplay.png" alt="Grooming a red piste with dialogue" width="45%">
 </p>
 <p align="center">
-  <img src="assets/screenshot-level.png" alt="Level complete with trophy and stars" width="45%">
+  <img src="assets/screenshot-level.png" alt="Run complete with trophy and stars" width="45%">
   <img src="assets/screenshot-ski.png" alt="Ski trick in the terrain park" width="45%">
 </p>
 
-A retro-style snow groomer simulation set in a fictional Savoie ski resort, inspired by the classic **SkiFree** aesthetic. You operate a PistenBully-style grooming machine across 11 progressive levels — from a gentle tutorial through night operations, storm recovery, and FIS competition prep.
+A retro-style snow groomer simulation set in a fictional Savoie ski resort, inspired by the classic **SkiFree** aesthetic. You operate a PistenBully-style grooming machine across 11 progressive runs — from ski school through night operations, storm recovery, and FIS competition prep.
 
 ## 🤖 Built with Copilot
 
@@ -19,7 +19,7 @@ This game is an experiment in building a complete, polished game almost entirely
 
 ## ✨ Features
 
-- **11 Progressive Levels** — Tutorial through storm operations, night grooming, and competition prep
+- **11 Progressive Runs** — Ski school through storm operations, night grooming, and competition prep
 - **Authentic Grooming** — Tiller with quality system, blade, winch with breakable cable
 - **Terrain Park** — Kickers, rails, and halfpipe with zone-specific grooming challenges
 - **Ski & Snowboard Reward Run** — Carve down your freshly groomed pistes with tricks, off-piste powder, and ski tracks
