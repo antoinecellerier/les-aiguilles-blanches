@@ -188,6 +188,8 @@ Only perform cross-model consultation when Phase 2 produced significant findings
 - When running as Opus: consult `gemini-3-pro-preview` (strong vision analysis) and `gpt-5.2` (creative/aesthetic judgment)
 - When running as any other model: consult `claude-opus-4.6` (vision-capable, strong aesthetic sense)
 
+Share screenshots from Phase 3 alongside findings and ask reviewers to **evaluate aesthetics and catch missed issues** — don't ask them to re-run code searches or greps you already did. Cross-model value is in creative/visual judgment, not mechanical analysis.
+
 Share screenshots from Phase 3 alongside findings and ask reviewers to evaluate:
 - Palette compliance — do rendered colors match ART_STYLE.md?
 - Visual balance — are elements well-composed and proportional?

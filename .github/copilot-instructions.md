@@ -40,6 +40,7 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 - **Test Firefox too** — after any change to input handling (touch, keyboard, gamepad), rendering, or browser APIs, verify in both Chromium and Firefox. Many bugs are Firefox-specific (touch detection, canvas rendering, fullscreen API). Run E2E tests with both browsers (`./run-tests.sh --smart`) before committing input/rendering changes.
 - **Commit after each completed unit of work** — don't accumulate changes across multiple features or fixes. Commit as soon as a coherent change is done and tests pass, without waiting to be asked. This makes rollbacks easy and keeps the session focused.
 - **Fix flaky tests immediately** — when a test fails intermittently during a run, fix the flakiness before moving on. Don't skip it, don't ignore it, don't leave it for later. Common causes: missing `wait_for_input_ready`, tight timeouts, race conditions with scene transitions.
+- **Changelog is for major player-visible changes only** — new levels, new features, new mechanics. Don't add bug fixes, refactors, signage updates, or minor UI tweaks. Consolidate small fixes into a single catch-all line if needed. See content-review skill for format reference.
 
 ## Skill Triggers
 

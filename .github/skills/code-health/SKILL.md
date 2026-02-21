@@ -24,7 +24,7 @@ Launch parallel explore agents to investigate these dimensions simultaneously:
 Only perform cross-model consultation when Phase 1 produced significant findings (3+ HIGH/MEDIUM issues, or changes span 5+ files):
 - When running as Opus: consult `gemini-3-pro-preview` and `gpt-5.1-codex`
 - When running as any other model: consult `claude-opus-4.6` for confirmation
-- Ask them to rank findings by impact, confirm or refute each, and suggest any missed issues
+- Ask them to **review findings and suggest missed issues** — don't ask them to re-run the same grep/glob searches you already did
 - Look for convergence — issues identified by multiple models are highest priority
 
 Skip this phase for minor audits (few files, no HIGH findings) to save time and cost.

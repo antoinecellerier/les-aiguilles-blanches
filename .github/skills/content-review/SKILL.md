@@ -93,7 +93,7 @@ Evaluate content across these dimensions, launching parallel explore agents:
 For significant content reviews (new dialogues, major localization changes):
 - When running as Opus: consult `gpt-5.2` for creative writing quality and `gemini-3-pro-preview` for multilingual/cultural accuracy
 - When running as any other model: consult `claude-opus-4.6`
-- Ask reviewers to flag: unnatural phrasing, cultural inaccuracies, tone breaks, missing humor adaptation
+- Ask reviewers to **evaluate tone, idiom quality, and cultural accuracy** — don't ask them to re-run greps or key parity checks you already did. Cross-model value is in linguistic/cultural judgment, not mechanical validation.
 
 Skip for minor reviews (typo fixes, single-string changes).
 
