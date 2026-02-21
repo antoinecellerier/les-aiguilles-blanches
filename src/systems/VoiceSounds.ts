@@ -118,6 +118,7 @@ export function playVoiceBlip(speaker: string, char: string): void {
   gain.connect(voiceNode);
   osc.start(now);
   osc.stop(now + duration);
+  osc.onended = () => { try { gain.disconnect(); } catch {} };
 
   // Vowel formant: quiet second harmonic adds body to vowel sounds
   const isVowel = 'aeiouyéèêàùî'.includes(lower);
@@ -133,5 +134,6 @@ export function playVoiceBlip(speaker: string, char: string): void {
     fGain.connect(voiceNode);
     formant.start(now);
     formant.stop(now + duration);
+    formant.onended = () => { try { fGain.disconnect(); } catch {} };
   }
 }

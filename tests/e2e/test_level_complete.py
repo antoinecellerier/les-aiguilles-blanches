@@ -3,7 +3,8 @@ import pytest
 from playwright.sync_api import Page
 from conftest import (
     wait_for_scene, skip_to_level, skip_to_credits,
-    click_button, click_menu_by_key, get_current_level, get_active_scenes,
+    click_button, click_menu_by_key, find_menu_button_index,
+    get_current_level, get_active_scenes,
     assert_scene_active, assert_scene_not_active, wait_for_input_ready,
     BUTTON_START,
 )
@@ -314,7 +315,7 @@ class TestFailScreen:
         assert final_index == 0, "LEFT should return to first button"
 
     def test_fail_screen_has_retry_option(self, game_page: Page):
-        """Test that fail screen has retry button."""
+        """Test that fail screen shows retry button after cliff death."""
         click_button(game_page, BUTTON_START, "Start Game")
         wait_for_scene(game_page, 'GameScene')
         
@@ -326,6 +327,17 @@ class TestFailScreen:
         }""")
         
         wait_for_scene(game_page, 'LevelCompleteScene')
+        
+        scene_data = game_page.evaluate("""() => {
+            const scene = window.game.scene.getScene('LevelCompleteScene');
+            if (!scene) return null;
+            return { won: scene.won };
+        }""")
+        assert scene_data is not None, "LevelCompleteScene should exist"
+        assert scene_data['won'] == False, "Should be a fail screen"
+        
+        retry_idx = find_menu_button_index(game_page, 'retry', 'LevelCompleteScene')
+        assert retry_idx >= 0, "Fail screen should have a retry button"
         
         game_page.screenshot(path="tests/screenshots/fail_screen_taunt.png")
 
