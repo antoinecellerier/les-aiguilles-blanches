@@ -75,6 +75,7 @@ export const DEPTHS = {
   MENU_MOUNTAINS_NEAR: 2, // Near mountains
   MENU_SNOW: 3,       // Snow ground, groomed lines
   MENU_TREES: 5,      // Trees, groomer (Y-sorted: 5 + y*0.001)
+  MENU_TINT_OVERLAY: 6, // Tinted overlay above terrain (fail screen, above trees, below backdrop)
   MENU_BACKDROP: 8,   // Dark semi-transparent overlay behind UI (readability)
   MENU_UI: 10,        // UI panels, buttons, text (above terrain + backdrop)
   MENU_SCROLL_FADE: 11, // Scroll fade gradients

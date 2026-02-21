@@ -176,7 +176,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Fail: somber red-brown tint overlay above terrain (above groomer effects)
     if (!this.won) {
-      this.add.rectangle(width / 2, height / 2, width, height, 0x3a1a1a, 0.55).setDepth(6);
+      this.add.rectangle(width / 2, height / 2, width, height, 0x3a1a1a, 0.55).setDepth(DEPTHS.MENU_TINT_OVERLAY);
     }
 
     // --- Responsive font sizes ---
@@ -209,13 +209,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
 
     // Create panel (width placeholder, resized after text is measured)
     const titlePanel = this.add.rectangle(cx, titlePanelCY, 400, titlePanelH, 0x1a1a2e, 0.85)
-      .setStrokeStyle(2, this.won ? 0x228b22 : 0xcc2200).setDepth(10);
+      .setStrokeStyle(2, this.won ? 0x228b22 : 0xcc2200).setDepth(DEPTHS.MENU_UI);
 
     // Icon
     cursorY += 14;
     this.add.text(cx, cursorY, icon, {
       font: `${iconFontSize}px ${THEME.fonts.familyEmoji}`,
-    }).setOrigin(0.5, 0).setDepth(11);
+    }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
     cursorY += iconFontSize + 4;
 
     // Level name
@@ -227,7 +227,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       fontSize: `${titleFontSize}px`,
       fontStyle: 'bold',
       color: THEME.colors.textPrimary,
-    }).setOrigin(0.5, 0).setDepth(11);
+    }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
     cursorY += titleFontSize * 1.3 + 2;
 
     // Grade or "Level Failed"
@@ -236,7 +236,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
       fontSize: `${statusFontSize}px`,
       fontStyle: 'bold',
       color: statusColor,
-    }).setOrigin(0.5, 0).setDepth(11);
+    }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
 
     // Resize panel to fit widest content + padding
     const contentW = Math.max(nameText.width, statusTextObj.width, 200);
@@ -257,12 +257,12 @@ export default class LevelCompleteScene extends Phaser.Scene {
         color: '#ffdddd',
         align: 'center',
         wordWrap: { width: maxTauntW - 30 },
-      }).setOrigin(0.5, 0).setDepth(11);
+      }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
 
       const tauntH = tauntText.height + 20;
       const tauntW = Math.min(maxTauntW, tauntText.width + 30);
       this.add.rectangle(cx, cursorY + tauntH / 2, tauntW, tauntH, 0x442222, 0.8)
-        .setStrokeStyle(2, 0xff4444).setDepth(10);
+        .setStrokeStyle(2, 0xff4444).setDepth(DEPTHS.MENU_UI);
       cursorY += tauntH + sectionGap;
     }
 
@@ -312,13 +312,13 @@ export default class LevelCompleteScene extends Phaser.Scene {
         color: THEME.colors.textPrimary,
         align: 'center',
         lineSpacing: 6,
-      }).setOrigin(0.5, 0).setDepth(11);
+      }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
 
       const statsPanelH = statsText.height + 24;
       const statsPanelW = Math.max(panelW * 0.8, statsText.width + 40);
       const statsPanelCY = cursorY + statsPanelH / 2;
       this.add.rectangle(cx, statsPanelCY, statsPanelW, statsPanelH, 0x1a1a2e, 0.85)
-        .setStrokeStyle(1, this.won ? 0x3d7a9b : 0x664444).setDepth(10);
+        .setStrokeStyle(1, this.won ? 0x3d7a9b : 0x664444).setDepth(DEPTHS.MENU_UI);
       // Re-center text vertically in the panel
       statsText.setY(statsPanelCY - statsText.height / 2);
 
@@ -336,14 +336,14 @@ export default class LevelCompleteScene extends Phaser.Scene {
         fontSize: `${Math.round(baseFontSize * 1.25)}px`,
         fontStyle: 'bold',
         color: THEME.colors.accent,
-      }).setOrigin(0.5, 0).setDepth(11);
+      }).setOrigin(0.5, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
       cursorY += gcMsg.height + sectionGap;
     }
 
     // --- Buttons ---
     const buttonY = Math.min(cursorY + 4, height - 50);
     const buttonPadding2 = { x: Math.max(15, padding), y: Math.max(8, padding * 0.6) };
-    const buttonContainer = this.add.container(0, 0).setDepth(11);
+    const buttonContainer = this.add.container(0, 0).setDepth(DEPTHS.MENU_SCROLL_FADE);
     let skiMode = getString(STORAGE_KEYS.SKI_MODE) || 'random';
     if (skiMode === 'random') skiMode = Math.random() < 0.5 ? 'ski' : 'snowboard';
     const skiLabel = skiMode === 'snowboard' ? (t('rideIt') || 'Ride it!') : (t('skiIt') || 'Ski it!');
@@ -675,7 +675,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
     const s = 3.0 * scaleFactor;
     const groundY = snowLineY;
-    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.002);
+    const g = this.add.graphics().setDepth(DEPTHS.MENU_TREES + snowLineY * 0.001 + 0.002);
 
     switch (levelIndex) {
       case 1: // Marmottes — cozy chalet
@@ -833,7 +833,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
   }
 
   private drawNightSky(_width: number, snowLineY: number, s: number): void {
-    const g = this.add.graphics().setDepth(3);
+    const g = this.add.graphics().setDepth(DEPTHS.MENU_SNOW);
     const w = this.scale.width;
     // Moon — rectangle with bite taken out (crescent)
     g.fillStyle(0xffffcc);
@@ -923,7 +923,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const s = 2.0 * scaleFactor;
     const groundY = snowLineY;
     const isStorm = weather.weather === 'storm';
-    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.001);
+    const g = this.add.graphics().setDepth(DEPTHS.MENU_TREES + snowLineY * 0.001 + 0.001);
 
     switch (this.failReason) {
       case 'tumble': {
@@ -1087,7 +1087,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
           fontSize: `${Math.round(14 * s)}px`,
           fontStyle: 'bold',
           color: '#aaaacc',
-        }).setDepth(5 + snowLineY * 0.001 + 0.002).setAngle(-10);
+        }).setDepth(DEPTHS.MENU_TREES + snowLineY * 0.001 + 0.002).setAngle(-10);
         break;
       }
       case 'feature': {
@@ -1262,7 +1262,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const groundY = snowLineY;
     const isStorm = weather.weather === 'storm';
     const isSnowboard = this.skiMode === 'snowboard';
-    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001);
+    const g = this.add.graphics().setDepth(DEPTHS.MENU_TREES + snowLineY * 0.001);
 
     // Colors match skiSprites.ts palette
     const jacketMain = isSnowboard ? 0xff3388 : 0x00aaaa;
@@ -1346,7 +1346,7 @@ export default class LevelCompleteScene extends Phaser.Scene {
     const gx = isLandscape ? width * 0.82 : width / 2 + 140 * sx;
     const s = 3.0 * scaleFactor;
     const groundY = snowLineY;
-    const g = this.add.graphics().setDepth(5 + snowLineY * 0.001 + 0.002);
+    const g = this.add.graphics().setDepth(DEPTHS.MENU_TREES + snowLineY * 0.001 + 0.002);
 
     const level = this.getLevel();
 
