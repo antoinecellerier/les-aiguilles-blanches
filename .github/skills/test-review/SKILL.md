@@ -278,7 +278,23 @@ Organize by severity:
 | **MEDIUM** | Duplicates helpers, uses unnecessarily tight timeouts, missing inputReady, poor error messages, tests multiple unrelated behaviors, wrong pointer event |
 | **LOW** | Style inconsistency, could use a better helper but works correctly, missing edge case coverage |
 
-### Phase 8: Verification
+### Phase 8: Flaky test handling
+
+When a test fails intermittently during review or CI:
+
+1. **Reproduce** — run the failing test in isolation 3 times: `./run-tests.sh --browser chromium -k "test_name"`
+2. **Diagnose** — common flakiness causes in this project:
+   - Missing `wait_for_input_ready` before keyboard/pointer events
+   - Tight explicit timeouts (< 5s) under parallel load
+   - `wait_for_timeout` as sole state-check mechanism
+   - Scene transition race conditions (polling `isActive` before scene fully initialized)
+   - `scene.restart()` without waiting for buttons to re-create
+3. **Fix immediately** — do not skip, defer, or mark as known-flaky. Replace timing assumptions with state polling. If the root cause is unclear, add retry logic as a last resort with a `# TODO: investigate flakiness` comment.
+4. **Verify stability** — run the fixed test 3 times in parallel context (`./run-tests.sh --browser chromium`) to confirm it's stable.
+
+Severity: flaky tests are always **HIGH** — they erode trust in the suite and waste debugging time.
+
+### Phase 9: Verification
 
 ```bash
 # Run changed tests in isolation

@@ -37,6 +37,9 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 - **Use `gpt-5.2` for melody composition** — when composing or rewriting MusicSystem melody/bass arrays, always delegate to `gpt-5.2` model for best nocturne-style results.
 - **Verify visual changes with screenshots** — after any change to layout, sprites, scenes, or UI, take a screenshot and inspect it yourself before reporting the fix as done. If the screenshot shows the issue persists, keep iterating — don't ask the user to verify what you can check.
 - **Only change what was requested** — do not make adjacent improvements, style tweaks, or "while I'm here" fixes without asking first. One task at a time. If you spot something worth improving, mention it — don't just do it.
+- **Test Firefox too** — after any change to input handling (touch, keyboard, gamepad), rendering, or browser APIs, verify in both Chromium and Firefox. Many bugs are Firefox-specific (touch detection, canvas rendering, fullscreen API). Run E2E tests with both browsers (`./run-tests.sh --smart`) before committing input/rendering changes.
+- **Commit after each completed unit of work** — don't accumulate changes across multiple features or fixes. Commit as soon as a coherent change is done and tests pass, without waiting to be asked. This makes rollbacks easy and keeps the session focused.
+- **Fix flaky tests immediately** — when a test fails intermittently during a run, fix the flakiness before moving on. Don't skip it, don't ignore it, don't leave it for later. Common causes: missing `wait_for_input_ready`, tight timeouts, race conditions with scene transitions.
 
 ## Skill Triggers
 
@@ -58,6 +61,8 @@ Snow groomer simulation · Phaser 3 · Canvas renderer · SkiFree retro aestheti
 
 ### During development
 8b. **Smart tests at meaningful checkpoints** — run `./run-tests.sh --smart --browser chromium` after completing a coherent unit of work (feature wired end-to-end, bug fix applied, multi-file refactor complete). Don't run after every tiny edit — wait until a logical milestone where a regression could hide. Typical cadence: 2–4 times per session, not after each file save.
+8c. **Responsive spot-check for UI changes** — after modifying any scene layout, menu, overlay, or HUD, verify at least 3 viewports: mobile portrait (360×640), mobile landscape (640×360), and desktop (1280×720). Use the art-review skill's viewport table for thorough checks. Don't wait for pre-commit — layout bugs compound.
+8d. **Run pre-commit skills proactively** — don't wait to be asked. After finishing a feature or fix, run the relevant conditional skills yourself (art-review for visual changes, content-review for text/locale changes, test-review for test changes). The skill trigger list above tells you which ones apply.
 
 ### Tests
 11. Regression test exists and passes.
