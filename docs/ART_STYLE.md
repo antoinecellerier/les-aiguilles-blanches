@@ -118,6 +118,31 @@ Alpine rock with warm brown tones (NOT gray):
 | CTA button hover | Bright green | `0x33bb33` |
 | Park rank button | Orange | `0xf59e0b` |
 | Gold/highlight | Gold | `0xffd700` |
+| Scrollbar track | Gray | `0x555555` |
+| Scrollbar thumb | Light gray | `0x888888` |
+| Slider track | Dark teal | `0x2a4a5e` |
+| Slider border | Muted blue | `0x4a6a8a` |
+
+### Groomed Snow Variants
+
+Quality-based texture colors generated in BootScene:
+
+| Quality | Base | Detail |
+|---------|------|--------|
+| High (fresh groom) | `0xf0f6fa` | `0xe0e8f0` |
+| Medium | `0xf8f8ff` | `0xdce6f0` |
+| Rough | `0xf0f0f8` | `0xd0dae4` |
+| Packed snow (service roads) | `0xe6eef3` | `0xd8e4ea`, accent `0xeef4f8` |
+
+### Night Variant Colors
+
+Generated alongside day textures for night rendering (avoid overlay):
+
+| Element | Day | Night |
+|---------|-----|-------|
+| Rock base | `0x696969` | `0x6B6B6B` |
+| Rock highlight | `0x888888` | `0x8B8B8B` |
+| Rock detail | `0x555555` | `0x4A4A4A` |
 
 ### Menu Screen
 
@@ -501,6 +526,7 @@ When adding new sprites or visual elements:
 1. **Use existing palettes** - Pick colors from the tables above
 2. **Match tile scale** - New elements should relate to 16px tile size
 3. **Simple shapes** - Rectangles only, no curves or complex polygons
+   - **Accepted exceptions**: headlight glow (WeatherSystem `ctx.arc()`), touch joystick (HUDScene circles), animal track marks (animalTracks.ts ellipses/circles). These are either UI overlays or tiny detail marks where rectangles would look wrong.
 4. **Limited details** - 2-4 colors per simple element (rocks, markers), up to 9 for complex sprites (groomer, fuel station)
 5. **Generate in BootScene** - All textures created via Phaser Graphics
 6. **Set NEAREST scaleMode** - After `generateTexture()` or `addDynamicTexture()`, set `source[0].scaleMode = Phaser.ScaleModes.NEAREST` for crisp scaling. Set `context.imageSmoothingEnabled = false` on DynamicTexture contexts. Do NOT use global `pixelArt: true` (breaks Firefox Canvas)
