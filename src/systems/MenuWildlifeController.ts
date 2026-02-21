@@ -333,7 +333,7 @@ export class MenuWildlifeController {
         a.hopPhase = 0;
         const graze = Math.sin(time / 400 + a.homeX) * 0.3;
         a.sprite.setPosition(a.x, a.y + graze);
-        a.sprite.setDepth(1 + a.y * 0.001);
+        a.sprite.setDepth(DEPTHS.MENU_MOUNTAINS_FAR + a.y * 0.001);
         if (a.wanderTimer <= 0) {
           a.climbIndex = (a.climbIndex + 1) % a.climbPath.length;
           a.wanderTimer = scared ? 200 : (800 + Math.random() * 2000);
@@ -350,7 +350,7 @@ export class MenuWildlifeController {
         a.y += (cdy / cdist) * hopSpeed * dt;
         if (a.y > this.snowLineY - 2) a.y = this.snowLineY - 2;
         a.sprite.setPosition(a.x, a.y + hopArc);
-        a.sprite.setDepth(1 + a.y * 0.001);
+        a.sprite.setDepth(DEPTHS.MENU_MOUNTAINS_FAR + a.y * 0.001);
       }
     }
   }
@@ -432,7 +432,7 @@ export class MenuWildlifeController {
     if (Math.abs(a.y - a.homeY) > 30) a.vy += (a.homeY - a.y) * homePull * dt;
     if (a.vx > 0.5) a.sprite.setScale(1, 1);
     else if (a.vx < -0.5) a.sprite.setScale(-1, 1);
-    a.sprite.setDepth(5 + (a.y + (a.feetOffsetY || 0)) * 0.001);
+    a.sprite.setDepth(DEPTHS.MENU_TREES + (a.y + (a.feetOffsetY || 0)) * 0.001);
 
     // Update burrow mask to follow marmot position
     if (a.burrowMaskShape) {
@@ -616,7 +616,7 @@ export class MenuWildlifeController {
     }
     const key = `track_${species}`;
     const angle = Math.atan2(vy, vx);
-    const img = this.scene.add.image(x, y, key).setDepth(3.5).setRotation(angle).setAlpha(0.5);
+    const img = this.scene.add.image(x, y, key).setDepth(DEPTHS.MENU_SNOW + 0.5).setRotation(angle).setAlpha(0.5);
     this.menuTracks.push({ image: img, age: 0 });
   }
 
@@ -641,7 +641,7 @@ export class MenuWildlifeController {
 
     const addGroundAnimal = (img: Phaser.GameObjects.Image, x: number, y: number, rangeX: number, species: string) => {
       const fo = feetOffset(species);
-      img.setDepth(5 + (y + fo) * 0.001);
+      img.setDepth(DEPTHS.MENU_TREES + (y + fo) * 0.001);
       this._menuAnimals.push({
         sprite: img, x, y, homeX: x, homeY: y,
         vx: 0, vy: 0, wanderTimer: Math.random() * 3000,
@@ -687,7 +687,7 @@ export class MenuWildlifeController {
       const mg = this.scene.add.image(0, 0, 'menu_marmot');
       const mx = marmotClusterX + (i - marmotCount / 2) * 18 * scaleFactor + (Math.random() - 0.5) * 10;
       const my = snowTop + Math.random() * (snowBottom - snowTop);
-      mg.setPosition(mx, my).setDepth(5 + (my + feetOffset('marmot')) * 0.001);
+      mg.setPosition(mx, my).setDepth(DEPTHS.MENU_TREES + (my + feetOffset('marmot')) * 0.001);
       // Burrow mask: clips marmot at ground level so it can slide down out of view
       const maskShape = this.scene.make.graphics({ x: 0, y: 0 });
       const halfH = 2 * s;   // sprite is centered; extends halfH above and below origin
@@ -722,7 +722,7 @@ export class MenuWildlifeController {
       const cx = chamoisClusterX + (i - chamoisCount / 2) * 25 * scaleFactor + (Math.random() - 0.5) * 15;
       const cy = i === 0 ? chamoisClusterY : snowTop + Math.random() * (snowBottom - snowTop);
       if (i === 0) chamoisClusterY = cy;
-      cg.setPosition(cx, cy).setDepth(5 + cy * 0.001);
+      cg.setPosition(cx, cy).setDepth(DEPTHS.MENU_TREES + cy * 0.001);
       addGroundAnimal(cg, cx, cy, width * 0.4, 'chamois');
       if (isNight) {
         const sleeper = this._menuAnimals[this._menuAnimals.length - 1];
@@ -742,7 +742,7 @@ export class MenuWildlifeController {
       const bunnyY = isStorm
         ? shelterY + 3
         : snowTop + Math.random() * (snowBottom - snowTop);
-      bunnyImg.setPosition(bunnyX, bunnyY).setDepth(5 + bunnyY * 0.001);
+      bunnyImg.setPosition(bunnyX, bunnyY).setDepth(DEPTHS.MENU_TREES + bunnyY * 0.001);
       addGroundAnimal(bunnyImg, bunnyX, bunnyY, isStorm ? 15 : width * 0.45, 'bunny');
     }
 
@@ -753,7 +753,7 @@ export class MenuWildlifeController {
       const foxImg = this.scene.add.image(0, 0, 'menu_fox');
       const foxX = randInZone(foxZone);
       const foxY = snowTop + Math.random() * (snowBottom - snowTop);
-      foxImg.setPosition(foxX, foxY).setDepth(5 + foxY * 0.001);
+      foxImg.setPosition(foxX, foxY).setDepth(DEPTHS.MENU_TREES + foxY * 0.001);
       addGroundAnimal(foxImg, foxX, foxY, width * 0.4, 'fox');
     }
 
@@ -771,7 +771,7 @@ export class MenuWildlifeController {
     const climbBase = snowLineY - 4;
     const climbPeak = snowLineY - climbMtnPeakH * 0.85;
     for (let ib = 0; ib < 2; ib++) {
-      const ibexImg = this.scene.add.image(0, 0, 'menu_bouquetin').setDepth(1.5);
+      const ibexImg = this.scene.add.image(0, 0, 'menu_bouquetin').setDepth(DEPTHS.MENU_MOUNTAINS_FAR + 0.5);
       const climbPath: { x: number; y: number }[] = [];
       const climbSteps = 8;
       const flankOffset = 0.12 + ib * 0.12;
@@ -827,7 +827,7 @@ export class MenuWildlifeController {
         texKey = 'menu_bird_flying';
       }
 
-      const birdDepth = this.behindBackdrop ? DEPTHS.MENU_TREES + by * 0.001 : 11;
+      const birdDepth = this.behindBackdrop ? DEPTHS.MENU_TREES + by * 0.001 : DEPTHS.MENU_SCROLL_FADE;
       const birdImg = this.scene.add.image(bx, by, texKey).setDepth(birdDepth);
       const initAngle = (Math.random() - 0.5) * Math.PI * 0.8;
       const initSpeed = 6 + Math.random() * 10;
@@ -867,7 +867,7 @@ export class MenuWildlifeController {
     const zTexts: Phaser.GameObjects.Text[] = [];
     const sizes = [8, 10, 13];
     for (let i = 0; i < 3; i++) {
-      const zDepth = this.behindBackdrop ? DEPTHS.MENU_TREES + y * 0.001 : 12;
+      const zDepth = this.behindBackdrop ? DEPTHS.MENU_TREES + y * 0.001 : DEPTHS.MENU_BADGES;
       const z = this.scene.add.text(x + 6, y - 8, 'z', {
         fontFamily: 'monospace',
         fontSize: sizes[i] + 'px',
