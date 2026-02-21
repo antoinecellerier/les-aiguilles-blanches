@@ -194,6 +194,7 @@ if [ "$SMART_MODE" = true ]; then
         "GameScene:test_daily_runs.py" "MenuScene:test_daily_runs.py"
         "DialogueScene:test_daily_runs.py" "LevelCompleteScene:test_daily_runs.py"
         "PauseScene:test_daily_runs.py"
+        "GameScene:test_seed_sharing.py"
     )
     MAPPING_DRIFT=()
 
