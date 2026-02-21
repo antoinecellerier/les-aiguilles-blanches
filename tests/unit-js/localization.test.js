@@ -4,10 +4,10 @@
 import { describe, it, expect } from 'vitest';
 import { TRANSLATIONS, LEVELS } from './config-wrappers/index.js';
 
-const ALL_LANGS = ['fr', 'en', 'de', 'it', 'es'];
+const ALL_LANGS = ['fr', 'en', 'de', 'it', 'es', 'sv', 'nb', 'fi', 'cs', 'pl', 'tr', 'sk', 'ja', 'ko'];
 
 describe('Localization', () => {
-    it('should have all 5 languages', () => {
+    it('should have all 14 supported languages', () => {
         ALL_LANGS.forEach(lang => {
             expect(TRANSLATIONS, `Missing ${lang}`).toHaveProperty(lang);
         });

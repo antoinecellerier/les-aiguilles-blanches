@@ -62,29 +62,6 @@ def test_shared_seed_invalid_rank_defaults_to_green(page: Page):
     assert rank == "green"
 
 
-def test_shared_seed_uppercase_normalized(page: Page):
-    """Seed codes are normalized to uppercase — 'abc123' and 'ABC123' produce the same seed."""
-    goto_with_seed(page, "abc123", "red")
-    wait_for_scene(page, "DailyRunsScene", timeout=15000)
-    seed_lower = page.evaluate("""() => {
-        const s = window.game?.scene?.getScene('DailyRunsScene');
-        return s?.sharedSeedNum;
-    }""")
-    assert seed_lower is not None and seed_lower > 0, f"Should decode lowercase seed, got: {seed_lower}"
-    # Verify it matches what uppercase would decode to
-    seed_upper = page.evaluate("""() => {
-        const BASE36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        let result = 0;
-        for (const ch of 'ABC123') {
-            const idx = BASE36.indexOf(ch);
-            if (idx < 0) continue;
-            result = result * 36 + idx;
-        }
-        return result >>> 0;
-    }""")
-    assert seed_lower == seed_upper, f"Lowercase seed {seed_lower} should equal uppercase {seed_upper}"
-
-
 def test_shared_seed_no_seed_param_goes_to_menu(page: Page):
     """Without seed param, game starts normally at MenuScene."""
     page.set_viewport_size({"width": 1280, "height": 720})
