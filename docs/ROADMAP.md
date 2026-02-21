@@ -222,12 +222,17 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 - Nintendo B-button back navigation flaky under parallel test execution
 - Y-depth sorting and collision hitbox changes lack dedicated E2E regression tests
 - Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests. E2E-only coverage. Add geometry query and collision logic tests.
+- HUDScene event listener leak (ski mode): no regression test verifying listeners don't accumulate across level transitions
+- Text truncation at 360px mobile portrait: no E2E test for MenuScene/CreditsScene title overflow
+- Settings overlay depth: no test verifying settings panel renders above menu after depth changes
+- Keybinding reload on resume: no test for rebinding keys in settings then resuming gameplay
 
 ### Deferred Refactors
 
 - ~~Halfpipe should not have lateral boundary walls — players need to enter/exit from the sides~~ ✅ Fixed
 - GameScene further decomposition: GroomingSystem, InputManager candidates. LevelGeometry, PisteRenderer, WinchSystem, ObstacleBuilder done. Remaining methods (movement, resources, game flow, camera) are tightly coupled to GameScene state — further extraction would increase complexity.
 - Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring ~7 lines, track aging ~10 lines, same-species repulsion ~9 lines). Both files use the same patterns but different coordinate systems (side-view vs top-down), making extraction non-trivial.
+- GameScene directly references DialogueScene via `scene.get()` cast — should use GAME_EVENTS for decoupling. DialogueScene similarly accesses HUDScene for touch control positioning.
 - MenuScene (1134 lines): terrain renderer, overlay manager, wildlife controller extracted; dead code removed, device detection deduplicated. Remaining UI layout/buttons/footer is inherently scene-specific.
 - SettingsScene (1263 lines): focus navigator, keybinding manager extracted; scroll panel setup consolidated, magic numbers extracted, binding row methods merged. Remaining UI factories are tightly coupled to scene state — extraction deferred as net-negative.
 - ✅ ~~HazardSystem callback coupling: GameScene passes 6 closures to `createAvalancheZones()`.~~ Replaced with `GAME_EVENTS.SHOW_DIALOGUE` and `GAME_EVENTS.HAZARD_GAME_OVER` events + query callback properties (`isGameOver`, `isGrooming`).

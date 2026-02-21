@@ -420,6 +420,24 @@ All depth values are centralized in `DEPTHS` from `src/config/gameConfig.ts`:
 | Frost overlay | 250 | `FROST_OVERLAY` | Frost vignette (above player and weather) |
 | Victory | 500 | `VICTORY` | Victory text (topmost) |
 
+**Menu/overlay scene depths** (separate depth space from game world):
+
+| Layer | Depth | Constant | Contents |
+|-------|-------|----------|----------|
+| Sky | 0 | `MENU_SKY` | Sky background |
+| Far mountains | 1 | `MENU_MOUNTAINS_FAR` | Distant mountains |
+| Near mountains | 2 | `MENU_MOUNTAINS_NEAR` | Close mountains |
+| Snow | 3 | `MENU_SNOW` | Snow ground, groomed lines |
+| Trees/groomer | 5 | `MENU_TREES` | Y-sorted: `MENU_TREES + y*0.001` |
+| Tint overlay | 6 | `MENU_TINT_OVERLAY` | Fail-screen tint (above terrain, below backdrop) |
+| Backdrop | 8 | `MENU_BACKDROP` | Dark overlay behind UI for readability |
+| UI | 10 | `MENU_UI` | Panels, buttons, text |
+| Scroll fade | 11 | `MENU_SCROLL_FADE` | Scroll fade gradients, content above panels |
+| Badges | 12 | `MENU_BADGES` | Level badges, star overlays |
+| Overlay | 13 | `MENU_OVERLAY` | Darken overlay for settings/pause modals |
+| Dialog | 15 | `MENU_DIALOG` | Dialogs, modals |
+| Toast | 200 | `MENU_TOAST` | Toast notifications (topmost) |
+
 ### Organic Edges
 
 For natural-looking boundaries (cliffs, terrain transitions):
