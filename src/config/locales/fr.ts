@@ -221,10 +221,10 @@ const fr: Record<string, string> = {
   tutorialGroomAction: "❄️ Maintiens {groomKey} en roulant pour damer la neige. Tu verras, ça se fait presque tout seul.",
   tutorialGroomActionTouch: "❄️ Maintiens le bouton de damage à droite en roulant pour damer la neige.",
   tutorialGroomActionGamepad: "❄️ Maintiens {groomKey} en roulant pour damer la neige. Tu verras, ça se fait presque tout seul.",
-  tutorialGroomGoal: "📊 Voilà ! Dame au moins 40% avant l'ouverture. Les skieurs arrivent bientôt !",
+  tutorialGroomGoal: "📊 Voilà ! Dame au moins 60% avant l'ouverture. Les skieurs arrivent bientôt !",
   // UNUSED   tutorialCoverage: "📊 Tu vois ? La neige devient plus lisse ! Continue à damer la piste.",
   // UNUSED   tutorialHUD: "📈 Regarde le tableau de bord en haut : la barre rouge c'est ton carburant, la verte ton endurance, et la blanche ta couverture. Le chrono tourne !",
-  // UNUSED   tutorialGoal: "🎯 Il faut damer au moins 40% de la piste avant l'ouverture. Les skieurs arrivent bientôt !",
+  // UNUSED   tutorialGoal: "🎯 Il faut damer au moins 60% de la piste avant l'ouverture. Les skieurs arrivent bientôt !",
   // UNUSED tutorialFuel: "⛽ Attention, rouler consomme du carburant. En mission, passe à la station-service !",
   tutorialComplete: "🏆 Bravo ! Tu maîtrises les bases. Prêt pour ta première vraie mission sur la Piste Verte ?",
   

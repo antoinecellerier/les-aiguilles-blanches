@@ -217,10 +217,10 @@ const tr: Record<string, string> = {
   tutorialGroomAction: "❄️ Sürerken {groomKey} basılı tutarak karı ez. Düzleşecek.",
   tutorialGroomActionTouch: "❄️ Sürerken sağdaki ezme düğmesini basılı tut.",
   tutorialGroomActionGamepad: "❄️ Sürerken {groomKey} basılı tutarak karı ez. Düzleşecek.",
-  tutorialGroomGoal: "📊 İşte böyle! Açılıştan önce en az %40'ını ez. Kayakçılar geliyor!",
+  tutorialGroomGoal: "📊 İşte böyle! Açılıştan önce en az %60'ını ez. Kayakçılar geliyor!",
   // UNUSED   tutorialCoverage: "📊 Gördün mü? Kar daha pürüzsüz! Pisti ezmeye devam et.",
   // UNUSED   tutorialHUD: "📈 Üstteki paneli kontrol et: kırmızı yakıt, yeşil dayanıklılık, beyaz kapsam. Zaman akıyor!",
-  // UNUSED   tutorialGoal: "🎯 Açılıştan önce pistin en az %40'ını ezmelisin. Kayakçılar geliyor!",
+  // UNUSED   tutorialGoal: "🎯 Açılıştan önce pistin en az %60'ını ezmelisin. Kayakçılar geliyor!",
   // UNUSED tutorialFuel: "⛽ Dikkat — sürüş yakıt tüketir. Görevlerde yakıt istasyonuna uğra.",
   tutorialComplete: "🏆 Aferin! Temelleri öğrendin. Yeşil pistteki ilk görevine hazır mısın?",
 

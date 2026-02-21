@@ -217,10 +217,10 @@ const fi: Record<string, string> = {
   tutorialGroomAction: "❄️ Pidä {groomKey} pohjassa ajaessasi tampataksesi lunta. Se tasoittuu heti.",
   tutorialGroomActionTouch: "❄️ Pidä oikealla olevaa tampausnappia pohjassa ajaessasi.",
   tutorialGroomActionGamepad: "❄️ Pidä {groomKey} pohjassa ajaessasi tampataksesi lunta. Se tasoittuu heti.",
-  tutorialGroomGoal: "📊 Juuri niin! Tamppaa vähintään 40% ennen avaamista. Hiihtäjät tulevat!",
+  tutorialGroomGoal: "📊 Juuri niin! Tamppaa vähintään 60% ennen avaamista. Hiihtäjät tulevat!",
   // UNUSED   tutorialCoverage: "📊 Näetkö? Lumi tasoittuu! Jatka rinteen tampaamista.",
   // UNUSED   tutorialHUD: "📈 Katso mittaristoa ylhäällä: punainen palkki on polttoaine, vihreä kestävyys, valkoinen kattavuus. Kello tikittää!",
-  // UNUSED   tutorialGoal: "🎯 Sinun täytyy tampata vähintään 40% rinteestä ennen avaamista. Hiihtäjät tulevat!",
+  // UNUSED   tutorialGoal: "🎯 Sinun täytyy tampata vähintään 60% rinteestä ennen avaamista. Hiihtäjät tulevat!",
   // UNUSED tutorialFuel: "⛽ Varoitus — ajaminen kuluttaa polttoainetta. Tehtävissä pysähdy tankkaamaan.",
   tutorialComplete: "🏆 Hyvin tehty! Perusasiat hallussa. Valmis ensimmäiseen oikeaan tehtävään vihreällä rinteellä?",
 

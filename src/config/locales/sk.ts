@@ -217,10 +217,10 @@ const sk: Record<string, string> = {
   tutorialGroomAction: "❄️ Drž {groomKey} počas jazdy pre úpravu snehu. Sneh sa vyrovná.",
   tutorialGroomActionTouch: "❄️ Drž tlačidlo úpravy vpravo počas jazdy pre úpravu snehu.",
   tutorialGroomActionGamepad: "❄️ Drž {groomKey} počas jazdy pre úpravu snehu. Sneh sa vyrovná.",
-  tutorialGroomGoal: "📊 Správne! Uprav aspoň 40% pred otvorením. Lyžiari prichádzajú!",
+  tutorialGroomGoal: "📊 Správne! Uprav aspoň 60% pred otvorením. Lyžiari prichádzajú!",
   // UNUSED   tutorialCoverage: "📊 Vidíš? Sneh je hladší! Pokračuj v úprave zjazdovky.",
   // UNUSED   tutorialHUD: "📈 Sleduj panel hore: červená je palivo, zelená výdrž, biela pokrytie. Čas beží!",
-  // UNUSED   tutorialGoal: "🎯 Musíš upraviť aspoň 40% zjazdovky pred otvorením. Lyžiari prichádzajú!",
+  // UNUSED   tutorialGoal: "🎯 Musíš upraviť aspoň 60% zjazdovky pred otvorením. Lyžiari prichádzajú!",
   // UNUSED tutorialFuel: "⛽ Pozor — jazda spotrebúva palivo. Na misiách stav na čerpacej stanici.",
   tutorialComplete: "🏆 Výborne! Ovládol si základy. Pripravený na prvú misiu na zelenej zjazdovke?",
 

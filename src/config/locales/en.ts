@@ -217,10 +217,10 @@ const en: Record<string, string> = {
   tutorialGroomAction: "❄️ Hold {groomKey} while driving to groom the snow. It'll smooth right out.",
   tutorialGroomActionTouch: "❄️ Hold the groom button on the right while driving to groom the snow.",
   tutorialGroomActionGamepad: "❄️ Hold {groomKey} while driving to groom the snow. It'll smooth right out.",
-  tutorialGroomGoal: "📊 That's it! Groom at least 40% before the lifts open. Skiers are coming!",
+  tutorialGroomGoal: "📊 That's it! Groom at least 60% before the lifts open. Skiers are coming!",
   // UNUSED   tutorialCoverage: "📊 See? The snow becomes smoother! Keep grooming the piste.",
   // UNUSED   tutorialHUD: "📈 Check the dashboard up top: the red bar is fuel, green is stamina, white is coverage. The clock's ticking!",
-  // UNUSED   tutorialGoal: "🎯 You need to groom at least 40% of the piste before opening. Skiers are coming!",
+  // UNUSED   tutorialGoal: "🎯 You need to groom at least 60% of the piste before opening. Skiers are coming!",
   // UNUSED tutorialFuel: "⛽ Careful — driving burns fuel. On missions, stop by the fuel station.",
   tutorialComplete: "🏆 Well done! You've mastered the basics. Ready for your first real mission on the Green Piste?",
   

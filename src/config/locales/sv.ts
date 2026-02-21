@@ -217,10 +217,10 @@ const sv: Record<string, string> = {
   tutorialGroomAction: "❄️ Håll {groomKey} medan du kör för att preparera snön. Den jämnas ut direkt.",
   tutorialGroomActionTouch: "❄️ Håll prepareringsknappen till höger medan du kör för att preparera snön.",
   tutorialGroomActionGamepad: "❄️ Håll {groomKey} medan du kör för att preparera snön. Den jämnas ut direkt.",
-  tutorialGroomGoal: "📊 Precis! Preparera minst 40% innan öppning. Skidåkarna kommer!",
+  tutorialGroomGoal: "📊 Precis! Preparera minst 60% innan öppning. Skidåkarna kommer!",
   // UNUSED   tutorialCoverage: "📊 Ser du? Snön blir jämnare! Fortsätt preparera pisten.",
   // UNUSED   tutorialHUD: "📈 Kolla instrumentpanelen: röd stapel är bränsle, grön uthållighet, vit täckning. Klockan tickar!",
-  // UNUSED   tutorialGoal: "🎯 Du måste preparera minst 40% av pisten innan öppning. Skidåkarna kommer!",
+  // UNUSED   tutorialGoal: "🎯 Du måste preparera minst 60% av pisten innan öppning. Skidåkarna kommer!",
   // UNUSED tutorialFuel: "⛽ Se upp — att köra förbrukar bränsle. Under uppdrag, stanna vid bensinstationen.",
   tutorialComplete: "🏆 Bra gjort! Du kan grunderna. Redo för ditt första riktiga uppdrag på gröna pisten?",
 

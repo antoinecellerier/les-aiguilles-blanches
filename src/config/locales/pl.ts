@@ -217,10 +217,10 @@ const pl: Record<string, string> = {
   tutorialGroomAction: "❄️ Przytrzymaj {groomKey} podczas jazdy aby ratrakować śnieg. Wygładzi się.",
   tutorialGroomActionTouch: "❄️ Przytrzymaj przycisk ratrakowania po prawej podczas jazdy.",
   tutorialGroomActionGamepad: "❄️ Przytrzymaj {groomKey} podczas jazdy aby ratrakować śnieg. Wygładzi się.",
-  tutorialGroomGoal: "📊 O to chodzi! Ratrakuj co najmniej 40% przed otwarciem. Narciarze nadjeżdżają!",
+  tutorialGroomGoal: "📊 O to chodzi! Ratrakuj co najmniej 60% przed otwarciem. Narciarze nadjeżdżają!",
   // UNUSED   tutorialCoverage: "📊 Widzisz? Śnieg jest gładszy! Kontynuuj ratrakowanie trasy.",
   // UNUSED   tutorialHUD: "📈 Sprawdź panel na górze: czerwony to paliwo, zielony kondycja, biały pokrycie. Czas leci!",
-  // UNUSED   tutorialGoal: "🎯 Musisz ratrakować co najmniej 40% trasy przed otwarciem. Narciarze nadjeżdżają!",
+  // UNUSED   tutorialGoal: "🎯 Musisz ratrakować co najmniej 60% trasy przed otwarciem. Narciarze nadjeżdżają!",
   // UNUSED tutorialFuel: "⛽ Uwaga — jazda zużywa paliwo. Na misjach zatrzymuj się na stacji paliw.",
   tutorialComplete: "🏆 Świetnie! Opanowałeś podstawy. Gotowy na pierwszą misję na zielonej trasie?",
 

@@ -217,10 +217,10 @@ const ja: Record<string, string> = {
   tutorialGroomAction: "❄️ {groomKey}を押しながら走ると雪が整備される。きれいになるぞ。",
   tutorialGroomActionTouch: "❄️ 右の圧雪ボタンを押しながら走ると雪が整備される。",
   tutorialGroomActionGamepad: "❄️ {groomKey}を押しながら走ると雪が整備される。きれいになるぞ。",
-  tutorialGroomGoal: "📊 その調子だ！オープンまでに40%以上を整備しろ。スキーヤーが来るぞ！",
+  tutorialGroomGoal: "📊 その調子だ！オープンまでに60%以上を整備しろ。スキーヤーが来るぞ！",
   // UNUSED   tutorialCoverage: "📊 ほら、雪がきれいになった！ゲレンデの圧雪を続けろ。",
   // UNUSED   tutorialHUD: "📈 上のダッシュボードを見ろ：赤が燃料、緑がスタミナ、白が整備率。時間も確認しろ！",
-  // UNUSED   tutorialGoal: "🎯 オープンまでにゲレンデの40%以上を整備する必要がある。スキーヤーが来るぞ！",
+  // UNUSED   tutorialGoal: "🎯 オープンまでにゲレンデの60%以上を整備する必要がある。スキーヤーが来るぞ！",
   // UNUSED tutorialFuel: "⛽ 注意 — 走ると燃料を消費する。ミッションでは給油所に寄れ。",
   tutorialComplete: "🏆 よくやった！基礎はマスターした。初めてのミッション、初級コースに挑戦するか？",
 

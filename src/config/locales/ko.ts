@@ -217,10 +217,10 @@ const ko: Record<string, string> = {
   tutorialGroomAction: "❄️ {groomKey}를 누르면서 주행하면 눈이 정비돼. 깔끔해질 거야.",
   tutorialGroomActionTouch: "❄️ 오른쪽의 정설 버튼을 누르면서 주행하면 눈이 정비돼.",
   tutorialGroomActionGamepad: "❄️ {groomKey}를 누르면서 주행하면 눈이 정비돼. 깔끔해질 거야.",
-  tutorialGroomGoal: "📊 바로 그거야! 개장 전까지 40% 이상 정비해. 스키어들이 오고 있어!",
+  tutorialGroomGoal: "📊 바로 그거야! 개장 전까지 60% 이상 정비해. 스키어들이 오고 있어!",
   // UNUSED   tutorialCoverage: "📊 봐! 눈이 깔끔해지고 있어! 슬로프 정설을 계속해.",
   // UNUSED   tutorialHUD: "📈 위의 대시보드를 확인해: 빨간 바는 연료, 초록은 체력, 흰색은 정비율. 시계도 확인해!",
-  // UNUSED   tutorialGoal: "🎯 개장 전까지 슬로프의 40% 이상을 정비해야 해. 스키어들이 오고 있어!",
+  // UNUSED   tutorialGoal: "🎯 개장 전까지 슬로프의 60% 이상을 정비해야 해. 스키어들이 오고 있어!",
   // UNUSED tutorialFuel: "⛽ 조심해 — 주행하면 연료가 소모돼. 미션에서는 주유소에 들러.",
   tutorialComplete: "🏆 잘했어! 기초를 마스터했어. 첫 미션, 초급 코스에 도전할 준비가 됐어?",
 
