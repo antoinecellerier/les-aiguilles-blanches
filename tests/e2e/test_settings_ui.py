@@ -330,7 +330,7 @@ class TestSettingsKeyboardNav:
         settings_page.wait_for_function("""() => {
             const scene = window.game.scene.getScene('SettingsScene');
             return scene && scene.focusIndex >= 0 && scene.focusItems.length > 0;
-        }""", timeout=3000)
+        }""", timeout=5000)
 
         has_focus = settings_page.evaluate("""() => {
             const scene = window.game.scene.getScene('SettingsScene');

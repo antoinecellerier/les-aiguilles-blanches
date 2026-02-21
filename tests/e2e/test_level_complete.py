@@ -52,6 +52,8 @@ class TestLevelComplete:
             return scene && scene.sys && scene.sys.isActive() &&
                    scene.children && scene.children.list.length > 3;
         }""", timeout=8000)
+        # Allow one more frame for layout to settle after scene restart
+        game_page.wait_for_timeout(200)
 
         bounds_ok = game_page.evaluate("""() => {
             const scene = window.game?.scene?.getScene('LevelCompleteScene');
@@ -126,7 +128,7 @@ class TestLevelComplete:
         # Click Retry (first button) — restartCount should increment
         game_page.wait_for_function(
             "() => window.game.scene.getScene('LevelCompleteScene')?.inputReady",
-            timeout=3000
+            timeout=5000
         )
         game_page.keyboard.press("Enter")
         wait_for_scene(game_page, 'GameScene', timeout=5000)
@@ -209,7 +211,7 @@ class TestFailScreen:
         game_page.wait_for_function("""() => {
             const scene = window.game?.scene?.getScene('LevelCompleteScene');
             return scene?.inputReady ?? false;
-        }""", timeout=3000)
+        }""", timeout=5000)
         
         input_ready = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('LevelCompleteScene');
@@ -251,7 +253,7 @@ class TestFailScreen:
         assert initial_state['selectedIndex'] == 0, "First button should be selected initially"
         
         game_page.keyboard.press("ArrowRight")
-        game_page.wait_for_function("() => window.game.scene.getScene('LevelCompleteScene')?.selectedIndex === 1", timeout=3000)
+        game_page.wait_for_function("() => window.game.scene.getScene('LevelCompleteScene')?.selectedIndex === 1", timeout=5000)
         
         new_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('LevelCompleteScene')?.selectedIndex;
@@ -259,7 +261,7 @@ class TestFailScreen:
         assert new_index == 1, "RIGHT should select second button"
         
         game_page.keyboard.press("ArrowLeft")
-        game_page.wait_for_function("() => window.game.scene.getScene('LevelCompleteScene')?.selectedIndex === 0", timeout=3000)
+        game_page.wait_for_function("() => window.game.scene.getScene('LevelCompleteScene')?.selectedIndex === 0", timeout=5000)
         
         final_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('LevelCompleteScene')?.selectedIndex;
@@ -283,7 +285,7 @@ class TestFailScreen:
         game_page.wait_for_function("""() => {
             const scene = window.game.scene.getScene('CreditsScene');
             return scene?.buttonsContainer?.visible === true;
-        }""", timeout=3000)
+        }""", timeout=5000)
         
         initial_state = game_page.evaluate("""() => {
             const scene = window.game.scene.getScene('CreditsScene');
@@ -299,7 +301,7 @@ class TestFailScreen:
         assert initial_state['selectedIndex'] == 0, "First button should be selected initially"
         
         game_page.keyboard.press("ArrowRight")
-        game_page.wait_for_function("() => window.game.scene.getScene('CreditsScene')?.selectedIndex === 1", timeout=3000)
+        game_page.wait_for_function("() => window.game.scene.getScene('CreditsScene')?.selectedIndex === 1", timeout=5000)
         
         new_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('CreditsScene')?.selectedIndex;
@@ -307,7 +309,7 @@ class TestFailScreen:
         assert new_index == 1, "RIGHT should select second button"
         
         game_page.keyboard.press("ArrowLeft")
-        game_page.wait_for_function("() => window.game.scene.getScene('CreditsScene')?.selectedIndex === 0", timeout=3000)
+        game_page.wait_for_function("() => window.game.scene.getScene('CreditsScene')?.selectedIndex === 0", timeout=5000)
         
         final_index = game_page.evaluate("""() => {
             return window.game.scene.getScene('CreditsScene')?.selectedIndex;

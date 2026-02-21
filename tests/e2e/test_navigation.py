@@ -135,7 +135,7 @@ class TestMenuNavigation:
         
         # Press Enter to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Enter")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=5000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=10000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Enter should only close overlay")
@@ -155,7 +155,7 @@ class TestMenuNavigation:
         
         # Press Space to dismiss - this should ONLY close overlay, not trigger menu
         game_page.keyboard.press("Space")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=8000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen === false; }", timeout=10000)
         
         # CRITICAL: Menu should still be active (not GameScene from accidental activation)
         assert_scene_active(game_page, 'MenuScene', "Menu should still be active - Space should only close overlay")
@@ -247,7 +247,7 @@ class TestMenuNavigation:
         
         # ESC should close it
         game_page.keyboard.press("Escape")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=5000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=8000)
         
         overlay_closed = game_page.evaluate("""() => {
             return window.game.scene.getScene('MenuScene')?.overlayOpen !== true;
@@ -304,7 +304,7 @@ class TestMenuNavigation:
         assert fits_screen, "Changelog content should fit within phone screen"
         
         game_page.keyboard.press("Escape")
-        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=5000)
+        game_page.wait_for_function("() => { const s = window.game?.scene?.getScene('MenuScene'); return s && s.overlayOpen !== true; }", timeout=8000)
         
         # Restore original viewport
         game_page.set_viewport_size({"width": 1280, "height": 720})

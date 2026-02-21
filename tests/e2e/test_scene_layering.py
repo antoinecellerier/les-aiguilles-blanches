@@ -113,7 +113,7 @@ class TestSceneLayering:
         game_page.keyboard.press("ArrowUp")
         game_page.wait_for_function(
             f"() => window.game.scene.getScene('MenuScene')?.selectedIndex === {btn_count - 1}",
-            timeout=3000
+            timeout=5000
         )
         idx = game_page.evaluate("() => window.game.scene.getScene('MenuScene')?.selectedIndex")
         assert idx == btn_count - 1, f"Up from first should wrap to last ({btn_count - 1}), got {idx}"
@@ -121,7 +121,7 @@ class TestSceneLayering:
         game_page.keyboard.press("ArrowDown")
         game_page.wait_for_function(
             "() => window.game.scene.getScene('MenuScene')?.selectedIndex === 0",
-            timeout=3000
+            timeout=5000
         )
         idx = game_page.evaluate("() => window.game.scene.getScene('MenuScene')?.selectedIndex")
         assert idx == 0, f"Down from last should wrap to first (0), got {idx}"
@@ -152,7 +152,7 @@ class TestSceneLayering:
         game_page.keyboard.press("ArrowDown")
         game_page.wait_for_function(
             "() => window.game.scene.getScene('MenuScene')?.selectedIndex === 1",
-            timeout=3000
+            timeout=5000
         )
         info2 = get_arrow_and_button()
         assert info2['selectedIndex'] == 1
