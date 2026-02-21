@@ -221,6 +221,27 @@ export const BALANCE = {
   AUDIO_VOICE_VOLUME_DEFAULT: 0.8,
   AUDIO_AMBIENCE_VOLUME_DEFAULT: 0.5,
 
+  // Voice blip volumes (per-character)
+  VOICE_VOLUME_JP: 0.22,        // Jean-Pierre — gruff, projected
+  VOICE_VOLUME_THIERRY: 0.20,   // Thierry — measured, technical
+  VOICE_VOLUME_EMILIE: 0.18,    // Émilie — bright, modern
+  VOICE_VOLUME_MARIE: 0.18,     // Marie — warm, gentle
+  VOICE_VOLUME_DEFAULT: 0.07,   // Fallback for unknown speakers
+  VOICE_FORMANT_MIX: 0.15,      // Vowel formant harmonic relative to voice volume
+
+  // Ambience volumes
+  AMBIENCE_STORM_WIND: 0.04,    // Base wind noise layer
+  AMBIENCE_STORM_GUST: 0.015,   // Howling gust layer
+  AMBIENCE_NIGHT_CALL: 0.05,    // Owl/wolf nocturnal calls
+
+  // UI SFX volumes
+  UI_CLICK_VOLUME: 0.1,         // Button click
+  UI_HOVER_VOLUME: 0.06,        // Selection tick
+  UI_FANFARE_VOLUME: 0.12,      // Level win/fail arpeggio notes
+
+  // Wildlife call base volume
+  WILDLIFE_CALL_VOLUME: 0.08,   // Base volume for animal vocalizations (marmot, chamois, etc.)
+
   // Ski/snowboard reward run
   SKI_GRAVITY_SPEED: 200,        // Base downhill velocity target (px/s)
   SKI_MAX_SPEED: 380,            // Terminal velocity

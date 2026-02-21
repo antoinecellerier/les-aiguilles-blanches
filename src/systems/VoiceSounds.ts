@@ -10,6 +10,7 @@
  */
 
 import { AudioSystem } from './AudioSystem';
+import { BALANCE } from '../config/gameConfig';
 
 /** Per-character voice profile */
 interface VoiceProfile {
@@ -27,28 +28,28 @@ const VOICES: Record<string, VoiceProfile> = {
     pitchRange: 40,
     type: 'triangle',
     speed: 1.0,
-    volume: 0.22,
+    volume: BALANCE.VOICE_VOLUME_JP,
   },
   'Thierry': {
     basePitch: 165,     // Mid-range, gruff
     pitchRange: 35,
     type: 'triangle',
     speed: 0.9,
-    volume: 0.20,
+    volume: BALANCE.VOICE_VOLUME_THIERRY,
   },
   'Émilie': {
     basePitch: 250,     // Higher, bright and lively
     pitchRange: 55,
     type: 'sine',
     speed: 1.1,
-    volume: 0.18,
+    volume: BALANCE.VOICE_VOLUME_EMILIE,
   },
   'Marie': {
     basePitch: 200,     // Warm, rounded — lower than Émilie
     pitchRange: 40,
     type: 'sine',
     speed: 0.95,        // slightly more relaxed pace
-    volume: 0.18,
+    volume: BALANCE.VOICE_VOLUME_MARIE,
   },
 };
 
@@ -57,7 +58,7 @@ const DEFAULT_VOICE: VoiceProfile = {
   pitchRange: 40,
   type: 'triangle',
   speed: 1.0,
-  volume: 0.07,
+  volume: BALANCE.VOICE_VOLUME_DEFAULT,
 };
 
 // Map vowels/consonants to pitch offsets for variety
@@ -128,7 +129,7 @@ export function playVoiceBlip(speaker: string, char: string): void {
     formant.type = 'sine';
     formant.frequency.setValueAtTime(pitch * 2.1, now);
     fGain.gain.setValueAtTime(0, now);
-    fGain.gain.linearRampToValueAtTime(voice.volume * 0.15, now + 0.005);
+    fGain.gain.linearRampToValueAtTime(voice.volume * BALANCE.VOICE_FORMANT_MIX, now + 0.005);
     fGain.gain.linearRampToValueAtTime(0, now + duration);
     formant.connect(fGain);
     fGain.connect(voiceNode);

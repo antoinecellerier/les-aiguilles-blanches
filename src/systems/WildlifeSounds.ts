@@ -7,7 +7,10 @@
  */
 
 import { AudioSystem } from './AudioSystem';
+import { BALANCE } from '../config/gameConfig';
 import type { AnimalType } from '../utils/animalSprites';
+
+const WV = () => BALANCE.WILDLIFE_CALL_VOLUME; // Base wildlife call volume
 
 /** Play the appropriate sound for a given animal type. */
 export function playAnimalCall(type: AnimalType): void {
@@ -36,8 +39,8 @@ export function playMarmotCall(): void {
   osc.frequency.setValueAtTime(2200, now);
   osc.frequency.linearRampToValueAtTime(1800, now + 0.15);
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.08, now + 0.02);
-  gain.gain.setValueAtTime(0.08, now + 0.10);
+  gain.gain.linearRampToValueAtTime(WV(), now + 0.02);
+  gain.gain.setValueAtTime(WV(), now + 0.10);
   gain.gain.linearRampToValueAtTime(0, now + 0.15);
   osc.connect(gain);
   gain.connect(sfx);
@@ -61,8 +64,8 @@ export function playChamoisCall(): void {
   osc.frequency.setValueAtTime(500, now);
   osc.frequency.linearRampToValueAtTime(350, now + 0.12);
   oscGain.gain.setValueAtTime(0, now);
-  oscGain.gain.linearRampToValueAtTime(0.06, now + 0.02);
-  oscGain.gain.setValueAtTime(0.06, now + 0.08);
+  oscGain.gain.linearRampToValueAtTime(WV() * 0.75, now + 0.02);
+  oscGain.gain.setValueAtTime(WV() * 0.75, now + 0.08);
   oscGain.gain.linearRampToValueAtTime(0, now + 0.15);
   osc.connect(oscGain);
   oscGain.connect(sfx);
@@ -83,7 +86,7 @@ export function playChamoisCall(): void {
   filter.frequency.value = 900;
   filter.Q.value = 1.2;
   const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.10, now);
+  gain.gain.setValueAtTime(WV() * 1.25, now);
   gain.gain.linearRampToValueAtTime(0, now + 0.2);
   noise.connect(filter);
   filter.connect(gain);
@@ -110,7 +113,7 @@ export function playBirdCall(): void {
     osc.frequency.setValueAtTime(freq, t);
     osc.frequency.linearRampToValueAtTime(freq * 0.8, t + 0.04);
     gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.06, t + 0.01);
+    gain.gain.linearRampToValueAtTime(WV() * 0.75, t + 0.01);
     gain.gain.linearRampToValueAtTime(0, t + 0.04);
     osc.connect(gain);
     gain.connect(sfx);
@@ -130,7 +133,7 @@ export function playBirdCall(): void {
   filter.type = 'highpass';
   filter.frequency.value = 3000;
   const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.04, now);
+  gain.gain.setValueAtTime(WV() * 0.5, now);
   gain.gain.linearRampToValueAtTime(0, now + 0.2);
   noise.connect(filter);
   filter.connect(gain);
@@ -155,7 +158,7 @@ export function playBunnyCall(): void {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(150, now + offset);
     osc.frequency.exponentialRampToValueAtTime(45, now + offset + 0.08);
-    gain.gain.setValueAtTime(0.12, now + offset);
+    gain.gain.setValueAtTime(WV() * 1.5, now + offset);
     gain.gain.linearRampToValueAtTime(0, now + offset + 0.08);
     osc.connect(gain);
     gain.connect(sfx);
@@ -180,7 +183,7 @@ export function playBouquetinCall(): void {
     const gain = ctx.createGain();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(600 + Math.random() * 400, t);
-    gain.gain.setValueAtTime(0.07, t);
+    gain.gain.setValueAtTime(WV() * 0.875, t);
     gain.gain.linearRampToValueAtTime(0, t + 0.03);
     osc.connect(gain);
     gain.connect(sfx);
@@ -205,7 +208,7 @@ export function playFoxCall(): void {
     osc.frequency.setValueAtTime(freq, now);
     osc.frequency.linearRampToValueAtTime(freq * 0.6, now + 0.1);
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.05, now + 0.02);
+    gain.gain.linearRampToValueAtTime(WV() * 0.625, now + 0.02);
     gain.gain.linearRampToValueAtTime(0, now + 0.1);
     osc.connect(gain);
     gain.connect(sfx);

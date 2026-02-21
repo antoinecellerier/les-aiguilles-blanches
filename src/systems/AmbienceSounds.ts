@@ -9,15 +9,16 @@
  */
 
 import { AudioSystem } from './AudioSystem';
+import { BALANCE } from '../config/gameConfig';
 
 // --- Storm tuning ---
-const STORM_WIND_VOLUME = 0.04;      // Moderate wind noise
-const STORM_GUST_VOLUME = 0.015;     // Subtle howling gust layer
+const STORM_WIND_VOLUME = BALANCE.AMBIENCE_STORM_WIND;
+const STORM_GUST_VOLUME = BALANCE.AMBIENCE_STORM_GUST;
 
 // --- Night wildlife tuning ---
 const NIGHT_CALL_MIN_INTERVAL = 8000;   // ms minimum between calls
 const NIGHT_CALL_MAX_INTERVAL = 20000;  // ms maximum between calls
-const NIGHT_CALL_VOLUME = 0.05;
+const NIGHT_CALL_VOLUME = BALANCE.AMBIENCE_NIGHT_CALL;
 
 // --- Noise buffer ---
 const NOISE_DURATION = 2;            // seconds of noise to generate

@@ -7,6 +7,7 @@
  */
 
 import { AudioSystem, type VolumeChannel } from './AudioSystem';
+import { BALANCE } from '../config/gameConfig';
 
 /** Small random pitch variation for organic feel (±5%) */
 function vary(base: number): number {
@@ -27,7 +28,7 @@ export function playClick(): void {
   osc.type = 'triangle';
   osc.frequency.setValueAtTime(vary(660), ctx.currentTime);
   osc.frequency.linearRampToValueAtTime(vary(550), ctx.currentTime + 0.05);
-  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+  gain.gain.setValueAtTime(BALANCE.UI_CLICK_VOLUME, ctx.currentTime);
   gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
 
   osc.connect(gain);
@@ -49,7 +50,7 @@ export function playHover(): void {
   const gain = ctx.createGain();
   osc.type = 'sine';
   osc.frequency.setValueAtTime(vary(900), ctx.currentTime);
-  gain.gain.setValueAtTime(0.06, ctx.currentTime);
+  gain.gain.setValueAtTime(BALANCE.UI_HOVER_VOLUME, ctx.currentTime);
   gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.02);
 
   osc.connect(gain);
@@ -204,8 +205,8 @@ export function playLevelWin(): void {
     const start = ctx.currentTime + i * 0.12;
     osc.frequency.setValueAtTime(vary(freq), start);
     gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(0.12, start + 0.03);
-    gain.gain.setValueAtTime(0.12, start + 0.08);
+    gain.gain.linearRampToValueAtTime(BALANCE.UI_FANFARE_VOLUME, start + 0.03);
+    gain.gain.setValueAtTime(BALANCE.UI_FANFARE_VOLUME, start + 0.08);
     gain.gain.linearRampToValueAtTime(0, start + 0.18);
     osc.connect(gain);
     gain.connect(sfx);
@@ -232,8 +233,8 @@ export function playLevelFail(): void {
     osc.frequency.setValueAtTime(vary(freq), start);
     osc.frequency.linearRampToValueAtTime(freq * 0.92, start + 0.25);
     gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(0.12, start + 0.03);
-    gain.gain.setValueAtTime(0.12, start + 0.12);
+    gain.gain.linearRampToValueAtTime(BALANCE.UI_FANFARE_VOLUME, start + 0.03);
+    gain.gain.setValueAtTime(BALANCE.UI_FANFARE_VOLUME, start + 0.12);
     gain.gain.linearRampToValueAtTime(0, start + 0.25);
     osc.connect(gain);
     gain.connect(sfx);
