@@ -198,7 +198,7 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_settings_ui.py` | Settings layout, DPI, viewport sizes |
 | `test_volume_indicator.py` | Volume icon, mute toggle, hover slider, overlay |
 | `test_level_select.py` | Level select navigation, star ratings, ski/groom buttons |
-| `test_daily_runs.py` | Daily runs navigation, rank cycling, gamepad, session persistence, briefing, level generation |
+| `test_daily_runs.py` | Daily runs navigation, rank cycling, gamepad, session persistence, briefing, level generation, obstacle consistency groom↔ski |
 | `test_seed_sharing.py` | URL param parsing, share button clipboard, shared seed display, locked/unlocked state, seed determinism |
 | `test_ski_run.py` | Ski run HUD, descent mode settings, viewport bounds |
 | `test_performance.py` | Baseline object counts (L0 vs L9), object count stability (leak detection) |

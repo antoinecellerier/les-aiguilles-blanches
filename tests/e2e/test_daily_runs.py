@@ -89,6 +89,23 @@ def start_daily_run(page: Page, use_gamepad: bool = False):
     dismiss_dialogues(page)
 
 
+def launch_daily_run(page: Page, rank: str = 'red'):
+    """Start a daily run programmatically — no menu navigation needed.
+    
+    Jumps straight to DailyRunsScene, sets the rank, and launches GameScene.
+    Page must already be loaded with all levels unlocked.
+    """
+    page.evaluate("() => window.game.scene.start('DailyRunsScene')")
+    wait_for_scene(page, "DailyRunsScene", timeout=8000)
+    page.evaluate(f"""() => {{
+        const drs = window.game.scene.getScene('DailyRunsScene');
+        drs.selectedRank = '{rank}';
+        drs.startDailyRun(12345, false);
+    }}""")
+    wait_for_scene(page, "GameScene", timeout=10000)
+    dismiss_dialogues(page)
+
+
 # --- Gamepad fixture ---
 
 
@@ -332,4 +349,46 @@ class TestDailyRunLevelGeneration:
         assert props1 == props2, f"Daily run not deterministic:\n  run1={props1}\n  run2={props2}"
 
 
+class TestDailyRunObstacleConsistency:
+    """Obstacle positions must match between groom mode and ski mode on daily runs."""
 
+    def test_obstacles_match_groom_to_ski(self, page: Page):
+        """Obstacle tile positions in groom mode should be identical in ski mode."""
+        setup_unlocked(page)
+        launch_daily_run(page, rank='red')
+
+        # Extract obstacle tile positions from groom mode (GameScene)
+        groom_data = page.evaluate("""() => {
+            const gs = window.game?.scene?.getScene('GameScene');
+            if (!gs) return null;
+            const ts = gs.tileSize;
+            const extract = (group) => (group?.getChildren() || [])
+                .filter(o => o.active)
+                .map(o => ({ tx: Math.round(o.x / ts), ty: Math.round(o.y / ts), key: o.texture?.key || '' }));
+            return extract(gs.obstacles).concat(extract(gs.interactables));
+        }""")
+        assert groom_data is not None, "GameScene not found"
+        groom_sorted = sorted(groom_data, key=lambda o: (o['ty'], o['tx']))
+        assert len(groom_sorted) > 0, "Should have obstacles in daily run"
+
+        # Dev shortcut K to jump to ski mode
+        page.keyboard.press("k")
+        wait_for_scene(page, "SkiRunScene", timeout=10000)
+
+        # SkiRunScene merges interactables into obstacles group
+        ski_data = page.evaluate("""() => {
+            const sr = window.game?.scene?.getScene('SkiRunScene');
+            if (!sr?.obstacles) return [];
+            const ts = sr.tileSize;
+            return sr.obstacles.getChildren()
+                .filter(o => o.active)
+                .map(o => ({ tx: Math.round(o.x / ts), ty: Math.round(o.y / ts), key: o.texture?.key || '' }));
+        }""")
+        ski_sorted = sorted(ski_data, key=lambda o: (o['ty'], o['tx']))
+        assert len(ski_sorted) > 0, "Should have obstacles in ski run"
+
+        assert groom_sorted == ski_sorted, (
+            f"Obstacle tile positions differ between groom and ski mode.\n"
+            f"  Groom ({len(groom_sorted)}): {groom_sorted[:5]}...\n"
+            f"  Ski   ({len(ski_sorted)}): {ski_sorted[:5]}..."
+        )

@@ -27,6 +27,7 @@ import { MusicSystem } from '../systems/MusicSystem';
 import { HazardSystem } from '../systems/HazardSystem';
 import { SlalomGateSystem } from '../systems/SlalomGateSystem';
 import { getDailyRunSession } from '../systems/DailyRunSession';
+import { SeededRNG, codeToSeed } from '../utils/seededRNG';
 import { ResizeManager } from '../utils/resizeManager';
 import { SCENE_KEYS } from '../config/sceneKeys';
 
@@ -198,10 +199,15 @@ export default class SkiRunScene extends Phaser.Scene {
     this.boundaryWalls = boundaryWalls;
     pisteRenderer.createPisteBoundaries(this.level, tileSize, worldWidth);
 
-    // Obstacles (reuse same system)
+    // Daily run seed for deterministic obstacle/hazard placement
+    const session = getDailyRunSession();
+    const dailyRunSeed = session ? codeToSeed(session.seedCode) : null;
+
+    // Obstacles (reuse same system with matching seed for daily runs)
+    const obstacleRng = dailyRunSeed !== null ? new SeededRNG((dailyRunSeed + 1) >>> 0) : null;
     this.obstacles = this.physics.add.staticGroup();
     const interactables = this.physics.add.staticGroup();
-    const obstacleBuilder = new ObstacleBuilder(this, this.geometry, this.nightSfx, this.nc);
+    const obstacleBuilder = new ObstacleBuilder(this, this.geometry, this.nightSfx, this.nc, obstacleRng);
     obstacleBuilder.create(this.level, tileSize, this.obstacles, interactables);
     // Buildings (fuel pump, restaurant) are solid obstacles during ski runs
     for (const child of interactables.getChildren()) {
@@ -307,7 +313,8 @@ export default class SkiRunScene extends Phaser.Scene {
 
     // Avalanche zones — skier can trigger avalanches on hazardous levels
     if (this.level.hazards?.includes('avalanche')) {
-      this.hazardSystem = new HazardSystem(this, this.nc);
+      const hazardRng = dailyRunSeed !== null ? new SeededRNG((dailyRunSeed + 2) >>> 0) : null;
+      this.hazardSystem = new HazardSystem(this, this.nc, hazardRng);
       this.hazardSystem.riskMultiplier = BALANCE.SKI_AVALANCHE_RISK_MULTIPLIER;
       this.hazardSystem.onAvalancheSound = (level: number) => {
         if (level === 1) this.skiSounds.playAvalancheWarning1();
