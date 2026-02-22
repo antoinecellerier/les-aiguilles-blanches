@@ -10,9 +10,9 @@ Captures 6 screenshots at 1280×720 + 1 Open Graph image at 1200×630.
 ### Quick Start
 
 ```bash
-./capture-screenshots.sh                    # All 7 images
-./capture-screenshots.sh --only menu,og     # Specific captures
-./capture-screenshots.sh --only gameplay    # Single capture
+scripts/capture-screenshots.sh                    # All 7 images
+scripts/capture-screenshots.sh --only menu,og     # Specific captures
+scripts/capture-screenshots.sh --only gameplay    # Single capture
 ```
 
 Requires dev server running (`./dev.sh`) and Playwright installed (`.venv/`).

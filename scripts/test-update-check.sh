@@ -2,6 +2,7 @@
 # Test the version update check banner
 # Builds the app, serves it with a fake version.json, opens in browser
 set -e
+cd "$(dirname "$0")/.."
 
 echo "🏗️  Building..."
 npm run build --silent

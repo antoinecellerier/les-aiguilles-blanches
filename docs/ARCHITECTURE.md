@@ -32,16 +32,16 @@ snow-groomer/
 │   └── favicon.svg         # Pixel-art favicon (groomer + mountain)
 ├── vite.config.ts          # Vite bundler config
 ├── tsconfig.json           # TypeScript config
-├── capture-screenshots.sh    # Capture 6 doc screenshots + OG image via Playwright
 ├── publish.sh              # Build script for deployment
-├── publish-remote.sh       # Build and deploy to remote server via scp
 ├── build-desktop.sh        # Build game + launch/package Electron desktop app
 ├── dev.sh                  # Ensure dev server is running (starts or reuses)
 ├── setup.sh                # Download dependencies, set up dev environment
 ├── run-tests.sh            # Run Playwright tests (headless, parallel, both browsers)
 ├── scripts/
-│   └── capture_screenshots.py  # Playwright screenshot capture (menu, gameplay, trail map, etc.)
-├── test-update-check.sh    # Test version update check banner locally
+│   ├── capture_screenshots.py  # Playwright screenshot capture (menu, gameplay, trail map, etc.)
+│   ├── capture-screenshots.sh  # Capture 6 doc screenshots + OG image via Playwright
+│   ├── clean-screenshots.sh    # Clean up temporary test screenshots
+│   └── test-update-check.sh    # Test version update check banner locally
 ├── electron/               # Optional desktop wrapper (Electron)
 │   ├── main.cjs            # Electron main process — window management, display modes, IPC, xdg integration
 │   ├── preload.cjs         # contextBridge API (quit, fullscreen, display mode, background audio)

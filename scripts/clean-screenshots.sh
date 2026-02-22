@@ -3,6 +3,7 @@
 # Safe to run at any time — only removes files inside tests/screenshots/.
 
 set -euo pipefail
+cd "$(dirname "$0")/.."
 
 DIR="tests/screenshots"
 

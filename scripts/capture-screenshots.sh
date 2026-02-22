@@ -3,12 +3,12 @@
 # Requires: dev server running (./dev.sh), Python venv with Playwright.
 #
 # Usage:
-#   ./capture-screenshots.sh          # Capture all screenshots
-#   ./capture-screenshots.sh --menu   # Capture only menu screenshot
-#   ./capture-screenshots.sh --og     # Capture only OG image
+#   scripts/capture-screenshots.sh          # Capture all screenshots
+#   scripts/capture-screenshots.sh --menu   # Capture only menu screenshot
+#   scripts/capture-screenshots.sh --og     # Capture only OG image
 
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 # Load port from .env.local
 PORT="${PORT:-3000}"
