@@ -138,10 +138,19 @@ export class ObstacleBuilder {
       rg.fillRect(restaurant.x - 28 * s, restaurant.y - 25 * s, 56 * s, 3 * s);
     }
 
-    // Fuel station at bottom of level (shifted right on park levels to avoid features)
-    const fuelX = level.difficulty === 'park'
-      ? worldWidth - tileSize * 4
-      : worldWidth / 2 + tileSize * 4;
+    // Fuel station at bottom of level — placed on-piste to avoid boundary collisions
+    const fuelRow = Math.max(0, level.height - 3);
+    const bottomPath = this.geometry.pistePath[fuelRow];
+    let fuelX: number;
+    if (bottomPath) {
+      const pisteRight = (bottomPath.centerX + bottomPath.width / 2) * tileSize;
+      // Park: hug the right boundary edge to stay clear of features; others: inset more
+      fuelX = level.difficulty === 'park'
+        ? pisteRight - tileSize
+        : pisteRight - tileSize * 2;
+    } else {
+      fuelX = worldWidth / 2 + tileSize * 4;
+    }
     const fuelStation = interactables.create(
       fuelX, worldHeight - tileSize * 3, 'fuel' + this.nightSfx
     );

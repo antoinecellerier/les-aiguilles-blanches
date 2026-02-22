@@ -32,6 +32,8 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
+- ✅ **Boundary wall & fuel pump placement fix** — Boundary colliders now sample all 4 rows per segment (widest piste extent + 1-tile margin) so walls never intrude into the visible piste. Fuel pump placed on the actual piste corridor (right side, inset from edge) instead of hardcoded world positions — fixes inaccessible pump on daily run black/park levels with shifted pistes.
+
 - ✅ **Documentation screenshots & OG image** — Automated Playwright capture script (`capture-screenshots.sh`) for 6 doc screenshots (menu, gameplay, trail map, daily runs, level complete, ski trick) + Open Graph image. README updated to 3×2 screenshot grid.
 
 - ✅ **E2E runtime optimization defaults** — Added `--e2e-only` mode to `run-tests.sh`, added optional screenshot write flag (`--screenshots`), switched pytest parallel scheduling to `--dist=worksteal` with 7 workers by default, added duration-aware E2E ordering from persisted history (`.pytest-e2e-durations.json`), and reused module-scoped Playwright contexts in heavy suites (`resize_touch`, `accessibility_full`, `daily_runs`) while keeping per-test page/storage isolation.

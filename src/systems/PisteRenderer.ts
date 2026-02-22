@@ -179,9 +179,7 @@ export class PisteRenderer {
             if (cliff.side === 'right') rightCovered = true;
           }
         }
-        const path = this.geometry.pistePath[y] || { centerX: level.width / 2, width: level.width * 0.5 };
-        const leftEdge = (path.centerX - path.width / 2) * tileSize;
-        const rightEdge = (path.centerX + path.width / 2) * tileSize;
+        const { leftEdge, rightEdge } = this.widestPisteBounds(y, level, tileSize);
         if (!leftCovered && leftEdge > tileSize && !isAccessZone(yPos, 'left')) {
           const wall = this.scene.add.rectangle(
             leftEdge / 2, yPos + segmentHeight / 2, leftEdge, segmentHeight, 0x000000, 0
@@ -204,9 +202,7 @@ export class PisteRenderer {
         if (y >= level.height - 2) continue;
 
         const yPos = y * tileSize;
-        const path = this.geometry.pistePath[y] || { centerX: level.width / 2, width: level.width * 0.5 };
-        const leftEdge = (path.centerX - path.width / 2) * tileSize;
-        const rightEdge = (path.centerX + path.width / 2) * tileSize;
+        const { leftEdge, rightEdge } = this.widestPisteBounds(y, level, tileSize);
 
         // Halfpipe levels: no lateral walls inside the pipe (rows 3..height-3)
         const inPipe = hasHalfpipe && y >= 3 && y < level.height - 3;
@@ -247,6 +243,22 @@ export class PisteRenderer {
     }
 
     return { boundaryWalls };
+  }
+
+  /** Compute widest piste bounds across a 4-row segment with groomer-width margin. */
+  private widestPisteBounds(startRow: number, level: Level, tileSize: number): { leftEdge: number; rightEdge: number } {
+    const fallback = { centerX: level.width / 2, width: level.width * 0.5 };
+    const path0 = this.geometry.pistePath[startRow] || fallback;
+    let minLeft = (path0.centerX - path0.width / 2) * tileSize;
+    let maxRight = (path0.centerX + path0.width / 2) * tileSize;
+    for (let dy = 1; dy < 4 && startRow + dy < level.height; dy++) {
+      const p = this.geometry.pistePath[startRow + dy];
+      if (!p) continue;
+      minLeft = Math.min(minLeft, (p.centerX - p.width / 2) * tileSize);
+      maxRight = Math.max(maxRight, (p.centerX + p.width / 2) * tileSize);
+    }
+    // Inset by 1 tile so the groomer body doesn't clip the wall at the piste edge
+    return { leftEdge: minLeft - tileSize, rightEdge: maxRight + tileSize };
   }
 
   private createCliffEdgeVisuals(level: Level, tileSize: number): void {
