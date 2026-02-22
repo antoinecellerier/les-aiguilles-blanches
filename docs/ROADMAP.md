@@ -15,10 +15,6 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 
 - **PipeWire/PulseAudio stream shows "Chromium"** — Electron/Chromium hardcodes the PulseAudio `application.name` in `pulse_util.cc`. No workaround exists. Tracking [electron/electron#49270](https://github.com/electron/electron/pull/49270).
 
-### Test Coverage Gaps
-
-- WinchSystem, ObstacleBuilder have no vitest unit tests (tightly coupled to Phaser — needs refactoring to decouple logic from rendering)
-
 ### Deferred Refactors
 
 - Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring, track aging, same-species repulsion). Same patterns, different coordinate systems (side-view vs top-down) — extraction non-trivial.
