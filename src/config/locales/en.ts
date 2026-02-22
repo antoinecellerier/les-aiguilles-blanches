@@ -304,6 +304,8 @@ const en: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "February 19, 2026",
   changelog_20260219: "🎬 Cold-open prologue for new players\n📖 Streamlined tutorial\n🌦️ Random menu weather\n🔗 Shareable daily runs\n🎥 Cinematic credits scene",
+  changelog_20260222_date: "February 22, 2026",
+  changelog_20260222: "🚩 Slalom gate rebalance\n💬 Feedback button",
   changelog_20260220_date: "February 20, 2026",
   changelog_20260220: "🗺️ Trail map\n🎿 Ski resort terminology",
   changelog_20260217_date: "February 17, 2026",

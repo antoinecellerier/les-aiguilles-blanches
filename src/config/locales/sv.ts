@@ -305,6 +305,8 @@ const sv: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19 februari 2026",
   changelog_20260219: "🎬 Prolog för nya spelare\n📖 Förenklad handledning\n🌦️ Slumpmässigt menyväder\n🔗 Delbara dagliga åk\n🎥 Filmisk sluttext",
+  changelog_20260222_date: "22 februari 2026",
+  changelog_20260222: "🚩 Ombalansering av slalomportar\n💬 Feedbackknapp",
   changelog_20260220_date: "20 februari 2026",
   changelog_20260220: "🗺️ Pistkartan\n🎿 Skidortsterminologi",
   changelog_20260217_date: "17 februari 2026",

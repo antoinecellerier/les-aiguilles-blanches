@@ -310,6 +310,8 @@ const fr: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19 février 2026",
   changelog_20260219: "🎬 Prologue pour les nouveaux joueurs\n📖 Tutoriel simplifié\n🌦️ Météo aléatoire au menu\n🔗 Pistes du jour partageables\n🎥 Générique cinématique",
+  changelog_20260222_date: "22 février 2026",
+  changelog_20260222: "🚩 Rééquilibrage des portes de slalom\n💬 Bouton de feedback",
   changelog_20260220_date: "20 février 2026",
   changelog_20260220: "🗺️ Plan des pistes\n🎿 Vocabulaire de station",
   changelog_20260217_date: "17 février 2026",

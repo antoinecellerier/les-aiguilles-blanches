@@ -305,6 +305,8 @@ const fi: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19. helmikuuta 2026",
   changelog_20260219: "🎬 Prologi uusille pelaajille\n📖 Yksinkertaistettu opastus\n🌦️ Satunnainen valikon sää\n🔗 Jaettavat päivän laskut\n🎥 Elokuvamainen lopputeksti",
+  changelog_20260222_date: "22. helmikuuta 2026",
+  changelog_20260222: "🚩 Pujotteluporttien tasapainotus\n💬 Palautepainike",
   changelog_20260220_date: "20. helmikuuta 2026",
   changelog_20260220: "🗺️ Rinnekartta\n🎿 Hiihtokeskussanasto",
   changelog_20260217_date: "17. helmikuuta 2026",

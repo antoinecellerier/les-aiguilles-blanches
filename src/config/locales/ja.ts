@@ -304,6 +304,8 @@ const ja: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "2026年2月19日",
   changelog_20260219: "🎬 新規プレイヤー向けプロローグ\n📖 チュートリアル簡略化\n🌦️ メニューのランダム天候\n🔗 デイリーラン共有\n🎥 シネマティックエンドロール",
+  changelog_20260222_date: "2026年2月22日",
+  changelog_20260222: "🚩 スラロームゲートの調整\n💬 フィードバックボタン",
   changelog_20260220_date: "2026年2月20日",
   changelog_20260220: "🗺️ ゲレンデマップ\n🎿 スキー場用語",
   changelog_20260217_date: "2026年2月17日",

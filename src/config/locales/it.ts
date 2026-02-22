@@ -256,6 +256,8 @@ const it: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19 febbraio 2026",
   changelog_20260219: "🎬 Prologo per nuovi giocatori\n📖 Tutorial semplificato\n🌦️ Meteo casuale nel menu\n🔗 Piste del giorno condivisibili\n🎥 Titoli di coda cinematografici",
+  changelog_20260222_date: "22 febbraio 2026",
+  changelog_20260222: "🚩 Ribilanciamento porte slalom\n💬 Pulsante feedback",
   changelog_20260220_date: "20 febbraio 2026",
   changelog_20260220: "🗺️ Mappa delle piste\n🎿 Terminologia da stazione",
   changelog_20260217_date: "17 febbraio 2026",

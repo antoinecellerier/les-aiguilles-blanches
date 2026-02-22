@@ -304,6 +304,8 @@ const pl: Record<string, string> = {
   // Changelog
   changelog_20260219_date: "19 lutego 2026",
   changelog_20260219: "🎬 Prolog dla nowych graczy\n📖 Uproszczony samouczek\n🌦️ Losowa pogoda w menu\n🔗 Udostępniane zjazdy dnia\n🎥 Kinowe napisy końcowe",
+  changelog_20260222_date: "22 lutego 2026",
+  changelog_20260222: "🚩 Rebalans bramek slalomowych\n💬 Przycisk opinii",
   changelog_20260220_date: "20 lutego 2026",
   changelog_20260220: "🗺️ Mapa tras\n🎿 Terminologia narciarska",
   changelog_20260217_date: "17 lutego 2026",
