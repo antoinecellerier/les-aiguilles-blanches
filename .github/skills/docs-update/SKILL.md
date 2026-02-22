@@ -22,11 +22,10 @@ Update `docs/ARCHITECTURE.md` if any of these changed:
 
 Update `docs/ROADMAP.md`:
 
-- **Work queue** — move completed items from queue to "Recently Completed"
-- **Recently Completed** — add a one-line summary of what was done
-- **Technical Debt** — add any new debt discovered, remove resolved items
+- **Backlog** — remove completed items, add new feature ideas
+- **Known Issues** — add new bugs discovered, remove resolved items
 - **Test Coverage Gaps** — update if tests were added or gaps identified
-- **Patterns to Watch** — add new patterns that future devs must follow
+- **Deferred Refactors** — add new debt discovered, remove resolved items
 
 ### 3. GAMEPLAY.md
 
