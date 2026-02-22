@@ -17,7 +17,6 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 
 ### Test Coverage Gaps
 
-- Nintendo B-button back navigation flaky under parallel test execution
 - WinchSystem, ObstacleBuilder have no vitest unit tests (tightly coupled to Phaser — needs refactoring to decouple logic from rendering)
 
 ### Deferred Refactors
