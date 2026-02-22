@@ -8,12 +8,8 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 
 ### Features
 
-- [ ] **Halfpipe scoring zones (v2)** — Replace raw coverage with zone-quality scoring (clean edges, transitions, flat bottom)
-- [ ] **Ski/snowboard reward run (v2)** — Per-level terrain modifications, best time tracking
-- [ ] **More character dialogues per level**
 - [ ] **Leaderboards**
 - [ ] **Publish to game stores** — Electron desktop wrapper exists (`./build-desktop.sh`); store distribution (Steam, itch.io) TBD
-- [ ] **Easter eggs** — 5G towers, Candide Thovex cameo
 
 ### Known Issues
 
