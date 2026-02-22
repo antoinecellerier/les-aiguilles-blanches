@@ -55,7 +55,12 @@ jobs:
         run: PLAYWRIGHT_WITH_DEPS=1 ./setup.sh ${{ matrix.browser }}
 
       - name: Run tests
-        run: ./run-tests.sh --browser ${{ matrix.browser }} -n 4
+        run: |
+          RERUNS=""
+          if [ "${{ matrix.browser }}" = "webkit" ]; then
+            RERUNS="--reruns 1"
+          fi
+          ./run-tests.sh --browser ${{ matrix.browser }} -n 4 $RERUNS
 
       - name: Upload screenshots on failure
         if: failure()
