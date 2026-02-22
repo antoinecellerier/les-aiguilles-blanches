@@ -32,7 +32,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Recently Completed
 
-- ✅ **Boundary wall & fuel pump placement fix** — Boundary colliders now sample all 4 rows per segment (widest piste extent + 1-tile margin) so walls never intrude into the visible piste. Fuel pump placed on the actual piste corridor (right side, inset from edge) instead of hardcoded world positions — fixes inaccessible pump on daily run black/park levels with shifted pistes.
+- ✅ **Boundary wall & fuel pump placement fix** — Boundary colliders now sample all 4 rows per segment (widest piste extent + 1-tile margin) so walls never intrude into the visible piste. Fuel pump placed on the actual piste corridor (right side, inset from edge) instead of hardcoded world positions — fixes inaccessible pump on daily run black/park levels with shifted pistes. Fixed HUDScene crash when returning from settings on daily runs (level resolved via `getDailyRunSession()` instead of `LEVELS[levelIndex]`).
 
 - ✅ **Documentation screenshots & OG image** — Automated Playwright capture script (`capture-screenshots.sh`) for 6 doc screenshots (menu, gameplay, trail map, daily runs, level complete, ski trick) + Open Graph image. README updated to 3×2 screenshot grid.
 

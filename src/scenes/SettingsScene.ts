@@ -19,6 +19,7 @@ import { getSavedProgress } from '../utils/gameProgress';
 import { GamepadDiagnosticPanel } from '../systems/GamepadDiagnostic';
 import { isDesktopApp, setDisplayMode, setBackgroundAudio } from '../types/electron';
 import { SCENE_KEYS } from '../config/sceneKeys';
+import { getDailyRunSession } from '../systems/DailyRunSession';
 
 /**
  * RexUI Settings Scene - Full responsive implementation using rexUI
@@ -1348,8 +1349,10 @@ export default class SettingsScene extends Phaser.Scene {
       // Return to pause menu — GameScene is still paused, just resume overlays
       const game = this.game;
       const levelIndex = this.levelIndex;
+      // Resolve level from running game scene (handles daily runs where id ∉ LEVELS)
+      const level = getDailyRunSession()?.level || LEVELS[levelIndex];
       this.scene.stop(SCENE_KEYS.SETTINGS);
-      game.scene.start(SCENE_KEYS.HUD, { level: LEVELS[levelIndex] });
+      game.scene.start(SCENE_KEYS.HUD, { level });
       game.scene.start(SCENE_KEYS.DIALOGUE);
       game.scene.start(SCENE_KEYS.PAUSE, { levelIndex, skiMode: this.skiMode, skiRunMode: this.skiRunMode });
     } else if (this.returnTo === SCENE_KEYS.GAME) {
