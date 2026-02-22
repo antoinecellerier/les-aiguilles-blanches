@@ -14,8 +14,3 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 ### Known Issues
 
 - **PipeWire/PulseAudio stream shows "Chromium"** — Electron/Chromium hardcodes the PulseAudio `application.name` in `pulse_util.cc`. No workaround exists. Tracking [electron/electron#49270](https://github.com/electron/electron/pull/49270).
-
-### Deferred Refactors
-
-- Wildlife behavior duplication between MenuScene and WildlifeSystem (bird soaring, track aging, same-species repulsion). Same patterns, different coordinate systems (side-view vs top-down) — extraction non-trivial.
-- Static Graphics to textures: ~26 pole/marker Graphics remaining (11-20 commands each, diminishing returns).
