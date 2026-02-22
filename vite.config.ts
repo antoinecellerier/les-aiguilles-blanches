@@ -8,7 +8,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 function getVersion() {
   try {
     const hash = execSync('git rev-parse --short HEAD').toString().trim();
-    const dirty = execSync('git status --porcelain -uno').toString().trim();
+    const dirty = execSync('git status --porcelain').toString().trim();
     if (dirty) {
       // Use mtime of the most recently modified tracked/untracked file
       const mtime = execSync(
