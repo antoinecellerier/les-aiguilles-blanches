@@ -33,3 +33,6 @@ publish-remote.sh
 
 # Local environment overrides
 .env.local
+
+# Copilot session artifacts
+files/
