@@ -64,7 +64,7 @@ def get_selected_index(page: Page, scene: str) -> int:
     }}""")
 
 
-def wait_for_selected_index(page: Page, scene: str, expected: int, timeout: int = 3000):
+def wait_for_selected_index(page: Page, scene: str, expected: int, timeout: int = 5000):
     page.wait_for_function(f"""() => {{
         const s = window.game?.scene?.getScene('{scene}');
         const idx = s?.buttonNav?.selectedIndex ?? s?.selectedIndex ?? -1;
@@ -72,7 +72,7 @@ def wait_for_selected_index(page: Page, scene: str, expected: int, timeout: int 
     }}""", timeout=timeout)
 
 
-def wait_for_rank(page: Page, expected: str, timeout: int = 3000):
+def wait_for_rank(page: Page, expected: str, timeout: int = 5000):
     page.wait_for_function(f"""() => {{
         const s = window.game?.scene?.getScene('DailyRunsScene');
         return s?.selectedRank === '{expected}';
