@@ -166,12 +166,13 @@ export default class CreditsScene extends Phaser.Scene {
         fontStyle: isTitle ? 'bold' : 'normal',
         color: isTitle ? THEME.colors.accent : THEME.colors.textPrimary,
         align: 'center',
+        wordWrap: { width: width - 40 },
         shadow: textShadow,
       };
 
       const text = this.add.text(width / 2, yOffset, line, style).setOrigin(0.5);
       this.creditsContainer.add(text);
-      yOffset += line === '' ? 15 : 25;
+      yOffset += line === '' ? 15 : Math.max(25, text.height + 5);
     });
 
     this.creditsHeight = yOffset;

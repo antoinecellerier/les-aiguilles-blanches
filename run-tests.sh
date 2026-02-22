@@ -82,7 +82,7 @@ if [ "$SMART_MODE" = true ]; then
         while IFS= read -r f; do
             case "$f" in
                 src/utils/gamepad*.ts)       SMART_E2E_FILES+=("tests/e2e/test_gamepad.py") ;;
-                src/scenes/SettingsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_settings_ui.py") ;;
+                src/scenes/SettingsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_settings_ui.py" "tests/e2e/test_keybinding_reload.py") ;;
                 src/utils/touchDetect.ts)     SMART_E2E_FILES+=("tests/e2e/test_touch_controls.py" "tests/e2e/test_resize_touch.py") ;;
                 src/scenes/HUDScene.ts)       SMART_E2E_FILES+=("tests/e2e/test_touch_controls.py" "tests/e2e/test_resize_touch.py") ;;
                 src/scenes/DialogueScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_dialogue_speakers.py")
@@ -93,8 +93,8 @@ if [ "$SMART_MODE" = true ]; then
                 src/utils/resizeManager.ts)  SMART_E2E_FILES+=("tests/e2e/test_resize_touch.py") ;;
                 src/scenes/PauseScene.ts)    SMART_E2E_FILES+=("tests/e2e/test_pause_menu.py") ;;
                 src/scenes/LevelCompleteScene.ts) SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
-                src/scenes/CreditsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
-                src/scenes/MenuScene.ts)     SMART_E2E_FILES+=("tests/e2e/test_scene_layering.py" "tests/e2e/test_volume_indicator.py" "tests/e2e/test_level_select.py") ;;
+                src/scenes/CreditsScene.ts)  SMART_E2E_FILES+=("tests/e2e/test_level_complete.py" "tests/e2e/test_text_overflow.py") ;;
+                src/scenes/MenuScene.ts)     SMART_E2E_FILES+=("tests/e2e/test_scene_layering.py" "tests/e2e/test_volume_indicator.py" "tests/e2e/test_level_select.py" "tests/e2e/test_text_overflow.py") ;;
                 src/scenes/LevelSelectScene.ts) SMART_E2E_FILES+=("tests/e2e/test_level_select.py") ;;
                 src/scenes/DailyRunsScene.ts) SMART_E2E_FILES+=("tests/e2e/test_daily_runs.py" "tests/e2e/test_seed_sharing.py") ;;
                 src/scenes/SkiRunScene.ts)   SMART_E2E_FILES+=("tests/e2e/test_ski_run.py" "tests/e2e/test_daily_runs.py") ;;
@@ -124,7 +124,7 @@ if [ "$SMART_MODE" = true ]; then
                 src/utils/sceneTransitions.ts|src/utils/menuButtonNav.ts) SMART_E2E_FILES+=("tests/e2e/test_navigation.py" "tests/e2e/test_level_select.py") ;;
                 src/utils/overlayManager.ts) SMART_E2E_FILES+=("tests/e2e/test_pause_menu.py") ;;
                 src/utils/focusNavigator.ts) SMART_E2E_FILES+=("tests/e2e/test_settings_ui.py" "tests/e2e/test_accessibility.py") ;;
-                src/utils/keybindingManager.ts) SMART_E2E_FILES+=("tests/e2e/test_key_hints.py") ;;
+                src/utils/keybindingManager.ts) SMART_E2E_FILES+=("tests/e2e/test_key_hints.py" "tests/e2e/test_keybinding_reload.py") ;;
                 src/utils/renderThrottle.ts) SMART_E2E_FILES+=("tests/e2e/test_performance.py") ;;
                 src/utils/animalSprites.ts|src/utils/animalTracks.ts|src/utils/foxBehavior.ts) SMART_E2E_FILES+=("tests/e2e/test_level_mechanics.py") ;;
                 src/utils/bonusObjectives.ts) SMART_E2E_FILES+=("tests/e2e/test_level_complete.py") ;;
@@ -152,7 +152,7 @@ if [ "$SMART_MODE" = true ]; then
 
     # Validate: every E2E test file on disk must be known to the selection logic.
     # This catches new test files that haven't been added to the mapping above.
-    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_accessibility_full.py test_key_hints.py test_level_mechanics.py test_level_select.py test_ski_run.py test_volume_indicator.py test_performance.py test_resize_touch.py test_daily_runs.py test_seed_sharing.py"
+    KNOWN_E2E_FILES="test_navigation.py test_gamepad.py test_settings_ui.py test_touch_controls.py test_dialogue_speakers.py test_gameplay.py test_dialogue.py test_pause_menu.py test_level_complete.py test_scene_layering.py test_accessibility.py test_accessibility_full.py test_key_hints.py test_level_mechanics.py test_level_select.py test_ski_run.py test_volume_indicator.py test_performance.py test_resize_touch.py test_daily_runs.py test_seed_sharing.py test_text_overflow.py test_keybinding_reload.py"
     UNKNOWN_E2E=()
     for f in tests/e2e/test_*.py; do
         [ -f "$f" ] || continue

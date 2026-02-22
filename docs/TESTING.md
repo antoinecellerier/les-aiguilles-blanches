@@ -44,15 +44,16 @@ The `--smart` flag runs only tests affected by uncommitted changes (`git diff HE
   - `src/scenes/GameScene.ts` → also runs `test_gameplay.py`, `test_level_mechanics.py`, `test_resize_touch.py`
   - `src/scenes/DialogueScene.ts` → also runs `test_dialogue_speakers.py`, `test_dialogue.py`, `test_resize_touch.py`
   - `src/scenes/PauseScene.ts` → also runs `test_pause_menu.py`
-  - `src/scenes/LevelCompleteScene.ts` or `CreditsScene.ts` → also runs `test_level_complete.py`
-  - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`, `test_volume_indicator.py`
+  - `src/scenes/LevelCompleteScene.ts` or `CreditsScene.ts` → also runs `test_level_complete.py`, `test_text_overflow.py`
+  - `src/scenes/MenuScene.ts` → also runs `test_scene_layering.py`, `test_volume_indicator.py`, `test_text_overflow.py`
   - `src/utils/gamepad*.ts` → also runs `test_gamepad.py`
-  - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`
+  - `src/scenes/SettingsScene.ts` → also runs `test_settings_ui.py`, `test_keybinding_reload.py`
   - `src/scenes/DailyRunsScene.ts`, `src/systems/DailyRunSession.ts`, `src/systems/LevelGenerator.ts` → also runs `test_daily_runs.py`, `test_seed_sharing.py`
   - `src/utils/shareUrl.ts`, `src/utils/seededRNG.ts` → also runs `test_seed_sharing.py`
   - `src/scenes/SkiRunScene.ts`, `src/systems/ParkFeatureSystem.ts`, `src/utils/skiSprites.ts`, `src/utils/skiRunState.ts` → also runs `test_ski_run.py`
   - `src/utils/touchDetect.ts` or `src/scenes/HUDScene.ts` → also runs `test_touch_controls.py`, `test_resize_touch.py`
   - `src/utils/keyboardLayout.ts` → also runs `test_key_hints.py`
+  - `src/utils/keybindingManager.ts` → also runs `test_key_hints.py`, `test_keybinding_reload.py`
   - `src/config/levels.ts`, `src/systems/*` → also runs `test_level_mechanics.py`
   - `src/utils/resizeManager.ts`, `src/utils/cameraCoords.ts`, `src/config/gameConfig.ts` → also runs `test_resize_touch.py`
   - `src/utils/accessibility.ts` → also runs `test_accessibility.py`, `test_accessibility_full.py`
@@ -200,6 +201,8 @@ The `game_page` fixture automatically clears localStorage after each test to pre
 | `test_level_select.py` | Level select navigation, star ratings, ski/groom buttons |
 | `test_daily_runs.py` | Daily runs navigation, rank cycling, gamepad, session persistence, briefing, level generation, obstacle consistency groom↔ski |
 | `test_seed_sharing.py` | URL param parsing, share button clipboard, shared seed display, locked/unlocked state, seed determinism |
+| `test_text_overflow.py` | Text overflow at narrow viewports (360px, 320px) for MenuScene and CreditsScene |
+| `test_keybinding_reload.py` | Custom keybinding persistence: rebind in settings → verify in gameplay |
 | `test_ski_run.py` | Ski run HUD, descent mode settings, viewport bounds |
 | `test_performance.py` | Baseline object counts (L0 vs L9), object count stability (leak detection) |
 

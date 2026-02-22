@@ -18,12 +18,7 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 ### Test Coverage Gaps
 
 - Nintendo B-button back navigation flaky under parallel test execution
-- Y-depth sorting and collision hitbox changes lack dedicated E2E regression tests
-- Unit tests for extracted systems: LevelGeometry, WinchSystem, ObstacleBuilder have no vitest unit tests (E2E-only coverage)
-- HUDScene event listener leak (ski mode): no regression test verifying listeners don't accumulate across level transitions
-- Text truncation at 360px mobile portrait: no E2E test for MenuScene/CreditsScene title overflow
-- Settings overlay depth: no test verifying settings panel renders above menu after depth changes
-- Keybinding reload on resume: no test for rebinding keys in settings then resuming gameplay
+- WinchSystem, ObstacleBuilder have no vitest unit tests (tightly coupled to Phaser — needs refactoring to decouple logic from rendering)
 
 ### Deferred Refactors
 
