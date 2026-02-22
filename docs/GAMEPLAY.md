@@ -438,7 +438,7 @@ Certain levels feature slalom gates — paired red/blue poles placed along the p
 - **Miss** a gate for a ✗ and a buzz — the poles dim but there's no speed penalty
 - **Gate counter** shows progress in the HUD (e.g., "Gates: 5/8")
 - **Results** displayed on the level complete screen (perfect run highlighted in green)
-- Gate difficulty scales: L4 has 8 wide gates, L5 has 10 tighter gates, L10 has 12 tight gates at night
+- Gate difficulty scales: L4 has 8 wide gates, L5 has 10 tighter gates, L10 has 10 super-G style gates at night
 
 ### Dev Shortcuts
 

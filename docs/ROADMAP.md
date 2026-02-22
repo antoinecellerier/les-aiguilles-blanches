@@ -114,7 +114,7 @@ For technical implementation details, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 - ✅ **Ski jumps** — Groom key triggers speed-dependent jump during ski runs. Cliff jumps clear cliff zones at 30+ km/h. Airborne skiers skip all ground-level collisions. Touch JMP button for mobile. Win screen shows celebrating skier/snowboarder. Park features render below player. 3 E2E tests.
 
-- ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (12 tight). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. 3 E2E tests.
+- ✅ **Slalom gates** — Red/blue pole pairs on L4 (8 wide), L5 (10 medium), L10 (10 super-G). Pass/miss detection with ✓/✗ feedback, HUD gate counter, results on level complete. Audio chime on pass, buzz on miss. Gate positions clamped to ski physics traversal range. 3 E2E tests.
 
 - ✅ **FPS counter & simulation monitor** — In-game FPS display in visor bottom-right with simulation speed percentage (actualFps/targetFps). Passive FPS monitoring via Phaser `poststep` event with rolling 30-frame average and hysteresis-based throttle detection. Togglable in Settings → Accessibility → Show FPS. Green monospace font, 500ms update interval. Localized in 14 languages. Investigated Phaser `fps.limit` config — `stepLimitFPS()` couples update+render so can't decouple physics from rendering.
 

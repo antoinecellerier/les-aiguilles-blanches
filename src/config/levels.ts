@@ -476,7 +476,7 @@ export const LEVELS: Level[] = [
     timeLimit: 360,
     targetCoverage: 85,
     width: 65,
-    height: 90,
+    height: 100,
     hasWinch: true,
     isNight: true,
     weather: 'clear',
@@ -503,7 +503,7 @@ export const LEVELS: Level[] = [
       { type: 'flawless', target: 0 },
       { type: 'precision_grooming', target: 60 },
     ],
-    slalomGates: { count: 12, width: 3 },
+    slalomGates: { count: 10, width: 5 },
     wildlife: [
       { type: 'bouquetin', count: 2 },
       { type: 'chamois', count: 3 },

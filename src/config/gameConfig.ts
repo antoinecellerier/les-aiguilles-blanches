@@ -245,7 +245,7 @@ export const BALANCE = {
   // Ski/snowboard reward run
   SKI_GRAVITY_SPEED: 200,        // Base downhill velocity target (px/s)
   SKI_MAX_SPEED: 380,            // Terminal velocity
-  SKI_LATERAL_SPEED: 140,        // Max left/right steering speed (px/s)
+  SKI_LATERAL_SPEED: 180,        // Max left/right steering speed (px/s)
   SKI_DRAG: 60,                  // Natural deceleration (px/s²)
   SKI_GROOMED_MULTIPLIER: 1.0,   // Speed on groomed tiles (baseline)
   SKI_UNGROOMED_MULTIPLIER: 0.65, // Speed on ungroomed tiles

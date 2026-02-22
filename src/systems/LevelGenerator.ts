@@ -71,8 +71,8 @@ const RANK_CONFIGS: Record<DailyRunRank, RankConfig> = {
     coverageRange: [80, 85],
     obstacleDensity: 0.25,
     slalomChance: 0.3,
-    slalomCount: [5, 7],
-    slalomWidth: 5,
+    slalomCount: [4, 6],
+    slalomWidth: 6,
   },
   red: {
     widthRange: [32, 48],
@@ -89,8 +89,8 @@ const RANK_CONFIGS: Record<DailyRunRank, RankConfig> = {
     coverageRange: [78, 84],
     obstacleDensity: 0.4,
     slalomChance: 0.5,
-    slalomCount: [8, 10],
-    slalomWidth: 4,
+    slalomCount: [5, 7],
+    slalomWidth: 5,
   },
   black: {
     widthRange: [35, 55],
@@ -107,8 +107,8 @@ const RANK_CONFIGS: Record<DailyRunRank, RankConfig> = {
     coverageRange: [70, 80],
     obstacleDensity: 0.55,
     slalomChance: 0.7,
-    slalomCount: [10, 12],
-    slalomWidth: 3,
+    slalomCount: [6, 8],
+    slalomWidth: 5,
   },
 };
 

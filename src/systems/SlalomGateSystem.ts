@@ -45,16 +45,36 @@ export class SlalomGateSystem {
     const usableEnd = level.height - BALANCE.SKI_FINISH_BUFFER - 1;
     const spacing = Math.floor((usableEnd - usableStart) / (count + 1));
 
+    // Max lateral px the skier can traverse between gates (conservative: direction-reversal case)
+    const gateTimeSec = (spacing * tileSize) / BALANCE.SKI_GRAVITY_SPEED;
+    const maxLateralPx = BALANCE.SKI_LATERAL_SPEED * gateTimeSec * 0.65;
+    let prevCenterX: number | null = null;
+
     for (let i = 0; i < count; i++) {
       const tileY = usableStart + spacing * (i + 1);
       const path = geometry.pistePath[tileY];
       if (!path) continue;
 
-      // Alternate offset left/right of center for variety
-      const offsetDir = i % 2 === 0 ? -1 : 1;
-      const offsetAmount = Math.min(width * 0.3, path.width * 0.15);
-      const centerX = (path.centerX + offsetDir * offsetAmount) * tileSize;
       const halfW = (width / 2) * tileSize;
+      const baseOffset = Math.min(width * 0.3, path.width * 0.15);
+      const offsetDir = i % 2 === 0 ? -1 : 1;
+
+      // Ideal position follows piste center with alternating offset
+      let centerX = (path.centerX + offsetDir * baseOffset) * tileSize;
+
+      // Piste boundaries for the gate center (poles must fit inside the piste)
+      const pisteLeft = (path.centerX - path.width / 2 + width / 2) * tileSize;
+      const pisteRight = (path.centerX + path.width / 2 - width / 2) * tileSize;
+
+      // Clamp lateral distance from previous gate to what's physically achievable
+      if (prevCenterX !== null) {
+        const dist = Math.abs(centerX - prevCenterX);
+        if (dist > maxLateralPx + halfW) {
+          const dir = Math.sign(centerX - prevCenterX) || 1;
+          centerX = prevCenterX + dir * (maxLateralPx + halfW);
+          centerX = Math.max(pisteLeft, Math.min(pisteRight, centerX));
+        }
+      }
 
       const color = i % 2 === 0 ? 'red' : 'blue';
       const texKey = (color === 'red' ? 'slalom_red' : 'slalom_blue') + nightSfx;
@@ -63,6 +83,8 @@ export class SlalomGateSystem {
       const leftPole = scene.add.image(centerX - halfW, worldY, texKey).setOrigin(0.5, 1).setDepth(DEPTHS.MARKERS);
       const rightPole = scene.add.image(centerX + halfW, worldY, texKey).setOrigin(0.5, 1).setDepth(DEPTHS.MARKERS);
       // No scaling — texture is already at world-coordinate size (3×36px)
+
+      prevCenterX = centerX;
 
       this.gates.push({
         y: tileY,
