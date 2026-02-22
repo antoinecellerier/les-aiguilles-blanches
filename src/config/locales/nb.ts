@@ -23,6 +23,7 @@ const nb: Record<string, string> = {
   inputGamepadOff: "✗ Ingen gamepad",
   updateAvailable: "Ny versjon tilgjengelig — trykk for å laste på nytt",
   madeIn: "Laget med ❄️ i Savoie",
+  feedback: "Gi tilbakemelding",
   on: "✓ PÅ",
   off: "✗ AV",
   zoneClosed: "🚫 SONE STENGT",

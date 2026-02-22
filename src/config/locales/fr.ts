@@ -24,6 +24,7 @@ const fr: Record<string, string> = {
   inputGamepadOff: "✗ Pas de manette",
   updateAvailable: "Nouvelle version disponible — toucher pour recharger",
   madeIn: "Fait avec ❄️ en Savoie",
+  feedback: "Donner son avis",
   on: "✓ OUI",
   off: "✗ NON",
   zoneClosed: "🚫 ZONE FERMÉE",

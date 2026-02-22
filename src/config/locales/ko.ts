@@ -23,6 +23,7 @@ const ko: Record<string, string> = {
   inputGamepadOff: "✗ 게임패드 없음",
   updateAvailable: "새 버전이 있습니다 — 탭하여 새로고침",
   madeIn: "❄️ 사부아에서 제작",
+  feedback: "피드백 보내기",
   on: "✓ 켜기",
   off: "✗ 끄기",
   zoneClosed: "🚫 구역 폐쇄",

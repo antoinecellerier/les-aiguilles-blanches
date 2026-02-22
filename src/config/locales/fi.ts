@@ -23,6 +23,7 @@ const fi: Record<string, string> = {
   inputGamepadOff: "✗ Ei peliohjainta",
   updateAvailable: "Uusi versio saatavilla — napauta ladataksesi uudelleen",
   madeIn: "Tehty ❄️:lla Savoie'ssa",
+  feedback: "Anna palautetta",
   on: "✓ PÄÄLLÄ",
   off: "✗ POIS",
   zoneClosed: "🚫 ALUE SULJETTU",

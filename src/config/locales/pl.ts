@@ -23,6 +23,7 @@ const pl: Record<string, string> = {
   inputGamepadOff: "✗ Brak gamepada",
   updateAvailable: "Nowa wersja dostępna — dotknij, aby odświeżyć",
   madeIn: "Zrobione z ❄️ w Sabaudii",
+  feedback: "Prześlij opinię",
   on: "✓ WŁ",
   off: "✗ WYŁ",
   zoneClosed: "🚫 STREFA ZAMKNIĘTA",

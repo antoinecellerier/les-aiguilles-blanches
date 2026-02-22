@@ -23,6 +23,7 @@ const sk: Record<string, string> = {
   inputGamepadOff: "✗ Žiadny gamepad",
   updateAvailable: "Nová verzia k dispozícii — ťukni pre obnovenie",
   madeIn: "Vyrobené s ❄️ v Savojsku",
+  feedback: "Odoslať spätnú väzbu",
   on: "✓ ZAP",
   off: "✗ VYP",
   zoneClosed: "🚫 ZÓNA ZATVORENÁ",

@@ -1,0 +1,67 @@
+name: 💬 Feedback
+description: Share feedback — bug reports, feature ideas, or general thoughts
+title: "[Feedback] "
+labels: ["feedback"]
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - General feedback
+        - Bug report
+        - Feature request
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: Tell us what's on your mind...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Game version (shown in menu footer)
+      placeholder: e.g. 1.2.3
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Only needed for bug reports
+      options:
+        - Web (mobile)
+        - Web (desktop)
+        - Desktop app (Electron)
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Only needed for bug reports
+      placeholder: "e.g. Chrome 122, Safari 17.3, Firefox 124, Samsung Internet"
+  - type: dropdown
+    id: controls
+    attributes:
+      label: Control method
+      description: Only needed for bug reports
+      options:
+        - Keyboard
+        - Touch
+        - Gamepad
+        - Keyboard + mouse
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: Only needed for bug reports
+      placeholder: "e.g. Windows 11, macOS 14, Android 14, iOS 17, Ubuntu 24.04"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Only needed for bug reports — what did you do before the issue appeared?
+      placeholder: |
+        1. Open level X
+        2. Do Y
+        3. Bug happens

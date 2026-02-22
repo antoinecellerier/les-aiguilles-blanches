@@ -23,6 +23,7 @@ const tr: Record<string, string> = {
   inputGamepadOff: "✗ Gamepad yok",
   updateAvailable: "Yeni sürüm mevcut — yenilemek için dokun",
   madeIn: "❄️ ile Savoie'da yapıldı",
+  feedback: "Geri bildirim gönder",
   on: "✓ AÇIK",
   off: "✗ KAPALI",
   zoneClosed: "🚫 BÖLGE KAPALI",

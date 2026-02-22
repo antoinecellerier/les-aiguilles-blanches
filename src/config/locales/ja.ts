@@ -23,6 +23,7 @@ const ja: Record<string, string> = {
   inputGamepadOff: "✗ ゲームパッドなし",
   updateAvailable: "新しいバージョンがあります — タップで更新",
   madeIn: "❄️ サヴォワ製",
+  feedback: "フィードバックを送る",
   on: "✓ オン",
   off: "✗ オフ",
   zoneClosed: "🚫 エリア閉鎖",

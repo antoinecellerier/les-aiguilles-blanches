@@ -23,6 +23,7 @@ const en: Record<string, string> = {
   inputGamepadOff: "✗ No gamepad",
   updateAvailable: "New version available — tap to reload",
   madeIn: "Made with ❄️ in Savoie",
+  feedback: "Send feedback",
   on: "✓ ON",
   off: "✗ OFF",
   zoneClosed: "🚫 ZONE CLOSED",

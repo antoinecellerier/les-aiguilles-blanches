@@ -23,6 +23,7 @@ const sv: Record<string, string> = {
   inputGamepadOff: "✗ Ingen gamepad",
   updateAvailable: "Ny version tillgänglig — tryck för att ladda om",
   madeIn: "Gjord med ❄️ i Savoie",
+  feedback: "Skicka feedback",
   on: "✓ PÅ",
   off: "✗ AV",
   zoneClosed: "🚫 ZON STÄNGD",

@@ -58,6 +58,7 @@ export default class MenuScene extends Phaser.Scene {
   private volumeSliderTimer: Phaser.Time.TimerEvent | null = null;
   private volumeSliderListeners: { onMove: Function; onUp: Function } | null = null;
   private inputTooltipObjects: Phaser.GameObjects.GameObject[] = [];
+  private feedbackTooltipObjects: Phaser.GameObjects.GameObject[] = [];
   private randomMood: { isNight: boolean; weather: string } | null = null;
    
   constructor() {
@@ -580,6 +581,8 @@ export default class MenuScene extends Phaser.Scene {
         window.open('https://github.com/antoinecellerier/les-aiguilles-blanches', '_blank', 'noopener,noreferrer');
       });
 
+    const feedbackUrl = `https://github.com/antoinecellerier/les-aiguilles-blanches/issues/new?template=feedback.yml&version=${encodeURIComponent(version)}`;
+
     if (import.meta.env.DEV) {
       fetch('/api/version')
         .then(r => r.json())
@@ -608,7 +611,7 @@ export default class MenuScene extends Phaser.Scene {
         .on('pointerdown', () => location.reload());
     }).catch(() => {});
 
-    this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {
+    const madeInText = this.add.text(width / 2, footerTop + footerHeight / 2 + Math.round(7 * scaleFactor), t('madeIn'), {
       fontFamily: THEME.fonts.family,
       fontSize: Math.round(Math.max(10, 12 * scaleFactor)) + 'px',
       color: THEME.colors.accent,
@@ -623,6 +626,33 @@ export default class MenuScene extends Phaser.Scene {
     };
     this.updateInputHints();
     this.createVolumeIndicator(scaleFactor);
+
+    const feedbackIcon = this.add.text(0, 0, '💬', {
+        fontFamily: THEME.fonts.family,
+        fontSize: footerFontSize + 'px',
+        color: THEME.colors.info,
+      }).setOrigin(0, 0.5).setDepth(DEPTHS.MENU_UI).setAlpha(0.8);
+    // Position after volume icon with comfortable touch gap
+    const volRight = this.volumeIndicator!.getBounds().right;
+    feedbackIcon.setPosition(volRight + Math.max(16, Math.round(12 * scaleFactor)), this.footerHintY);
+    const fbBounds = feedbackIcon.getBounds();
+    const fbHitW = Math.max(fbBounds.width, 48);
+    const fbHitH = Math.max(fbBounds.height, 48);
+    const fbZone = this.add.zone(fbBounds.centerX, fbBounds.centerY, fbHitW, fbHitH)
+      .setDepth(DEPTHS.MENU_OVERLAY).setInteractive({ useHandCursor: true });
+    fbZone
+      .on('pointerover', (p: Phaser.Input.Pointer) => {
+        if (p.wasTouch) return;
+        feedbackIcon.setAlpha(1);
+        this.showFeedbackTooltip(feedbackIcon, scaleFactor);
+      })
+      .on('pointerout', () => {
+        feedbackIcon.setAlpha(0.8);
+        this.destroyFeedbackTooltip();
+      })
+      .on('pointerdown', () => {
+        window.open(feedbackUrl, '_blank', 'noopener,noreferrer');
+      });
   }
 
   private setupInput(): void {
@@ -1059,6 +1089,42 @@ export default class MenuScene extends Phaser.Scene {
     this.inputTooltipObjects = [];
   }
 
+  private showFeedbackTooltip(anchor: Phaser.GameObjects.Text, scaleFactor: number): void {
+    this.destroyFeedbackTooltip();
+    const padding = 8;
+    const style = {
+      fontFamily: this.footerHintStyle.fontFamily as string,
+      fontSize: this.footerHintStyle.fontSize as string,
+      color: THEME.colors.textPrimary,
+    };
+    const label = this.add.text(0, 0, t('feedback'), style).setVisible(false);
+    const tw = label.width;
+    const th = label.height;
+    label.destroy();
+
+    const panelW = tw + padding * 2;
+    const panelH = th + padding * 2;
+    const bounds = anchor.getBounds();
+    const panelX = Math.max(4, bounds.centerX - panelW / 2);
+    const panelY = bounds.top - panelH - 4;
+
+    const bg = this.add.graphics().setDepth(DEPTHS.MENU_SCROLL_FADE);
+    bg.fillStyle(0x1a2a3a, 0.92);
+    bg.fillRoundedRect(panelX, panelY, panelW, panelH, 4);
+    bg.lineStyle(1, 0x4a6a8a, 0.5);
+    bg.strokeRoundedRect(panelX, panelY, panelW, panelH, 4);
+    this.feedbackTooltipObjects.push(bg);
+
+    const text = this.add.text(panelX + padding, panelY + padding, t('feedback'), style)
+      .setOrigin(0, 0).setDepth(DEPTHS.MENU_BADGES);
+    this.feedbackTooltipObjects.push(text);
+  }
+
+  private destroyFeedbackTooltip(): void {
+    this.feedbackTooltipObjects.forEach(o => { if (o.active) o.destroy(); });
+    this.feedbackTooltipObjects = [];
+  }
+
   update(time: number, delta: number): void {
     this.wildlife.update(time, delta);
     this.gamepadNav.update(delta);
@@ -1084,6 +1150,7 @@ export default class MenuScene extends Phaser.Scene {
     // Music persists across scenes (singleton) — no stop here
     // Close any open overlay dialog before teardown
     if (this.overlay.open) this.overlay.close();
+    this.destroyFeedbackTooltip();
     this.input.keyboard?.removeAllListeners();
     this.input.off('wheel');
     this.input.off('pointerdown');

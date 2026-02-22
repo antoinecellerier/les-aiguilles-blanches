@@ -27,6 +27,7 @@ const es: Record<string, string> = {
   inputGamepadOff: "✗ Sin mando",
   updateAvailable: "Nueva versión disponible — toca para recargar",
   madeIn: "Hecho con ❄️ en Saboya",
+  feedback: "Enviar comentarios",
   on: "✓ SÍ",
   off: "✗ NO",
   zoneClosed: "🚫 ZONA CERRADA",
