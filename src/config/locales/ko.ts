@@ -288,7 +288,7 @@ const ko: Record<string, string> = {
 
   jeanPierreIntro: "튜토리얼 잘했어. 이제 진짜다 — 초급 코스, 시간 제한과 연료 관리가 있어.",
   level_marmottesMid: "봉우리의 저 빛이 보여? 첫 여명이야. 이 일의 가장 좋은 순간 — 너, 기계, 그리고 깨어나는 산뿐이지.",
-  level_chamoisIntro: "안녕, 나 에밀리야 — JP가 중급 코스로 보내. 초급만 하는 게 아니라는 걸 보여줘.",
+  level_chamoisIntro: "안녕, 나 에밀리야 — 장피에르가 중급 코스로 보내. 초급만 하는 게 아니라는 걸 보여줘.",
   level_airZoneIntro: "스노파크는 내 영역이야 — 끝내주는 코스를 만들 거야! 모듈 하나하나 완벽해야 해, 라이더들이 기대하고 있거든.",
   level_aigleIntro: "L'Aigle은 진짜다. 연료에 주의해. 작업 도로로 올라갈 수 있어 — 노란색과 검은색 줄무늬 기둥을 찾아.",
   level_glacierIntro: "안녕, 나 티에리야 — 안전 관리 책임자. Le Glacier는 급경사야. 앵커는 전부 확인했어. 포스트 근처에서 {winchKey}를 눌러 윈치를 연결해 — 제발, 놓지 마.",
@@ -296,7 +296,7 @@ const ko: Record<string, string> = {
   level_tubeIntro: "내일 Tube에서 대회야! 벽은 깔끔하게, 립은 날카롭게, 요철은 제로로 만들어줘.",
   level_verticaleIntro: "La Verticale 야간 작업: 급경사, 위험한 가장자리. 윈치 필수 — 앵커 3개를 사용하고 축에서 벗어나지 마.",
   level_colDangereuxIntro: "Col의 눈사태 위험이 높아 — 눈사태 안전 프로토콜 발동 중. 하중 구역에 들어가지 말고 경계를 지켜.",
-  level_tempeteIntro: "폭풍이 지나갔어. vin chaud 한 잔 마셔 — 시간이 걸릴 거야!",
+  level_tempeteIntro: "폭풍이 지나갔어. 뱅쇼 한 잔 마셔 — 시간이 걸릴 거야!",
   level_coupeDesAiguillesIntro: "오늘 밤이 승부야. 내일 FIS 검사가 있어. 모든 코스가 완벽해야 해 — 배운 걸 보여줘.",
   marieWelcome: "마리네에서 몸 좀 녹여요. 맛있는 타르티플레트가 있어요!",
   marieIntro: "안녕! 나 마리야, 슬로프 위에 식당을 운영해. 언제든 들러 — 따뜻한 한 끼가 힘이 돼!",

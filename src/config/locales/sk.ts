@@ -1,6 +1,6 @@
 /** SK translations for Les Aiguilles Blanches */
 const sk: Record<string, string> = {
-  subtitle: "Simulátor snežnej frézy",
+  subtitle: "Simulátor rolby",
   startGame: "Začať hru",
   resumeGame: "Pokračovať",
   newGame: "Nová hra",
@@ -207,9 +207,9 @@ const sk: Record<string, string> = {
   tutorialIntro: "Vitaj v Les Aiguilles Blanches!",
   skipTutorial: "⏭️ Preskakujem návod… Ťukni pre prehranie.",
   skipTutorialGamepad: "⏭️ Preskakujem návod… Stlač tlačidlo pre prehranie.",
-  tutorialWelcome: "🏔️ Jean-Pierre, hlavný frézkár. Choď po zjazdovke — použi {keys} alebo ↑↓←→.",
-  tutorialWelcomeTouch: "🏔️ Jean-Pierre, hlavný frézkár. Choď po zjazdovke — použi D-pad vľavo.",
-  tutorialWelcomeGamepad: "🏔️ Jean-Pierre, hlavný frézkár. Choď po zjazdovke — použi ľavú páčku alebo D-pad.",
+  tutorialWelcome: "🏔️ Jean-Pierre, hlavný rolbár. Choď po zjazdovke — použi {keys} alebo ↑↓←→.",
+  tutorialWelcomeTouch: "🏔️ Jean-Pierre, hlavný rolbár. Choď po zjazdovke — použi D-pad vľavo.",
+  tutorialWelcomeGamepad: "🏔️ Jean-Pierre, hlavný rolbár. Choď po zjazdovke — použi ľavú páčku alebo D-pad.",
   // UNUSED     tutorialControls: "🎮 Pre pohyb frézy použi {keys} alebo šípky ↑↓←→.",
   // UNUSED     tutorialControlsTouch: "🎮 Pre pohyb frézy použi D-pad ◀▲▼▶ vľavo.",
   // UNUSED     tutorialControlsGamepad: "🎮 Pre pohyb frézy použi ľavú páčku alebo D-pad.",
@@ -268,14 +268,14 @@ const sk: Record<string, string> = {
   tauntFeature1: 'Ten prvok stavali tri hodiny. Ty si ho zrovnal za tri sekundy.',
   tauntFeature2: 'Émilie si s tebou pohovorí o tom parkovom prvku.',
   tauntFeature3: 'Parková posádka práve videla, ako ničíš ich dielo.',
-  tauntFeature4: 'Prvky sú pre lyžiarov, nie pre frézy. Obíď ich!',
+  tauntFeature4: 'Prvky sú pre lyžiarov, nie pre rolby. Obíď ich!',
   tauntFeature5: 'O jeden prvok menej na zajtrajšie preteky.',
   bonusPipeMastery: 'Zvládnutie halfpipe',
 
   // Taunts - Avalanche
   tauntAvalanche1: "Hora málokedy odpúšťa. Tentoraz neodpustila.",
   tauntAvalanche2: "Météo France hlásilo stupeň rizika 4. Čítal si to?",
-  tauntAvalanche3: "Horská služba nájde frézu na jar. Možno.",
+  tauntAvalanche3: "Horská služba nájde rolbu na jar. Možno.",
   tauntAvalanche4: "Marie počuje poplach v rádiu. Už vie, že si to ty.",
   tauntAvalanche5: "Horská služba zabezpečila ten sektor. Ty si ho odbezpečil.",
 
@@ -353,7 +353,7 @@ changelog_20260211: "⛷️ Zjazd na lyžiach po úprave\n🎯 Kvalita úpravy\n
   dailyRuns_dailyShift: "Denná zmena",
   dailyRuns_randomRun: "Náhodná jazda",
   dailyRuns_rank: "Hodnotenie",
-  dailyRuns_seed: "Seed",
+  dailyRuns_seed: "Kód",
   // UNUSED   dailyRuns_start: "Začať kontrakt",
   dailyRuns_locked: "Dokonči všetky trate na odomknutie",
   dailyRuns_lockedShared: "Dokonči všetky trate na odomknutie denných behov a zahranie tejto zdieľanej zjazdovky",

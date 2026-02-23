@@ -353,7 +353,7 @@ changelog_20260211: "⛷️ Sjezd na lyžích po úpravě\n🎯 Kvalita úpravy\
   dailyRuns_dailyShift: "Denní směna",
   dailyRuns_randomRun: "Náhodná jízda",
   dailyRuns_rank: "Hodnocení",
-  dailyRuns_seed: "Seed",
+  dailyRuns_seed: "Kód",
   // UNUSED   dailyRuns_start: "Zahájit kontrakt",
   dailyRuns_locked: "Dokonči všechny tratě pro odemknutí",
   dailyRuns_lockedShared: "Dokonči všechny tratě k odemknutí denních běhů a zahrání této sdílené sjezdovky",
