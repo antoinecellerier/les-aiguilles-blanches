@@ -282,7 +282,7 @@ const fr: Record<string, string> = {
   tauntAvalanche2: "Le bulletin Météo France disait risque 4. Tu l'as lu ?",
   tauntAvalanche3: "Les pisteurs retrouveront la dameuse au printemps. Peut-être.",
   tauntAvalanche4: "Marie écoute l'alerte radio. Elle sait déjà que c'est toi.",
-  tauntAvalanche5: "Le PIDA avait sécurisé le secteur. Toi, tu as tout fichu en l'air.",
+  tauntAvalanche5: "Les pisteurs avaient sécurisé le secteur. Toi, tu as tout fichu en l'air.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Yard sale classique. Le matos partout, la dignité nulle part.",
