@@ -129,22 +129,22 @@ const ja: Record<string, string> = {
 
   // Taunts - Cliff falls
   tauntCliff1: "9トンが谷底へ。保険会社は大喜びだろう。",
-  tauntCliff2: "Jean-Pierreが「崖に近づくな！」と言ったの覚えてる？",
+  tauntCliff2: "ジャン=ピエールが「崖に近づくな！」と言ったの覚えてる？",
   tauntCliff3: "パトロール隊がまたロープを持って降りてくる。",
-  tauntCliff4: "Marieが今夜のラクレット予約をキャンセルした。",
-  tauntCliff5: "Thierryはもう修理費を計算している...",
+  tauntCliff4: "マリーが今夜のラクレット予約をキャンセルした。",
+  tauntCliff5: "ティエリはもう修理費を計算している...",
 
   // Taunts - Fuel empty
   tauntFuel1: "10分前から燃料警告灯が点いていた。何を見ていた？",
-  tauntFuel2: "Émilieが掲示板に「給油」と大文字で書いていた。",
+  tauntFuel2: "エミリーが掲示板に「給油」と大文字で書いていた。",
   tauntFuel3: "軽油にも限界がある。君にもあるらしい。",
-  tauntFuel4: "Jean-Pierreがため息。Thierryに携行缶を持たせた。",
+  tauntFuel4: "ジャン=ピエールがため息。ティエリに携行缶を持たせた。",
   tauntFuel5: "日が昇った。ゲレンデは未整備。スキーヤーが来る。",
 
   // Taunts - Time limit
   tauntTime1: "始発リフトまで3...2...1...間に合わなかった。",
   tauntTime2: "スキーヤーがゲレンデを発見。ガタガタ。凍結。見事。",
-  tauntTime3: "Jean-Pierreが時計を見て、君を見て、また時計を見る。",
+  tauntTime3: "ジャン=ピエールが時計を見て、君を見て、また時計を見る。",
   tauntTime4: "FISがなぜスラロームコースがスープ状なのか聞いている。",
   tauntTime5: "インストラクターがお客に「自分のせいじゃない」と説明しているのが聞こえる。",
 
@@ -207,9 +207,9 @@ const ja: Record<string, string> = {
   tutorialIntro: "Les Aiguilles Blanchesへようこそ！",
   skipTutorial: "⏭️ チュートリアルをスキップ…タップでリプレイ。",
   skipTutorialGamepad: "⏭️ チュートリアルをスキップ…ボタンでリプレイ。",
-  tutorialWelcome: "🏔️ Jean-Pierre、チーフ圧雪担当だ。ゲレンデを走れ — {keys}か↑↓←→を使え。",
-  tutorialWelcomeTouch: "🏔️ Jean-Pierre、チーフ圧雪担当だ。ゲレンデを走れ — 左のDパッドを使え。",
-  tutorialWelcomeGamepad: "🏔️ Jean-Pierre、チーフ圧雪担当だ。ゲレンデを走れ — 左スティックかDパッドを使え。",
+  tutorialWelcome: "🏔️ ジャン=ピエール、チーフ圧雪担当だ。ゲレンデを走れ — {keys}か↑↓←→を使え。",
+  tutorialWelcomeTouch: "🏔️ ジャン=ピエール、チーフ圧雪担当だ。ゲレンデを走れ — 左のDパッドを使え。",
+  tutorialWelcomeGamepad: "🏔️ ジャン=ピエール、チーフ圧雪担当だ。ゲレンデを走れ — 左スティックかDパッドを使え。",
   // UNUSED     tutorialControls: "🎮 圧雪車を動かすには{keys}か矢印キー↑↓←→を使え。",
   // UNUSED     tutorialControlsTouch: "🎮 圧雪車を動かすには左のDパッド◀▲▼▶を使え。",
   // UNUSED     tutorialControlsGamepad: "🎮 圧雪車を動かすには左スティックかDパッドを使え。",
@@ -259,8 +259,8 @@ const ja: Record<string, string> = {
 
   // Taunts - Tumble
   tauntTumble1: "ウインチは飾りじゃない。こういう斜面のためにある。",
-  tauntTumble2: "Thierryが損傷を見つめる。何も言わない。それが最悪だ。",
-  tauntTumble3: "Jean-Pierreがアンカーの使い方を見せた。寝てたのか？",
+  tauntTumble2: "ティエリが損傷を見つめる。何も言わない。それが最悪だ。",
+  tauntTumble3: "ジャン=ピエールがアンカーの使い方を見せた。寝てたのか？",
   tauntTumble4: "PistenBullyは6000万円する。したんだがな。",
   tauntTumble5: "この斜面は楽勝に見えた？圧雪車はそう思わなかった。",
   featureDestroyedKicker: 'パークのモジュールに乗り上げた！キッカーが壊れてしまった。',
@@ -276,7 +276,7 @@ const ja: Record<string, string> = {
   tauntAvalanche1: "山はめったに許さない。今回も許さなかった。",
   tauntAvalanche2: "Météo Franceが危険度4と言っていた。読んだか？",
   tauntAvalanche3: "春になれば圧雪車が見つかるだろう。たぶん。",
-  tauntAvalanche4: "Marieが無線警報を聞いた。もう犯人が分かっている。",
+  tauntAvalanche4: "マリーが無線警報を聞いた。もう犯人が分かっている。",
   tauntAvalanche5: "パトロール隊があのエリアを安全にした。君が台無しにした。",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
@@ -288,11 +288,11 @@ const ja: Record<string, string> = {
 
   jeanPierreIntro: "チュートリアルはよくやった。ここからが本番だ — 初級コース、タイマーと燃料管理ありだ。",
   level_marmottesMid: "山頂のあの光が見えるか？夜明けだ。この仕事で一番いい瞬間 — お前と、マシンと、目覚める山だけだ。",
-  level_chamoisIntro: "やあ、Émilieよ — JPが中級コースに行かせるって。初級だけじゃないところを見せて。",
+  level_chamoisIntro: "やあ、エミリーよ — JPが中級コースに行かせるって。初級だけじゃないところを見せて。",
   level_airZoneIntro: "スノーパークは私の領域よ — とんでもないコースを作るわ！モジュールは全部完璧に、ライダーが期待してるんだから。",
   level_aigleIntro: "L'Aigleは本格的だ。燃料に注意。作業道で登り返せる — 黄色と黒のポールを探せ。",
-  level_glacierIntro: "やあ、Thierryだ — 安全管理責任者。Le Glacierは急斜面だ。アンカーは全部確認済み。ポストの近くで{winchKey}を押してウインチを接続 — 頼むから、離すなよ。",
-  level_glacierIntroTouch: "やあ、Thierryだ — 安全管理責任者。Le Glacierは急斜面だ。アンカーは全部確認済み。ポストの近くでウインチボタンをタップ — 頼むから、離すなよ。",
+  level_glacierIntro: "やあ、ティエリだ — 安全管理責任者。Le Glacierは急斜面だ。アンカーは全部確認済み。ポストの近くで{winchKey}を押してウインチを接続 — 頼むから、離すなよ。",
+  level_glacierIntroTouch: "やあ、ティエリだ — 安全管理責任者。Le Glacierは急斜面だ。アンカーは全部確認済み。ポストの近くでウインチボタンをタップ — 頼むから、離すなよ。",
   level_tubeIntro: "明日はTubeでコンテストだ！壁はきれいに、リップはシャープに、凸凹ゼロで頼む。",
   level_verticaleIntro: "La Verticaleで夜間作業：急斜面、危険な縁。ウインチ必須 — 3つのアンカーを使い、軸からずれるな。",
   level_colDangereuxIntro: "Colの雪崩リスクが高い — 雪崩安全プロトコル発動中。荷重エリアに入るな、境界を守れ。",
