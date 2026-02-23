@@ -9,7 +9,7 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 ### Features
 
 - [ ] **Leaderboards**
-- [ ] **Publish to game stores** — Electron desktop wrapper exists (`./build-desktop.sh`); store distribution (Steam, itch.io) TBD
+- [ ] **Publish to game stores** — Tauri v2 desktop wrapper (`./build-tauri.sh`) and PWA exist; store distribution (Steam, itch.io, Google Play via TWA) TBD
 
 ### Known Issues
 

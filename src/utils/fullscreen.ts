@@ -2,13 +2,24 @@ import { t } from '../setup';
 import { THEME } from '../config/theme';
 import { isDesktopApp } from '../types/electron';
 
+// Track Tauri fullscreen state in memory (native window fullscreen
+// doesn't update document.fullscreenElement)
+let tauriFullscreen = false;
+
 /**
  * Toggle fullscreen mode. On rejection (e.g. Firefox gamepad gesture),
  * shows a hint toast directing the user to the F keyboard shortcut.
  */
 export function toggleFullscreen(scene: Phaser.Scene): void {
-  if (isDesktopApp()) {
-    window.electronAPI!.toggleFullscreen();
+  if (window.electronAPI?.isDesktop) {
+    window.electronAPI.toggleFullscreen();
+    return;
+  }
+  if ('__TAURI_INTERNALS__' in window) {
+    tauriFullscreen = !tauriFullscreen;
+    import('@tauri-apps/api/core')
+      .then(({ invoke }) => invoke('toggle_fullscreen'))
+      .catch(err => console.error('[tauri] toggle_fullscreen failed:', err));
     return;
   }
   if (document.fullscreenElement) {
@@ -20,15 +31,18 @@ export function toggleFullscreen(scene: Phaser.Scene): void {
   }
 }
 
-/** Check if currently fullscreen (works in both browser and Electron). */
+/** Check if currently fullscreen (works in browser, Electron, and Tauri). */
 export function isFullscreen(): boolean {
-  if (isDesktopApp()) {
-    return window.electronAPI!.isFullscreen();
+  if (window.electronAPI?.isDesktop) {
+    return window.electronAPI.isFullscreen();
+  }
+  if ('__TAURI_INTERNALS__' in window) {
+    return tauriFullscreen;
   }
   return !!document.fullscreenElement;
 }
 
-/** Check if fullscreen is supported (always true in Electron). */
+/** Check if fullscreen is supported (always true in desktop apps). */
 export function fullscreenEnabled(): boolean {
   if (isDesktopApp()) return true;
   return document.fullscreenEnabled;

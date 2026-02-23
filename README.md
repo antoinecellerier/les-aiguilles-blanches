@@ -41,7 +41,7 @@ This game is an experiment in building a complete, polished game almost entirely
 npm run clean        # Remove all build artifacts and caches
 ```
 
-An optional [desktop build](docs/ARCHITECTURE.md#electron-desktop-wrapper) is available via Electron.
+An optional [desktop build](docs/ARCHITECTURE.md#tauri-desktop-wrapper) is available via Tauri (~7 MB .deb) or [Electron](docs/ARCHITECTURE.md#electron-desktop-wrapper) (~99 MB AppImage). The web version can be [installed as a PWA](docs/ARCHITECTURE.md#pwa-progressive-web-app) for offline play.
 
 ## 🧪 Testing
 

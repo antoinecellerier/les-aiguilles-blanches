@@ -529,7 +529,7 @@ export default class SettingsScene extends Phaser.Scene {
   private addDisplaySection(sizer: any): void {
     const panel = this.createSectionPanel('🖥️ ' + (t('display') || 'Display'), 6);
 
-    const currentMode = getString(STORAGE_KEYS.DISPLAY_MODE) || 'borderless';
+    const currentMode = getString(STORAGE_KEYS.DISPLAY_MODE) || 'windowed';
     const spacing = Math.round(this.fontSize * 0.5);
 
     const modes = [

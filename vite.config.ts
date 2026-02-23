@@ -3,6 +3,7 @@ import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // Get git commit hash and build date for version string
 function getVersion() {
@@ -94,6 +95,15 @@ export default defineConfig(({ mode }) => {
   plugins: [
     liveVersionPlugin(),
     versionFilePlugin(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,json,mp3,ogg,wav}'],
+        // Bump to 10 MB — Phaser chunk alone is ~1.2 MB, total dist is ~19 MB
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+      },
+      manifest: false, // We provide our own public/manifest.json
+    }),
     // Generate bundle analysis (run: npm run build && open stats.html)
     visualizer({
       filename: 'stats.html',

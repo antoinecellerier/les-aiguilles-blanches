@@ -129,7 +129,7 @@ function renderIcon(size) {
 }
 
 // Generate all sizes natively — each rendered from scratch, not downscaled
-const SIZES = [16, 32, 48, 64, 128, 256, 512];
+const SIZES = [16, 32, 48, 64, 128, 192, 256, 512];
 
 for (const dir of ['icons', path.join('build', 'icons')]) {
   const outDir = path.join(__dirname, dir);
