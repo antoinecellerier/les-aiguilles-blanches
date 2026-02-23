@@ -129,22 +129,22 @@ const ko: Record<string, string> = {
 
   // Taunts - Cliff falls
   tauntCliff1: "9톤이 계곡 아래로. 보험사가 좋아할 거야.",
-  tauntCliff2: "Jean-Pierre가 '절벽에 가까이 가지 마!'라고 했던 거 기억나?",
+  tauntCliff2: "장피에르가 '절벽에 가까이 가지 마!'라고 했던 거 기억나?",
   tauntCliff3: "구조대가 또 로프를 들고 내려온다.",
-  tauntCliff4: "Marie가 오늘 밤 라클렛 예약을 취소했다.",
-  tauntCliff5: "Thierry가 벌써 수리비를 계산하고 있다...",
+  tauntCliff4: "마리가 오늘 밤 라클렛 예약을 취소했다.",
+  tauntCliff5: "티에리가 벌써 수리비를 계산하고 있다...",
 
   // Taunts - Fuel empty
   tauntFuel1: "10분 전부터 연료 경고등이 켜져 있었는데. 뭘 보고 있었어?",
-  tauntFuel2: "Émilie가 게시판에 '급유'라고 크게 써놨었다.",
+  tauntFuel2: "에밀리가 게시판에 '급유'라고 크게 써놨었다.",
   tauntFuel3: "경유에도 한계가 있다. 너도 마찬가지인 모양이다.",
-  tauntFuel4: "Jean-Pierre가 한숨을 쉰다. Thierry에게 휴대용 연료통을 보냈다.",
+  tauntFuel4: "장피에르가 한숨을 쉰다. 티에리에게 휴대용 연료통을 보냈다.",
   tauntFuel5: "해가 떴다. 슬로프는 미정비. 스키어들이 온다.",
 
   // Taunts - Time limit
   tauntTime1: "첫 리프트까지 3...2...1...놓쳤다.",
   tauntTime2: "스키어들이 슬로프를 발견했다. 울퉁불퉁. 빙판. 훌륭하다.",
-  tauntTime3: "Jean-Pierre가 시계를 보고, 너를 보고, 다시 시계를 본다.",
+  tauntTime3: "장피에르가 시계를 보고, 너를 보고, 다시 시계를 본다.",
   tauntTime4: "FIS가 왜 슬랄롬 코스가 수프 같은지 묻고 있다.",
   tauntTime5: "강사들이 손님에게 '자기 탓이 아니다'라고 설명하는 소리가 들린다.",
 
@@ -207,9 +207,9 @@ const ko: Record<string, string> = {
   tutorialIntro: "Les Aiguilles Blanches에 오신 것을 환영합니다!",
   skipTutorial: "⏭️ 튜토리얼 건너뛰기…탭으로 다시 보기.",
   skipTutorialGamepad: "⏭️ 튜토리얼 건너뛰기…버튼으로 다시 보기.",
-  tutorialWelcome: "🏔️ Jean-Pierre, 수석 정설 담당이다. 슬로프를 돌아다녀 — {keys} 또는 ↑↓←→를 사용해.",
-  tutorialWelcomeTouch: "🏔️ Jean-Pierre, 수석 정설 담당이다. 슬로프를 돌아다녀 — 왼쪽의 D패드를 사용해.",
-  tutorialWelcomeGamepad: "🏔️ Jean-Pierre, 수석 정설 담당이다. 슬로프를 돌아다녀 — 왼쪽 스틱이나 D패드를 사용해.",
+  tutorialWelcome: "🏔️ 장피에르, 수석 정설 담당이다. 슬로프를 돌아다녀 — {keys} 또는 ↑↓←→를 사용해.",
+  tutorialWelcomeTouch: "🏔️ 장피에르, 수석 정설 담당이다. 슬로프를 돌아다녀 — 왼쪽의 D패드를 사용해.",
+  tutorialWelcomeGamepad: "🏔️ 장피에르, 수석 정설 담당이다. 슬로프를 돌아다녀 — 왼쪽 스틱이나 D패드를 사용해.",
   // UNUSED     tutorialControls: "🎮 설상차를 움직이려면 {keys} 또는 방향키 ↑↓←→를 사용해.",
   // UNUSED     tutorialControlsTouch: "🎮 설상차를 움직이려면 왼쪽의 D패드 ◀▲▼▶를 사용해.",
   // UNUSED     tutorialControlsGamepad: "🎮 설상차를 움직이려면 왼쪽 스틱이나 D패드를 사용해.",
@@ -259,8 +259,8 @@ const ko: Record<string, string> = {
 
   // Taunts - Tumble
   tauntTumble1: "윈치는 장식이 아니다. 이런 경사면을 위한 거야.",
-  tauntTumble2: "Thierry가 손상을 바라본다. 아무 말이 없다. 그게 더 나쁘다.",
-  tauntTumble3: "Jean-Pierre가 앵커 사용법을 보여줬는데. 자고 있었어?",
+  tauntTumble2: "티에리가 손상을 바라본다. 아무 말이 없다. 그게 더 나쁘다.",
+  tauntTumble3: "장피에르가 앵커 사용법을 보여줬는데. 자고 있었어?",
   tauntTumble4: "PistenBully는 5억 원이다. 아니, 이었다.",
   tauntTumble5: "이 경사면이 만만해 보였어? 설상차는 그렇게 생각 안 했어.",
   featureDestroyedKicker: '파크 모듈 위로 지나갔어! 키커가 파괴됐어.',
@@ -276,7 +276,7 @@ const ko: Record<string, string> = {
   tauntAvalanche1: "산은 좀처럼 용서하지 않는다. 이번에도 용서하지 않았다.",
   tauntAvalanche2: "Météo France가 위험도 4라고 했는데. 읽었어?",
   tauntAvalanche3: "봄이 되면 설상차를 찾을 수 있을 거다. 아마.",
-  tauntAvalanche4: "Marie가 무전 경보를 들었다. 범인이 누군지 벌써 안다.",
+  tauntAvalanche4: "마리가 무전 경보를 들었다. 범인이 누군지 벌써 안다.",
   tauntAvalanche5: "구조대가 그 구역을 안전하게 만들었었다. 네가 원상복구시켰다.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
@@ -288,11 +288,11 @@ const ko: Record<string, string> = {
 
   jeanPierreIntro: "튜토리얼 잘했어. 이제 진짜다 — 초급 코스, 시간 제한과 연료 관리가 있어.",
   level_marmottesMid: "봉우리의 저 빛이 보여? 첫 여명이야. 이 일의 가장 좋은 순간 — 너, 기계, 그리고 깨어나는 산뿐이지.",
-  level_chamoisIntro: "안녕, 나 Émilie야 — JP가 중급 코스로 보내. 초급만 하는 게 아니라는 걸 보여줘.",
+  level_chamoisIntro: "안녕, 나 에밀리야 — JP가 중급 코스로 보내. 초급만 하는 게 아니라는 걸 보여줘.",
   level_airZoneIntro: "스노파크는 내 영역이야 — 끝내주는 코스를 만들 거야! 모듈 하나하나 완벽해야 해, 라이더들이 기대하고 있거든.",
   level_aigleIntro: "L'Aigle은 진짜다. 연료에 주의해. 작업 도로로 올라갈 수 있어 — 노란색과 검은색 줄무늬 기둥을 찾아.",
-  level_glacierIntro: "안녕, 나 Thierry야 — 안전 관리 책임자. Le Glacier는 급경사야. 앵커는 전부 확인했어. 포스트 근처에서 {winchKey}를 눌러 윈치를 연결해 — 제발, 놓지 마.",
-  level_glacierIntroTouch: "안녕, 나 Thierry야 — 안전 관리 책임자. Le Glacier는 급경사야. 앵커는 전부 확인했어. 포스트 근처에서 윈치 버튼을 탭해 — 제발, 놓지 마.",
+  level_glacierIntro: "안녕, 나 티에리야 — 안전 관리 책임자. Le Glacier는 급경사야. 앵커는 전부 확인했어. 포스트 근처에서 {winchKey}를 눌러 윈치를 연결해 — 제발, 놓지 마.",
+  level_glacierIntroTouch: "안녕, 나 티에리야 — 안전 관리 책임자. Le Glacier는 급경사야. 앵커는 전부 확인했어. 포스트 근처에서 윈치 버튼을 탭해 — 제발, 놓지 마.",
   level_tubeIntro: "내일 Tube에서 대회야! 벽은 깔끔하게, 립은 날카롭게, 요철은 제로로 만들어줘.",
   level_verticaleIntro: "La Verticale 야간 작업: 급경사, 위험한 가장자리. 윈치 필수 — 앵커 3개를 사용하고 축에서 벗어나지 마.",
   level_colDangereuxIntro: "Col의 눈사태 위험이 높아 — 눈사태 안전 프로토콜 발동 중. 하중 구역에 들어가지 말고 경계를 지켜.",
