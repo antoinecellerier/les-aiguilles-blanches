@@ -277,12 +277,12 @@ const nb: Record<string, string> = {
   tauntAvalanche2: "Météo France sa faregrad 4. Leste du det?",
   tauntAvalanche3: "Løypepatrullen finner maskinen til våren. Kanskje.",
   tauntAvalanche4: "Marie hører radiovarselet. Hun vet allerede at det er deg.",
-  tauntAvalanche5: "Skredteamet hadde sikret sektoren. Du avsikret den.",
+  tauntAvalanche5: "Løypepatrullen hadde sikret sektoren. Du avsikret den.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klassisk velt. Utstyr overalt, verdighet ingensteds.",
   tauntSkiWipeout2: "Stupet brydde seg ikke om skiteknikken din.",
-  tauntSkiWipeout3: "Skipatruljen ler allerede. De så hele greia.",
+  tauntSkiWipeout3: "Løypepatrullen ler allerede. De så hele greia.",
   tauntSkiWipeout4: "Det skjer når du kjører din egen løype.",
   tauntSkiWipeout5: "Selv steinbukkene grein av den landingen.",
 

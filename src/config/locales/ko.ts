@@ -277,7 +277,7 @@ const ko: Record<string, string> = {
   tauntAvalanche2: "Météo France가 위험도 4라고 했는데. 읽었어?",
   tauntAvalanche3: "봄이 되면 설상차를 찾을 수 있을 거다. 아마.",
   tauntAvalanche4: "Marie가 무전 경보를 들었다. 범인이 누군지 벌써 안다.",
-  tauntAvalanche5: "눈사태 대응팀이 그 구역을 안전하게 만들었었다. 네가 원상복구시켰다.",
+  tauntAvalanche5: "구조대가 그 구역을 안전하게 만들었었다. 네가 원상복구시켰다.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "완벽한 낙법 실패. 장비는 사방에, 자존심은 어디에도.",
@@ -296,7 +296,7 @@ const ko: Record<string, string> = {
   level_tubeIntro: "내일 Tube에서 대회야! 벽은 깔끔하게, 립은 날카롭게, 요철은 제로로 만들어줘.",
   level_verticaleIntro: "La Verticale 야간 작업: 급경사, 위험한 가장자리. 윈치 필수 — 앵커 3개를 사용하고 축에서 벗어나지 마.",
   level_colDangereuxIntro: "Col의 눈사태 위험이 높아 — 눈사태 안전 프로토콜 발동 중. 하중 구역에 들어가지 말고 경계를 지켜.",
-  level_tempeteIntro: "폭풍이 지나갔어. 뱅쇼 한 잔 마셔 — 시간이 걸릴 거야!",
+  level_tempeteIntro: "폭풍이 지나갔어. vin chaud 한 잔 마셔 — 시간이 걸릴 거야!",
   level_coupeDesAiguillesIntro: "오늘 밤이 승부야. 내일 FIS 검사가 있어. 모든 코스가 완벽해야 해 — 배운 걸 보여줘.",
   marieWelcome: "마리네에서 몸 좀 녹여요. 맛있는 타르티플레트가 있어요!",
   marieIntro: "안녕! 나 마리야, 슬로프 위에 식당을 운영해. 언제든 들러 — 따뜻한 한 끼가 힘이 돼!",

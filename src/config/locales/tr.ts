@@ -277,12 +277,12 @@ const tr: Record<string, string> = {
   tauntAvalanche2: "Météo France risk seviyesi 4 dedi. Okudun mu?",
   tauntAvalanche3: "Kurtarma ekibi aracı baharda bulur. Belki.",
   tauntAvalanche4: "Marie telsiz alarmını duyuyor. Senin olduğunu zaten biliyor.",
-  tauntAvalanche5: "Çığ ekibi o sektörü güvence altına almıştı. Sen güvensizleştirdin.",
+  tauntAvalanche5: "Kurtarma ekibi o sektörü güvence altına almıştı. Sen güvensizleştirdin.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klasik takla. Malzeme her yerde, gurur hiçbir yerde.",
   tauntSkiWipeout2: "Uçurumun kayak tekniğinle ilgilenmedi.",
-  tauntSkiWipeout3: "Pist kurtarma zaten gülüyor. Her şeyi gördüler.",
+  tauntSkiWipeout3: "Kurtarma ekibi zaten gülüyor. Her şeyi gördüler.",
   tauntSkiWipeout4: "Kendi hazırladığın pistte kayarsan böyle olur.",
   tauntSkiWipeout5: "Dağ keçileri bile o inişe yüzlerini buruşturdu.",
 

@@ -155,7 +155,7 @@ const de: Record<string, string> = {
   excellent: "Ausgezeichnet!",
   good: "Gut gemacht!",
   passed: "Geschafft",
-  bonusFuel: "Treibstoff verbraucht",
+  bonusFuel: "Kraftstoff verbraucht",
   bonusFlawless: "Erster Versuch",
   bonusSpeed: "Zeit",
   bonusWinch: "Windeneinsätze",
@@ -330,12 +330,12 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   tauntAvalanche2: "Météo France sagte Risikostufe 4. Hast du gelesen?",
   tauntAvalanche3: "Die Bergwacht findet die Raupe im Frühling. Vielleicht.",
   tauntAvalanche4: "Marie hört den Funkalarm. Sie weiß schon, dass du es warst.",
-  tauntAvalanche5: "Das Lawinenteam hatte den Sektor gesichert. Du hast ihn entsichert.",
+  tauntAvalanche5: "Die Bergwacht hatte den Sektor gesichert. Du hast ihn entsichert.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klassischer Abflug. Ausrüstung überall, Würde nirgends.",
   tauntSkiWipeout2: "Der Abhang hat sich nicht für deine Skitechnik interessiert.",
-  tauntSkiWipeout3: "Die Pistenrettung lacht schon. Die haben alles gesehen.",
+  tauntSkiWipeout3: "Die Bergwacht lacht schon. Die haben alles gesehen.",
   tauntSkiWipeout4: "Das passiert, wenn man seine eigene Piste fährt.",
   tauntSkiWipeout5: "Selbst die Steinböcke haben bei der Landung zusammengezuckt.",
   // Key names

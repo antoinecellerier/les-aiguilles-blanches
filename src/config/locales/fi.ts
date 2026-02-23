@@ -277,7 +277,7 @@ const fi: Record<string, string> = {
   tauntAvalanche2: "Météo France sanoi riskiluokka 4. Luitko?",
   tauntAvalanche3: "Rinnepartio löytää koneen keväällä. Ehkä.",
   tauntAvalanche4: "Marie kuulee radiohälytyksen. Hän tietää jo että sinä se olit.",
-  tauntAvalanche5: "Vyöryryhmä oli turvannut alueen. Sinä turvasit sen pois.",
+  tauntAvalanche5: "Rinnepartio oli turvannut alueen. Sinä turvasit sen pois.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klassinen kaatuminen. Varusteet joka puolella, arvokkuus ei missään.",

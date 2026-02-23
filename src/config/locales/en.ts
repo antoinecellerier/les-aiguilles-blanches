@@ -277,7 +277,7 @@ const en: Record<string, string> = {
   tauntAvalanche2: "Météo France said risk level 4. Did you read it?",
   tauntAvalanche3: "Ski patrol will find the groomer in spring. Maybe.",
   tauntAvalanche4: "Marie hears the radio alert. She already knows it's you.",
-  tauntAvalanche5: "The avalanche team had secured that sector. You un-secured it.",
+  tauntAvalanche5: "Ski patrol had secured that sector. You un-secured it.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Classic yard sale. Gear everywhere, dignity nowhere.",

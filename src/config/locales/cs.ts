@@ -277,7 +277,7 @@ const cs: Record<string, string> = {
   tauntAvalanche2: "Météo France hlásilo stupeň rizika 4. Četl jsi to?",
   tauntAvalanche3: "Horská služba najde rolbu na jaře. Možná.",
   tauntAvalanche4: "Marie slyší poplach v rádiu. Už ví, že jsi to ty.",
-  tauntAvalanche5: "Lavinový tým zabezpečil ten sektor. Ty jsi ho odjistil.",
+  tauntAvalanche5: "Horská služba zabezpečila ten sektor. Ty jsi ho odjistil.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klasický pád. Výbava všude, důstojnost nikde.",

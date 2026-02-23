@@ -277,12 +277,12 @@ const ja: Record<string, string> = {
   tauntAvalanche2: "Météo Franceが危険度4と言っていた。読んだか？",
   tauntAvalanche3: "春になれば圧雪車が見つかるだろう。たぶん。",
   tauntAvalanche4: "Marieが無線警報を聞いた。もう犯人が分かっている。",
-  tauntAvalanche5: "雪崩対策チームがあのエリアを安全にした。君が台無しにした。",
+  tauntAvalanche5: "パトロール隊があのエリアを安全にした。君が台無しにした。",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "豪快な転倒。装備はあちこち、プライドはどこにもなし。",
   tauntSkiWipeout2: "崖はお前のスキー技術に興味がなかった。",
-  tauntSkiWipeout3: "パトロールはもう笑っている。全部見ていた。",
+  tauntSkiWipeout3: "パトロール隊はもう笑っている。全部見ていた。",
   tauntSkiWipeout4: "自分で整備したゲレンデで転ぶとは。",
   tauntSkiWipeout5: "アイベックスでさえ、あの着地には顔をしかめた。",
 

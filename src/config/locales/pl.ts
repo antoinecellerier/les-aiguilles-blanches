@@ -130,7 +130,7 @@ const pl: Record<string, string> = {
   // Taunts - Cliff falls
   tauntCliff1: "9 ton w przepaść. Ubezpieczyciel będzie zachwycony.",
   tauntCliff2: "Jean-Pierre mówił 'nie za blisko krawędzi!' Pamiętasz?",
-  tauntCliff3: "GOPR zjeżdża z linami. Znowu.",
+  tauntCliff3: "Patrol narciarski zjeżdża z linami. Znowu.",
   tauntCliff4: "Marie anuluje twoją rezerwację na raclette na dzisiejszy wieczór.",
   tauntCliff5: "Thierry już liczy koszty naprawy...",
 
@@ -275,14 +275,14 @@ const pl: Record<string, string> = {
   // Taunts - Avalanche
   tauntAvalanche1: "Góra rzadko wybacza. Tym razem nie wybaczyła.",
   tauntAvalanche2: "Météo France podało stopień zagrożenia 4. Czytałeś?",
-  tauntAvalanche3: "GOPR znajdzie ratrak wiosną. Może.",
+  tauntAvalanche3: "Patrol narciarski znajdzie ratrak wiosną. Może.",
   tauntAvalanche4: "Marie słyszy alarm w radiu. Już wie, że to ty.",
-  tauntAvalanche5: "Zespół lawinowy zabezpieczył ten sektor. Ty go odbezpieczyłeś.",
+  tauntAvalanche5: "Patrol narciarski zabezpieczył ten sektor. Ty go odbezpieczyłeś.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klasyczny wywrotek. Sprzęt wszędzie, godność nigdzie.",
   tauntSkiWipeout2: "Urwisko nie interesowało się twoją techniką.",
-  tauntSkiWipeout3: "GOPR już się śmieje. Widzieli wszystko.",
+  tauntSkiWipeout3: "Patrol narciarski już się śmieje. Widzieli wszystko.",
   tauntSkiWipeout4: "Tak bywa, gdy jeździ się po własnym stoku.",
   tauntSkiWipeout5: "Nawet kozice skrzywiły się na to lądowanie.",
 

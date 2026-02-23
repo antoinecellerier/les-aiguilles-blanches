@@ -296,7 +296,7 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   // Taunts - Cliff
   tauntCliff1: "9 tonnellate nel burrone. L'assicurazione sarà entusiasta.",
   tauntCliff2: "Jean-Pierre aveva detto: 'Non troppo vicino al bordo!' Ricordi?",
-  tauntCliff3: "Il soccorso alpino arriva con le corde. Di nuovo.",
+  tauntCliff3: "Il soccorso piste arriva con le corde. Di nuovo.",
   tauntCliff4: "Marie cancella la tua prenotazione per la raclette di stasera.",
   tauntCliff5: "Thierry sta già calcolando i costi di riparazione...",
   // Taunts - Fuel
@@ -330,7 +330,7 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   tauntAvalanche2: "Météo France diceva rischio 4. L'hai letto?",
   tauntAvalanche3: "Il soccorso troverà il gatto in primavera. Forse.",
   tauntAvalanche4: "Marie sente l'allarme radio. Sa già che sei tu.",
-  tauntAvalanche5: "La squadra valanghe aveva messo in sicurezza il settore. Tu l'hai rimesso in pericolo.",
+  tauntAvalanche5: "Il soccorso piste aveva messo in sicurezza il settore. Tu l'hai rimesso in pericolo.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Disastro totale. Attrezzatura ovunque, dignità da nessuna parte.",
