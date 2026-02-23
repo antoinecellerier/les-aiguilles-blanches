@@ -306,6 +306,8 @@ const ko: Record<string, string> = {
   changelog_20260219: "🎬 신규 플레이어 프롤로그\n📖 튜토리얼 간소화\n🌦️ 메뉴 랜덤 날씨\n🔗 데일리 런 공유\n🎥 시네마틱 크레딧",
   changelog_20260222_date: "2026년 2월 22일",
   changelog_20260222: "🚩 슬라롬 게이트 밸런스 조정\n💬 피드백 버튼",
+  changelog_20260223_date: "2026년 2월 23일",
+  changelog_20260223: "📲 기기에 설치하고 오프라인으로 플레이",
   changelog_20260220_date: "2026년 2월 20일",
   changelog_20260220: "🗺️ 슬로프 맵\n🎿 스키장 용어",
   changelog_20260217_date: "2026년 2월 17일",

@@ -306,6 +306,8 @@ const tr: Record<string, string> = {
   changelog_20260219: "🎬 Yeni oyuncular için prolog\n📖 Basitleştirilmiş eğitim\n🌦️ Menüde rastgele hava\n🔗 Paylaşılabilir günlük parkurlar\n🎥 Sinematik jenerik",
   changelog_20260222_date: "22 Şubat 2026",
   changelog_20260222: "🚩 Slalom kapısı dengelemesi\n💬 Geri bildirim düğmesi",
+  changelog_20260223_date: "23 Şubat 2026",
+  changelog_20260223: "📲 Cihazına yükle, internetsiz oyna",
   changelog_20260220_date: "20 Şubat 2026",
   changelog_20260220: "🗺️ Pist haritası\n🎿 Kayak merkezi terminolojisi",
   changelog_20260217_date: "17 Şubat 2026",

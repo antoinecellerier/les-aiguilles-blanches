@@ -258,6 +258,8 @@ const es: Record<string, string> = {
   changelog_20260219: "🎬 Prólogo para nuevos jugadores\n📖 Tutorial simplificado\n🌦️ Clima aleatorio en el menú\n🔗 Pistas del día compartibles\n🎥 Créditos cinematográficos",
   changelog_20260222_date: "22 de febrero de 2026",
   changelog_20260222: "🚩 Reequilibrio de puertas de slalom\n💬 Botón de feedback",
+  changelog_20260223_date: "23 de febrero de 2026",
+  changelog_20260223: "📲 Instala en tu dispositivo para jugar sin conexión",
   changelog_20260220_date: "20 de febrero de 2026",
   changelog_20260220: "🗺️ Mapa de pistas\n🎿 Terminología de estación",
   changelog_20260217_date: "17 de febrero de 2026",

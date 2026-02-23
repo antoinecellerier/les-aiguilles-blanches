@@ -307,6 +307,8 @@ const nb: Record<string, string> = {
   changelog_20260219: "🎬 Prolog for nye spillere\n📖 Forenklet opplæring\n🌦️ Tilfeldig menøvær\n🔗 Delbare daglige løyper\n🎥 Filmisk rulletekst",
   changelog_20260222_date: "22. februar 2026",
   changelog_20260222: "🚩 Rebalansering av slalomporter\n💬 Tilbakemeldingsknapp",
+  changelog_20260223_date: "23. februar 2026",
+  changelog_20260223: "📲 Installer på enheten din og spill offline",
   changelog_20260220_date: "20. februar 2026",
   changelog_20260220: "🗺️ Løypekart\n🎿 Skianlegg-terminologi",
   changelog_20260217_date: "17. februar 2026",
