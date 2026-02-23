@@ -281,7 +281,7 @@ const ja: Record<string, string> = {
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "豪快な転倒。装備はあちこち、プライドはどこにもなし。",
-  tauntSkiWipeout2: "崖はあなたのスキー技術に興味がなかった。",
+  tauntSkiWipeout2: "崖はお前のスキー技術に興味がなかった。",
   tauntSkiWipeout3: "パトロールはもう笑っている。全部見ていた。",
   tauntSkiWipeout4: "自分で整備したゲレンデで転ぶとは。",
   tauntSkiWipeout5: "アイベックスでさえ、あの着地には顔をしかめた。",
@@ -296,7 +296,7 @@ const ja: Record<string, string> = {
   level_tubeIntro: "明日はTubeでコンテストだ！壁はきれいに、リップはシャープに、凸凹ゼロで頼む。",
   level_verticaleIntro: "La Verticaleで夜間作業：急斜面、危険な縁。ウインチ必須 — 3つのアンカーを使い、軸からずれるな。",
   level_colDangereuxIntro: "Colの雪崩リスクが高い — 雪崩安全プロトコル発動中。荷重エリアに入るな、境界を守れ。",
-  level_tempeteIntro: "暴風雪が去った。ホットワインを飲んで — 時間がかかるぞ！",
+  level_tempeteIntro: "暴風雪が去った。vin chaudを飲んで — 時間がかかるぞ！",
   level_coupeDesAiguillesIntro: "今夜が勝負だ。明日FISの検査がある。全コース完璧にしろ — 学んだことを見せてくれ。",
   marieWelcome: "マリーの店で温まっていきなさい。美味しいタルティフレットがあるわよ！",
   marieIntro: "こんにちは！マリーよ、ゲレンデ上のレストランをやってるの。いつでも寄ってね — 温かい食事は最高の充電よ！",

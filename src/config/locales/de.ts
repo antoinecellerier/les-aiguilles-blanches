@@ -330,7 +330,7 @@ changelog_20260211: "⛷️ Skiabfahrt nach der Präparierung\n🎯 Präparierqu
   tauntAvalanche2: "Météo France sagte Risikostufe 4. Hast du gelesen?",
   tauntAvalanche3: "Die Bergwacht findet die Raupe im Frühling. Vielleicht.",
   tauntAvalanche4: "Marie hört den Funkalarm. Sie weiß schon, dass du es warst.",
-  tauntAvalanche5: "Das Lawinenteam hatte den Sektor gesichert. Du hast ihn ent-sichert.",
+  tauntAvalanche5: "Das Lawinenteam hatte den Sektor gesichert. Du hast ihn entsichert.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Klassischer Abflug. Ausrüstung überall, Würde nirgends.",

@@ -290,7 +290,7 @@ const en: Record<string, string> = {
   level_marmottesMid: "See that glow on the peaks? First light. Best part of this job — just you, the machine, and the mountain waking up.",
   level_chamoisIntro: "Hey, I'm Émilie — JP's putting you on the blue. Come on, show you can do more than lay corduroy on the green.",
   level_airZoneIntro: "The snowpark's MY turf — we're gonna set up something sick! Every feature needs to be dialed, the riders are counting on us.",
-  level_aigleIntro: "L'Aigle is serious. Watch your fuel. Access paths let you drive back up — look for the amber and black striped poles.",
+  level_aigleIntro: "L'Aigle is serious. Watch your fuel. Access paths let you drive back up — look for the yellow and black striped poles.",
   level_glacierIntro: "Hey, I'm Thierry — head of safety. Le Glacier is steep. I've checked every anchor. Press {winchKey} near a post to attach the winch — and please, don't let go.",
   level_glacierIntroTouch: "Hey, I'm Thierry — head of safety. Le Glacier is steep. I've checked every anchor. Tap the winch button near a post to attach — and please, don't let go.",
   level_tubeIntro: "Tomorrow's the contest at The Tube! I want clean walls, a sharp lip, and zero bumps.",

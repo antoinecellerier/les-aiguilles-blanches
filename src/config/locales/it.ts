@@ -189,7 +189,7 @@ const it: Record<string, string> = {
   skipTutorial: "⏭️ Saltando il tutorial… Tocca per rifarlo.",
   skipTutorialGamepad: "⏭️ Saltando il tutorial… Premi per rifarlo.",
   tutorialWelcome: "🏔️ Jean-Pierre, capo gattista. Vai sulla pista — usa {keys} o le frecce ↑↓←→.",
-  tutorialWelcomeTouch: "🧑‍🔧 Jean-Pierre, capo gattista. Vai sulla pista — usa il D-pad a sinistra.",
+  tutorialWelcomeTouch: "🏔️ Jean-Pierre, capo gattista. Vai sulla pista — usa il D-pad a sinistra.",
   tutorialWelcomeGamepad: "🏔️ Jean-Pierre, capo gattista. Vai sulla pista — usa lo stick sinistro o il D-pad.",
   // UNUSED     tutorialControls: "🎮 Per muovere il gatto delle nevi, usa {keys} o le frecce ↑↓←→.",
   // UNUSED     tutorialControlsTouch: "🎮 Per muoverti, usa il D-pad ◀▲▼▶ a sinistra.",
@@ -248,7 +248,7 @@ const it: Record<string, string> = {
   level_tubeIntro: "Domani c'è il contest al Tube! Voglio pareti pulite, labbro netto e zero gobbe.",
   level_verticaleIntro: "Notte su La Verticale: pendio ripido, bordi pericolosi. Verricello obbligatorio — agganciati ai 3 ancoraggi e resta in asse.",
   level_colDangereuxIntro: "Rischio valanga alto sul Col — siamo in protocollo sicurezza valanghe attivo. Stai fuori dalle zone cariche e rispetta i limiti.",
-  level_tempeteIntro: "La tempesta è passata. Prendi un vin brulé, sarà lunga!",
+  level_tempeteIntro: "La tempesta è passata. Prendi un vin chaud, sarà lunga!",
   level_coupeDesAiguillesIntro: "È la grande notte. La FIS ispeziona domani. Ogni pista deve essere perfetta — mostrami cosa hai imparato.",
   marieWelcome: "Vieni a scaldarti da Marie. Una bella tartiflette!",
   marieIntro: "Ciao! Sono Marie, gestisco il ristorante in cima. Passa quando vuoi — un piatto caldo fa miracoli quassù!",
@@ -330,7 +330,7 @@ changelog_20260211: "⛷️ Discesa sci dopo la preparazione\n🎯 Qualità dell
   tauntAvalanche2: "Météo France diceva rischio 4. L'hai letto?",
   tauntAvalanche3: "Il soccorso troverà il gatto in primavera. Forse.",
   tauntAvalanche4: "Marie sente l'allarme radio. Sa già che sei tu.",
-  tauntAvalanche5: "La squadra valanghe aveva messo in sicurezza il settore. Tu l'hai de-sicurato.",
+  tauntAvalanche5: "La squadra valanghe aveva messo in sicurezza il settore. Tu l'hai rimesso in pericolo.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Disastro totale. Attrezzatura ovunque, dignità da nessuna parte.",

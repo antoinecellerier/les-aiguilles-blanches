@@ -307,7 +307,7 @@ const cs: Record<string, string> = {
   changelog_20260222_date: "22. února 2026",
   changelog_20260222: "🚩 Vyvážení slalomových branek\n💬 Tlačítko zpětné vazby",
   changelog_20260223_date: "23. února 2026",
-  changelog_20260223: "📲 Nainstalujte si hru do zařízení a hrajte offline",
+  changelog_20260223: "📲 Nainstaluj si hru do zařízení a hraj offline",
   changelog_20260220_date: "20. února 2026",
   changelog_20260220: "🗺️ Mapa tratí\n🎿 Lyžařská terminologie",
   changelog_20260217_date: "17. února 2026",

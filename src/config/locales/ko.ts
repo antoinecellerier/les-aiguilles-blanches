@@ -261,7 +261,7 @@ const ko: Record<string, string> = {
   tauntTumble1: "윈치는 장식이 아니다. 이런 경사면을 위한 거야.",
   tauntTumble2: "Thierry가 손상을 바라본다. 아무 말이 없다. 그게 더 나쁘다.",
   tauntTumble3: "Jean-Pierre가 앵커 사용법을 보여줬는데. 자고 있었어?",
-  tauntTumble4: "PistenBully는 5억 원이다. 이었다.",
+  tauntTumble4: "PistenBully는 5억 원이다. 아니, 이었다.",
   tauntTumble5: "이 경사면이 만만해 보였어? 설상차는 그렇게 생각 안 했어.",
   featureDestroyedKicker: '파크 모듈 위로 지나갔어! 키커가 파괴됐어.',
   featureDestroyedRail: '파크 모듈 위로 지나갔어! 레일이 파괴됐어.',
@@ -281,7 +281,7 @@ const ko: Record<string, string> = {
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "완벽한 낙법 실패. 장비는 사방에, 자존심은 어디에도.",
-  tauntSkiWipeout2: "절벽은 당신의 스키 기술에 관심이 없었다.",
+  tauntSkiWipeout2: "절벽은 네 스키 기술에 관심이 없었다.",
   tauntSkiWipeout3: "구조대가 이미 웃고 있다. 전부 봤다.",
   tauntSkiWipeout4: "자기가 정비한 슬로프에서 넘어지다니.",
   tauntSkiWipeout5: "산양들도 그 착지를 보고 얼굴을 찡그렸다.",

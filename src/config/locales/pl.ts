@@ -208,7 +208,7 @@ const pl: Record<string, string> = {
   skipTutorial: "⏭️ Pomijam samouczek… Dotknij aby powtórzyć.",
   skipTutorialGamepad: "⏭️ Pomijam samouczek… Naciśnij przycisk aby powtórzyć.",
   tutorialWelcome: "🏔️ Jean-Pierre, główny ratrakista. Jedź po trasie — użyj {keys} lub ↑↓←→.",
-  tutorialWelcomeTouch: "🧑‍🔧 Jean-Pierre, główny ratrakista. Jedź po trasie — użyj D-pada po lewej.",
+  tutorialWelcomeTouch: "🏔️ Jean-Pierre, główny ratrakista. Jedź po trasie — użyj D-pada po lewej.",
   tutorialWelcomeGamepad: "🏔️ Jean-Pierre, główny ratrakista. Jedź po trasie — użyj lewej gałki lub D-pada.",
   // UNUSED     tutorialControls: "🎮 Aby poruszać ratrakiem, użyj {keys} lub strzałek ↑↓←→.",
   // UNUSED     tutorialControlsTouch: "🎮 Aby poruszać ratrakiem, użyj D-pada ◀▲▼▶ po lewej.",

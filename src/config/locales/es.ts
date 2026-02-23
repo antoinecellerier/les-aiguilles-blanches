@@ -248,7 +248,7 @@ const es: Record<string, string> = {
   level_tubeIntro: "¡Mañana es el contest en el Tube! Quiero paredes limpias, labio afilado y cero baches.",
   level_verticaleIntro: "Noche en La Verticale: pendiente fuerte, bordes peligrosos. Cabrestante obligatorio — usa los 3 anclajes y mantente en línea.",
   level_colDangereuxIntro: "Alto riesgo de avalancha en el Col — estamos en protocolo de seguridad de avalanchas activo. Evita las zonas sobrecargadas y respeta los límites.",
-  level_tempeteIntro: "La tormenta ha pasado. ¡Toma un vino caliente, va a ser largo!",
+  level_tempeteIntro: "La tormenta ha pasado. ¡Toma un vin chaud, va a ser largo!",
   level_coupeDesAiguillesIntro: "Es la gran noche. La FIS inspecciona mañana. Cada pista debe ser perfecta — muéstrame lo que has aprendido.",
   marieWelcome: "Ven a calentarte a lo de Marie. ¡Una buena tartiflette!",
   marieIntro: "¡Hola! Soy Marie, llevo el restaurante de arriba. Pasa cuando quieras — ¡una comida caliente hace milagros aquí!",
@@ -330,7 +330,7 @@ changelog_20260211: "⛷️ Descenso en esquí tras la preparación\n🎯 Calida
   tauntAvalanche2: "Météo France dijo nivel de riesgo 4. ¿Lo leíste?",
   tauntAvalanche3: "El rescate encontrará la máquina en primavera. Quizás.",
   tauntAvalanche4: "Marie oye la alerta por radio. Ya sabe que eres tú.",
-  tauntAvalanche5: "El equipo de avalanchas había asegurado el sector. Tú lo des-aseguraste.",
+  tauntAvalanche5: "El equipo de avalanchas había asegurado el sector. Tú lo dejaste sin asegurar.",
 
   // Taunts - Ski wipeout (fun, self-deprecating)
   tauntSkiWipeout1: "Caída estrepitosa. Equipo por todos lados, dignidad en ninguno.",
