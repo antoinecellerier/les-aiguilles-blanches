@@ -257,6 +257,13 @@ text = text.replace('{groomKey}', getGroomKeyName());
 
 **Testing**: Unit tests in `tests/unit-js/localization.test.js` ensure all languages have all keys from FR (primary locale). Test fails if any translation is missing.
 
+**Localization conventions** (enforced by content-review skill):
+- **Register**: Informal throughout (FR=tu, DE=du, CS=ty, SK=ty). No formal forms (vous, Sie, vy).
+- **French cultural terms**: Keep "vin chaud", "tartiflette", "Météo France" in Latin-script locales. For JA/KO, use native script equivalents (JA: ホットワイン, KO: 뱅쇼).
+- **Character names**: Latin script in most locales. JA uses katakana (ジャン=ピエール, エミリー, ティエリ, マリー). KO uses hangul (장피에르, 에밀리, 티에리, 마리).
+- **Groomer term**: FR=dameuse, CS/SK=rolba (not fréza), DE=Raupe, IT=gatto, PL=ratrak, JA=圧雪車, KO=설상차.
+- **Term consistency**: Same concept must use same word per language across all keys (e.g., patrol team in all taunts).
+
 ### 5. Accessibility Architecture
 
 **Decision**: Multiple layers of accessibility support

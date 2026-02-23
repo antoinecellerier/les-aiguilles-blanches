@@ -43,8 +43,13 @@ Evaluate content across these dimensions, launching parallel explore agents:
    - Humor and wordplay should be adapted, not translated literally (e.g., "yard sale" → local wipeout idiom, "soup" for slush → local ski slush term)
    - Check for missing translations, placeholder text, or English left in non-English languages — scan ALL keys, especially short UI labels (skiStyle, skiTricks, skiBestCombo, quitGame, showDebug)
    - **Register consistency**: the game uses informal address throughout (FR=tu, DE=du, CS=ty, SK=ty, etc.). Scan ALL taunts, tutorials, dialogues, hazard warnings, and credits for formal forms (FR=vous, DE=Sie, CS=vy/jste, SK=vy/ste). Every line must use informal register.
-   - **Immersion**: the game is set in Savoie, France. Keep French references like Météo France, ESF, PIDA — do not replace with local equivalents (SMHI, 気象庁, etc.)
-   - **Factual consistency across locales**: colors (jaune=yellow, not orange), currency conversions, proper nouns must match the FR source exactly
+   - **Immersion**: the game is set in Savoie, France. Keep French references like Météo France, ESF — do not replace with local equivalents (SMHI, 気象庁, etc.). Do not substitute local organizations (e.g., PL "GOPR" for ski patrol — use generic terms like "patrol narciarski").
+   - **Factual consistency across locales**: colors (jaune=yellow, not orange/amber), currency conversions, proper nouns must match the FR source exactly
+   - **Cross-locale term consistency**: the SAME concept must use the SAME word within each language. Key terms to unify: rescue/patrol team, grooming machine, ski run, winch, fuel. Run a dedicated audit comparing taunt/dialogue keys that reference the same concept (e.g., tauntCliff3 and tauntAvalanche5 both mention the patrol team — must be the same word).
+   - **CJK readability**: JA and KO use non-Latin scripts. Character names must use katakana (JA: ジャン=ピエール, エミリー, ティエリ, マリー) or hangul (KO: 장피에르, 에밀리, 티에리, 마리) — never Latin script mid-text. Food/drink terms should use native script (JA: ホットワイン not "vin chaud", KO: 뱅쇼 not "vin chaud"). French level names and "Météo France" may stay in Latin as recognizable proper nouns.
+   - **Nickname clarity**: "JP" (for Jean-Pierre) is opaque outside French-speaking locales, especially in JA (JP=Japan). Use the full localized name in JA/KO; "JP" is acceptable in Latin-script locales where Jean-Pierre was introduced earlier.
+   - **Wordplay adaptation**: Hyphenated non-words like "de-sicurato" (IT), "des-aseguraste" (ES) don't work as wordplay in the target language — rephrase using natural idioms. Only use wordplay that works in the target language (e.g., DE "entsichert" is a real word).
+   - **Groomer terminology by language**: FR=dameuse, EN=groomer, DE=Raupe/Pistenraupe, IT=gatto delle nevi, ES=máquina, SV=maskin, NB=maskin, FI=rinnekone, CS=rolba, SK=rolba (NOT fréza), PL=ratrak, TR=araç, JA=圧雪車, KO=설상차
 
 4. **Narrative coherence**
    - Difficulty progression should be reflected in dialogue tone (encouraging → challenging → intense)
@@ -52,7 +57,7 @@ Evaluate content across these dimensions, launching parallel explore agents:
    - Dialogue must match level mechanics — don't tell players to use equipment they don't have (e.g., winch on `hasWinch: false` levels)
    - One-shot dialogues (steep warning, Marie intro) persist via localStorage — verify they only trigger once, not per-level
    - Lore references should be consistent across levels (no contradictions in backstory)
-   - Avoid opaque acronyms or jargon that players won't know (e.g., "PIDA protocol" → "avalanche safety protocol")
+   - Avoid opaque acronyms or jargon that players won't know (e.g., "PIDA" → "les pisteurs", "ESF" → "l'école de ski")
    - Bonus objectives should feel achievable and well-described
    - Players traverse levels bottom-to-top — zone encounter order matters. Higher `startY` = lower on map = encountered FIRST. Verify that tutorial/warning text appears on the gentler zone before the deadly one.
 
@@ -163,6 +168,26 @@ for key in winchKey groomKey keys; do
     [ "$n" != "$en" ] && echo "MISMATCH: $f {$key} $n vs EN $en"
   done
 done
+```
+
+**Cross-locale term consistency check** — for each language, verify patrol/team term is the same in tauntCliff3, tauntSkiWipeout3, tauntAvalanche3, tauntAvalanche5:
+
+```bash
+cd src/config/locales
+for f in fr en de it es sv nb fi cs pl sk ja ko tr; do
+  terms=$(grep -oP 'tauntCliff3:.*"|tauntSkiWipeout3:.*"|tauntAvalanche3:.*"|tauntAvalanche5:.*"' ${f}.ts | head -4)
+  echo "=== $f ===" && echo "$terms"
+done
+```
+
+**CJK character name check** — JA must use katakana, KO must use hangul for all character names:
+
+```bash
+# Must return zero (no Latin character names in JA/KO text values)
+grep -n 'Jean-Pierre\|Émilie\|Thierry\b\|Marie\b' ja.ts ko.ts | grep -v UNUSED | grep -v '//' | grep -v 'Briefing'
+
+# SK must use rolba, not fréza
+grep -n 'fréz' sk.ts | grep -v UNUSED
 ```
 
 Any grep hit (excluding known false positives like DE "Sie" meaning "she") must be fixed before proceeding.
