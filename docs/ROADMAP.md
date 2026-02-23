@@ -9,7 +9,8 @@ For technical details, see [ARCHITECTURE.md](./ARCHITECTURE.md). For design prop
 ### Features
 
 - [ ] **Leaderboards**
-- [ ] **Publish to game stores** — Tauri v2 desktop wrapper (`./build-tauri.sh`) and PWA exist; store distribution (Steam, itch.io, Google Play via TWA) TBD
+- [ ] **Publish to Steam** — Tauri desktop build exists (`./build-tauri.sh`). Requires: Steamworks partner account ($100), Steamworks SDK integration (achievements, overlay, cloud saves optional), store page (screenshots, description, capsule art), build upload via SteamPipe, content review
+- [ ] **Publish to Google Play** — PWA exists with offline support. Requires: Google Play developer account ($25), TWA wrapper via Bubblewrap (~2 MB APK), Digital Asset Links on `cellerier.net/.well-known/assetlinks.json`, store listing + content rating, app signing. Updates are automatic — new web builds are picked up by the TWA without re-submission
 
 ### Known Issues
 
